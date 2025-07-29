@@ -29,6 +29,7 @@ export const ComparePage = () => {
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
+      alert('Failed to create checkout session. Please try again.');
     }
   };
 

@@ -28,7 +28,7 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/free-version" element={<FreeVersionPage />} />
-            <Route path="/premium-version" element={<PremiumVersionPage />} />
+            <Route path="/premium" element={<PremiumVersionPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

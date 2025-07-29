@@ -88,7 +88,7 @@ export const DashboardPage = () => {
               
               {profile?.is_premium ? (
                 <Button variant="brand" size="lg" asChild className="w-full">
-                  <Link to="/premium-version">Launch Premium Version</Link>
+                  <Link to="/premium">Launch Premium Version</Link>
                 </Button>
               ) : (
                 <Button variant="brand" size="lg" asChild className="w-full">

@@ -45,6 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user) return;
 
     try {
+      // First try to get from database
       const { data, error } = await supabase
         .from('users')
         .select('id, email, is_premium, subscription_tier, subscription_end')
@@ -77,6 +78,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else {
           setProfile(newProfile);
         }
+      }
+
+      // Also check with our edge function for real-time status
+      try {
+        const { data: checkData } = await supabase.functions.invoke('check-subscription');
+        if (checkData && !checkData.error) {
+          // Update local state if there's a discrepancy
+          const serverProfile = {
+            id: user.id,
+            email: user.email,
+            is_premium: checkData.is_premium,
+            subscription_tier: checkData.subscription_tier,
+            subscription_end: checkData.subscription_end
+          };
+          setProfile(serverProfile);
+        }
+      } catch (checkError) {
+        console.error('Error checking subscription:', checkError);
       }
     } catch (error) {
       console.error('Error in refreshProfile:', error);
