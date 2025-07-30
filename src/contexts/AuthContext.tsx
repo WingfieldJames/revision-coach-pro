@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       // First try to get from database
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('users')
         .select('id, email, is_premium, subscription_tier, subscription_end')
         .eq('id', user.id)
@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setProfile(data);
       } else {
         // Create initial profile if it doesn't exist
-        const { data: newProfile, error: insertError } = await supabase
+        const { data: newProfile, error: insertError } = await (supabase as any)
           .from('users')
           .insert([
             {
