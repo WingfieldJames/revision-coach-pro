@@ -17,6 +17,7 @@ export const ComparePage = () => {
 
     // User is logged in, proceed to Stripe
     try {
+      console.log('Invoking create-checkout function...');
       const { data, error } = await supabase.functions.invoke('create-checkout');
       
       if (error) {
