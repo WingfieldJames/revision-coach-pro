@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/Header';
@@ -7,7 +7,41 @@ import { useAuth } from '@/contexts/AuthContext';
 import logo from '@/assets/logo.png';
 
 export const DashboardPage = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  // Check for payment success and verify with Stripe
+  useEffect(() => {
+    const paymentSuccess = searchParams.get('payment_success');
+    const sessionId = searchParams.get('session_id');
+    
+    if (paymentSuccess === 'true' && sessionId) {
+      // Verify payment with Stripe and update user status
+      const verifyPayment = async () => {
+        try {
+          const { supabase } = await import('@/integrations/supabase/client');
+          const { data, error } = await supabase.functions.invoke('verify-payment', {
+            body: { sessionId }
+          });
+          
+          if (data?.success) {
+            // Refresh profile to get updated premium status
+            setTimeout(() => {
+              refreshProfile();
+            }, 1000);
+          }
+        } catch (error) {
+          console.error('Payment verification failed:', error);
+        }
+      };
+      
+      verifyPayment();
+      
+      // Clean up the URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams, refreshProfile]);
 
   if (!user) {
     return (
