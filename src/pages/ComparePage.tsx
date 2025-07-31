@@ -9,6 +9,8 @@ export const ComparePage = () => {
   const { user } = useAuth();
 
   const handlePremiumClick = async () => {
+    console.log('Premium button clicked, user:', user);
+    
     if (!user) {
       // Redirect to login if not authenticated
       window.location.href = '/login?redirect=stripe';
@@ -17,20 +19,32 @@ export const ComparePage = () => {
 
     // User is logged in, proceed to Stripe
     try {
-      console.log('Invoking create-checkout function...');
-      const { data, error } = await supabase.functions.invoke('create-checkout');
+      console.log('Invoking create-checkout function with user:', user.email);
+      
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+      
+      console.log('Create checkout response:', { data, error });
       
       if (error) {
         console.error('Error creating checkout session:', error);
+        alert(`Failed to create checkout session: ${error.message}`);
         return;
       }
 
       if (data?.url) {
+        console.log('Redirecting to Stripe checkout:', data.url);
         window.open(data.url, '_blank');
+      } else {
+        console.error('No checkout URL received');
+        alert('No checkout URL received from server');
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      alert('Failed to create checkout session. Please try again.');
+      alert(`Failed to create checkout session: ${error}`);
     }
   };
 
