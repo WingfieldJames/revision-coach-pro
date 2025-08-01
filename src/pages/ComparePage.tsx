@@ -13,7 +13,7 @@ export const ComparePage = () => {
     
     if (!user) {
       // Redirect to login if not authenticated
-      window.location.href = '/login?redirect=/compare';
+      window.location.href = '/login?redirect=/premium';
       return;
     }
 
