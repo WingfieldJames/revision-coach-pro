@@ -14,15 +14,23 @@ export const HomePage = () => {
     <div className="min-h-screen bg-background font-sans">
       <Header showNavLinks />
       
+      {/* Logo Section */}
+      <section className="p-8 pb-4">
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="A* AI logo" className="h-12" />
+          <h1 className="text-4xl font-bold">A* AI</h1>
+        </div>
+      </section>
+
       {/* Hero Section */}
-      <section className="flex flex-col lg:flex-row items-center justify-between p-8 gap-8">
+      <section className="flex flex-col lg:flex-row items-center justify-between px-8 pb-8 gap-8">
         <div className="flex-1 max-w-2xl">
           <div className="bg-secondary text-foreground text-sm px-4 py-2 rounded-full inline-block mb-6">
             ⭐ Loved by 50+ users with a 4.9 star rating
           </div>
           
-          <h1 className="text-5xl font-bold mb-4 flex items-center gap-3">
-            Meet <img src={logo} alt="A* AI logo" className="h-12" />
+          <h1 className="text-5xl font-bold mb-4">
+            Meet A* AI
           </h1>
           
           <h2 className="text-3xl font-medium mb-6 text-foreground">

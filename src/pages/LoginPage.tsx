@@ -31,8 +31,8 @@ export const LoginPage = () => {
       });
 
       // Redirect based on query parameter
-      if (redirect === 'stripe') {
-        navigate('/compare');
+      if (redirect) {
+        navigate(redirect);
       } else {
         navigate('/dashboard');
       }
