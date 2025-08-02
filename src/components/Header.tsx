@@ -46,6 +46,11 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Menu</span>
           <span>Testimonials</span>
           <span>Our Story</span>
+          {user && (
+            <Link to="/dashboard" className="hover:text-foreground transition-colors">
+              My Profile
+            </Link>
+          )}
         </nav>
       )}
 

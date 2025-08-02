@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
 import logo from '@/assets/logo.png';
 import phone from '@/assets/phone.png';
 import laptop from '@/assets/laptop.png';
@@ -10,6 +12,14 @@ import elliotSmith from '@/assets/elliot-smith.png';
 import revishann from '@/assets/revishann.png';
 
 export const HomePage = () => {
+  const { user, profile } = useAuth();
+
+  // Auto-redirect premium users to premium chatbot
+  useEffect(() => {
+    if (user && profile?.is_premium) {
+      window.location.href = '/premium';
+    }
+  }, [user, profile]);
   return (
     <div className="min-h-screen bg-background font-sans">
       <Header showNavLinks />
