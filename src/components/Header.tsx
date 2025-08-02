@@ -43,14 +43,12 @@ export const Header: React.FC<HeaderProps> = ({
       
       {showNavLinks && (
         <nav className="flex gap-6 text-sm text-muted-foreground">
-          <span>Menu</span>
+          <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
           <span>Testimonials</span>
           <span>Our Story</span>
-          {user && (
-            <Link to="/dashboard" className="hover:text-foreground transition-colors">
-              My Profile
-            </Link>
-          )}
+          <Link to="/dashboard" className="hover:text-foreground transition-colors">
+            My Profile
+          </Link>
         </nav>
       )}
 

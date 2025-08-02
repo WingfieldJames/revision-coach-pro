@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo.png';
 import phone from '@/assets/phone.png';
 import laptop from '@/assets/laptop.png';
@@ -13,13 +14,17 @@ import revishann from '@/assets/revishann.png';
 
 export const HomePage = () => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
 
   // Auto-redirect premium users to premium chatbot
   useEffect(() => {
     if (user && profile?.is_premium) {
       window.location.href = 'https://a-star-round-2.vercel.app/premium';
+    } else if (user && profile && !profile.is_premium) {
+      // If user is logged in but not premium, redirect to free version
+      navigate('/free-version');
     }
-  }, [user, profile]);
+  }, [user, profile, navigate]);
   return (
     <div className="min-h-screen bg-background font-sans">
       <Header showNavLinks />
@@ -130,6 +135,31 @@ export const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-muted py-16 px-8 text-center">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <img src={logo} alt="A* AI" className="h-8" />
+            <span className="text-xl font-semibold">A* AI</span>
+          </div>
+          
+          <p className="text-muted-foreground mb-8">
+            Your AI-powered A-Level revision coach for Edexcel Economics
+          </p>
+          
+          {!user && (
+            <div className="flex gap-4 justify-center">
+              <Button variant="outline" asChild>
+                <Link to="/login">Login</Link>
+              </Button>
+              <Button variant="brand" asChild>
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            </div>
+          )}
+        </div>
+      </footer>
     </div>
   );
 };

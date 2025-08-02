@@ -12,15 +12,15 @@ export const ComparePage = () => {
     console.log('Premium button clicked, user:', user, 'profile:', profile);
     
     if (!user) {
-      // Redirect to login if not authenticated
-      window.location.href = '/login?redirect=/premium';
+      // Redirect to signup if not authenticated
+      window.location.href = '/signup';
       return;
     }
 
     // Check if user is already premium
     if (profile?.is_premium) {
       console.log('User is already premium, redirecting to premium chatbot');
-      window.location.href = '/premium';
+      window.location.href = 'https://a-star-round-2.vercel.app/premium';
       return;
     }
 
@@ -83,8 +83,19 @@ export const ComparePage = () => {
                 Spec-aligned questions
               </li>
             </ul>
-            <Button variant="brand" size="lg" asChild className="w-full">
-              <Link to="/free-version">Use Free Version</Link>
+            <Button 
+              variant="brand" 
+              size="lg" 
+              className="w-full"
+              onClick={() => {
+                if (!user) {
+                  window.location.href = '/signup';
+                } else {
+                  window.location.href = '/free-version';
+                }
+              }}
+            >
+              Use Free Version
             </Button>
           </div>
 
