@@ -51,12 +51,11 @@ export const PremiumVersionPage = () => {
 
   return (
     <div className="h-screen w-screen bg-background">
-      <Header showBackButton backUrl="/dashboard" />
+      <Header showBackButton backUrl="/compare" />
       
       <div className="relative" style={{ height: 'calc(100vh - 80px)' }}>
-        {/* Replace this iframe URL with your premium chatbot iframe */}
         <iframe
-          src="https://www.chatbase.co/chatbot-iframe/PREMIUM_CHATBOT_ID_HERE"
+          src="https://www.chatbase.co/chatbot-iframe/rdUsQQiBG6DHV2jFtXzn5"
           allow="clipboard-write"
           className="w-full h-full border-none"
           title="A* AI Premium Version Chatbot"
