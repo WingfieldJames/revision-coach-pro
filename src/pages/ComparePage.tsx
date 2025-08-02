@@ -6,10 +6,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 export const ComparePage = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const handlePremiumClick = async () => {
-    console.log('Premium button clicked, user:', user);
+    console.log('Premium button clicked, user:', user, 'profile:', profile);
     
     if (!user) {
       // Redirect to login if not authenticated
@@ -17,7 +17,14 @@ export const ComparePage = () => {
       return;
     }
 
-    // User is logged in, proceed to Stripe
+    // Check if user is already premium
+    if (profile?.is_premium) {
+      console.log('User is already premium, redirecting to premium chatbot');
+      window.location.href = '/premium';
+      return;
+    }
+
+    // User is logged in but not premium, proceed to Stripe
     try {
       console.log('Invoking create-checkout function with user:', user.email);
       
