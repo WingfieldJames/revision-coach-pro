@@ -17,7 +17,7 @@ export const HomePage = () => {
   // Auto-redirect premium users to premium chatbot
   useEffect(() => {
     if (user && profile?.is_premium) {
-      window.location.href = '/premium';
+      window.location.href = 'https://a-star-round-2.vercel.app/premium';
     }
   }, [user, profile]);
   return (
