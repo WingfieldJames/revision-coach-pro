@@ -30,12 +30,8 @@ export const LoginPage = () => {
         description: "You've been logged in successfully!",
       });
 
-      // Redirect based on query parameter
-      if (redirect) {
-        navigate(redirect);
-      } else {
-        navigate('/dashboard');
-      }
+      // Always redirect to dashboard after login
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: "Error",
@@ -49,7 +45,7 @@ export const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header showBackButton />
+      <Header showNavLinks />
       
       <div className="flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">

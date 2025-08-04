@@ -16,10 +16,10 @@ export const HomePage = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
-  // Auto-redirect premium users to premium chatbot
+  // Auto-redirect premium users to deluxe chatbot iframe
   useEffect(() => {
     if (user && profile?.is_premium) {
-      window.location.href = 'https://a-star-round-2.vercel.app/premium';
+      navigate('/premium');
     } else if (user && profile && !profile.is_premium) {
       // If user is logged in but not premium, redirect to free version
       navigate('/free-version');

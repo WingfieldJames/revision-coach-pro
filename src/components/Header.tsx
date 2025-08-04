@@ -6,14 +6,10 @@ import logo from '@/assets/logo.png';
 
 interface HeaderProps {
   showNavLinks?: boolean;
-  showBackButton?: boolean;
-  backUrl?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
-  showNavLinks = false, 
-  showBackButton = false, 
-  backUrl = '/' 
+  showNavLinks = false
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -30,15 +26,9 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="flex justify-between items-center p-6">
       <div className="flex items-center">
-        {showBackButton ? (
-          <Button variant="back" size="sm" asChild>
-            <Link to={backUrl}>← Back to Home</Link>
-          </Button>
-        ) : (
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="A* AI logo" className="h-10" />
-          </Link>
-        )}
+        <Link to="/" className="flex items-center">
+          <img src={logo} alt="A* AI logo" className="h-10" />
+        </Link>
       </div>
       
       {showNavLinks && (

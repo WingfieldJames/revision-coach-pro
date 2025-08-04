@@ -51,7 +51,7 @@ export const PremiumVersionPage = () => {
 
   return (
     <div className="h-screen w-screen bg-background">
-      <Header showBackButton backUrl="/compare" />
+      <Header showNavLinks />
       
       <div className="relative" style={{ height: 'calc(100vh - 80px)' }}>
         <iframe

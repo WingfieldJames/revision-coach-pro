@@ -41,12 +41,8 @@ export const SignupPage = () => {
         description: "Account created successfully! Please check your email to verify your account.",
       });
 
-      // Redirect based on query parameter
-      if (redirect === 'stripe') {
-        navigate('/compare');
-      } else {
-        navigate('/dashboard');
-      }
+      // Always redirect to dashboard after signup
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: "Error",
@@ -60,7 +56,7 @@ export const SignupPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header showBackButton />
+      <Header showNavLinks />
       
       <div className="flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">

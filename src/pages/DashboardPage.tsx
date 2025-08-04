@@ -58,7 +58,7 @@ export const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header showNavLinks />
       
       <div className="py-8 px-8 max-w-4xl mx-auto">
         <div className="text-center mb-12">

@@ -20,7 +20,7 @@ export const ComparePage = () => {
     // Check if user is already premium
     if (profile?.is_premium) {
       console.log('User is already premium, redirecting to premium chatbot');
-      window.location.href = 'https://a-star-round-2.vercel.app/premium';
+      window.location.href = '/premium';
       return;
     }
 
@@ -57,7 +57,7 @@ export const ComparePage = () => {
 
   return (
     <div className="min-h-screen bg-background font-sans">
-      <Header />
+      <Header showNavLinks />
       
       <main className="py-8 px-8 max-w-4xl mx-auto text-center">
         <h1 className="text-4xl font-bold mb-4">Choose Your A* AI Plan</h1>
