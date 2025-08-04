@@ -125,8 +125,33 @@ export const DashboardPage = () => {
                   <Link to="/premium">Launch Premium Version</Link>
                 </Button>
               ) : (
-                <Button variant="brand" size="lg" asChild className="w-full">
-                  <Link to="/compare">Upgrade to Premium</Link>
+                <Button 
+                  variant="brand" 
+                  size="lg" 
+                  className="w-full"
+                  onClick={async () => {
+                    try {
+                      const { supabase } = await import('@/integrations/supabase/client');
+                      const { data, error } = await supabase.functions.invoke('create-checkout', {
+                        headers: {
+                          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+                        },
+                      });
+                      
+                      if (error) {
+                        console.error('Error creating checkout session:', error);
+                        return;
+                      }
+
+                      if (data?.url) {
+                        window.open(data.url, '_blank');
+                      }
+                    } catch (error) {
+                      console.error('Error creating checkout session:', error);
+                    }
+                  }}
+                >
+                  Upgrade to Premium
                 </Button>
               )}
             </CardContent>
