@@ -51,7 +51,9 @@ export const PremiumVersionPage = () => {
 
   return (
     <div className="h-screen w-screen bg-background">
-      <Header showNavLinks />
+      <div className="relative z-10">
+        <Header showNavLinks />
+      </div>
       
       <div className="relative" style={{ height: 'calc(100vh - 80px)' }}>
         <iframe
