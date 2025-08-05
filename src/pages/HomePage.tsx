@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import logo from '@/assets/logo.png';
-import phone from '@/assets/phone.png';
+// import phone from '@/assets/phone.png';
 import laptop from '@/assets/laptop.png';
 import tillyTaylor from '@/assets/tilly-taylor.png';
 import elliotSmith from '@/assets/elliot-smith.png';
@@ -51,7 +51,7 @@ export const HomePage = () => {
         </div>
 
         <div className="flex-1 text-center">
-          <img src={phone} alt="A* AI on mobile" className="max-w-full h-auto mx-auto" />
+          <img src="/lovable-uploads/92ff8122-110e-4b97-8135-37b4607f3798.png" alt="A* AI on mobile" className="max-w-full h-auto mx-auto" />
           <Button variant="brand" size="xl" asChild className="mt-6">
             <Link to="/compare">Try It Now →</Link>
           </Button>
