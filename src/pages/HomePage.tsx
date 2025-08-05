@@ -8,9 +8,9 @@ import { useNavigate } from 'react-router-dom';
 // import logo from '@/assets/logo.png';
 // import phone from '@/assets/phone.png';
 // import laptop from '@/assets/laptop.png';
-import tillyTaylor from '@/assets/tilly-taylor.png';
-import elliotSmith from '@/assets/elliot-smith.png';
-import revishann from '@/assets/revishann.png';
+// import tillyTaylor from '@/assets/tilly-taylor.png';
+// import elliotSmith from '@/assets/elliot-smith.png';
+// import revishann from '@/assets/revishann.png';
 
 export const HomePage = () => {
   const { user, profile } = useAuth();
@@ -66,7 +66,7 @@ export const HomePage = () => {
         
         <div className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
           <div className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src={tillyTaylor} alt="Tilly Taylor" className="w-full h-48 object-cover" />
+            <img src="/lovable-uploads/580b4f69-5a21-45da-9eed-4542853cc6c2.png" alt="Tilly Taylor" className="w-full h-48 object-cover" />
             <div className="p-4 text-left">
               <strong className="text-card-foreground">Tilly Taylor</strong><br />
               <span className="text-sm text-muted-foreground">BSc Economics, LSE</span>
@@ -74,7 +74,7 @@ export const HomePage = () => {
           </div>
 
           <div className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src={elliotSmith} alt="Elliot Smith" className="w-full h-48 object-cover" />
+            <img src="/lovable-uploads/f6bb9307-5484-4552-b77a-5ff9dca13907.png" alt="Elliot Smith" className="w-full h-48 object-cover" />
             <div className="p-4 text-left">
               <strong className="text-card-foreground">Elliot Smith</strong><br />
               <span className="text-sm text-muted-foreground">BSc Finance, LSE</span>
@@ -82,7 +82,7 @@ export const HomePage = () => {
           </div>
 
           <div className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src={revishann} alt="Revishann" className="w-full h-48 object-cover" />
+            <img src="/lovable-uploads/28e78021-41d3-4030-b115-5682fc1d7b71.png" alt="Revishann" className="w-full h-48 object-cover" />
             <div className="p-4 text-left">
               <strong className="text-card-foreground">Revishann</strong><br />
               <span className="text-sm text-muted-foreground">A* Student & A-Level Mentor</span>
