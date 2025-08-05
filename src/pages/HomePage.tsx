@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import logo from '@/assets/logo.png';
 // import phone from '@/assets/phone.png';
-import laptop from '@/assets/laptop.png';
+// import laptop from '@/assets/laptop.png';
 import tillyTaylor from '@/assets/tilly-taylor.png';
 import elliotSmith from '@/assets/elliot-smith.png';
 import revishann from '@/assets/revishann.png';
@@ -101,7 +101,7 @@ export const HomePage = () => {
         <div className="flex flex-col lg:flex-row items-start justify-center max-w-6xl mx-auto gap-12">
           {/* Laptop Image */}
           <div className="flex-1 text-center">
-            <img src={laptop} alt="Laptop mockup" className="max-w-full h-auto rounded-xl shadow-elevated mx-auto" />
+            <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto rounded-xl shadow-elevated mx-auto" />
             <Button variant="brand" size="xl" asChild className="mt-8">
               <Link to="/compare">Try A* AI Now →</Link>
             </Button>
