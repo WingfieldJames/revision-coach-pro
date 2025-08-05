@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
-import logo from '@/assets/logo.png';
+// import logo from '@/assets/logo.png';
 
 export const DashboardPage = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -63,7 +63,7 @@ export const DashboardPage = () => {
       <div className="py-8 px-8 max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3">
-            Welcome to <img src={logo} alt="A* AI" className="h-10" />
+            Welcome to <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-10" />
           </h1>
           <p className="text-lg text-muted-foreground">
             Your AI-powered revision dashboard

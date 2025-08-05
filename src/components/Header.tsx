@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import logo from '@/assets/logo.png';
+// import logo from '@/assets/logo.png';
 
 interface HeaderProps {
   showNavLinks?: boolean;
@@ -27,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="flex justify-between items-center p-6">
       <div className="flex items-center">
         <Link to="/" className="flex items-center">
-          <img src={logo} alt="A* AI logo" className="h-10" />
+          <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-10" />
         </Link>
       </div>
       
