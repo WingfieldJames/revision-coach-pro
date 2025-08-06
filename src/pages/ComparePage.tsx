@@ -140,9 +140,9 @@ export const ComparePage = () => {
           <h2 className="text-3xl text-center mb-12 flex items-center justify-center gap-2">
             Loved by sixth formers across the UK ⬇️
           </h2>
-          <div className="flex flex-wrap justify-center gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
             {/* Testimonial 1 */}
-            <div className="flex-1 min-w-80 bg-card p-8 rounded-2xl shadow-card flex gap-6">
+            <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
               <img src="oxford1.jpg" alt="Sophia profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
               <div>
                 <strong className="text-lg text-card-foreground">Sophia – Economics & Management, Oxford</strong>
@@ -153,7 +153,7 @@ export const ComparePage = () => {
             </div>
 
             {/* Testimonial 2 */}
-            <div className="flex-1 min-w-80 bg-card p-8 rounded-2xl shadow-card flex gap-6">
+            <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
               <img src="cambridge1.jpg" alt="David profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
               <div>
                 <strong className="text-lg text-card-foreground">David – Economics, Cambridge</strong>
@@ -164,7 +164,7 @@ export const ComparePage = () => {
             </div>
 
             {/* Testimonial 3 */}
-            <div className="flex-1 min-w-80 bg-card p-8 rounded-2xl shadow-card flex gap-6">
+            <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
               <img src="durham1.jpg" alt="Hannah profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
               <div>
                 <strong className="text-lg text-card-foreground">Hannah – Economics, Durham</strong>
@@ -175,7 +175,7 @@ export const ComparePage = () => {
             </div>
 
             {/* Testimonial 4 */}
-            <div className="flex-1 min-w-80 bg-card p-8 rounded-2xl shadow-card flex gap-6">
+            <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
               <img src="lse1.jpg" alt="Amira profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
               <div>
                 <strong className="text-lg text-card-foreground">Amira – LSE Offer Holder</strong>
