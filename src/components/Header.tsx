@@ -36,7 +36,10 @@ export const Header: React.FC<HeaderProps> = ({
           <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
           <span>Testimonials</span>
           <span>Our Story</span>
-          <Link to="/dashboard" className="hover:text-foreground transition-colors">
+          <Link 
+            to={user ? "/dashboard" : "/login"} 
+            className="hover:text-foreground transition-colors"
+          >
             My Profile
           </Link>
         </nav>
