@@ -2,6 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
+import sophiaImage from '@/assets/sophia-oxford.jpg';
+import davidImage from '@/assets/david-cambridge.jpg';
+import hannahImage from '@/assets/hannah-durham.jpg';
+import amiraImage from '@/assets/amira-lse.jpg';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -144,7 +148,7 @@ export const ComparePage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
               {/* Testimonial 1 */}
               <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
-                <img src="oxford1.jpg" alt="Sophia profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
+                <img src={sophiaImage} alt="Sophia profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
                 <div>
                   <strong className="text-lg text-card-foreground">Sophia – Economics & Management, Oxford</strong>
                   <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
@@ -155,7 +159,7 @@ export const ComparePage = () => {
 
               {/* Testimonial 2 */}
               <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
-                <img src="cambridge1.jpg" alt="David profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
+                <img src={davidImage} alt="David profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
                 <div>
                   <strong className="text-lg text-card-foreground">David – Economics, Cambridge</strong>
                   <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
@@ -166,7 +170,7 @@ export const ComparePage = () => {
 
               {/* Testimonial 3 */}
               <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
-                <img src="durham1.jpg" alt="Hannah profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
+                <img src={hannahImage} alt="Hannah profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
                 <div>
                   <strong className="text-lg text-card-foreground">Hannah – Economics, Durham</strong>
                   <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
@@ -177,7 +181,7 @@ export const ComparePage = () => {
 
               {/* Testimonial 4 */}
               <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
-                <img src="lse1.jpg" alt="Amira profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
+                <img src={amiraImage} alt="Amira profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
                 <div>
                   <strong className="text-lg text-card-foreground">Amira – LSE Offer Holder</strong>
                   <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
