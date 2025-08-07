@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 // import logo from '@/assets/logo.png';
 // import phone from '@/assets/phone.png';
 // import laptop from '@/assets/laptop.png';
@@ -14,17 +12,8 @@ import { useNavigate } from 'react-router-dom';
 
 export const HomePage = () => {
   const { user, profile } = useAuth();
-  const navigate = useNavigate();
 
-  // Auto-redirect premium users to deluxe chatbot iframe
-  useEffect(() => {
-    if (user && profile?.is_premium) {
-      navigate('/premium');
-    } else if (user && profile && !profile.is_premium) {
-      // If user is logged in but not premium, redirect to free version
-      navigate('/free-version');
-    }
-  }, [user, profile, navigate]);
+  // No auto-redirect - always show the home page when accessed directly
   return (
     <div className="min-h-screen bg-background font-sans">
       <Header showNavLinks />
