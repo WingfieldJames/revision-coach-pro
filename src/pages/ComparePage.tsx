@@ -140,17 +140,17 @@ export const ComparePage = () => {
         </div>
 
         {/* Testimonials Section */}
-        <section className="py-20 bg-muted -mx-8">
+        <section id="testimonials" className="py-20 bg-muted -mx-8">
           <div className="px-8">
             <h2 className="text-3xl text-center mb-12 flex items-center justify-center gap-2">
               Loved by sixth formers across the UK ⬇️
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
               {/* Testimonial 1 */}
-              <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
-                <img src={sophiaImage} alt="Sophia profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
+              <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
+                <img src={sophiaImage} alt="Sophia profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
                 <div>
-                  <strong className="text-lg text-card-foreground">Sophia – Economics & Management, Oxford</strong>
+                  <strong className="text-base text-card-foreground">Sophia – Economics & Management, Oxford</strong>
                   <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
                     "I used A* AI daily before my mocks — especially for Paper 3. The real-world examples and structure help made it easier to hit those top evaluation marks."
                   </p>
@@ -158,10 +158,10 @@ export const ComparePage = () => {
               </div>
 
               {/* Testimonial 2 */}
-              <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
-                <img src={davidImage} alt="David profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
+              <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
+                <img src={davidImage} alt="David profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
                 <div>
-                  <strong className="text-lg text-card-foreground">David – Economics, Cambridge</strong>
+                  <strong className="text-base text-card-foreground">David – Economics, Cambridge</strong>
                   <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
                     "A* AI understood the mark schemes better than my tutor. It explained diagrams perfectly and helped me plan 25-markers like an examiner would expect."
                   </p>
@@ -169,10 +169,10 @@ export const ComparePage = () => {
               </div>
 
               {/* Testimonial 3 */}
-              <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
-                <img src={hannahImage} alt="Hannah profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
+              <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
+                <img src={hannahImage} alt="Hannah profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
                 <div>
-                  <strong className="text-lg text-card-foreground">Hannah – Economics, Durham</strong>
+                  <strong className="text-base text-card-foreground">Hannah – Economics, Durham</strong>
                   <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
                     "No fluff, no wasted time — A* AI helped me revise with focus. Being able to search by topic and command word made past paper practice 10x more efficient."
                   </p>
@@ -180,10 +180,10 @@ export const ComparePage = () => {
               </div>
 
               {/* Testimonial 4 */}
-              <div className="bg-card p-8 rounded-2xl shadow-card flex gap-6 w-full">
-                <img src={amiraImage} alt="Amira profile" className="w-18 h-18 rounded-full object-cover flex-shrink-0" />
+              <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
+                <img src={amiraImage} alt="Amira profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
                 <div>
-                  <strong className="text-lg text-card-foreground">Amira – LSE Offer Holder</strong>
+                  <strong className="text-base text-card-foreground">Amira – LSE Offer Holder</strong>
                   <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
                     "I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant."
                   </p>

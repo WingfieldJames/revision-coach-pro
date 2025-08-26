@@ -57,9 +57,11 @@ export const PremiumVersionPage = () => {
       
       <div className="relative" style={{ height: 'calc(100vh - 80px)' }}>
         <iframe
-          src="https://www.chatbase.co/chatbot-iframe/rdUsQQiBG6DHV2jFtXzn5"
+          src="https://www.chatbase.co/chatbot-iframe/1l2aTsS1zKI3FgVTquzOu"
+          width="100%"
+          style={{ height: '100%', minHeight: '700px' }}
+          frameBorder="0"
           allow="clipboard-write"
-          className="w-full h-full border-none"
           title="A* AI Premium Version Chatbot"
         />
       </div>

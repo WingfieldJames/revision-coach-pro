@@ -140,6 +140,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (error) {
       throw error;
     }
+    
+    // Redirect to dashboard after successful login
+    window.location.href = '/dashboard';
   };
 
   const signUp = async (email: string, password: string) => {
