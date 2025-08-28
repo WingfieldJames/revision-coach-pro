@@ -12,9 +12,19 @@ import { supabase } from '@/lib/supabase';
 export const ComparePage = () => {
   const { user, profile } = useAuth();
 
-  // Scroll to top when component mounts
+  // Scroll to top when component mounts, or to testimonials if hash is present
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (window.location.hash === '#testimonials') {
+      // Small delay to ensure the component is fully rendered
+      setTimeout(() => {
+        const testimonialsSection = document.getElementById('testimonials');
+        if (testimonialsSection) {
+          testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
   }, []);
 
   const handlePremiumClick = async () => {

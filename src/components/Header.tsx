@@ -35,7 +35,6 @@ export const Header: React.FC<HeaderProps> = ({
         <nav className="flex gap-6 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
           <Link to="/compare#testimonials" className="hover:text-foreground transition-colors">Testimonials</Link>
-          <span>Our Story</span>
           <Link 
             to={user ? "/dashboard" : "/login"} 
             className="hover:text-foreground transition-colors"
