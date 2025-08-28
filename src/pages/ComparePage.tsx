@@ -145,7 +145,7 @@ export const ComparePage = () => {
         </div>
 
         {/* Testimonials Section */}
-        <section id="testimonials" className="py-20 bg-muted -mx-8">
+        <section id="testimonials" className="py-20 bg-muted -mx-8 mt-16">
           <div className="px-8">
             <h2 className="text-3xl text-center mb-12 flex items-center justify-center gap-2">
               Loved by sixth formers across the UK ⬇️
