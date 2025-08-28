@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
@@ -11,6 +11,11 @@ import { supabase } from '@/lib/supabase';
 
 export const ComparePage = () => {
   const { user, profile } = useAuth();
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handlePremiumClick = async () => {
     console.log('Premium button clicked, user:', user, 'profile:', profile);
