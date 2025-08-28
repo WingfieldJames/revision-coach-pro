@@ -28,49 +28,65 @@ export const ComparePage = () => {
   }, []);
 
   const handlePremiumClick = async () => {
-    console.log('Premium button clicked, user:', user, 'profile:', profile);
-    
-    if (!user) {
-      // Redirect to signup if not authenticated
-      window.location.href = '/signup';
-      return;
-    }
-
-    // Check if user is already premium
-    if (profile?.is_premium) {
-      console.log('User is already premium, redirecting to premium chatbot');
-      window.location.href = '/premium';
-      return;
-    }
-
-    // User is logged in but not premium, proceed to Stripe
     try {
-      console.log('Invoking create-checkout function with user:', user.email);
+      console.log('🔥 Premium button clicked! User:', user?.email, 'Premium status:', profile?.is_premium);
+      
+      if (!user) {
+        console.log('❌ No user found, redirecting to signup');
+        window.location.href = '/signup';
+        return;
+      }
+
+      // Check if user is already premium
+      if (profile?.is_premium) {
+        console.log('✅ User is already premium, redirecting to premium page');
+        window.location.href = '/premium';
+        return;
+      }
+
+      console.log('💳 User is authenticated but not premium, creating checkout session...');
+      
+      // Get fresh session token
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session?.access_token) {
+        console.error('❌ Session error:', sessionError);
+        alert('Please log in again to continue');
+        window.location.href = '/login';
+        return;
+      }
+
+      console.log('📞 Calling create-checkout function...');
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          Authorization: `Bearer ${sessionData.session.access_token}`,
         },
       });
       
-      console.log('Create checkout response:', { data, error });
+      console.log('📋 Checkout response:', { data, error });
       
       if (error) {
-        console.error('Error creating checkout session:', error);
-        alert(`Failed to create checkout session: ${error.message}`);
+        console.error('❌ Checkout error:', error);
+        alert(`Failed to create checkout session: ${error.message || error}`);
         return;
       }
 
       if (data?.url) {
-        console.log('Redirecting to Stripe checkout:', data.url);
-        window.open(data.url, '_blank');
+        console.log('🚀 Opening Stripe checkout:', data.url);
+        // Open in new tab for better UX
+        const newTab = window.open(data.url, '_blank');
+        if (!newTab) {
+          // Fallback if popup blocked
+          window.location.href = data.url;
+        }
       } else {
-        console.error('No checkout URL received');
-        alert('No checkout URL received from server');
+        console.error('❌ No checkout URL in response:', data);
+        alert('Unable to create checkout session. Please try again.');
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
-      alert(`Failed to create checkout session: ${error}`);
+      console.error('💥 Unexpected error in handlePremiumClick:', error);
+      alert(`Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
