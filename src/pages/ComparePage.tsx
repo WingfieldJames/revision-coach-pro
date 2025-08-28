@@ -153,64 +153,65 @@ export const ComparePage = () => {
             </Button>
           </div>
         </div>
-
-        {/* Testimonials Section */}
-        <section id="testimonials" className="py-20 bg-muted -mx-8 mt-16">
-          <div className="px-8">
-            <h2 className="text-3xl text-center mb-12 flex items-center justify-center gap-2">
-              Loved by sixth formers across the UK ⬇️
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-              {/* Testimonial 1 */}
-              <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-                <img src={sophiaImage} alt="Sophia profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                <div>
-                  <strong className="text-base text-card-foreground">Sophia – Economics & Management, Oxford</strong>
-                  <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                    "I used A* AI daily before my mocks — especially for Paper 3. The real-world examples and structure help made it easier to hit those top evaluation marks."
-                  </p>
-                </div>
+      </main>
+      
+      <section id="testimonials" className="py-16 md:py-20 bg-muted w-full mt-12 md:mt-20">
+        <div className="px-8 max-w-4xl mx-auto">
+          <h2 className="text-3xl text-center mb-12 flex items-center justify-center gap-2">
+            Loved by sixth formers across the UK ⬇️
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            {/* Testimonial 1 */}
+            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
+              <img src={sophiaImage} alt="Sophia profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+              <div>
+                <strong className="text-base text-card-foreground">Sophia – Economics & Management, Oxford</strong>
+                <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
+                  "I used A* AI daily before my mocks — especially for Paper 3. The real-world examples and structure help made it easier to hit those top evaluation marks."
+                </p>
               </div>
+            </div>
 
-              {/* Testimonial 2 */}
-              <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-                <img src={davidImage} alt="David profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                <div>
-                  <strong className="text-base text-card-foreground">David – Economics, Cambridge</strong>
-                  <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                    "A* AI understood the mark schemes better than my tutor. It explained diagrams perfectly and helped me plan 25-markers like an examiner would expect."
-                  </p>
-                </div>
+            {/* Testimonial 2 */}
+            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
+              <img src={davidImage} alt="David profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+              <div>
+                <strong className="text-base text-card-foreground">David – Economics, Cambridge</strong>
+                <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
+                  "A* AI understood the mark schemes better than my tutor. It explained diagrams perfectly and helped me plan 25-markers like an examiner would expect."
+                </p>
               </div>
+            </div>
 
-              {/* Testimonial 3 */}
-              <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-                <img src={hannahImage} alt="Hannah profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                <div>
-                  <strong className="text-base text-card-foreground">Hannah – Economics, Durham</strong>
-                  <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                    "No fluff, no wasted time — A* AI helped me revise with focus. Being able to search by topic and command word made past paper practice 10x more efficient."
-                  </p>
-                </div>
+            {/* Testimonial 3 */}
+            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
+              <img src={hannahImage} alt="Hannah profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+              <div>
+                <strong className="text-base text-card-foreground">Hannah – Economics, Durham</strong>
+                <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
+                  "No fluff, no wasted time — A* AI helped me revise with focus. Being able to search by topic and command word made past paper practice 10x more efficient."
+                </p>
               </div>
+            </div>
 
-              {/* Testimonial 4 */}
-              <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-                <img src={amiraImage} alt="Amira profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                <div>
-                  <strong className="text-base text-card-foreground">Amira – LSE Offer Holder</strong>
-                  <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                    "I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant."
-                  </p>
-                </div>
+            {/* Testimonial 4 */}
+            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
+              <img src={amiraImage} alt="Amira profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+              <div>
+                <strong className="text-base text-card-foreground">Amira – LSE Offer Holder</strong>
+                <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
+                  "I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant."
+                </p>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {!user && (
-          <div className="mt-12 p-6 bg-secondary rounded-lg">
-            <p className="text-muted-foreground mb-4">
+      {!user && (
+        <div className="px-8 max-w-4xl mx-auto mt-12 mb-12">
+          <div className="p-6 bg-secondary rounded-lg">
+            <p className="text-muted-foreground mb-4 text-center">
               New to A* AI? Create an account to track your progress and access premium features.
             </p>
             <div className="flex gap-4 justify-center">
@@ -222,8 +223,8 @@ export const ComparePage = () => {
               </Button>
             </div>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 };
