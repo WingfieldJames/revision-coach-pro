@@ -131,23 +131,54 @@ export const DashboardPage = () => {
                   className="w-full"
                   onClick={async () => {
                     try {
+                      console.log('Starting premium upgrade process...');
                       const { supabase } = await import('@/integrations/supabase/client');
+                      
+                      // Get current session
+                      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+                      if (sessionError || !sessionData.session) {
+                        console.error('No active session:', sessionError);
+                        alert('Please log in again to upgrade to premium.');
+                        return;
+                      }
+
+                      console.log('Creating checkout session...');
                       const { data, error } = await supabase.functions.invoke('create-checkout', {
                         headers: {
-                          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+                          Authorization: `Bearer ${sessionData.session.access_token}`,
                         },
                       });
                       
                       if (error) {
                         console.error('Error creating checkout session:', error);
+                        alert('There was an error starting the checkout process. Please try again.');
                         return;
                       }
 
                       if (data?.url) {
-                        window.open(data.url, '_blank');
+                        console.log('Opening Stripe checkout:', data.url);
+                        
+                        // Try to open in new tab
+                        const newWindow = window.open(data.url, '_blank');
+                        
+                        // Check if popup was blocked
+                        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                          console.log('Popup blocked, offering fallback...');
+                          const userWantsRedirect = confirm(
+                            'Pop-up blocked! Would you like to continue with the checkout in this tab instead?'
+                          );
+                          
+                          if (userWantsRedirect) {
+                            window.location.href = data.url;
+                          }
+                        }
+                      } else {
+                        console.error('No checkout URL received');
+                        alert('Unable to start checkout process. Please try again.');
                       }
                     } catch (error) {
                       console.error('Error creating checkout session:', error);
+                      alert('There was an error starting the checkout process. Please try again.');
                     }
                   }}
                 >
