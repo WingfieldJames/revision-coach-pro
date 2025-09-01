@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 // import logo from '@/assets/logo.png';
 // import phone from '@/assets/phone.png';
 // import laptop from '@/assets/laptop.png';
@@ -121,6 +122,65 @@ export const HomePage = () => {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 px-8 bg-background">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-4">
+            Frequently asked questions
+          </h2>
+          <p className="text-center text-muted-foreground mb-12">
+            Everything you need to know about <span className="bg-gradient-brand bg-clip-text text-transparent">A* AI</span> and revision.
+          </p>
+          
+          <Accordion type="single" collapsible className="space-y-4">
+            <AccordionItem value="item-1" className="bg-muted rounded-xl px-6 border-0">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline">
+                How does A* AI understand Edexcel Economics?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                A* AI has been specifically trained on Edexcel Economics past papers, mark schemes, and examiner reports to understand the exact requirements and expectations for your exam board.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2" className="bg-muted rounded-xl px-6 border-0">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline">
+                Can I practice with real past paper questions?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Yes! A* AI provides access to authentic past paper questions organized by topic, command word, and difficulty level, so you can practice exactly what you need.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3" className="bg-muted rounded-xl px-6 border-0">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline">
+                How often are the case studies and examples updated?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Our live application examples are updated regularly from current global economic events, ensuring you have the most relevant and up-to-date case studies for your essays.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4" className="bg-muted rounded-xl px-6 border-0">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline">
+                Does A* AI help with diagram drawing?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Absolutely! A* AI includes all key economic diagrams with step-by-step explanations, helping you understand when and how to use them effectively in your exams.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-5" className="bg-muted rounded-xl px-6 border-0">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline">
+                Is there a free version available?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Yes, we offer a free version with limited features so you can try A* AI before upgrading. The premium version unlocks full access to all past papers, unlimited questions, and advanced features.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
 
