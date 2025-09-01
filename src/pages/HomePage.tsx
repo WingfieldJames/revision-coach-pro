@@ -138,52 +138,43 @@ export const HomePage = () => {
           
           <Accordion type="single" collapsible className="space-y-4">
             <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
-                <span>How does A* AI understand Edexcel Economics?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden">
+                <span>Why is this better than ChatGPT or a normal AI?</span>
+                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-muted-foreground">
-                A* AI has been specifically trained on Edexcel Economics past papers, mark schemes, and examiner reports to understand the exact requirements and expectations for your exam board.
+                A* AI is built only for Edexcel A-Level Economics A. It's trained on past papers, mark schemes, and the full spec — so instead of vague textbook answers, you get examiner-style responses that match the real exams.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
-                <span>Can I practice with real past paper questions?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden">
+                <span>How do the plans work?</span>
+                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-muted-foreground">
-                Yes! A* AI provides access to authentic past paper questions organized by topic, command word, and difficulty level, so you can practice exactly what you need.
+                Free: Access to one year of past papers with limited usage.<br/>
+                Deluxe (£20 one-time): Lifetime access to every past paper, full mark schemes, unlimited usage, and top-grade exam technique.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
-                <span>How often are the case studies and examples updated?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden">
+                <span>What's included in the Deluxe version?</span>
+                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-muted-foreground">
-                Our live application examples are updated regularly from current global economic events, ensuring you have the most relevant and up-to-date case studies for your essays.
+                All past papers (Paper 1, 2 & 3), every official mark scheme, the full spec, model essay structures, examiner insights, and real-world application examples — everything you need for A* answers in one place.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
-                <span>Does A* AI help with diagram drawing?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden">
+                <span>Does it work for other exam boards or subjects?</span>
+                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-muted-foreground">
-                Absolutely! A* AI includes all key economic diagrams with step-by-step explanations, helping you understand when and how to use them effectively in your exams.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="item-5" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
-                <span>Is there a free version available?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-4 text-muted-foreground">
-                Yes, we offer a free version with limited features so you can try A* AI before upgrading. The premium version unlocks full access to all past papers, unlimited questions, and advanced features.
+                Currently, it's built specifically for Edexcel A-Level Economics A. Other boards and subjects may be added in the future.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
