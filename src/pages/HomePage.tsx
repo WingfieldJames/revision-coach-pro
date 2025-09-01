@@ -140,7 +140,7 @@ export const HomePage = () => {
             <AccordionItem value="item-1" className="bg-muted rounded-xl px-6 border-0">
               <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:hidden relative">
                 How does A* AI understand Edexcel Economics?
-                <Plus className="h-5 w-5 absolute right-0 bg-gradient-brand bg-clip-text text-transparent transition-transform duration-200 [&[data-state=open]]:rotate-45" />
+                <Plus className="h-5 w-5 absolute right-0 text-[hsl(var(--primary-variant))] transition-transform duration-200 [&[data-state=open]]:rotate-45" />
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 A* AI has been specifically trained on Edexcel Economics past papers, mark schemes, and examiner reports to understand the exact requirements and expectations for your exam board.
@@ -150,7 +150,7 @@ export const HomePage = () => {
             <AccordionItem value="item-2" className="bg-muted rounded-xl px-6 border-0">
               <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:hidden relative">
                 Can I practice with real past paper questions?
-                <Plus className="h-5 w-5 absolute right-0 bg-gradient-brand bg-clip-text text-transparent transition-transform duration-200 [&[data-state=open]]:rotate-45" />
+                <Plus className="h-5 w-5 absolute right-0 text-[hsl(var(--primary-variant))] transition-transform duration-200 [&[data-state=open]]:rotate-45" />
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 Yes! A* AI provides access to authentic past paper questions organized by topic, command word, and difficulty level, so you can practice exactly what you need.
@@ -160,7 +160,7 @@ export const HomePage = () => {
             <AccordionItem value="item-3" className="bg-muted rounded-xl px-6 border-0">
               <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:hidden relative">
                 How often are the case studies and examples updated?
-                <Plus className="h-5 w-5 absolute right-0 bg-gradient-brand bg-clip-text text-transparent transition-transform duration-200 [&[data-state=open]]:rotate-45" />
+                <Plus className="h-5 w-5 absolute right-0 text-[hsl(var(--primary-variant))] transition-transform duration-200 [&[data-state=open]]:rotate-45" />
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 Our live application examples are updated regularly from current global economic events, ensuring you have the most relevant and up-to-date case studies for your essays.
@@ -170,7 +170,7 @@ export const HomePage = () => {
             <AccordionItem value="item-4" className="bg-muted rounded-xl px-6 border-0">
               <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:hidden relative">
                 Does A* AI help with diagram drawing?
-                <Plus className="h-5 w-5 absolute right-0 bg-gradient-brand bg-clip-text text-transparent transition-transform duration-200 [&[data-state=open]]:rotate-45" />
+                <Plus className="h-5 w-5 absolute right-0 text-[hsl(var(--primary-variant))] transition-transform duration-200 [&[data-state=open]]:rotate-45" />
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 Absolutely! A* AI includes all key economic diagrams with step-by-step explanations, helping you understand when and how to use them effectively in your exams.
@@ -180,7 +180,7 @@ export const HomePage = () => {
             <AccordionItem value="item-5" className="bg-muted rounded-xl px-6 border-0">
               <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:hidden relative">
                 Is there a free version available?
-                <Plus className="h-5 w-5 absolute right-0 bg-gradient-brand bg-clip-text text-transparent transition-transform duration-200 [&[data-state=open]]:rotate-45" />
+                <Plus className="h-5 w-5 absolute right-0 text-[hsl(var(--primary-variant))] transition-transform duration-200 [&[data-state=open]]:rotate-45" />
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
                 Yes, we offer a free version with limited features so you can try A* AI before upgrading. The premium version unlocks full access to all past papers, unlimited questions, and advanced features.
