@@ -160,11 +160,16 @@ export const HomePage = () => {
 
             <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
               <AccordionTrigger className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden text-lg">
-                <span>What's included in the Deluxe version?</span>
+                <span>🔥 Deluxe Plan — £19.99 (One-Time, Lifetime Access)</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                All past papers (Paper 1, 2 & 3), every official mark scheme, the full spec, model essay structures, examiner insights, and real-world application examples — everything you need for A* answers in one place.
+                • All Edexcel A-Level Economics A past papers (Paper 1, 2 & 3, 2017–2023)<br/>
+                • Official examiner mark schemes<br/>
+                • Trained on full exam technique + essay structures<br/>
+                • Step-by-step diagram guidance (every diagram from AD/AS to buffer stocks)<br/>
+                • Application + model essay examples<br/>
+                • Full Notion study guide
               </AccordionContent>
             </AccordionItem>
 
