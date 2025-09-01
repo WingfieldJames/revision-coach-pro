@@ -146,27 +146,31 @@ export const ComparePage = () => {
 
           {/* Deluxe Plan */}
           <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left border-2 border-primary">
-            <h2 className="text-2xl font-semibold mb-6">🔥 Deluxe Plan – £19.99</h2>
+            <h2 className="text-2xl font-semibold mb-6">🔥 Deluxe Plan — £19.99 (One-Time, Lifetime Access)</h2>
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                10+ years of past papers
+                All Edexcel A-Level Economics A past papers (Paper 1, 2 & 3, 2017–2023)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Official mark schemes
+                Official examiner mark schemes
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Built-in exam technique
+                Trained on full exam technique + essay structures
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Application and essay examples
+                Complete specification coverage
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Full Notion study guide
+                Step-by-step diagram guidance (every diagram from AD/AS to buffer stocks)
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Application + model essay examples
               </li>
             </ul>
             <Button 
