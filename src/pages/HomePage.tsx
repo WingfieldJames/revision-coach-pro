@@ -138,7 +138,7 @@ export const HomePage = () => {
           
           <Accordion type="single" collapsible className="space-y-4">
             <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:!hidden">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
                 <span>How does A* AI understand Edexcel Economics?</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
               </AccordionTrigger>
@@ -148,7 +148,7 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:!hidden">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
                 <span>Can I practice with real past paper questions?</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
               </AccordionTrigger>
@@ -158,7 +158,7 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:!hidden">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
                 <span>How often are the case studies and examples updated?</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
               </AccordionTrigger>
@@ -168,7 +168,7 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:!hidden">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
                 <span>Does A* AI help with diagram drawing?</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
               </AccordionTrigger>
@@ -178,7 +178,7 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-5" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:!hidden">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
                 <span>Is there a free version available?</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
               </AccordionTrigger>
