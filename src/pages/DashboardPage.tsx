@@ -93,11 +93,11 @@ export const DashboardPage = () => {
             </CardContent>
           </Card>
 
-          {/* Premium Version Card */}
+          {/* Deluxe Version Card */}
           <Card className={profile?.is_premium ? 'border-primary bg-primary/5' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                🔥 Premium Version
+                🔥 Deluxe Plan — £19.99 (One-Time, Lifetime Access)
                 {profile?.is_premium && (
                   <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">
                     ACTIVE
@@ -106,23 +106,24 @@ export const DashboardPage = () => {
               </CardTitle>
               <CardDescription>
                 {profile?.is_premium 
-                  ? 'Access all premium features and content'
+                  ? 'Access all deluxe features and content'
                   : 'Upgrade for full access to A* AI features'
                 }
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-muted-foreground mb-6 space-y-2">
-                <li>✓ 10+ years of past papers</li>
-                <li>✓ Official mark schemes</li>
-                <li>✓ Built-in exam technique</li>
-                <li>✓ Application and essay examples</li>
-                <li>✓ Full Notion study guide</li>
+                <li>✓ All Edexcel A-Level Economics A past papers (Paper 1, 2 & 3, 2017–2023)</li>
+                <li>✓ Official examiner mark schemes</li>
+                <li>✓ Trained on full exam technique + essay structures</li>
+                <li>✓ Complete specification coverage</li>
+                <li>✓ Step-by-step diagram guidance (every diagram from AD/AS to buffer stocks)</li>
+                <li>✓ Application + model essay examples</li>
               </ul>
               
               {profile?.is_premium ? (
                 <Button variant="brand" size="lg" asChild className="w-full">
-                  <Link to="/premium">Launch Premium Version</Link>
+                  <Link to="/premium">Launch Deluxe Version</Link>
                 </Button>
               ) : (
                 <Button 
@@ -182,7 +183,7 @@ export const DashboardPage = () => {
                     }
                   }}
                 >
-                  Upgrade to Premium
+                  Upgrade to Deluxe
                 </Button>
               )}
             </CardContent>
@@ -209,7 +210,7 @@ export const DashboardPage = () => {
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-gray-100 text-gray-800'
                   }`}>
-                    {profile?.is_premium ? 'Premium' : 'Free'}
+                    {profile?.is_premium ? 'Deluxe' : 'Free'}
                   </span>
                   {profile?.subscription_tier && (
                     <span className="text-sm text-muted-foreground">
