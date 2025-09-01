@@ -157,22 +157,10 @@ export const DashboardPage = () => {
                       }
 
                       if (data?.url) {
-                        console.log('Opening Stripe checkout:', data.url);
+                        console.log('Redirecting to Stripe checkout:', data.url);
                         
-                        // Try to open in new tab
-                        const newWindow = window.open(data.url, '_blank');
-                        
-                        // Check if popup was blocked
-                        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                          console.log('Popup blocked, offering fallback...');
-                          const userWantsRedirect = confirm(
-                            'Pop-up blocked! Would you like to continue with the checkout in this tab instead?'
-                          );
-                          
-                          if (userWantsRedirect) {
-                            window.location.href = data.url;
-                          }
-                        }
+                        // Direct redirect - most reliable approach
+                        window.location.href = data.url;
                       } else {
                         console.error('No checkout URL received');
                         alert('Unable to start checkout process. Please try again.');

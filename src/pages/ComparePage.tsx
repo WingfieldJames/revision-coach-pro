@@ -73,23 +73,10 @@ export const ComparePage = () => {
       }
 
       if (data?.url) {
-        console.log('🚀 Opening Stripe checkout:', data.url);
+        console.log('🚀 Redirecting to Stripe checkout:', data.url);
         
-        // Try to open in new tab
-        const newTab = window.open(data.url, '_blank');
-        
-        // Check if popup was blocked
-        setTimeout(() => {
-          if (!newTab || newTab.closed || typeof newTab.closed == 'undefined') {
-            // Popup was blocked - show user-friendly message and redirect
-            const userConfirmed = confirm(
-              'Popup was blocked by your browser. Click OK to continue to Stripe checkout in this tab, or Cancel to try again.'
-            );
-            if (userConfirmed) {
-              window.location.href = data.url;
-            }
-          }
-        }, 100);
+        // Direct redirect - most reliable approach
+        window.location.href = data.url;
       } else {
         console.error('❌ No checkout URL in response:', data);
         alert('Unable to create checkout session. Please try again.');
