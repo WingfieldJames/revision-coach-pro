@@ -129,7 +129,7 @@ export const HomePage = () => {
       <section className="py-8 px-8 bg-background">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-4 flex items-center justify-center gap-2">
-            Frequently asked <span className="bg-gradient-brand bg-clip-text text-transparent">questions</span>
+            Frequently asked questions
           </h2>
           <p className="text-center text-muted-foreground mb-12">
             Everything you need to know about <span className="bg-gradient-brand bg-clip-text text-transparent">A* AI</span> and revision.
@@ -137,7 +137,7 @@ export const HomePage = () => {
           
           <Accordion type="single" collapsible className="space-y-4">
             <AccordionItem value="item-1" className="bg-muted rounded-xl px-6 border-0">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline bg-gradient-brand bg-clip-text text-transparent">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:bg-gradient-brand [&>svg]:bg-clip-text [&>svg]:text-transparent">
                 How does A* AI understand Edexcel Economics?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
@@ -146,7 +146,7 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-2" className="bg-muted rounded-xl px-6 border-0">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline bg-gradient-brand bg-clip-text text-transparent">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:bg-gradient-brand [&>svg]:bg-clip-text [&>svg]:text-transparent">
                 Can I practice with real past paper questions?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
@@ -155,7 +155,7 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-3" className="bg-muted rounded-xl px-6 border-0">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline bg-gradient-brand bg-clip-text text-transparent">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:bg-gradient-brand [&>svg]:bg-clip-text [&>svg]:text-transparent">
                 How often are the case studies and examples updated?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
@@ -164,7 +164,7 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-4" className="bg-muted rounded-xl px-6 border-0">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline bg-gradient-brand bg-clip-text text-transparent">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:bg-gradient-brand [&>svg]:bg-clip-text [&>svg]:text-transparent">
                 Does A* AI help with diagram drawing?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
@@ -173,7 +173,7 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-5" className="bg-muted rounded-xl px-6 border-0">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline bg-gradient-brand bg-clip-text text-transparent">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline text-foreground [&>svg]:bg-gradient-brand [&>svg]:bg-clip-text [&>svg]:text-transparent">
                 Is there a free version available?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
