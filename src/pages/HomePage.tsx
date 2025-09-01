@@ -127,53 +127,53 @@ export const HomePage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-8 px-8 bg-background">
+      <section className="py-4 px-8 bg-background">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-4 flex items-center justify-center gap-2">
+          <h2 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2">
             Frequently asked questions
           </h2>
-          <p className="text-center text-muted-foreground mb-12">
+          <p className="text-center text-muted-foreground mb-8 text-lg">
             Everything you need to know about <span className="bg-gradient-brand bg-clip-text text-transparent">A* AI</span> and revision.
           </p>
           
           <Accordion type="single" collapsible className="space-y-4">
             <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden">
+              <AccordionTrigger className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden text-lg">
                 <span>Why is this better than ChatGPT or a normal AI?</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-4 text-muted-foreground">
+              <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                 A* AI is built only for Edexcel A-Level Economics A. It's trained on past papers, mark schemes, and the full spec — so instead of vague textbook answers, you get examiner-style responses that match the real exams.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden">
+              <AccordionTrigger className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden text-lg">
                 <span>How do the plans work?</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-4 text-muted-foreground">
+              <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                 Free: Access to one year of past papers with limited usage.<br/>
                 Deluxe (£20 one-time): Lifetime access to every past paper, full mark schemes, unlimited usage, and top-grade exam technique.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden">
+              <AccordionTrigger className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden text-lg">
                 <span>What's included in the Deluxe version?</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-4 text-muted-foreground">
+              <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                 All past papers (Paper 1, 2 & 3), every official mark scheme, the full spec, model essay structures, examiner insights, and real-world application examples — everything you need for A* answers in one place.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden">
+              <AccordionTrigger className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg:first-child]:rotate-180 [&>svg:first-child]:hidden text-lg">
                 <span>Does it work for other exam boards or subjects?</span>
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-4 text-muted-foreground">
+              <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                 Currently, it's built specifically for Edexcel A-Level Economics A. Other boards and subjects may be added in the future.
               </AccordionContent>
             </AccordionItem>
