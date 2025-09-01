@@ -138,9 +138,9 @@ export const HomePage = () => {
           
           <Accordion type="single" collapsible className="space-y-4">
             <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:hidden">
                 <span>How does A* AI understand Edexcel Economics?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
+                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0 ml-auto" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-muted-foreground">
                 A* AI has been specifically trained on Edexcel Economics past papers, mark schemes, and examiner reports to understand the exact requirements and expectations for your exam board.
@@ -148,9 +148,9 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:hidden">
                 <span>Can I practice with real past paper questions?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
+                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0 ml-auto" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-muted-foreground">
                 Yes! A* AI provides access to authentic past paper questions organized by topic, command word, and difficulty level, so you can practice exactly what you need.
@@ -158,9 +158,9 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:hidden">
                 <span>How often are the case studies and examples updated?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
+                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0 ml-auto" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-muted-foreground">
                 Our live application examples are updated regularly from current global economic events, ensuring you have the most relevant and up-to-date case studies for your essays.
@@ -168,9 +168,9 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:hidden">
                 <span>Does A* AI help with diagram drawing?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
+                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0 ml-auto" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-muted-foreground">
                 Absolutely! A* AI includes all key economic diagrams with step-by-step explanations, helping you understand when and how to use them effectively in your exams.
@@ -178,9 +178,9 @@ export const HomePage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-5" className="bg-muted rounded-xl border-0 overflow-hidden">
-              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full">
+              <AccordionTrigger className="px-6 py-4 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&>svg]:hidden">
                 <span>Is there a free version available?</span>
-                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0" />
+                <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 data-[state=open]:rotate-180 shrink-0 ml-auto" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-4 text-muted-foreground">
                 Yes, we offer a free version with limited features so you can try A* AI before upgrading. The premium version unlocks full access to all past papers, unlimited questions, and advanced features.
