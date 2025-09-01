@@ -54,10 +54,10 @@ export const HomePage = () => {
         
         <div className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
           <div className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/580b4f69-5a21-45da-9eed-4542853cc6c2.png" alt="mahmudur" className="w-full h-48 object-cover" />
+            <img src="/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png" alt="Mahmudur Rahman" className="w-full h-48 object-cover" />
             <div className="p-4 text-left">
-              <strong className="text-card-foreground">mahmudur</strong><br />
-              <span className="text-sm text-muted-foreground">BSc Economics, LSE</span>
+              <strong className="text-card-foreground">Mahmudur Rahman</strong><br />
+              <span className="text-sm text-muted-foreground">15m views & 1.5m+ likes</span>
             </div>
           </div>
 
