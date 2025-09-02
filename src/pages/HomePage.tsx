@@ -41,7 +41,7 @@ export const HomePage = () => {
         </div>
 
         <div className="flex-1 text-center">
-          <img src="/lovable-uploads/1d5cebbe-e17b-4f72-82c7-5d2667e550ed.png" alt="A* AI on mobile" className="max-w-full h-auto mx-auto" />
+          <img src="/lovable-uploads/962384ae-eb06-481f-a929-16bce5c920a5.png" alt="A* AI on mobile" className="max-w-full h-auto mx-auto" />
           <Button variant="brand" size="xl" asChild className="mt-6">
             <Link to="/compare">Try It Now →</Link>
           </Button>
