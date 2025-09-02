@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Palette } from 'lucide-react';
 
 export const PremiumVersionPage = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const [isDarkChat, setIsDarkChat] = useState(true); // Default to black as requested
 
   useEffect(() => {
     if (!loading) {
@@ -57,18 +55,7 @@ export const PremiumVersionPage = () => {
         <Header showNavLinks />
       </div>
       
-      <div className={`relative ${isDarkChat ? 'bg-black' : 'bg-white'}`} style={{ height: 'calc(100vh - 80px)' }}>
-        {/* Theme Toggle Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsDarkChat(!isDarkChat)}
-          className="absolute top-4 right-4 z-20 bg-background/80 backdrop-blur-sm hover:bg-background/90"
-        >
-          <Palette className="h-4 w-4 mr-2" />
-          {isDarkChat ? 'Light Mode' : 'Dark Mode'}
-        </Button>
-
+      <div className="relative" style={{ height: 'calc(100vh - 80px)' }}>
         <iframe
           src="https://www.chatbase.co/chatbot-iframe/1l2aTsS1zKI3FgVTquzOu"
           width="100%"
