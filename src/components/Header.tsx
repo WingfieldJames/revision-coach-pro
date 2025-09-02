@@ -32,9 +32,9 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
       
       {showNavLinks && (
-        <nav className="flex gap-2 md:gap-6 text-xs md:text-sm text-muted-foreground">
+        <nav className="flex flex-wrap gap-2 md:gap-6 text-xs md:text-sm text-muted-foreground">
           <Link to="/" className="hover:text-foreground transition-colors whitespace-nowrap">Home</Link>
-          <Link to="/compare#testimonials" className="hover:text-foreground transition-colors whitespace-nowrap hidden sm:block">Testimonials</Link>
+          <Link to="/compare#testimonials" className="hover:text-foreground transition-colors whitespace-nowrap">Testimonials</Link>
           <Link 
             to={user ? "/dashboard" : "/login"} 
             className="hover:text-foreground transition-colors whitespace-nowrap"
