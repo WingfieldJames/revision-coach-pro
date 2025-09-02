@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="flex justify-between items-center p-6">
+    <header className="flex justify-between items-center p-6 bg-black text-white">
       <div className="flex items-center">
         <Link to="/" className="flex items-center">
           <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-10" />
