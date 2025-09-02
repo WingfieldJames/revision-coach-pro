@@ -45,8 +45,10 @@ export const Header: React.FC<HeaderProps> = ({
       )}
 
       {user && (
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">{user.email}</span>
+        <div className="flex items-center gap-2 md:gap-4 min-w-0">
+          <span className="text-sm text-muted-foreground truncate max-w-[120px] md:max-w-none hidden sm:block">
+            {user.email}
+          </span>
           <Button variant="outline" size="sm" onClick={handleSignOut}>
             Sign Out
           </Button>
