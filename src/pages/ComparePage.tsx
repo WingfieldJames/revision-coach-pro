@@ -28,63 +28,13 @@ export const ComparePage = () => {
   }, []);
 
   const handlePremiumClick = async () => {
-    try {
-      console.log('🔥 Premium button clicked! User:', user?.email, 'Premium status:', profile?.is_premium);
-      
-      if (!user) {
-        console.log('❌ No user found, redirecting to signup');
-        window.location.href = '/signup';
-        return;
-      }
-
-      // Check if user is already premium
-      if (profile?.is_premium) {
-        console.log('✅ User is already premium, redirecting to dashboard');
-        window.location.href = '/dashboard';
-        return;
-      }
-
-      console.log('💳 User is authenticated but not premium, creating checkout session...');
-      
-      // Get fresh session token
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !sessionData.session?.access_token) {
-        console.error('❌ Session error:', sessionError);
-        alert('Please log in again to continue');
-        window.location.href = '/login';
-        return;
-      }
-
-      console.log('📞 Calling create-checkout function...');
-      
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        headers: {
-          Authorization: `Bearer ${sessionData.session.access_token}`,
-        },
-      });
-      
-      console.log('📋 Checkout response:', { data, error });
-      
-      if (error) {
-        console.error('❌ Checkout error:', error);
-        alert(`Failed to create checkout session: ${error.message || error}`);
-        return;
-      }
-
-      if (data?.url) {
-        console.log('🚀 Redirecting to Stripe checkout:', data.url);
-        
-        // Direct redirect - most reliable approach
-        window.location.href = data.url;
-      } else {
-        console.error('❌ No checkout URL in response:', data);
-        alert('Unable to create checkout session. Please try again.');
-      }
-    } catch (error) {
-      console.error('💥 Unexpected error in handlePremiumClick:', error);
-      alert(`Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    if (!user) {
+      window.location.href = '/signup';
+      return;
     }
+
+    // Redirect all logged-in users to dashboard
+    window.location.href = '/dashboard';
   };
 
   return (
