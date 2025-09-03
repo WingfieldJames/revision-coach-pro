@@ -51,6 +51,11 @@ serve(async (req) => {
       throw new Error("Stripe configuration missing");
     }
 
+    // Debug: Check if we're using live or test key
+    const keyType = stripeKey.startsWith("sk_live_") ? "LIVE" : "TEST";
+    console.log("Stripe key type:", keyType);
+    console.log("Stripe key prefix:", stripeKey.substring(0, 12) + "...");
+
     console.log("Initializing Stripe");
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2023-10-16",
