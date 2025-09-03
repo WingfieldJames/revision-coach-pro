@@ -86,10 +86,7 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      automatic_payment_methods: {
-        enabled: true,
-        allow_redirects: "never", // Disables Link and other redirect-based payment methods
-      },
+      payment_method_types: ['card'], // Only allow card payments to disable Link
       success_url: `${req.headers.get("origin")}/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/compare`,
     });
