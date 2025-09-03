@@ -39,8 +39,8 @@ export const ComparePage = () => {
 
       // Check if user is already premium
       if (profile?.is_premium) {
-        console.log('✅ User is already premium, redirecting to premium page');
-        window.location.href = '/premium';
+        console.log('✅ User is already premium, redirecting to dashboard');
+        window.location.href = '/dashboard';
         return;
       }
 
