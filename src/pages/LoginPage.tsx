@@ -30,8 +30,17 @@ export const LoginPage = () => {
         description: "You've been logged in successfully!",
       });
 
-      // Always redirect to dashboard after login
-      navigate('/dashboard');
+      // Handle different redirect scenarios
+      if (redirect === 'stripe') {
+        // User wanted to access premium, redirect to stripe checkout
+        navigate('/compare?checkout=true');
+      } else if (redirect === 'premium') {
+        // User wanted premium version, check if they have access
+        navigate('/premium-version');
+      } else {
+        // Default redirect to dashboard
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       toast({
         title: "Error",

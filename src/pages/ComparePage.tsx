@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import sophiaImage from '@/assets/sophia-oxford.jpg';
@@ -11,6 +11,8 @@ import { supabase } from '@/lib/supabase';
 
 export const ComparePage = () => {
   const { user, profile } = useAuth();
+  const [searchParams] = useSearchParams();
+  const shouldCheckout = searchParams.get('checkout') === 'true';
 
   // Scroll to top when component mounts, or to testimonials if hash is present
   useEffect(() => {
@@ -27,14 +29,75 @@ export const ComparePage = () => {
     }
   }, []);
 
+  // Auto-trigger checkout if redirected from login
+  useEffect(() => {
+    if (shouldCheckout && user && !profile?.is_premium) {
+      console.log('Auto-triggering checkout for logged-in user');
+      handlePremiumClick();
+    }
+  }, [shouldCheckout, user, profile?.is_premium]);
+
+  const handleFreeClick = async () => {
+    if (!user) {
+      // NOT logged in → Login → Dashboard
+      window.location.href = '/login?redirect=dashboard';
+      return;
+    }
+    
+    // LOGGED in (any user) → Free version
+    window.location.href = '/free-version';
+  };
+
   const handlePremiumClick = async () => {
     if (!user) {
-      window.location.href = '/signup';
+      // NOT logged in → Login → Stripe
+      window.location.href = '/login?redirect=stripe';
       return;
     }
 
-    // Redirect all logged-in users to dashboard
-    window.location.href = '/dashboard';
+    // Check if user is already premium
+    if (profile?.is_premium) {
+      // LOGGED in (paying user) → Deluxe chat bot
+      window.location.href = '/premium-version';
+      return;
+    }
+
+    // LOGGED in (standard user) → Stripe checkout
+    try {
+      console.log('Creating checkout session for standard user...');
+      
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session?.access_token) {
+        console.error('Session error:', sessionError);
+        alert('Please log in again to continue');
+        window.location.href = '/login';
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers: {
+          Authorization: `Bearer ${sessionData.session.access_token}`,
+        },
+      });
+      
+      if (error) {
+        console.error('Checkout error:', error);
+        alert(`Failed to create checkout session: ${error.message || error}`);
+        return;
+      }
+
+      if (data?.url) {
+        console.log('Redirecting to Stripe checkout:', data.url);
+        window.location.href = data.url;
+      } else {
+        console.error('No checkout URL in response:', data);
+        alert('Unable to create checkout session. Please try again.');
+      }
+    } catch (error) {
+      console.error('Unexpected error in handlePremiumClick:', error);
+      alert(`Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   return (
@@ -69,13 +132,7 @@ export const ComparePage = () => {
               variant="brand" 
               size="lg" 
               className="w-full"
-              onClick={() => {
-                if (!user) {
-                  window.location.href = '/signup';
-                } else {
-                  window.location.href = '/free-version';
-                }
-              }}
+              onClick={handleFreeClick}
             >
               Use Free Version
             </Button>
