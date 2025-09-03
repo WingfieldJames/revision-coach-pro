@@ -57,8 +57,8 @@ export const ComparePage = () => {
 
     // Check if user is already premium
     if (profile?.is_premium) {
-      // LOGGED in (paying user) → Deluxe chat bot
-      window.location.href = '/premium-version';
+      // LOGGED in (paying user) → Profile dashboard
+      window.location.href = '/dashboard';
       return;
     }
 
