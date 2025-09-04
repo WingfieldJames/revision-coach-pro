@@ -6,7 +6,6 @@ import sophiaImage from '@/assets/sophia-oxford.jpg';
 import davidImage from '@/assets/david-cambridge.jpg';
 import hannahImage from '@/assets/hannah-durham.jpg';
 import amiraImage from '@/assets/amira-lse.jpg';
-import logoImage from '@/assets/logo.png';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -184,7 +183,7 @@ export const ComparePage = () => {
       <section className="py-16 px-8 max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <img src={logoImage} alt="A* AI Logo" className="w-8 h-8" />
+            <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="w-10 h-6" />
             <h2 className="text-3xl font-bold">See A* AI in action</h2>
           </div>
         </div>
