@@ -79,7 +79,10 @@ serve(async (req) => {
         {
           price_data: {
             currency: "gbp",
-            product_data: { name: "A* AI Deluxe Plan" },
+            product_data: { 
+              name: "A* AI Deluxe Plan",
+              description: "Premium AI-powered academic assistance with advanced features, unlimited access, and priority support for achieving A* grades."
+            },
             unit_amount: 1999, // £19.99 in pence
           },
           quantity: 1,
