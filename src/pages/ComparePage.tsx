@@ -105,9 +105,10 @@ export const ComparePage = () => {
       <Header showNavLinks />
       
       <main className="py-8 px-8 max-w-4xl mx-auto text-center">
-        <h1 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
-          Revise smarter with A* AI — artificial intelligence built for Edexcel Economics. Trained on past papers, mark schemes and examiner insights, it gives you instant answers, live feedback and top-grade exam technique — all in one place.
-        </h1>
+        <h1 className="text-4xl font-bold mb-4">Choose Your A* AI Plan</h1>
+        <p className="text-lg text-muted-foreground mb-12">
+          Unlock your full revision power. Go beyond free.
+        </p>
 
         <div className="flex flex-col lg:flex-row gap-8 justify-center">
           {/* Free Plan */}
