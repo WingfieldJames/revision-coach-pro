@@ -64,10 +64,10 @@ export const HomePage = () => {
           </div>
 
           <div className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/f6bb9307-5484-4552-b77a-5ff9dca13907.png" alt="Elliot Smith" className="w-full h-48 object-cover" />
+            <img src="/lovable-uploads/f6bb9307-5484-4552-b77a-5ff9dca13907.png" alt="Sina Naderi" className="w-full h-48 object-cover" />
             <div className="p-4 text-left">
-              <strong className="text-card-foreground">Elliot Smith</strong><br />
-              <span className="text-sm text-muted-foreground">BSc Finance, LSE</span>
+              <strong className="text-card-foreground">Sina Naderi</strong><br />
+              <span className="text-sm text-muted-foreground">BA Economics, Cambridge</span>
             </div>
           </div>
 
