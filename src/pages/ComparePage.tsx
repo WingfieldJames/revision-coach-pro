@@ -6,6 +6,7 @@ import sophiaImage from '@/assets/sophia-oxford.jpg';
 import davidImage from '@/assets/david-cambridge.jpg';
 import hannahImage from '@/assets/hannah-durham.jpg';
 import amiraImage from '@/assets/amira-lse.jpg';
+import logoImage from '@/assets/logo.png';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -178,8 +179,30 @@ export const ComparePage = () => {
           </div>
         </div>
       </main>
+
+      {/* Video Demo Section */}
+      <section className="py-16 px-8 max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img src={logoImage} alt="A* AI Logo" className="w-8 h-8" />
+            <h2 className="text-3xl font-bold">See A* AI in action</h2>
+          </div>
+        </div>
+        
+        {/* Responsive Video Container */}
+        <div className="relative w-full" style={{ paddingBottom: '62.5%' }}>
+          <iframe 
+            src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" 
+            className="absolute top-0 left-0 w-full h-full rounded-lg"
+            frameBorder="0" 
+            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
+            referrerPolicy="strict-origin-when-cross-origin" 
+            title="A* AI Demo Video"
+          />
+        </div>
+      </section>
       
-      <section id="testimonials" className="py-16 md:py-20 bg-muted w-full mt-12 md:mt-20">
+      <section id="testimonials" className="py-16 md:py-20 bg-muted w-full">
         <div className="px-8 max-w-4xl mx-auto">
           <h2 className="text-3xl text-center mb-12 flex items-center justify-center gap-2">
             Loved by sixth formers across the UK ⬇️
