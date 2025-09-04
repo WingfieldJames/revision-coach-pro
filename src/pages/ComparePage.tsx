@@ -183,8 +183,11 @@ export const ComparePage = () => {
       <section className="py-16 px-8 max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="w-10 h-6" />
-            <h2 className="text-3xl font-bold">See A* AI in action</h2>
+            <h2 className="text-3xl font-bold flex items-center gap-3">
+              See 
+              <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="w-10 h-6" />
+              in action
+            </h2>
           </div>
         </div>
         
