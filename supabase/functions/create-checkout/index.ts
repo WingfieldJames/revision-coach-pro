@@ -87,6 +87,7 @@ serve(async (req) => {
       ],
       mode: "payment",
       payment_method_types: ['card'], // Only allow card payments to disable Link
+      allow_promotion_codes: true, // Enable coupon codes
       success_url: `${req.headers.get("origin")}/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/compare`,
     });
