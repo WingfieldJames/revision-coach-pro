@@ -32,7 +32,7 @@ export const HomePage = () => {
           </h1>
           
           <h2 className="text-3xl font-medium mb-6 text-foreground">
-            Your AI-powered A-Level revision coach
+            Your AI-powered revision coach for Edexcel Economics A
           </h2>
           
           <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
