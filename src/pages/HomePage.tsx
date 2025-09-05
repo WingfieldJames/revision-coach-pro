@@ -175,8 +175,26 @@ export const HomePage = () => {
             <span className="text-xl font-semibold">A* AI</span>
           </div>
           
-          <p className="text-muted-foreground mb-8">
+          <p className="text-muted-foreground mb-6">
             Your AI-powered A-Level revision coach for Edexcel Economics
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-4 mb-6 text-muted-foreground">
+            <Link to="/compare" className="hover:text-foreground transition-colors">Plans</Link>
+            <span>•</span>
+            <Link to="/#faq" className="hover:text-foreground transition-colors">FAQs</Link>
+            <span>•</span>
+            <Link to="/login" className="hover:text-foreground transition-colors">Sign in</Link>
+            <span>•</span>
+            <Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+          </div>
+          
+          <p className="text-sm text-muted-foreground mb-4">
+            Secure checkout via Stripe • Your chats stay private
+          </p>
+          
+          <p className="text-sm text-muted-foreground mb-6">
+            © A* AI
           </p>
           
           {!user && (

@@ -196,6 +196,38 @@ export const SignupPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-muted py-16 px-8 text-center">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-8" />
+            <span className="text-xl font-semibold">A* AI</span>
+          </div>
+          
+          <p className="text-muted-foreground mb-6">
+            Your AI-powered A-Level revision coach for Edexcel Economics
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-4 mb-6 text-muted-foreground">
+            <Link to="/compare" className="hover:text-foreground transition-colors">Plans</Link>
+            <span>•</span>
+            <Link to="/#faq" className="hover:text-foreground transition-colors">FAQs</Link>
+            <span>•</span>
+            <Link to="/login" className="hover:text-foreground transition-colors">Sign in</Link>
+            <span>•</span>
+            <Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+          </div>
+          
+          <p className="text-sm text-muted-foreground mb-4">
+            Secure checkout via Stripe • Your chats stay private
+          </p>
+          
+          <p className="text-sm text-muted-foreground">
+            © A* AI
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
