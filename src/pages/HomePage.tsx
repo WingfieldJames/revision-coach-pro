@@ -82,7 +82,7 @@ export const HomePage = () => {
       </section>
 
       {/* Video Demo Section */}
-      <section className="py-16 px-8 max-w-4xl mx-auto">
+      <section className="py-16 px-8 max-w-7xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
           <div className="flex flex-wrap items-center justify-center gap-2">
             <span>See</span>
@@ -93,7 +93,7 @@ export const HomePage = () => {
         </h2>
         
         {/* Responsive Video Container */}
-        <div className="relative w-full" style={{ paddingBottom: '62.5%' }}>
+        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
           <iframe 
             src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" 
             className="absolute top-0 left-0 w-full h-full rounded-lg"
@@ -102,6 +102,13 @@ export const HomePage = () => {
             referrerPolicy="strict-origin-when-cross-origin" 
             title="A* AI Demo Video"
           />
+        </div>
+        
+        {/* Button beneath video */}
+        <div className="text-center mt-8">
+          <Button variant="brand" size="xl" asChild>
+            <Link to="/compare">Try It Now →</Link>
+          </Button>
         </div>
       </section>
 
