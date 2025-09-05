@@ -177,6 +177,10 @@ export const ComparePage = () => {
             </Button>
           </div>
         </div>
+        
+        <p className="text-sm text-muted-foreground mt-6">
+          One-time payment • Lifetime access • Secure checkout via Stripe
+        </p>
       </main>
 
       {/* Video Demo Section */}

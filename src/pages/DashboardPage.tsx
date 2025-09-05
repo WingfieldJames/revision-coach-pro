@@ -177,6 +177,10 @@ export const DashboardPage = () => {
             </CardContent>
           </Card>
         </div>
+        
+        <p className="text-sm text-muted-foreground text-center mt-6">
+          One-time payment • Lifetime access • Secure checkout via Stripe
+        </p>
 
         {/* Account Info */}
         <Card className="mt-8">
