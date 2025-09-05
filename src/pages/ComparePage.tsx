@@ -204,7 +204,7 @@ export const ComparePage = () => {
               className="mt-8"
               onClick={handlePremiumClick}
             >
-              Unlock deluxe now
+              Unlock deluxe now →
             </Button>
           </div>
 
