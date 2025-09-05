@@ -72,7 +72,7 @@ export const HomePage = () => {
           </div>
 
           <div className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/5f1a95b3-3053-4592-8c13-1952dd59926b.png" alt="Mark Somers" className="w-full h-48 object-cover object-[center_30%] scale-95" />
+            <img src="/lovable-uploads/5f1a95b3-3053-4592-8c13-1952dd59926b.png" alt="Mark Somers" className="w-full h-48 object-cover object-[center_35%] scale-90" />
             <div className="p-4 text-left">
               <strong className="text-card-foreground">Mark Somers</strong><br />
               <span className="text-sm text-muted-foreground">BSc Finance, LSE</span>
