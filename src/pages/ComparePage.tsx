@@ -198,8 +198,13 @@ export const ComparePage = () => {
           {/* Laptop Image */}
           <div className="flex-1 text-center">
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
-            <Button variant="brand" size="xl" asChild className="mt-8">
-              <Link to="/compare">Try A* AI Now →</Link>
+            <Button 
+              variant="brand" 
+              size="xl" 
+              className="mt-8"
+              onClick={handlePremiumClick}
+            >
+              Unlock deluxe now
             </Button>
           </div>
 
