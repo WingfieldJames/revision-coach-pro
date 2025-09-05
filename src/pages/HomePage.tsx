@@ -107,7 +107,7 @@ export const HomePage = () => {
         {/* Button beneath video */}
         <div className="text-center mt-8">
           <Button variant="brand" size="xl" asChild>
-            <Link to="/compare">Try It Now →</Link>
+            <Link to="/compare">Try A* AI now →</Link>
           </Button>
         </div>
       </section>
