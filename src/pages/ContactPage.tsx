@@ -96,17 +96,6 @@ export const ContactPage = () => {
                 {loading ? 'Sending...' : 'Send Message'}
               </Button>
             </form>
-
-            <div className="mt-8 text-center">
-              <p className="text-muted-foreground mb-4">
-                Or reach out directly:
-              </p>
-              <p className="text-lg font-medium">
-                <a href="mailto:support@astarai.com" className="bg-gradient-brand bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-                  support@astarai.com
-                </a>
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
