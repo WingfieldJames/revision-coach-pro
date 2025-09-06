@@ -8,6 +8,7 @@ import { HomePage } from "./pages/HomePage";
 import { ComparePage } from "./pages/ComparePage";
 import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
+import { ContactPage } from "./pages/ContactPage";
 import { FreeVersionPage } from "./pages/FreeVersionPage";
 import { PremiumVersionPage } from "./pages/PremiumVersionPage";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/free-version" element={<FreeVersionPage />} />
             <Route path="/premium" element={<PremiumVersionPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
