@@ -11,8 +11,7 @@ export const FreeVersionPage = () => {
         <iframe
           src="https://www.chatbase.co/chatbot-iframe/rdUsQQiBG6DHV2jFtXzn5"
           allow="clipboard-write"
-          className="w-full border-none absolute inset-0"
-          style={{ height: 'calc(100vh - 88px)' }}
+          className="w-full h-full border-none absolute inset-0"
           title="A* AI Free Version Chatbot"
         />
       </div>
