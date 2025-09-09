@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 
 export const FreeVersionPage = () => {
+  useEffect(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header showNavLinks />

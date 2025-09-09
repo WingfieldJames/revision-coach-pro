@@ -22,6 +22,10 @@ export const PremiumVersionPage = () => {
     }
   }, [user, profile, loading, navigate]);
 
+  useEffect(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  }, []);
+
   if (loading) {
     return (
       <div className="h-screen w-screen bg-background flex items-center justify-center">
