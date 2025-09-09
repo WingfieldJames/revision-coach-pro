@@ -105,7 +105,15 @@ export const ComparePage = () => {
       <Header showNavLinks />
       
       <main className="py-8 px-8 max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-4">Choose Your A* AI Plan</h1>
+        <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3 flex-wrap">
+          Choose Your 
+          <img 
+            src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
+            alt="A* AI" 
+            className="h-8 sm:h-10 md:h-12 inline-block" 
+          />
+          Plan
+        </h1>
         <p className="text-lg text-muted-foreground mb-12">
           Unlock your full revision power. Go beyond free.
         </p>
