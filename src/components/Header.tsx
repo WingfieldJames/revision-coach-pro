@@ -38,6 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
           <Link 
             to={user ? "/dashboard" : "/login"} 
             className="hover:text-foreground transition-colors whitespace-nowrap"
+            onClick={() => !user && window.scrollTo(0, 0)}
           >
             Profile
           </Link>
