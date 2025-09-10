@@ -36,7 +36,7 @@ export const HomePage = () => {
           </h2>
           
           <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            Revise smarter with A* AI — artificial intelligence built for Edexcel Economics. Trained on past papers, mark schemes and examiner insights, it gives you instant answers, live feedback and top-grade exam technique — all in one place.
+            Trained on past papers, mark schemes, and top-grade exam technique — giving you everything you need to hit that A* all in one place
           </p>
         </div>
 
