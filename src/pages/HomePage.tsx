@@ -36,7 +36,7 @@ export const HomePage = () => {
           </h2>
           
           <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            Trained on past papers, mark schemes, and top-grade exam technique — giving you everything you need to hit that A* all in one place
+            Trained on past papers, mark schemes, specifications and A* technique — giving you everything you need to hit that top grade all in one place
           </p>
         </div>
 
