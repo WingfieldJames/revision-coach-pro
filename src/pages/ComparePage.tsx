@@ -277,7 +277,7 @@ export const ComparePage = () => {
             <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
               <img src={hannahImage} alt="Hannah profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
               <div>
-                <strong className="text-base text-card-foreground">Hannah – Economics, Durham</strong>
+                <strong className="text-base text-card-foreground">Elliot S - Year 13</strong>
                 <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
                   "No fluff, no wasted time — A* AI helped me revise with focus. Being able to search by topic and command word made past paper practice 10x more efficient."
                 </p>
