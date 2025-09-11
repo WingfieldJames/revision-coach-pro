@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
-import hannahImage from '@/assets/hannah-durham.jpg';
+import hannahImage from '/lovable-uploads/09844c96-b3ff-4730-8040-d9250f0cfd4b.png';
 import amiraImage from '@/assets/amira-lse.jpg';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
