@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
-import jamesImage from '/lovable-uploads/james-zoomed-out.png';
+import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import hannahImage from '@/assets/hannah-durham.jpg';
 import amiraImage from '@/assets/amira-lse.jpg';
 import { useAuth } from '@/contexts/AuthContext';
@@ -255,7 +255,7 @@ export const ComparePage = () => {
             <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
               <img src={lucyImage} alt="Lucy profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
               <div>
-                <strong className="text-base text-card-foreground">Lucy W</strong>
+                <strong className="text-base text-card-foreground">Lucy W - Year 12</strong>
                 <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
                   "I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩"
                 </p>
