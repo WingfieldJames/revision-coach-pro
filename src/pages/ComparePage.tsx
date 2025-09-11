@@ -235,10 +235,9 @@ export const ComparePage = () => {
             </div>
             
             <div className="bg-muted rounded-xl p-6">
-              <strong className="text-lg font-semibold">📊 Diagram Mastery</strong>
+              <strong className="text-lg font-semibold">📈 A* Technique</strong>
               <p className="text-muted-foreground mt-2 leading-relaxed">
-                Every key diagram — from negative externalities to subsidies, tariffs to buffer stocks — 
-                is built-in and explained so you can deploy it mid-essay with precision.
+                From 2 markers to 25 markers, A* AI knows exactly how to structure every response. It guides you through KAA, chains of reasoning and evaluation — so you can write those top band answers that examiners love
               </p>
             </div>
           </div>
