@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
-import sophiaImage from '@/assets/sophia-oxford.jpg';
+import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import davidImage from '@/assets/david-cambridge.jpg';
 import hannahImage from '@/assets/hannah-durham.jpg';
 import amiraImage from '@/assets/amira-lse.jpg';
@@ -253,11 +253,11 @@ export const ComparePage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {/* Testimonial 1 */}
             <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-              <img src={sophiaImage} alt="Sophia profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+              <img src={lucyImage} alt="Lucy profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
               <div>
-                <strong className="text-base text-card-foreground">Sophia – Economics & Management, Oxford</strong>
+                <strong className="text-base text-card-foreground">Lucy - Year 12</strong>
                 <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                  "I used A* AI daily before my mocks — especially for Paper 3. The real-world examples and structure help made it easier to hit those top evaluation marks."
+                  "I only started using A* AI a month ago and it has done levels for my econ. Explanation tailored to the spec is super helpful"
                 </p>
               </div>
             </div>
