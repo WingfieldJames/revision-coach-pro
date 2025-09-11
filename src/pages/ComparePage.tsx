@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
-import jamesImage from '/lovable-uploads/b3ba351c-3519-4a54-bb2c-0990e6444265.png';
+import jamesImage from '/lovable-uploads/james-zoomed-out.png';
 import hannahImage from '@/assets/hannah-durham.jpg';
 import amiraImage from '@/assets/amira-lse.jpg';
 import { useAuth } from '@/contexts/AuthContext';
@@ -266,7 +266,7 @@ export const ComparePage = () => {
             <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
               <img src={jamesImage} alt="James profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
               <div>
-                <strong className="text-base text-card-foreground">James W - BSc Management at LSE</strong>
+                <strong className="text-base text-card-foreground">James W - BSc Management @ LSE</strong>
                 <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
                   "A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick "
                 </p>
