@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
@@ -15,12 +15,14 @@ import { ChevronDown } from 'lucide-react';
 export const HomePage = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
+  const isInitialLoad = useRef(true);
 
-  // Redirect logged-in users to dashboard
+  // Redirect logged-in users to dashboard only on initial load
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && isInitialLoad.current) {
       navigate('/dashboard');
     }
+    isInitialLoad.current = false;
   }, [user, loading, navigate]);
   return (
     <div className="min-h-screen bg-background font-sans">
