@@ -251,8 +251,7 @@ export const ComparePage = () => {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {/* Testimonial 1 */}
-            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-              <img src={lucyImage} alt="Lucy profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+            <div className="bg-card p-6 rounded-2xl shadow-card w-full">
               <div>
                 <strong className="text-base text-card-foreground">Lucy W - Year 12</strong>
                 <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
@@ -265,7 +264,7 @@ export const ComparePage = () => {
             <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
               <img src={jamesImage} alt="James profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
               <div>
-                <strong className="text-base text-card-foreground">James W - BSc Management @ LSE</strong>
+                <strong className="text-base text-card-foreground">James W - LSE</strong>
                 <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
                   "A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick "
                 </p>
