@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,9 +13,15 @@ import { ChevronDown } from 'lucide-react';
 // import revishann from '@/assets/revishann.png';
 
 export const HomePage = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
+  const navigate = useNavigate();
 
-  // No auto-redirect - always show the home page when accessed directly
+  // Redirect logged-in users to dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate]);
   return (
     <div className="min-h-screen bg-background font-sans">
       <Header showNavLinks />
