@@ -251,7 +251,8 @@ export const ComparePage = () => {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {/* Testimonial 1 */}
-            <div className="bg-card p-6 rounded-2xl shadow-card w-full">
+            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
+              <div className="w-12 h-12 rounded-full bg-muted flex-shrink-0"></div>
               <div>
                 <strong className="text-base text-card-foreground">Lucy W - Year 12</strong>
                 <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
