@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
@@ -15,14 +15,12 @@ import { ChevronDown } from 'lucide-react';
 export const HomePage = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const isInitialLoad = useRef(true);
 
-  // Redirect logged-in users to dashboard only on initial load
+  // Redirect logged-in users to dashboard
   useEffect(() => {
-    if (!loading && user && isInitialLoad.current) {
+    if (!loading && user) {
       navigate('/dashboard');
     }
-    isInitialLoad.current = false;
   }, [user, loading, navigate]);
   return (
     <div className="min-h-screen bg-background font-sans">
@@ -137,7 +135,7 @@ export const HomePage = () => {
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                A* AI is purpose-built for Edexcel Economics A (9EC0) and trained on 2017–2023 past papers (P1–P3), official mark schemes, the full spec and A* technique. You get tailored exam-style answers, structures and diagram guidance — not generic AI chat.
+                A* AI is built only for Edexcel A-Level Economics A. It's trained on past papers, mark schemes, and the full spec — so instead of vague textbook answers, you get examiner-style responses that match the real exams.
               </AccordionContent>
             </AccordionItem>
 
@@ -147,7 +145,8 @@ export const HomePage = () => {
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                Free uses a limited training window and offers general AI help so you can try it out. Deluxe uses the full 2017–2023 training set (P1–P3) with mark-scheme-level feedback, technique and diagrams. It's £19.99 one-time — no subscription. You're not unlocking PDFs; you're using an AI that's trained on them.
+                Free: Access to one year of past papers with limited usage.<br/>
+                Deluxe (£20 one-time): Lifetime access to every past paper, full mark schemes, unlimited usage, and top-grade exam technique.
               </AccordionContent>
             </AccordionItem>
 
@@ -157,7 +156,7 @@ export const HomePage = () => {
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                The AI is trained on all papers (P1–P3, 2017–2023), official mark schemes and the complete spec. You also get step-by-step diagrams (AD/AS → buffer stocks), an application/examples bank, model structures and all future updates, with lifetime access.
+                All past papers (Paper 1, 2 & 3), every official mark scheme, the full spec, model essay structures, examiner insights, and real-world application examples — everything you need for A* answers in one place.
               </AccordionContent>
             </AccordionItem>
 
@@ -167,7 +166,7 @@ export const HomePage = () => {
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                We're focused on Edexcel Economics A right now. Tell us what you want next — we're listening.
+                Currently, it's built specifically for Edexcel A-Level Economics A. Other boards and subjects may be added in the future.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
