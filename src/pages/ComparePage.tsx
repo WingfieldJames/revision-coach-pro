@@ -148,7 +148,7 @@ export const ComparePage = () => {
 
           {/* Deluxe Plan */}
           <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left border-2 border-primary">
-            <h2 className="text-2xl font-semibold mb-6">🔥 Deluxe Plan — £19.99 (One-Time, Lifetime Access)</h2>
+            <h2 className="text-2xl font-semibold mb-6">🔥 Deluxe Plan — <span className="line-through text-muted-foreground">£39.99</span> £19.99 (One-Time, Lifetime Access)</h2>
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
