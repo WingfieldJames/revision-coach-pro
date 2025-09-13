@@ -75,20 +75,20 @@ export const DashboardPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                🎓 Free Version
+                🎓 Free Plan - £0
               </CardTitle>
               <CardDescription>
-                Access basic A* AI features with 2 years of past papers
+                Access basic A* AI features with AI trained on recent past papers
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-muted-foreground mb-6 space-y-2">
-                <li>✓ 2 years of past papers</li>
-                <li>✓ Basic GPT responses</li>
-                <li>✓ Spec-aligned questions</li>
+                <li>✓ AI trained on the 2024-2023 past papers (P1–P3)</li>
+                <li>✓ Spec-aligned responses and quick practice</li>
+                <li>✓ Basic help only (no mark-scheme feedback or structures)</li>
               </ul>
               <Button variant="outline" size="lg" asChild className="w-full">
-                <Link to="/free-version">Launch Free Version</Link>
+                <Link to="/free-version">Try free now</Link>
               </Button>
             </CardContent>
           </Card>
@@ -97,7 +97,7 @@ export const DashboardPage = () => {
           <Card className={profile?.is_premium ? 'border-primary bg-primary/5' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                🔥 Deluxe Plan — £19.99 (One-Time, Lifetime Access)
+                🔥 Deluxe Plan — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)
                 {profile?.is_premium && (
                   <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">
                     ACTIVE
@@ -113,12 +113,12 @@ export const DashboardPage = () => {
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-muted-foreground mb-6 space-y-2">
-                <li>✓ All Edexcel A-Level Economics A past papers (Paper 1, 2 & 3, 2017–2023)</li>
-                <li>✓ Official examiner mark schemes</li>
+                <li>✓ AI trained on all Edexcel Economics A past papers (2017–2023, P1–P3)</li>
+                <li>✓ Official examiner mark schemes built-in</li>
                 <li>✓ Trained on full exam technique + essay structures</li>
-                <li>✓ Complete specification coverage</li>
-                <li>✓ Step-by-step diagram guidance (every diagram from AD/AS to buffer stocks)</li>
-                <li>✓ Application + model essay examples</li>
+                <li>✓ Covers the entire Edexcel specification</li>
+                <li>✓ Step-by-step diagram guidance (AD/AS → buffer stocks)</li>
+                <li>✓ Application bank + model essay examples</li>
               </ul>
               
               {profile?.is_premium ? (
