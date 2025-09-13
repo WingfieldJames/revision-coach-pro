@@ -152,11 +152,11 @@ export const ComparePage = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                All Edexcel A-Level Economics A past papers (Paper 1, 2 & 3, 2017–2023)
+                AI trained on all Edexcel Economics A past papers (2017–2023, P1–P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Official examiner mark schemes
+                Official examiner mark schemes built-in
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -164,15 +164,15 @@ export const ComparePage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Complete specification coverage
+                Covers the entire Edexcel specification
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Step-by-step diagram guidance (every diagram from AD/AS to buffer stocks)
+                Step-by-step diagram guidance (AD/AS → buffer stocks)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Application + model essay examples
+                Application bank + model essay examples
               </li>
             </ul>
             <Button 
