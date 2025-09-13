@@ -121,19 +121,19 @@ export const ComparePage = () => {
         <div className="flex flex-col lg:flex-row gap-8 justify-center">
           {/* Free Plan */}
           <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left">
-            <h2 className="text-2xl font-semibold mb-6">🎓 Free Plan</h2>
+            <h2 className="text-2xl font-semibold mb-6">🎓 Free Plan - £0</h2>
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                2 years of past papers
+                AI trained on the 2024-2023 past papers (P1–P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Basic GPT responses
+                Spec-aligned responses and quick practice
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Spec-aligned questions
+                Basic help only (no mark-scheme feedback or structures)
               </li>
             </ul>
             <Button 
@@ -142,7 +142,7 @@ export const ComparePage = () => {
               className="w-full"
               onClick={handleFreeClick}
             >
-              Use Free Version
+              Try free now
             </Button>
           </div>
 
