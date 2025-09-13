@@ -39,8 +39,8 @@ export const ComparePage = () => {
 
   const handleFreeClick = async () => {
     if (!user) {
-      // NOT logged in → Login → Dashboard
-      window.location.href = '/login?redirect=dashboard';
+      // NOT logged in → Login → Free version
+      window.location.href = '/login?redirect=free-version';
       return;
     }
     
