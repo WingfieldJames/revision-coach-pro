@@ -94,7 +94,7 @@ export const DashboardPage = () => {
               className="w-full"
               asChild
             >
-              <Link to="/free-version">Try free now</Link>
+              <Link to="/free-version">Launch free</Link>
             </Button>
           </div>
 
