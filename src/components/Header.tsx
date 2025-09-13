@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-50 flex justify-between items-center px-6 pt-6 pb-4 bg-background text-foreground">
       <div className="flex items-center">
-        <Link to="/" className="flex items-center">
+        <Link to="/" className="flex items-center" onClick={() => window.scrollTo(0, 0)}>
           <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-10" />
         </Link>
       </div>
