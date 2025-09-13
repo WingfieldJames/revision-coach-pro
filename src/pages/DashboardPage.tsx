@@ -70,112 +70,130 @@ export const DashboardPage = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Free Version Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                🎓 Free Plan - £0
-              </CardTitle>
-              <CardDescription>
-                Access basic A* AI features with AI trained on recent past papers
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-muted-foreground mb-6 space-y-2">
-                <li>✓ AI trained on the 2024-2023 past papers (P1–P3)</li>
-                <li>✓ Spec-aligned responses and quick practice</li>
-                <li>✓ Basic help only (no mark-scheme feedback or structures)</li>
-              </ul>
-              <Button variant="outline" size="lg" asChild className="w-full">
-                <Link to="/free-version">Try free now</Link>
+        <div className="flex flex-col lg:flex-row gap-8 justify-center mb-8">
+          {/* Free Plan */}
+          <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left">
+            <h2 className="text-2xl font-semibold mb-6">🎓 Free Plan - £0</h2>
+            <ul className="space-y-3 mb-8">
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                AI trained on the 2024-2023 past papers (P1–P3)
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Spec-aligned responses and quick practice
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Basic help only (no mark-scheme feedback or structures)
+              </li>
+            </ul>
+            <Button 
+              variant="brand" 
+              size="lg" 
+              className="w-full"
+              asChild
+            >
+              <Link to="/free-version">Try free now</Link>
+            </Button>
+          </div>
+
+          {/* Deluxe Plan */}
+          <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${profile?.is_premium ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
+            <h2 className="text-2xl font-semibold mb-6">
+              🔥 Deluxe Plan — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)
+              {profile?.is_premium && (
+                <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
+                  ACTIVE
+                </span>
+              )}
+            </h2>
+            <ul className="space-y-3 mb-8">
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                AI trained on all Edexcel Economics A past papers (2017–2023, P1–P3)
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Official examiner mark schemes built-in
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Trained on full exam technique + essay structures
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Covers the entire Edexcel specification
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Step-by-step diagram guidance (AD/AS → buffer stocks)
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Application bank + model essay examples
+              </li>
+            </ul>
+            
+            {profile?.is_premium ? (
+              <Button 
+                variant="brand" 
+                size="lg" 
+                className="w-full"
+                asChild
+              >
+                <Link to="/premium">Launch Deluxe Version</Link>
               </Button>
-            </CardContent>
-          </Card>
+            ) : (
+              <Button 
+                variant="brand" 
+                size="lg" 
+                className="w-full"
+                onClick={async () => {
+                  try {
+                    console.log('Starting premium upgrade process...');
+                    const { supabase } = await import('@/integrations/supabase/client');
+                    
+                    // Get current session
+                    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+                    if (sessionError || !sessionData.session) {
+                      console.error('No active session:', sessionError);
+                      alert('Please log in again to upgrade to premium.');
+                      return;
+                    }
 
-          {/* Deluxe Version Card */}
-          <Card className={profile?.is_premium ? 'border-primary bg-primary/5' : ''}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                🔥 Deluxe Plan — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)
-                {profile?.is_premium && (
-                  <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">
-                    ACTIVE
-                  </span>
-                )}
-              </CardTitle>
-              <CardDescription>
-                {profile?.is_premium 
-                  ? 'Access all deluxe features and content'
-                  : 'Upgrade for full access to A* AI features'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-muted-foreground mb-6 space-y-2">
-                <li>✓ AI trained on all Edexcel Economics A past papers (2017–2023, P1–P3)</li>
-                <li>✓ Official examiner mark schemes built-in</li>
-                <li>✓ Trained on full exam technique + essay structures</li>
-                <li>✓ Covers the entire Edexcel specification</li>
-                <li>✓ Step-by-step diagram guidance (AD/AS → buffer stocks)</li>
-                <li>✓ Application bank + model essay examples</li>
-              </ul>
-              
-              {profile?.is_premium ? (
-                <Button variant="brand" size="lg" asChild className="w-full">
-                  <Link to="/premium">Launch Deluxe Version</Link>
-                </Button>
-              ) : (
-                <Button 
-                  variant="brand" 
-                  size="lg" 
-                  className="w-full"
-                  onClick={async () => {
-                    try {
-                      console.log('Starting premium upgrade process...');
-                      const { supabase } = await import('@/integrations/supabase/client');
-                      
-                      // Get current session
-                      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-                      if (sessionError || !sessionData.session) {
-                        console.error('No active session:', sessionError);
-                        alert('Please log in again to upgrade to premium.');
-                        return;
-                      }
-
-                      console.log('Creating checkout session...');
-                      const { data, error } = await supabase.functions.invoke('create-checkout', {
-                        headers: {
-                          Authorization: `Bearer ${sessionData.session.access_token}`,
-                        },
-                      });
-                      
-                      if (error) {
-                        console.error('Error creating checkout session:', error);
-                        alert('There was an error starting the checkout process. Please try again.');
-                        return;
-                      }
-
-                      if (data?.url) {
-                        console.log('Redirecting to Stripe checkout:', data.url);
-                        
-                        // Direct redirect - most reliable approach
-                        window.location.href = data.url;
-                      } else {
-                        console.error('No checkout URL received');
-                        alert('Unable to start checkout process. Please try again.');
-                      }
-                    } catch (error) {
+                    console.log('Creating checkout session...');
+                    const { data, error } = await supabase.functions.invoke('create-checkout', {
+                      headers: {
+                        Authorization: `Bearer ${sessionData.session.access_token}`,
+                      },
+                    });
+                    
+                    if (error) {
                       console.error('Error creating checkout session:', error);
                       alert('There was an error starting the checkout process. Please try again.');
+                      return;
                     }
-                  }}
-                >
-                  Upgrade to Deluxe
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+
+                    if (data?.url) {
+                      console.log('Redirecting to Stripe checkout:', data.url);
+                      
+                      // Direct redirect - most reliable approach
+                      window.location.href = data.url;
+                    } else {
+                      console.error('No checkout URL received');
+                      alert('Unable to start checkout process. Please try again.');
+                    }
+                  } catch (error) {
+                    console.error('Error creating checkout session:', error);
+                    alert('There was an error starting the checkout process. Please try again.');
+                  }
+                }}
+              >
+                Upgrade to Deluxe
+              </Button>
+            )}
+          </div>
         </div>
         
         <p className="text-sm text-muted-foreground text-center mt-6">
