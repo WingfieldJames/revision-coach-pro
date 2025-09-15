@@ -48,6 +48,9 @@ export const SignupPage = () => {
       } else if (redirect === 'premium') {
         // User wanted premium version, check if they have access
         navigate('/premium-version');
+      } else if (redirect === 'free-version') {
+        // User wanted free version, redirect to free chatbot
+        navigate('/free-version');
       } else {
         // Default redirect to dashboard
         navigate('/dashboard');
