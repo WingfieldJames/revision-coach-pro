@@ -141,8 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw error;
     }
     
-    // Redirect to dashboard after successful login
-    window.location.href = '/dashboard';
+    // Let the LoginPage handle redirects
   };
 
   const signUp = async (email: string, password: string) => {
@@ -157,10 +156,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signInWithGoogle = async () => {
+    // Get redirect parameter from current URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirect = urlParams.get('redirect');
+    
+    let redirectTo = `${window.location.origin}/dashboard`;
+    if (redirect === 'free-version') {
+      redirectTo = `${window.location.origin}/free-version`;
+    } else if (redirect === 'stripe') {
+      redirectTo = `${window.location.origin}/compare?checkout=true`;
+    } else if (redirect === 'premium') {
+      redirectTo = `${window.location.origin}/premium-version`;
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`
+        redirectTo
       }
     });
 
