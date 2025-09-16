@@ -45,6 +45,9 @@ export const HomePage = () => {
           <Button variant="brand" size="xl" asChild className="mt-6">
             <Link to="/compare">Try It Now →</Link>
           </Button>
+          <p className="text-sm text-muted-foreground mt-3">
+            Get started free • No payment needed
+          </p>
         </div>
       </section>
 
