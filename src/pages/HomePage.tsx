@@ -47,7 +47,7 @@ export const HomePage = () => {
               <Link to="/compare">Try It Now →</Link>
             </Button>
             <p className="text-sm text-muted-foreground mt-3 text-left">
-              Get started free • No card required
+              Get started free • No card needed
             </p>
           </div>
         </div>
