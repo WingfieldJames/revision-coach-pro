@@ -42,12 +42,14 @@ export const HomePage = () => {
 
         <div className="flex-1 text-center">
           <img src="/lovable-uploads/962384ae-eb06-481f-a929-16bce5c920a5.png" alt="A* AI on mobile" className="max-w-full h-auto mx-auto" />
-          <Button variant="brand" size="xl" asChild className="mt-6">
-            <Link to="/compare">Try It Now →</Link>
-          </Button>
-          <p className="text-sm text-muted-foreground mt-3">
-            Get started free • No payment needed
-          </p>
+          <div className="inline-block mt-6">
+            <Button variant="brand" size="xl" asChild>
+              <Link to="/compare">Try It Now →</Link>
+            </Button>
+            <p className="text-sm text-muted-foreground mt-3 text-left">
+              Get started free • No payment needed
+            </p>
+          </div>
         </div>
       </section>
 
