@@ -109,8 +109,13 @@ export const HomePage = () => {
           />
         </div>
         
+        {/* Disclaimer */}
+        <p className="text-center text-sm text-muted-foreground mt-4">
+          For the best experience, use a laptop or iPad
+        </p>
+        
         {/* Button beneath video */}
-        <div className="text-center mt-8">
+        <div className="text-center mt-6">
           <Button variant="brand" size="xl" asChild>
             <Link to="/compare">Try A* AI now →</Link>
           </Button>
