@@ -207,16 +207,15 @@ export const HomePage = () => {
             Secure checkout via Stripe • Your chats stay private
           </p>
           
-          {/* Social Media Icons */}
-          <div className="flex justify-center gap-4 mb-6">
+          {/* Social Media Icons and Copyright */}
+          <div className="flex justify-center items-center gap-4 mb-6">
             <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Instagram size={24} />
             </a>
+            <p className="text-sm text-muted-foreground">
+              © A* AI
+            </p>
           </div>
-          
-          <p className="text-sm text-muted-foreground mb-6">
-            © A* AI
-          </p>
           
           {!user && (
             <div className="flex gap-4 justify-center">
