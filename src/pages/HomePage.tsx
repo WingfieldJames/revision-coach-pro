@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Instagram, Music } from 'lucide-react';
 // import logo from '@/assets/logo.png';
 // import phone from '@/assets/phone.png';
 // import laptop from '@/assets/laptop.png';
@@ -200,6 +200,16 @@ export const HomePage = () => {
           <p className="text-sm text-muted-foreground mb-4">
             Secure checkout via Stripe • Your chats stay private
           </p>
+          
+          {/* Social Media Icons */}
+          <div className="flex justify-center gap-4 mb-6">
+            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Instagram size={24} />
+            </a>
+            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Music size={24} />
+            </a>
+          </div>
           
           <p className="text-sm text-muted-foreground mb-6">
             © A* AI
