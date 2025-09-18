@@ -29,6 +29,9 @@ export const HomePage = () => {
           
           <h1 className="text-5xl font-bold mb-4 flex items-center gap-3">
             Meet <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-12" />
+            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Instagram size={24} />
+            </a>
           </h1>
           
           <h2 className="text-3xl font-medium mb-6 text-foreground">
@@ -205,9 +208,6 @@ export const HomePage = () => {
           <div className="flex justify-center gap-4 mb-6">
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               <Instagram size={24} />
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              <Music size={24} />
             </a>
           </div>
           
