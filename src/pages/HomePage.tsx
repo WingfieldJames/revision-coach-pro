@@ -123,6 +123,59 @@ export const HomePage = () => {
         </p>
       </section>
 
+      {/* How A* AI helps you revise smarter Section */}
+      <section className="py-16 px-8 max-w-7xl mx-auto">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span>How</span>
+            <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-6 md:h-8" />
+            <span>helps you revise</span>
+            <span className="bg-gradient-brand bg-clip-text text-transparent">smarter</span>
+          </div>
+        </h2>
+
+        <div className="flex flex-col lg:flex-row items-start justify-center max-w-6xl mx-auto gap-12">
+          {/* Laptop Image */}
+          <div className="flex-1 text-center">
+            <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
+            <Button 
+              variant="brand" 
+              size="xl" 
+              className="mt-8"
+              asChild
+            >
+              <Link to="/compare">Try A* AI now →</Link>
+            </Button>
+          </div>
+
+          {/* Features */}
+          <div className="flex-1 space-y-6">
+            <div className="bg-muted rounded-xl p-6">
+              <strong className="text-lg font-semibold">📄 Past Paper Mastery</strong>
+              <p className="text-muted-foreground mt-2 leading-relaxed">
+                Search and retrieve real past paper questions by topic, paper, or command word. 
+                A* AI understands how Edexcel organises questions, making practice fully targeted.
+              </p>
+            </div>
+            
+            <div className="bg-muted rounded-xl p-6">
+              <strong className="text-lg font-semibold">📰 Live Updated Application</strong>
+              <p className="text-muted-foreground mt-2 leading-relaxed">
+                The latest examples and case studies — formatted specifically for 25-mark essays 
+                in Paper 1 and 2. Updated regularly from global economic news to match Edexcel expectations.
+              </p>
+            </div>
+            
+            <div className="bg-muted rounded-xl p-6">
+              <strong className="text-lg font-semibold">📈 A* Technique</strong>
+              <p className="text-muted-foreground mt-2 leading-relaxed">
+                From 2 markers to 25 markers, A* AI knows exactly how to structure every response. It guides you through KAA, chains of reasoning and evaluation — so you can write those top band answers that examiners love
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="py-4 px-8 bg-background">
         <div className="max-w-4xl mx-auto">
