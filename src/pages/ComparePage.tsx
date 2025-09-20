@@ -213,7 +213,7 @@ export const ComparePage = () => {
               variant="brand" 
               size="xl" 
               className="mt-8"
-              onClick={handlePremiumClick}
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
               Choose your plan →
             </Button>
