@@ -184,7 +184,7 @@ export const HomePage = () => {
           </h2>
           
           <div className="flex items-center justify-center mb-6">
-            <img src="/logos/openai-logo.png" alt="OpenAI" className="h-16 object-contain" />
+            <img src="/logos/openai-final.png" alt="OpenAI" className="h-16 object-contain" />
           </div>
           
           <p className="text-sm text-muted-foreground">
