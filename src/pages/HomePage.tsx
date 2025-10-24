@@ -176,6 +176,26 @@ export const HomePage = () => {
         </div>
       </section>
 
+      {/* Powered by AI Models Section */}
+      <section className="py-16 px-8 bg-background">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-12">
+            Powered by Leading AI models
+          </h2>
+          
+          <div className="flex flex-wrap items-center justify-center gap-12 mb-6 opacity-60 grayscale">
+            <img src="/logos/openai-logo.png" alt="OpenAI" className="h-12 object-contain" />
+            <img src="/logos/gemini-logo.png" alt="Gemini" className="h-12 object-contain" />
+            <img src="/logos/claude-logo.png" alt="Claude" className="h-12 object-contain" />
+            <img src="/logos/deepseek-logo.png" alt="DeepSeek" className="h-12 object-contain" />
+          </div>
+          
+          <p className="text-sm text-muted-foreground">
+            * A* AI is currently deployed using OpenAI. Other AI models are available for testing upon request.
+          </p>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="py-4 px-8 bg-background">
         <div className="max-w-4xl mx-auto">
