@@ -183,10 +183,8 @@ export const HomePage = () => {
             Powered by Leading AI models ⬇️
           </h2>
           
-          <div className="flex flex-wrap items-center justify-center gap-12 mb-6 opacity-60 grayscale">
-            <img src="/logos/openai-logo.png" alt="OpenAI" className="h-12 object-contain" />
-            <img src="/logos/gemini-logo.png" alt="Gemini" className="h-12 object-contain" />
-            <img src="/logos/claude-logo.png" alt="Claude" className="h-12 object-contain" />
+          <div className="flex items-center justify-center mb-6">
+            <img src="/logos/openai-logo.png" alt="OpenAI" className="h-16 object-contain" />
           </div>
           
           <p className="text-sm text-muted-foreground">
