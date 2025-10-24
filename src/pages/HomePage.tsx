@@ -179,8 +179,8 @@ export const HomePage = () => {
       {/* Powered by AI Models Section */}
       <section className="py-16 px-8 bg-muted">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-12">
-            Powered by Leading AI models
+          <h2 className="text-3xl font-bold mb-12">
+            Powered by Leading AI models ⬇️
           </h2>
           
           <div className="flex flex-wrap items-center justify-center gap-12 mb-6 opacity-60 grayscale">
