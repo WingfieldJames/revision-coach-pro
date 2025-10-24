@@ -187,7 +187,6 @@ export const HomePage = () => {
             <img src="/logos/openai-logo.png" alt="OpenAI" className="h-12 object-contain" />
             <img src="/logos/gemini-logo.png" alt="Gemini" className="h-12 object-contain" />
             <img src="/logos/claude-logo.png" alt="Claude" className="h-12 object-contain" />
-            <img src="/logos/deepseek-logo.png" alt="DeepSeek" className="h-12 object-contain" />
           </div>
           
           <p className="text-sm text-muted-foreground">
