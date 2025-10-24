@@ -177,7 +177,7 @@ export const HomePage = () => {
       </section>
 
       {/* Powered by AI Models Section */}
-      <section className="py-16 px-8 bg-background">
+      <section className="py-16 px-8 bg-muted">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-12">
             Powered by Leading AI models
@@ -191,7 +191,7 @@ export const HomePage = () => {
           </div>
           
           <p className="text-sm text-muted-foreground">
-            * A* AI is currently deployed using OpenAI. Other AI models are available for testing upon request.
+            * <span className="bg-gradient-brand bg-clip-text text-transparent">A* AI</span> is currently deployed using OpenAI. Other AI models are available for testing upon request.
           </p>
         </div>
       </section>
