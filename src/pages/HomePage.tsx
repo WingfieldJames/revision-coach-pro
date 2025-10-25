@@ -246,6 +246,12 @@ export const HomePage = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+          
+          <div className="text-center mt-8">
+            <Button variant="brand" size="xl" asChild>
+              <Link to="/compare">Get started today →</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
