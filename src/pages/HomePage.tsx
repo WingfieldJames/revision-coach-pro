@@ -39,8 +39,8 @@ export const HomePage = () => {
           <img src="/lovable-uploads/deluxe-assistant-new.png" alt="A* AI Demo" className="w-full h-full object-contain" />
         </ContainerScroll>
         
-        <div className="text-center mb-8 -mt-20">
-          <Button variant="brand" size="xl" asChild>
+        <div className="text-center mb-8 -mt-20 relative z-50">
+          <Button variant="brand" size="xl" asChild className="pointer-events-auto">
             <Link to="/compare">Try It Now →</Link>
           </Button>
           <p className="text-sm text-muted-foreground mt-3">
