@@ -39,7 +39,7 @@ export const HomePage = () => {
           <img
             src="/lovable-uploads/deluxe-assistant-screenshot.png"
             alt="A* AI Demo"
-            className="mx-auto rounded-2xl object-cover h-full object-left-top w-full"
+            className="w-full h-full object-fill"
           />
         </ContainerScroll>
       </section>
