@@ -15,7 +15,21 @@ export const Header: React.FC<HeaderProps> = ({
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [selectedTab, setSelectedTab] = useState<string>("home");
+  
+  // Determine selected tab based on current route
+  const getSelectedTab = () => {
+    if (location.pathname === '/dashboard') return 'profile';
+    if (location.pathname === '/login') return 'profile';
+    if (location.hash === '#testimonials') return 'testimonials';
+    return 'home';
+  };
+  
+  const [selectedTab, setSelectedTab] = useState<string>(getSelectedTab());
+
+  // Update selected tab when location changes
+  React.useEffect(() => {
+    setSelectedTab(getSelectedTab());
+  }, [location.pathname, location.hash]);
 
   const tabs: ITab[] = [
     { title: "Home", value: "home" },

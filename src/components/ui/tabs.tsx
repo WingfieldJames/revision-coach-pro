@@ -26,10 +26,10 @@ interface TabProps extends ITab {
 }
 
 const getClasses = (isSelected: boolean, disabled: boolean, variant: TTabVariant) => {
-  let classes = `relative overflow-visible box-border font-sans text-sm flex gap-0.5 duration-100 ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`;
+  let classes = `relative overflow-visible box-border text-sm flex gap-0.5 duration-100 ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`;
   if (isSelected) {
     if (variant === "primary") {
-      classes += " border-b-2 border-gray-1000 -mb-0.5";
+      classes += " border-b-2 border-foreground -mb-0.5";
     } else if (variant === "secondary") {
       classes += " bg-gray-1000";
     }
@@ -43,15 +43,15 @@ const getClasses = (isSelected: boolean, disabled: boolean, variant: TTabVariant
     }
   }
   if (variant === "primary") {
-    classes += " pb-[5px] hover:text-gray-1000";
+    classes += " pb-[5px] hover:text-foreground";
   } else if (variant === "secondary") {
     classes += " h-6 rounded-md text-[13px] px-1.5 items-center";
   }
   if (disabled) {
-    classes += isSelected ? " text-gray-1000" : " text-gray-900";
+    classes += isSelected ? " text-foreground" : " text-muted-foreground";
   } else {
     if (variant === "primary") {
-      classes += isSelected ? " text-gray-1000" : " text-gray-900";
+      classes += isSelected ? " text-foreground font-medium" : " text-muted-foreground";
     } else {
       classes += isSelected ? " text-background-100" : " text-gray-1000";
     }
@@ -97,7 +97,7 @@ export const Tabs = ({
 }: TabsProps) => {
   return (
     <div
-      className={`flex${disabled ? " cursor-not-allowed" : ""} ${variant === "primary" ? "gap-6 pb-[1px] border-b border-accents-2" : "gap-2"}`}>
+      className={`flex${disabled ? " cursor-not-allowed" : ""} ${variant === "primary" ? "gap-6 pb-[1px] border-b border-border" : "gap-2"}`}>
       {tabs.map((tab) => tab.tooltip ? (
         <SimpleTooltip key={tab.value} text={tab.tooltip}>
           <Tab
