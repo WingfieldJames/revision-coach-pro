@@ -43,7 +43,7 @@ export const HomePage = () => {
         
         <div className="text-center mb-8 -mt-12 sm:-mt-16 md:-mt-20 relative z-50 px-4">
           <InteractiveHoverButton 
-            text="Get started today" 
+            text="Get started today →" 
             onClick={() => navigate('/compare')}
             className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[180px] sm:w-[200px] bg-white text-foreground border border-border"
           />
