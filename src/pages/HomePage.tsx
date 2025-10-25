@@ -22,7 +22,7 @@ export const HomePage = () => {
       <Header showNavLinks />
       
       {/* Hero Scroll Animation Section */}
-      <section className="overflow-hidden pb-[500px] -mt-8">
+      <section className="overflow-hidden pb-[200px] -mt-8">
         <ContainerScroll
           titleComponent={
             <>
@@ -47,7 +47,7 @@ export const HomePage = () => {
             className="w-full h-full object-fill"
           />
         </ContainerScroll>
-        <div className="text-center -mt-24 mb-8">
+        <div className="text-center -mt-8 mb-8">
           <Button variant="brand" size="xl" asChild>
             <Link to="/compare">Try It Now →</Link>
           </Button>
@@ -55,7 +55,7 @@ export const HomePage = () => {
             Get started free • No card needed
           </p>
         </div>
-        <p className="text-center text-lg text-muted-foreground max-w-4xl mx-auto px-8 -mt-32">
+        <p className="text-center text-lg text-muted-foreground max-w-4xl mx-auto px-8 -mt-4">
           Trained on past papers, mark schemes, specifications and A* technique — giving you everything you need to hit that top grade all in one place
         </p>
       </section>
