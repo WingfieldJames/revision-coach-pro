@@ -26,6 +26,9 @@ export const HomePage = () => {
         <ContainerScroll
           titleComponent={
             <>
+              <div className="bg-secondary text-foreground text-sm px-4 py-2 rounded-full inline-block mb-6">
+                ⭐ Loved by 50+ users with a 4.9 star rating
+              </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-2 flex items-center justify-center gap-3">
                 Meet 
                 <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-10 md:h-12" />
