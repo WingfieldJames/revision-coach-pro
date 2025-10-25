@@ -45,7 +45,7 @@ export const HomePage = () => {
           <InteractiveHoverButton 
             text="Get started today →" 
             onClick={() => navigate('/compare')}
-            className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[180px] sm:w-[200px] bg-white text-foreground border border-border"
+            className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px] bg-white text-foreground border border-border"
           />
           <p className="text-xs sm:text-sm text-muted-foreground mt-3">
             Get started free • No card needed
