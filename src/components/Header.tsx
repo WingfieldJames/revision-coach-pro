@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   const getSelectedTab = () => {
     if (location.pathname === '/dashboard') return 'profile';
     if (location.pathname === '/login') return 'profile';
-    if (location.hash === '#testimonials') return 'testimonials';
+    if (location.pathname === '/compare') return 'testimonials';
     return 'home';
   };
   
@@ -28,8 +28,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   // Update selected tab when location changes
   React.useEffect(() => {
-    setSelectedTab(getSelectedTab());
-  }, [location.pathname, location.hash]);
+    const newTab = getSelectedTab();
+    if (newTab !== selectedTab) {
+      setSelectedTab(newTab);
+    }
+  }, [location.pathname]);
 
   const tabs: ITab[] = [
     { title: "Home", value: "home" },
@@ -38,20 +41,17 @@ export const Header: React.FC<HeaderProps> = ({
   ];
 
   const handleTabChange = (value: string) => {
-    setSelectedTab(value);
-    
     if (value === "home") {
-      if (location.pathname !== '/') {
-        navigate('/');
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigate('/');
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } else if (value === "testimonials") {
-      if (location.pathname !== '/') {
-        navigate('/', { state: { scrollTo: 'testimonials' } });
-      } else {
-        const testimonialsSection = document.querySelector('[data-section="testimonials"]');
-        testimonialsSection?.scrollIntoView({ behavior: 'smooth' });
-      }
+      navigate('/compare');
+      setTimeout(() => {
+        const testimonialsSection = document.getElementById('testimonials');
+        if (testimonialsSection) {
+          testimonialsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 200);
     } else if (value === "profile") {
       if (user) {
         navigate('/dashboard');
