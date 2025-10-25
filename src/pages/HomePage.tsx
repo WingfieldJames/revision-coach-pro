@@ -37,7 +37,7 @@ export const HomePage = () => {
           }
         >
           <img
-            src="/lovable-uploads/962384ae-eb06-481f-a929-16bce5c920a5.png"
+            src="/lovable-uploads/deluxe-assistant-screenshot.png"
             alt="A* AI Demo"
             className="mx-auto rounded-2xl object-cover h-full object-left-top w-full"
           />
