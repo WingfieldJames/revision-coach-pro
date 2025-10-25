@@ -107,9 +107,11 @@ export const HomePage = () => {
 
           {/* Button beneath video */}
           <div className="text-center mb-4">
-            <Button variant="brand" size="xl" asChild>
-              <Link to="/compare">Try A* AI now →</Link>
-            </Button>
+            <InteractiveHoverButton 
+              text="Try A* AI now →" 
+              onClick={() => navigate('/compare')}
+              className="pointer-events-auto text-base px-6 py-3 w-[200px] bg-white text-foreground border border-border"
+            />
           </div>
 
           {/* Disclaimer */}
@@ -134,9 +136,11 @@ export const HomePage = () => {
           {/* Laptop Image */}
           <div className="flex-1 text-center">
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
-            <Button variant="brand" size="xl" className="mt-8" asChild>
-              <Link to="/compare">Try A* AI now →</Link>
-            </Button>
+            <InteractiveHoverButton 
+              text="Try A* AI now →" 
+              onClick={() => navigate('/compare')}
+              className="pointer-events-auto text-base px-6 py-3 w-[200px] bg-white text-foreground border border-border mt-8"
+            />
           </div>
 
           {/* Features */}
@@ -239,9 +243,11 @@ export const HomePage = () => {
           </Accordion>
           
           <div className="text-center mt-8">
-            <Button variant="brand" size="xl" asChild>
-              <Link to="/compare">Get started today →</Link>
-            </Button>
+            <InteractiveHoverButton 
+              text="Get started today →" 
+              onClick={() => navigate('/compare')}
+              className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border"
+            />
           </div>
         </div>
       </section>

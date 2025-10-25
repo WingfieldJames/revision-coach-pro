@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.png';
@@ -15,6 +16,7 @@ import { Check, Star, Instagram } from 'lucide-react';
 export const ComparePage = () => {
   const { user, profile } = useAuth();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
 
   // Scroll to top when component mounts, or to testimonials if hash is present
@@ -139,14 +141,11 @@ export const ComparePage = () => {
                 Basic help only (no mark-scheme feedback or structures)
               </li>
             </ul>
-            <Button 
-              variant="brand" 
-              size="lg" 
-              className="w-full"
+            <InteractiveHoverButton 
+              text="Try free now" 
               onClick={handleFreeClick}
-            >
-              Try free now
-            </Button>
+              className="pointer-events-auto text-base px-6 py-3 w-full bg-white text-foreground border border-border"
+            />
           </div>
 
           {/* Deluxe Plan */}
@@ -178,14 +177,11 @@ export const ComparePage = () => {
                 Application bank + model essay examples
               </li>
             </ul>
-            <Button 
-              variant="brand" 
-              size="lg" 
-              className="w-full"
+            <InteractiveHoverButton 
+              text="Unlock Deluxe" 
               onClick={handlePremiumClick}
-            >
-              Unlock Deluxe
-            </Button>
+              className="pointer-events-auto text-base px-6 py-3 w-full bg-white text-foreground border border-border"
+            />
           </div>
         </div>
         
@@ -209,14 +205,11 @@ export const ComparePage = () => {
           {/* Laptop Image */}
           <div className="flex-1 text-center">
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
-            <Button 
-              variant="brand" 
-              size="xl" 
-              className="mt-8"
+            <InteractiveHoverButton 
+              text="Choose your plan →" 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            >
-              Choose your plan →
-            </Button>
+              className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border mt-8"
+            />
           </div>
 
           {/* Features */}
