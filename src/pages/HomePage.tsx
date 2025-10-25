@@ -26,11 +26,11 @@ export const HomePage = () => {
         <ContainerScroll
           titleComponent={
             <>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center gap-3">
+              <h1 className="text-4xl md:text-5xl font-bold mb-2 flex items-center justify-center gap-3">
                 Meet 
                 <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-10 md:h-12" />
               </h1>
-              <h2 className="text-2xl md:text-3xl font-medium text-foreground">
+              <h2 className="text-xl md:text-2xl font-medium text-foreground mb-8">
                 Your AI-powered coach for Edexcel Economics
               </h2>
             </>
