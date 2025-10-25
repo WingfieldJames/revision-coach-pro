@@ -88,69 +88,64 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Video Demo Section */}
-      <section className="py-16 px-8 max-w-7xl mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <span>See</span>
-            <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="h-6 md:h-8" />
-            <span>in</span>
-            <span className="bg-gradient-brand bg-clip-text text-transparent">action</span>
-          </div>
-        </h2>
-        
-        {/* Responsive Video Container */}
-        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+      {/* Video Demo Section with Scroll Animation */}
+      <section className="overflow-hidden">
+        <ContainerScroll
+          titleComponent={
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span>See</span>
+                <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="h-6 md:h-8" />
+                <span>in</span>
+                <span className="bg-gradient-brand bg-clip-text text-transparent">action</span>
+              </div>
+            </h2>
+          }
+        >
           <iframe 
             src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" 
-            className="absolute top-0 left-0 w-full h-full rounded-lg"
+            className="w-full h-full rounded-lg"
             frameBorder="0" 
             allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
             referrerPolicy="strict-origin-when-cross-origin" 
             title="A* AI Demo Video"
           />
-        </div>
+        </ContainerScroll>
         
-        {/* Button beneath video */}
-        <div className="text-center mt-6">
-          <Button variant="brand" size="xl" asChild>
-            <Link to="/compare">Try A* AI now →</Link>
-          </Button>
-        </div>
+        <div className="max-w-7xl mx-auto px-8 pb-16 -mt-32">
+          {/* Button beneath video */}
+          <div className="text-center mb-4">
+            <Button variant="brand" size="xl" asChild>
+              <Link to="/compare">Try A* AI now →</Link>
+            </Button>
+          </div>
 
-        {/* Disclaimer */}
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          For the best experience, use a laptop or iPad
-        </p>
+          {/* Disclaimer */}
+          <p className="text-center text-sm text-muted-foreground">
+            For the best experience, use a laptop or iPad
+          </p>
+        </div>
       </section>
 
-      {/* How A* AI helps you revise smarter Section with Scroll Animation */}
-      <section className="overflow-hidden">
-        <ContainerScroll
-          titleComponent={
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span>How</span>
-                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-6 md:h-8" />
-                <span>helps you revise</span>
-                <span className="bg-gradient-brand bg-clip-text text-transparent">smarter</span>
-              </div>
-            </h2>
-          }
-        >
-          <img 
-            src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" 
-            alt="Laptop mockup" 
-            className="mx-auto rounded-2xl object-cover h-full w-full"
-            draggable={false}
-          />
-        </ContainerScroll>
+      {/* How A* AI helps you revise smarter Section */}
+      <section className="py-16 px-8 max-w-7xl mx-auto">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span>How</span>
+            <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-6 md:h-8" />
+            <span>helps you revise</span>
+            <span className="bg-gradient-brand bg-clip-text text-transparent">smarter</span>
+          </div>
+        </h2>
 
-        <div className="max-w-6xl mx-auto px-8 pb-16">
-          <div className="text-center mb-12">
+        <div className="flex flex-col lg:flex-row items-start justify-center max-w-6xl mx-auto gap-12">
+          {/* Laptop Image */}
+          <div className="flex-1 text-center">
+            <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
             <Button 
               variant="brand" 
-              size="xl"
+              size="xl" 
+              className="mt-8"
               asChild
             >
               <Link to="/compare">Try A* AI now →</Link>
@@ -158,7 +153,7 @@ export const HomePage = () => {
           </div>
 
           {/* Features */}
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="flex-1 space-y-6">
             <div className="bg-muted rounded-xl p-6">
               <strong className="text-lg font-semibold">📄 Past Paper Mastery</strong>
               <p className="text-muted-foreground mt-2 leading-relaxed">
