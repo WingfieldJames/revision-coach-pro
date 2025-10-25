@@ -39,7 +39,7 @@ export const HomePage = () => {
                 </h2>
               </div>
             </>}>
-          <img src="/lovable-uploads/deluxe-assistant-updated.png" alt="A* AI Demo" className="w-full h-full object-fill" />
+          <img src="/lovable-uploads/deluxe-assistant-new.png" alt="A* AI Demo" className="w-full h-full object-contain" />
         </ContainerScroll>
         <p className="text-center text-lg text-muted-foreground max-w-4xl mx-auto px-8 -mt-8 mb-6">
           Trained on past papers, mark schemes, specifications and A* technique — giving you everything you need to hit that top grade all in one place
