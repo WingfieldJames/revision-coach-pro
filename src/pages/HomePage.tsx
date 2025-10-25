@@ -21,6 +21,29 @@ export const HomePage = () => {
     <div className="min-h-screen bg-background font-sans">
       <Header showNavLinks />
       
+      {/* Hero Scroll Animation Section */}
+      <section className="overflow-hidden pb-[500px] pt-[100px]">
+        <ContainerScroll
+          titleComponent={
+            <>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center gap-3">
+                Meet 
+                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-10 md:h-12" />
+              </h1>
+              <h2 className="text-2xl md:text-3xl font-medium text-foreground">
+                Your AI-powered coach for Edexcel Economics
+              </h2>
+            </>
+          }
+        >
+          <img
+            src="/lovable-uploads/962384ae-eb06-481f-a929-16bce5c920a5.png"
+            alt="A* AI Demo"
+            className="mx-auto rounded-2xl object-cover h-full object-left-top w-full"
+          />
+        </ContainerScroll>
+      </section>
+
       {/* Hero Section */}
       <section className="flex flex-col lg:flex-row items-center justify-between p-8 gap-8">
         <div className="flex-1 max-w-2xl">
