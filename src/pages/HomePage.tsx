@@ -90,22 +90,22 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Video Demo Section with Scroll Animation */}
-      <section className="overflow-hidden">
-        <ContainerScroll titleComponent={<h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span>See</span>
-                <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="h-6 md:h-8" />
-                <span>in</span>
-                <span className="bg-gradient-brand bg-clip-text text-transparent">action</span>
-              </div>
-            </h2>}>
-          <div className="relative w-full h-full">
-            <iframe src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" className="absolute top-0 left-0 w-full h-full rounded-lg" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
+      {/* Video Demo Section */}
+      <section className="py-16 px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <span>See</span>
+              <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="h-6 md:h-8" />
+              <span>in</span>
+              <span className="bg-gradient-brand bg-clip-text text-transparent">action</span>
+            </div>
+          </h2>
+          
+          <div className="relative w-full aspect-video mb-8 rounded-lg overflow-hidden">
+            <iframe src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
           </div>
-        </ContainerScroll>
-        
-        <div className="max-w-7xl mx-auto px-8 pb-16 -mt-32">
+
           {/* Button beneath video */}
           <div className="text-center mb-4">
             <Button variant="brand" size="xl" asChild>
