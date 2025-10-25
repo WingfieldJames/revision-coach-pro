@@ -180,7 +180,7 @@ export const HomePage = () => {
       <section className="py-16 px-8 bg-muted">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-12">
-            Powered by Leading AI models ⬇️
+            Powered by leading AI models ⬇️
           </h2>
           
           <div className="flex items-center justify-center gap-12 mb-6">
@@ -196,7 +196,7 @@ export const HomePage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-4 px-8 bg-background">
+      <section className="py-16 px-8 bg-background">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2">
             Frequently asked questions
