@@ -186,10 +186,11 @@ export const HomePage = () => {
           <div className="flex items-center justify-center gap-12 mb-6">
             <img src="/logos/openai-final.png" alt="OpenAI" className="h-16 object-contain" />
             <img src="/logos/gemini-final.png" alt="Gemini" className="h-16 object-contain" />
+            <img src="/logos/deepseek-final.png" alt="DeepSeek" className="h-16 object-contain" />
           </div>
           
           <p className="text-sm text-muted-foreground">
-            * <span className="bg-gradient-brand bg-clip-text text-transparent">A* AI</span> is currently deployed using OpenAI. Other AI models are available for testing upon request.
+            * A* AI is currently deployed using OpenAI. Other AI models are available for testing upon request.
           </p>
         </div>
       </section>
@@ -201,7 +202,7 @@ export const HomePage = () => {
             Frequently asked questions
           </h2>
           <p className="text-center text-muted-foreground mb-8 text-lg">
-            Everything you need to know about <span className="bg-gradient-brand bg-clip-text text-transparent">A* AI</span> and revision.
+            Everything you need to know about A* AI and revision.
           </p>
           
           <Accordion type="single" collapsible className="space-y-4">
