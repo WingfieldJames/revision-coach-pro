@@ -43,7 +43,11 @@ export const HomePage = () => {
         </div>
 
         <div className="flex-1 text-center">
-          <img src="/lovable-uploads/962384ae-eb06-481f-a929-16bce5c920a5.png" alt="A* AI on mobile" className="max-w-full h-auto mx-auto" />
+          <img 
+            src="/lovable-uploads/962384ae-eb06-481f-a929-16bce5c920a5.png" 
+            alt="A* AI on mobile" 
+            className="max-w-full h-auto mx-auto animate-float"
+          />
           <div className="inline-block mt-6">
             <Button variant="brand" size="xl" asChild>
               <Link to="/compare">Try It Now →</Link>
@@ -102,14 +106,16 @@ export const HomePage = () => {
             </h2>
           }
         >
-          <iframe 
-            src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" 
-            className="w-full h-full rounded-lg"
-            frameBorder="0" 
-            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
-            referrerPolicy="strict-origin-when-cross-origin" 
-            title="A* AI Demo Video"
-          />
+          <div className="relative w-full h-full">
+            <iframe 
+              src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" 
+              className="absolute top-0 left-0 w-full h-full rounded-lg"
+              frameBorder="0" 
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
+              referrerPolicy="strict-origin-when-cross-origin" 
+              title="A* AI Demo Video"
+            />
+          </div>
         </ContainerScroll>
         
         <div className="max-w-7xl mx-auto px-8 pb-16 -mt-32">
