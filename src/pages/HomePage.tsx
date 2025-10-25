@@ -186,7 +186,7 @@ export const HomePage = () => {
           <div className="flex items-center justify-center gap-12 mb-6">
             <img src="/logos/openai-final.png" alt="OpenAI" className="h-16 object-contain" />
             <img src="/logos/gemini-final.png" alt="Gemini" className="h-16 object-contain" />
-            <img src="/logos/deepseek-final.png" alt="DeepSeek" className="h-16 object-contain" />
+            <img src="/logos/deepseek-final.png" alt="DeepSeek" className="h-12 object-contain" />
           </div>
           
           <p className="text-sm text-muted-foreground">
