@@ -14,18 +14,18 @@ import { ContainerScroll } from '@/components/ui/container-scroll-animation';
 // import revishann from '@/assets/revishann.png';
 
 export const HomePage = () => {
-  const { user, profile } = useAuth();
+  const {
+    user,
+    profile
+  } = useAuth();
 
   // No auto-redirect - always show the home page when accessed directly
-  return (
-    <div className="min-h-screen bg-background font-sans">
+  return <div className="min-h-screen bg-background font-sans">
       <Header showNavLinks />
       
       {/* Hero Scroll Animation Section */}
       <section className="overflow-hidden pb-[200px] -mt-8">
-        <ContainerScroll
-          titleComponent={
-            <>
+        <ContainerScroll titleComponent={<>
               <div className="text-left max-w-5xl mx-auto px-8">
                 <div className="bg-secondary text-foreground text-sm px-4 py-2 rounded-full inline-block mb-6">
                   ⭐ Loved by 50+ users with a 4.9 star rating
@@ -38,14 +38,8 @@ export const HomePage = () => {
                   Your AI-powered coach for Edexcel Economics
                 </h2>
               </div>
-            </>
-          }
-        >
-          <img
-            src="/lovable-uploads/deluxe-assistant-updated.png"
-            alt="A* AI Demo"
-            className="w-full h-full object-fill"
-          />
+            </>}>
+          <img src="/lovable-uploads/deluxe-assistant-updated.png" alt="A* AI Demo" className="w-full h-full object-fill" />
         </ContainerScroll>
         <p className="text-center text-lg text-muted-foreground max-w-4xl mx-auto px-8 -mt-8 mb-6">
           Trained on past papers, mark schemes, specifications and A* technique — giving you everything you need to hit that top grade all in one place
@@ -61,42 +55,7 @@ export const HomePage = () => {
       </section>
 
       {/* Hero Section */}
-      <section className="flex flex-col lg:flex-row items-center justify-between p-8 gap-8">
-        <div className="flex-1 max-w-2xl">
-          <div className="bg-secondary text-foreground text-sm px-4 py-2 rounded-full inline-block mb-6">
-            ⭐ Loved by 50+ users with a 4.9 star rating
-          </div>
-          
-          <h1 className="text-5xl font-bold mb-4 flex items-center gap-3">
-            Meet 
-            <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-12" />
-          </h1>
-          
-          <h2 className="text-3xl font-medium mb-6 text-foreground">
-            Your AI-powered coach for Edexcel Economics
-          </h2>
-          
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            Trained on past papers, mark schemes, specifications and A* technique — giving you everything you need to hit that top grade all in one place
-          </p>
-        </div>
-
-        <div className="flex-1 text-center">
-          <img 
-            src="/lovable-uploads/962384ae-eb06-481f-a929-16bce5c920a5.png" 
-            alt="A* AI on mobile" 
-            className="max-w-full h-auto mx-auto"
-          />
-          <div className="inline-block mt-6">
-            <Button variant="brand" size="xl" asChild>
-              <Link to="/compare">Try It Now →</Link>
-            </Button>
-            <p className="text-sm text-muted-foreground mt-3 text-left">
-              Get started free • No card needed
-            </p>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Testimonials Section */}
       <section className="py-16 px-8 text-center bg-muted">
@@ -133,27 +92,16 @@ export const HomePage = () => {
 
       {/* Video Demo Section with Scroll Animation */}
       <section className="overflow-hidden">
-        <ContainerScroll
-          titleComponent={
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
+        <ContainerScroll titleComponent={<h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <span>See</span>
                 <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="h-6 md:h-8" />
                 <span>in</span>
                 <span className="bg-gradient-brand bg-clip-text text-transparent">action</span>
               </div>
-            </h2>
-          }
-        >
+            </h2>}>
           <div className="relative w-full h-full">
-            <iframe 
-              src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" 
-              className="absolute top-0 left-0 w-full h-full rounded-lg"
-              frameBorder="0" 
-              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
-              referrerPolicy="strict-origin-when-cross-origin" 
-              title="A* AI Demo Video"
-            />
+            <iframe src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" className="absolute top-0 left-0 w-full h-full rounded-lg" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
           </div>
         </ContainerScroll>
         
@@ -187,12 +135,7 @@ export const HomePage = () => {
           {/* Laptop Image */}
           <div className="flex-1 text-center">
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
-            <Button 
-              variant="brand" 
-              size="xl" 
-              className="mt-8"
-              asChild
-            >
+            <Button variant="brand" size="xl" className="mt-8" asChild>
               <Link to="/compare">Try A* AI now →</Link>
             </Button>
           </div>
@@ -342,18 +285,15 @@ export const HomePage = () => {
             </p>
           </div>
           
-          {!user && (
-            <div className="flex gap-4 justify-center">
+          {!user && <div className="flex gap-4 justify-center">
               <Button variant="outline" asChild>
                 <Link to="/login">Login</Link>
               </Button>
               <Button variant="brand" asChild>
                 <Link to="/signup">Sign Up</Link>
               </Button>
-            </div>
-          )}
+            </div>}
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
