@@ -38,7 +38,7 @@ export const HomePage = () => {
                 </h2>
               </div>
             </>}>
-          <img src="/lovable-uploads/deluxe-assistant-new.png" alt="A* AI Demo" className="w-full h-full object-contain" />
+          <img src="/lovable-uploads/hero-ipad-demo.jpg" alt="A* AI Demo" className="w-full h-full object-contain" />
         </ContainerScroll>
         
         <div className="text-center mb-8 -mt-8 sm:-mt-12 md:-mt-20 relative z-50 px-4">
