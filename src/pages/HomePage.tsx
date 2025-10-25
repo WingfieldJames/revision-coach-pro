@@ -22,7 +22,7 @@ export const HomePage = () => {
       <Header showNavLinks />
       
       {/* Hero Scroll Animation Section */}
-      <section className="overflow-hidden pb-[500px]">
+      <section className="overflow-hidden pb-[500px] -mt-8">
         <ContainerScroll
           titleComponent={
             <>
