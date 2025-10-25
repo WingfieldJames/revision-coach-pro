@@ -23,17 +23,17 @@ export const HomePage = () => {
       <Header showNavLinks />
       
       {/* Hero Scroll Animation Section */}
-      <section className="overflow-hidden pb-0 -mt-8">
+      <section className="overflow-hidden pb-0 -mt-8 md:-mt-8">
         <ContainerScroll titleComponent={<>
-              <div className="text-left max-w-5xl mx-auto px-8">
-                <div className="bg-secondary text-foreground text-sm px-4 py-2 rounded-full inline-block mb-6">
+              <div className="text-left max-w-5xl mx-auto px-4 sm:px-8">
+                <div className="bg-secondary text-foreground text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full inline-block mb-4 sm:mb-6">
                   ⭐ Loved by 50+ users with a 4.9 star rating
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-2 flex items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
                   Meet 
-                  <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-10 md:h-12" />
+                  <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-7 sm:h-9 md:h-10 lg:h-12" />
                 </h1>
-                <h2 className="text-xl md:text-2xl font-medium text-foreground mb-8">
+                <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-foreground mb-6 sm:mb-8">
                   Your AI-powered coach for Edexcel Economics
                 </h2>
               </div>
@@ -41,13 +41,13 @@ export const HomePage = () => {
           <img src="/lovable-uploads/deluxe-assistant-new.png" alt="A* AI Demo" className="w-full h-full object-contain" />
         </ContainerScroll>
         
-        <div className="text-center mb-8 -mt-20 relative z-50">
+        <div className="text-center mb-8 -mt-12 sm:-mt-16 md:-mt-20 relative z-50 px-4">
           <InteractiveHoverButton 
             text="Get started today" 
             onClick={() => navigate('/compare')}
-            className="pointer-events-auto text-base px-6 py-3 w-[200px] bg-white text-foreground border border-border"
+            className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[180px] sm:w-[200px] bg-white text-foreground border border-border"
           />
-          <p className="text-sm text-muted-foreground mt-3">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-3">
             Get started free • No card needed
           </p>
         </div>
