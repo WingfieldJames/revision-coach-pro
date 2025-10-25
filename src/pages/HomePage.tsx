@@ -42,7 +42,7 @@ export const HomePage = () => {
             className="w-full h-full object-fill"
           />
         </ContainerScroll>
-        <p className="text-center text-lg text-muted-foreground max-w-4xl mx-auto px-8 -mt-16">
+        <p className="text-center text-lg text-muted-foreground max-w-4xl mx-auto px-8 -mt-32">
           Trained on past papers, mark schemes, specifications and A* technique — giving you everything you need to hit that top grade all in one place
         </p>
       </section>
