@@ -47,7 +47,10 @@ export const HomePage = () => {
             className="w-full h-full object-fill"
           />
         </ContainerScroll>
-        <div className="text-center -mt-8 mb-8">
+        <p className="text-center text-lg text-muted-foreground max-w-4xl mx-auto px-8 -mt-8 mb-6">
+          Trained on past papers, mark schemes, specifications and A* technique — giving you everything you need to hit that top grade all in one place
+        </p>
+        <div className="text-center mb-8">
           <Button variant="brand" size="xl" asChild>
             <Link to="/compare">Try It Now →</Link>
           </Button>
@@ -55,9 +58,6 @@ export const HomePage = () => {
             Get started free • No card needed
           </p>
         </div>
-        <p className="text-center text-lg text-muted-foreground max-w-4xl mx-auto px-8 -mt-4">
-          Trained on past papers, mark schemes, specifications and A* technique — giving you everything you need to hit that top grade all in one place
-        </p>
       </section>
 
       {/* Hero Section */}
