@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ChevronDown, Instagram, Music } from 'lucide-react';
 import { ContainerScroll } from '@/components/ui/container-scroll-animation';
-import { Tabs, ITab } from '@/components/ui/tabs';
 // import logo from '@/assets/logo.png';
 // import phone from '@/assets/phone.png';
 // import laptop from '@/assets/laptop.png';
@@ -16,47 +15,10 @@ import { Tabs, ITab } from '@/components/ui/tabs';
 
 export const HomePage = () => {
   const { user, profile } = useAuth();
-  const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState<string>("home");
-
-  const tabs: ITab[] = [
-    { title: "Home", value: "home" },
-    { title: "Testimonials", value: "testimonials" },
-    { title: "Profile", value: "profile" }
-  ];
-
-  const handleTabChange = (value: string) => {
-    setSelectedTab(value);
-    
-    if (value === "home") {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (value === "testimonials") {
-      const testimonialsSection = document.querySelector('[data-section="testimonials"]');
-      testimonialsSection?.scrollIntoView({ behavior: 'smooth' });
-    } else if (value === "profile") {
-      if (user) {
-        navigate('/dashboard');
-      } else {
-        navigate('/login');
-      }
-    }
-  };
 
   // No auto-redirect - always show the home page when accessed directly
   return <div className="min-h-screen bg-background font-sans">
       <Header showNavLinks />
-      
-      {/* Navigation Tabs */}
-      <div className="sticky top-0 z-40 bg-background border-b border-accents-2">
-        <div className="max-w-7xl mx-auto px-8 pt-4">
-          <Tabs 
-            selected={selectedTab} 
-            setSelected={handleTabChange} 
-            tabs={tabs} 
-            variant="primary"
-          />
-        </div>
-      </div>
       
       {/* Hero Scroll Animation Section */}
       <section className="overflow-hidden pb-0 -mt-8">

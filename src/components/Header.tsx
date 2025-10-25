@@ -1,7 +1,8 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { Tabs, ITab } from '@/components/ui/tabs';
 // import logo from '@/assets/logo.png';
 
 interface HeaderProps {
@@ -13,6 +14,38 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [selectedTab, setSelectedTab] = useState<string>("home");
+
+  const tabs: ITab[] = [
+    { title: "Home", value: "home" },
+    { title: "Testimonials", value: "testimonials" },
+    { title: "Profile", value: "profile" }
+  ];
+
+  const handleTabChange = (value: string) => {
+    setSelectedTab(value);
+    
+    if (value === "home") {
+      if (location.pathname !== '/') {
+        navigate('/');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (value === "testimonials") {
+      if (location.pathname !== '/') {
+        navigate('/', { state: { scrollTo: 'testimonials' } });
+      } else {
+        const testimonialsSection = document.querySelector('[data-section="testimonials"]');
+        testimonialsSection?.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else if (value === "profile") {
+      if (user) {
+        navigate('/dashboard');
+      } else {
+        navigate('/login');
+      }
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -24,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 flex justify-between items-center px-6 pt-6 pb-4 bg-background text-foreground">
+    <header className="sticky top-0 z-50 flex justify-between items-center px-6 pt-6 pb-2 bg-background text-foreground">
       <div className="flex items-center">
         <Link to="/" className="flex items-center" onClick={() => window.scrollTo(0, 0)}>
           <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-10" />
@@ -32,17 +65,14 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
       
       {showNavLinks && (
-        <nav className="flex flex-wrap gap-2 md:gap-6 text-xs md:text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground transition-colors whitespace-nowrap">Home</Link>
-          <Link to="/compare#testimonials" className="hover:text-foreground transition-colors whitespace-nowrap">Testimonials</Link>
-          <Link 
-            to={user ? "/dashboard" : "/login"} 
-            className="hover:text-foreground transition-colors whitespace-nowrap"
-            onClick={() => !user && window.scrollTo(0, 0)}
-          >
-            Profile
-          </Link>
-        </nav>
+        <div className="flex-1 flex justify-center">
+          <Tabs 
+            selected={selectedTab} 
+            setSelected={handleTabChange} 
+            tabs={tabs} 
+            variant="primary"
+          />
+        </div>
       )}
 
       {user && (
