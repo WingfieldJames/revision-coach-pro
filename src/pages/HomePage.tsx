@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ChevronDown, Instagram, Music } from 'lucide-react';
 import { ContainerScroll } from '@/components/ui/container-scroll-animation';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 // import logo from '@/assets/logo.png';
 // import phone from '@/assets/phone.png';
 // import laptop from '@/assets/laptop.png';
@@ -15,6 +16,7 @@ import { ContainerScroll } from '@/components/ui/container-scroll-animation';
 
 export const HomePage = () => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
 
   // No auto-redirect - always show the home page when accessed directly
   return <div className="min-h-screen bg-background font-sans">
@@ -40,9 +42,11 @@ export const HomePage = () => {
         </ContainerScroll>
         
         <div className="text-center mb-8 -mt-20 relative z-50">
-          <Button variant="brand" size="xl" asChild className="pointer-events-auto">
-            <Link to="/compare">Try It Now →</Link>
-          </Button>
+          <InteractiveHoverButton 
+            text="Try It Now" 
+            onClick={() => navigate('/compare')}
+            className="pointer-events-auto text-lg px-8 py-3 w-auto"
+          />
           <p className="text-sm text-muted-foreground mt-3">
             Get started free • No card needed
           </p>
