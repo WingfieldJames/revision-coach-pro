@@ -24,7 +24,7 @@ export const HomePage = () => {
       <Header showNavLinks />
       
       {/* Hero Scroll Animation Section */}
-      <section className="overflow-hidden pb-8 -mt-8">
+      <section className="overflow-hidden pb-0 -mt-8">
         <ContainerScroll titleComponent={<>
               <div className="text-left max-w-5xl mx-auto px-8">
                 <div className="bg-secondary text-foreground text-sm px-4 py-2 rounded-full inline-block mb-6">
@@ -42,7 +42,7 @@ export const HomePage = () => {
           <img src="/lovable-uploads/deluxe-assistant-new.png" alt="A* AI Demo" className="w-full h-full object-contain" />
         </ContainerScroll>
         
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 -mt-8">
           <Button variant="brand" size="xl" asChild>
             <Link to="/compare">Try It Now →</Link>
           </Button>
