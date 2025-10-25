@@ -24,7 +24,7 @@ export const HomePage = () => {
       <Header showNavLinks />
       
       {/* Hero Scroll Animation Section */}
-      <section className="overflow-hidden pb-[200px] -mt-8">
+      <section className="overflow-hidden pb-8 -mt-8">
         <ContainerScroll titleComponent={<>
               <div className="text-left max-w-5xl mx-auto px-8">
                 <div className="bg-secondary text-foreground text-sm px-4 py-2 rounded-full inline-block mb-6">
