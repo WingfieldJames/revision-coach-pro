@@ -19,7 +19,7 @@ const InteractiveHoverButton = React.forwardRef<
       )}
       {...props}
     >
-      <div className="absolute left-[50%] top-[50%] h-2 w-2 scale-[1] rounded-lg bg-primary transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8] group-hover:bg-primary z-0"></div>
+      <div className="absolute left-[50%] top-[50%] h-2 w-2 scale-0 rounded-lg bg-primary transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8] group-hover:bg-primary z-0"></div>
       <span className="relative z-20 inline-block transition-all duration-300">
         {text}
       </span>
