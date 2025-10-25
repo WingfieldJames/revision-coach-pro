@@ -110,8 +110,9 @@ export const HomePage = () => {
           <div className="text-center mb-4">
             <InteractiveHoverButton 
               text="Try A* AI now →" 
+              variant="reverse"
               onClick={() => navigate('/compare')}
-              className="pointer-events-auto text-base px-6 py-3 w-[200px] bg-white text-foreground border border-border"
+              className="pointer-events-auto text-base px-6 py-3 w-[200px]"
             />
           </div>
 
@@ -139,8 +140,9 @@ export const HomePage = () => {
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
             <InteractiveHoverButton 
               text="Try A* AI now →" 
+              variant="reverse"
               onClick={() => navigate('/compare')}
-              className="pointer-events-auto text-base px-6 py-3 w-[200px] bg-white text-foreground border border-border mt-8"
+              className="pointer-events-auto text-base px-6 py-3 w-[200px] mt-8"
             />
           </div>
 
@@ -246,8 +248,9 @@ export const HomePage = () => {
           <div className="text-center mt-8">
             <InteractiveHoverButton 
               text="Get started today →" 
+              variant="reverse"
               onClick={() => navigate('/compare')}
-              className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border"
+              className="pointer-events-auto text-base px-6 py-3 w-[220px]"
             />
           </div>
         </div>
