@@ -1,53 +1,123 @@
-import * as React from "react"
-import * as TabsPrimitive from "@radix-ui/react-tabs"
+import React from "react";
+import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 
-import { cn } from "@/lib/utils"
+type TTabVariant = "primary" | "secondary";
 
-const Tabs = TabsPrimitive.Root
+export interface ITab {
+  title?: string;
+  value: string;
+  disabled?: boolean;
+  icon?: string;
+  tooltip?: string;
+}
 
-const TabsList = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
-      className
-    )}
-    {...props}
-  />
-))
-TabsList.displayName = TabsPrimitive.List.displayName
+interface TabsProps {
+  selected: string;
+  setSelected: React.Dispatch<React.SetStateAction<string>>;
+  tabs: ITab[];
+  disabled?: boolean;
+  variant?: TTabVariant;
+}
 
-const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
+interface TabProps extends ITab {
+  selected: string;
+  setSelected: React.Dispatch<React.SetStateAction<string>>;
+  variant: TTabVariant;
+}
 
-const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content
-    ref={ref}
-    className={cn(
-      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      className
-    )}
-    {...props}
-  />
-))
-TabsContent.displayName = TabsPrimitive.Content.displayName
+const getClasses = (isSelected: boolean, disabled: boolean, variant: TTabVariant) => {
+  let classes = `relative overflow-visible box-border font-sans text-sm flex gap-0.5 duration-100 ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`;
+  if (isSelected) {
+    if (variant === "primary") {
+      classes += " border-b-2 border-gray-1000 -mb-0.5";
+    } else if (variant === "secondary") {
+      classes += " bg-gray-1000";
+    }
+  } else {
+    if (variant === "secondary") {
+      if (disabled) {
+        classes += " bg-gray-200";
+      } else {
+        classes += " bg-gray-alpha-200";
+      }
+    }
+  }
+  if (variant === "primary") {
+    classes += " pb-[5px] hover:text-gray-1000";
+  } else if (variant === "secondary") {
+    classes += " h-6 rounded-md text-[13px] px-1.5 items-center";
+  }
+  if (disabled) {
+    classes += isSelected ? " text-gray-1000" : " text-gray-900";
+  } else {
+    if (variant === "primary") {
+      classes += isSelected ? " text-gray-1000" : " text-gray-900";
+    } else {
+      classes += isSelected ? " text-background-100" : " text-gray-1000";
+    }
+  }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+  return classes;
+};
+
+const Tab = ({
+  selected,
+  setSelected,
+  title,
+  value,
+  disabled = false,
+  icon,
+  variant
+}: TabProps) => {
+  if (!title && !icon) {
+    return;
+  }
+
+  return (
+    <div
+      className={getClasses(selected === value, disabled, variant)}
+      onClick={() => {
+        if (!disabled) {
+          setSelected(value);
+        }
+      }}
+    >
+      {icon && <img src={icon} alt={title} width={16} height={16} />}
+      <div>{title}</div>
+    </div>
+  );
+};
+
+export const Tabs = ({
+  selected,
+  setSelected,
+  tabs,
+  disabled = false,
+  variant = "primary"
+}: TabsProps) => {
+  return (
+    <div
+      className={`flex${disabled ? " cursor-not-allowed" : ""} ${variant === "primary" ? "gap-6 pb-[1px] border-b border-accents-2" : "gap-2"}`}>
+      {tabs.map((tab) => tab.tooltip ? (
+        <SimpleTooltip key={tab.value} text={tab.tooltip}>
+          <Tab
+            selected={selected}
+            setSelected={setSelected}
+            disabled={disabled || tab.disabled}
+            variant={variant}
+            {...tab}
+          />
+        </SimpleTooltip>
+      ) : (
+        <Tab
+          key={tab.value}
+          selected={selected}
+          setSelected={setSelected}
+          disabled={disabled || tab.disabled}
+          variant={variant}
+          {...tab}
+        />
+      ))}
+    </div>
+  );
+};
