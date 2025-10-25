@@ -141,11 +141,14 @@ export const ComparePage = () => {
                 Basic help only (no mark-scheme feedback or structures)
               </li>
             </ul>
-            <InteractiveHoverButton 
-              text="Try free now" 
+            <Button 
+              variant="brand" 
+              size="lg" 
+              className="w-full"
               onClick={handleFreeClick}
-              className="pointer-events-auto text-base px-6 py-3 w-full bg-white text-foreground border border-border"
-            />
+            >
+              Try free now
+            </Button>
           </div>
 
           {/* Deluxe Plan */}
@@ -177,11 +180,14 @@ export const ComparePage = () => {
                 Application bank + model essay examples
               </li>
             </ul>
-            <InteractiveHoverButton 
-              text="Unlock Deluxe" 
+            <Button 
+              variant="brand" 
+              size="lg" 
+              className="w-full"
               onClick={handlePremiumClick}
-              className="pointer-events-auto text-base px-6 py-3 w-full bg-white text-foreground border border-border"
-            />
+            >
+              Unlock Deluxe
+            </Button>
           </div>
         </div>
         
