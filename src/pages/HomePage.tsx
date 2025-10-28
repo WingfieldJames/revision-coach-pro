@@ -40,7 +40,7 @@ export const HomePage = () => {
             </>}>
           {/* Mobile portrait image - shown only on small screens */}
           <img 
-            src="/lovable-uploads/hero-mobile-demo.jpg" 
+            src="/lovable-uploads/hero-mobile-app-screenshot.jpg" 
             alt="A* AI Demo" 
             className="block sm:hidden mx-auto rounded-2xl object-contain h-full object-center" 
           />
