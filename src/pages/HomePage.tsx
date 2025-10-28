@@ -42,7 +42,7 @@ export const HomePage = () => {
           <img 
             src="/lovable-uploads/hero-mobile-updated.jpg" 
             alt="A* AI Demo" 
-            className="block sm:hidden mx-auto rounded-2xl object-contain h-full object-center max-w-[65%]" 
+            className="block sm:hidden mx-auto rounded-2xl object-cover h-full object-center w-[80%]" 
           />
           
           {/* Desktop/tablet landscape image - hidden on mobile */}
@@ -53,7 +53,7 @@ export const HomePage = () => {
           />
         </ContainerScroll>
         
-        <div className="text-center mb-8 -mt-8 sm:-mt-12 md:-mt-20 relative z-50 px-4">
+        <div className="text-center mb-8 -mt-32 sm:-mt-12 md:-mt-20 relative z-50 px-4">
           <InteractiveHoverButton 
             text="Get started today →" 
             variant="default"
