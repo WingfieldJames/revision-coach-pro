@@ -26,7 +26,7 @@ export const HomePage = () => {
       <section className="overflow-hidden pb-0 -mt-8 md:-mt-8">
         <ContainerScroll titleComponent={<>
               <div className="text-left max-w-5xl mx-auto px-4 sm:px-8">
-                <div className="bg-secondary text-foreground text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full inline-block mb-3 sm:mb-4 md:mb-6 whitespace-nowrap">
+                <div className="bg-secondary text-foreground text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full inline-block mb-3 sm:mb-4 md:mb-6 max-w-full text-center">
                   ⭐ Loved by 50+ users with a 4.9 star rating
                 </div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
