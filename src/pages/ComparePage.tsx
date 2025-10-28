@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Star, Instagram } from 'lucide-react';
 
 export const ComparePage = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
@@ -36,11 +36,19 @@ export const ComparePage = () => {
 
   // Auto-trigger checkout if redirected from login
   useEffect(() => {
-    if (shouldCheckout && user && !profile?.is_premium) {
+    // Wait for auth to finish loading before making decision
+    if (loading || !shouldCheckout || !user) return;
+    
+    // If user is already premium, redirect to premium page
+    if (profile?.is_premium) {
+      console.log('User is already premium, redirecting to premium version');
+      navigate('/premium');
+    } else {
+      // User is not premium, trigger checkout
       console.log('Auto-triggering checkout for logged-in user');
       handlePremiumClick();
     }
-  }, [shouldCheckout, user, profile?.is_premium]);
+  }, [shouldCheckout, user, profile?.is_premium, loading, navigate]);
 
   const handleFreeClick = async () => {
     if (!user) {
