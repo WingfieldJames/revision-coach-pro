@@ -38,7 +38,19 @@ export const HomePage = () => {
                 </h2>
               </div>
             </>}>
-          <img src="/lovable-uploads/hero-ipad-demo.jpg" alt="A* AI Demo" className="w-full h-full object-contain" />
+          {/* Mobile portrait image - shown only on small screens */}
+          <img 
+            src="/lovable-uploads/hero-mobile-demo.jpg" 
+            alt="A* AI Demo" 
+            className="block sm:hidden mx-auto rounded-2xl object-contain h-full object-center" 
+          />
+          
+          {/* Desktop/tablet landscape image - hidden on mobile */}
+          <img 
+            src="/lovable-uploads/hero-ipad-demo.jpg" 
+            alt="A* AI Demo" 
+            className="hidden sm:block mx-auto rounded-2xl object-contain h-full object-center" 
+          />
         </ContainerScroll>
         
         <div className="text-center mb-8 -mt-8 sm:-mt-12 md:-mt-20 relative z-50 px-4">
