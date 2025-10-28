@@ -42,7 +42,7 @@ export const HomePage = () => {
           <img 
             src="/lovable-uploads/hero-mobile-app-screenshot.jpg" 
             alt="A* AI Demo" 
-            className="block sm:hidden mx-auto rounded-2xl object-contain h-full object-center" 
+            className="block sm:hidden mx-auto rounded-2xl object-contain h-full object-center max-w-[65%]" 
           />
           
           {/* Desktop/tablet landscape image - hidden on mobile */}
