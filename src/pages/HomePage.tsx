@@ -25,7 +25,7 @@ export const HomePage = () => {
       {/* Hero Scroll Animation Section */}
       <section className="overflow-hidden pb-0 mt-4 sm:-mt-8 md:-mt-8">
         <ContainerScroll titleComponent={<>
-              <div className="text-left max-w-5xl mx-auto px-6 sm:px-8 pt-4 sm:pt-0">
+              <div className="text-left max-w-5xl mx-auto px-6 sm:px-8 pt-8 sm:pt-0">
                 <div className="bg-secondary text-foreground text-[11px] sm:text-xs md:text-sm px-3 sm:px-3 md:px-4 py-1.5 sm:py-1.5 md:py-2 rounded-full inline-block mb-3 sm:mb-4 md:mb-6 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
                   ⭐ Loved by 50+ users with a 4.9 star rating
                 </div>
