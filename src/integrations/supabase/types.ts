@@ -20,6 +20,9 @@ export type Database = {
           email: string
           id: string
           is_premium: boolean
+          payment_type: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           subscription_end: string | null
           subscription_tier: string | null
           updated_at: string
@@ -29,6 +32,9 @@ export type Database = {
           email: string
           id: string
           is_premium?: boolean
+          payment_type?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_end?: string | null
           subscription_tier?: string | null
           updated_at?: string
@@ -38,6 +44,9 @@ export type Database = {
           email?: string
           id?: string
           is_premium?: boolean
+          payment_type?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_end?: string | null
           subscription_tier?: string | null
           updated_at?: string

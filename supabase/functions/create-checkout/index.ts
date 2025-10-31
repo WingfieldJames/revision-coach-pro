@@ -45,6 +45,10 @@ serve(async (req) => {
 
     console.log("User authenticated:", user.email);
 
+    // Get payment type from request body
+    const { paymentType = 'lifetime' } = await req.json().catch(() => ({ paymentType: 'lifetime' }));
+    console.log("Payment type:", paymentType);
+
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
       console.error("Stripe secret key not found");
@@ -68,32 +72,63 @@ serve(async (req) => {
       customerId = customers.data[0].id;
       console.log("Found existing customer:", customerId);
     } else {
-      console.log("No existing customer found");
+      console.log("No existing customer found, will create new one");
     }
 
-    console.log("Creating checkout session");
-    const session = await stripe.checkout.sessions.create({
+    console.log("Creating checkout session for payment type:", paymentType);
+    
+    // Configure session based on payment type
+    let sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [
+      payment_method_types: ['card'],
+      allow_promotion_codes: true,
+      success_url: `${req.headers.get("origin")}/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin")}/compare`,
+      metadata: {
+        user_id: user.id,
+        payment_type: paymentType,
+      },
+    };
+
+    if (paymentType === 'monthly') {
+      // Monthly subscription
+      sessionConfig.mode = 'subscription';
+      sessionConfig.line_items = [
         {
           price_data: {
             currency: "gbp",
             product_data: { 
-              name: "A* AI Deluxe Plan",
-              description: "Premium AI-powered academic assistance with advanced features, unlimited access, and priority support for achieving A* grades."
+              name: "A* AI Deluxe Plan (Monthly)",
+              description: "Premium AI-powered academic assistance - Monthly subscription"
+            },
+            unit_amount: 999, // £9.99 in pence
+            recurring: {
+              interval: 'month',
+            },
+          },
+          quantity: 1,
+        },
+      ];
+    } else {
+      // Lifetime (one-time payment)
+      sessionConfig.mode = 'payment';
+      sessionConfig.line_items = [
+        {
+          price_data: {
+            currency: "gbp",
+            product_data: { 
+              name: "A* AI Deluxe Plan (Lifetime)",
+              description: "Premium AI-powered academic assistance - Lifetime access"
             },
             unit_amount: 1999, // £19.99 in pence
           },
           quantity: 1,
         },
-      ],
-      mode: "payment",
-      payment_method_types: ['card'], // Only allow card payments to disable Link
-      allow_promotion_codes: true, // Enable coupon codes
-      success_url: `${req.headers.get("origin")}/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/compare`,
-    });
+      ];
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     console.log("Checkout session created successfully:", session.id);
     return new Response(JSON.stringify({ url: session.url }), {

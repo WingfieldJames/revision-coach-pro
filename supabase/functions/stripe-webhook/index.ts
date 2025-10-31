@@ -73,50 +73,72 @@ serve(async (req) => {
         logStep("Processing checkout session", { 
           sessionId: session.id, 
           mode: session.mode, 
-          paymentStatus: session.payment_status 
+          paymentStatus: session.payment_status,
+          metadata: session.metadata 
         });
         
-        if (session.mode === "payment" && session.payment_status === "paid") {
+        if (session.payment_status === "paid") {
           // Get customer email
           let customerEmail = session.customer_email;
+          let customerId = session.customer as string;
           
-          if (!customerEmail && session.customer) {
+          if (!customerEmail && customerId) {
             try {
-              const customer = await stripe.customers.retrieve(session.customer as string) as Stripe.Customer;
+              const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
               customerEmail = customer.email;
             } catch (err) {
-              logStep("ERROR: Failed to retrieve customer", { customerId: session.customer, error: err.message });
+              logStep("ERROR: Failed to retrieve customer", { customerId, error: err.message });
             }
           }
 
           if (customerEmail) {
-            logStep("Updating user to premium", { email: customerEmail });
+            const paymentType = session.metadata?.payment_type || 'lifetime';
+            logStep("Updating user to premium", { email: customerEmail, paymentType, mode: session.mode });
             
-            // Calculate subscription end date (30 days from now for one-time payment)
-            const subscriptionEnd = new Date();
-            subscriptionEnd.setDate(subscriptionEnd.getDate() + 30);
+            let updateData: any = {
+              is_premium: true,
+              subscription_tier: "Deluxe",
+              payment_type: paymentType,
+              stripe_customer_id: customerId,
+              updated_at: new Date().toISOString()
+            };
+
+            if (session.mode === "subscription") {
+              // Monthly subscription
+              const subscriptionId = session.subscription as string;
+              const subscriptionEnd = new Date();
+              subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
+              
+              updateData.stripe_subscription_id = subscriptionId;
+              updateData.subscription_end = subscriptionEnd.toISOString();
+              
+              logStep("Setting up monthly subscription", { 
+                subscriptionId, 
+                subscriptionEnd: subscriptionEnd.toISOString() 
+              });
+            } else {
+              // Lifetime (one-time payment) - no expiration
+              updateData.subscription_end = null;
+              updateData.stripe_subscription_id = null;
+              
+              logStep("Setting up lifetime access", { paymentType });
+            }
             
             const { error } = await supabaseClient
               .from('users')
-              .update({ 
-                is_premium: true,
-                subscription_tier: "Deluxe",
-                subscription_end: subscriptionEnd.toISOString(),
-                updated_at: new Date().toISOString()
-              })
+              .update(updateData)
               .eq('email', customerEmail);
 
             if (error) {
               logStep("ERROR: Failed to update user", { email: customerEmail, error });
-              // Still return 200 to acknowledge receipt of webhook
             } else {
-              logStep("Successfully updated user to premium", { email: customerEmail });
+              logStep("Successfully updated user to premium", { email: customerEmail, paymentType });
             }
           } else {
             logStep("WARNING: No customer email found", { sessionId: session.id });
           }
         } else {
-          logStep("Ignoring checkout session", { 
+          logStep("Ignoring checkout session - not paid", { 
             mode: session.mode, 
             paymentStatus: session.payment_status 
           });
@@ -125,35 +147,59 @@ serve(async (req) => {
       }
       
       case "invoice.payment_succeeded": {
-        // Handle subscription renewals
+        // Handle subscription renewals (monthly payments)
         const invoice = event.data.object as Stripe.Invoice;
-        logStep("Processing invoice payment", { invoiceId: invoice.id });
+        logStep("Processing invoice payment", { 
+          invoiceId: invoice.id, 
+          subscriptionId: invoice.subscription 
+        });
         
-        if (invoice.customer_email) {
-          // Update subscription end date for recurring payments
-          const subscriptionEnd = new Date();
-          subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
+        // Only process recurring subscription invoices
+        if (invoice.subscription && invoice.billing_reason === 'subscription_cycle') {
+          let customerEmail = invoice.customer_email;
           
-          const { error } = await supabaseClient
-            .from('users')
-            .update({ 
-              is_premium: true,
-              subscription_end: subscriptionEnd.toISOString(),
-              updated_at: new Date().toISOString()
-            })
-            .eq('email', invoice.customer_email);
-
-          if (error) {
-            logStep("ERROR: Failed to update subscription", { email: invoice.customer_email, error });
-          } else {
-            logStep("Successfully renewed subscription", { email: invoice.customer_email });
+          if (!customerEmail && invoice.customer) {
+            try {
+              const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer;
+              customerEmail = customer.email;
+            } catch (err) {
+              logStep("ERROR: Failed to retrieve customer for renewal", { error: err.message });
+            }
           }
+          
+          if (customerEmail) {
+            // Extend subscription by one month
+            const subscriptionEnd = new Date();
+            subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
+            
+            const { error } = await supabaseClient
+              .from('users')
+              .update({ 
+                is_premium: true,
+                subscription_end: subscriptionEnd.toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .eq('email', customerEmail);
+
+            if (error) {
+              logStep("ERROR: Failed to renew subscription", { email: customerEmail, error });
+            } else {
+              logStep("Successfully renewed monthly subscription", { 
+                email: customerEmail, 
+                newEndDate: subscriptionEnd.toISOString() 
+              });
+            }
+          }
+        } else {
+          logStep("Skipping invoice - not a subscription renewal", { 
+            billingReason: invoice.billing_reason 
+          });
         }
         break;
       }
       
       case "customer.subscription.deleted": {
-        // Handle subscription cancellations
+        // Handle subscription cancellations (monthly only)
         const subscription = event.data.object as Stripe.Subscription;
         logStep("Processing subscription cancellation", { subscriptionId: subscription.id });
         
@@ -167,14 +213,20 @@ serve(async (req) => {
                   is_premium: false,
                   subscription_tier: null,
                   subscription_end: null,
+                  stripe_subscription_id: null,
+                  payment_type: null,
                   updated_at: new Date().toISOString()
                 })
-                .eq('email', customer.email);
+                .eq('email', customer.email)
+                .eq('stripe_subscription_id', subscription.id); // Only cancel if IDs match
 
               if (error) {
                 logStep("ERROR: Failed to cancel subscription", { email: customer.email, error });
               } else {
-                logStep("Successfully cancelled subscription", { email: customer.email });
+                logStep("Successfully cancelled monthly subscription", { 
+                  email: customer.email,
+                  subscriptionId: subscription.id 
+                });
               }
             }
           } catch (err) {
