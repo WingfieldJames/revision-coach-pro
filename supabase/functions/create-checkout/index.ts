@@ -102,7 +102,7 @@ serve(async (req) => {
               name: "A* AI Deluxe Plan (Monthly)",
               description: "Premium AI-powered academic assistance - Monthly subscription"
             },
-            unit_amount: 999, // £9.99 in pence
+            unit_amount: 499, // £4.99 in pence
             recurring: {
               interval: 'month',
             },
