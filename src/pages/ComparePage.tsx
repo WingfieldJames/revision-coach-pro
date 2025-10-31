@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.png';
@@ -18,6 +19,7 @@ export const ComparePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
+  const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
 
   // Scroll to top when component mounts, or to testimonials if hash is present
   useEffect(() => {
@@ -77,7 +79,7 @@ export const ComparePage = () => {
 
     // LOGGED in (standard user) → Stripe checkout
     try {
-      console.log('Creating checkout session for standard user...');
+      console.log('Creating checkout session for standard user with payment type:', paymentType);
       
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
@@ -91,6 +93,9 @@ export const ComparePage = () => {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: {
           Authorization: `Bearer ${sessionData.session.access_token}`,
+        },
+        body: {
+          paymentType,
         },
       });
       
@@ -118,7 +123,7 @@ export const ComparePage = () => {
       <Header showNavLinks />
       
       <main className="py-8 px-8 max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3 flex-wrap">
+        <h1 className="text-4xl font-bold mb-8 flex items-center justify-center gap-3 flex-wrap">
           Choose Your 
           <img 
             src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
@@ -127,9 +132,32 @@ export const ComparePage = () => {
           />
           Plan
         </h1>
-        <p className="text-lg text-muted-foreground mb-12">
-          Unlock your full revision power. Go beyond free.
-        </p>
+
+        {/* Payment Type Toggle */}
+        <div className="flex justify-center mb-12">
+          <ToggleGroup 
+            type="single" 
+            value={paymentType} 
+            onValueChange={(value) => value && setPaymentType(value as 'monthly' | 'lifetime')}
+            className="bg-[#1a1f3a] p-1.5 rounded-full border-0"
+          >
+            <ToggleGroupItem 
+              value="monthly" 
+              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-white data-[state=off]:bg-transparent hover:bg-white/5 transition-all"
+            >
+              Monthly
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="lifetime" 
+              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-white data-[state=off]:bg-transparent hover:bg-white/5 transition-all relative"
+            >
+              Lifetime
+              <Badge className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] px-1.5 py-0.5 border-0">
+                Save 62%
+              </Badge>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-8 justify-center">
           {/* Free Plan */}
@@ -161,7 +189,17 @@ export const ComparePage = () => {
 
           {/* Deluxe Plan */}
           <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left border-2 border-primary">
-            <h2 className="text-2xl font-semibold mb-6">🔥 Deluxe Plan — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)</h2>
+            {paymentType === 'monthly' ? (
+              <>
+                <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — £9.99/month</h2>
+                <p className="text-sm text-muted-foreground mb-6">Cancel anytime • Active while subscription is active</p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)</h2>
+                <p className="text-sm text-muted-foreground mb-6">One-time payment • Lifetime access</p>
+              </>
+            )}
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -200,7 +238,10 @@ export const ComparePage = () => {
         </div>
         
         <p className="text-sm text-muted-foreground mt-6">
-          One-time payment • Lifetime access • Secure checkout via Stripe
+          {paymentType === 'monthly' 
+            ? 'Monthly billing • Cancel anytime • Secure checkout via Stripe'
+            : 'One-time payment • Lifetime access • Secure checkout via Stripe'
+          }
         </p>
       </main>
 
