@@ -93,7 +93,7 @@ export const HomePage = () => {
           </div>
 
           <div className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/tanuj-kakumani.png" alt="Tanuj Kakumani" className="w-full h-48 object-cover" />
+            <img src="/lovable-uploads/tanuj-kakumani.png" alt="Tanuj Kakumani" className="w-full h-48 object-contain bg-muted" />
             <div className="p-4 text-left">
               <strong className="text-card-foreground">Tanuj Kakumani</strong><br />
               <span className="text-sm text-muted-foreground">BSc EFDS, Imperial</span>
