@@ -188,7 +188,7 @@ export const ComparePage = () => {
           <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left border-2 border-primary">
             {paymentType === 'monthly' ? (
               <>
-                <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — <span className="line-through text-red-500">£9.99</span> £4.99/month</h2>
+                <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — <span className="line-through text-red-500">£9.99</span> £4.99 (Monthly Access)</h2>
                 <p className="text-sm text-muted-foreground mb-6">Cancel anytime • Active while subscription is active</p>
               </>
             ) : (
