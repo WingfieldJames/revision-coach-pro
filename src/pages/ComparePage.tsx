@@ -139,22 +139,19 @@ export const ComparePage = () => {
             type="single" 
             value={paymentType} 
             onValueChange={(value) => value && setPaymentType(value as 'monthly' | 'lifetime')}
-            className="bg-[#1a1f3a] p-1.5 rounded-full border-0"
+            className="border border-border p-1.5 rounded-full bg-transparent"
           >
             <ToggleGroupItem 
               value="monthly" 
-              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-white data-[state=off]:bg-transparent hover:bg-white/5 transition-all"
+              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
             >
               Monthly
             </ToggleGroupItem>
             <ToggleGroupItem 
               value="lifetime" 
-              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-white data-[state=off]:bg-transparent hover:bg-white/5 transition-all relative"
+              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
             >
               Lifetime
-              <Badge className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] px-1.5 py-0.5 border-0">
-                Save 62%
-              </Badge>
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
