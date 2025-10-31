@@ -151,7 +151,7 @@ export const ComparePage = () => {
               value="lifetime" 
               className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
             >
-              Lifetime
+              Lifetime (save 67% yearly)
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
