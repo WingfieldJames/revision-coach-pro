@@ -292,24 +292,6 @@ export const ComparePage = () => {
         </div>
       </section>
 
-      {/* Study Influencers Section */}
-      <section className="py-16 md:py-20 bg-background w-full">
-        <div className="px-8 max-w-4xl mx-auto">
-          <h2 className="text-3xl text-center mb-12">
-            Used by your favourite study influencers and top students
-          </h2>
-          <div className="flex justify-center">
-            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 max-w-md">
-              <img src="/lovable-uploads/tanuj-kakumani.png" alt="Tanuj Kakumani" className="w-16 h-16 rounded-full object-cover flex-shrink-0" />
-              <div>
-                <strong className="text-lg text-card-foreground">Tanuj Kakumani</strong>
-                <p className="text-muted-foreground text-sm mt-1">BSc EFDS, Imperial</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section id="testimonials" className="py-16 md:py-20 bg-muted w-full">
         <div className="px-8 max-w-4xl mx-auto">
           <h2 className="text-3xl text-center mb-12 flex items-center justify-center gap-2">
