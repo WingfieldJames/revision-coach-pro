@@ -30,14 +30,14 @@ export const HomePage = () => {
           // Mobile version - simple image without scroll animation
           <div className="pt-4">
             <div className="text-left max-w-5xl mx-auto px-6 pt-4">
-              <div className="bg-secondary text-foreground text-[11px] px-3 py-1.5 rounded-full inline-block mb-3 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              <div className="bg-secondary text-foreground text-sm px-3 py-1.5 rounded-full inline-block mb-4 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
                 ⭐ Loved by 50+ users with a 4.9 star rating
               </div>
-              <h1 className="text-2xl font-bold mb-2 flex flex-wrap items-center gap-2">
+              <h1 className="text-3xl font-bold mb-3 flex flex-wrap items-center gap-2">
                 Meet 
-                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-7" />
+                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-9" />
               </h1>
-              <h2 className="text-sm font-medium text-foreground mb-6">
+              <h2 className="text-lg font-medium text-foreground mb-6">
                 Your AI-powered coach for Edexcel Economics
               </h2>
             </div>
@@ -51,7 +51,7 @@ export const HomePage = () => {
             </div>
             
             <div className="text-center mb-8 px-6">
-              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+              <p className="text-base text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
                 Trained on past paper, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
               </p>
               
