@@ -40,6 +40,9 @@ export const HomePage = () => {
               <h2 className="text-lg font-medium text-foreground mb-6">
                 Your AI-powered coach for Edexcel Economics
               </h2>
+              <p className="text-base text-muted-foreground mb-6 max-w-md leading-relaxed">
+                Trained on past paper, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
+              </p>
             </div>
             
             <div className="px-6 mb-6">
@@ -51,9 +54,6 @@ export const HomePage = () => {
             </div>
             
             <div className="text-center mb-8 px-6">
-              <p className="text-base text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
-                Trained on past paper, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
-              </p>
               
               <InteractiveHoverButton 
                 text="Get started today →" 
