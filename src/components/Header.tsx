@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   const getSelectedTab = () => {
     if (location.pathname === '/dashboard') return 'profile';
     if (location.pathname === '/login') return 'profile';
-    if (location.pathname === '/compare') return 'testimonials';
+    if (location.pathname === '/compare') return 'pricing';
     return 'home';
   };
   
@@ -36,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const tabs: ITab[] = [
     { title: "Home", value: "home" },
-    { title: "Testimonials", value: "testimonials" },
+    { title: "Pricing", value: "pricing" },
     { title: "Profile", value: "profile" }
   ];
 
@@ -44,14 +44,9 @@ export const Header: React.FC<HeaderProps> = ({
     if (value === "home") {
       navigate('/');
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-    } else if (value === "testimonials") {
+    } else if (value === "pricing") {
       navigate('/compare');
-      setTimeout(() => {
-        const testimonialsSection = document.getElementById('testimonials');
-        if (testimonialsSection) {
-          testimonialsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 200);
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } else if (value === "profile") {
       if (user) {
         navigate('/dashboard');
