@@ -30,17 +30,17 @@ export const HomePage = () => {
           // Mobile version - simple image without scroll animation
           <div className="pt-4">
             <div className="text-left max-w-5xl mx-auto px-6 pt-4">
-              <div className="bg-secondary text-foreground text-sm px-3 py-1.5 rounded-full inline-block mb-4 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              <div className="bg-secondary text-foreground text-base px-3 py-1.5 rounded-full inline-block mb-4 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
                 ⭐ Loved by 50+ users with a 4.9 star rating
               </div>
-              <h1 className="text-4xl font-bold mb-3 flex flex-wrap items-center gap-2">
+              <h1 className="text-6xl font-bold mb-3 flex flex-wrap items-center gap-2">
                 Meet 
-                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-10" />
+                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-16" />
               </h1>
-              <h2 className="text-xl font-medium text-foreground mb-6">
-                Your AI-powered A-Level revision coach
+              <h2 className="text-4xl font-medium text-foreground mb-6 leading-tight">
+                Your AI-powered coach for Edexcel Economics
               </h2>
-              <p className="text-base text-muted-foreground mb-6 leading-relaxed">
+              <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
                 A* AI is the smartest way to revise for Edexcel Economics. Get real past paper questions, official mark schemes, live feedback and top-grade technique — all in one place.
               </p>
             </div>
