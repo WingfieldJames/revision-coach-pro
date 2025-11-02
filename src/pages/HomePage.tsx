@@ -42,15 +42,19 @@ export const HomePage = () => {
               </h2>
             </div>
             
-            <div className="px-6 mb-8">
+            <div className="px-6 mb-6">
               <img 
                 src="/lovable-uploads/hero-mobile-phone.png" 
                 alt="A* AI Demo" 
-                className="mx-auto rounded-2xl object-contain w-full max-w-[280px]" 
+                className="mx-auto rounded-2xl object-contain w-full max-w-[360px]" 
               />
             </div>
             
-            <div className="text-center mb-8 px-4">
+            <div className="text-center mb-8 px-6">
+              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                Trained on past paper, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
+              </p>
+              
               <InteractiveHoverButton 
                 text="Get started today →" 
                 variant="default"
