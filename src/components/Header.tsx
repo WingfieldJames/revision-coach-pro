@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
   const tabs: ITab[] = [
     { title: "Home", value: "home" },
     { title: "Pricing", value: "pricing" },
-    { title: "Profile", value: "profile" }
+    { title: "Launch", value: "profile" }
   ];
 
   const handleTabChange = (value: string) => {
