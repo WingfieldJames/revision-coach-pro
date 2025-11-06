@@ -56,7 +56,7 @@ export const HomePage = () => {
             <div className="text-center mb-8 px-6">
               
               <InteractiveHoverButton 
-                text="Launch" 
+                text="Get started today →" 
                 variant="default"
                 onClick={() => navigate('/compare')}
                 className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]"
@@ -92,7 +92,7 @@ export const HomePage = () => {
             
             <div className="text-center mb-8 -mt-12 md:-mt-20 relative z-50 px-4">
               <InteractiveHoverButton 
-                text="Launch" 
+                text="Get started today →" 
                 variant="default"
                 onClick={() => navigate('/compare')}
                 className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]"
@@ -298,7 +298,7 @@ export const HomePage = () => {
           
           <div className="text-center mt-8">
             <InteractiveHoverButton 
-              text="Launch" 
+              text="Get started today →" 
               variant="reverse"
               onClick={() => navigate('/compare')}
               className="pointer-events-auto text-base px-6 py-3 w-[220px]"

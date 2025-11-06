@@ -258,7 +258,7 @@ export const ComparePage = () => {
           <div className="flex-1 text-center">
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
             <InteractiveHoverButton 
-              text="Launch" 
+              text="Choose your plan →" 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border mt-8"
             />
