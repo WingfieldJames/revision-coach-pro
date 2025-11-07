@@ -50,8 +50,10 @@ export const Header: React.FC<HeaderProps> = ({
     } else if (value === "profile") {
       if (user) {
         navigate('/dashboard');
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
       } else {
         navigate('/login');
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
       }
     }
   };
