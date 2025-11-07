@@ -62,9 +62,9 @@ export const DashboardPage = () => {
     <div className="min-h-screen bg-background">
       <Header showNavLinks />
       
-      <div className="py-8 px-8 max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3">
+      <div className="py-6 px-8 max-w-4xl mx-auto">
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
             Welcome to <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-10" />
           </h1>
           <p className="text-lg text-muted-foreground">
@@ -72,7 +72,7 @@ export const DashboardPage = () => {
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 justify-center mb-8">
+        <div className="flex flex-col lg:flex-row gap-8 justify-center mb-6">
           {/* Free Plan */}
           <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left">
             <h2 className="text-2xl font-semibold mb-6">🎓 Free Plan - £0</h2>
