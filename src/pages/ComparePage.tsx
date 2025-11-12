@@ -144,8 +144,8 @@ export const ComparePage = () => {
             {/* Payment Type Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white hover:opacity-90 transition-all flex items-center gap-2">
-                  {paymentType === 'lifetime' ? 'Lifetime' : 'Monthly'}
+                <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
+                  {paymentType === 'lifetime' ? 'Lifetime (save 67% yearly)' : 'Monthly'}
                   <ChevronDown className="h-3 w-3" />
                 </button>
               </DropdownMenuTrigger>
@@ -160,7 +160,7 @@ export const ComparePage = () => {
                   onClick={() => setPaymentType('lifetime')}
                   className="cursor-pointer hover:bg-muted"
                 >
-                  Lifetime
+                  Lifetime (save 67% yearly)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
