@@ -136,36 +136,15 @@ export const ComparePage = () => {
           Plan
         </h1>
 
-        {/* Combined Toggle - All Options in One Line */}
+        {/* Combined Toggle - All Options in One Border */}
         <div className="flex justify-center mb-12">
-          <div className="flex flex-col sm:flex-row gap-3 items-center">
-            {/* Product Type Toggle */}
-            <ToggleGroup 
-              type="single" 
-              value={productType} 
-              onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa')}
-              className="border border-border p-1.5 rounded-full bg-transparent"
-            >
-              <ToggleGroupItem 
-                value="edexcel" 
-                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-              >
-                Edexcel
-              </ToggleGroupItem>
-              <ToggleGroupItem 
-                value="aqa" 
-                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-              >
-                AQA
-              </ToggleGroupItem>
-            </ToggleGroup>
-
+          <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
             {/* Payment Type Toggle */}
             <ToggleGroup 
               type="single" 
               value={paymentType} 
               onValueChange={(value) => value && setPaymentType(value as 'monthly' | 'lifetime')}
-              className="border border-border p-1.5 rounded-full bg-transparent"
+              className="flex items-center gap-1"
             >
               <ToggleGroupItem 
                 value="monthly" 
@@ -178,6 +157,27 @@ export const ComparePage = () => {
                 className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
               >
                 Lifetime
+              </ToggleGroupItem>
+            </ToggleGroup>
+
+            {/* Product Type Toggle */}
+            <ToggleGroup 
+              type="single" 
+              value={productType} 
+              onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa')}
+              className="flex items-center gap-1"
+            >
+              <ToggleGroupItem 
+                value="edexcel" 
+                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              >
+                Edexcel
+              </ToggleGroupItem>
+              <ToggleGroupItem 
+                value="aqa" 
+                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              >
+                AQA
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
