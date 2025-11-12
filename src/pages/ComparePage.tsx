@@ -19,8 +19,8 @@ export const ComparePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
-  const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [productType, setProductType] = useState<'edexcel' | 'aqa'>('edexcel');
+  const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
 
   // Scroll to top when component mounts, or to testimonials if hash is present
   useEffect(() => {
@@ -136,50 +136,51 @@ export const ComparePage = () => {
           Plan
         </h1>
 
-        {/* Product Type Toggle */}
-        <div className="flex justify-center mb-6">
-          <ToggleGroup 
-            type="single" 
-            value={productType} 
-            onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa')}
-            className="border border-border p-1.5 rounded-full bg-transparent"
-          >
-            <ToggleGroupItem 
-              value="edexcel" 
-              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-            >
-              Edexcel
-            </ToggleGroupItem>
-            <ToggleGroupItem 
-              value="aqa" 
-              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-            >
-              AQA
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-
-        {/* Payment Type Toggle */}
+        {/* Combined Toggle - All Options in One Line */}
         <div className="flex justify-center mb-12">
-          <ToggleGroup 
-            type="single" 
-            value={paymentType} 
-            onValueChange={(value) => value && setPaymentType(value as 'monthly' | 'lifetime')}
-            className="border border-border p-1.5 rounded-full bg-transparent"
-          >
-            <ToggleGroupItem 
-              value="monthly" 
-              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+          <div className="flex flex-col sm:flex-row gap-3 items-center">
+            {/* Product Type Toggle */}
+            <ToggleGroup 
+              type="single" 
+              value={productType} 
+              onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa')}
+              className="border border-border p-1.5 rounded-full bg-transparent"
             >
-              Monthly
-            </ToggleGroupItem>
-            <ToggleGroupItem 
-              value="lifetime" 
-              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              <ToggleGroupItem 
+                value="edexcel" 
+                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              >
+                Edexcel
+              </ToggleGroupItem>
+              <ToggleGroupItem 
+                value="aqa" 
+                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              >
+                AQA
+              </ToggleGroupItem>
+            </ToggleGroup>
+
+            {/* Payment Type Toggle */}
+            <ToggleGroup 
+              type="single" 
+              value={paymentType} 
+              onValueChange={(value) => value && setPaymentType(value as 'monthly' | 'lifetime')}
+              className="border border-border p-1.5 rounded-full bg-transparent"
             >
-              Lifetime (save 67% yearly)
-            </ToggleGroupItem>
-          </ToggleGroup>
+              <ToggleGroupItem 
+                value="monthly" 
+                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              >
+                Monthly
+              </ToggleGroupItem>
+              <ToggleGroupItem 
+                value="lifetime" 
+                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              >
+                Lifetime
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 justify-center">
