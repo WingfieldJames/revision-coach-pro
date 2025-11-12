@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.png';
@@ -136,29 +138,32 @@ export const ComparePage = () => {
           Plan
         </h1>
 
-        {/* Combined Toggle - All Options in One Border */}
+        {/* Combined Toggle - Payment Dropdown + Product Toggle */}
         <div className="flex justify-center mb-12">
           <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
-            {/* Payment Type Toggle */}
-            <ToggleGroup 
-              type="single" 
-              value={paymentType} 
-              onValueChange={(value) => value && setPaymentType(value as 'monthly' | 'lifetime')}
-              className="flex items-center gap-1"
-            >
-              <ToggleGroupItem 
-                value="monthly" 
-                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-              >
-                Monthly
-              </ToggleGroupItem>
-              <ToggleGroupItem 
-                value="lifetime" 
-                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-              >
-                Lifetime
-              </ToggleGroupItem>
-            </ToggleGroup>
+            {/* Payment Type Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white hover:opacity-90 transition-all flex items-center gap-2">
+                  {paymentType === 'lifetime' ? 'Lifetime' : 'Monthly'}
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-background border border-border z-50">
+                <DropdownMenuItem 
+                  onClick={() => setPaymentType('monthly')}
+                  className="cursor-pointer hover:bg-muted"
+                >
+                  Monthly
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setPaymentType('lifetime')}
+                  className="cursor-pointer hover:bg-muted"
+                >
+                  Lifetime
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Product Type Toggle */}
             <ToggleGroup 
