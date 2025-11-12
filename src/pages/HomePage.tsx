@@ -79,7 +79,7 @@ export const HomePage = () => {
                       <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-9 md:h-10 lg:h-12" />
                     </h1>
                     <h2 className="text-base md:text-xl lg:text-2xl font-medium text-foreground mb-6 md:mb-8">
-                      Your AI-powered coach for Edexcel Economics
+                      Your AI-powered coach for A-Level Economics
                     </h2>
                   </div>
                 </>}>
