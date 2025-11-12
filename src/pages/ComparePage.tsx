@@ -20,6 +20,7 @@ export const ComparePage = () => {
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
+  const [productType, setProductType] = useState<'edexcel' | 'aqa'>('edexcel');
 
   // Scroll to top when component mounts, or to testimonials if hash is present
   useEffect(() => {
@@ -132,6 +133,29 @@ export const ComparePage = () => {
           />
           Plan
         </h1>
+
+        {/* Product Type Toggle */}
+        <div className="flex justify-center mb-6">
+          <ToggleGroup 
+            type="single" 
+            value={productType} 
+            onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa')}
+            className="border border-border p-1.5 rounded-full bg-transparent"
+          >
+            <ToggleGroupItem 
+              value="edexcel" 
+              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+            >
+              Edexcel
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="aqa" 
+              className="rounded-full px-8 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+            >
+              AQA
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
 
         {/* Payment Type Toggle */}
         <div className="flex justify-center mb-12">
