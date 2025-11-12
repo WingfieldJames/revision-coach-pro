@@ -56,12 +56,14 @@ export const ComparePage = () => {
   const handleFreeClick = async () => {
     if (!user) {
       // NOT logged in → Login → Free version
-      window.location.href = '/login?redirect=free-version';
+      const redirectPath = productType === 'aqa' ? 'aqa-free-version' : 'free-version';
+      window.location.href = `/login?redirect=${redirectPath}`;
       return;
     }
     
     // LOGGED in (any user) → Free version
-    window.location.href = '/free-version';
+    const freePath = productType === 'aqa' ? '/aqa-free-version' : '/free-version';
+    window.location.href = freePath;
   };
 
   const handlePremiumClick = async () => {

@@ -10,6 +10,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { ContactPage } from "./pages/ContactPage";
 import { FreeVersionPage } from "./pages/FreeVersionPage";
+import { AQAFreeVersionPage } from "./pages/AQAFreeVersionPage";
 import { PremiumVersionPage } from "./pages/PremiumVersionPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import NotFound from "./pages/NotFound";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/free-version" element={<FreeVersionPage />} />
+            <Route path="/aqa-free-version" element={<AQAFreeVersionPage />} />
             <Route path="/premium" element={<PremiumVersionPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="*" element={<NotFound />} />
