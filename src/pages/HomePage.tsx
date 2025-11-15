@@ -31,7 +31,7 @@ export const HomePage = () => {
           <div className="pt-4">
             <div className="text-left max-w-5xl mx-auto px-6 pt-4">
               <div className="bg-secondary text-foreground text-base px-3 py-1.5 rounded-full inline-block mb-4 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
-                ⭐ Loved by 50+ users with a 4.9 star rating
+                ⭐ Loved by 100+ users with a 4.9 star rating
               </div>
               <h1 className="text-6xl font-bold mb-3 flex flex-wrap items-center gap-2">
                 Meet 
@@ -72,7 +72,7 @@ export const HomePage = () => {
             <ContainerScroll titleComponent={<>
                   <div className="text-left max-w-5xl mx-auto px-6 sm:px-8 pt-4 sm:pt-0">
                     <div className="bg-secondary text-foreground text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full inline-block mb-4 md:mb-6 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
-                      ⭐ Loved by 50+ users with a 4.9 star rating
+                      ⭐ Loved by 100+ users with a 4.9 star rating
                     </div>
                     <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
                       Meet 
