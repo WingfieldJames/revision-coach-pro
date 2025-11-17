@@ -162,7 +162,7 @@ export const LoginPage = () => {
                             required
                           />
                         </div>
-                        <Button type="submit" className="w-full" disabled={loading}>
+                        <Button type="submit" variant="brand" className="w-full" disabled={loading}>
                           {loading ? "Sending..." : "Send Reset Link"}
                         </Button>
                       </form>
