@@ -13,6 +13,7 @@ import { FreeVersionPage } from "./pages/FreeVersionPage";
 import { AQAFreeVersionPage } from "./pages/AQAFreeVersionPage";
 import { PremiumVersionPage } from "./pages/PremiumVersionPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/aqa-free-version" element={<AQAFreeVersionPage />} />
             <Route path="/premium" element={<PremiumVersionPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
