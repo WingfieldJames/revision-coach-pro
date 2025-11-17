@@ -111,6 +111,7 @@ export const ResetPasswordPage = () => {
 
               <Button 
                 type="submit" 
+                variant="brand"
                 className="w-full"
                 disabled={loading}
               >
