@@ -93,36 +93,68 @@ serve(async (req) => {
 
           if (customerEmail) {
             const paymentType = session.metadata?.payment_type || 'lifetime';
-            logStep("Updating user to premium", { email: customerEmail, paymentType, mode: session.mode });
+            const productId = session.metadata?.product_id;
+            const userId = session.metadata?.user_id;
             
-            let updateData: any = {
+            logStep("Processing payment", { 
+              email: customerEmail, 
+              paymentType, 
+              mode: session.mode,
+              productId,
+              userId 
+            });
+            
+            let subscriptionEnd = null;
+            let stripeSubscriptionId = null;
+            
+            if (session.mode === "subscription") {
+              // Monthly subscription
+              stripeSubscriptionId = session.subscription as string;
+              const endDate = new Date();
+              endDate.setMonth(endDate.getMonth() + 1);
+              subscriptionEnd = endDate.toISOString();
+              
+              logStep("Setting up monthly subscription", { 
+                subscriptionId: stripeSubscriptionId, 
+                subscriptionEnd 
+              });
+            } else {
+              // Lifetime (one-time payment) - no expiration
+              logStep("Setting up lifetime access", { paymentType });
+            }
+            
+            // Create entry in new user_subscriptions table
+            if (productId && userId) {
+              const { error: subError } = await supabaseClient
+                .from('user_subscriptions')
+                .insert({
+                  user_id: userId,
+                  product_id: productId,
+                  tier: 'deluxe',
+                  payment_type: paymentType,
+                  stripe_subscription_id: stripeSubscriptionId,
+                  stripe_customer_id: customerId,
+                  subscription_end: subscriptionEnd,
+                  active: true
+                });
+                
+              if (subError) {
+                logStep("ERROR: Failed to create subscription", { userId, productId, error: subError });
+              } else {
+                logStep("Successfully created subscription", { userId, productId, paymentType });
+              }
+            }
+            
+            // Also update legacy users table for backward compatibility
+            const updateData: any = {
               is_premium: true,
               subscription_tier: "Deluxe",
               payment_type: paymentType,
               stripe_customer_id: customerId,
+              stripe_subscription_id: stripeSubscriptionId,
+              subscription_end: subscriptionEnd,
               updated_at: new Date().toISOString()
             };
-
-            if (session.mode === "subscription") {
-              // Monthly subscription
-              const subscriptionId = session.subscription as string;
-              const subscriptionEnd = new Date();
-              subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
-              
-              updateData.stripe_subscription_id = subscriptionId;
-              updateData.subscription_end = subscriptionEnd.toISOString();
-              
-              logStep("Setting up monthly subscription", { 
-                subscriptionId, 
-                subscriptionEnd: subscriptionEnd.toISOString() 
-              });
-            } else {
-              // Lifetime (one-time payment) - no expiration
-              updateData.subscription_end = null;
-              updateData.stripe_subscription_id = null;
-              
-              logStep("Setting up lifetime access", { paymentType });
-            }
             
             const { error } = await supabaseClient
               .from('users')

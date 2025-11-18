@@ -1,32 +1,42 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { checkProductAccess } from '@/lib/productAccess';
 
 export const PremiumVersionPage = () => {
-  const { user, profile, loading } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [checkingAccess, setCheckingAccess] = useState(true);
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        navigate('/login?redirect=premium');
-        return;
+    const verifyAccess = async () => {
+      if (!loading) {
+        if (!user) {
+          navigate('/login?redirect=premium');
+          return;
+        }
+        
+        const { hasAccess } = await checkProductAccess(user.id, 'edexcel-economics');
+        
+        if (!hasAccess) {
+          navigate('/compare');
+          return;
+        }
+        
+        setCheckingAccess(false);
       }
-      
-      if (!profile?.is_premium) {
-        navigate('/compare');
-        return;
-      }
-    }
-  }, [user, profile, loading, navigate]);
+    };
+    
+    verifyAccess();
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
   }, []);
 
-  if (loading) {
+  if (loading || checkingAccess) {
     return (
       <div className="h-screen w-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -37,7 +47,7 @@ export const PremiumVersionPage = () => {
     );
   }
 
-  if (!user || !profile?.is_premium) {
+  if (!user) {
     return (
       <div className="h-screen w-screen bg-background flex items-center justify-center">
         <div className="text-center">
