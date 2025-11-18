@@ -45,9 +45,44 @@ serve(async (req) => {
 
     console.log("User authenticated:", user.email);
 
-    // Get payment type from request body
-    const { paymentType = 'lifetime' } = await req.json().catch(() => ({ paymentType: 'lifetime' }));
+    // Get payment type and product ID from request body
+    const { paymentType = 'lifetime', productId } = await req.json().catch(() => ({ paymentType: 'lifetime' }));
     console.log("Payment type:", paymentType);
+    console.log("Product ID:", productId);
+
+    // Get product details from database
+    let product = null;
+    let productName = "A* AI Deluxe Plan";
+    
+    if (productId) {
+      console.log("Fetching product details");
+      const { data: productData, error: productError } = await supabaseClient
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+      
+      if (productError) {
+        console.error("Error fetching product:", productError);
+      } else {
+        product = productData;
+        productName = productData.name;
+        console.log("Product found:", productName);
+      }
+    } else {
+      console.log("No product ID provided, using default Edexcel Economics");
+      // Default to Edexcel Economics for backward compatibility
+      const { data: productData } = await supabaseClient
+        .from('products')
+        .select('*')
+        .eq('slug', 'edexcel-economics')
+        .single();
+      
+      if (productData) {
+        product = productData;
+        productName = productData.name;
+      }
+    }
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
@@ -88,6 +123,7 @@ serve(async (req) => {
       metadata: {
         user_id: user.id,
         payment_type: paymentType,
+        product_id: product?.id || '',
       },
     };
 
@@ -99,10 +135,10 @@ serve(async (req) => {
           price_data: {
             currency: "gbp",
             product_data: { 
-              name: "A* AI Deluxe Plan (Monthly)",
+              name: `${productName} (Monthly)`,
               description: "Premium AI-powered academic assistance - Monthly subscription"
             },
-            unit_amount: 499, // £4.99 in pence
+            unit_amount: product?.monthly_price || 499,
             recurring: {
               interval: 'month',
             },

@@ -14,6 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
+      products: {
+        Row: {
+          active: boolean | null
+          chatbase_free_url: string | null
+          chatbase_premium_url: string | null
+          created_at: string | null
+          exam_board: string
+          id: string
+          lifetime_price: number
+          monthly_price: number
+          name: string
+          slug: string
+          stripe_lifetime_price_id: string | null
+          stripe_monthly_price_id: string | null
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          chatbase_free_url?: string | null
+          chatbase_premium_url?: string | null
+          created_at?: string | null
+          exam_board: string
+          id?: string
+          lifetime_price: number
+          monthly_price: number
+          name: string
+          slug: string
+          stripe_lifetime_price_id?: string | null
+          stripe_monthly_price_id?: string | null
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          chatbase_free_url?: string | null
+          chatbase_premium_url?: string | null
+          created_at?: string | null
+          exam_board?: string
+          id?: string
+          lifetime_price?: number
+          monthly_price?: number
+          name?: string
+          slug?: string
+          stripe_lifetime_price_id?: string | null
+          stripe_monthly_price_id?: string | null
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          active: boolean | null
+          cancelled_at: string | null
+          created_at: string | null
+          id: string
+          migrated_from_users_table: boolean | null
+          payment_type: string | null
+          product_id: string
+          started_at: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_end: string | null
+          tier: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          id?: string
+          migrated_from_users_table?: boolean | null
+          payment_type?: string | null
+          product_id: string
+          started_at?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_end?: string | null
+          tier: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          id?: string
+          migrated_from_users_table?: boolean | null
+          payment_type?: string | null
+          product_id?: string
+          started_at?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_end?: string | null
+          tier?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string
