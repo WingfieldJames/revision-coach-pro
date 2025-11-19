@@ -36,15 +36,27 @@ export const ComparePage = () => {
   // Check product access when user or productType changes
   useEffect(() => {
     const checkAccess = async () => {
+      console.log('Checking access for user:', user?.id, 'productType:', productType);
+      
       if (!user || loading) {
+        console.log('No user or still loading, setting hasAccess to false');
         setHasProductAccess(false);
         return;
       }
 
       setCheckingAccess(true);
       const productSlug = productType === 'aqa' ? 'aqa-economics' : 'edexcel-economics';
-      const { hasAccess } = await checkProductAccess(user.id, productSlug);
-      setHasProductAccess(hasAccess);
+      console.log('Checking access for product slug:', productSlug);
+      
+      try {
+        const { hasAccess } = await checkProductAccess(user.id, productSlug);
+        console.log('Access check result:', hasAccess);
+        setHasProductAccess(hasAccess);
+      } catch (error) {
+        console.error('Error checking product access:', error);
+        setHasProductAccess(false);
+      }
+      
       setCheckingAccess(false);
     };
 
@@ -96,8 +108,11 @@ export const ComparePage = () => {
   };
 
   const handlePremiumClick = async () => {
+    console.log('Button clicked! User:', user ? 'logged in' : 'not logged in', 'hasProductAccess:', hasProductAccess);
+    
     if (!user) {
       // NOT logged in → Login → Stripe
+      console.log('Redirecting to login');
       window.location.href = '/login?redirect=stripe';
       return;
     }
@@ -105,12 +120,14 @@ export const ComparePage = () => {
     // Check if user has access to current product
     if (hasProductAccess) {
       // User has access → redirect to premium page
+      console.log('User has access, redirecting to premium page');
       const premiumPath = productType === 'aqa' ? '/aqa-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
 
     // User doesn't have access → Stripe checkout
+    console.log('User does not have access, starting checkout');
     try {
       console.log('Creating checkout session with payment type:', paymentType, 'for product:', productType);
       
@@ -124,6 +141,7 @@ export const ComparePage = () => {
       }
 
       const productId = PRODUCT_IDS[productType];
+      console.log('Using product ID:', productId);
 
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: {
