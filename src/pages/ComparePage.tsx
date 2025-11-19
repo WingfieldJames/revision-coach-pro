@@ -267,26 +267,53 @@ export const ComparePage = () => {
             </div>
           )}
 
-          {/* Deluxe Plan - AQA Coming Soon */}
+          {/* Deluxe Plan - AQA */}
           {productType === 'aqa' && (
             <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left border-2 border-primary">
-              <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan</h2>
-              <p className="text-sm text-muted-foreground mb-6">AQA Edition</p>
-              <div className="flex items-center justify-center min-h-[200px]">
-                <div className="text-center">
-                  <p className="text-3xl font-bold mb-4">Coming Soon</p>
-                  <p className="text-muted-foreground">
-                    We're working on bringing the full Deluxe experience to AQA students
-                  </p>
-                </div>
-              </div>
+              {paymentType === 'monthly' ? (
+                <>
+                  <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — <span className="line-through text-red-500">£9.99</span> £4.99 (Monthly Access)</h2>
+                  <p className="text-sm text-muted-foreground mb-6">Cancel anytime • Active while subscription is active</p>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)</h2>
+                  <p className="text-sm text-muted-foreground mb-6">One-time payment • Lifetime access</p>
+                </>
+              )}
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start">
+                  <span className="text-green-500 font-bold mr-2">✓</span>
+                  AI trained on all AQA Economics A-Level past papers (2017–2023)
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-500 font-bold mr-2">✓</span>
+                  Official examiner mark schemes built-in
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-500 font-bold mr-2">✓</span>
+                  Trained on full exam technique + essay structures
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-500 font-bold mr-2">✓</span>
+                  Covers the entire AQA specification
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-500 font-bold mr-2">✓</span>
+                  Step-by-step diagram guidance (AD/AS → buffer stocks)
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-500 font-bold mr-2">✓</span>
+                  Application bank + model essay examples
+                </li>
+              </ul>
               <Button 
                 variant="brand" 
                 size="lg" 
                 className="w-full"
-                disabled
+                onClick={handlePremiumClick}
               >
-                Coming Soon
+                Unlock Deluxe
               </Button>
             </div>
           )}
