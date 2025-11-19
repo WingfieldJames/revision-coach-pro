@@ -21,17 +21,10 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
+    const { data } = await supabaseClient.auth.getUser(token);
+    const user = data.user;
     
-    // Decode JWT directly instead of validating with Supabase
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const decodedString = atob(base64);
-    const payload = JSON.parse(decodedString);
-
-    const userEmail = payload.email || payload.user_metadata?.email;
-    const userId = payload.sub;
-    
-    if (!userEmail || !userId) {
+    if (!user?.email) {
       throw new Error("User not authenticated");
     }
 
@@ -40,7 +33,7 @@ serve(async (req) => {
     const { data: userData, error } = await supabaseClient
       .from('users')
       .select('is_premium, subscription_tier, subscription_end')
-      .eq('id', userId)
+      .eq('id', user.id)
       .single();
 
     if (error && error.code !== 'PGRST116') {
@@ -54,8 +47,8 @@ serve(async (req) => {
         .from('users')
         .insert([
           {
-            id: userId,
-            email: userEmail,
+            id: user.id,
+            email: user.email,
             is_premium: false
           }
         ])
