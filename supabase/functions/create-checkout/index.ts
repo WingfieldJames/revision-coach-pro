@@ -18,22 +18,30 @@ serve(async (req) => {
     console.log("Initializing Supabase client");
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        global: {
+          headers: {
+            Authorization: req.headers.get("Authorization") ?? "",
+          },
+        },
+        auth: { persistSession: false },
+      }
     );
 
-    console.log("Getting user from auth token");
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      console.error("No authorization header found");
-      throw new Error("Authorization header missing");
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    console.log("Getting user from auth context");
+    const { data, error: authError } = await supabaseClient.auth.getUser();
+    const user = data?.user;
 
     if (authError || !user?.email) {
-      console.error("Auth error:", authError);
-      throw new Error("User not authenticated");
+      console.log("User not authenticated in create-checkout", authError || null);
+      return new Response(
+        JSON.stringify({ error: "not_authenticated" }),
+        { 
+          headers: { ...corsHeaders, "Content-Type": "application/json" }, 
+          status: 401 
+        }
+      );
     }
 
     console.log("User authenticated:", user.email);
@@ -87,27 +95,20 @@ serve(async (req) => {
     console.log("Stripe key type:", keyType);
     console.log("Stripe key prefix:", stripeKey.substring(0, 12) + "...");
 
-    console.log("Initializing Stripe");
+    console.log("Initializing Stripe with Fetch HTTP client");
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2023-10-16",
+      httpClient: Stripe.createFetchHttpClient(),
     });
 
-    console.log("Checking for existing customer:", user.email);
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      console.log("Found existing customer:", customerId);
-    } else {
-      console.log("No existing customer found, will create new one");
-    }
+    // Simplified: Let Stripe handle customer creation per session
+    console.log("Using customer_email for checkout:", user.email);
 
     console.log("Creating checkout session for payment type:", paymentType);
     
     // Configure session based on payment type
     let sessionConfig: any = {
-      customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: user.email,
       payment_method_types: ['card'],
       allow_promotion_codes: true,
       success_url: `${req.headers.get("origin")}/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
