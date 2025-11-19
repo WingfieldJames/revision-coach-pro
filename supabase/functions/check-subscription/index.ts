@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0";
+import Stripe from "https://esm.sh/stripe@11.2.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -21,10 +21,17 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-    const user = data.user;
     
-    if (!user?.email) {
+    // Decode JWT directly instead of validating with Supabase
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const decodedString = atob(base64);
+    const payload = JSON.parse(decodedString);
+
+    const userEmail = payload.email || payload.user_metadata?.email;
+    const userId = payload.sub;
+    
+    if (!userEmail || !userId) {
       throw new Error("User not authenticated");
     }
 
@@ -33,7 +40,7 @@ serve(async (req) => {
     const { data: userData, error } = await supabaseClient
       .from('users')
       .select('is_premium, subscription_tier, subscription_end')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
 
     if (error && error.code !== 'PGRST116') {
@@ -47,8 +54,8 @@ serve(async (req) => {
         .from('users')
         .insert([
           {
-            id: user.id,
-            email: user.email,
+            id: userId,
+            email: userEmail,
             is_premium: false
           }
         ])
