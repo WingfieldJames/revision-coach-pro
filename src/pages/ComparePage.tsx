@@ -155,7 +155,16 @@ export const ComparePage = () => {
       
       if (error) {
         console.error('Checkout error:', error);
-        alert(`Failed to create checkout session: ${error.message || error}`);
+        const msg = (error as any).message || String(error);
+        
+        // Check if it's an authentication error
+        if (msg.includes('not_authenticated') || msg.includes('401')) {
+          alert('Your session has expired. Please log in again to continue.');
+          window.location.href = '/login?redirect=stripe';
+          return;
+        }
+        
+        alert(`Failed to create checkout session: ${msg}`);
         return;
       }
 

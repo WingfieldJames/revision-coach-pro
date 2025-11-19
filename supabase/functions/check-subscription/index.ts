@@ -16,27 +16,20 @@ serve(async (req) => {
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
+      {
+        global: {
+          headers: {
+            Authorization: req.headers.get("Authorization") ?? "",
+          },
+        },
+        auth: { persistSession: false },
+      }
     );
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      console.log("No Authorization header, returning default free subscription status");
-      return new Response(JSON.stringify({ 
-        is_premium: false,
-        subscription_tier: null,
-        subscription_end: null 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
+    const { data, error: authError } = await supabaseClient.auth.getUser();
+    const user = data?.user;
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-    const user = data.user;
-    
-    if (!user?.email) {
+    if (authError || !user?.email) {
       console.log("Auth token invalid or no user, returning default free subscription status");
       return new Response(JSON.stringify({ 
         is_premium: false,
