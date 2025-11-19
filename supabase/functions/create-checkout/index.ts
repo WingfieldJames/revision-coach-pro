@@ -29,23 +29,23 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    console.log("Getting user with token");
-    
-    const { data, error: authError } = await supabaseClient.auth.getUser(token);
-    if (authError) {
-      console.error("Auth error:", authError);
-      throw new Error(`Authentication failed: ${authError.message}`);
-    }
-    
-    const user = data.user;
-    if (!user?.email) {
-      console.error("No user or email found");
+    console.log("Decoding JWT to get user info from token");
+
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const decodedString = atob(base64);
+    const payload = JSON.parse(decodedString);
+
+    const userEmail: string | undefined = payload.email || payload.user_metadata?.email;
+    const userId: string | undefined = payload.sub;
+
+    if (!userEmail || !userId) {
+      console.error("No user email or ID found in token");
       throw new Error("User not authenticated or email missing");
     }
 
-    console.log("User authenticated:", user.email);
+    console.log("User authenticated:", userEmail);
 
-    // Get payment type and product ID from request body
     const { paymentType = 'lifetime', productId } = await req.json().catch(() => ({ paymentType: 'lifetime' }));
     console.log("Payment type:", paymentType);
     console.log("Product ID:", productId);
@@ -100,8 +100,8 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    console.log("Checking for existing customer:", user.email);
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    console.log("Checking for existing customer:", userEmail);
+    const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
@@ -115,13 +115,13 @@ serve(async (req) => {
     // Configure session based on payment type
     let sessionConfig: any = {
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : userEmail,
       payment_method_types: ['card'],
       allow_promotion_codes: true,
       success_url: `${req.headers.get("origin")}/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/compare`,
       metadata: {
-        user_id: user.id,
+        user_id: userId,
         payment_type: paymentType,
         product_id: product?.id || '',
       },
