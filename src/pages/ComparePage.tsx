@@ -12,6 +12,7 @@ import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.p
 import amiraImage from '@/assets/amira-lse.jpg';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { checkProductAccess } from '@/lib/productAccess';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, Star, Instagram } from 'lucide-react';
@@ -23,6 +24,32 @@ export const ComparePage = () => {
   const shouldCheckout = searchParams.get('checkout') === 'true';
   const [productType, setProductType] = useState<'edexcel' | 'aqa'>('edexcel');
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
+  const [hasProductAccess, setHasProductAccess] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(false);
+
+  // Product IDs
+  const PRODUCT_IDS = {
+    edexcel: '6dc19d53-8a88-4741-9528-f25af97afb21',
+    aqa: '17ade690-8c44-4961-83b5-0edf42a9faea'
+  };
+
+  // Check product access when user or productType changes
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!user || loading) {
+        setHasProductAccess(false);
+        return;
+      }
+
+      setCheckingAccess(true);
+      const productSlug = productType === 'aqa' ? 'aqa-economics' : 'edexcel-economics';
+      const { hasAccess } = await checkProductAccess(user.id, productSlug);
+      setHasProductAccess(hasAccess);
+      setCheckingAccess(false);
+    };
+
+    checkAccess();
+  }, [user, productType, loading]);
 
   // Scroll to top when component mounts, or to testimonials if hash is present
   useEffect(() => {
@@ -75,16 +102,17 @@ export const ComparePage = () => {
       return;
     }
 
-    // Check if user is already premium
-    if (profile?.is_premium) {
-      // LOGGED in (paying user) → Profile dashboard
-      window.location.href = '/dashboard';
+    // Check if user has access to current product
+    if (hasProductAccess) {
+      // User has access → redirect to premium page
+      const premiumPath = productType === 'aqa' ? '/aqa-premium' : '/premium';
+      window.location.href = premiumPath;
       return;
     }
 
-    // LOGGED in (standard user) → Stripe checkout
+    // User doesn't have access → Stripe checkout
     try {
-      console.log('Creating checkout session for standard user with payment type:', paymentType);
+      console.log('Creating checkout session with payment type:', paymentType, 'for product:', productType);
       
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
@@ -95,12 +123,15 @@ export const ComparePage = () => {
         return;
       }
 
+      const productId = PRODUCT_IDS[productType];
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: {
           Authorization: `Bearer ${sessionData.session.access_token}`,
         },
         body: {
           paymentType,
+          productId,
         },
       });
       
@@ -262,7 +293,7 @@ export const ComparePage = () => {
                 className="w-full"
                 onClick={handlePremiumClick}
               >
-                Unlock Deluxe
+                {hasProductAccess ? 'Launch Deluxe' : 'Unlock Deluxe'}
               </Button>
             </div>
           )}
@@ -313,7 +344,7 @@ export const ComparePage = () => {
                 className="w-full"
                 onClick={handlePremiumClick}
               >
-                Unlock Deluxe
+                {hasProductAccess ? 'Launch Deluxe' : 'Unlock Deluxe'}
               </Button>
             </div>
           )}

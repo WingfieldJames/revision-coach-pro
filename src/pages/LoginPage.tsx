@@ -47,10 +47,16 @@ export const LoginPage = () => {
         navigate('/compare?checkout=true');
       } else if (redirect === 'premium') {
         // User wanted premium version, check if they have access
-        navigate('/premium-version');
+        navigate('/premium');
+      } else if (redirect === 'aqa-premium') {
+        // User wanted AQA premium version
+        navigate('/aqa-premium');
       } else if (redirect === 'free-version') {
         // User wanted free version, redirect to free chatbot
         navigate('/free-version');
+      } else if (redirect === 'aqa-free-version') {
+        // User wanted AQA free version
+        navigate('/aqa-free-version');
       } else {
         // Default redirect to dashboard
         navigate('/dashboard');
