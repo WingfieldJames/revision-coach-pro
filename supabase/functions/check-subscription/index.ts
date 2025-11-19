@@ -19,13 +19,33 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.log("No Authorization header, returning default free subscription status");
+      return new Response(JSON.stringify({ 
+        is_premium: false,
+        subscription_tier: null,
+        subscription_end: null 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
     
     if (!user?.email) {
-      throw new Error("User not authenticated");
+      console.log("Auth token invalid or no user, returning default free subscription status");
+      return new Response(JSON.stringify({ 
+        is_premium: false,
+        subscription_tier: null,
+        subscription_end: null 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
     // For now, we'll just check the database and return the current status
