@@ -1,4 +1,3 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/Header';
 import { Link } from 'react-router-dom';
 import { Mail, Instagram } from 'lucide-react';
@@ -8,32 +7,32 @@ export const ContactPage = () => {
     <div className="min-h-screen bg-background">
       <Header showNavLinks />
       
-      <div className="flex items-center justify-center py-12 px-4">
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold bg-gradient-brand bg-clip-text text-transparent">
-              Get in Touch
-            </CardTitle>
-            <CardDescription className="text-lg">
-              Have questions about A* AI? We'd love to hear from you.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center py-12 space-y-6">
+      {/* Contact Section */}
+      <section className="py-16 px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <span className="bg-gradient-brand bg-clip-text text-transparent">Get in Touch</span>
+          </h1>
+          <p className="text-lg text-muted-foreground mb-12">
+            Have questions about A* AI? We'd love to hear from you.
+          </p>
+          
+          <div className="bg-muted rounded-xl p-12 flex flex-col items-center space-y-6">
             <Mail className="w-16 h-16 text-primary" />
-            <div className="text-center space-y-2">
-              <p className="text-muted-foreground">
+            <div className="text-center space-y-3">
+              <p className="text-muted-foreground text-lg">
                 Send us an email at:
               </p>
               <a 
                 href="mailto:astarai.official@gmail.com"
-                className="text-2xl font-semibold bg-gradient-brand bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+                className="text-2xl md:text-3xl font-semibold bg-gradient-brand bg-clip-text text-transparent hover:opacity-80 transition-opacity block"
               >
                 astarai.official@gmail.com
               </a>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="bg-muted py-16 px-8 text-center">
