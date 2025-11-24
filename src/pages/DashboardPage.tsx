@@ -74,15 +74,6 @@ export const DashboardPage = () => {
       <Header showNavLinks />
       
       <div className="py-6 px-8 max-w-4xl mx-auto">
-        <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
-            Welcome to <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-10" />
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Your AI-powered revision dashboard
-          </p>
-        </div>
-
         {/* Product Type Toggle */}
         <div className="flex justify-center mb-8">
           <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
