@@ -274,7 +274,7 @@ export const ComparePage = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on the 2024-2023 {productType === 'edexcel' ? 'Edexcel' : 'AQA'} Economics A past papers (P1–P3)
+                AI trained on the 2024-2023 {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA Economics'} past papers (P1–P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
