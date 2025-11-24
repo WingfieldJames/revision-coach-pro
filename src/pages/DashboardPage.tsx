@@ -12,7 +12,16 @@ import { Trash2, ExternalLink, Instagram } from 'lucide-react';
 export const DashboardPage = () => {
   const { user, profile, refreshProfile } = useAuth();
   const [searchParams] = useSearchParams();
-  const [productType, setProductType] = useState<'edexcel' | 'aqa'>('edexcel');
+  const [productType, setProductType] = useState<'edexcel' | 'aqa'>(() => {
+    // Load saved preference from localStorage
+    const saved = localStorage.getItem('preferred-exam-board');
+    return (saved === 'aqa' || saved === 'edexcel') ? saved : 'edexcel';
+  });
+
+  // Save preference whenever it changes
+  useEffect(() => {
+    localStorage.setItem('preferred-exam-board', productType);
+  }, [productType]);
 
   // Check for payment success and verify with Stripe
   useEffect(() => {
