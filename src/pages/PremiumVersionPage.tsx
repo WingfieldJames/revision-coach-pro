@@ -3,12 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { checkProductAccess } from '@/lib/productAccess';
 
 export const PremiumVersionPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [productType, setProductType] = useState<'edexcel' | 'aqa'>('edexcel');
 
   useEffect(() => {
     const verifyAccess = async () => {
@@ -63,15 +65,45 @@ export const PremiumVersionPage = () => {
     );
   }
 
+  const iframeSrc = productType === 'edexcel' 
+    ? "https://www.chatbase.co/chatbot-iframe/1l2aTsS1zKI3FgVTquzOu"
+    : "https://www.chatbase.co/chatbot-iframe/kkZTJB7EYleMIFmsFEEJ0";
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="relative z-10">
         <Header showNavLinks />
       </div>
       
+      {/* Product Type Toggle */}
+      <div className="flex justify-center py-6 px-4">
+        <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
+          <ToggleGroup 
+            type="single" 
+            value={productType} 
+            onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa')}
+            className="flex items-center gap-1"
+          >
+            <ToggleGroupItem 
+              value="edexcel" 
+              className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+            >
+              Edexcel
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="aqa" 
+              className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+            >
+              AQA
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+      </div>
+      
       <div className="flex-1 relative">
         <iframe
-          src="https://www.chatbase.co/chatbot-iframe/1l2aTsS1zKI3FgVTquzOu"
+          key={productType}
+          src={iframeSrc}
           width="100%"
           style={{ height: '100%', minHeight: '700px' }}
           frameBorder="0"
