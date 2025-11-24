@@ -215,6 +215,9 @@ export const ComparePage = () => {
                   Maths (coming soon)
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-default opacity-50">
+                  Computer Science (coming soon)
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-default opacity-50">
                   Chemistry (coming soon)
                 </DropdownMenuItem>
               </DropdownMenuContent>
