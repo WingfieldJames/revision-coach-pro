@@ -363,7 +363,7 @@ export const ComparePage = () => {
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
                   <span className="text-green-500 font-bold mr-2">✓</span>
-                  AI trained on all AQA Economics A-Level past papers (2017–2023)
+                  AI trained on all AQA past papers (2017–2023)
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-500 font-bold mr-2">✓</span>
