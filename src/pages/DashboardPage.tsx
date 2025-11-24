@@ -7,7 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 // import logo from '@/assets/logo.png';
 import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Trash2, ExternalLink, Instagram } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Trash2, ExternalLink, Instagram, ChevronDown } from 'lucide-react';
 
 export const DashboardPage = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -77,6 +78,22 @@ export const DashboardPage = () => {
         {/* Product Type Toggle */}
         <div className="flex justify-center mb-8">
           <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
+            {/* Subject Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
+                  Economics
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-background border border-border z-50">
+                <DropdownMenuItem className="cursor-pointer hover:bg-muted">
+                  Economics
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Exam Board Toggle */}
             <ToggleGroup 
               type="single" 
               value={productType} 
