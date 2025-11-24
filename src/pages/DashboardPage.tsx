@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,11 +6,13 @@ import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 // import logo from '@/assets/logo.png';
 import { Badge } from '@/components/ui/badge';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Trash2, ExternalLink, Instagram } from 'lucide-react';
 
 export const DashboardPage = () => {
   const { user, profile, refreshProfile } = useAuth();
   const [searchParams] = useSearchParams();
+  const [productType, setProductType] = useState<'edexcel' | 'aqa'>('edexcel');
 
   // Check for payment success and verify with Stripe
   useEffect(() => {
@@ -72,6 +74,31 @@ export const DashboardPage = () => {
           </p>
         </div>
 
+        {/* Product Type Toggle */}
+        <div className="flex justify-center mb-8">
+          <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
+            <ToggleGroup 
+              type="single" 
+              value={productType} 
+              onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa')}
+              className="flex items-center gap-1"
+            >
+              <ToggleGroupItem 
+                value="edexcel" 
+                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              >
+                Edexcel
+              </ToggleGroupItem>
+              <ToggleGroupItem 
+                value="aqa" 
+                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              >
+                AQA
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8 justify-center mb-6">
           {/* Free Plan */}
           <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left">
@@ -96,14 +123,14 @@ export const DashboardPage = () => {
               className="w-full"
               asChild
             >
-              <Link to="/free-version">Launch free</Link>
+              <Link to={productType === 'edexcel' ? '/free-version' : '/aqa-free-version'}>Launch free</Link>
             </Button>
           </div>
 
           {/* Deluxe Plan */}
           <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${profile?.is_premium ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
             <h2 className="text-2xl font-semibold mb-6">
-              🔥 Deluxe Plan — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)
+              🔥 Deluxe Plan {productType === 'edexcel' ? '(Edexcel)' : '(AQA)'} — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)
               {profile?.is_premium && (
                 <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
                   ACTIVE
@@ -113,7 +140,7 @@ export const DashboardPage = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all Edexcel Economics A past papers (2017–2023, P1–P3)
+                AI trained on all {productType === 'edexcel' ? 'Edexcel' : 'AQA'} Economics A past papers (2017–2023, P1–P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -125,7 +152,7 @@ export const DashboardPage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire Edexcel specification
+                Covers the entire {productType === 'edexcel' ? 'Edexcel' : 'AQA'} specification
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -144,7 +171,7 @@ export const DashboardPage = () => {
                 className="w-full"
                 asChild
               >
-                <Link to="/premium">Launch Deluxe Version</Link>
+                <Link to={productType === 'edexcel' ? '/premium' : '/aqa-premium'}>Launch Deluxe Version</Link>
               </Button>
             ) : (
               <Button 
