@@ -166,7 +166,7 @@ export const DashboardPage = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA'} past papers (2017–2023, P1–P3)
+                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA'} past papers (2017-2024, P1-P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
