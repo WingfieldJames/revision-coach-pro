@@ -1,38 +1,9 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/Header';
 import { Link } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { Mail, MessageSquare, Instagram } from 'lucide-react';
+import { Mail, Instagram } from 'lucide-react';
 
 export const ContactPage = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Message sent!",
-        description: "We'll get back to you within 24 hours.",
-      });
-      setName('');
-      setEmail('');
-      setMessage('');
-      setLoading(false);
-    }, 1000);
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header showNavLinks />
@@ -47,56 +18,19 @@ export const ContactPage = () => {
               Have questions about A* AI? We'd love to hear from you.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea
-                  id="message"
-                  placeholder="Tell us how we can help you..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={6}
-                  required
-                />
-              </div>
-
-              <Button 
-                type="submit" 
-                variant="brand" 
-                size="lg" 
-                className="w-full"
-                disabled={loading}
+          <CardContent className="flex flex-col items-center justify-center py-12 space-y-6">
+            <Mail className="w-16 h-16 text-primary" />
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground">
+                Send us an email at:
+              </p>
+              <a 
+                href="mailto:astarai.official@gmail.com"
+                className="text-2xl font-semibold bg-gradient-brand bg-clip-text text-transparent hover:opacity-80 transition-opacity"
               >
-                {loading ? 'Sending...' : 'Send Message'}
-              </Button>
-            </form>
+                astarai.official@gmail.com
+              </a>
+            </div>
           </CardContent>
         </Card>
       </div>
