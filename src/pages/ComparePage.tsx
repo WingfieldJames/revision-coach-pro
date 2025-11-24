@@ -208,6 +208,9 @@ export const ComparePage = () => {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-background border border-border z-50">
+                <DropdownMenuItem className="cursor-pointer hover:bg-muted">
+                  Economics
+                </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-default opacity-50">
                   Maths (coming soon)
                 </DropdownMenuItem>
