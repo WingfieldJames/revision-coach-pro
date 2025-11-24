@@ -224,7 +224,14 @@ export const ComparePage = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
-                  {paymentType === 'lifetime' ? 'Lifetime (save 67% yearly)' : 'Monthly'}
+                  {/* Mobile: Short text */}
+                  <span className="md:hidden">
+                    {paymentType === 'lifetime' ? 'Lifetime' : 'Monthly'}
+                  </span>
+                  {/* Desktop/Tablet: Full text */}
+                  <span className="hidden md:inline">
+                    {paymentType === 'lifetime' ? 'Lifetime (save 67% yearly)' : 'Monthly'}
+                  </span>
                   <ChevronDown className="h-3 w-3" />
                 </button>
               </DropdownMenuTrigger>
