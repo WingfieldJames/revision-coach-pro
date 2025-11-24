@@ -71,7 +71,7 @@ export const AQAPremiumPage = () => {
       
       <div className="flex-1 relative">
         <iframe
-          src="https://www.chatbase.co/chatbot-iframe/rRsRPPSXyI-f4kL8JHcyz"
+          src="https://www.chatbase.co/chatbot-iframe/kkZTJB7EYleMIFmsFEEJ0"
           width="100%"
           style={{ height: '100%', minHeight: '700px' }}
           frameBorder="0"
