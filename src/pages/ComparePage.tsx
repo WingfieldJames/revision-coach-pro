@@ -196,9 +196,27 @@ export const ComparePage = () => {
           Plan
         </h1>
 
-        {/* Combined Toggle - Payment Dropdown + Product Toggle */}
+        {/* Combined Toggle - Subject Dropdown + Payment Dropdown + Product Toggle */}
         <div className="flex justify-center mb-12">
           <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
+            {/* Subject Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
+                  Economics
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-background border border-border z-50">
+                <DropdownMenuItem className="cursor-default opacity-50">
+                  Maths (coming soon)
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-default opacity-50">
+                  Chemistry (coming soon)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {/* Payment Type Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
