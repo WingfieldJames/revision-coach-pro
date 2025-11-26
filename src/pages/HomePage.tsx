@@ -38,10 +38,10 @@ export const HomePage = () => {
                 <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-16" />
               </h1>
               <h2 className="text-4xl font-medium text-foreground mb-6 leading-tight">
-                Your AI-powered coach for Edexcel Economics
+                Your AI-powered coach for A-Level Economics
               </h2>
               <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                A* AI is the smartest way to revise for Edexcel Economics. Get real past paper questions, official mark schemes, live feedback and top-grade technique — all in one place.
+                Trained on past papers, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
               </p>
             </div>
             
