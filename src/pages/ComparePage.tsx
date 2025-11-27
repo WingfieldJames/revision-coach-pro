@@ -13,6 +13,7 @@ import amiraImage from '@/assets/amira-lse.jpg';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { checkProductAccess } from '@/lib/productAccess';
+import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, Star, Instagram } from 'lucide-react';
@@ -143,6 +144,12 @@ export const ComparePage = () => {
       const productId = PRODUCT_IDS[productType];
       console.log('Using product ID:', productId);
 
+      // Get affiliate code if available
+      const affiliateCode = getValidAffiliateCode();
+      if (affiliateCode) {
+        console.log('Including affiliate code:', affiliateCode);
+      }
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: {
           Authorization: `Bearer ${sessionData.session.access_token}`,
@@ -150,6 +157,7 @@ export const ComparePage = () => {
         body: {
           paymentType,
           productId,
+          affiliateCode,
         },
       });
       
