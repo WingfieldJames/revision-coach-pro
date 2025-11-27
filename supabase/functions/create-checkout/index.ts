@@ -46,9 +46,28 @@ serve(async (req) => {
 
     console.log("User authenticated:", user.email);
 
-    const { paymentType = 'lifetime', productId } = await req.json().catch(() => ({ paymentType: 'lifetime' }));
+    const { paymentType = 'lifetime', productId, affiliateCode } = await req.json().catch(() => ({ paymentType: 'lifetime' }));
     console.log("Payment type:", paymentType);
     console.log("Product ID:", productId);
+    console.log("Affiliate code:", affiliateCode || 'none');
+
+    // Validate affiliate code if provided
+    let validatedAffiliateId = null;
+    if (affiliateCode) {
+      const { data: affiliate, error: affiliateError } = await supabaseClient
+        .from('affiliates')
+        .select('id, name, commission_rate')
+        .eq('code', affiliateCode)
+        .eq('active', true)
+        .maybeSingle();
+      
+      if (!affiliateError && affiliate) {
+        validatedAffiliateId = affiliate.id;
+        console.log('Valid affiliate found:', affiliate.name, 'with', affiliate.commission_rate * 100 + '% commission');
+      } else {
+        console.log('Affiliate code not found or inactive:', affiliateCode);
+      }
+    }
 
     // Get product details from database
     let product = null;
@@ -117,6 +136,8 @@ serve(async (req) => {
         user_id: user.id,
         payment_type: paymentType,
         product_id: product?.id || '',
+        affiliate_code: affiliateCode || '',
+        affiliate_id: validatedAffiliateId || '',
       },
     };
 

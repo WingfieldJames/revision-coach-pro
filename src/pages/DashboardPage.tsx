@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
+import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 // import logo from '@/assets/logo.png';
 import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -218,9 +219,19 @@ export const DashboardPage = () => {
                     }
 
                     console.log('Creating checkout session...');
+                    
+                    // Get affiliate code if available
+                    const affiliateCode = getValidAffiliateCode();
+                    if (affiliateCode) {
+                      console.log('Including affiliate code:', affiliateCode);
+                    }
+                    
                     const { data, error } = await supabase.functions.invoke('create-checkout', {
                       headers: {
                         Authorization: `Bearer ${sessionData.session.access_token}`,
+                      },
+                      body: {
+                        affiliateCode,
                       },
                     });
                     

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { useAffiliateTracking } from "./hooks/useAffiliateTracking";
 import { HomePage } from "./pages/HomePage";
 import { ComparePage } from "./pages/ComparePage";
 import { LoginPage } from "./pages/LoginPage";
@@ -19,6 +20,11 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  useAffiliateTracking();
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -26,6 +32,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AppContent />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/compare" element={<ComparePage />} />

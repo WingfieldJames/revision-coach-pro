@@ -143,6 +143,53 @@ serve(async (req) => {
                 logStep("ERROR: Failed to create subscription", { userId, productId, error: subError });
               } else {
                 logStep("Successfully created subscription", { userId, productId, paymentType });
+                
+                // Record affiliate commission if applicable
+                const affiliateCode = session.metadata?.affiliate_code;
+                const affiliateId = session.metadata?.affiliate_id;
+                
+                if (affiliateCode && affiliateId) {
+                  logStep("Processing affiliate referral", { affiliateCode, affiliateId });
+                  
+                  // Get sale amount (in pence/cents)
+                  const saleAmount = session.amount_total || 0;
+                  
+                  // Fetch affiliate to get commission rate
+                  const { data: affiliate } = await supabaseClient
+                    .from('affiliates')
+                    .select('commission_rate')
+                    .eq('id', affiliateId)
+                    .maybeSingle();
+                  
+                  if (affiliate) {
+                    const commissionAmount = Math.round(saleAmount * affiliate.commission_rate);
+                    
+                    // Record the referral
+                    const { error: refError } = await supabaseClient
+                      .from('affiliate_referrals')
+                      .insert({
+                        affiliate_id: affiliateId,
+                        referred_user_id: userId,
+                        sale_amount: saleAmount,
+                        commission_amount: commissionAmount,
+                        stripe_session_id: session.id,
+                        payment_type: paymentType,
+                        product_id: productId,
+                        status: 'pending'
+                      });
+                    
+                    if (refError) {
+                      logStep("ERROR: Failed to record affiliate referral", { error: refError });
+                    } else {
+                      logStep("Successfully recorded affiliate commission", { 
+                        affiliateId, 
+                        saleAmount, 
+                        commissionAmount,
+                        commissionRate: affiliate.commission_rate 
+                      });
+                    }
+                  }
+                }
               }
             }
             
