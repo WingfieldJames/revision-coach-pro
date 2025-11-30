@@ -341,14 +341,14 @@ export const ComparePage = () => {
                   <span className="text-green-500 font-bold mr-2">✓</span>
                   Covers the entire Edexcel specification
                 </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Step-by-step diagram guidance (AD/AS → buffer stocks)
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Application bank + model essay examples
-                </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Step-by-step diagram guidance (AD/AS → buffer stocks) + application bank
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Unlimited daily prompts
+              </li>
               </ul>
               <Button 
                 variant="brand" 
@@ -392,14 +392,14 @@ export const ComparePage = () => {
                   <span className="text-green-500 font-bold mr-2">✓</span>
                   Covers the entire AQA specification
                 </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Step-by-step diagram guidance (AD/AS → buffer stocks)
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Application bank + model essay examples
-                </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Step-by-step diagram guidance (AD/AS → buffer stocks) + application bank
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Unlimited daily prompts
+              </li>
               </ul>
               <Button 
                 variant="brand" 
