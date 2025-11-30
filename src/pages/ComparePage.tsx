@@ -295,6 +295,10 @@ export const ComparePage = () => {
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 Basic help only (no mark-scheme feedback or structures)
               </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                5 free prompts daily
+              </li>
             </ul>
             <Button 
               variant="brand" 
