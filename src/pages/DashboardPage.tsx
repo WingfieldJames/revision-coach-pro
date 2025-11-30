@@ -187,11 +187,11 @@ export const DashboardPage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Step-by-step diagram guidance (AD/AS → buffer stocks)
+                Step-by-step diagram guidance (AD/AS → buffer stocks) + application bank
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Application bank + model essay examples
+                Unlimited daily prompts
               </li>
             </ul>
             
