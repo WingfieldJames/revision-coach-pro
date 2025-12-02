@@ -10,25 +10,16 @@ export const checkProductAccess = async (
   userId: string, 
   productSlug: string
 ): Promise<ProductAccess> => {
-  // First get the product ID by slug
-  const { data: product } = await supabase
-    .from('products')
-    .select('id')
-    .eq('slug', productSlug)
-    .eq('active', true)
-    .maybeSingle();
-  
-  if (!product) {
-    return { hasAccess: false, tier: 'free' };
-  }
-  
-  // Check user_subscriptions for this specific product
+  // First check new user_subscriptions table
   const { data: subscription, error } = await supabase
     .from('user_subscriptions')
-    .select('*')
+    .select(`
+      *,
+      product:products(*)
+    `)
     .eq('user_id', userId)
-    .eq('product_id', product.id)
     .eq('active', true)
+    .eq('product.slug', productSlug)
     .maybeSingle();
   
   if (!error && subscription) {
@@ -47,21 +38,20 @@ export const checkProductAccess = async (
     };
   }
   
-  // Fallback: Check legacy users table ONLY for Edexcel (all legacy users are Edexcel)
-  if (productSlug === 'edexcel-economics') {
-    const { data: user } = await supabase
-      .from('users')
-      .select('is_premium, subscription_end')
-      .eq('id', userId)
-      .maybeSingle();
-      
-    if (user?.is_premium) {
-      return { 
-        hasAccess: true, 
-        tier: 'deluxe',
-        subscription: { legacy: true } 
-      };
-    }
+  // Fallback: Check legacy users table for backwards compatibility
+  const { data: user } = await supabase
+    .from('users')
+    .select('is_premium, subscription_end')
+    .eq('id', userId)
+    .maybeSingle();
+    
+  if (user?.is_premium) {
+    // Legacy user still has access
+    return { 
+      hasAccess: true, 
+      tier: 'deluxe',
+      subscription: { legacy: true } 
+    };
   }
   
   return { hasAccess: false, tier: 'free' };
