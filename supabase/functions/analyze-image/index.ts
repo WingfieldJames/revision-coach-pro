@@ -30,57 +30,17 @@ serve(async (req) => {
       );
     }
 
-    // Build the system prompt based on image type
-    let systemPrompt = `You are an expert at analyzing economics exam materials for A-Level students. Your task is to extract and format content from images so students can paste it into a chatbot for help.`;
+    // Build the system prompt for exact OCR extraction
+    let systemPrompt = `You are a precise OCR tool. Your ONLY job is to extract the EXACT text from images character-by-character. Do NOT summarize, interpret, explain, or add any commentary. Output ONLY the text exactly as it appears in the image, preserving:
+- Exact wording and spelling
+- Line breaks and paragraph structure
+- Bullet points and numbering
+- Any symbols, numbers, or special characters
+- Headers and subheadings
+
+If there are diagrams, describe the labels/text ON the diagram only (axis labels, curve names, annotations). Do not explain what the diagram means.`;
     
-    let userPrompt = '';
-    switch (imageType) {
-      case 'exam-question':
-        userPrompt = `This is an exam question image. Please:
-1. Transcribe the EXACT question text, including any sub-parts (a, b, c, etc.)
-2. Note the mark allocation for each part if visible
-3. Describe any diagrams, graphs, or tables included
-4. Format it clearly so it can be pasted into a chatbot
-
-Output format:
-**Question:** [transcribed question]
-**Marks:** [mark allocation if visible]
-**Diagrams/Data:** [description of any visual elements]`;
-        break;
-      case 'diagram':
-        userPrompt = `This is an economics diagram. Please:
-1. Identify the type of diagram (e.g., AD/AS, supply/demand, buffer stock, etc.)
-2. Describe all axes, curves, and labels
-3. Explain any shifts, equilibrium points, or annotations shown
-4. Format it so a student can ask for help understanding or recreating it
-
-Output format:
-**Diagram Type:** [type of diagram]
-**Axes:** [x-axis and y-axis labels]
-**Curves/Lines:** [list all curves with their labels]
-**Key Points:** [equilibrium points, shifts, shaded areas, etc.]
-**Description:** [brief explanation of what the diagram shows]`;
-        break;
-      case 'notes':
-        userPrompt = `This is a page of economics notes or textbook content. Please:
-1. Transcribe the key information and concepts
-2. Organize bullet points and definitions clearly
-3. Note any formulas, diagrams, or examples mentioned
-4. Format it so a student can ask questions about the content
-
-Output format:
-**Topic:** [main topic if identifiable]
-**Key Concepts:** [bullet points of main ideas]
-**Definitions:** [any key terms defined]
-**Examples/Data:** [any examples or statistics mentioned]`;
-        break;
-      default:
-        userPrompt = `Please analyze this economics-related image and extract all relevant text and information. Format it clearly so a student can paste it into a chatbot to get help. Include:
-- Any questions or text content
-- Description of diagrams or graphs
-- Key data or statistics
-- Context about what the image shows`;
-    }
+    let userPrompt = `Extract ALL text from this image EXACTLY as written. Do not summarize or interpret - just transcribe the exact characters you see. Preserve the original formatting and structure.`;
 
     console.log("Sending image to Lovable AI for analysis, type:", imageType);
 
