@@ -4,7 +4,6 @@ import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { checkProductAccess } from '@/lib/productAccess';
-import { ImageUploadTool } from '@/components/ImageUploadTool';
 
 export const AQAPremiumPage = () => {
   const { user, loading } = useAuth();
@@ -67,12 +66,7 @@ export const AQAPremiumPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="relative z-10">
-        <Header showNavLinks />
-      </div>
-      
-      {/* Image Upload Tool - AQA Deluxe Exclusive */}
-      <div className="px-4 py-3 max-w-4xl mx-auto w-full">
-        <ImageUploadTool />
+        <Header showNavLinks showImageTool />
       </div>
       
       <div className="flex-1 relative">
