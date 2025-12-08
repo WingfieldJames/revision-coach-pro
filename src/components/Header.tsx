@@ -9,10 +9,12 @@ import { Camera } from 'lucide-react';
 
 interface HeaderProps {
   showNavLinks?: boolean;
+  showImageTool?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
-  showNavLinks = false
+  showNavLinks = false,
+  showImageTool = false
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -77,27 +79,29 @@ export const Header: React.FC<HeaderProps> = ({
           <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-8 sm:h-10" />
         </Link>
         
-        <Popover open={imageToolOpen} onOpenChange={setImageToolOpen}>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
+        {showImageTool && (
+          <Popover open={imageToolOpen} onOpenChange={setImageToolOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
+              >
+                <Camera className="h-4 w-4" />
+                <span className="hidden sm:inline">Image to Text</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              className="w-[90vw] max-w-md p-0 bg-background border border-border shadow-xl" 
+              align="start"
+              sideOffset={8}
             >
-              <Camera className="h-4 w-4" />
-              <span className="hidden sm:inline">Image to Text</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent 
-            className="w-[90vw] max-w-md p-0 bg-background border border-border shadow-xl" 
-            align="start"
-            sideOffset={8}
-          >
-            <div className="p-4">
-              <ImageUploadTool />
-            </div>
-          </PopoverContent>
-        </Popover>
+              <div className="p-4">
+                <ImageUploadTool />
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
       
       {showNavLinks && (
