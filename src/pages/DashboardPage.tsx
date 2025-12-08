@@ -179,11 +179,15 @@ export const DashboardPage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Trained on full exam technique + essay structures
+                Trained on full A* exam technique + essay structures
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 Covers the entire {productType === 'edexcel' ? 'Edexcel' : 'AQA'} specification
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Image uploads supported
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
