@@ -204,7 +204,7 @@ export const ComparePage = () => {
           Plan
         </h1>
 
-        {/* Combined Toggle - Subject Dropdown + Payment Dropdown + Product Toggle */}
+        {/* Combined Toggle - Subject Dropdown + Product Toggle */}
         <div className="flex justify-center mb-12">
           <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
             {/* Subject Dropdown */}
@@ -227,30 +227,6 @@ export const ComparePage = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-default opacity-50">
                   Chemistry (coming soon)
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Payment Type Dropdown - Hidden on mobile */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="hidden md:flex rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all items-center gap-2">
-                  {paymentType === 'lifetime' ? 'Lifetime (save 67% yearly)' : 'Monthly'}
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-background border border-border z-50">
-                <DropdownMenuItem 
-                  onClick={() => setPaymentType('monthly')}
-                  className="cursor-pointer hover:bg-muted"
-                >
-                  Monthly
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setPaymentType('lifetime')}
-                  className="cursor-pointer hover:bg-muted"
-                >
-                  Lifetime (save 67% yearly)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -278,14 +254,17 @@ export const ComparePage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 justify-center">
+        {/* Desktop: 3 columns, Mobile: stack */}
+        <div className="flex flex-col lg:flex-row gap-6 justify-center">
           {/* Free Plan */}
-          <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left">
-            <h2 className="text-2xl font-semibold mb-6">🎓 Free Plan - £0</h2>
-            <ul className="space-y-3 mb-8">
+          <div className="bg-muted p-6 lg:p-8 rounded-xl max-w-md lg:max-w-sm w-full shadow-card text-left">
+            <h2 className="text-xl lg:text-2xl font-semibold mb-6">🎓 Free Plan</h2>
+            <p className="text-3xl font-bold mb-2">£0</p>
+            <p className="text-sm text-muted-foreground mb-6">Forever free</p>
+            <ul className="space-y-3 mb-8 text-sm">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on the 2024-2023 {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA Economics'} past papers (P1–P3)
+                AI trained on 2024-2023 {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA Economics'} past papers (P1–P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -293,7 +272,7 @@ export const ComparePage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Basic help only (no mark-scheme feedback or structures)
+                Basic help only (no mark-scheme feedback)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -310,122 +289,100 @@ export const ComparePage = () => {
             </Button>
           </div>
 
-          {/* Deluxe Plan - Edexcel */}
-          {productType === 'edexcel' && (
-            <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left border-2 border-primary">
-              {paymentType === 'monthly' ? (
-                <>
-                  <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — <span className="line-through text-red-500">£9.99</span> £4.99 (Monthly Access)</h2>
-                  <p className="text-sm text-muted-foreground mb-6">Cancel anytime • Active while subscription is active</p>
-                </>
-              ) : (
-                <>
-                  <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)</h2>
-                  <p className="text-sm text-muted-foreground mb-6">One-time payment • Lifetime access</p>
-                </>
-              )}
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  AI trained on all Edexcel Economics A past papers (2017-2024, P1-P3)
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Official examiner mark schemes built-in
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Trained on full A* exam technique + essay structures
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Covers the entire Edexcel specification
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Image uploads supported
-                </li>
+          {/* Monthly Plan - Desktop only */}
+          <div className="hidden lg:block bg-muted p-6 lg:p-8 rounded-xl max-w-md lg:max-w-sm w-full shadow-card text-left">
+            <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Monthly</h2>
+            <p className="text-3xl font-bold mb-2"><span className="line-through text-red-500 text-lg">£9.99</span> £4.99<span className="text-base font-normal">/mo</span></p>
+            <p className="text-sm text-muted-foreground mb-6">Cancel anytime</p>
+            <ul className="space-y-3 mb-8 text-sm">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Step-by-step diagram guidance (AD/AS → buffer stocks) + application bank
+                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA'} past papers (2017-2024, P1-P3)
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Official examiner mark schemes built-in
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Trained on full A* exam technique + essay structures
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Covers the entire {productType === 'edexcel' ? 'Edexcel' : 'AQA'} specification
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Image uploads supported
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 Unlimited daily prompts
               </li>
-              </ul>
-              <Button 
-                variant="brand" 
-                size="lg" 
-                className="w-full"
-                onClick={handlePremiumClick}
-              >
-                {hasProductAccess ? 'Launch Deluxe' : 'Unlock Deluxe'}
-              </Button>
-            </div>
-          )}
+            </ul>
+            <Button 
+              variant="brand" 
+              size="lg" 
+              className="w-full"
+              onClick={() => {
+                setPaymentType('monthly');
+                handlePremiumClick();
+              }}
+            >
+              {hasProductAccess ? 'Launch Deluxe' : 'Get Monthly'}
+            </Button>
+          </div>
 
-          {/* Deluxe Plan - AQA */}
-          {productType === 'aqa' && (
-            <div className="bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left border-2 border-primary">
-              {paymentType === 'monthly' ? (
-                <>
-                  <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — <span className="line-through text-red-500">£9.99</span> £4.99 (Monthly Access)</h2>
-                  <p className="text-sm text-muted-foreground mb-6">Cancel anytime • Active while subscription is active</p>
-                </>
-              ) : (
-                <>
-                  <h2 className="text-2xl font-semibold mb-2">🔥 Deluxe Plan — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)</h2>
-                  <p className="text-sm text-muted-foreground mb-6">One-time payment • Lifetime access</p>
-                </>
-              )}
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  AI trained on all AQA past papers (2017-2024, P1-P3)
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Official examiner mark schemes built-in
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Trained on full A* exam technique + essay structures
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Covers the entire AQA specification
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-500 font-bold mr-2">✓</span>
-                  Image uploads supported
-                </li>
+          {/* Lifetime Plan */}
+          <div className="bg-muted p-6 lg:p-8 rounded-xl max-w-md lg:max-w-sm w-full shadow-card text-left border-2 border-primary relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+              BEST VALUE
+            </div>
+            <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Lifetime</h2>
+            <p className="text-3xl font-bold mb-2"><span className="line-through text-red-500 text-lg">£39.99</span> £19.99</p>
+            <p className="text-sm text-muted-foreground mb-6">One-time payment • Save 67%</p>
+            <ul className="space-y-3 mb-8 text-sm">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Step-by-step diagram guidance (AD/AS → buffer stocks) + application bank
+                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA'} past papers (2017-2024, P1-P3)
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Official examiner mark schemes built-in
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Trained on full A* exam technique + essay structures
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Covers the entire {productType === 'edexcel' ? 'Edexcel' : 'AQA'} specification
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 font-bold mr-2">✓</span>
+                Image uploads supported
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 Unlimited daily prompts
               </li>
-              </ul>
-              <Button 
-                variant="brand" 
-                size="lg" 
-                className="w-full"
-                onClick={handlePremiumClick}
-              >
-                {hasProductAccess ? 'Launch Deluxe' : 'Unlock Deluxe'}
-              </Button>
-            </div>
-          )}
+            </ul>
+            <Button 
+              variant="brand" 
+              size="lg" 
+              className="w-full"
+              onClick={() => {
+                setPaymentType('lifetime');
+                handlePremiumClick();
+              }}
+            >
+              {hasProductAccess ? 'Launch Deluxe' : 'Get Lifetime'}
+            </Button>
+          </div>
         </div>
         
         <p className="text-sm text-muted-foreground mt-6">
-          {paymentType === 'monthly' 
-            ? 'Monthly billing • Cancel anytime • Secure checkout via Stripe'
-            : 'One-time payment • Lifetime access • Secure checkout via Stripe'
-          }
+          Secure checkout via Stripe • Your chats stay private
         </p>
       </main>
 
