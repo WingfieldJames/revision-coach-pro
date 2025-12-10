@@ -255,13 +255,13 @@ export const ComparePage = () => {
         </div>
 
         {/* Desktop: 3 columns, Mobile: stack */}
-        <div className="flex flex-col lg:flex-row gap-6 justify-center">
+        <div className="flex flex-col lg:flex-row gap-8 justify-center">
           {/* Free Plan */}
-          <div className="bg-muted p-6 lg:p-8 rounded-xl max-w-md lg:max-w-sm w-full shadow-card text-left">
+          <div className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-6">🎓 Free Plan</h2>
-            <p className="text-3xl font-bold mb-2">£0</p>
-            <p className="text-sm text-muted-foreground mb-6">Forever free</p>
-            <ul className="space-y-3 mb-8 text-sm">
+            <p className="text-3xl lg:text-4xl font-bold mb-2">£0</p>
+            <p className="text-sm lg:text-base text-muted-foreground mb-6">Forever free</p>
+            <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 AI trained on 2024-2023 {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA Economics'} past papers (P1–P3)
@@ -290,11 +290,11 @@ export const ComparePage = () => {
           </div>
 
           {/* Monthly Plan - Desktop only */}
-          <div className="hidden lg:block bg-muted p-6 lg:p-8 rounded-xl max-w-md lg:max-w-sm w-full shadow-card text-left">
+          <div className="hidden lg:block bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Monthly</h2>
-            <p className="text-3xl font-bold mb-2"><span className="line-through text-red-500 text-lg">£9.99</span> £4.99<span className="text-base font-normal">/mo</span></p>
-            <p className="text-sm text-muted-foreground mb-6">Cancel anytime</p>
-            <ul className="space-y-3 mb-8 text-sm">
+            <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£9.99</span> £4.99<span className="text-base lg:text-lg font-normal">/mo</span></p>
+            <p className="text-sm lg:text-base text-muted-foreground mb-6">Cancel anytime</p>
+            <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA'} past papers (2017-2024, P1-P3)
@@ -334,14 +334,14 @@ export const ComparePage = () => {
           </div>
 
           {/* Lifetime Plan */}
-          <div className="bg-muted p-6 lg:p-8 rounded-xl max-w-md lg:max-w-sm w-full shadow-card text-left border-2 border-primary relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+          <div className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left border-2 border-primary relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs lg:text-sm font-semibold px-4 py-1.5 rounded-full">
               BEST VALUE
             </div>
             <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Lifetime</h2>
-            <p className="text-3xl font-bold mb-2"><span className="line-through text-red-500 text-lg">£39.99</span> £19.99</p>
-            <p className="text-sm text-muted-foreground mb-6">One-time payment • Save 67%</p>
-            <ul className="space-y-3 mb-8 text-sm">
+            <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£39.99</span> £19.99</p>
+            <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 67%</p>
+            <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA'} past papers (2017-2024, P1-P3)
