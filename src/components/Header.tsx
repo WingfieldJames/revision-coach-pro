@@ -116,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
               >
                 <BarChart2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Find Diagram</span>
+                <span className="hidden sm:inline">Diagram Generator</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent 

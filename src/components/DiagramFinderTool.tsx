@@ -68,7 +68,7 @@ export const DiagramFinderTool: React.FC = () => {
           <BarChart2 className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Find Diagram</h3>
+          <h3 className="font-semibold text-foreground">Diagram Generator</h3>
           <p className="text-xs text-muted-foreground">
             Paste question text to find the right diagram
           </p>
