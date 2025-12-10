@@ -66,7 +66,7 @@ export const AQAPremiumPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="relative z-10">
-        <Header showNavLinks showImageTool />
+        <Header showNavLinks showImageTool showDiagramTool />
       </div>
       
       <div className="flex-1 relative">
