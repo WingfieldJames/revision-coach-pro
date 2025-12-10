@@ -5,21 +5,25 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, ITab } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ImageUploadTool } from '@/components/ImageUploadTool';
-import { Camera } from 'lucide-react';
+import { DiagramFinderTool } from '@/components/DiagramFinderTool';
+import { Camera, BarChart2 } from 'lucide-react';
 
 interface HeaderProps {
   showNavLinks?: boolean;
   showImageTool?: boolean;
+  showDiagramTool?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
   showNavLinks = false,
-  showImageTool = false
+  showImageTool = false,
+  showDiagramTool = false
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [imageToolOpen, setImageToolOpen] = useState(false);
+  const [diagramToolOpen, setDiagramToolOpen] = useState(false);
   
   // Determine selected tab based on current route
   const getSelectedTab = () => {
@@ -98,6 +102,30 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <div className="p-4">
                 <ImageUploadTool />
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+        
+        {showDiagramTool && (
+          <Popover open={diagramToolOpen} onOpenChange={setDiagramToolOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
+              >
+                <BarChart2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Find Diagram</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              className="w-[90vw] max-w-md p-0 bg-background border border-border shadow-xl" 
+              align="start"
+              sideOffset={8}
+            >
+              <div className="p-4">
+                <DiagramFinderTool />
               </div>
             </PopoverContent>
           </Popover>
