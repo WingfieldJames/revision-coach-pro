@@ -41,6 +41,46 @@ const availableDiagrams = [
     id: 'supply-shift-left',
     title: 'Supply Shifts Left (Decrease in Supply)',
     keywords: ['supply decrease', 'supply shift left', 'fall in supply', 'supply curve shift left', 'leftward shift supply', 'decrease in quantity supplied', 'lower supply', 'S2 to S1']
+  },
+  {
+    id: 'producer-consumer-surplus',
+    title: 'Producer and Consumer Surplus',
+    keywords: ['producer surplus', 'consumer surplus', 'welfare', 'economic welfare', 'total surplus', 'market surplus', 'surplus triangle', 'deadweight loss', 'allocative efficiency']
+  },
+  {
+    id: 'specific-tax',
+    title: 'Specific Tax (Per Unit Tax)',
+    keywords: ['specific tax', 'per unit tax', 'indirect tax', 'tax incidence', 'consumer incidence', 'producer incidence', 'tax burden', 'excise tax', 'unit tax']
+  },
+  {
+    id: 'ad-valorem-tax',
+    title: 'Ad-Valorem Tax',
+    keywords: ['ad valorem tax', 'percentage tax', 'VAT', 'value added tax', 'proportional tax', 'tax on value', 'government revenue', 'pivoting supply curve']
+  },
+  {
+    id: 'subsidy',
+    title: 'Subsidy',
+    keywords: ['subsidy', 'government subsidy', 'producer benefit', 'consumer benefit', 'cost to government', 'subsidy diagram', 'supply shift subsidy', 'government spending']
+  },
+  {
+    id: 'minimum-price',
+    title: 'Minimum Price (Price Floor)',
+    keywords: ['minimum price', 'price floor', 'excess supply', 'surplus', 'guaranteed minimum price', 'buffer stock', 'agricultural support', 'Pmin', 'price support']
+  },
+  {
+    id: 'maximum-price',
+    title: 'Maximum Price (Price Ceiling)',
+    keywords: ['maximum price', 'price ceiling', 'excess demand', 'shortage', 'price cap', 'rent control', 'Pmax', 'price control', 'rationing']
+  },
+  {
+    id: 'negative-externality-production',
+    title: 'Negative Externality of Production',
+    keywords: ['negative externality', 'externality of production', 'MSC', 'MPC', 'marginal social cost', 'marginal private cost', 'pollution', 'market failure', 'welfare loss', 'overproduction', 'deadweight loss']
+  },
+  {
+    id: 'positive-externality-consumption',
+    title: 'Positive Externality of Consumption',
+    keywords: ['positive externality', 'externality of consumption', 'MSB', 'MPB', 'marginal social benefit', 'marginal private benefit', 'merit good', 'underconsumption', 'welfare gain', 'education', 'healthcare']
   }
 ];
 
