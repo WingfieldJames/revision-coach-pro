@@ -8,44 +8,39 @@ const corsHeaders = {
 // Available diagrams with their keywords for AI matching
 const availableDiagrams = [
   {
-    id: 'ad-as-basic',
-    title: 'Aggregate Demand and Aggregate Supply',
-    keywords: ['AD', 'AS', 'aggregate demand', 'aggregate supply', 'macroeconomic equilibrium', 'price level', 'real GDP', 'LRAS', 'SRAS']
+    id: 'ppf',
+    title: 'Production Possibility Frontier (PPF)',
+    keywords: ['PPF', 'production possibility frontier', 'production possibilities curve', 'PPC', 'opportunity cost', 'trade-off', 'scarcity', 'capital goods', 'consumer goods', 'economic efficiency', 'productive efficiency']
   },
   {
-    id: 'perfect-competition',
-    title: 'Perfect Competition',
-    keywords: ['perfect competition', 'perfectly competitive', 'price taker', 'MC=MR', 'normal profit', 'supernormal profit', 'long run equilibrium']
-  },
-  {
-    id: 'demand-shift-left',
-    title: 'Demand Shifting Left',
-    keywords: ['demand decrease', 'demand shift left', 'fall in demand', 'demand curve shift', 'leftward shift demand', 'decrease in quantity demanded']
-  },
-  {
-    id: 'kuznets-curve',
-    title: 'Kuznets Curve',
-    keywords: ['kuznets', 'inequality', 'income inequality', 'economic development', 'inverted U', 'simon kuznets']
+    id: 'ppf-shift',
+    title: 'Shift of PPF',
+    keywords: ['PPF shift', 'production possibility frontier shift', 'economic growth', 'outward shift', 'inward shift', 'increase in productive capacity', 'technological progress', 'capital accumulation']
   },
   {
     id: 'supply-demand-equilibrium',
     title: 'Supply and Demand Equilibrium',
-    keywords: ['supply', 'demand', 'equilibrium', 'market equilibrium', 'price equilibrium', 'quantity equilibrium', 'market clearing']
+    keywords: ['supply', 'demand', 'equilibrium', 'market equilibrium', 'price equilibrium', 'quantity equilibrium', 'market clearing', 'Pe', 'Qe', 'equilibrium price', 'equilibrium quantity']
   },
   {
-    id: 'monopoly',
-    title: 'Monopoly Price and Output',
-    keywords: ['monopoly', 'monopolist', 'price maker', 'MR=MC', 'supernormal profit', 'deadweight loss', 'allocative inefficiency']
+    id: 'demand-shift-right',
+    title: 'Demand Shifts Right (Increase in Demand)',
+    keywords: ['demand increase', 'demand shift right', 'rise in demand', 'demand curve shift right', 'rightward shift demand', 'increase in quantity demanded', 'higher demand', 'D1 to D2']
+  },
+  {
+    id: 'demand-shift-left',
+    title: 'Demand Shifts Left (Decrease in Demand)',
+    keywords: ['demand decrease', 'demand shift left', 'fall in demand', 'demand curve shift left', 'leftward shift demand', 'decrease in quantity demanded', 'lower demand', 'D2 to D1']
   },
   {
     id: 'supply-shift-right',
-    title: 'Supply Shifting Right',
-    keywords: ['supply increase', 'supply shift right', 'rise in supply', 'supply curve shift', 'rightward shift supply']
+    title: 'Supply Shifts Right (Increase in Supply)',
+    keywords: ['supply increase', 'supply shift right', 'rise in supply', 'supply curve shift right', 'rightward shift supply', 'increase in quantity supplied', 'higher supply', 'S1 to S2']
   },
   {
-    id: 'phillips-curve',
-    title: 'Phillips Curve',
-    keywords: ['phillips curve', 'inflation', 'unemployment', 'trade-off', 'stagflation', 'NAIRU']
+    id: 'supply-shift-left',
+    title: 'Supply Shifts Left (Decrease in Supply)',
+    keywords: ['supply decrease', 'supply shift left', 'fall in supply', 'supply curve shift left', 'leftward shift supply', 'decrease in quantity supplied', 'lower supply', 'S2 to S1']
   }
 ];
 
