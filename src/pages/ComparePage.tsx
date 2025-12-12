@@ -292,7 +292,7 @@ export const ComparePage = () => {
           {/* Monthly Plan - Desktop only */}
           <div className="hidden lg:block bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Monthly</h2>
-            <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£9.99</span> £4.99<span className="text-base lg:text-lg font-normal">/mo</span></p>
+            <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£12.99</span> £6.99<span className="text-base lg:text-lg font-normal">/mo</span></p>
             <p className="text-sm lg:text-base text-muted-foreground mb-6">Cancel anytime</p>
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
@@ -339,8 +339,8 @@ export const ComparePage = () => {
               BEST VALUE
             </div>
             <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Lifetime</h2>
-            <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£39.99</span> £19.99</p>
-            <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 67%</p>
+            <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£79.99</span> £34.99</p>
+            <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 56%</p>
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
