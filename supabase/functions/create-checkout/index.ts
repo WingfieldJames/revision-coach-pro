@@ -152,7 +152,7 @@ serve(async (req) => {
               name: `${productName} (Monthly)`,
               description: "Premium AI-powered academic assistance - Monthly subscription"
             },
-            unit_amount: product?.monthly_price || 499,
+            unit_amount: product?.monthly_price || 699, // £6.99 in pence
             recurring: {
               interval: 'month',
             },
@@ -168,10 +168,10 @@ serve(async (req) => {
           price_data: {
             currency: "gbp",
             product_data: { 
-              name: "A* AI Deluxe Plan (Lifetime)",
+              name: `${productName} (Lifetime)`,
               description: "Premium AI-powered academic assistance - Lifetime access"
             },
-            unit_amount: 1999, // £19.99 in pence
+            unit_amount: product?.lifetime_price || 3499, // £34.99 in pence
           },
           quantity: 1,
         },
