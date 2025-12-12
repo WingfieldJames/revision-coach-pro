@@ -25,12 +25,10 @@ export const ImageUploadTool: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [extractedText, setExtractedText] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processFile = (file: File) => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please select an image file');
@@ -49,6 +47,39 @@ export const ImageUploadTool: React.FC = () => {
       setExtractedText(null);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      processFile(files[0]);
+    }
   };
 
   const analyzeImage = async () => {
@@ -137,11 +168,21 @@ export const ImageUploadTool: React.FC = () => {
 
       {/* Upload Area */}
       {!imagePreview ? (
-        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+        <label 
+          className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+            isDragging 
+              ? 'border-primary bg-primary/10' 
+              : 'border-border hover:bg-muted/50'
+          }`}
+          onDragOver={handleDragOver}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <div className="flex flex-col items-center justify-center py-4">
             <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              <span className="font-semibold">Click to upload</span>
+              <span className="font-semibold">{isDragging ? 'Drop image here' : 'Click or drag to upload'}</span>
             </p>
             <p className="text-xs text-muted-foreground">PNG, JPG, WEBP (max 10MB)</p>
           </div>
