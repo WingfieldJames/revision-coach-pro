@@ -66,7 +66,7 @@ export const PremiumVersionPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="relative z-10">
-        <Header showNavLinks showImageTool showDiagramTool />
+        <Header showNavLinks showImageTool showDiagramTool showEssayMarker />
       </div>
       
       <div className="flex-1 relative">

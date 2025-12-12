@@ -6,24 +6,28 @@ import { Tabs, ITab } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ImageUploadTool } from '@/components/ImageUploadTool';
 import { DiagramFinderTool } from '@/components/DiagramFinderTool';
-import { Camera, BarChart2 } from 'lucide-react';
+import { EssayMarkerTool } from '@/components/EssayMarkerTool';
+import { Camera, BarChart2, PenLine } from 'lucide-react';
 
 interface HeaderProps {
   showNavLinks?: boolean;
   showImageTool?: boolean;
   showDiagramTool?: boolean;
+  showEssayMarker?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
   showNavLinks = false,
   showImageTool = false,
-  showDiagramTool = false
+  showDiagramTool = false,
+  showEssayMarker = false
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [imageToolOpen, setImageToolOpen] = useState(false);
   const [diagramToolOpen, setDiagramToolOpen] = useState(false);
+  const [essayMarkerOpen, setEssayMarkerOpen] = useState(false);
   
   // Determine selected tab based on current route
   const getSelectedTab = () => {
@@ -126,6 +130,30 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <div className="p-4">
                 <DiagramFinderTool />
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {showEssayMarker && (
+          <Popover open={essayMarkerOpen} onOpenChange={setEssayMarkerOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
+              >
+                <PenLine className="h-4 w-4" />
+                <span className="hidden sm:inline">Essay Marker</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              className="w-[90vw] max-w-md p-0 bg-background border border-border shadow-xl" 
+              align="start"
+              sideOffset={8}
+            >
+              <div className="p-4">
+                <EssayMarkerTool />
               </div>
             </PopoverContent>
           </Popover>
