@@ -193,6 +193,23 @@ export const ComparePage = () => {
     <div className="min-h-screen bg-background font-sans">
       <Header showNavLinks />
       
+      {/* Instagram Follow Banner */}
+      <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 py-3 px-4 text-center text-white">
+        <p className="text-sm font-medium flex items-center justify-center gap-2 flex-wrap">
+          <Instagram className="h-4 w-4" />
+          Please follow us on{' '}
+          <a 
+            href="https://www.instagram.com/astar.ai/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="underline font-semibold hover:opacity-80 transition-opacity"
+          >
+            Instagram
+          </a>
+          {' '}to stay updated on the latest features, deals and events!
+        </p>
+      </div>
+      
       <main className="py-8 px-8 max-w-4xl mx-auto text-center">
         <h1 className="text-4xl font-bold mb-8 flex items-center justify-center gap-3 flex-wrap">
           Choose Your 
