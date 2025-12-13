@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { BarChart2, Search, Loader2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { diagrams, Diagram } from '@/data/diagrams';
 
 export const DiagramFinderTool: React.FC = () => {
@@ -14,7 +13,6 @@ export const DiagramFinderTool: React.FC = () => {
 
   const findDiagram = async () => {
     if (!inputText.trim()) {
-      toast.error('Please paste some text first');
       return;
     }
 
@@ -29,7 +27,6 @@ export const DiagramFinderTool: React.FC = () => {
 
       if (error) {
         console.error('Find diagram error:', error);
-        toast.error('Failed to find diagram. Please try again.');
         return;
       }
 
@@ -37,18 +34,14 @@ export const DiagramFinderTool: React.FC = () => {
         const found = diagrams.find(d => d.id === data.diagramId);
         if (found) {
           setMatchedDiagram(found);
-          toast.success(`Found: ${found.title}`);
         } else {
           setNoMatch(true);
-          toast.info('No matching diagram found');
         }
       } else {
         setNoMatch(true);
-        toast.info('No matching diagram found');
       }
     } catch (error) {
       console.error('Error finding diagram:', error);
-      toast.error('An error occurred. Please try again.');
     } finally {
       setIsSearching(false);
     }

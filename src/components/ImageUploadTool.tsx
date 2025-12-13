@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Image, Copy, Check, X, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 type ImageType = 'exam-question' | 'diagram' | 'notes' | 'general';
 
@@ -31,13 +30,11 @@ export const ImageUploadTool: React.FC = () => {
   const processFile = (file: File) => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('Image must be less than 10MB');
       return;
     }
 
@@ -95,19 +92,14 @@ export const ImageUploadTool: React.FC = () => {
 
       if (error) {
         console.error('Analysis error:', error);
-        toast.error('Failed to analyze image. Please try again.');
         return;
       }
 
       if (data?.extractedText) {
         setExtractedText(data.extractedText);
-        toast.success('Image analyzed successfully!');
-      } else if (data?.error) {
-        toast.error(data.error);
       }
     } catch (error) {
       console.error('Error analyzing image:', error);
-      toast.error('An error occurred. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -119,10 +111,9 @@ export const ImageUploadTool: React.FC = () => {
     try {
       await navigator.clipboard.writeText(extractedText);
       setCopied(true);
-      toast.success('Copied to clipboard! Paste it in the chat.');
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      toast.error('Failed to copy. Please select and copy manually.');
+      console.error('Failed to copy:', error);
     }
   };
 
