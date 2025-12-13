@@ -9,7 +9,7 @@ export const AQAFreeVersionPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header showNavLinks />
+      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked />
       
       <div className="flex-1 relative">
         <iframe
