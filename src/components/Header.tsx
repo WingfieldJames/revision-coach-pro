@@ -7,20 +7,22 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ImageUploadTool } from '@/components/ImageUploadTool';
 import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
-import { Camera, BarChart2, PenLine } from 'lucide-react';
+import { Camera, BarChart2, PenLine, Lock } from 'lucide-react';
 
 interface HeaderProps {
   showNavLinks?: boolean;
   showImageTool?: boolean;
   showDiagramTool?: boolean;
   showEssayMarker?: boolean;
+  toolsLocked?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
   showNavLinks = false,
   showImageTool = false,
   showDiagramTool = false,
-  showEssayMarker = false
+  showEssayMarker = false,
+  toolsLocked = false
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -28,6 +30,28 @@ export const Header: React.FC<HeaderProps> = ({
   const [imageToolOpen, setImageToolOpen] = useState(false);
   const [diagramToolOpen, setDiagramToolOpen] = useState(false);
   const [essayMarkerOpen, setEssayMarkerOpen] = useState(false);
+
+  const LockedToolContent = () => (
+    <div className="text-center py-6 px-4">
+      <Lock className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
+      <h3 className="font-semibold text-lg mb-2">Deluxe Feature</h3>
+      <p className="text-muted-foreground text-sm mb-4">
+        To access this feature, you need to upgrade to the Deluxe plan.
+      </p>
+      <Button 
+        variant="brand" 
+        size="sm"
+        onClick={() => {
+          setImageToolOpen(false);
+          setDiagramToolOpen(false);
+          setEssayMarkerOpen(false);
+          navigate('/compare');
+        }}
+      >
+        Upgrade to Deluxe
+      </Button>
+    </div>
+  );
 
   // Close all popovers when clicking on iframe (detected via window blur)
   useEffect(() => {
@@ -117,7 +141,7 @@ export const Header: React.FC<HeaderProps> = ({
               sideOffset={8}
             >
               <div className="p-4">
-                <ImageUploadTool />
+                {toolsLocked ? <LockedToolContent /> : <ImageUploadTool />}
               </div>
             </PopoverContent>
           </Popover>
@@ -141,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({
               sideOffset={8}
             >
               <div className="p-4">
-                <DiagramFinderTool />
+                {toolsLocked ? <LockedToolContent /> : <DiagramFinderTool />}
               </div>
             </PopoverContent>
           </Popover>
@@ -165,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
               sideOffset={8}
             >
               <div className="p-4">
-                <EssayMarkerTool />
+                {toolsLocked ? <LockedToolContent /> : <EssayMarkerTool />}
               </div>
             </PopoverContent>
           </Popover>
