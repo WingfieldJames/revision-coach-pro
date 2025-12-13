@@ -194,6 +194,7 @@ serve(async (req) => {
             }
             
             // Also update legacy users table for backward compatibility
+            // First try to update, if no rows affected, insert
             const updateData: any = {
               is_premium: true,
               subscription_tier: "Deluxe",
@@ -204,13 +205,40 @@ serve(async (req) => {
               updated_at: new Date().toISOString()
             };
             
-            const { error } = await supabaseClient
+            const { data: updateResult, error: updateError } = await supabaseClient
               .from('users')
               .update(updateData)
-              .eq('email', customerEmail);
+              .eq('email', customerEmail)
+              .select();
 
-            if (error) {
-              logStep("ERROR: Failed to update user", { email: customerEmail, error });
+            if (updateError) {
+              logStep("ERROR: Failed to update user", { email: customerEmail, error: updateError });
+            } else if (!updateResult || updateResult.length === 0) {
+              // User doesn't exist in users table, insert them
+              logStep("User not found in users table, inserting", { email: customerEmail, userId });
+              
+              const insertData: any = {
+                id: userId,
+                email: customerEmail,
+                is_premium: true,
+                subscription_tier: "Deluxe",
+                payment_type: paymentType,
+                stripe_customer_id: customerId,
+                stripe_subscription_id: stripeSubscriptionId,
+                subscription_end: subscriptionEnd,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+              
+              const { error: insertError } = await supabaseClient
+                .from('users')
+                .insert(insertData);
+                
+              if (insertError) {
+                logStep("ERROR: Failed to insert user", { email: customerEmail, error: insertError });
+              } else {
+                logStep("Successfully inserted new premium user", { email: customerEmail, userId });
+              }
             } else {
               logStep("Successfully updated user to premium", { email: customerEmail, paymentType });
             }
