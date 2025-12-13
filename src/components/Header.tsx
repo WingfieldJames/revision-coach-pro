@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +28,18 @@ export const Header: React.FC<HeaderProps> = ({
   const [imageToolOpen, setImageToolOpen] = useState(false);
   const [diagramToolOpen, setDiagramToolOpen] = useState(false);
   const [essayMarkerOpen, setEssayMarkerOpen] = useState(false);
+
+  // Close all popovers when clicking on iframe (detected via window blur)
+  useEffect(() => {
+    const closeAllPopovers = () => {
+      setImageToolOpen(false);
+      setDiagramToolOpen(false);
+      setEssayMarkerOpen(false);
+    };
+
+    window.addEventListener('blur', closeAllPopovers);
+    return () => window.removeEventListener('blur', closeAllPopovers);
+  }, []);
   
   // Determine selected tab based on current route
   const getSelectedTab = () => {
