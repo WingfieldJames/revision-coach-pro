@@ -199,7 +199,7 @@ export const ComparePage = () => {
           <Instagram className="h-4 w-4" />
           Please follow us on{' '}
           <a 
-            href="https://www.instagram.com/astar.ai/" 
+            href="https://www.instagram.com/a.star.ai/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="underline font-semibold hover:opacity-80 transition-opacity"
