@@ -26,11 +26,13 @@ const InteractiveHoverButton = React.forwardRef<
       {...props}
     >
       <div className={cn(
-        "absolute left-[50%] top-[50%] h-2 w-2 scale-0 rounded-lg transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8] z-0",
+        "absolute left-[50%] top-[50%] h-2 w-2 scale-0 rounded-lg z-0",
+        "transition-[left,top,width,height,transform] duration-200 ease-out",
+        "group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8]",
         isReverse ? "bg-white" : "bg-gradient-brand"
       )}></div>
       <span className={cn(
-        "relative z-20 inline-block transition-all duration-300",
+        "relative z-20 inline-block transition-colors duration-200 ease-out",
         isReverse ? "text-white group-hover:text-foreground" : "group-hover:text-white"
       )}>
         {text}
