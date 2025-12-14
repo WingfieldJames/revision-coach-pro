@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Image, Copy, Check, X, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { fileDialogOpen } from '@/components/Header';
 
 type ImageType = 'exam-question' | 'diagram' | 'notes' | 'general';
 
@@ -30,7 +31,13 @@ export const ImageUploadTool: React.FC = () => {
   // Handle click on file input - prevent popover from closing when file dialog opens
   const handleUploadClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Set flag to prevent blur handler from closing popover
+    fileDialogOpen.current = true;
     fileInputRef.current?.click();
+    // Reset flag after a delay (file dialog will have opened by then)
+    setTimeout(() => {
+      fileDialogOpen.current = false;
+    }, 500);
   };
 
   const processFile = (file: File) => {
