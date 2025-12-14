@@ -27,6 +27,12 @@ export const ImageUploadTool: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Handle click on file input - prevent popover from closing when file dialog opens
+  const handleUploadClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    fileInputRef.current?.click();
+  };
+
   const processFile = (file: File) => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
@@ -159,18 +165,27 @@ export const ImageUploadTool: React.FC = () => {
 
       {/* Upload Area */}
       {!imagePreview ? (
-        <label 
+        <div
           className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
             isDragging 
               ? 'border-primary bg-primary/10' 
               : 'border-border hover:bg-muted/50'
           }`}
-          onDragOver={handleDragOver}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
+          onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
+          onDrop={(e) => { 
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            setIsDragging(false);
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+              processFile(files[0]);
+            }
+          }}
+          onClick={handleUploadClick}
         >
-          <div className="flex flex-col items-center justify-center py-4">
+          <div className="flex flex-col items-center justify-center py-4 pointer-events-none">
             <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               <span className="font-semibold">{isDragging ? 'Drop image here' : 'Click or drag to upload'}</span>
@@ -184,7 +199,7 @@ export const ImageUploadTool: React.FC = () => {
             accept="image/*"
             onChange={handleFileSelect}
           />
-        </label>
+        </div>
       ) : (
         <div className="space-y-3">
           {/* Image Preview */}

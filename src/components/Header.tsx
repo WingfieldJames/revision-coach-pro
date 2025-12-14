@@ -124,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
         </Link>
         
         {showImageTool && (
-          <Popover open={imageToolOpen} onOpenChange={setImageToolOpen}>
+          <Popover open={imageToolOpen} onOpenChange={setImageToolOpen} modal={false}>
             <PopoverTrigger asChild>
               <Button 
                 variant="outline" 
@@ -139,6 +139,14 @@ export const Header: React.FC<HeaderProps> = ({
               className="w-[90vw] max-w-md p-0 bg-background border border-border shadow-xl" 
               align="start"
               sideOffset={8}
+              onPointerDownOutside={(e) => {
+                // Prevent closing when clicking outside (e.g., file dialog)
+                e.preventDefault();
+              }}
+              onInteractOutside={(e) => {
+                // Prevent closing on any interaction outside
+                e.preventDefault();
+              }}
             >
               <div className="p-4">
                 {toolsLocked ? <LockedToolContent /> : <ImageUploadTool />}
