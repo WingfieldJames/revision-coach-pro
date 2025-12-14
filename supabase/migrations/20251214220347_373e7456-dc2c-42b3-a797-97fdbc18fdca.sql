@@ -1,0 +1,1 @@
+INSERT INTO affiliates (name, email, code, commission_rate, active) VALUES ('ivy', 'h.pan11@lse.ac.uk', 'ivy', 0.15, true);
