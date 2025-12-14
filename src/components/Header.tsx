@@ -9,6 +9,9 @@ import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
 import { Camera, BarChart2, PenLine, Lock } from 'lucide-react';
 
+// Global flag to track when file dialog is open (set by ImageUploadTool)
+export const fileDialogOpen = { current: false };
+
 interface HeaderProps {
   showNavLinks?: boolean;
   showImageTool?: boolean;
@@ -52,6 +55,23 @@ export const Header: React.FC<HeaderProps> = ({
       </Button>
     </div>
   );
+
+  // Close all popovers when clicking on iframe (detected via window blur)
+  // Skip if file dialog is open to prevent closing when picking a file
+  useEffect(() => {
+    const closeAllPopovers = () => {
+      // Don't close if file dialog is open
+      if (fileDialogOpen.current) {
+        return;
+      }
+      setImageToolOpen(false);
+      setDiagramToolOpen(false);
+      setEssayMarkerOpen(false);
+    };
+
+    window.addEventListener('blur', closeAllPopovers);
+    return () => window.removeEventListener('blur', closeAllPopovers);
+  }, []);
 
   // Determine selected tab based on current route
   const getSelectedTab = () => {
