@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Image, Copy, Check, X, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-
+import { fileDialogOpen } from '@/components/Header';
 type ImageType = 'exam-question' | 'diagram' | 'notes' | 'general';
 
 interface ImageTypeOption {
@@ -27,12 +27,33 @@ export const ImageUploadTool: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle click on file input
+  // Handle click on file input - prevent popover from closing when file dialog opens
   const handleUploadClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Set flag to prevent blur handler from closing popover
+    fileDialogOpen.current = true;
     fileInputRef.current?.click();
   };
 
+  // Reset file dialog flag when file is selected or dialog is cancelled
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Reset the flag after file dialog closes
+    fileDialogOpen.current = false;
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  };
+
+  // Also reset on window focus (handles cancel case)
+  React.useEffect(() => {
+    const handleFocus = () => {
+      // Small delay to ensure this runs after the blur handler check
+      setTimeout(() => {
+        fileDialogOpen.current = false;
+      }, 100);
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
   const processFile = (file: File) => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
@@ -50,11 +71,6 @@ export const ImageUploadTool: React.FC = () => {
       setExtractedText(null);
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
