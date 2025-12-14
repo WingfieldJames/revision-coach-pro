@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,9 +8,6 @@ import { ImageUploadTool } from '@/components/ImageUploadTool';
 import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
 import { Camera, BarChart2, PenLine, Lock } from 'lucide-react';
-
-// Global flag to track when file dialog is open
-export const fileDialogOpen = { current: false };
 
 interface HeaderProps {
   showNavLinks?: boolean;
@@ -56,23 +53,6 @@ export const Header: React.FC<HeaderProps> = ({
     </div>
   );
 
-  // Close all popovers when clicking on iframe (detected via window blur)
-  // Skip if file dialog is open to prevent closing when picking a file
-  useEffect(() => {
-    const closeAllPopovers = () => {
-      // Don't close if file dialog is open
-      if (fileDialogOpen.current) {
-        return;
-      }
-      setImageToolOpen(false);
-      setDiagramToolOpen(false);
-      setEssayMarkerOpen(false);
-    };
-
-    window.addEventListener('blur', closeAllPopovers);
-    return () => window.removeEventListener('blur', closeAllPopovers);
-  }, []);
-  
   // Determine selected tab based on current route
   const getSelectedTab = () => {
     if (location.pathname === '/dashboard') return 'profile';
