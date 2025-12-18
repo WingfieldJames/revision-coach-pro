@@ -1,3 +1,6 @@
+# A* AI - astarai.co.uk
+# https://astarai.co.uk
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +15,6 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://astarai.co.uk/sitemap.xml
