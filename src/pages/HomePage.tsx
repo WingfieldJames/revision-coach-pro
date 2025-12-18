@@ -35,10 +35,10 @@ export const HomePage = () => {
               </div>
               <h1 className="text-6xl font-bold mb-3 flex flex-wrap items-center gap-2">
                 Meet 
-                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-16" />
+                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-16" />
               </h1>
               <h2 className="text-4xl font-medium text-foreground mb-6 leading-tight">
-                Your AI-powered coach for A-Level Economics
+                Your AI-powered coach for A-Level Edexcel Economics - astarai
               </h2>
               <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
                 Trained on past papers, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
@@ -48,7 +48,7 @@ export const HomePage = () => {
             <div className="px-6 mb-6">
               <img 
                 src="/lovable-uploads/hero-mobile-phone.png" 
-                alt="A* AI Demo" 
+                alt="A* AI Demo - A Star AI mobile interface for A-Level Economics revision" 
                 className="mx-auto rounded-2xl object-contain w-full max-w-[360px]" 
               />
             </div>
@@ -76,16 +76,16 @@ export const HomePage = () => {
                     </div>
                     <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
                       Meet 
-                      <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-9 md:h-10 lg:h-12" />
+                      <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-9 md:h-10 lg:h-12" />
                     </h1>
                     <h2 className="text-base md:text-xl lg:text-2xl font-medium text-foreground mb-6 md:mb-8">
-                      Your AI-powered coach for A-Level Economics
+                      Your AI-powered coach for A-Level Edexcel Economics - astarai
                     </h2>
                   </div>
                 </>}>
               <img 
                 src="/lovable-uploads/hero-ipad-demo.jpg" 
-                alt="A* AI Demo" 
+                alt="A* AI Demo - A Star AI interface showing A-Level Economics revision features on iPad" 
                 className="mx-auto rounded-2xl object-contain h-full object-center" 
               />
             </ContainerScroll>
@@ -111,7 +111,7 @@ export const HomePage = () => {
       {/* Testimonials Section */}
       <section data-section="testimonials" className="py-16 px-8 text-center bg-muted">
         <h2 className="text-3xl font-bold mb-8">
-          Used by your favourite study influencers & top students 👀
+          A* AI is used by your favourite study influencers & top students 👀
         </h2>
         
         <div className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
@@ -318,7 +318,7 @@ export const HomePage = () => {
           </div>
           
           <p className="text-muted-foreground mb-6">
-            Your AI-powered A-Level revision coach for Edexcel Economics
+            A* AI (A Star AI) - Your AI-powered A-Level revision coach for Edexcel Economics | astarai
           </p>
           
           <div className="flex flex-wrap justify-center gap-4 mb-6 text-muted-foreground">
