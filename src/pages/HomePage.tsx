@@ -111,7 +111,7 @@ export const HomePage = () => {
       {/* Testimonials Section */}
       <section data-section="testimonials" className="py-16 px-8 text-center bg-muted">
         <h2 className="text-3xl font-bold mb-8">
-          A* AI is used by your favourite study influencers & top students 👀
+          Used by your favourite study influencers & top students 👀
         </h2>
         
         <div className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
