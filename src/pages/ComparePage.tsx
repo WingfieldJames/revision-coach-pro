@@ -18,35 +18,62 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Check, Star, Instagram } from 'lucide-react';
 
+type Subject = 'economics' | 'chemistry' | 'computer-science' | 'maths';
+type ExamBoard = 'edexcel' | 'aqa' | 'ocr';
+
 export const ComparePage = () => {
   const { user, profile, loading } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
-  const [productType, setProductType] = useState<'edexcel' | 'aqa'>('edexcel');
+  const [subject, setSubject] = useState<Subject>('economics');
+  const [examBoard, setExamBoard] = useState<ExamBoard>('edexcel');
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [hasProductAccess, setHasProductAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(false);
 
-  // Product IDs
-  const PRODUCT_IDS = {
-    edexcel: '6dc19d53-8a88-4741-9528-f25af97afb21',
-    aqa: '17ade690-8c44-4961-83b5-0edf42a9faea'
+  // Product IDs mapped by slug
+  const PRODUCT_IDS: Record<string, string> = {
+    'edexcel-economics': '6dc19d53-8a88-4741-9528-f25af97afb21',
+    'aqa-economics': '17ade690-8c44-4961-83b5-0edf42a9faea',
+    'ocr-chemistry': '6c32e2fb-4c1d-4166-b3e8-70c22e1c90c8',
+    'ocr-computer-science': '5d05830b-de7b-4206-8f49-6d3695324eb6'
   };
 
-  // Check product access when user or productType changes
+  // Get current product slug based on subject and exam board
+  const getCurrentProductSlug = () => {
+    if (subject === 'economics') {
+      return examBoard === 'aqa' ? 'aqa-economics' : 'edexcel-economics';
+    }
+    if (subject === 'chemistry') return 'ocr-chemistry';
+    if (subject === 'computer-science') return 'ocr-computer-science';
+    return null;
+  };
+
+  // Check if current subject is coming soon
+  const isComingSoon = subject === 'chemistry' || subject === 'computer-science' || subject === 'maths';
+
+  // Subject display names
+  const subjectLabels: Record<Subject, string> = {
+    'economics': 'Economics',
+    'chemistry': 'Chemistry',
+    'computer-science': 'Computer Science',
+    'maths': 'Maths'
+  };
+
+  // Check product access when user or subject/examBoard changes
   useEffect(() => {
     const checkAccess = async () => {
-      console.log('Checking access for user:', user?.id, 'productType:', productType);
+      const productSlug = getCurrentProductSlug();
+      console.log('Checking access for user:', user?.id, 'subject:', subject, 'examBoard:', examBoard);
       
-      if (!user || loading) {
-        console.log('No user or still loading, setting hasAccess to false');
+      if (!user || loading || !productSlug || isComingSoon) {
+        console.log('No user, still loading, or coming soon - setting hasAccess to false');
         setHasProductAccess(false);
         return;
       }
 
       setCheckingAccess(true);
-      const productSlug = productType === 'aqa' ? 'aqa-economics' : 'edexcel-economics';
       console.log('Checking access for product slug:', productSlug);
       
       try {
@@ -62,7 +89,7 @@ export const ComparePage = () => {
     };
 
     checkAccess();
-  }, [user, productType, loading]);
+  }, [user, subject, examBoard, loading, isComingSoon]);
 
   // Scroll to top when component mounts, or to testimonials if hash is present
   useEffect(() => {
@@ -96,19 +123,23 @@ export const ComparePage = () => {
   }, [shouldCheckout, user, profile?.is_premium, loading, navigate]);
 
   const handleFreeClick = async () => {
+    if (isComingSoon) return; // Don't allow clicks for coming soon subjects
+    
     if (!user) {
       // NOT logged in → Login → Free version
-      const redirectPath = productType === 'aqa' ? 'aqa-free-version' : 'free-version';
+      const redirectPath = examBoard === 'aqa' ? 'aqa-free-version' : 'free-version';
       window.location.href = `/login?redirect=${redirectPath}`;
       return;
     }
     
     // LOGGED in (any user) → Free version
-    const freePath = productType === 'aqa' ? '/aqa-free-version' : '/free-version';
+    const freePath = examBoard === 'aqa' ? '/aqa-free-version' : '/free-version';
     window.location.href = freePath;
   };
 
   const handlePremiumClick = async () => {
+    if (isComingSoon) return; // Don't allow clicks for coming soon subjects
+    
     console.log('Button clicked! User:', user ? 'logged in' : 'not logged in', 'hasProductAccess:', hasProductAccess);
     
     if (!user) {
@@ -122,7 +153,7 @@ export const ComparePage = () => {
     if (hasProductAccess) {
       // User has access → redirect to premium page
       console.log('User has access, redirecting to premium page');
-      const premiumPath = productType === 'aqa' ? '/aqa-premium' : '/premium';
+      const premiumPath = examBoard === 'aqa' ? '/aqa-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
@@ -130,7 +161,8 @@ export const ComparePage = () => {
     // User doesn't have access → Stripe checkout
     console.log('User does not have access, starting checkout');
     try {
-      console.log('Creating checkout session with payment type:', paymentType, 'for product:', productType);
+      const productSlug = getCurrentProductSlug();
+      console.log('Creating checkout session with payment type:', paymentType, 'for product:', productSlug);
       
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
@@ -141,7 +173,7 @@ export const ComparePage = () => {
         return;
       }
 
-      const productId = PRODUCT_IDS[productType];
+      const productId = productSlug ? PRODUCT_IDS[productSlug] : null;
       console.log('Using product ID:', productId);
 
       // Get affiliate code if available
@@ -221,53 +253,68 @@ export const ComparePage = () => {
           Plan
         </h1>
 
-        {/* Combined Toggle - Subject Dropdown + Product Toggle */}
+        {/* Combined Toggle - Subject Dropdown + Exam Board Toggle */}
         <div className="flex justify-center mb-12">
           <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
             {/* Subject Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
-                  Economics
+                  {subjectLabels[subject]}
                   <ChevronDown className="h-3 w-3" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-background border border-border z-50">
-                <DropdownMenuItem className="cursor-pointer hover:bg-muted">
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-muted"
+                  onClick={() => { setSubject('economics'); setExamBoard('edexcel'); }}
+                >
                   Economics
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-default opacity-50">
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-muted"
+                  onClick={() => { setSubject('chemistry'); setExamBoard('ocr'); }}
+                >
+                  Chemistry
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-muted"
+                  onClick={() => { setSubject('computer-science'); setExamBoard('ocr'); }}
+                >
+                  Computer Science
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-default text-muted-foreground">
                   Maths (coming soon)
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-default opacity-50">
-                  Computer Science (coming soon)
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-default opacity-50">
-                  Chemistry (coming soon)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Product Type Toggle */}
-            <ToggleGroup 
-              type="single" 
-              value={productType} 
-              onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa')}
-              className="flex items-center gap-1"
-            >
-              <ToggleGroupItem 
-                value="edexcel" 
-                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+            {/* Exam Board Toggle - Different options based on subject */}
+            {subject === 'economics' ? (
+              <ToggleGroup 
+                type="single" 
+                value={examBoard} 
+                onValueChange={(value) => value && setExamBoard(value as ExamBoard)}
+                className="flex items-center gap-1"
               >
-                Edexcel
-              </ToggleGroupItem>
-              <ToggleGroupItem 
-                value="aqa" 
-                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-              >
-                AQA
-              </ToggleGroupItem>
-            </ToggleGroup>
+                <ToggleGroupItem 
+                  value="edexcel" 
+                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                >
+                  Edexcel
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="aqa" 
+                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                >
+                  AQA
+                </ToggleGroupItem>
+              </ToggleGroup>
+            ) : (
+              <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
+                OCR
+              </div>
+            )}
           </div>
         </div>
 
@@ -276,12 +323,21 @@ export const ComparePage = () => {
           {/* Free Plan */}
           <div className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-6">🎓 Free Plan</h2>
-            <p className="text-3xl lg:text-4xl font-bold mb-2">£0</p>
-            <p className="text-sm lg:text-base text-muted-foreground mb-6">Forever free</p>
+            {isComingSoon ? (
+              <>
+                <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
+                <p className="text-sm lg:text-base text-muted-foreground mb-6">Stay tuned!</p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl lg:text-4xl font-bold mb-2">£0</p>
+                <p className="text-sm lg:text-base text-muted-foreground mb-6">Forever free</p>
+              </>
+            )}
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on 2024-2023 {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA Economics'} past papers (P1–P3)
+                AI trained on 2024-2023 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : `OCR ${subjectLabels[subject]}`} past papers
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -301,20 +357,30 @@ export const ComparePage = () => {
               size="lg" 
               className="w-full"
               onClick={handleFreeClick}
+              disabled={isComingSoon}
             >
-              Try free now
+              {isComingSoon ? 'Coming Soon' : 'Try free now'}
             </Button>
           </div>
 
           {/* Monthly Plan - Desktop only */}
           <div className="hidden lg:block bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Monthly</h2>
-            <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£12.99</span> £6.99<span className="text-base lg:text-lg font-normal">/mo</span></p>
-            <p className="text-sm lg:text-base text-muted-foreground mb-6">Cancel anytime</p>
+            {isComingSoon ? (
+              <>
+                <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
+                <p className="text-sm lg:text-base text-muted-foreground mb-6">Stay tuned!</p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£12.99</span> £6.99<span className="text-base lg:text-lg font-normal">/mo</span></p>
+                <p className="text-sm lg:text-base text-muted-foreground mb-6">Cancel anytime</p>
+              </>
+            )}
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA'} past papers (2017-2024, P1-P3)
+                AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : `OCR ${subjectLabels[subject]}`} past papers
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -326,7 +392,7 @@ export const ComparePage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire {productType === 'edexcel' ? 'Edexcel' : 'AQA'} specification
+                Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : 'OCR'} specification
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -345,23 +411,33 @@ export const ComparePage = () => {
                 setPaymentType('monthly');
                 handlePremiumClick();
               }}
+              disabled={isComingSoon}
             >
-              {hasProductAccess ? 'Launch Deluxe' : 'Get Monthly'}
+              {isComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Monthly'}
             </Button>
           </div>
 
           {/* Lifetime Plan */}
           <div className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left border-2 border-primary relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs lg:text-sm font-semibold px-4 py-1.5 rounded-full">
-              BEST VALUE
+              {isComingSoon ? 'COMING SOON' : 'BEST VALUE'}
             </div>
             <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Lifetime</h2>
-            <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£79.99</span> £34.99</p>
-            <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 56%</p>
+            {isComingSoon ? (
+              <>
+                <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
+                <p className="text-sm lg:text-base text-muted-foreground mb-6">Stay tuned!</p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£79.99</span> £34.99</p>
+                <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 56%</p>
+              </>
+            )}
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA'} past papers (2017-2024, P1-P3)
+                AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : `OCR ${subjectLabels[subject]}`} past papers
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -373,7 +449,7 @@ export const ComparePage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire {productType === 'edexcel' ? 'Edexcel' : 'AQA'} specification
+                Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : 'OCR'} specification
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -392,8 +468,9 @@ export const ComparePage = () => {
                 setPaymentType('lifetime');
                 handlePremiumClick();
               }}
+              disabled={isComingSoon}
             >
-              {hasProductAccess ? 'Launch Deluxe' : 'Get Lifetime'}
+              {isComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Lifetime'}
             </Button>
           </div>
         </div>
