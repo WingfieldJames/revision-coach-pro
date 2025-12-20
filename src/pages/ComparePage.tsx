@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Star, Instagram } from 'lucide-react';
 
 type Subject = 'economics' | 'chemistry' | 'computer-science' | 'maths';
-type ExamBoard = 'edexcel' | 'aqa' | 'ocr';
+type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 
 export const ComparePage = () => {
   const { user, profile, loading } = useAuth();
@@ -36,6 +36,7 @@ export const ComparePage = () => {
   const PRODUCT_IDS: Record<string, string> = {
     'edexcel-economics': '6dc19d53-8a88-4741-9528-f25af97afb21',
     'aqa-economics': '17ade690-8c44-4961-83b5-0edf42a9faea',
+    'cie-economics': '9a710cf9-0523-4c1f-82c6-0e02b19087e5',
     'ocr-chemistry': '6c32e2fb-4c1d-4166-b3e8-70c22e1c90c8',
     'ocr-computer-science': '5d05830b-de7b-4206-8f49-6d3695324eb6'
   };
@@ -43,7 +44,9 @@ export const ComparePage = () => {
   // Get current product slug based on subject and exam board
   const getCurrentProductSlug = () => {
     if (subject === 'economics') {
-      return examBoard === 'aqa' ? 'aqa-economics' : 'edexcel-economics';
+      if (examBoard === 'aqa') return 'aqa-economics';
+      if (examBoard === 'cie') return 'cie-economics';
+      return 'edexcel-economics';
     }
     if (subject === 'chemistry') return 'ocr-chemistry';
     if (subject === 'computer-science') return 'ocr-computer-science';
@@ -127,13 +130,13 @@ export const ComparePage = () => {
     
     if (!user) {
       // NOT logged in → Login → Free version
-      const redirectPath = examBoard === 'aqa' ? 'aqa-free-version' : 'free-version';
+      const redirectPath = examBoard === 'aqa' ? 'aqa-free-version' : examBoard === 'cie' ? 'cie-free-version' : 'free-version';
       window.location.href = `/login?redirect=${redirectPath}`;
       return;
     }
     
     // LOGGED in (any user) → Free version
-    const freePath = examBoard === 'aqa' ? '/aqa-free-version' : '/free-version';
+    const freePath = examBoard === 'aqa' ? '/aqa-free-version' : examBoard === 'cie' ? '/cie-free-version' : '/free-version';
     window.location.href = freePath;
   };
 
@@ -153,7 +156,7 @@ export const ComparePage = () => {
     if (hasProductAccess) {
       // User has access → redirect to premium page
       console.log('User has access, redirecting to premium page');
-      const premiumPath = examBoard === 'aqa' ? '/aqa-premium' : '/premium';
+      const premiumPath = examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
@@ -299,15 +302,21 @@ export const ComparePage = () => {
               >
                 <ToggleGroupItem 
                   value="edexcel" 
-                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
                 >
                   Edexcel
                 </ToggleGroupItem>
                 <ToggleGroupItem 
                   value="aqa" 
-                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
                 >
                   AQA
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="cie" 
+                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                >
+                  CIE
                 </ToggleGroupItem>
               </ToggleGroup>
             ) : (
@@ -337,7 +346,7 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on 2024-2023 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : `OCR ${subjectLabels[subject]}`} past papers
+                AI trained on 2024-2023 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : examBoard === 'cie' ? 'CIE Economics' : `OCR ${subjectLabels[subject]}`} past papers
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -380,7 +389,7 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : `OCR ${subjectLabels[subject]}`} past papers
+                AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -392,7 +401,7 @@ export const ComparePage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : 'OCR'} specification
+                Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -437,7 +446,7 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : `OCR ${subjectLabels[subject]}`} past papers
+                AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -449,7 +458,7 @@ export const ComparePage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : 'OCR'} specification
+                Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>

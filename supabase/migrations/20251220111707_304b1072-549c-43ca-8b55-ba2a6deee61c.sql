@@ -1,0 +1,2 @@
+INSERT INTO products (name, slug, subject, exam_board, monthly_price, lifetime_price, active, chatbase_free_url, chatbase_premium_url) 
+VALUES ('CIE Economics Deluxe', 'cie-economics', 'Economics', 'CIE', 699, 3499, true, NULL, NULL);
