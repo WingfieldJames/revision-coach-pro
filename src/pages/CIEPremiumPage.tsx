@@ -69,11 +69,16 @@ export const CIEPremiumPage = () => {
         <Header showNavLinks showImageTool showDiagramTool />
       </div>
       
-      <div className="flex-1 relative flex items-center justify-center">
-        <div className="text-center p-8">
-          <h1 className="text-2xl font-bold mb-4">CIE Economics Premium Version</h1>
-          <p className="text-muted-foreground">Coming soon! The premium chatbot will be available shortly.</p>
-        </div>
+      <div className="flex-1 relative">
+        <iframe
+          src="https://www.chatbase.co/chatbot-iframe/qZY8ajOntZ2Tem3CqdOr0"
+          width="100%"
+          style={{ height: '100%', minHeight: '700px' }}
+          frameBorder="0"
+          allow="clipboard-write"
+          title="A* AI CIE Premium Version Chatbot"
+          className="absolute inset-0"
+        />
       </div>
     </div>
   );
