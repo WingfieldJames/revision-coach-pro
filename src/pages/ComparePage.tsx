@@ -382,7 +382,7 @@ export const ComparePage = () => {
               </>
             ) : (
               <>
-                <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£12.99</span> £6.99<span className="text-base lg:text-lg font-normal">/mo</span></p>
+                <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£9.99</span> £4.99<span className="text-base lg:text-lg font-normal">/mo</span></p>
                 <p className="text-sm lg:text-base text-muted-foreground mb-6">Cancel anytime</p>
               </>
             )}
@@ -439,8 +439,8 @@ export const ComparePage = () => {
               </>
             ) : (
               <>
-                <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£79.99</span> £34.99</p>
-                <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 56%</p>
+                <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£49.99</span> £24.99</p>
+                <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 50%</p>
               </>
             )}
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
