@@ -14,10 +14,10 @@ import { Trash2, ExternalLink, Instagram, ChevronDown } from 'lucide-react';
 export const DashboardPage = () => {
   const { user, profile, refreshProfile, loading } = useAuth();
   const [searchParams] = useSearchParams();
-  const [productType, setProductType] = useState<'edexcel' | 'aqa'>(() => {
+  const [productType, setProductType] = useState<'edexcel' | 'aqa' | 'cie'>(() => {
     // Load saved preference from localStorage
     const saved = localStorage.getItem('preferred-exam-board');
-    return (saved === 'aqa' || saved === 'edexcel') ? saved : 'edexcel';
+    return (saved === 'aqa' || saved === 'edexcel' || saved === 'cie') ? saved : 'edexcel';
   });
 
   // Save preference whenever it changes
@@ -119,20 +119,26 @@ export const DashboardPage = () => {
             <ToggleGroup 
               type="single" 
               value={productType} 
-              onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa')}
+              onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa' | 'cie')}
               className="flex items-center gap-1"
             >
               <ToggleGroupItem 
                 value="edexcel" 
-                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
               >
                 Edexcel
               </ToggleGroupItem>
               <ToggleGroupItem 
                 value="aqa" 
-                className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
               >
                 AQA
+              </ToggleGroupItem>
+              <ToggleGroupItem 
+                value="cie" 
+                className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              >
+                CIE
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -145,7 +151,7 @@ export const DashboardPage = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on the 2024-2023 {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA Economics'} past papers (P1–P3)
+                AI trained on the 2024-2023 {productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA Economics' : 'CIE Economics'} past papers (P1–P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -166,14 +172,14 @@ export const DashboardPage = () => {
               className="w-full"
               asChild
             >
-              <Link to={productType === 'edexcel' ? '/free-version' : '/aqa-free-version'}>Launch free</Link>
+              <Link to={productType === 'edexcel' ? '/free-version' : productType === 'aqa' ? '/aqa-free-version' : '/cie-free-version'}>Launch free</Link>
             </Button>
           </div>
 
           {/* Deluxe Plan */}
           <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${profile?.is_premium ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
             <h2 className="text-2xl font-semibold mb-6">
-              🔥 Deluxe Plan {productType === 'edexcel' ? '(Edexcel)' : '(AQA)'} — <span className="line-through text-red-500">£39.99</span> £19.99 (Lifetime Access)
+              🔥 Deluxe Plan {productType === 'edexcel' ? '(Edexcel)' : productType === 'aqa' ? '(AQA)' : '(CIE)'} — <span className="line-through text-red-500">£49.99</span> £24.99 (Lifetime Access)
               {profile?.is_premium && (
                 <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
                   ACTIVE
@@ -183,7 +189,7 @@ export const DashboardPage = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : 'AQA'} past papers (2017-2024, P1-P3)
+                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA' : 'CIE'} past papers (2017-2024, P1-P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -195,7 +201,7 @@ export const DashboardPage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire {productType === 'edexcel' ? 'Edexcel' : 'AQA'} specification
+                Covers the entire {productType === 'edexcel' ? 'Edexcel' : productType === 'aqa' ? 'AQA' : 'CIE'} specification
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -218,7 +224,7 @@ export const DashboardPage = () => {
                 className="w-full"
                 asChild
               >
-                <Link to={productType === 'edexcel' ? '/premium' : '/aqa-premium'}>Launch Deluxe Version</Link>
+                <Link to={productType === 'edexcel' ? '/premium' : productType === 'aqa' ? '/aqa-premium' : '/cie-premium'}>Launch Deluxe Version</Link>
               </Button>
             ) : (
               <Button 
