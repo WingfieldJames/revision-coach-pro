@@ -203,7 +203,7 @@ export const HomePage = () => {
               <strong className="text-lg font-semibold">📄 Past Paper Mastery</strong>
               <p className="text-muted-foreground mt-2 leading-relaxed">
                 Search and retrieve real past paper questions by topic, paper, or command word. 
-                A* AI understands how Edexcel organises questions, making practice fully targeted.
+                A* AI understands how your exam board organises questions, making practice fully targeted.
               </p>
             </div>
             
