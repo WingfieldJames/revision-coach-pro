@@ -32,19 +32,27 @@ export function TestimonialsSection({
           )}
         </div>
 
-        <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
+        <div className="relative flex w-full overflow-hidden">
           <div
-            className="flex overflow-hidden p-4 [--gap:1.5rem] [gap:var(--gap)] flex-row [--duration:80s]"
+            className="flex [--gap:1.5rem] [gap:var(--gap)] [--duration:120s] animate-marquee"
           >
-            <div
-              className="flex shrink-0 justify-around [gap:var(--gap)] animate-marquee flex-row"
-            >
-              {[...Array(4)].map((_, setIndex) => (
-                testimonials.map((testimonial, i) => (
-                  <TestimonialCard key={`${setIndex}-${i}`} {...testimonial} />
-                ))
-              ))}
-            </div>
+            {/* First set */}
+            {[...Array(6)].map((_, setIndex) => (
+              testimonials.map((testimonial, i) => (
+                <TestimonialCard key={`a-${setIndex}-${i}`} {...testimonial} className="flex-shrink-0" />
+              ))
+            ))}
+          </div>
+          <div
+            className="flex [--gap:1.5rem] [gap:var(--gap)] [--duration:120s] animate-marquee"
+            aria-hidden="true"
+          >
+            {/* Duplicate set for seamless loop */}
+            {[...Array(6)].map((_, setIndex) => (
+              testimonials.map((testimonial, i) => (
+                <TestimonialCard key={`b-${setIndex}-${i}`} {...testimonial} className="flex-shrink-0" />
+              ))
+            ))}
           </div>
         </div>
       </div>
