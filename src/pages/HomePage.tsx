@@ -156,10 +156,8 @@ export const HomePage = () => {
         </div>
         
         <BackgroundPaths>
-          <div className="max-w-7xl mx-auto px-8">
-            <div className="relative w-full aspect-video rounded-lg overflow-hidden">
-              <iframe src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
-            </div>
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+            <iframe src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
           </div>
         </BackgroundPaths>
 
