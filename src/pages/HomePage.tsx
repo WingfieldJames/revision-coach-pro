@@ -261,7 +261,7 @@ export const HomePage = () => {
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                A* AI is purpose-built for Edexcel Economics A (9EC0) and trained on 2017–2023 past papers (P1–P3), official mark schemes, the full spec and A* technique. You get exam-style answers, structures and diagram guidance — not generic AI chat.
+                ChatGPT knows a bit about everything. A*AI knows everything about your exam. Trained on every past paper, mark scheme, and spec point for your board. We find A* students from the UK's top universities and train the AI on exactly how they think - the structures, the shortcuts, the phrases examiners reward. The brain of an A* student, powered by AI.
               </AccordionContent>
             </AccordionItem>
 
