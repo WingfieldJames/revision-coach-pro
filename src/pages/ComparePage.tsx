@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Check, Star, Instagram } from 'lucide-react';
 import { TestimonialsSection } from '@/components/ui/testimonials-with-marquee';
+import { FounderSection } from '@/components/ui/founder-section';
 
 type Subject = 'economics' | 'chemistry' | 'computer-science' | 'maths';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
@@ -528,7 +529,9 @@ export const ComparePage = () => {
         ]}
       />
 
-      {/* Features Section */}
+      {/* Founder Section - Only show for Economics */}
+      {subject === 'economics' && <FounderSection />}
+
       <section className="py-16 px-8">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
           <div className="flex flex-wrap items-center justify-center gap-2">
