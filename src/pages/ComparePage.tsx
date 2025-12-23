@@ -490,6 +490,44 @@ export const ComparePage = () => {
         </p>
       </main>
 
+      <TestimonialsSection
+        title="Loved by sixth formers across the UK ⬇️"
+        testimonials={[
+          {
+            author: {
+              name: "Lucy W",
+              handle: "Year 12",
+              avatar: lucyImage
+            },
+            text: "\"I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩\""
+          },
+          {
+            author: {
+              name: "James W",
+              handle: "LSE",
+              avatar: jamesImage
+            },
+            text: "\"A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick\""
+          },
+          {
+            author: {
+              name: "Elliot S",
+              handle: "Year 13",
+              avatar: hannahImage
+            },
+            text: "\"No fluff, no wasted time — A* AI helped me revise with focus. Being able to search by topic and command word made past paper practice 10x more efficient.\""
+          },
+          {
+            author: {
+              name: "Amira",
+              handle: "LSE Offer Holder",
+              avatar: amiraImage
+            },
+            text: "\"I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant.\""
+          }
+        ]}
+      />
+
       {/* Features Section */}
       <section className="py-16 px-8">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
@@ -539,44 +577,6 @@ export const ComparePage = () => {
           </div>
         </div>
       </section>
-
-      <TestimonialsSection
-        title="Loved by sixth formers across the UK ⬇️"
-        testimonials={[
-          {
-            author: {
-              name: "Lucy W",
-              handle: "Year 12",
-              avatar: lucyImage
-            },
-            text: "\"I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩\""
-          },
-          {
-            author: {
-              name: "James W",
-              handle: "LSE",
-              avatar: jamesImage
-            },
-            text: "\"A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick\""
-          },
-          {
-            author: {
-              name: "Elliot S",
-              handle: "Year 13",
-              avatar: hannahImage
-            },
-            text: "\"No fluff, no wasted time — A* AI helped me revise with focus. Being able to search by topic and command word made past paper practice 10x more efficient.\""
-          },
-          {
-            author: {
-              name: "Amira",
-              handle: "LSE Offer Holder",
-              avatar: amiraImage
-            },
-            text: "\"I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant.\""
-          }
-        ]}
-      />
 
       {!user && (
         <div className="px-8 max-w-4xl mx-auto mt-12 mb-12">
