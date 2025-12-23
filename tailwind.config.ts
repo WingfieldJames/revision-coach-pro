@@ -108,11 +108,19 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				marquee: {
+					from: { transform: 'translateX(0)' },
+					to: { transform: 'translateX(calc(-100% - var(--gap)))' }
 				}
+			},
+			maxWidth: {
+				container: '1280px'
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				marquee: 'marquee var(--duration) linear infinite'
 			}
 		}
 	},

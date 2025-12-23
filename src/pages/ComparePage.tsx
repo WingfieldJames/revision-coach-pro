@@ -17,6 +17,7 @@ import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, Star, Instagram } from 'lucide-react';
+import { TestimonialsSection } from '@/components/ui/testimonials-with-marquee';
 
 type Subject = 'economics' | 'chemistry' | 'computer-science' | 'maths';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
@@ -539,58 +540,43 @@ export const ComparePage = () => {
         </div>
       </section>
 
-      <section id="testimonials" className="py-16 md:py-20 bg-muted w-full">
-        <div className="px-8 max-w-4xl mx-auto">
-          <h2 className="text-3xl text-center mb-12 flex items-center justify-center gap-2">
-            Loved by sixth formers across the UK ⬇️
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-            {/* Testimonial 1 */}
-            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-              <div className="w-12 h-12 rounded-full bg-muted flex-shrink-0"></div>
-              <div>
-                <strong className="text-base text-card-foreground">Lucy W - Year 12</strong>
-                <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                  "I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩"
-                </p>
-              </div>
-            </div>
-
-            {/* Testimonial 2 */}
-            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-              <img src={jamesImage} alt="James profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-              <div>
-                <strong className="text-base text-card-foreground">James W - LSE</strong>
-                <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                  "A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick "
-                </p>
-              </div>
-            </div>
-
-            {/* Testimonial 3 */}
-            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-              <img src={hannahImage} alt="Hannah profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-              <div>
-                <strong className="text-base text-card-foreground">Elliot S - Year 13</strong>
-                <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                  "No fluff, no wasted time — A* AI helped me revise with focus. Being able to search by topic and command word made past paper practice 10x more efficient."
-                </p>
-              </div>
-            </div>
-
-            {/* Testimonial 4 */}
-            <div className="bg-card p-6 rounded-2xl shadow-card flex gap-4 w-full">
-              <img src={amiraImage} alt="Amira profile" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-              <div>
-                <strong className="text-base text-card-foreground">Amira – LSE Offer Holder</strong>
-                <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                  "I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant."
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TestimonialsSection
+        title="Loved by sixth formers across the UK ⬇️"
+        testimonials={[
+          {
+            author: {
+              name: "Lucy W",
+              handle: "Year 12",
+              avatar: lucyImage
+            },
+            text: "\"I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩\""
+          },
+          {
+            author: {
+              name: "James W",
+              handle: "LSE",
+              avatar: jamesImage
+            },
+            text: "\"A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick\""
+          },
+          {
+            author: {
+              name: "Elliot S",
+              handle: "Year 13",
+              avatar: hannahImage
+            },
+            text: "\"No fluff, no wasted time — A* AI helped me revise with focus. Being able to search by topic and command word made past paper practice 10x more efficient.\""
+          },
+          {
+            author: {
+              name: "Amira",
+              handle: "LSE Offer Holder",
+              avatar: amiraImage
+            },
+            text: "\"I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant.\""
+          }
+        ]}
+      />
 
       {!user && (
         <div className="px-8 max-w-4xl mx-auto mt-12 mb-12">
