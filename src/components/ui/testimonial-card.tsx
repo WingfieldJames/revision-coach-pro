@@ -26,29 +26,29 @@ export function TestimonialCard({
     <Card
       {...(href ? { href, target: "_blank", rel: "noopener noreferrer" } : {})}
       className={cn(
-        "flex flex-col rounded-lg border border-border/50",
-        "bg-gradient-to-b from-card to-card/80",
-        "p-4 text-start sm:p-6",
-        "hover:border-border transition-colors duration-300",
-        "max-w-[320px] sm:max-w-[320px]",
+        "flex flex-col rounded-2xl",
+        "bg-card shadow-card",
+        "p-6 text-start",
+        "transition-all duration-200 hover:shadow-elevated",
+        "w-[320px]",
         href && "cursor-pointer",
         className
       )}
     >
-      <div className="flex items-center gap-3">
-        <Avatar className="h-12 w-12">
-          <AvatarImage src={author.avatar} alt={author.name} />
+      <div className="flex items-center gap-4">
+        <Avatar className="h-12 w-12 flex-shrink-0">
+          <AvatarImage src={author.avatar} alt={author.name} className="object-cover" />
         </Avatar>
         <div className="flex flex-col items-start">
-          <h3 className="text-md font-semibold leading-none text-foreground">
+          <strong className="text-base font-semibold text-card-foreground">
             {author.name}
-          </h3>
+          </strong>
           <p className="text-sm text-muted-foreground">
             {author.handle}
           </p>
         </div>
       </div>
-      <p className="sm:text-md mt-4 text-sm text-muted-foreground">
+      <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
         {text}
       </p>
     </Card>
