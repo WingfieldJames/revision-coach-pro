@@ -273,7 +273,10 @@ export const HomePage = () => {
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                Free uses a limited training window and offers general AI help so you can try it out. Deluxe uses the full 2017–2023 training set (P1–P3) with mark-scheme-level feedback, technique and diagrams. It's £19.99 one-time — no subscription. You're not unlocking PDFs; you're using an AI that's trained on them.
+                <p className="mb-3">Free gives you a taste - limited training data and general AI help to try it out.</p>
+                <p className="mb-3">Deluxe is the full experience. Trained on every past paper from 2017-2024, official mark schemes, and the complete specification. Plus exam technique trained directly by A* students - the structures, timings, and evaluation phrases that examiners reward.</p>
+                <p className="mb-3">Deluxe also unlocks premium tools: upload essays and diagrams for instant AI feedback, or use the Diagram Generator to find the exact diagram for any question - all tailored to your subject and exam board.</p>
+                <p>£24.99 once. Less than half a tutoring session. Access forever. That's it.</p>
               </AccordionContent>
             </AccordionItem>
 
