@@ -261,7 +261,9 @@ export const HomePage = () => {
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                ChatGPT knows a bit about everything. A*AI knows everything about your exam. Trained on every past paper, mark scheme, and spec point for your board. We find A* students from the UK's top universities and train the AI on exactly how they think - the structures, the shortcuts, the phrases examiners reward. The brain of an A* student, powered by AI.
+                <p className="mb-3">ChatGPT knows a bit about everything. A*AI knows everything about your exam - from paper layout to the small tricks that push you towards top grades.</p>
+                <p className="mb-3">Trained on every past paper, mark scheme, and spec point for your board. A personalised 24/7 tutor, built specifically for your subject.</p>
+                <p>We handpick A* students from the UK's top universities and train the AI on exactly how they think - the structures, the shortcuts, the phrases examiners reward. The brain of an A* student, powered by AI.</p>
               </AccordionContent>
             </AccordionItem>
 
