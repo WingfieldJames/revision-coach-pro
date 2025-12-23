@@ -286,7 +286,9 @@ export const HomePage = () => {
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                The AI is trained on all papers (P1–P3, 2017–2023), official mark schemes and the complete spec. You also get step-by-step diagrams (AD/AS → buffer stocks), an application/examples bank, model structures and all future updates, with lifetime access.
+                <p className="mb-3">We sat down with A* students from LSE, Cambridge, and Imperial and got them to teach the AI everything - how they structured essays, which examples impressed examiners, the timing tricks that saved them marks.</p>
+                <p className="mb-3">That's layered on top of every past paper (2017-2024), official mark schemes, and the full spec. Plus diagram guidance, application banks, model structures, and all future updates.</p>
+                <p>Lifetime access. One payment. Done.</p>
               </AccordionContent>
             </AccordionItem>
 
