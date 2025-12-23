@@ -143,39 +143,39 @@ export const HomePage = () => {
       </section>
 
       {/* Video Demo Section */}
-      <BackgroundPaths>
-        <section className="py-16 px-8">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span>See</span>
-                <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="h-6 md:h-8" />
-                <span>in</span>
-                <span className="bg-gradient-brand bg-clip-text text-transparent">action</span>
-              </div>
-            </h2>
-            
-            <div className="relative w-full aspect-video mb-8 rounded-lg overflow-hidden">
+      <section className="py-16 px-8 bg-background">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <span>See</span>
+              <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="h-6 md:h-8" />
+              <span>in</span>
+              <span className="bg-gradient-brand bg-clip-text text-transparent">action</span>
+            </div>
+          </h2>
+          
+          <BackgroundPaths>
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden">
               <iframe src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
             </div>
+          </BackgroundPaths>
 
-            {/* Button beneath video */}
-            <div className="text-center mb-4">
-              <InteractiveHoverButton 
-                text="Try A* AI now →" 
-                variant="reverse"
-                onClick={() => navigate('/compare')}
-                className="pointer-events-auto text-base px-6 py-3 w-[200px]"
-              />
-            </div>
-
-            {/* Disclaimer */}
-            <p className="text-center text-sm text-muted-foreground">
-              For the best experience, use a laptop or iPad
-            </p>
+          {/* Button beneath video */}
+          <div className="text-center mt-8 mb-4">
+            <InteractiveHoverButton 
+              text="Try A* AI now →" 
+              variant="reverse"
+              onClick={() => navigate('/compare')}
+              className="pointer-events-auto text-base px-6 py-3 w-[200px]"
+            />
           </div>
-        </section>
-      </BackgroundPaths>
+
+          {/* Disclaimer */}
+          <p className="text-center text-sm text-muted-foreground">
+            For the best experience, use a laptop or iPad
+          </p>
+        </div>
+      </section>
 
       {/* How A* AI helps you revise smarter Section */}
       <section className="py-16 px-8 max-w-7xl mx-auto">

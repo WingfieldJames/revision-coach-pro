@@ -53,7 +53,7 @@ function FloatingPaths({ position }: { position: number }) {
 
 export function BackgroundPaths({ children }: { children?: React.ReactNode }) {
     return (
-        <div className="relative w-full overflow-hidden bg-gradient-to-br from-primary/5 via-primary-variant/10 to-primary/5">
+        <div className="relative w-full overflow-hidden">
             <FloatingPaths position={1} />
             <FloatingPaths position={-1} />
             <div className="relative z-10">
