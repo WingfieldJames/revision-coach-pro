@@ -298,7 +298,9 @@ export const HomePage = () => {
                 <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                We're focused on Edexcel Economics A right now. Tell us what you want next — we're listening.
+                <p className="mb-3">We started with A-Level Economics. Now we cover Edexcel, AQA, and CIE exam boards - with Computer Science, Chemistry, and Psychology dropping soon and more subjects in the pipeline.</p>
+                <p className="mb-3">We're growing fast.</p>
+                <p>Tell us what you need next - we're listening.</p>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
