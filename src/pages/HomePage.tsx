@@ -143,8 +143,8 @@ export const HomePage = () => {
       </section>
 
       {/* Video Demo Section */}
-      <section className="py-16 px-8 bg-background">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-16 bg-background">
+        <div className="max-w-7xl mx-auto px-8">
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
             <div className="flex flex-wrap items-center justify-center gap-2">
               <span>See</span>
@@ -153,13 +153,17 @@ export const HomePage = () => {
               <span className="bg-gradient-brand bg-clip-text text-transparent">action</span>
             </div>
           </h2>
-          
-          <BackgroundPaths>
+        </div>
+        
+        <BackgroundPaths>
+          <div className="max-w-7xl mx-auto px-8">
             <div className="relative w-full aspect-video rounded-lg overflow-hidden">
               <iframe src="https://player.vimeo.com/video/1115781223?badge=0&autopause=0&player_id=0&app_id=58479" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
             </div>
-          </BackgroundPaths>
+          </div>
+        </BackgroundPaths>
 
+        <div className="max-w-7xl mx-auto px-8">
           {/* Button beneath video */}
           <div className="text-center mt-8 mb-4">
             <InteractiveHoverButton 
