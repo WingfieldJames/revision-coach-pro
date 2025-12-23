@@ -233,9 +233,9 @@ export const HomePage = () => {
           </h2>
           
           <div className="flex items-center justify-center gap-4 md:gap-8 lg:gap-12 mb-6">
-            <img src="/logos/openai-final.svg" alt="OpenAI" className="h-10 md:h-14 lg:h-16 object-contain" />
-            <img src="/logos/gemini-final.png" alt="Gemini" className="h-10 md:h-14 lg:h-16 object-contain" />
-            <img src="/logos/deepseek-final.png" alt="DeepSeek" className="h-8 md:h-10 lg:h-12 object-contain" />
+            <img src="/logos/openai-final.png" alt="OpenAI" className="h-8 md:h-10 lg:h-12 object-contain mix-blend-multiply dark:mix-blend-screen dark:invert" />
+            <img src="/logos/gemini-final.png" alt="Gemini" className="h-8 md:h-10 lg:h-12 object-contain" />
+            <img src="/logos/deepseek-final.png" alt="DeepSeek" className="h-6 md:h-8 lg:h-10 object-contain" />
           </div>
           
           <p className="text-sm text-muted-foreground">
