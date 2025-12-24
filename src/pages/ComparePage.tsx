@@ -20,6 +20,7 @@ import { Check, Star, Instagram } from 'lucide-react';
 import { TestimonialsSection } from '@/components/ui/testimonials-with-marquee';
 import { FounderSection } from '@/components/ui/founder-section';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
+import { ScreenshotTestimonials } from '@/components/ui/screenshot-testimonials';
 
 type Subject = 'economics' | 'chemistry' | 'computer-science' | 'maths';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
@@ -607,6 +608,9 @@ export const ComparePage = () => {
           </div>
         </ScrollReveal>
       )}
+
+      {/* Screenshot Testimonials */}
+      <ScreenshotTestimonials />
 
       {/* Footer */}
       <footer className="bg-muted py-16 px-8 text-center">
