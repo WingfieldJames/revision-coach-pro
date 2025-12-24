@@ -540,6 +540,9 @@ export const ComparePage = () => {
       {/* Founder Section - Only show for Economics */}
       {subject === 'economics' && <FounderSection />}
 
+      {/* Screenshot Testimonials */}
+      <ScreenshotTestimonials />
+
       <section className="py-16 px-8">
         <ScrollReveal>
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
@@ -590,9 +593,6 @@ export const ComparePage = () => {
           </StaggerContainer>
         </div>
       </section>
-
-      {/* Screenshot Testimonials */}
-      <ScreenshotTestimonials />
 
       {!user && (
         <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12">
