@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Star, Instagram } from 'lucide-react';
 import { TestimonialsSection } from '@/components/ui/testimonials-with-marquee';
 import { FounderSection } from '@/components/ui/founder-section';
+import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
 
 type Subject = 'economics' | 'chemistry' | 'computer-science' | 'maths';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
@@ -248,91 +249,95 @@ export const ComparePage = () => {
       </div>
       
       <main className="py-8 px-8 max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-8 flex items-center justify-center gap-3 flex-wrap">
-          Choose Your 
-          <img 
-            src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
-            alt="A* AI" 
-            className="h-8 sm:h-10 md:h-12 inline-block" 
-          />
-          Plan
-        </h1>
+        <ScrollReveal>
+          <h1 className="text-4xl font-bold mb-8 flex items-center justify-center gap-3 flex-wrap">
+            Choose Your 
+            <img 
+              src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
+              alt="A* AI" 
+              className="h-8 sm:h-10 md:h-12 inline-block" 
+            />
+            Plan
+          </h1>
+        </ScrollReveal>
 
         {/* Combined Toggle - Subject Dropdown + Exam Board Toggle */}
-        <div className="flex justify-center mb-12">
-          <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
-            {/* Subject Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
-                  {subjectLabels[subject]}
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-background border border-border z-50">
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-muted"
-                  onClick={() => { setSubject('economics'); setExamBoard('edexcel'); }}
-                >
-                  Economics
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-muted"
-                  onClick={() => { setSubject('chemistry'); setExamBoard('ocr'); }}
-                >
-                  Chemistry
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer hover:bg-muted"
-                  onClick={() => { setSubject('computer-science'); setExamBoard('ocr'); }}
-                >
-                  Computer Science
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-default text-muted-foreground">
-                  Maths (coming soon)
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+        <ScrollReveal delay={0.1}>
+          <div className="flex justify-center mb-12">
+            <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
+              {/* Subject Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
+                    {subjectLabels[subject]}
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-background border border-border z-50">
+                  <DropdownMenuItem 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => { setSubject('economics'); setExamBoard('edexcel'); }}
+                  >
+                    Economics
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => { setSubject('chemistry'); setExamBoard('ocr'); }}
+                  >
+                    Chemistry
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => { setSubject('computer-science'); setExamBoard('ocr'); }}
+                  >
+                    Computer Science
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-default text-muted-foreground">
+                    Maths (coming soon)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            {/* Exam Board Toggle - Different options based on subject */}
-            {subject === 'economics' ? (
-              <ToggleGroup 
-                type="single" 
-                value={examBoard} 
-                onValueChange={(value) => value && setExamBoard(value as ExamBoard)}
-                className="flex items-center gap-1"
-              >
-                <ToggleGroupItem 
-                  value="edexcel" 
-                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+              {/* Exam Board Toggle - Different options based on subject */}
+              {subject === 'economics' ? (
+                <ToggleGroup 
+                  type="single" 
+                  value={examBoard} 
+                  onValueChange={(value) => value && setExamBoard(value as ExamBoard)}
+                  className="flex items-center gap-1"
                 >
-                  Edexcel
-                </ToggleGroupItem>
-                <ToggleGroupItem 
-                  value="aqa" 
-                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-                >
-                  AQA
-                </ToggleGroupItem>
-                <ToggleGroupItem 
-                  value="cie" 
-                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-                >
-                  CIE
-                </ToggleGroupItem>
-              </ToggleGroup>
-            ) : (
-              <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
-                OCR
-              </div>
-            )}
+                  <ToggleGroupItem 
+                    value="edexcel" 
+                    className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  >
+                    Edexcel
+                  </ToggleGroupItem>
+                  <ToggleGroupItem 
+                    value="aqa" 
+                    className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  >
+                    AQA
+                  </ToggleGroupItem>
+                  <ToggleGroupItem 
+                    value="cie" 
+                    className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  >
+                    CIE
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              ) : (
+                <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
+                  OCR
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Desktop: 3 columns, Mobile: stack */}
-        <div className="flex flex-col lg:flex-row gap-8 justify-center">
+        <StaggerContainer className="flex flex-col lg:flex-row gap-8 justify-center">
           {/* Free Plan */}
-          <div className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
+          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-6">🎓 Free Plan</h2>
             {isComingSoon ? (
               <>
@@ -372,10 +377,10 @@ export const ComparePage = () => {
             >
               {isComingSoon ? 'Coming Soon' : 'Try free now'}
             </Button>
-          </div>
+          </StaggerItem>
 
           {/* Monthly Plan - Desktop only */}
-          <div className="hidden lg:block bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
+          <StaggerItem className="hidden lg:block bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Monthly</h2>
             {isComingSoon ? (
               <>
@@ -426,10 +431,10 @@ export const ComparePage = () => {
             >
               {isComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Monthly'}
             </Button>
-          </div>
+          </StaggerItem>
 
           {/* Lifetime Plan */}
-          <div className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left border-2 border-primary relative">
+          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left border-2 border-primary relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs lg:text-sm font-semibold px-4 py-1.5 rounded-full">
               {isComingSoon ? 'COMING SOON' : 'BEST VALUE'}
             </div>
@@ -483,12 +488,14 @@ export const ComparePage = () => {
             >
               {isComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Lifetime'}
             </Button>
-          </div>
-        </div>
+          </StaggerItem>
+        </StaggerContainer>
         
-        <p className="text-sm text-muted-foreground mt-6">
-          Secure checkout via Stripe • Your chats stay private
-        </p>
+        <ScrollReveal delay={0.3}>
+          <p className="text-sm text-muted-foreground mt-6">
+            Secure checkout via Stripe • Your chats stay private
+          </p>
+        </ScrollReveal>
       </main>
 
       <TestimonialsSection
@@ -533,56 +540,58 @@ export const ComparePage = () => {
       {subject === 'economics' && <FounderSection />}
 
       <section className="py-16 px-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <span>How</span>
-            <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-6 md:h-8" />
-            <span>helps you revise</span>
-            <span className="bg-gradient-brand bg-clip-text text-transparent">smarter</span>
-          </div>
-        </h2>
+        <ScrollReveal>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <span>How</span>
+              <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-6 md:h-8" />
+              <span>helps you revise</span>
+              <span className="bg-gradient-brand bg-clip-text text-transparent">smarter</span>
+            </div>
+          </h2>
+        </ScrollReveal>
 
         <div className="flex flex-col lg:flex-row items-start justify-center max-w-6xl mx-auto gap-12">
           {/* Laptop Image */}
-          <div className="flex-1 text-center">
+          <ScrollReveal direction="left" className="flex-1 text-center">
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
             <InteractiveHoverButton 
               text="Choose your plan →" 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border mt-8"
             />
-          </div>
+          </ScrollReveal>
 
           {/* Features */}
-          <div className="flex-1 space-y-6">
-            <div className="bg-muted rounded-xl p-6">
+          <StaggerContainer className="flex-1 space-y-6">
+            <StaggerItem className="bg-muted rounded-xl p-6">
               <strong className="text-lg font-semibold">📄 Past Paper Mastery</strong>
               <p className="text-muted-foreground mt-2 leading-relaxed">
                 Search and retrieve real past paper questions by topic, paper, or command word. 
                 A* AI understands how Edexcel organises questions, making practice fully targeted.
               </p>
-            </div>
+            </StaggerItem>
             
-            <div className="bg-muted rounded-xl p-6">
+            <StaggerItem className="bg-muted rounded-xl p-6">
               <strong className="text-lg font-semibold">📰 Live Updated Application</strong>
               <p className="text-muted-foreground mt-2 leading-relaxed">
                 The latest examples and case studies — formatted specifically for 25-mark essays 
                 in Paper 1 and 2. Updated regularly from global economic news to match Edexcel expectations.
               </p>
-            </div>
+            </StaggerItem>
             
-            <div className="bg-muted rounded-xl p-6">
+            <StaggerItem className="bg-muted rounded-xl p-6">
               <strong className="text-lg font-semibold">📈 A* Technique</strong>
               <p className="text-muted-foreground mt-2 leading-relaxed">
                 From 2 markers to 25 markers, A* AI knows exactly how to structure every response. It guides you through KAA, chains of reasoning and evaluation — so you can write those top band answers that examiners love
               </p>
-            </div>
-          </div>
+            </StaggerItem>
+          </StaggerContainer>
         </div>
       </section>
 
       {!user && (
-        <div className="px-8 max-w-4xl mx-auto mt-12 mb-12">
+        <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12">
           <div className="p-6 bg-secondary rounded-lg">
             <p className="text-muted-foreground mb-4 text-center">
               New to A* AI? Create an account to track your progress and access premium features.
@@ -596,12 +605,12 @@ export const ComparePage = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       )}
 
       {/* Footer */}
       <footer className="bg-muted py-16 px-8 text-center">
-        <div className="max-w-4xl mx-auto">
+        <ScrollReveal className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
             <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-8" />
             <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -635,7 +644,7 @@ export const ComparePage = () => {
               © A* AI
             </p>
           </div>
-        </div>
+        </ScrollReveal>
       </footer>
     </div>
   );
