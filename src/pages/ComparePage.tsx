@@ -591,6 +591,9 @@ export const ComparePage = () => {
         </div>
       </section>
 
+      {/* Screenshot Testimonials */}
+      <ScreenshotTestimonials />
+
       {!user && (
         <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12">
           <div className="p-6 bg-secondary rounded-lg">
@@ -608,9 +611,6 @@ export const ComparePage = () => {
           </div>
         </ScrollReveal>
       )}
-
-      {/* Screenshot Testimonials */}
-      <ScreenshotTestimonials />
 
       {/* Footer */}
       <footer className="bg-muted py-16 px-8 text-center">
