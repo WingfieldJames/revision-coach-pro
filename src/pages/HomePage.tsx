@@ -157,7 +157,7 @@ export const HomePage = () => {
           </BackgroundPaths>
         </ScrollReveal>
 
-        <ScrollReveal delay={0.3} className="max-w-7xl mx-auto px-8">
+        <div className="max-w-7xl mx-auto px-8">
           {/* Button beneath video */}
           <div className="text-center mt-8 mb-4">
             <InteractiveHoverButton 
@@ -172,7 +172,7 @@ export const HomePage = () => {
           <p className="text-center text-sm text-muted-foreground">
             For the best experience, use a laptop or iPad
           </p>
-        </ScrollReveal>
+        </div>
       </section>
 
       {/* How A* AI helps you revise smarter Section */}
