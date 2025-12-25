@@ -4,22 +4,22 @@ import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button
 
 const features = [
   {
+    id: "diagram-generator",
+    title: "📊 Diagram Generator",
+    description: "Paste any question and instantly get the exact diagram you need - AD/AS, supply and demand, market failure, and more. AI-powered, so it understands context, not just keywords.",
+    image: "/features/diagram-generator.png"
+  },
+  {
     id: "past-paper",
     title: "📄 Past Paper Mastery",
-    description: "Search and retrieve real past paper questions by topic, paper, or command word. A* AI understands how Edexcel organises questions, making practice fully targeted.",
+    description: "Search and retrieve real past paper questions by topic, paper, or command word. Trained on every exam from 2017-2024, so your practice is always exam-focused.",
     image: "/features/past-papers.png"
   },
   {
-    id: "live-application",
-    title: "📰 Live Updated Application",
-    description: "The latest examples and case studies — formatted specifically for 25-mark essays in Paper 1 and 2. Updated regularly from global economic news to match Edexcel expectations.",
+    id: "essay-marker",
+    title: "✍️ A* Technique and Essay Marker",
+    description: "Upload your essays and get instant feedback against real mark schemes. Learn the exact structures, evaluation phrases, and timing tricks that A* students use.",
     image: "/features/essay-marker.png"
-  },
-  {
-    id: "a-star-technique",
-    title: "📈 A* Technique",
-    description: "From 2 markers to 25 markers, A* AI knows exactly how to structure every response. It guides you through KAA, chains of reasoning and evaluation — so you can write those top band answers that examiners love",
-    image: "/features/diagram-generator.png"
   }
 ];
 
@@ -29,23 +29,18 @@ export function LatestFeaturesSection() {
   const currentFeature = features.find(f => f.id === selectedFeature) || features[0];
 
   return (
-    <div className="flex flex-col lg:flex-row items-start justify-center max-w-6xl mx-auto gap-12">
+    <div className="flex flex-col items-center justify-center max-w-4xl mx-auto gap-8">
       {/* Feature Image */}
-      <ScrollReveal direction="left" className="flex-1 text-center">
+      <ScrollReveal className="w-full text-center">
         <img 
           src={currentFeature.image} 
           alt={currentFeature.title} 
           className="max-w-full h-auto mx-auto rounded-xl shadow-lg transition-all duration-300" 
         />
-        <InteractiveHoverButton 
-          text="Choose your plan →" 
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border mt-8"
-        />
       </ScrollReveal>
 
       {/* Features */}
-      <div className="flex-1 space-y-6">
+      <div className="w-full space-y-4">
         {features.map((feature) => (
           <button
             key={feature.id}
@@ -63,6 +58,13 @@ export function LatestFeaturesSection() {
           </button>
         ))}
       </div>
+
+      {/* Choose your plan button */}
+      <InteractiveHoverButton 
+        text="Choose your plan →" 
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border mt-4"
+      />
     </div>
   );
 }
