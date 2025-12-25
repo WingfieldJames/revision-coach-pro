@@ -236,16 +236,15 @@ export const ComparePage = () => {
       <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 py-3 px-4 text-center text-white">
         <p className="text-sm font-medium flex items-center justify-center gap-2 flex-wrap">
           <Instagram className="h-4 w-4" />
-          Please follow us on{' '}
+          Follow us for daily A* tips and exclusive deals{' '}
           <a 
             href="https://www.instagram.com/a.star.ai/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="underline font-semibold hover:opacity-80 transition-opacity"
           >
-            Instagram
+            @a.star.ai
           </a>
-          {' '}to stay updated on the latest features, deals and events!
         </p>
       </div>
       
