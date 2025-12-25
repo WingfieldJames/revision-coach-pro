@@ -546,10 +546,9 @@ export const ComparePage = () => {
         <ScrollReveal>
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <span>How</span>
-              <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-6 md:h-8" />
-              <span>helps you revise</span>
-              <span className="bg-gradient-brand bg-clip-text text-transparent">smarter</span>
+              <span>Check out our</span>
+              <span className="bg-gradient-brand bg-clip-text text-transparent">latest</span>
+              <span>features</span>
             </div>
           </h2>
         </ScrollReveal>
