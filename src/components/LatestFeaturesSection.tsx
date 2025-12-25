@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+import { motion, AnimatePresence } from "framer-motion";
 
 const features = [
   {
@@ -30,41 +31,51 @@ export function LatestFeaturesSection() {
 
   return (
     <div className="flex flex-col items-center justify-center max-w-4xl mx-auto gap-8">
-      {/* Feature Image */}
+      {/* Feature Image with animation */}
       <ScrollReveal className="w-full text-center">
-        <img 
-          src={currentFeature.image} 
-          alt={currentFeature.title} 
-          className="max-w-full h-auto mx-auto rounded-xl shadow-lg transition-all duration-300" 
-        />
+        <AnimatePresence mode="wait">
+          <motion.img 
+            key={currentFeature.id}
+            src={currentFeature.image} 
+            alt={currentFeature.title} 
+            className="max-w-full h-auto mx-auto rounded-xl shadow-lg" 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          />
+        </AnimatePresence>
       </ScrollReveal>
 
-      {/* Features */}
-      <div className="w-full space-y-4">
+      {/* Features with stagger animation */}
+      <StaggerContainer className="w-full space-y-4">
         {features.map((feature) => (
-          <button
-            key={feature.id}
-            onClick={() => setSelectedFeature(feature.id)}
-            className={`w-full text-left bg-muted rounded-xl p-6 transition-all duration-300 ${
-              selectedFeature === feature.id 
-                ? "ring-2 ring-[#7c3aed] ring-offset-2 ring-offset-background" 
-                : "hover:bg-muted/80"
-            }`}
-          >
-            <strong className="text-lg font-semibold">{feature.title}</strong>
-            <p className="text-muted-foreground mt-2 leading-relaxed">
-              {feature.description}
-            </p>
-          </button>
+          <StaggerItem key={feature.id}>
+            <button
+              onClick={() => setSelectedFeature(feature.id)}
+              className={`w-full text-left bg-muted rounded-xl p-6 transition-all duration-300 ${
+                selectedFeature === feature.id 
+                  ? "ring-2 ring-[#7c3aed] ring-offset-2 ring-offset-background" 
+                  : "hover:bg-muted/80"
+              }`}
+            >
+              <strong className="text-lg font-semibold">{feature.title}</strong>
+              <p className="text-muted-foreground mt-2 leading-relaxed">
+                {feature.description}
+              </p>
+            </button>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
 
       {/* Choose your plan button */}
-      <InteractiveHoverButton 
-        text="Choose your plan →" 
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border mt-4"
-      />
+      <ScrollReveal>
+        <InteractiveHoverButton 
+          text="Choose your plan →" 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border mt-4"
+        />
+      </ScrollReveal>
     </div>
   );
 }
