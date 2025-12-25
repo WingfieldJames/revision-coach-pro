@@ -553,43 +553,7 @@ export const ComparePage = () => {
           </h2>
         </ScrollReveal>
 
-        <div className="flex flex-col lg:flex-row items-start justify-center max-w-6xl mx-auto gap-12">
-          {/* Laptop Image */}
-          <ScrollReveal direction="left" className="flex-1 text-center">
-            <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
-            <InteractiveHoverButton 
-              text="Choose your plan →" 
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border mt-8"
-            />
-          </ScrollReveal>
-
-          {/* Features */}
-          <StaggerContainer className="flex-1 space-y-6">
-            <StaggerItem className="bg-muted rounded-xl p-6">
-              <strong className="text-lg font-semibold">📄 Past Paper Mastery</strong>
-              <p className="text-muted-foreground mt-2 leading-relaxed">
-                Search and retrieve real past paper questions by topic, paper, or command word. 
-                A* AI understands how Edexcel organises questions, making practice fully targeted.
-              </p>
-            </StaggerItem>
-            
-            <StaggerItem className="bg-muted rounded-xl p-6">
-              <strong className="text-lg font-semibold">📰 Live Updated Application</strong>
-              <p className="text-muted-foreground mt-2 leading-relaxed">
-                The latest examples and case studies — formatted specifically for 25-mark essays 
-                in Paper 1 and 2. Updated regularly from global economic news to match Edexcel expectations.
-              </p>
-            </StaggerItem>
-            
-            <StaggerItem className="bg-muted rounded-xl p-6">
-              <strong className="text-lg font-semibold">📈 A* Technique</strong>
-              <p className="text-muted-foreground mt-2 leading-relaxed">
-                From 2 markers to 25 markers, A* AI knows exactly how to structure every response. It guides you through KAA, chains of reasoning and evaluation — so you can write those top band answers that examiners love
-              </p>
-            </StaggerItem>
-          </StaggerContainer>
-        </div>
+        <LatestFeaturesSection />
       </section>
 
       {!user && (
