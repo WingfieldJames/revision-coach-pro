@@ -176,7 +176,7 @@ export const HomePage = () => {
       </section>
 
       {/* How A* AI helps you revise smarter Section */}
-      <section className="py-16 px-8 max-w-7xl mx-auto">
+      <section className="py-8 md:py-16 px-8 max-w-7xl mx-auto">
         <ScrollReveal>
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
             <div className="flex flex-wrap items-center justify-center gap-2">
