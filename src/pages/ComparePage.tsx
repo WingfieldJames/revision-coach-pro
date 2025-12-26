@@ -503,7 +503,7 @@ export const ComparePage = () => {
         </StaggerContainer>
         
         <ScrollReveal delay={0.3}>
-          <p className="text-sm text-muted-foreground mt-6">
+          <p className="text-xs md:text-sm text-muted-foreground mt-6 whitespace-nowrap">
             Secure checkout via Stripe • Your chats stay private
           </p>
         </ScrollReveal>
