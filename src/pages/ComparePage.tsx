@@ -551,9 +551,9 @@ export const ComparePage = () => {
       {subject === 'economics' && <FounderSection />}
 
       {/* Latest Features Section */}
-      <section className="py-16 px-8">
+      <section className="py-8 md:py-16 px-4 md:px-8">
         <ScrollReveal>
-          <h2 className="text-xl md:text-3xl font-bold text-center mb-12">
+          <h2 className="text-xl md:text-3xl font-bold text-center mb-6 md:mb-12">
             <div className="flex flex-nowrap items-center justify-center gap-1 md:gap-2">
               <span>Check out our</span>
               <span className="bg-gradient-brand bg-clip-text text-transparent">latest</span>
