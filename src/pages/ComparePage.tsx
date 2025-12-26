@@ -261,7 +261,7 @@ export const ComparePage = () => {
       
       <main className="py-8 px-8 max-w-4xl mx-auto text-center">
         <ScrollReveal>
-          <h1 className="text-4xl font-bold mb-8 flex items-center justify-center gap-3 flex-wrap">
+          <h1 className="text-2xl md:text-4xl font-bold mb-8 flex items-center justify-center gap-2 md:gap-3 flex-nowrap">
             Choose Your 
             <img 
               src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
