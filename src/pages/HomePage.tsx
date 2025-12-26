@@ -102,7 +102,7 @@ export const HomePage = () => {
       {/* Testimonials Section */}
       <section data-section="testimonials" className="py-16 px-8 text-center bg-muted">
         <ScrollReveal>
-          <h2 className="text-3xl font-bold mb-8">
+          <h2 className="text-xl md:text-3xl font-bold mb-8">
             Used by your favourite study influencers & top students 👀
           </h2>
         </ScrollReveal>
