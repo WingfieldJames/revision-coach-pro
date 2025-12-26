@@ -553,8 +553,8 @@ export const ComparePage = () => {
       {/* Latest Features Section */}
       <section className="py-16 px-8">
         <ScrollReveal>
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-            <div className="flex flex-wrap items-center justify-center gap-2">
+          <h2 className="text-xl md:text-3xl font-bold text-center mb-12">
+            <div className="flex flex-nowrap items-center justify-center gap-1 md:gap-2">
               <span>Check out our</span>
               <span className="bg-gradient-brand bg-clip-text text-transparent">latest</span>
               <span>features</span>
