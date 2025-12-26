@@ -25,7 +25,7 @@ export const HomePage = () => {
           // Mobile version - simple image without scroll animation
           <div className="pt-4">
             <ScrollReveal className="text-left max-w-5xl mx-auto px-6 pt-4">
-              <div className="bg-secondary text-foreground text-base px-3 py-1.5 rounded-full inline-block mb-4 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              <div className="bg-secondary text-foreground text-xs px-3 py-1.5 rounded-full inline-block mb-4 text-center whitespace-nowrap">
                 ⭐ Loved by 300+ users with a 4.9 star rating
               </div>
               <h1 className="text-6xl font-bold mb-3 flex flex-wrap items-center gap-2">
