@@ -31,7 +31,7 @@ export function LatestFeaturesSection() {
 
   return (
     <div className="flex flex-col items-center justify-center max-w-4xl mx-auto gap-8">
-      {/* Feature Image with animation */}
+      {/* Feature Image - only this animates on change */}
       <ScrollReveal className="w-full text-center">
         <AnimatePresence mode="wait">
           <motion.img 
@@ -39,43 +39,43 @@ export function LatestFeaturesSection() {
             src={currentFeature.image} 
             alt={currentFeature.title} 
             className="max-w-full h-auto mx-auto rounded-xl shadow-lg" 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           />
         </AnimatePresence>
       </ScrollReveal>
 
-      {/* Features with stagger animation */}
-      <StaggerContainer className="w-full space-y-4">
+      {/* Features - no animation on click, just selection state */}
+      <div className="w-full space-y-4">
         {features.map((feature) => (
-          <StaggerItem key={feature.id}>
-            <button
-              onClick={() => setSelectedFeature(feature.id)}
-              className={`w-full text-left bg-muted rounded-xl p-6 transition-all duration-300 ${
-                selectedFeature === feature.id 
-                  ? "ring-2 ring-[#7c3aed] ring-offset-2 ring-offset-background" 
-                  : "hover:bg-muted/80"
-              }`}
-            >
-              <strong className="text-lg font-semibold">{feature.title}</strong>
-              <p className="text-muted-foreground mt-2 leading-relaxed">
-                {feature.description}
-              </p>
-            </button>
-          </StaggerItem>
+          <button
+            key={feature.id}
+            onClick={() => setSelectedFeature(feature.id)}
+            className={`w-full text-left bg-muted rounded-xl p-6 transition-colors duration-200 ${
+              selectedFeature === feature.id 
+                ? "ring-2 ring-[#7c3aed] ring-offset-2 ring-offset-background" 
+                : "hover:bg-muted/80"
+            }`}
+          >
+            <strong className="text-lg font-semibold">{feature.title}</strong>
+            <p className="text-muted-foreground mt-2 leading-relaxed">
+              {feature.description}
+            </p>
+          </button>
         ))}
-      </StaggerContainer>
+      </div>
 
-      {/* Choose your plan button */}
-      <ScrollReveal>
+      {/* Choose your plan button + disclaimer */}
+      <div className="flex flex-col items-center gap-2">
         <InteractiveHoverButton 
           text="Choose your plan →" 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="pointer-events-auto text-base px-6 py-3 w-[220px] bg-white text-foreground border border-border mt-4"
         />
-      </ScrollReveal>
+        <p className="text-sm text-muted-foreground">These features are only included in the Deluxe version</p>
+      </div>
     </div>
   );
 }
