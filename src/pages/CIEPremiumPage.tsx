@@ -4,12 +4,13 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { checkProductAccess } from '@/lib/productAccess';
+import { supabase } from '@/integrations/supabase/client';
 
 export const CIEPremiumPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [chatbotUrl, setChatbotUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const verifyAccess = async () => {
@@ -19,14 +20,23 @@ export const CIEPremiumPage = () => {
           return;
         }
         
-        const { hasAccess } = await checkProductAccess(user.id, 'cie-economics');
-        
-        if (!hasAccess) {
+        try {
+          const { data, error } = await supabase.functions.invoke('get-chatbot-url', {
+            body: { productSlug: 'cie-economics', tier: 'premium' },
+          });
+          
+          if (error || !data?.url) {
+            console.error('Access check failed:', error || data?.error);
+            navigate('/compare');
+            return;
+          }
+          
+          setChatbotUrl(data.url);
+          setCheckingAccess(false);
+        } catch (err) {
+          console.error('Error verifying access:', err);
           navigate('/compare');
-          return;
         }
-        
-        setCheckingAccess(false);
       }
     };
     
@@ -48,7 +58,7 @@ export const CIEPremiumPage = () => {
     );
   }
 
-  if (!user) {
+  if (!user || !chatbotUrl) {
     return (
       <div className="h-screen w-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -77,7 +87,7 @@ export const CIEPremiumPage = () => {
       
       <div className="flex-1 relative">
         <iframe
-          src="https://www.chatbase.co/chatbot-iframe/qZY8ajOntZ2Tem3CqdOr0"
+          src={chatbotUrl}
           width="100%"
           style={{ height: '100%', minHeight: '700px' }}
           frameBorder="0"
