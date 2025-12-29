@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 // import logo from '@/assets/logo.png';
@@ -85,6 +86,11 @@ export const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead 
+        title="Dashboard | A* AI – A-Level Economics Revision"
+        description="Access your A* AI dashboard. Launch your free or Deluxe AI revision coach for Edexcel, AQA & CIE Economics."
+        canonical="https://astarai.co.uk/dashboard"
+      />
       <Header showNavLinks />
       
       <div className="py-6 px-8 max-w-4xl mx-auto">

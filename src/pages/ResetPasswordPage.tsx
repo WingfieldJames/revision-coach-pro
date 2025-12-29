@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -73,6 +74,11 @@ export const ResetPasswordPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead 
+        title="Reset Password | A* AI"
+        description="Reset your A* AI account password. Enter your new password to regain access to your AI revision coach."
+        canonical="https://astarai.co.uk/reset-password"
+      />
       <Header showNavLinks />
       
       <div className="flex items-center justify-center py-12 px-4">

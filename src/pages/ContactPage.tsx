@@ -1,10 +1,16 @@
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 import { Link } from 'react-router-dom';
 import { Mail, Instagram } from 'lucide-react';
 
 export const ContactPage = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead 
+        title="Contact A* AI | A-Level Economics Revision Support"
+        description="Get in touch with A* AI. Questions about our AI-powered A-Level Economics revision coach? Email us at astarai.official@gmail.com."
+        canonical="https://astarai.co.uk/contact"
+      />
       <Header showNavLinks />
       
       {/* Contact Section */}

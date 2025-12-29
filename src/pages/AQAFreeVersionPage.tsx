@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 
 export const AQAFreeVersionPage = () => {
   useEffect(() => {
@@ -9,6 +10,11 @@ export const AQAFreeVersionPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead 
+        title="Free A* AI – AQA Economics A-Level Revision | Try Now"
+        description="Try A* AI free for AQA Economics. AI trained on AQA past papers for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
+        canonical="https://astarai.co.uk/aqa-free-version"
+      />
       <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked />
       
       <div className="flex-1 relative">

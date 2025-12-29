@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Instagram } from 'lucide-react';
@@ -88,6 +89,11 @@ export const SignupPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead 
+        title="Create Account | A* AI – A-Level Economics Revision"
+        description="Join 1000+ students using A* AI to master A-Level Economics. Create your free account and start revising with AI trained on real past papers."
+        canonical="https://astarai.co.uk/signup"
+      />
       <Header showNavLinks />
       
       <div className="flex items-center justify-center py-12 px-4">

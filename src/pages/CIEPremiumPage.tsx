@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -65,6 +66,11 @@ export const CIEPremiumPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead 
+        title="Deluxe A* AI – CIE Economics | Full Past Paper Training"
+        description="Access A* AI Deluxe for CIE/Cambridge Economics. Full training on past papers, mark schemes, A* technique & unlimited prompts."
+        canonical="https://astarai.co.uk/cie-premium"
+      />
       <div className="relative z-10">
         <Header showNavLinks showImageTool showDiagramTool />
       </div>
