@@ -60,6 +60,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "affiliate_referrals_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "affiliate_referrals_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -252,7 +259,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      affiliates_public: {
+        Row: {
+          active: boolean | null
+          code: string | null
+          id: string | null
+          name: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code?: string | null
+          id?: string | null
+          name?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string | null
+          id?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
