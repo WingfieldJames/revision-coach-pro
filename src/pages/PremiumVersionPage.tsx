@@ -81,7 +81,7 @@ export const PremiumVersionPage = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
         title="Deluxe A* AI – Edexcel Economics | Full Past Paper Training"
-        description="Access A* AI Deluxe for Edexcel Economics. Full training on 2017-2024 past papers, mark schemes, A* technique & unlimited prompts."
+        description="Access A* AI Deluxe for Edexcel Economics. Full training on 2017-2025 past papers, mark schemes, A* technique & unlimited prompts."
         canonical="https://astarai.co.uk/premium"
       />
       <div className="relative z-10">

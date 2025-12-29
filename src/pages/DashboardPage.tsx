@@ -157,7 +157,7 @@ export const DashboardPage = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on the 2024-2023 {productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA Economics' : 'CIE Economics'} past papers (P1–P3)
+                AI trained on the 2025-2024 {productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA Economics' : 'CIE Economics'} past papers (P1–P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -195,7 +195,7 @@ export const DashboardPage = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA' : 'CIE'} past papers (2017-2024, P1-P3)
+                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA' : 'CIE'} past papers (2017-2025, P1-P3)
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -374,7 +374,7 @@ export const DashboardPage = () => {
               <Instagram size={24} />
             </a>
             <p className="text-sm text-muted-foreground">
-              © A* AI
+              © 2025 A* AI
             </p>
           </div>
         </div>

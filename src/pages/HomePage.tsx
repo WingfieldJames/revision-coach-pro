@@ -20,7 +20,7 @@ export const HomePage = () => {
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead 
         title="A* AI – Get an A* in A-Level Economics | AI Revision Coach for Edexcel, AQA & CIE"
-        description="Join 1000+ students using A* AI to master Edexcel, AQA & CIE Economics. Trained on real past papers (2017-2024), mark schemes & examiner reports. Free to try – get your A* today."
+        description="Join 1000+ students using A* AI to master Edexcel, AQA & CIE Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today."
         canonical="https://astarai.co.uk/"
       />
       <Header showNavLinks />
@@ -286,7 +286,7 @@ export const HomePage = () => {
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                   <p className="mb-3">Free gives you a taste - limited training data and general AI help to try it out.</p>
-                  <p className="mb-3">Deluxe is the full experience. Trained on every past paper from 2017-2024, official mark schemes, and the complete specification. Plus exam technique trained directly by A* students - the structures, timings, and evaluation phrases that examiners reward.</p>
+                  <p className="mb-3">Deluxe is the full experience. Trained on every past paper from 2017-2025, official mark schemes, and the complete specification. Plus exam technique trained directly by A* students - the structures, timings, and evaluation phrases that examiners reward.</p>
                   <p className="mb-3">Deluxe also unlocks premium tools: upload essays and diagrams for instant AI feedback, or use the Diagram Generator to find the exact diagram for any question - all tailored to your subject and exam board.</p>
                   <p>£24.99 once. Less than half a tutoring session. Access forever. That's it.</p>
                 </AccordionContent>
@@ -299,7 +299,7 @@ export const HomePage = () => {
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                   <p className="mb-3">We sat down with A* students from LSE, Cambridge, and Imperial and got them to teach the AI everything - how they structured essays, which examples impressed examiners, the timing tricks that saved them marks.</p>
-                  <p className="mb-3">That's layered on top of every past paper (2017-2024), official mark schemes, and the full spec. Plus diagram guidance, application banks, model structures, and all future updates.</p>
+                  <p className="mb-3">That's layered on top of every past paper (2017-2025), official mark schemes, and the full spec. Plus diagram guidance, application banks, model structures, and all future updates.</p>
                   <p>Lifetime access. One payment. Done.</p>
                 </AccordionContent>
               </AccordionItem>
@@ -363,7 +363,7 @@ export const HomePage = () => {
               <Instagram size={24} />
             </a>
             <p className="text-sm text-muted-foreground">
-              © A* AI
+              © 2025 A* AI
             </p>
           </div>
           
