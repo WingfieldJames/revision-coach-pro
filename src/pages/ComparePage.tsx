@@ -463,7 +463,7 @@ export const ComparePage = () => {
             ) : (
               <>
                 <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£49.99</span> £24.99</p>
-                <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 50%</p>
+                <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 67% yearly</p>
               </>
             )}
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
