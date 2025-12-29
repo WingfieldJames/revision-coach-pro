@@ -1,9 +1,29 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
+import { supabase } from '@/integrations/supabase/client';
 
 export const FreeVersionPage = () => {
+  const [chatbotUrl, setChatbotUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUrl = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-chatbot-url', {
+          body: { productSlug: 'edexcel-economics', tier: 'free' },
+        });
+        
+        if (!error && data?.url) {
+          setChatbotUrl(data.url);
+        }
+      } catch (err) {
+        console.error('Error fetching chatbot URL:', err);
+      }
+    };
+    
+    fetchUrl();
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
   }, []);
@@ -18,12 +38,18 @@ export const FreeVersionPage = () => {
       <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked />
       
       <div className="flex-1 relative">
-        <iframe
-          src="https://www.chatbase.co/chatbot-iframe/rdUsQQiBG6DHV2jFtXzn5"
-          allow="clipboard-write"
-          className="w-full h-full border-none absolute inset-0"
-          title="A* AI Free Version Chatbot"
-        />
+        {chatbotUrl ? (
+          <iframe
+            src={chatbotUrl}
+            allow="clipboard-write"
+            className="w-full h-full border-none absolute inset-0"
+            title="A* AI Free Version Chatbot"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        )}
       </div>
     </div>
   );

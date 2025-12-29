@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { checkProductAccess } from '@/lib/productAccess';
+import { supabase } from '@/integrations/supabase/client';
 
 export const PremiumVersionPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [chatbotUrl, setChatbotUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const verifyAccess = async () => {
@@ -19,14 +20,26 @@ export const PremiumVersionPage = () => {
           return;
         }
         
-        const { hasAccess } = await checkProductAccess(user.id, 'edexcel-economics');
-        
-        if (!hasAccess) {
+        try {
+          // Get session for auth header
+          const { data: sessionData } = await supabase.auth.getSession();
+          
+          const { data, error } = await supabase.functions.invoke('get-chatbot-url', {
+            body: { productSlug: 'edexcel-economics', tier: 'premium' },
+          });
+          
+          if (error || !data?.url) {
+            console.error('Access check failed:', error || data?.error);
+            navigate('/compare');
+            return;
+          }
+          
+          setChatbotUrl(data.url);
+          setCheckingAccess(false);
+        } catch (err) {
+          console.error('Error verifying access:', err);
           navigate('/compare');
-          return;
         }
-        
-        setCheckingAccess(false);
       }
     };
     
@@ -48,7 +61,7 @@ export const PremiumVersionPage = () => {
     );
   }
 
-  if (!user) {
+  if (!user || !chatbotUrl) {
     return (
       <div className="h-screen w-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -77,7 +90,7 @@ export const PremiumVersionPage = () => {
       
       <div className="flex-1 relative">
         <iframe
-          src="https://www.chatbase.co/chatbot-iframe/1l2aTsS1zKI3FgVTquzOu"
+          src={chatbotUrl}
           width="100%"
           style={{ height: '100%', minHeight: '700px' }}
           frameBorder="0"

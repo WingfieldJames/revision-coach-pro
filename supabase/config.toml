@@ -17,3 +17,6 @@ verify_jwt = true
 
 [functions.find-diagram]
 verify_jwt = true
+
+[functions.get-chatbot-url]
+verify_jwt = false
