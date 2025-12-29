@@ -73,7 +73,7 @@ export const ContactPage = () => {
               <Instagram size={24} />
             </a>
             <p className="text-sm text-muted-foreground">
-              © A* AI
+              © 2025 A* AI
             </p>
           </div>
         </div>

@@ -234,7 +234,7 @@ export const ComparePage = () => {
     <div className="min-h-screen bg-background font-sans">
       <SEOHead 
         title="A* AI Plans & Pricing – Free vs Deluxe | A-Level Economics AI Tutor"
-        description="Compare A* AI plans: Free tier with basic past paper help or Deluxe with full 2017-2024 training, mark scheme feedback & A* technique. One-time £24.99 – cheaper than a single tutoring session."
+        description="Compare A* AI plans: Free tier with basic past paper help or Deluxe with full 2017-2025 training, mark scheme feedback & A* technique. One-time £24.99 – cheaper than a single tutoring session."
         canonical="https://astarai.co.uk/compare"
       />
       <Header showNavLinks />
@@ -375,7 +375,7 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on 2024-2023 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : examBoard === 'cie' ? 'CIE Economics' : `OCR ${subjectLabels[subject]}`} past papers
+                AI trained on 2025-2024 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : examBoard === 'cie' ? 'CIE Economics' : `OCR ${subjectLabels[subject]}`} past papers
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -630,7 +630,7 @@ export const ComparePage = () => {
               <Instagram size={24} />
             </a>
             <p className="text-sm text-muted-foreground">
-              © A* AI
+              © 2025 A* AI
             </p>
           </div>
         </ScrollReveal>

@@ -13,7 +13,7 @@ const features = [
   {
     id: "past-paper",
     title: "📄 Past Paper Mastery",
-    description: "Search and retrieve real past paper questions by topic, paper, or command word. Trained on every exam from 2017-2024, so your practice is always exam-focused.",
+    description: "Search and retrieve real past paper questions by topic, paper, or command word. Trained on every exam from 2017-2025, so your practice is always exam-focused.",
     image: "/features/past-papers.png"
   },
   {
