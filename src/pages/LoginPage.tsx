@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Instagram } from 'lucide-react';
@@ -116,6 +117,11 @@ export const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead 
+        title="Sign In to A* AI | A-Level Economics Revision"
+        description="Sign in to your A* AI account to access your AI-powered A-Level Economics revision coach. Continue your journey to an A*."
+        canonical="https://astarai.co.uk/login"
+      />
       <Header showNavLinks />
       
       <div className="flex items-center justify-center py-12 px-4">

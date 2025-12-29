@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -231,6 +232,11 @@ export const ComparePage = () => {
 
   return (
     <div className="min-h-screen bg-background font-sans">
+      <SEOHead 
+        title="A* AI Plans & Pricing – Free vs Deluxe | A-Level Economics AI Tutor"
+        description="Compare A* AI plans: Free tier with basic past paper help or Deluxe with full 2017-2024 training, mark scheme feedback & A* technique. One-time £24.99 – cheaper than a single tutoring session."
+        canonical="https://astarai.co.uk/compare"
+      />
       <Header showNavLinks />
       
       {/* Instagram Follow Banner */}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -65,6 +66,11 @@ export const PremiumVersionPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEOHead 
+        title="Deluxe A* AI – Edexcel Economics | Full Past Paper Training"
+        description="Access A* AI Deluxe for Edexcel Economics. Full training on 2017-2024 past papers, mark schemes, A* technique & unlimited prompts."
+        canonical="https://astarai.co.uk/premium"
+      />
       <div className="relative z-10">
         <Header showNavLinks showImageTool showDiagramTool showEssayMarker />
       </div>

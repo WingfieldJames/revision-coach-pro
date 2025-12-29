@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
+import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ChevronDown, Instagram, Music } from 'lucide-react';
@@ -17,6 +18,11 @@ export const HomePage = () => {
   const isMobile = useIsMobile();
 
   return <div className="min-h-screen bg-background font-sans">
+      <SEOHead 
+        title="A* AI – Get an A* in A-Level Economics | AI Revision Coach for Edexcel, AQA & CIE"
+        description="Join 1000+ students using A* AI to master Edexcel, AQA & CIE Economics. Trained on real past papers (2017-2024), mark schemes & examiner reports. Free to try – get your A* today."
+        canonical="https://astarai.co.uk/"
+      />
       <Header showNavLinks />
       
       {/* Hero Scroll Animation Section */}
