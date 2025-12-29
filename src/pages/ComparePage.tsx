@@ -247,17 +247,20 @@ export const ComparePage = () => {
             >
               Follow us
             </a>
-            {' '}for daily A* tips and exclusive deals
+            {' '}for daily A* study tips, new features and exclusive deals
           </span>
           {/* Desktop: Simple "Follow us" with underlined link */}
-          <a 
-            href="https://www.instagram.com/a.star.ai/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="hidden md:inline underline font-semibold hover:opacity-80 transition-opacity"
-          >
-            Follow us
-          </a>
+          <span className="hidden md:inline">
+            <a 
+              href="https://www.instagram.com/a.star.ai/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline font-semibold hover:opacity-80 transition-opacity"
+            >
+              Follow us
+            </a>
+            {' '}for daily A* study tips, new features and exclusive deals
+          </span>
         </p>
       </div>
       
