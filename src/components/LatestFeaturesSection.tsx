@@ -31,20 +31,22 @@ export function LatestFeaturesSection() {
 
   return (
     <div className="flex flex-col items-center justify-center max-w-4xl mx-auto gap-8">
-      {/* Feature Image - only this animates on change */}
+      {/* Feature Image - fixed height container to prevent layout shift */}
       <ScrollReveal className="w-full text-center">
-        <AnimatePresence mode="wait">
-          <motion.img 
-            key={currentFeature.id}
-            src={currentFeature.image} 
-            alt={currentFeature.title} 
-            className="max-w-full h-auto mx-auto rounded-xl shadow-lg" 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          />
-        </AnimatePresence>
+        <div className="relative w-full h-[300px] md:h-[400px]">
+          <AnimatePresence mode="wait">
+            <motion.img 
+              key={currentFeature.id}
+              src={currentFeature.image} 
+              alt={currentFeature.title} 
+              className="absolute inset-0 w-full h-full object-contain mx-auto rounded-xl shadow-lg" 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            />
+          </AnimatePresence>
+        </div>
       </ScrollReveal>
 
       {/* Features - no animation on click, just selection state */}
