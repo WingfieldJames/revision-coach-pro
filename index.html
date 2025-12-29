@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/lovable-uploads/3ad16679-5d12-4284-8df2-27c78f41b9b5.png" type="image/png">
-    <!-- Default canonical for homepage - dynamically overridden by SEOHead component -->
-    <link rel="canonical" href="https://astarai.co.uk/" />
+    <!-- Canonical URLs are dynamically set by SEOHead component per page -->
     <link rel="alternate" hreflang="en-GB" href="https://astarai.co.uk/" />
     <link rel="alternate" hreflang="en" href="https://astarai.co.uk/" />
     
@@ -48,13 +47,29 @@
     }
     </script>
 
+    <!-- Structured Data - WebSite (for brand search and sitelinks) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "A* AI",
+      "alternateName": ["A Star AI", "astarai", "A*AI", "A-Star AI"],
+      "url": "https://astarai.co.uk",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://astarai.co.uk/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
     <!-- Structured Data - SoftwareApplication -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "A* AI",
-      "alternateName": ["A Star AI", "astarai"],
+      "alternateName": ["A Star AI", "astarai", "A*AI", "A-Star AI"],
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Web",
       "offers": {
