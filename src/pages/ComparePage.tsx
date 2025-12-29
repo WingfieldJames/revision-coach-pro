@@ -237,24 +237,26 @@ export const ComparePage = () => {
       <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 py-3 px-4 text-center text-white">
         <p className="text-sm font-medium flex items-center justify-center gap-2 flex-wrap">
           <Instagram className="h-4 w-4" />
-          <a 
-            href="https://www.instagram.com/a.star.ai/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="underline font-semibold hover:opacity-80 transition-opacity md:no-underline md:pointer-events-none"
-          >
-            <span className="md:hidden">Follow us</span>
-            <span className="hidden md:inline">Follow us</span>
-          </a>
-          <span className="hidden md:inline">for daily A* tips and exclusive deals{' '}</span>
-          <span className="md:hidden">for daily A* tips and exclusive deals</span>
+          {/* Mobile: Full text with link */}
+          <span className="md:hidden">
+            <a 
+              href="https://www.instagram.com/a.star.ai/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline font-semibold hover:opacity-80 transition-opacity"
+            >
+              Follow us
+            </a>
+            {' '}for daily A* tips and exclusive deals
+          </span>
+          {/* Desktop: Simple "Follow us" with underlined link */}
           <a 
             href="https://www.instagram.com/a.star.ai/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="hidden md:inline underline font-semibold hover:opacity-80 transition-opacity"
           >
-            @a.star.ai
+            Follow us
           </a>
         </p>
       </div>
