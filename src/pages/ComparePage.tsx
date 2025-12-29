@@ -247,7 +247,7 @@ export const ComparePage = () => {
             >
               Follow us
             </a>
-            {' '}for daily A* study tips, new features and exclusive deals
+            {' '}for A* study tips and exclusive deals
           </span>
           {/* Desktop: Simple "Follow us" with underlined link */}
           <span className="hidden md:inline">
