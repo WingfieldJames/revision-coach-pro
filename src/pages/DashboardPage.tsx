@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Trash2, ExternalLink, Instagram, ChevronDown } from 'lucide-react';
+import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
 
 export const DashboardPage = () => {
   const { user, profile, refreshProfile, loading } = useAuth();
@@ -20,6 +21,31 @@ export const DashboardPage = () => {
     const saved = localStorage.getItem('preferred-exam-board');
     return (saved === 'aqa' || saved === 'edexcel' || saved === 'cie') ? saved : 'edexcel';
   });
+  
+  // Track product-specific access for each exam board
+  const [productAccess, setProductAccess] = useState<Record<string, ProductAccess>>({});
+  const [checkingAccess, setCheckingAccess] = useState(true);
+
+  // Check product access for all exam boards when user loads
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (user) {
+        setCheckingAccess(true);
+        const [edexcelAccess, aqaAccess, cieAccess] = await Promise.all([
+          checkProductAccess(user.id, 'edexcel-economics'),
+          checkProductAccess(user.id, 'aqa-economics'),
+          checkProductAccess(user.id, 'cie-economics'),
+        ]);
+        setProductAccess({
+          'edexcel': edexcelAccess,
+          'aqa': aqaAccess,
+          'cie': cieAccess,
+        });
+        setCheckingAccess(false);
+      }
+    };
+    checkAccess();
+  }, [user]);
 
   // Save preference whenever it changes
   useEffect(() => {
@@ -183,10 +209,10 @@ export const DashboardPage = () => {
           </div>
 
           {/* Deluxe Plan */}
-          <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${profile?.is_premium ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
+          <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${productAccess[productType]?.hasAccess ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
             <h2 className="text-2xl font-semibold mb-6">
               🔥 Deluxe Plan {productType === 'edexcel' ? '(Edexcel)' : productType === 'aqa' ? '(AQA)' : '(CIE)'} — <span className="line-through text-red-500">£49.99</span> £24.99 (Lifetime Access)
-              {profile?.is_premium && (
+              {productAccess[productType]?.hasAccess && (
                 <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
                   ACTIVE
                 </span>
@@ -223,7 +249,7 @@ export const DashboardPage = () => {
               </li>
             </ul>
             
-            {profile?.is_premium ? (
+            {productAccess[productType]?.hasAccess ? (
               <Button 
                 variant="brand" 
                 size="lg" 
@@ -237,9 +263,10 @@ export const DashboardPage = () => {
                 variant="brand" 
                 size="lg" 
                 className="w-full"
+                disabled={checkingAccess}
                 onClick={async () => {
                   try {
-                    console.log('Starting premium upgrade process...');
+                    console.log('Starting premium upgrade process for', productType);
                     const { supabase } = await import('@/integrations/supabase/client');
                     
                     // Get current session
@@ -258,12 +285,18 @@ export const DashboardPage = () => {
                       console.log('Including affiliate code:', affiliateCode);
                     }
                     
+                    // Map product type to product slug
+                    const productSlug = productType === 'edexcel' ? 'edexcel-economics' 
+                      : productType === 'aqa' ? 'aqa-economics' 
+                      : 'cie-economics';
+                    
                     const { data, error } = await supabase.functions.invoke('create-checkout', {
                       headers: {
                         Authorization: `Bearer ${sessionData.session.access_token}`,
                       },
                       body: {
                         affiliateCode,
+                        productSlug,
                       },
                     });
                     
@@ -288,7 +321,7 @@ export const DashboardPage = () => {
                   }
                 }}
               >
-                Upgrade to Deluxe
+                {checkingAccess ? 'Checking access...' : 'Upgrade to Deluxe'}
               </Button>
             )}
           </div>

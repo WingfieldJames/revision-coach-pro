@@ -10,16 +10,25 @@ export const checkProductAccess = async (
   userId: string, 
   productSlug: string
 ): Promise<ProductAccess> => {
-  // First check new user_subscriptions table
+  // First get the product ID from the slug
+  const { data: product } = await supabase
+    .from('products')
+    .select('id')
+    .eq('slug', productSlug)
+    .eq('active', true)
+    .maybeSingle();
+    
+  if (!product) {
+    return { hasAccess: false, tier: 'free' };
+  }
+  
+  // Then check user_subscriptions with the exact product_id
   const { data: subscription, error } = await supabase
     .from('user_subscriptions')
-    .select(`
-      *,
-      product:products(*)
-    `)
+    .select('*')
     .eq('user_id', userId)
+    .eq('product_id', product.id)
     .eq('active', true)
-    .eq('product.slug', productSlug)
     .maybeSingle();
   
   if (!error && subscription) {
@@ -38,20 +47,28 @@ export const checkProductAccess = async (
     };
   }
   
-  // Fallback: Check legacy users table for backwards compatibility
-  const { data: user } = await supabase
-    .from('users')
-    .select('is_premium, subscription_end')
-    .eq('id', userId)
-    .maybeSingle();
-    
-  if (user?.is_premium) {
-    // Legacy user still has access
-    return { 
-      hasAccess: true, 
-      tier: 'deluxe',
-      subscription: { legacy: true } 
-    };
+  // Fallback: Check legacy users table for backwards compatibility (Edexcel only)
+  if (productSlug === 'edexcel-economics') {
+    const { data: user } = await supabase
+      .from('users')
+      .select('is_premium, subscription_end')
+      .eq('id', userId)
+      .maybeSingle();
+      
+    if (user?.is_premium) {
+      // Check if subscription is still valid
+      if (user.subscription_end) {
+        const endDate = new Date(user.subscription_end);
+        if (endDate < new Date()) {
+          return { hasAccess: false, tier: 'free' };
+        }
+      }
+      return { 
+        hasAccess: true, 
+        tier: 'deluxe',
+        subscription: { legacy: true } 
+      };
+    }
   }
   
   return { hasAccess: false, tier: 'free' };
