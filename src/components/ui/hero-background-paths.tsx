@@ -5,15 +5,15 @@ import { motion } from "framer-motion";
 function HeroFloatingPaths({ position }: { position: number }) {
     const paths = Array.from({ length: 28 }, (_, i) => ({
         id: i,
-        // More horizontal, sweeping wave pattern that flows through the hero
-        d: `M-${1000 - i * 15 * position} ${150 + i * 12 + Math.sin(i * 0.5) * 30}C-${
+        // More horizontal, sweeping wave pattern that flows through the hero - shifted up
+        d: `M-${1000 - i * 15 * position} ${80 + i * 10 + Math.sin(i * 0.5) * 25}C-${
             600 - i * 12 * position
-        } ${180 + i * 10 + Math.cos(i * 0.3) * 40} ${100 + i * 8 * position} ${
-            220 + i * 8 + Math.sin(i * 0.4) * 35
-        } ${500 + i * 10 * position} ${200 + i * 10}C${900 + i * 12 * position} ${
-            180 + i * 12 + Math.cos(i * 0.5) * 30
-        } ${1400 + i * 10 * position} ${240 + i * 8} ${2200 + i * 15 * position} ${
-            180 + i * 14 + Math.sin(i * 0.6) * 25
+        } ${100 + i * 8 + Math.cos(i * 0.3) * 35} ${100 + i * 8 * position} ${
+            130 + i * 7 + Math.sin(i * 0.4) * 30
+        } ${500 + i * 10 * position} ${110 + i * 8}C${900 + i * 12 * position} ${
+            90 + i * 10 + Math.cos(i * 0.5) * 25
+        } ${1400 + i * 10 * position} ${140 + i * 6} ${2200 + i * 15 * position} ${
+            100 + i * 12 + Math.sin(i * 0.6) * 20
         }`,
         // Using exact purple gradient colors from the website
         color: i % 2 === 0 
