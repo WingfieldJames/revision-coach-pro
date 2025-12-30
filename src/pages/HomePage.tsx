@@ -10,6 +10,7 @@ import { ContainerScroll } from '@/components/ui/container-scroll-animation';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { BackgroundPaths } from '@/components/ui/background-paths';
+import { HeroBackgroundPaths } from '@/components/ui/hero-background-paths';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
 
 export const HomePage = () => {
@@ -27,82 +28,84 @@ export const HomePage = () => {
       
       {/* Hero Scroll Animation Section */}
       <section className="overflow-hidden pb-0 mt-4 sm:-mt-8 md:-mt-8">
-        {isMobile ? (
-          // Mobile version - simple image without scroll animation
-          <div className="pt-4">
-            <ScrollReveal className="text-left max-w-5xl mx-auto px-6 pt-4">
-              <div className="bg-secondary text-foreground text-xs px-3 py-1.5 rounded-full inline-block mb-4 text-center whitespace-nowrap">
-                ⭐ Loved by 300+ users with a 4.9 star rating
-              </div>
-              <h1 className="text-6xl font-bold mb-3 flex flex-wrap items-center gap-2">
-                Meet 
-                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-16" />
-              </h1>
-              <h2 className="text-4xl font-medium text-foreground mb-6 leading-tight">
+        <HeroBackgroundPaths>
+          {isMobile ? (
+            // Mobile version - simple image without scroll animation
+            <div className="pt-4 px-6">
+              <ScrollReveal className="text-left max-w-5xl mx-auto pt-4">
+                <div className="bg-secondary text-foreground text-xs px-3 py-1.5 rounded-full inline-block mb-4 text-center whitespace-nowrap">
+                  ⭐ Loved by 300+ users with a 4.9 star rating
+                </div>
+                <h1 className="text-6xl font-bold mb-3 flex flex-wrap items-center gap-2">
+                  Meet 
+                  <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-16" />
+                </h1>
+                <h2 className="text-4xl font-medium text-foreground mb-6 leading-tight">
+                  Your AI-powered coach for A-Levels
+                </h2>
+                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+                  Trained on past papers, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
+                </p>
+              </ScrollReveal>
+              
+              <ScrollReveal delay={0.2} className="mb-6">
+                <img 
+                  src="/lovable-uploads/hero-mobile-phone.png" 
+                  alt="A* AI Demo - A Star AI mobile interface for A-Level Economics revision" 
+                  className="mx-auto rounded-2xl object-contain w-full max-w-[360px]" 
+                />
+              </ScrollReveal>
+              
+              <ScrollReveal delay={0.3} className="text-center mb-8">
+                <InteractiveHoverButton 
+                  text="Get started today →" 
+                  variant="default"
+                  onClick={() => navigate('/compare')}
+                  className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]"
+                />
+                <p className="text-xs text-muted-foreground mt-3">
+                  Get started free • No card needed
+                </p>
+              </ScrollReveal>
+            </div>
+          ) : (
+            // Desktop version - scroll animation with iPad
+            <>
+              <ContainerScroll titleComponent={<>
+                    <div className="text-left max-w-5xl mx-auto px-6 sm:px-8 pt-4 sm:pt-0">
+                      <div className="bg-secondary text-foreground text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full inline-block mb-4 md:mb-6 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
+                        ⭐ Loved by 300+ users with a 4.9 star rating
+                      </div>
+                      <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
+                        Meet 
+                        <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-9 md:h-10 lg:h-12" />
+                      </h1>
+              <h2 className="text-base md:text-xl lg:text-2xl font-medium text-foreground mb-6 md:mb-8">
                 Your AI-powered coach for A-Levels
               </h2>
-              <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                Trained on past papers, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
-              </p>
-            </ScrollReveal>
-            
-            <ScrollReveal delay={0.2} className="px-6 mb-6">
-              <img 
-                src="/lovable-uploads/hero-mobile-phone.png" 
-                alt="A* AI Demo - A Star AI mobile interface for A-Level Economics revision" 
-                className="mx-auto rounded-2xl object-contain w-full max-w-[360px]" 
-              />
-            </ScrollReveal>
-            
-            <ScrollReveal delay={0.3} className="text-center mb-8 px-6">
-              <InteractiveHoverButton 
-                text="Get started today →" 
-                variant="default"
-                onClick={() => navigate('/compare')}
-                className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]"
-              />
-              <p className="text-xs text-muted-foreground mt-3">
-                Get started free • No card needed
-              </p>
-            </ScrollReveal>
-          </div>
-        ) : (
-          // Desktop version - scroll animation with iPad
-          <>
-            <ContainerScroll titleComponent={<>
-                  <div className="text-left max-w-5xl mx-auto px-6 sm:px-8 pt-4 sm:pt-0">
-                    <div className="bg-secondary text-foreground text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full inline-block mb-4 md:mb-6 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
-                      ⭐ Loved by 300+ users with a 4.9 star rating
                     </div>
-                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
-                      Meet 
-                      <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-9 md:h-10 lg:h-12" />
-                    </h1>
-            <h2 className="text-base md:text-xl lg:text-2xl font-medium text-foreground mb-6 md:mb-8">
-              Your AI-powered coach for A-Levels
-            </h2>
-                  </div>
-                </>}>
-              <img 
-                src="/lovable-uploads/hero-ipad-demo.jpg" 
-                alt="A* AI Demo - A Star AI interface showing A-Level Economics revision features on iPad" 
-                className="mx-auto rounded-2xl object-contain h-full object-center" 
-              />
-            </ContainerScroll>
-            
-            <div className="text-center mb-8 -mt-12 md:-mt-20 relative z-50 px-4">
-              <InteractiveHoverButton 
-                text="Get started today →" 
-                variant="default"
-                onClick={() => navigate('/compare')}
-                className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]"
-              />
-              <p className="text-xs sm:text-sm text-muted-foreground mt-3">
-                Get started free • No card needed
-              </p>
-            </div>
-          </>
-        )}
+                  </>}>
+                <img 
+                  src="/lovable-uploads/hero-ipad-demo.jpg" 
+                  alt="A* AI Demo - A Star AI interface showing A-Level Economics revision features on iPad" 
+                  className="mx-auto rounded-2xl object-contain h-full object-center" 
+                />
+              </ContainerScroll>
+              
+              <div className="text-center mb-8 -mt-12 md:-mt-20 relative z-50 px-4">
+                <InteractiveHoverButton 
+                  text="Get started today →" 
+                  variant="default"
+                  onClick={() => navigate('/compare')}
+                  className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]"
+                />
+                <p className="text-xs sm:text-sm text-muted-foreground mt-3">
+                  Get started free • No card needed
+                </p>
+              </div>
+            </>
+          )}
+        </HeroBackgroundPaths>
       </section>
 
       {/* Testimonials Section */}
