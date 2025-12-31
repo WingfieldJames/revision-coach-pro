@@ -264,6 +264,7 @@ serve(async (req) => {
         
         // Only process recurring subscription invoices
         if (invoice.subscription && invoice.billing_reason === 'subscription_cycle') {
+          const stripeSubscriptionId = invoice.subscription as string;
           let customerEmail = invoice.customer_email;
           
           if (!customerEmail && invoice.customer) {
@@ -280,6 +281,26 @@ serve(async (req) => {
             const subscriptionEnd = new Date();
             subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
             
+            // Update user_subscriptions table (primary)
+            const { error: subError } = await supabaseClient
+              .from('user_subscriptions')
+              .update({ 
+                subscription_end: subscriptionEnd.toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .eq('stripe_subscription_id', stripeSubscriptionId)
+              .eq('active', true);
+
+            if (subError) {
+              logStep("ERROR: Failed to renew user_subscriptions", { stripeSubscriptionId, error: subError });
+            } else {
+              logStep("Successfully renewed user_subscriptions", { 
+                stripeSubscriptionId,
+                newEndDate: subscriptionEnd.toISOString() 
+              });
+            }
+            
+            // Also update legacy users table for backward compatibility
             const { error } = await supabaseClient
               .from('users')
               .update({ 
@@ -290,9 +311,9 @@ serve(async (req) => {
               .eq('email', customerEmail);
 
             if (error) {
-              logStep("ERROR: Failed to renew subscription", { email: customerEmail, error });
+              logStep("ERROR: Failed to renew users table", { email: customerEmail, error });
             } else {
-              logStep("Successfully renewed monthly subscription", { 
+              logStep("Successfully renewed monthly subscription in users table", { 
                 email: customerEmail, 
                 newEndDate: subscriptionEnd.toISOString() 
               });
