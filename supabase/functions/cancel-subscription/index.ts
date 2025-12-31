@@ -51,41 +51,68 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { data: userData, error: userError } = await supabaseAdmin
-      .from('users')
-      .select('stripe_subscription_id, payment_type, email')
-      .eq('id', user.id)
-      .single();
+    // First check user_subscriptions table (primary source)
+    const { data: subscriptions, error: subError } = await supabaseAdmin
+      .from('user_subscriptions')
+      .select('*, products(name, slug)')
+      .eq('user_id', user.id)
+      .eq('payment_type', 'monthly')
+      .eq('active', true);
 
-    if (userError || !userData) {
-      console.error("Failed to fetch user data:", userError);
-      throw new Error("Failed to fetch subscription information");
+    if (subError) {
+      console.error("Failed to fetch subscriptions:", subError);
     }
 
-    console.log("User data:", { 
-      email: userData.email, 
-      paymentType: userData.payment_type,
-      hasSubscriptionId: !!userData.stripe_subscription_id 
+    // Find monthly subscription to cancel
+    let subscriptionToCancel = subscriptions?.[0];
+    
+    // Fallback to legacy users table if no subscription found
+    if (!subscriptionToCancel) {
+      console.log("No subscription in user_subscriptions, checking legacy users table");
+      const { data: userData, error: userError } = await supabaseAdmin
+        .from('users')
+        .select('stripe_subscription_id, payment_type, email')
+        .eq('id', user.id)
+        .single();
+
+      if (userError || !userData) {
+        console.error("Failed to fetch user data:", userError);
+        throw new Error("Failed to fetch subscription information");
+      }
+
+      if (userData.payment_type !== 'monthly' || !userData.stripe_subscription_id) {
+        console.log("No monthly subscription found in legacy table either");
+        return new Response(
+          JSON.stringify({ 
+            error: "Only monthly subscriptions can be cancelled. Lifetime purchases are permanent." 
+          }), 
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 400,
+          }
+        );
+      }
+
+      subscriptionToCancel = {
+        stripe_subscription_id: userData.stripe_subscription_id,
+        payment_type: userData.payment_type,
+        id: null, // Legacy - no user_subscriptions record
+      };
+    }
+
+    console.log("Subscription to cancel:", { 
+      subscriptionId: subscriptionToCancel.stripe_subscription_id,
+      paymentType: subscriptionToCancel.payment_type,
+      productName: subscriptionToCancel.products?.name || 'Legacy subscription'
     });
 
-    // Check if user has a monthly subscription
-    if (userData.payment_type !== 'monthly') {
-      console.log("User does not have a monthly subscription");
-      return new Response(
-        JSON.stringify({ 
-          error: "Only monthly subscriptions can be cancelled. Lifetime purchases are permanent." 
-        }), 
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
-      );
-    }
-
-    if (!userData.stripe_subscription_id) {
+    if (!subscriptionToCancel.stripe_subscription_id) {
       console.error("No Stripe subscription ID found");
       throw new Error("No active subscription found");
     }
+
+    const stripeSubscriptionId = subscriptionToCancel.stripe_subscription_id;
+    const userSubscriptionId = subscriptionToCancel.id;
 
     // Initialize Stripe
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -102,17 +129,29 @@ serve(async (req) => {
     // Get cancellation preference from request body
     const { cancelAtPeriodEnd = true } = await req.json().catch(() => ({ cancelAtPeriodEnd: true }));
 
-    console.log("Cancelling subscription:", userData.stripe_subscription_id);
+    console.log("Cancelling subscription:", stripeSubscriptionId);
     console.log("Cancel at period end:", cancelAtPeriodEnd);
 
     if (cancelAtPeriodEnd) {
       // Cancel at end of billing period (user keeps access until then)
       const subscription = await stripe.subscriptions.update(
-        userData.stripe_subscription_id,
+        stripeSubscriptionId,
         { cancel_at_period_end: true }
       );
       
       console.log("Subscription will be cancelled at period end:", subscription.cancel_at);
+
+      // Mark as cancelled in user_subscriptions if record exists
+      if (userSubscriptionId) {
+        await supabaseAdmin
+          .from('user_subscriptions')
+          .update({ 
+            cancelled_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userSubscriptionId);
+        console.log("Marked user_subscriptions as cancelled");
+      }
       
       return new Response(
         JSON.stringify({ 
@@ -127,11 +166,23 @@ serve(async (req) => {
       );
     } else {
       // Cancel immediately
-      await stripe.subscriptions.cancel(userData.stripe_subscription_id);
+      await stripe.subscriptions.cancel(stripeSubscriptionId);
       
       console.log("Subscription cancelled immediately");
       
-      // Update database immediately
+      // Update user_subscriptions table
+      if (userSubscriptionId) {
+        await supabaseAdmin
+          .from('user_subscriptions')
+          .update({ 
+            active: false,
+            cancelled_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userSubscriptionId);
+      }
+      
+      // Update legacy users table
       await supabaseAdmin
         .from('users')
         .update({ 
