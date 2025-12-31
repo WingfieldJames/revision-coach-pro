@@ -332,6 +332,23 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         logStep("Processing subscription cancellation", { subscriptionId: subscription.id });
         
+        // Update user_subscriptions table (primary)
+        const { error: subError } = await supabaseClient
+          .from('user_subscriptions')
+          .update({ 
+            active: false,
+            cancelled_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('stripe_subscription_id', subscription.id);
+
+        if (subError) {
+          logStep("ERROR: Failed to cancel in user_subscriptions", { subscriptionId: subscription.id, error: subError });
+        } else {
+          logStep("Successfully cancelled in user_subscriptions", { subscriptionId: subscription.id });
+        }
+        
+        // Also update legacy users table
         if (subscription.customer) {
           try {
             const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
@@ -350,9 +367,9 @@ serve(async (req) => {
                 .eq('stripe_subscription_id', subscription.id); // Only cancel if IDs match
 
               if (error) {
-                logStep("ERROR: Failed to cancel subscription", { email: customer.email, error });
+                logStep("ERROR: Failed to cancel in users table", { email: customer.email, error });
               } else {
-                logStep("Successfully cancelled monthly subscription", { 
+                logStep("Successfully cancelled in users table", { 
                   email: customer.email,
                   subscriptionId: subscription.id 
                 });
