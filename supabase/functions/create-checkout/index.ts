@@ -46,9 +46,10 @@ serve(async (req) => {
 
     console.log("User authenticated:", user.email);
 
-    const { paymentType = 'lifetime', productId, affiliateCode } = await req.json().catch(() => ({ paymentType: 'lifetime' }));
+    const { paymentType = 'lifetime', productId, productSlug, affiliateCode } = await req.json().catch(() => ({ paymentType: 'lifetime' }));
     console.log("Payment type:", paymentType);
     console.log("Product ID:", productId);
+    console.log("Product Slug:", productSlug);
     console.log("Affiliate code:", affiliateCode || 'none');
 
     // Validate affiliate code if provided
@@ -74,7 +75,7 @@ serve(async (req) => {
     let productName = "A* AI Deluxe Plan";
     
     if (productId) {
-      console.log("Fetching product details");
+      console.log("Fetching product by ID:", productId);
       const { data: productData, error: productError } = await supabaseClient
         .from('products')
         .select('*')
@@ -88,8 +89,23 @@ serve(async (req) => {
         productName = productData.name;
         console.log("Product found:", productName);
       }
+    } else if (productSlug) {
+      console.log("Fetching product by slug:", productSlug);
+      const { data: productData, error: productError } = await supabaseClient
+        .from('products')
+        .select('*')
+        .eq('slug', productSlug)
+        .single();
+      
+      if (productError) {
+        console.error("Error fetching product by slug:", productError);
+      } else {
+        product = productData;
+        productName = productData.name;
+        console.log("Product found by slug:", productName);
+      }
     } else {
-      console.log("No product ID provided, using default Edexcel Economics");
+      console.log("No product ID or slug provided, using default Edexcel Economics");
       // Default to Edexcel Economics for backward compatibility
       const { data: productData } = await supabaseClient
         .from('products')
