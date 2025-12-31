@@ -345,17 +345,25 @@ export const DashboardPage = () => {
               
               <div>
                 <p className="text-sm font-medium">Subscription Status</p>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    profile?.is_premium 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {profile?.is_premium ? 'Deluxe' : 'Free'}
-                  </span>
-                  {profile?.subscription_tier && (
-                    <span className="text-sm text-muted-foreground">
-                      ({profile.subscription_tier})
+                <div className="flex flex-wrap items-center gap-2">
+                  {productAccess['edexcel']?.hasAccess && (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Edexcel Economics Deluxe
+                    </span>
+                  )}
+                  {productAccess['aqa']?.hasAccess && (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      AQA Economics Deluxe
+                    </span>
+                  )}
+                  {productAccess['cie']?.hasAccess && (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      CIE Economics Deluxe
+                    </span>
+                  )}
+                  {!productAccess['edexcel']?.hasAccess && !productAccess['aqa']?.hasAccess && !productAccess['cie']?.hasAccess && (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      Free
                     </span>
                   )}
                 </div>
