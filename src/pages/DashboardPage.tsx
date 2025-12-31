@@ -10,8 +10,10 @@ import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Trash2, ExternalLink, Instagram, ChevronDown } from 'lucide-react';
+import { Trash2, ExternalLink, Instagram, ChevronDown, AlertCircle } from 'lucide-react';
 import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export const DashboardPage = () => {
   const { user, profile, refreshProfile, loading } = useAuth();
@@ -25,6 +27,8 @@ export const DashboardPage = () => {
   // Track product-specific access for each exam board
   const [productAccess, setProductAccess] = useState<Record<string, ProductAccess>>({});
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [cancellingSubscription, setCancellingSubscription] = useState<string | null>(null);
+  const [subscriptionDetails, setSubscriptionDetails] = useState<Record<string, any>>({});
 
   // Check product access for all exam boards when user loads
   useEffect(() => {
@@ -41,11 +45,82 @@ export const DashboardPage = () => {
           'aqa': aqaAccess,
           'cie': cieAccess,
         });
+        
+        // Fetch subscription details for monthly subscriptions
+        const { data: subs } = await supabase
+          .from('user_subscriptions')
+          .select('*, products(name, slug)')
+          .eq('user_id', user.id)
+          .eq('active', true);
+        
+        if (subs) {
+          const details: Record<string, any> = {};
+          subs.forEach((sub: any) => {
+            const slug = sub.products?.slug;
+            if (slug) {
+              const key = slug.replace('-economics', '');
+              details[key] = sub;
+            }
+          });
+          setSubscriptionDetails(details);
+        }
+        
         setCheckingAccess(false);
       }
     };
     checkAccess();
   }, [user]);
+
+  // Cancel subscription handler
+  const handleCancelSubscription = async (productKey: string) => {
+    const sub = subscriptionDetails[productKey];
+    if (!sub || sub.payment_type !== 'monthly') {
+      toast.error('Only monthly subscriptions can be cancelled');
+      return;
+    }
+    
+    if (!confirm('Are you sure you want to cancel your subscription? You will keep access until the end of your billing period.')) {
+      return;
+    }
+    
+    setCancellingSubscription(productKey);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        toast.error('Please log in again');
+        return;
+      }
+      
+      const { data, error } = await supabase.functions.invoke('cancel-subscription', {
+        headers: {
+          Authorization: `Bearer ${sessionData.session.access_token}`,
+        },
+        body: { cancelAtPeriodEnd: true },
+      });
+      
+      if (error) throw error;
+      
+      toast.success(data.message || 'Subscription cancelled successfully');
+      
+      // Refresh access
+      refreshProfile();
+      const [edexcelAccess, aqaAccess, cieAccess] = await Promise.all([
+        checkProductAccess(user!.id, 'edexcel-economics'),
+        checkProductAccess(user!.id, 'aqa-economics'),
+        checkProductAccess(user!.id, 'cie-economics'),
+      ]);
+      setProductAccess({
+        'edexcel': edexcelAccess,
+        'aqa': aqaAccess,
+        'cie': cieAccess,
+      });
+    } catch (error: any) {
+      console.error('Cancel error:', error);
+      toast.error(error.message || 'Failed to cancel subscription');
+    } finally {
+      setCancellingSubscription(null);
+    }
+  };
 
   // Save preference whenever it changes
   useEffect(() => {
@@ -344,23 +419,46 @@ export const DashboardPage = () => {
               </div>
               
               <div>
-                <p className="text-sm font-medium">Subscription Status</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  {productAccess['edexcel']?.hasAccess && (
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Edexcel Economics Deluxe
-                    </span>
-                  )}
-                  {productAccess['aqa']?.hasAccess && (
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      AQA Economics Deluxe
-                    </span>
-                  )}
-                  {productAccess['cie']?.hasAccess && (
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      CIE Economics Deluxe
-                    </span>
-                  )}
+                <p className="text-sm font-medium mb-2">Subscription Status</p>
+                <div className="space-y-3">
+                  {(['edexcel', 'aqa', 'cie'] as const).map((board) => {
+                    const access = productAccess[board];
+                    const sub = subscriptionDetails[board];
+                    if (!access?.hasAccess) return null;
+                    
+                    const isMonthly = sub?.payment_type === 'monthly';
+                    const boardName = board === 'edexcel' ? 'Edexcel' : board === 'aqa' ? 'AQA' : 'CIE';
+                    
+                    return (
+                      <div key={board} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div>
+                          <span className="font-medium">{boardName} Economics Deluxe</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800">
+                              {isMonthly ? 'Monthly' : 'Lifetime'}
+                            </span>
+                            {isMonthly && sub?.subscription_end && (
+                              <span className="text-xs text-muted-foreground">
+                                Renews: {new Date(sub.subscription_end).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {isMonthly && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleCancelSubscription(board)}
+                            disabled={cancellingSubscription === board}
+                          >
+                            {cancellingSubscription === board ? 'Cancelling...' : 'Cancel'}
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
+                  
                   {!productAccess['edexcel']?.hasAccess && !productAccess['aqa']?.hasAccess && !productAccess['cie']?.hasAccess && (
                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                       Free
@@ -368,15 +466,6 @@ export const DashboardPage = () => {
                   )}
                 </div>
               </div>
-
-              {profile?.subscription_end && (
-                <div>
-                  <p className="text-sm font-medium">Subscription Ends</p>
-                  <p className="text-muted-foreground">
-                    {new Date(profile.subscription_end).toLocaleDateString()}
-                  </p>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
