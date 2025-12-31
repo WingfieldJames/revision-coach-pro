@@ -146,7 +146,7 @@ export const ComparePage = () => {
     window.location.href = freePath;
   };
 
-  const handlePremiumClick = async () => {
+  const handlePremiumClick = async (selectedPaymentType: 'monthly' | 'lifetime' = paymentType) => {
     if (isComingSoon) return; // Don't allow clicks for coming soon subjects
     
     console.log('Button clicked! User:', user ? 'logged in' : 'not logged in', 'hasProductAccess:', hasProductAccess);
@@ -168,7 +168,7 @@ export const ComparePage = () => {
     }
 
     // User doesn't have access → Stripe checkout
-    console.log('User does not have access, starting checkout');
+    console.log('User does not have access, starting checkout with payment type:', selectedPaymentType);
     try {
       const productSlug = getCurrentProductSlug();
       console.log('Creating checkout session with payment type:', paymentType, 'for product:', productSlug);
@@ -196,7 +196,7 @@ export const ComparePage = () => {
           Authorization: `Bearer ${sessionData.session.access_token}`,
         },
         body: {
-          paymentType,
+          paymentType: selectedPaymentType,
           productId,
           affiliateCode,
         },
@@ -445,10 +445,7 @@ export const ComparePage = () => {
               variant="brand" 
               size="lg" 
               className="w-full"
-              onClick={() => {
-                setPaymentType('monthly');
-                handlePremiumClick();
-              }}
+              onClick={() => handlePremiumClick('monthly')}
               disabled={isComingSoon}
             >
               {isComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Monthly'}
@@ -502,10 +499,7 @@ export const ComparePage = () => {
               variant="brand" 
               size="lg" 
               className="w-full"
-              onClick={() => {
-                setPaymentType('lifetime');
-                handlePremiumClick();
-              }}
+              onClick={() => handlePremiumClick('lifetime')}
               disabled={isComingSoon}
             >
               {isComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Lifetime'}
