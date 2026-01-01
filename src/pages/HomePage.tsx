@@ -50,7 +50,7 @@ export const HomePage = () => {
               
               <ScrollReveal delay={0.2} className="mb-6">
                 <img 
-                  src="/lovable-uploads/hero-mobile-phone.png" 
+                  src="/lovable-uploads/hero-mobile-phone-transparent.png" 
                   alt="A* AI Demo - A Star AI mobile interface for A-Level Economics revision" 
                   className="mx-auto rounded-2xl object-contain w-full max-w-[360px]" 
                 />
