@@ -23,7 +23,7 @@ function HeroFloatingPaths({ position }: { position: number }) {
     }));
 
     return (
-        <div className="absolute inset-0 pointer-events-none overflow-visible">
+        <div className="absolute inset-0 pointer-events-none overflow-visible hidden md:block">
             <svg
                 className="w-full h-full"
                 viewBox="-400 0 2000 500"
