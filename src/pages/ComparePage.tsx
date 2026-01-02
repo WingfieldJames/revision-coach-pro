@@ -233,8 +233,8 @@ export const ComparePage = () => {
   return (
     <div className="min-h-screen bg-background font-sans">
       <SEOHead 
-        title="A* AI Plans & Pricing – Free vs Deluxe | A-Level Economics AI Tutor"
-        description="Compare A* AI plans: Free tier with basic past paper help or Deluxe with full 2017-2025 training, mark scheme feedback & A* technique. One-time £24.99 – cheaper than a single tutoring session."
+        title="Choose Your A* AI Plan | A-Level Economics Revision"
+        description="Compare A* AI plans for A-Level Economics. Free tier to try or Deluxe with full 2017-2025 past papers, mark scheme feedback & A* technique. £24.99 one-time – cheaper than a tutoring session."
         canonical="https://astarai.co.uk/compare"
       />
       <Header showNavLinks />
