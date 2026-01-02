@@ -59,8 +59,11 @@ export const ComparePage = () => {
     return null;
   };
 
-  // Check if current subject is coming soon
+  // Check if current subject is coming soon (affects all plans)
   const isComingSoon = subject === 'chemistry' || subject === 'maths';
+  
+  // Check if Deluxe is coming soon (Free may still be available)
+  const isDeluxeComingSoon = subject === 'chemistry' || subject === 'computer-science' || subject === 'maths';
 
   // Subject display names
   const subjectLabels: Record<Subject, string> = {
@@ -411,7 +414,7 @@ export const ComparePage = () => {
           {/* Monthly Plan - Desktop only */}
           <StaggerItem className="hidden lg:block bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Monthly</h2>
-            {isComingSoon ? (
+            {isDeluxeComingSoon ? (
               <>
                 <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
                 <p className="text-sm lg:text-base text-muted-foreground mb-6">Stay tuned!</p>
@@ -453,19 +456,19 @@ export const ComparePage = () => {
               size="lg" 
               className="w-full"
               onClick={() => handlePremiumClick('monthly')}
-              disabled={isComingSoon}
+              disabled={isDeluxeComingSoon}
             >
-              {isComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Monthly'}
+              {isDeluxeComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Monthly'}
             </Button>
           </StaggerItem>
 
           {/* Lifetime Plan */}
           <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left border-2 border-primary relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs lg:text-sm font-semibold px-4 py-1.5 rounded-full">
-              {isComingSoon ? 'COMING SOON' : 'BEST VALUE'}
+              {isDeluxeComingSoon ? 'COMING SOON' : 'BEST VALUE'}
             </div>
             <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Lifetime</h2>
-            {isComingSoon ? (
+            {isDeluxeComingSoon ? (
               <>
                 <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
                 <p className="text-sm lg:text-base text-muted-foreground mb-6">Stay tuned!</p>
@@ -507,9 +510,9 @@ export const ComparePage = () => {
               size="lg" 
               className="w-full"
               onClick={() => handlePremiumClick('lifetime')}
-              disabled={isComingSoon}
+              disabled={isDeluxeComingSoon}
             >
-              {isComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Lifetime'}
+              {isDeluxeComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Lifetime'}
             </Button>
           </StaggerItem>
         </StaggerContainer>
