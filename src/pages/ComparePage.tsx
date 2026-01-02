@@ -60,7 +60,7 @@ export const ComparePage = () => {
   };
 
   // Check if current subject is coming soon
-  const isComingSoon = subject === 'chemistry' || subject === 'computer-science' || subject === 'maths';
+  const isComingSoon = subject === 'chemistry' || subject === 'maths';
 
   // Subject display names
   const subjectLabels: Record<Subject, string> = {
@@ -134,16 +134,23 @@ export const ComparePage = () => {
   const handleFreeClick = async () => {
     if (isComingSoon) return; // Don't allow clicks for coming soon subjects
     
+    // Determine the free version path based on subject and exam board
+    const getFreePath = () => {
+      if (subject === 'computer-science') return '/ocr-cs-free-version';
+      if (examBoard === 'aqa') return '/aqa-free-version';
+      if (examBoard === 'cie') return '/cie-free-version';
+      return '/free-version';
+    };
+    
     if (!user) {
       // NOT logged in → Login → Free version
-      const redirectPath = examBoard === 'aqa' ? 'aqa-free-version' : examBoard === 'cie' ? 'cie-free-version' : 'free-version';
+      const redirectPath = getFreePath().replace('/', '');
       window.location.href = `/login?redirect=${redirectPath}`;
       return;
     }
     
     // LOGGED in (any user) → Free version
-    const freePath = examBoard === 'aqa' ? '/aqa-free-version' : examBoard === 'cie' ? '/cie-free-version' : '/free-version';
-    window.location.href = freePath;
+    window.location.href = getFreePath();
   };
 
   const handlePremiumClick = async (selectedPaymentType: 'monthly' | 'lifetime' = paymentType) => {
