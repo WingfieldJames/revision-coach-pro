@@ -7,8 +7,8 @@ export const ContactPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead 
-        title="Contact A* AI | A-Level Economics Revision Support"
-        description="Get in touch with A* AI. Questions about our AI-powered A-Level Economics revision coach? Email us at astarai.official@gmail.com."
+        title="Contact A* AI | Get in Touch"
+        description="Have questions about A* AI? We'd love to hear from you. Email us at astarai.official@gmail.com for support with your A-Level revision."
         canonical="https://astarai.co.uk/contact"
       />
       <Header showNavLinks />
