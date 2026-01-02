@@ -19,6 +19,10 @@ const CHATBOT_URLS: Record<string, { free: string; premium: string }> = {
   'cie-economics': {
     free: 'https://www.chatbase.co/chatbot-iframe/UuE_HD759RpXk9-xsbZa7',
     premium: 'https://www.chatbase.co/chatbot-iframe/qZY8ajOntZ2Tem3CqdOr0'
+  },
+  'ocr-computer-science': {
+    free: 'https://www.chatbase.co/chatbot-iframe/t9DaRQyfRFdgqWKI2fOnq',
+    premium: '' // To be added when Deluxe is ready
   }
 };
 
