@@ -12,7 +12,7 @@ const DEFAULT_IMAGE = `${BASE_URL}/lovable-uploads/fa6e3eef-a0ca-4e4b-ae8e-a54b1
 
 export const SEOHead = ({
   title = "A* AI – Get an A* in A-Level Economics | AI Revision Coach",
-  description = "Join 1000+ students using A* AI to master Edexcel, AQA & CIE Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today.",
+  description = "Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today.",
   canonical = BASE_URL,
   ogImage = DEFAULT_IMAGE,
 }: SEOHeadProps) => {
