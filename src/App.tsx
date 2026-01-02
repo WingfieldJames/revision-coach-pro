@@ -16,6 +16,7 @@ import { PremiumVersionPage } from "./pages/PremiumVersionPage";
 import { AQAPremiumPage } from "./pages/AQAPremiumPage";
 import { CIEFreeVersionPage } from "./pages/CIEFreeVersionPage";
 import { CIEPremiumPage } from "./pages/CIEPremiumPage";
+import { OCRCSFreeVersionPage } from "./pages/OCRCSFreeVersionPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/free-version" element={<FreeVersionPage />} />
             <Route path="/aqa-free-version" element={<AQAFreeVersionPage />} />
             <Route path="/cie-free-version" element={<CIEFreeVersionPage />} />
+            <Route path="/ocr-cs-free-version" element={<OCRCSFreeVersionPage />} />
             <Route path="/premium" element={<PremiumVersionPage />} />
             <Route path="/aqa-premium" element={<AQAPremiumPage />} />
             <Route path="/cie-premium" element={<CIEPremiumPage />} />
