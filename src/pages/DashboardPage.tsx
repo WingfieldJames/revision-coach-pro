@@ -15,13 +15,17 @@ import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+type Subject = 'economics' | 'computer-science';
+type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
+
 export const DashboardPage = () => {
   const { user, profile, refreshProfile, loading } = useAuth();
   const [searchParams] = useSearchParams();
-  const [productType, setProductType] = useState<'edexcel' | 'aqa' | 'cie'>(() => {
+  const [subject, setSubject] = useState<Subject>('economics');
+  const [productType, setProductType] = useState<ExamBoard>(() => {
     // Load saved preference from localStorage
     const saved = localStorage.getItem('preferred-exam-board');
-    return (saved === 'aqa' || saved === 'edexcel' || saved === 'cie') ? saved : 'edexcel';
+    return (saved === 'aqa' || saved === 'edexcel' || saved === 'cie' || saved === 'ocr') ? saved as ExamBoard : 'edexcel';
   });
   
   // Track product-specific access for each exam board
@@ -29,6 +33,15 @@ export const DashboardPage = () => {
   const [checkingAccess, setCheckingAccess] = useState(true);
   const [cancellingSubscription, setCancellingSubscription] = useState<string | null>(null);
   const [subscriptionDetails, setSubscriptionDetails] = useState<Record<string, any>>({});
+  
+  // Reset exam board when subject changes
+  useEffect(() => {
+    if (subject === 'economics') {
+      setProductType('edexcel');
+    } else if (subject === 'computer-science') {
+      setProductType('ocr');
+    }
+  }, [subject]);
 
   // Check product access for all exam boards when user loads
   useEffect(() => {
@@ -125,7 +138,8 @@ export const DashboardPage = () => {
   // Save preference whenever it changes
   useEffect(() => {
     localStorage.setItem('preferred-exam-board', productType);
-  }, [productType]);
+    localStorage.setItem('preferred-subject', subject);
+  }, [productType, subject]);
 
   // Check for payment success and verify with Stripe
   useEffect(() => {
@@ -202,19 +216,25 @@ export const DashboardPage = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
-                  Economics
+                  {subject === 'economics' ? 'Economics' : 'Computer Science'}
                   <ChevronDown className="h-3 w-3" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-background border border-border z-50">
-                <DropdownMenuItem className="cursor-pointer hover:bg-muted">
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-muted"
+                  onClick={() => setSubject('economics')}
+                >
                   Economics
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-muted"
+                  onClick={() => setSubject('computer-science')}
+                >
+                  Computer Science
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-default opacity-50">
                   Maths (coming soon)
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-default opacity-50">
-                  Computer Science (coming soon)
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-default opacity-50">
                   Chemistry (coming soon)
@@ -222,32 +242,47 @@ export const DashboardPage = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Exam Board Toggle */}
-            <ToggleGroup 
-              type="single" 
-              value={productType} 
-              onValueChange={(value) => value && setProductType(value as 'edexcel' | 'aqa' | 'cie')}
-              className="flex items-center gap-1"
-            >
-              <ToggleGroupItem 
-                value="edexcel" 
-                className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+            {/* Exam Board Toggle - Changes based on subject */}
+            {subject === 'economics' ? (
+              <ToggleGroup 
+                type="single" 
+                value={productType} 
+                onValueChange={(value) => value && setProductType(value as ExamBoard)}
+                className="flex items-center gap-1"
               >
-                Edexcel
-              </ToggleGroupItem>
-              <ToggleGroupItem 
-                value="aqa" 
-                className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                <ToggleGroupItem 
+                  value="edexcel" 
+                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                >
+                  Edexcel
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="aqa" 
+                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                >
+                  AQA
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="cie" 
+                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                >
+                  CIE
+                </ToggleGroupItem>
+              </ToggleGroup>
+            ) : (
+              <ToggleGroup 
+                type="single" 
+                value="ocr" 
+                className="flex items-center gap-1"
               >
-                AQA
-              </ToggleGroupItem>
-              <ToggleGroupItem 
-                value="cie" 
-                className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-              >
-                CIE
-              </ToggleGroupItem>
-            </ToggleGroup>
+                <ToggleGroupItem 
+                  value="ocr" 
+                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white"
+                >
+                  OCR
+                </ToggleGroupItem>
+              </ToggleGroup>
+            )}
           </div>
         </div>
 
@@ -258,7 +293,10 @@ export const DashboardPage = () => {
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on the 2025-2024 {productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA Economics' : 'CIE Economics'} past papers (P1–P3)
+                {subject === 'economics' 
+                  ? `AI trained on the 2025-2024 ${productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA Economics' : 'CIE Economics'} past papers (P1–P3)`
+                  : 'AI trained on the 2025-2024 OCR Computer Science past papers'
+                }
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -279,24 +317,37 @@ export const DashboardPage = () => {
               className="w-full"
               asChild
             >
-              <Link to={productType === 'edexcel' ? '/free-version' : productType === 'aqa' ? '/aqa-free-version' : '/cie-free-version'}>Launch free</Link>
+              <Link to={
+                subject === 'computer-science' 
+                  ? '/ocr-cs-free-version'
+                  : productType === 'edexcel' ? '/free-version' : productType === 'aqa' ? '/aqa-free-version' : '/cie-free-version'
+              }>Launch free</Link>
             </Button>
           </div>
 
           {/* Deluxe Plan */}
           <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${productAccess[productType]?.hasAccess ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
             <h2 className="text-2xl font-semibold mb-6">
-              🔥 Deluxe Plan {productType === 'edexcel' ? '(Edexcel)' : productType === 'aqa' ? '(AQA)' : '(CIE)'} — <span className="line-through text-red-500">£49.99</span> £24.99 (Lifetime Access)
-              {productAccess[productType]?.hasAccess && (
-                <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
-                  ACTIVE
-                </span>
+              {subject === 'computer-science' ? (
+                <>🔥 Deluxe Plan (OCR CS) — Coming Soon</>
+              ) : (
+                <>
+                  🔥 Deluxe Plan {productType === 'edexcel' ? '(Edexcel)' : productType === 'aqa' ? '(AQA)' : '(CIE)'} — <span className="line-through text-red-500">£49.99</span> £24.99 (Lifetime Access)
+                  {productAccess[productType]?.hasAccess && (
+                    <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
+                      ACTIVE
+                    </span>
+                  )}
+                </>
               )}
             </h2>
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA' : 'CIE'} past papers (2017-2025, P1-P3)
+                {subject === 'economics'
+                  ? `AI trained on all ${productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA' : 'CIE'} past papers (2017-2025, P1-P3)`
+                  : 'AI trained on all OCR Computer Science past papers'
+                }
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -308,7 +359,7 @@ export const DashboardPage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire {productType === 'edexcel' ? 'Edexcel' : productType === 'aqa' ? 'AQA' : 'CIE'} specification
+                Covers the entire {subject === 'economics' ? (productType === 'edexcel' ? 'Edexcel' : productType === 'aqa' ? 'AQA' : 'CIE') : 'OCR'} specification
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -316,7 +367,10 @@ export const DashboardPage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Step-by-step diagram guidance (AD/AS → buffer stocks) + application bank
+                {subject === 'economics' 
+                  ? 'Step-by-step diagram guidance (AD/AS → buffer stocks) + application bank'
+                  : 'Step-by-step coding guidance + algorithm explanations'
+                }
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -324,7 +378,16 @@ export const DashboardPage = () => {
               </li>
             </ul>
             
-            {productAccess[productType]?.hasAccess ? (
+            {subject === 'computer-science' ? (
+              <Button 
+                variant="brand" 
+                size="lg" 
+                className="w-full"
+                disabled
+              >
+                Coming Soon
+              </Button>
+            ) : productAccess[productType]?.hasAccess ? (
               <Button 
                 variant="brand" 
                 size="lg" 
