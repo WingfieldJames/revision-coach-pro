@@ -37,10 +37,7 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
   const achievements = isCS ? csAchievements : economicsAchievements;
 
   const founderName = isCS ? "Naman" : "James";
-  const founderStatus = isCS ? "Gap Year student (reapplying to Cambridge and Imperial)" : "LSE Student";
-  const founderQuote = isCS 
-    ? "Hi, I'm Naman. 4 A*s (Double Maths, Computer Science, Physics), TMUA score of 8.9, and straight 9s at GCSE.\n\nI built this model on everything that got me top marks in OCR CS - the pseudocode patterns, the algorithm tricks, the exam shortcuts that actually work."
-    : "Hi, I'm James. A* in Economics (90% across all papers), straight 9s at GCSE, A*A*A at A-Level, now at LSE.\n\nI built this model on everything that got me top marks - the KAA structures, evaluation phrases, and diagram techniques that examiners actually reward.";
+  const founderStatus = isCS ? "Gap Year Student" : "LSE Student";
 
   return (
     <section className="py-16 px-6 bg-gradient-to-br from-muted/50 via-background to-muted/30">
@@ -122,8 +119,20 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
             {/* Content */}
             <div className="flex-1 text-center md:text-left">
               {/* Quote */}
-              <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 whitespace-pre-line">
-                "{founderQuote}"
+              <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
+                {isCS ? (
+                  <>
+                    "Hi, I'm Naman. 4 A*s (Double Maths, Computer Science, Physics), TMUA score of 8.9, and straight 9s at GCSE.
+                    <br /><br />
+                    I built this model on everything that got me top marks in OCR CS - the pseudocode patterns, the algorithm tricks, the exam shortcuts that actually work."
+                  </>
+                ) : (
+                  <>
+                    "Hi, I'm James. A* in Economics (90% across all papers), straight 9s at GCSE, A*A*A at A-Level, now at LSE.
+                    <br /><br />
+                    I built this model on everything that got me top marks - the KAA structures, evaluation phrases, and diagram techniques that examiners actually reward."
+                  </>
+                )}
               </blockquote>
 
               {/* Achievement badges */}
