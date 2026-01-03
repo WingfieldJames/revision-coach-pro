@@ -562,8 +562,8 @@ export const ComparePage = () => {
         ]}
       />
 
-      {/* Founder Section - Only show for Economics */}
-      {subject === 'economics' && <FounderSection />}
+      {/* Founder Section - Show for Economics and Computer Science */}
+      {(subject === 'economics' || subject === 'computer-science') && <FounderSection />}
 
       {/* Latest Features Section */}
       <section className="py-8 md:py-16 px-4 md:px-8">
