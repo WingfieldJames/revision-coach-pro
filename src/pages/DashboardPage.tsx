@@ -277,7 +277,7 @@ export const DashboardPage = () => {
               >
                 <ToggleGroupItem 
                   value="ocr" 
-                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white"
+                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold bg-gradient-brand !text-white"
                 >
                   OCR
                 </ToggleGroupItem>
