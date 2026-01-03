@@ -2,7 +2,12 @@ import { motion } from 'framer-motion';
 import { Quote, GraduationCap, Award, BookOpen } from 'lucide-react';
 import jamesFounder from '@/assets/james-founder.png';
 
-export function FounderSection() {
+interface FounderSectionProps {
+  subject?: 'economics' | 'computer-science';
+}
+
+export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
+  const subjectLabel = subject === 'computer-science' ? 'Computer Science' : 'Economics';
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: { 
@@ -39,7 +44,7 @@ export function FounderSection() {
               alt="A* AI" 
               className="h-6 md:h-8 inline-block" 
             />
-            <span className="bg-gradient-brand bg-clip-text text-transparent">Economics</span>
+            <span className="bg-gradient-brand bg-clip-text text-transparent">{subjectLabel}</span>
           </h2>
         </motion.div>
 
