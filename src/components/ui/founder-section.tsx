@@ -8,6 +8,8 @@ interface FounderSectionProps {
 
 export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
   const subjectLabel = subject === 'computer-science' ? 'Computer Science' : 'Economics';
+  const isCS = subject === 'computer-science';
+  
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: { 
@@ -20,11 +22,25 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
     }
   };
 
-  const achievements = [
+  const economicsAchievements = [
     { icon: Award, text: "A* in Economics (90% across all papers)" },
     { icon: GraduationCap, text: "Straight 9s at GCSE" },
     { icon: BookOpen, text: "A*A*A at A-Level" },
   ];
+
+  const csAchievements = [
+    { icon: Award, text: "A*A*A*A* at A-Level" },
+    { icon: GraduationCap, text: "Straight 9s at GCSE" },
+    { icon: BookOpen, text: "8.9 TMUA score" },
+  ];
+
+  const achievements = isCS ? csAchievements : economicsAchievements;
+
+  const founderName = isCS ? "Naman" : "James";
+  const founderStatus = isCS ? "Gap Year student (reapplying to Cambridge and Imperial)" : "LSE Student";
+  const founderQuote = isCS 
+    ? "Hi, I'm Naman. 4 A*s (Double Maths, Computer Science, Physics), TMUA score of 8.9, and straight 9s at GCSE.\n\nI built this model on everything that got me top marks in OCR CS - the pseudocode patterns, the algorithm tricks, the exam shortcuts that actually work."
+    : "Hi, I'm James. A* in Economics (90% across all papers), straight 9s at GCSE, A*A*A at A-Level, now at LSE.\n\nI built this model on everything that got me top marks - the KAA structures, evaluation phrases, and diagram techniques that examiners actually reward.";
 
   return (
     <section className="py-16 px-6 bg-gradient-to-br from-muted/50 via-background to-muted/30">
@@ -72,12 +88,18 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg">
-                  <img 
-                    src={jamesFounder} 
-                    alt="James - Founder"
-                    className="w-full h-full object-cover object-top"
-                  />
+                <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg bg-muted">
+                  {isCS ? (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      <GraduationCap className="w-16 h-16" />
+                    </div>
+                  ) : (
+                    <img 
+                      src={jamesFounder} 
+                      alt="James - Founder"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  )}
                 </div>
                 {/* Decorative ring */}
                 <motion.div
@@ -92,18 +114,16 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
               
               {/* Name and current status */}
               <div className="text-center mt-4">
-                <h3 className="text-xl font-bold text-foreground">James</h3>
-                <p className="text-sm text-primary font-medium">LSE Student</p>
+                <h3 className="text-xl font-bold text-foreground">{founderName}</h3>
+                <p className="text-sm text-primary font-medium">{founderStatus}</p>
               </div>
             </div>
 
             {/* Content */}
             <div className="flex-1 text-center md:text-left">
               {/* Quote */}
-              <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
-                "Hi, I'm James. A* in Economics (90% across all papers), straight 9s at GCSE, A*A*A at A-Level, now at LSE.
-                <br /><br />
-                I built this model on everything that got me top marks - the KAA structures, evaluation phrases, and diagram techniques that examiners actually reward."
+              <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 whitespace-pre-line">
+                "{founderQuote}"
               </blockquote>
 
               {/* Achievement badges */}
