@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Quote, GraduationCap, Award, BookOpen } from 'lucide-react';
 import jamesFounder from '@/assets/james-founder.png';
+import namanFounder from '@/assets/naman-founder.png';
 
 interface FounderSectionProps {
   subject?: 'economics' | 'computer-science';
@@ -87,9 +88,11 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
               >
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg bg-muted">
                   {isCS ? (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                      <GraduationCap className="w-16 h-16" />
-                    </div>
+                    <img 
+                      src={namanFounder} 
+                      alt="Naman - Founder"
+                      className="w-full h-full object-cover object-top"
+                    />
                   ) : (
                     <img 
                       src={jamesFounder} 
@@ -122,7 +125,7 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
               <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
                 {isCS ? (
                   <>
-                    "Hi, I'm Naman. 4 A*s (Double Maths, Computer Science, Physics), TMUA score of 8.9, and straight 9s at GCSE.
+                    "Hi, I'm Naman. 4 A*s (Maths, Further Maths, Computer Science and Physics), TMUA score of 8.9, and straight 9s at GCSE.
                     <br /><br />
                     I built this model on everything that got me top marks in OCR CS - the pseudocode patterns, the algorithm tricks, the exam shortcuts that actually work."
                   </>
