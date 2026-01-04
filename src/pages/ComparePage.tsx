@@ -563,7 +563,7 @@ export const ComparePage = () => {
       />
 
       {/* Founder Section - Show for Economics and Computer Science */}
-      {(subject === 'economics' || subject === 'computer-science') && <FounderSection subject={subject} />}
+      {(subject === 'economics' || subject === 'computer-science') && <FounderSection subject={subject} examBoard={examBoard} />}
 
       {/* Latest Features Section */}
       <section className="py-8 md:py-16 px-4 md:px-8">

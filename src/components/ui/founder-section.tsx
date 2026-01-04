@@ -1,15 +1,19 @@
 import { motion } from 'framer-motion';
-import { Quote, GraduationCap, Award, BookOpen } from 'lucide-react';
+import { Quote, GraduationCap, Award, BookOpen, Trophy } from 'lucide-react';
 import jamesFounder from '@/assets/james-founder.png';
 import namanFounder from '@/assets/naman-founder.png';
+import etienneFounder from '@/assets/etienne-founder.png';
 
 interface FounderSectionProps {
   subject?: 'economics' | 'computer-science';
+  examBoard?: 'edexcel' | 'aqa' | 'cie' | 'ocr';
 }
 
-export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
+export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }: FounderSectionProps) {
   const subjectLabel = subject === 'computer-science' ? 'Computer Science' : 'Economics';
   const isCS = subject === 'computer-science';
+  const isAQA = subject === 'economics' && examBoard === 'aqa';
+  const isCIE = subject === 'economics' && examBoard === 'cie';
   
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
@@ -35,10 +39,22 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
     { icon: BookOpen, text: "8.9 TMUA score" },
   ];
 
-  const achievements = isCS ? csAchievements : economicsAchievements;
+  const aqaAchievements = [
+    { icon: Trophy, text: "UKMT Gold Award" },
+    { icon: Award, text: "Founder of EasyNomics" },
+    { icon: BookOpen, text: "John Locke Shortlist (Econ)" },
+  ];
 
-  const founderName = isCS ? "Naman" : "James";
-  const founderStatus = isCS ? "Gap Year Student" : "LSE Student";
+  const cieAchievements = [
+    { icon: Award, text: "A*A*A* at A-Level" },
+    { icon: GraduationCap, text: "International Student" },
+    { icon: BookOpen, text: "5A*s in IGCSE in one year" },
+  ];
+
+  const achievements = isCS ? csAchievements : isAQA ? aqaAchievements : isCIE ? cieAchievements : economicsAchievements;
+
+  const founderName = isCS ? "Naman" : isAQA ? "Etienne" : isCIE ? "Carl" : "James";
+  const founderStatus = isCS ? "Gap Year Student" : isAQA ? "BSc Economics Student" : isCIE ? "LSE Student" : "LSE Student";
 
   return (
     <section className="py-16 px-6 bg-gradient-to-br from-muted/50 via-background to-muted/30">
@@ -93,6 +109,16 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
                       alt="Naman - Founder"
                       className="w-full h-full object-cover object-top"
                     />
+                  ) : isAQA ? (
+                    <img 
+                      src={etienneFounder} 
+                      alt="Etienne - Head of AQA"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  ) : isCIE ? (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      <GraduationCap className="w-16 h-16" />
+                    </div>
                   ) : (
                     <img 
                       src={jamesFounder} 
@@ -129,14 +155,25 @@ export function FounderSection({ subject = 'economics' }: FounderSectionProps) {
                     <br /><br />
                     I built this model on everything that got me top marks in OCR CS - the pseudocode patterns, the algorithm tricks, the exam shortcuts that actually work."
                   </>
+                ) : isAQA ? (
+                  <>
+                    "Hi, I'm Etienne. I joined as CTO/Head of AQA to integrate my 'EasyNomics' engine directly into A* AI. I trained this model specifically on KAAE-aligned templates and fed it hundreds of AQA-specific model answers.
+                    <br /><br />
+                    It doesn't just know Economics; it understands exactly how to structure an essay to hit the top mark bands."
+                  </>
+                ) : isCIE ? (
+                  <>
+                    "Hi, I am Carl, an international school student from Beijing, China. I got 3A*s in A-Level (Economics, Chemistry and Pure Mathematics) and straight 5A*s in IGCSE in one year, now studying at LSE.
+                    <br /><br />
+                    I built this model based on my experience and knowledge that helps me to get A* in CIE A-Level Economics — the structure of essay and the logic chain."
+                  </>
                 ) : (
                   <>
                     "Hi, I'm James. A* in Economics (90% across all papers), straight 9s at GCSE, A*A*A at A-Level, now at LSE.
                     <br /><br />
                     I built this model on everything that got me top marks - the KAA structures, evaluation phrases, and diagram techniques that examiners actually reward."
                   </>
-                )}
-              </blockquote>
+                )}</blockquote>
 
               {/* Achievement badges */}
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
