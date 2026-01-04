@@ -3,6 +3,7 @@ import { Quote, GraduationCap, Award, BookOpen, Trophy } from 'lucide-react';
 import jamesFounder from '@/assets/james-founder.png';
 import namanFounder from '@/assets/naman-founder.png';
 import etienneFounder from '@/assets/etienne-founder.png';
+import carlFounder from '@/assets/carl-founder.png';
 
 interface FounderSectionProps {
   subject?: 'economics' | 'computer-science';
@@ -116,9 +117,11 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
                       className="w-full h-full object-cover object-top"
                     />
                   ) : isCIE ? (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                      <GraduationCap className="w-16 h-16" />
-                    </div>
+                    <img 
+                      src={carlFounder} 
+                      alt="Carl - Head of CIE"
+                      className="w-full h-full object-cover object-top"
+                    />
                   ) : (
                     <img 
                       src={jamesFounder} 
