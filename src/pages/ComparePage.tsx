@@ -371,13 +371,13 @@ export const ComparePage = () => {
               >
                 <ToggleGroupItem 
                   value="economics" 
-                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-white data-[state=on]:text-foreground data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
                 >
                   Economics
                 </ToggleGroupItem>
                 <ToggleGroupItem 
                   value="computer-science" 
-                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-white data-[state=on]:text-foreground data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
                 >
                   Computer Science
                 </ToggleGroupItem>
