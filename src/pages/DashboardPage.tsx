@@ -21,11 +21,18 @@ type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 export const DashboardPage = () => {
   const { user, profile, refreshProfile, loading } = useAuth();
   const [searchParams] = useSearchParams();
-  const [subject, setSubject] = useState<Subject>('economics');
+  const [subject, setSubject] = useState<Subject>(() => {
+    const saved = localStorage.getItem('preferred-subject');
+    return (saved === 'economics' || saved === 'computer-science') ? saved as Subject : 'economics';
+  });
   const [productType, setProductType] = useState<ExamBoard>(() => {
-    // Load saved preference from localStorage
+    const savedSubject = localStorage.getItem('preferred-subject');
     const saved = localStorage.getItem('preferred-exam-board');
-    return (saved === 'aqa' || saved === 'edexcel' || saved === 'cie' || saved === 'ocr') ? saved as ExamBoard : 'edexcel';
+    // Only use saved exam board if it matches the subject
+    if (savedSubject === 'computer-science') {
+      return 'ocr';
+    }
+    return (saved === 'edexcel' || saved === 'aqa' || saved === 'cie') ? saved as ExamBoard : 'edexcel';
   });
   
   // Track product-specific access for each exam board
@@ -34,14 +41,23 @@ export const DashboardPage = () => {
   const [cancellingSubscription, setCancellingSubscription] = useState<string | null>(null);
   const [subscriptionDetails, setSubscriptionDetails] = useState<Record<string, any>>({});
   
-  // Reset exam board when subject changes
+  // Save preferences to localStorage and reset exam board when subject changes
   useEffect(() => {
+    localStorage.setItem('preferred-subject', subject);
     if (subject === 'economics') {
-      setProductType('edexcel');
+      // Only reset if current board is not valid for economics
+      if (productType === 'ocr') {
+        setProductType('edexcel');
+      }
     } else if (subject === 'computer-science') {
       setProductType('ocr');
     }
   }, [subject]);
+
+  // Save exam board preference when it changes
+  useEffect(() => {
+    localStorage.setItem('preferred-exam-board', productType);
+  }, [productType]);
 
   // Check product access for all exam boards when user loads
   useEffect(() => {
