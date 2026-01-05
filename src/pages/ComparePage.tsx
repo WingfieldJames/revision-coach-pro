@@ -293,11 +293,11 @@ export const ComparePage = () => {
           </h1>
         </ScrollReveal>
 
-        {/* Combined Toggle - Subject Dropdown + Exam Board Toggle */}
+        {/* Combined Toggle - Subject + Exam Board */}
         <ScrollReveal delay={0.1}>
           <div className="flex justify-center mb-12">
-            <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
-              {/* Subject Dropdown */}
+            {/* Mobile: Dropdown for subject */}
+            <div className="md:hidden border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
@@ -314,23 +314,14 @@ export const ComparePage = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     className="cursor-pointer hover:bg-muted"
-                    onClick={() => { setSubject('chemistry'); setExamBoard('ocr'); }}
-                  >
-                    Chemistry
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="cursor-pointer hover:bg-muted"
                     onClick={() => { setSubject('computer-science'); setExamBoard('ocr'); }}
                   >
                     Computer Science
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-default text-muted-foreground">
-                    Maths (coming soon)
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Exam Board Toggle - Different options based on subject */}
+              {/* Exam Board Toggle for mobile */}
               {subject === 'economics' ? (
                 <ToggleGroup 
                   type="single" 
@@ -340,19 +331,84 @@ export const ComparePage = () => {
                 >
                   <ToggleGroupItem 
                     value="edexcel" 
-                    className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                    className="rounded-full px-4 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
                   >
                     Edexcel
                   </ToggleGroupItem>
                   <ToggleGroupItem 
                     value="aqa" 
-                    className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                    className="rounded-full px-4 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
                   >
                     AQA
                   </ToggleGroupItem>
                   <ToggleGroupItem 
                     value="cie" 
-                    className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                    className="rounded-full px-4 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  >
+                    CIE
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              ) : (
+                <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
+                  OCR
+                </div>
+              )}
+            </div>
+
+            {/* Tablet/Desktop: All toggles in one row */}
+            <div className="hidden md:flex border border-border p-1.5 rounded-full bg-transparent items-center gap-1">
+              {/* Subject Toggle */}
+              <ToggleGroup 
+                type="single" 
+                value={subject} 
+                onValueChange={(value) => {
+                  if (value) {
+                    setSubject(value as Subject);
+                    setExamBoard(value === 'economics' ? 'edexcel' : 'ocr');
+                  }
+                }}
+                className="flex items-center gap-1"
+              >
+                <ToggleGroupItem 
+                  value="economics" 
+                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-white data-[state=on]:text-foreground data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                >
+                  Economics
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="computer-science" 
+                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-white data-[state=on]:text-foreground data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                >
+                  Computer Science
+                </ToggleGroupItem>
+              </ToggleGroup>
+
+              {/* Divider */}
+              <div className="w-px h-6 bg-border mx-1" />
+
+              {/* Exam Board Toggle */}
+              {subject === 'economics' ? (
+                <ToggleGroup 
+                  type="single" 
+                  value={examBoard} 
+                  onValueChange={(value) => value && setExamBoard(value as ExamBoard)}
+                  className="flex items-center gap-1"
+                >
+                  <ToggleGroupItem 
+                    value="edexcel" 
+                    className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  >
+                    Edexcel
+                  </ToggleGroupItem>
+                  <ToggleGroupItem 
+                    value="aqa" 
+                    className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  >
+                    AQA
+                  </ToggleGroupItem>
+                  <ToggleGroupItem 
+                    value="cie" 
+                    className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
                   >
                     CIE
                   </ToggleGroupItem>
