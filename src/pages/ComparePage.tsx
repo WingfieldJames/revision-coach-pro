@@ -32,8 +32,19 @@ export const ComparePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
-  const [subject, setSubject] = useState<Subject>('economics');
-  const [examBoard, setExamBoard] = useState<ExamBoard>('edexcel');
+  const [subject, setSubject] = useState<Subject>(() => {
+    const saved = localStorage.getItem('preferred-subject');
+    return (saved === 'economics' || saved === 'computer-science') ? saved as Subject : 'economics';
+  });
+  const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
+    const savedSubject = localStorage.getItem('preferred-subject');
+    const saved = localStorage.getItem('preferred-exam-board');
+    // Only use saved exam board if it matches the subject
+    if (savedSubject === 'computer-science') {
+      return 'ocr';
+    }
+    return (saved === 'edexcel' || saved === 'aqa' || saved === 'cie') ? saved as ExamBoard : 'edexcel';
+  });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [hasProductAccess, setHasProductAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(false);
@@ -102,6 +113,12 @@ export const ComparePage = () => {
 
     checkAccess();
   }, [user, subject, examBoard, loading, isComingSoon]);
+
+  // Save preferences to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('preferred-subject', subject);
+    localStorage.setItem('preferred-exam-board', examBoard);
+  }, [subject, examBoard]);
 
   // Scroll to top when component mounts, or to testimonials if hash is present
   useEffect(() => {
