@@ -356,35 +356,37 @@ export const ComparePage = () => {
             </div>
 
             {/* Tablet/Desktop: All toggles in one row */}
-            <div className="hidden md:flex border border-border p-1.5 rounded-full bg-transparent items-center gap-1">
-              {/* Subject Toggle */}
-              <ToggleGroup 
-                type="single" 
-                value={subject} 
-                onValueChange={(value) => {
-                  if (value) {
-                    setSubject(value as Subject);
-                    setExamBoard(value === 'economics' ? 'edexcel' : 'ocr');
-                  }
-                }}
-                className="flex items-center gap-1"
-              >
-                <ToggleGroupItem 
-                  value="economics" 
-                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+            <div className="hidden md:flex border border-border p-1.5 rounded-full bg-transparent items-center">
+              {/* Subject Toggle - Fixed width container to prevent shifting */}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <ToggleGroup 
+                  type="single" 
+                  value={subject} 
+                  onValueChange={(value) => {
+                    if (value) {
+                      setSubject(value as Subject);
+                      setExamBoard(value === 'economics' ? 'edexcel' : 'ocr');
+                    }
+                  }}
+                  className="flex items-center gap-1"
                 >
-                  Economics
-                </ToggleGroupItem>
-                <ToggleGroupItem 
-                  value="computer-science" 
-                  className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-                >
-                  Computer Science
-                </ToggleGroupItem>
-              </ToggleGroup>
+                  <ToggleGroupItem 
+                    value="economics" 
+                    className="rounded-full w-[110px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  >
+                    Economics
+                  </ToggleGroupItem>
+                  <ToggleGroupItem 
+                    value="computer-science" 
+                    className="rounded-full w-[150px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  >
+                    Computer Science
+                  </ToggleGroupItem>
+                </ToggleGroup>
 
-              {/* Divider */}
-              <div className="w-px h-6 bg-border mx-1" />
+                {/* Divider */}
+                <div className="w-px h-6 bg-border mx-1" />
+              </div>
 
               {/* Exam Board Toggle */}
               {subject === 'economics' ? (
