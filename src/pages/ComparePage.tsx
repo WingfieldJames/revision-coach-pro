@@ -388,31 +388,31 @@ export const ComparePage = () => {
                 <div className="w-px h-6 bg-border mx-1" />
               </div>
 
-              {/* Exam Board Toggle - Fixed width container */}
-              <div className="flex items-center gap-1">
+              {/* Exam Board Toggle - Fixed width container to prevent shifting */}
+              <div className="w-[200px] flex items-center gap-1">
                 <ToggleGroup 
                   type="single" 
                   value={examBoard} 
                   onValueChange={(value) => value && setExamBoard(value as ExamBoard)}
-                  className="flex items-center gap-1"
+                  className="flex items-center gap-1 w-full"
                 >
                   {subject === 'economics' ? (
                     <>
                       <ToggleGroupItem 
                         value="edexcel" 
-                        className="rounded-full w-[75px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                        className="rounded-full flex-1 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-colors"
                       >
                         Edexcel
                       </ToggleGroupItem>
                       <ToggleGroupItem 
                         value="aqa" 
-                        className="rounded-full w-[55px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                        className="rounded-full flex-1 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-colors"
                       >
                         AQA
                       </ToggleGroupItem>
                       <ToggleGroupItem 
                         value="cie" 
-                        className="rounded-full w-[50px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                        className="rounded-full flex-1 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-colors"
                       >
                         CIE
                       </ToggleGroupItem>
@@ -421,14 +421,14 @@ export const ComparePage = () => {
                     <>
                       <ToggleGroupItem 
                         value="ocr" 
-                        className="rounded-full w-[55px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                        className="rounded-full flex-1 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-colors"
                       >
                         OCR
                       </ToggleGroupItem>
-                      <div className="rounded-full w-[55px] py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                      <div className="rounded-full flex-1 py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
                         AQA
                       </div>
-                      <div className="rounded-full w-[70px] py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                      <div className="rounded-full flex-1 py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
                         Edexcel
                       </div>
                     </>
