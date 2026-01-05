@@ -388,38 +388,53 @@ export const ComparePage = () => {
                 <div className="w-px h-6 bg-border mx-1" />
               </div>
 
-              {/* Exam Board Toggle */}
-              {subject === 'economics' ? (
+              {/* Exam Board Toggle - Fixed width container */}
+              <div className="flex items-center gap-1">
                 <ToggleGroup 
                   type="single" 
                   value={examBoard} 
                   onValueChange={(value) => value && setExamBoard(value as ExamBoard)}
                   className="flex items-center gap-1"
                 >
-                  <ToggleGroupItem 
-                    value="edexcel" 
-                    className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-                  >
-                    Edexcel
-                  </ToggleGroupItem>
-                  <ToggleGroupItem 
-                    value="aqa" 
-                    className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-                  >
-                    AQA
-                  </ToggleGroupItem>
-                  <ToggleGroupItem 
-                    value="cie" 
-                    className="rounded-full px-6 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
-                  >
-                    CIE
-                  </ToggleGroupItem>
+                  {subject === 'economics' ? (
+                    <>
+                      <ToggleGroupItem 
+                        value="edexcel" 
+                        className="rounded-full w-[75px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                      >
+                        Edexcel
+                      </ToggleGroupItem>
+                      <ToggleGroupItem 
+                        value="aqa" 
+                        className="rounded-full w-[55px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                      >
+                        AQA
+                      </ToggleGroupItem>
+                      <ToggleGroupItem 
+                        value="cie" 
+                        className="rounded-full w-[50px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                      >
+                        CIE
+                      </ToggleGroupItem>
+                    </>
+                  ) : (
+                    <>
+                      <ToggleGroupItem 
+                        value="ocr" 
+                        className="rounded-full w-[55px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                      >
+                        OCR
+                      </ToggleGroupItem>
+                      <div className="rounded-full w-[55px] py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                        AQA
+                      </div>
+                      <div className="rounded-full w-[70px] py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                        Edexcel
+                      </div>
+                    </>
+                  )}
                 </ToggleGroup>
-              ) : (
-                <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
-                  OCR
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </ScrollReveal>
