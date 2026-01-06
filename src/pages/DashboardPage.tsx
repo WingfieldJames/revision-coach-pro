@@ -64,15 +64,17 @@ export const DashboardPage = () => {
     const checkAccess = async () => {
       if (user) {
         setCheckingAccess(true);
-        const [edexcelAccess, aqaAccess, cieAccess] = await Promise.all([
+        const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess] = await Promise.all([
           checkProductAccess(user.id, 'edexcel-economics'),
           checkProductAccess(user.id, 'aqa-economics'),
           checkProductAccess(user.id, 'cie-economics'),
+          checkProductAccess(user.id, 'ocr-computer-science'),
         ]);
         setProductAccess({
           'edexcel': edexcelAccess,
           'aqa': aqaAccess,
           'cie': cieAccess,
+          'ocr': ocrCsAccess,
         });
         
         // Fetch subscription details for monthly subscriptions
@@ -87,7 +89,8 @@ export const DashboardPage = () => {
           subs.forEach((sub: any) => {
             const slug = sub.products?.slug;
             if (slug) {
-              const key = slug.replace('-economics', '');
+              // Handle both economics and computer science slugs
+              const key = slug.replace('-economics', '').replace('-computer-science', '');
               details[key] = sub;
             }
           });
@@ -345,7 +348,14 @@ export const DashboardPage = () => {
           <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${productAccess[productType]?.hasAccess ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
             <h2 className="text-2xl font-semibold mb-6">
               {subject === 'computer-science' ? (
-                <>🔥 Deluxe Plan (OCR CS) — Coming Soon</>
+                <>
+                  🔥 Deluxe Plan (OCR CS) — <span className="line-through text-red-500">£49.99</span> £24.99 (Lifetime Access)
+                  {productAccess['ocr']?.hasAccess && (
+                    <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
+                      ACTIVE
+                    </span>
+                  )}
+                </>
               ) : (
                 <>
                   🔥 Deluxe Plan {productType === 'edexcel' ? '(Edexcel)' : productType === 'aqa' ? '(AQA)' : '(CIE)'} — <span className="line-through text-red-500">£49.99</span> £24.99 (Lifetime Access)
@@ -394,23 +404,18 @@ export const DashboardPage = () => {
               </li>
             </ul>
             
-            {subject === 'computer-science' ? (
-              <Button 
-                variant="brand" 
-                size="lg" 
-                className="w-full"
-                disabled
-              >
-                Coming Soon
-              </Button>
-            ) : productAccess[productType]?.hasAccess ? (
+            {(subject === 'computer-science' ? productAccess['ocr']?.hasAccess : productAccess[productType]?.hasAccess) ? (
               <Button 
                 variant="brand" 
                 size="lg" 
                 className="w-full"
                 asChild
               >
-                <Link to={productType === 'edexcel' ? '/premium' : productType === 'aqa' ? '/aqa-premium' : '/cie-premium'}>Launch Deluxe Version</Link>
+                <Link to={
+                  subject === 'computer-science' 
+                    ? '/ocr-cs-premium' 
+                    : productType === 'edexcel' ? '/premium' : productType === 'aqa' ? '/aqa-premium' : '/cie-premium'
+                }>Launch Deluxe Version</Link>
               </Button>
             ) : (
               <Button 
@@ -420,7 +425,7 @@ export const DashboardPage = () => {
                 disabled={checkingAccess}
                 onClick={async () => {
                   try {
-                    console.log('Starting premium upgrade process for', productType);
+                    console.log('Starting premium upgrade process for', subject === 'computer-science' ? 'ocr-computer-science' : productType);
                     const { supabase } = await import('@/integrations/supabase/client');
                     
                     // Get current session
@@ -440,9 +445,11 @@ export const DashboardPage = () => {
                     }
                     
                     // Map product type to product slug
-                    const productSlug = productType === 'edexcel' ? 'edexcel-economics' 
-                      : productType === 'aqa' ? 'aqa-economics' 
-                      : 'cie-economics';
+                    const productSlug = subject === 'computer-science' 
+                      ? 'ocr-computer-science'
+                      : productType === 'edexcel' ? 'edexcel-economics' 
+                        : productType === 'aqa' ? 'aqa-economics' 
+                        : 'cie-economics';
                     
                     const { data, error } = await supabase.functions.invoke('create-checkout', {
                       headers: {
@@ -451,6 +458,7 @@ export const DashboardPage = () => {
                       body: {
                         affiliateCode,
                         productSlug,
+                        paymentType: 'lifetime', // Dashboard uses lifetime by default
                       },
                     });
                     

@@ -22,7 +22,7 @@ const CHATBOT_URLS: Record<string, { free: string; premium: string }> = {
   },
   'ocr-computer-science': {
     free: 'https://www.chatbase.co/chatbot-iframe/t9DaRQyfRFdgqWKI2fOnq',
-    premium: '' // To be added when Deluxe is ready
+    premium: 'https://www.chatbase.co/chatbot-iframe/g-4moPbIfo-Q36Db_c6TJ'
   }
 };
 
