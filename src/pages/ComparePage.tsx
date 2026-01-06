@@ -74,7 +74,7 @@ export const ComparePage = () => {
   const isComingSoon = subject === 'chemistry' || subject === 'maths';
   
   // Check if Deluxe is coming soon (Free may still be available)
-  const isDeluxeComingSoon = subject === 'chemistry' || subject === 'computer-science' || subject === 'maths';
+  const isDeluxeComingSoon = subject === 'chemistry' || subject === 'maths';
 
   // Subject display names
   const subjectLabels: Record<Subject, string> = {
@@ -189,7 +189,9 @@ export const ComparePage = () => {
     if (hasProductAccess) {
       // User has access → redirect to premium page
       console.log('User has access, redirecting to premium page');
-      const premiumPath = examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
+      const premiumPath = subject === 'computer-science' 
+        ? '/ocr-cs-premium' 
+        : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
