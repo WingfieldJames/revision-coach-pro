@@ -8,6 +8,7 @@ import zaraTweet from '@/assets/testimonials/zara-tweet.png';
 import whatsappPawel from '@/assets/testimonials/whatsapp-pawel.png';
 import maisamMessage from '@/assets/testimonials/maisam-message.png';
 import pawelMessage from '@/assets/testimonials/pawel-message.png';
+import copyPasteAwesome from '@/assets/testimonials/copy-paste-awesome.png';
 
 const testimonialScreenshots = [
   { src: linkedinAryaan, alt: "LinkedIn testimonial from Aryaan" },
@@ -15,6 +16,7 @@ const testimonialScreenshots = [
   { src: zaraTweet, alt: "Testimonial from Zara" },
   { src: whatsappPawel, alt: "WhatsApp testimonial from Pawel" },
   { src: maisamMessage, alt: "Testimonial from Maisam Hussain" },
+  { src: copyPasteAwesome, alt: "Testimonial about copy-paste formatting" },
   { src: pawelMessage, alt: "Testimonial message" },
 ];
 
