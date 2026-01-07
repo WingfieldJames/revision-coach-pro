@@ -133,6 +133,32 @@
   </head>
 
   <body>
+    <!-- Early affiliate capture - runs before React loads -->
+    <script>
+      (function() {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var ref = params.get('ref');
+          if (ref) {
+            var existing = localStorage.getItem('affiliate_referral');
+            var shouldUpdate = !existing;
+            if (existing) {
+              try {
+                var parsed = JSON.parse(existing);
+                shouldUpdate = parsed.code !== ref;
+              } catch(e) { shouldUpdate = true; }
+            }
+            if (shouldUpdate) {
+              localStorage.setItem('affiliate_referral', JSON.stringify({
+                code: ref,
+                timestamp: Date.now()
+              }));
+              console.log('[AFFILIATE-EARLY] Captured referral code:', ref);
+            }
+          }
+        } catch(e) { console.error('[AFFILIATE-EARLY] Error:', e); }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
