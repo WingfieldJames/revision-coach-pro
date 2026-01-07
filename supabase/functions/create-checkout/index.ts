@@ -52,21 +52,33 @@ serve(async (req) => {
     console.log("Product Slug:", productSlug);
     console.log("Affiliate code:", affiliateCode || 'none');
 
-    // Validate affiliate code if provided
+    // Validate affiliate code if provided - use service role to bypass RLS
     let validatedAffiliateId = null;
+    let validatedAffiliateName = null;
     if (affiliateCode) {
-      const { data: affiliate, error: affiliateError } = await supabaseClient
+      console.log("Creating service client for affiliate lookup");
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      
+      const { data: affiliate, error: affiliateError } = await serviceClient
         .from('affiliates')
         .select('id, name, commission_rate')
         .eq('code', affiliateCode)
         .eq('active', true)
         .maybeSingle();
       
-      if (!affiliateError && affiliate) {
+      if (affiliateError) {
+        console.error('Error looking up affiliate:', affiliateError);
+      }
+      
+      if (affiliate) {
         validatedAffiliateId = affiliate.id;
-        console.log('Valid affiliate found:', affiliate.name, 'with', affiliate.commission_rate * 100 + '% commission');
+        validatedAffiliateName = affiliate.name;
+        console.log('✅ Valid affiliate found:', affiliate.name, 'ID:', affiliate.id, 'Commission:', (affiliate.commission_rate * 100) + '%');
       } else {
-        console.log('Affiliate code not found or inactive:', affiliateCode);
+        console.log('❌ Affiliate code not found or inactive:', affiliateCode);
       }
     }
 

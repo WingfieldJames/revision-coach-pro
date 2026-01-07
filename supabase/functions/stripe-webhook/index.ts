@@ -148,47 +148,75 @@ serve(async (req) => {
                 const affiliateCode = session.metadata?.affiliate_code;
                 const affiliateId = session.metadata?.affiliate_id;
                 
+                logStep("Checking affiliate metadata", { 
+                  hasAffiliateCode: !!affiliateCode, 
+                  hasAffiliateId: !!affiliateId,
+                  affiliateCode: affiliateCode || 'none',
+                  affiliateId: affiliateId || 'none'
+                });
+                
                 if (affiliateCode && affiliateId) {
-                  logStep("Processing affiliate referral", { affiliateCode, affiliateId });
+                  logStep("✅ Processing affiliate referral", { affiliateCode, affiliateId });
                   
                   // Get sale amount (in pence/cents)
                   const saleAmount = session.amount_total || 0;
+                  logStep("Sale amount from session", { saleAmount, amountTotal: session.amount_total });
                   
                   // Fetch affiliate to get commission rate
-                  const { data: affiliate } = await supabaseClient
+                  const { data: affiliate, error: affLookupError } = await supabaseClient
                     .from('affiliates')
-                    .select('commission_rate')
+                    .select('id, name, commission_rate')
                     .eq('id', affiliateId)
                     .maybeSingle();
+                  
+                  if (affLookupError) {
+                    logStep("ERROR: Failed to lookup affiliate", { affiliateId, error: affLookupError });
+                  }
                   
                   if (affiliate) {
                     const commissionAmount = Math.round(saleAmount * affiliate.commission_rate);
                     
+                    logStep("Calculated commission", { 
+                      affiliateName: affiliate.name,
+                      saleAmount, 
+                      commissionRate: affiliate.commission_rate,
+                      commissionAmount 
+                    });
+                    
                     // Record the referral
+                    const insertData = {
+                      affiliate_id: affiliateId,
+                      referred_user_id: userId,
+                      sale_amount: saleAmount,
+                      commission_amount: commissionAmount,
+                      stripe_session_id: session.id,
+                      payment_type: paymentType,
+                      product_id: productId,
+                      status: 'pending'
+                    };
+                    
+                    logStep("Inserting affiliate referral", insertData);
+                    
                     const { error: refError } = await supabaseClient
                       .from('affiliate_referrals')
-                      .insert({
-                        affiliate_id: affiliateId,
-                        referred_user_id: userId,
-                        sale_amount: saleAmount,
-                        commission_amount: commissionAmount,
-                        stripe_session_id: session.id,
-                        payment_type: paymentType,
-                        product_id: productId,
-                        status: 'pending'
-                      });
+                      .insert(insertData);
                     
                     if (refError) {
-                      logStep("ERROR: Failed to record affiliate referral", { error: refError });
+                      logStep("❌ ERROR: Failed to record affiliate referral", { error: refError, insertData });
                     } else {
-                      logStep("Successfully recorded affiliate commission", { 
+                      logStep("✅ Successfully recorded affiliate commission", { 
                         affiliateId, 
+                        affiliateName: affiliate.name,
                         saleAmount, 
                         commissionAmount,
                         commissionRate: affiliate.commission_rate 
                       });
                     }
+                  } else {
+                    logStep("❌ Affiliate not found in database", { affiliateId });
                   }
+                } else {
+                  logStep("No affiliate tracking for this purchase", { affiliateCode, affiliateId });
                 }
               }
             }
