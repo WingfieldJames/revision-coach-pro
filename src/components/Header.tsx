@@ -93,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const tabs: ITab[] = [
     { title: "Home", value: "home" },
-    { title: "Pricing", value: "pricing" },
+    { title: "Subjects", value: "pricing" },
     { title: "Launch", value: "profile" }
   ];
 
