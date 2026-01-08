@@ -23,6 +23,10 @@ const CHATBOT_URLS: Record<string, { free: string; premium: string }> = {
   'ocr-computer-science': {
     free: 'https://www.chatbase.co/chatbot-iframe/t9DaRQyfRFdgqWKI2fOnq',
     premium: 'https://www.chatbase.co/chatbot-iframe/g-4moPbIfo-Q36Db_c6TJ'
+  },
+  'ocr-physics': {
+    free: 'https://www.chatbase.co/chatbot-iframe/VBv4qqbbRjfZ_eFquDXBl',
+    premium: '' // To be added when Deluxe is ready
   }
 };
 

@@ -24,7 +24,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scr
 import { ScreenshotTestimonials } from '@/components/ui/screenshot-testimonials';
 import { LatestFeaturesSection } from '@/components/LatestFeaturesSection';
 
-type Subject = 'economics' | 'chemistry' | 'computer-science' | 'maths';
+type Subject = 'economics' | 'computer-science' | 'physics';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 
 export const ComparePage = () => {
@@ -34,13 +34,13 @@ export const ComparePage = () => {
   const shouldCheckout = searchParams.get('checkout') === 'true';
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
-    return (saved === 'economics' || saved === 'computer-science') ? saved as Subject : 'economics';
+    return (saved === 'economics' || saved === 'computer-science' || saved === 'physics') ? saved as Subject : 'economics';
   });
   const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
     const savedSubject = localStorage.getItem('preferred-subject');
     const saved = localStorage.getItem('preferred-exam-board');
     // Only use saved exam board if it matches the subject
-    if (savedSubject === 'computer-science') {
+    if (savedSubject === 'computer-science' || savedSubject === 'physics') {
       return 'ocr';
     }
     return (saved === 'edexcel' || saved === 'aqa' || saved === 'cie') ? saved as ExamBoard : 'edexcel';
@@ -54,8 +54,8 @@ export const ComparePage = () => {
     'edexcel-economics': '6dc19d53-8a88-4741-9528-f25af97afb21',
     'aqa-economics': '17ade690-8c44-4961-83b5-0edf42a9faea',
     'cie-economics': '9a710cf9-0523-4c1f-82c6-0e02b19087e5',
-    'ocr-chemistry': '6c32e2fb-4c1d-4166-b3e8-70c22e1c90c8',
-    'ocr-computer-science': '5d05830b-de7b-4206-8f49-6d3695324eb6'
+    'ocr-computer-science': '5d05830b-de7b-4206-8f49-6d3695324eb6',
+    'ocr-physics': '' // To be added when product is created in DB
   };
 
   // Get current product slug based on subject and exam board
@@ -65,23 +65,22 @@ export const ComparePage = () => {
       if (examBoard === 'cie') return 'cie-economics';
       return 'edexcel-economics';
     }
-    if (subject === 'chemistry') return 'ocr-chemistry';
     if (subject === 'computer-science') return 'ocr-computer-science';
+    if (subject === 'physics') return 'ocr-physics';
     return null;
   };
 
   // Check if current subject is coming soon (affects all plans)
-  const isComingSoon = subject === 'chemistry' || subject === 'maths';
+  const isComingSoon = false;
   
   // Check if Deluxe is coming soon (Free may still be available)
-  const isDeluxeComingSoon = subject === 'chemistry' || subject === 'maths';
+  const isDeluxeComingSoon = subject === 'physics';
 
   // Subject display names
   const subjectLabels: Record<Subject, string> = {
     'economics': 'Economics',
-    'chemistry': 'Chemistry',
     'computer-science': 'Computer Science',
-    'maths': 'Maths'
+    'physics': 'Physics'
   };
 
   // Check product access when user or subject/examBoard changes
@@ -157,6 +156,7 @@ export const ComparePage = () => {
     // Determine the free version path based on subject and exam board
     const getFreePath = () => {
       if (subject === 'computer-science') return '/ocr-cs-free-version';
+      if (subject === 'physics') return '/ocr-physics-free-version';
       if (examBoard === 'aqa') return '/aqa-free-version';
       if (examBoard === 'cie') return '/cie-free-version';
       return '/free-version';
@@ -191,6 +191,8 @@ export const ComparePage = () => {
       console.log('User has access, redirecting to premium page');
       const premiumPath = subject === 'computer-science' 
         ? '/ocr-cs-premium' 
+        : subject === 'physics'
+        ? '/ocr-physics-premium'
         : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
@@ -337,6 +339,12 @@ export const ComparePage = () => {
                   >
                     Computer Science
                   </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => { setSubject('physics'); setExamBoard('ocr'); }}
+                  >
+                    Physics
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -367,11 +375,11 @@ export const ComparePage = () => {
                     CIE
                   </ToggleGroupItem>
                 </ToggleGroup>
-              ) : (
+              ) : subject === 'computer-science' || subject === 'physics' ? (
                 <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
                   OCR
                 </div>
-              )}
+              ) : null}
             </div>
 
             {/* Tablet/Desktop: All toggles in one row */}
@@ -401,6 +409,12 @@ export const ComparePage = () => {
                   >
                     Computer Science
                   </ToggleGroupItem>
+                  <ToggleGroupItem 
+                    value="physics" 
+                    className="rounded-full w-[80px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all"
+                  >
+                    Physics
+                  </ToggleGroupItem>
                 </ToggleGroup>
 
                 {/* Divider */}
@@ -415,7 +429,7 @@ export const ComparePage = () => {
                   onValueChange={(value) => value && setExamBoard(value as ExamBoard)}
                   className="flex items-center gap-1 w-full"
                 >
-                  {subject === 'economics' ? (
+                {subject === 'economics' ? (
                     <>
                       <ToggleGroupItem 
                         value="edexcel" 
@@ -436,7 +450,7 @@ export const ComparePage = () => {
                         CIE
                       </ToggleGroupItem>
                     </>
-                  ) : (
+                  ) : subject === 'computer-science' || subject === 'physics' ? (
                     <>
                       <ToggleGroupItem 
                         value="ocr" 
@@ -451,7 +465,7 @@ export const ComparePage = () => {
                         Edexcel
                       </div>
                     </>
-                  )}
+                  ) : null}
                 </ToggleGroup>
               </div>
             </div>

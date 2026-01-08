@@ -15,7 +15,7 @@ import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-type Subject = 'economics' | 'computer-science';
+type Subject = 'economics' | 'computer-science' | 'physics';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 
 export const DashboardPage = () => {
@@ -23,13 +23,13 @@ export const DashboardPage = () => {
   const [searchParams] = useSearchParams();
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
-    return (saved === 'economics' || saved === 'computer-science') ? saved as Subject : 'economics';
+    return (saved === 'economics' || saved === 'computer-science' || saved === 'physics') ? saved as Subject : 'economics';
   });
   const [productType, setProductType] = useState<ExamBoard>(() => {
     const savedSubject = localStorage.getItem('preferred-subject');
     const saved = localStorage.getItem('preferred-exam-board');
     // Only use saved exam board if it matches the subject
-    if (savedSubject === 'computer-science') {
+    if (savedSubject === 'computer-science' || savedSubject === 'physics') {
       return 'ocr';
     }
     return (saved === 'edexcel' || saved === 'aqa' || saved === 'cie') ? saved as ExamBoard : 'edexcel';
@@ -49,7 +49,7 @@ export const DashboardPage = () => {
       if (productType === 'ocr') {
         setProductType('edexcel');
       }
-    } else if (subject === 'computer-science') {
+    } else if (subject === 'computer-science' || subject === 'physics') {
       setProductType('ocr');
     }
   }, [subject]);
@@ -64,17 +64,20 @@ export const DashboardPage = () => {
     const checkAccess = async () => {
       if (user) {
         setCheckingAccess(true);
-        const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess] = await Promise.all([
+        const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess, ocrPhysicsAccess] = await Promise.all([
           checkProductAccess(user.id, 'edexcel-economics'),
           checkProductAccess(user.id, 'aqa-economics'),
           checkProductAccess(user.id, 'cie-economics'),
           checkProductAccess(user.id, 'ocr-computer-science'),
+          checkProductAccess(user.id, 'ocr-physics'),
         ]);
         setProductAccess({
           'edexcel': edexcelAccess,
           'aqa': aqaAccess,
           'cie': cieAccess,
-          'ocr': ocrCsAccess,
+          'ocr': subject === 'physics' ? ocrPhysicsAccess : ocrCsAccess,
+          'ocr-cs': ocrCsAccess,
+          'ocr-physics': ocrPhysicsAccess,
         });
         
         // Fetch subscription details for monthly subscriptions
@@ -235,7 +238,7 @@ export const DashboardPage = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
-                  {subject === 'economics' ? 'Economics' : 'Computer Science'}
+                  {subject === 'economics' ? 'Economics' : subject === 'computer-science' ? 'Computer Science' : 'Physics'}
                   <ChevronDown className="h-3 w-3" />
                 </button>
               </DropdownMenuTrigger>
@@ -252,11 +255,11 @@ export const DashboardPage = () => {
                 >
                   Computer Science
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-default opacity-50">
-                  Maths (coming soon)
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-default opacity-50">
-                  Chemistry (coming soon)
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-muted"
+                  onClick={() => setSubject('physics')}
+                >
+                  Physics
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -314,7 +317,9 @@ export const DashboardPage = () => {
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 {subject === 'economics' 
                   ? `AI trained on the 2025-2024 ${productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA Economics' : 'CIE Economics'} past papers (P1–P3)`
-                  : 'AI trained on the 2025-2024 OCR Computer Science past papers'
+                  : subject === 'computer-science'
+                  ? 'AI trained on the 2025-2024 OCR Computer Science past papers'
+                  : 'AI trained on the 2025-2024 OCR Physics past papers'
                 }
               </li>
               <li className="flex items-start">
@@ -339,22 +344,28 @@ export const DashboardPage = () => {
               <Link to={
                 subject === 'computer-science' 
                   ? '/ocr-cs-free-version'
+                  : subject === 'physics'
+                  ? '/ocr-physics-free-version'
                   : productType === 'edexcel' ? '/free-version' : productType === 'aqa' ? '/aqa-free-version' : '/cie-free-version'
               }>Launch free</Link>
             </Button>
           </div>
 
           {/* Deluxe Plan */}
-          <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${productAccess[productType]?.hasAccess ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
+          <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : productAccess[productType]?.hasAccess) ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
             <h2 className="text-2xl font-semibold mb-6">
               {subject === 'computer-science' ? (
                 <>
                   🔥 Deluxe Plan (OCR CS) — <span className="line-through text-red-500">£49.99</span> £24.99 (Lifetime Access)
-                  {productAccess['ocr']?.hasAccess && (
+                  {productAccess['ocr-cs']?.hasAccess && (
                     <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
                       ACTIVE
                     </span>
                   )}
+                </>
+              ) : subject === 'physics' ? (
+                <>
+                  🔥 Deluxe Plan (OCR Physics) — Coming Soon
                 </>
               ) : (
                 <>
@@ -372,7 +383,10 @@ export const DashboardPage = () => {
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 {subject === 'economics'
                   ? `AI trained on all ${productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA' : 'CIE'} past papers (2017-2025, P1-P3)`
-                  : 'AI trained on all OCR Computer Science past papers'
+                  : subject === 'computer-science'
+                  ? 'AI trained on all OCR Computer Science past papers'
+                  : 'AI trained on all OCR Physics past papers'
+                }
                 }
               </li>
               <li className="flex items-start">
@@ -395,7 +409,10 @@ export const DashboardPage = () => {
                 <span className="text-green-500 font-bold mr-2">✓</span>
                 {subject === 'economics' 
                   ? 'Step-by-step diagram guidance (AD/AS → buffer stocks) + application bank'
-                  : 'Step-by-step coding guidance + algorithm explanations'
+                  : subject === 'computer-science'
+                  ? 'Step-by-step coding guidance + algorithm explanations'
+                  : 'Step-by-step calculation guidance + formula explanations'
+                }
                 }
               </li>
               <li className="flex items-start">

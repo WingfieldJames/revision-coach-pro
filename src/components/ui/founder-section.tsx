@@ -6,13 +6,14 @@ import etienneFounder from '@/assets/etienne-founder.png';
 import carlFounder from '@/assets/carl-founder.png';
 
 interface FounderSectionProps {
-  subject?: 'economics' | 'computer-science';
+  subject?: 'economics' | 'computer-science' | 'physics';
   examBoard?: 'edexcel' | 'aqa' | 'cie' | 'ocr';
 }
 
 export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }: FounderSectionProps) {
-  const subjectLabel = subject === 'computer-science' ? 'Computer Science' : 'Economics';
+  const subjectLabel = subject === 'computer-science' ? 'Computer Science' : subject === 'physics' ? 'Physics' : 'Economics';
   const isCS = subject === 'computer-science';
+  const isPhysics = subject === 'physics';
   const isAQA = subject === 'economics' && examBoard === 'aqa';
   const isCIE = subject === 'economics' && examBoard === 'cie';
   
@@ -52,10 +53,16 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
     { icon: BookOpen, text: "5A*s in IGCSE in one year" },
   ];
 
-  const achievements = isCS ? csAchievements : isAQA ? aqaAchievements : isCIE ? cieAchievements : economicsAchievements;
+  const physicsAchievements = [
+    { icon: Award, text: "A*A*A*A* at A-Level" },
+    { icon: GraduationCap, text: "Straight 9s at GCSE" },
+    { icon: BookOpen, text: "8.9 TMUA score" },
+  ];
 
-  const founderName = isCS ? "Naman" : isAQA ? "Etienne" : isCIE ? "Carl" : "James";
-  const founderStatus = isCS ? "Gap Year Student" : isAQA ? "BSc Economics Student" : isCIE ? "LSE Student" : "LSE Student";
+  const achievements = isPhysics ? physicsAchievements : isCS ? csAchievements : isAQA ? aqaAchievements : isCIE ? cieAchievements : economicsAchievements;
+
+  const founderName = isPhysics ? "Naman" : isCS ? "Naman" : isAQA ? "Etienne" : isCIE ? "Carl" : "James";
+  const founderStatus = isPhysics ? "Gap Year Student" : isCS ? "Gap Year Student" : isAQA ? "BSc Economics Student" : isCIE ? "LSE Student" : "LSE Student";
 
   return (
     <section className="py-16 px-6 bg-gradient-to-br from-muted/50 via-background to-muted/30">
@@ -104,7 +111,13 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
                 transition={{ duration: 0.3 }}
               >
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg bg-muted">
-                  {isCS ? (
+                  {isPhysics ? (
+                    <img 
+                      src={namanFounder} 
+                      alt="Naman - Founder"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  ) : isCS ? (
                     <img 
                       src={namanFounder} 
                       alt="Naman - Founder"
@@ -152,7 +165,13 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
             <div className="flex-1 text-center md:text-left">
               {/* Quote */}
               <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
-                {isCS ? (
+                {isPhysics ? (
+                  <>
+                    "Hi, I'm Naman. 4 A*s (Maths, Further Maths, Computer Science and Physics), TMUA score of 8.9, and straight 9s at GCSE.
+                    <br /><br />
+                    I built this model on everything that got me top marks in OCR Physics - the calculation techniques, the derivation tricks, the exam shortcuts that actually work."
+                  </>
+                ) : isCS ? (
                   <>
                     "Hi, I'm Naman. 4 A*s (Maths, Further Maths, Computer Science and Physics), TMUA score of 8.9, and straight 9s at GCSE.
                     <br /><br />
