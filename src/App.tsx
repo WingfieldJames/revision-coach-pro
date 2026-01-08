@@ -18,6 +18,8 @@ import { CIEFreeVersionPage } from "./pages/CIEFreeVersionPage";
 import { CIEPremiumPage } from "./pages/CIEPremiumPage";
 import { OCRCSFreeVersionPage } from "./pages/OCRCSFreeVersionPage";
 import { OCRCSPremiumPage } from "./pages/OCRCSPremiumPage";
+import { OCRPhysicsFreeVersionPage } from "./pages/OCRPhysicsFreeVersionPage";
+import { OCRPhysicsPremiumPage } from "./pages/OCRPhysicsPremiumPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -47,10 +49,12 @@ const App = () => (
             <Route path="/aqa-free-version" element={<AQAFreeVersionPage />} />
             <Route path="/cie-free-version" element={<CIEFreeVersionPage />} />
             <Route path="/ocr-cs-free-version" element={<OCRCSFreeVersionPage />} />
+            <Route path="/ocr-physics-free-version" element={<OCRPhysicsFreeVersionPage />} />
             <Route path="/premium" element={<PremiumVersionPage />} />
             <Route path="/aqa-premium" element={<AQAPremiumPage />} />
             <Route path="/cie-premium" element={<CIEPremiumPage />} />
             <Route path="/ocr-cs-premium" element={<OCRCSPremiumPage />} />
+            <Route path="/ocr-physics-premium" element={<OCRPhysicsPremiumPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="*" element={<NotFound />} />
