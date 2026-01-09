@@ -1,0 +1,2 @@
+INSERT INTO products (name, slug, exam_board, subject, monthly_price, lifetime_price, chatbase_free_url, active)
+VALUES ('OCR Physics Deluxe', 'ocr-physics', 'OCR', 'Physics', 499, 2499, 'https://www.chatbase.co/chatbot-iframe/VBv4qqbbRjfZ_eFquDXBl', true);
