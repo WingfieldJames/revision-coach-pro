@@ -54,15 +54,15 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
   ];
 
   const physicsAchievements = [
-    { icon: Award, text: "[ACHIEVEMENT 1]" },
-    { icon: GraduationCap, text: "[ACHIEVEMENT 2]" },
-    { icon: BookOpen, text: "[ACHIEVEMENT 3]" },
+    { icon: Award, text: "A*A*A*A* at A-Level" },
+    { icon: GraduationCap, text: "Straight 9s at GCSE" },
+    { icon: BookOpen, text: "8.9 TMUA score" },
   ];
 
   const achievements = isPhysics ? physicsAchievements : isCS ? csAchievements : isAQA ? aqaAchievements : isCIE ? cieAchievements : economicsAchievements;
 
-  const founderName = isPhysics ? "[NAME]" : isCS ? "Naman" : isAQA ? "Etienne" : isCIE ? "Carl" : "James";
-  const founderStatus = isPhysics ? "[STATUS]" : isCS ? "Gap Year Student" : isAQA ? "BSc Economics Student" : isCIE ? "LSE Student" : "LSE Student";
+  const founderName = isPhysics ? "Naman" : isCS ? "Naman" : isAQA ? "Etienne" : isCIE ? "Carl" : "James";
+  const founderStatus = isPhysics ? "Gap Year Student" : isCS ? "Gap Year Student" : isAQA ? "BSc Economics Student" : isCIE ? "LSE Student" : "LSE Student";
 
   return (
     <section className="py-16 px-6 bg-gradient-to-br from-muted/50 via-background to-muted/30">
@@ -112,9 +112,11 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
               >
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg bg-muted">
                   {isPhysics ? (
-                    <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
-                      [PHOTO]
-                    </div>
+                    <img 
+                      src={namanFounder} 
+                      alt="Naman - Founder"
+                      className="w-full h-full object-cover object-top"
+                    />
                   ) : isCS ? (
                     <img 
                       src={namanFounder} 
@@ -165,9 +167,9 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
               <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
                 {isPhysics ? (
                   <>
-                    "[QUOTE LINE 1]
+                    "Hi, I'm Naman. 4 A*s (Maths, Further Maths, Computer Science and Physics), TMUA score of 8.9, and straight 9s at GCSE.
                     <br /><br />
-                    [QUOTE LINE 2]"
+                    I built this model on everything that got me top marks in OCR Physics - the calculation techniques, the derivation tricks, the exam shortcuts that actually work."
                   </>
                 ) : isCS ? (
                   <>
