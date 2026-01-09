@@ -387,7 +387,6 @@ export const DashboardPage = () => {
                   ? 'AI trained on all OCR Computer Science past papers'
                   : 'AI trained on all OCR Physics past papers'
                 }
-                }
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -412,7 +411,6 @@ export const DashboardPage = () => {
                   : subject === 'computer-science'
                   ? 'Step-by-step coding guidance + algorithm explanations'
                   : 'Step-by-step calculation guidance + formula explanations'
-                }
                 }
               </li>
               <li className="flex items-start">
