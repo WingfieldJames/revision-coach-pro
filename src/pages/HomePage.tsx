@@ -88,7 +88,7 @@ export const HomePage = () => {
                 <img 
                   src="/lovable-uploads/hero-ipad-demo.jpg" 
                   alt="A* AI Demo - A Star AI interface showing A-Level Economics revision features on iPad" 
-                  className="w-full h-full object-contain rounded-2xl" 
+                  className="mx-auto rounded-2xl object-contain h-full object-center" 
                 />
               </ContainerScroll>
               
