@@ -55,13 +55,13 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
 
   const physicsAchievements = [
     { icon: Award, text: "A*A*A*A* at A-Level" },
+    { icon: Trophy, text: "200/200 in A-Level Physics" },
     { icon: GraduationCap, text: "Straight 9s at GCSE" },
-    { icon: BookOpen, text: "8.9 TMUA score" },
   ];
 
   const achievements = isPhysics ? physicsAchievements : isCS ? csAchievements : isAQA ? aqaAchievements : isCIE ? cieAchievements : economicsAchievements;
 
-  const founderName = isPhysics ? "Naman" : isCS ? "Naman" : isAQA ? "Etienne" : isCIE ? "Carl" : "James";
+  const founderName = isPhysics ? "Tudor" : isCS ? "Naman" : isAQA ? "Etienne" : isCIE ? "Carl" : "James";
   const founderStatus = isPhysics ? "Gap Year Student" : isCS ? "Gap Year Student" : isAQA ? "BSc Economics Student" : isCIE ? "LSE Student" : "LSE Student";
 
   return (
@@ -167,9 +167,9 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
               <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
                 {isPhysics ? (
                   <>
-                    "Hi, I'm Naman. 4 A*s (Maths, Further Maths, Computer Science and Physics), TMUA score of 8.9, and straight 9s at GCSE.
+                    "Hi, I'm Tudor. 4 A* grades at A-Level and 9 Grade 9s at GCSE, including perfect scores of 200/200 in Physics, 197/200 in Chemistry, and 236/240 in Mathematics.
                     <br /><br />
-                    I built this model on everything that got me top marks in OCR Physics - the calculation techniques, the derivation tricks, the exam shortcuts that actually work."
+                    Through A* AI, you'll gain access to the exact revision strategies that drove some of the strongest Physics results in the country, alongside laser-focused exam technique for every question type and exclusive OCR-specific training on formulae and calculations."
                   </>
                 ) : isCS ? (
                   <>
