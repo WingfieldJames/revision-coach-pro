@@ -264,8 +264,8 @@ export const ComparePage = () => {
   return (
     <div className="min-h-screen bg-background font-sans">
       <SEOHead 
-        title="Choose Your A* AI Plan | A-Level Economics Revision"
-        description="Compare A* AI plans for A-Level Economics. Free tier to try or Deluxe with full 2017-2025 past papers, mark scheme feedback & A* technique. £24.99 one-time – cheaper than a tutoring session."
+        title="Choose Your A* AI Plan | A-Level Economics, Computer Science & Physics"
+        description="Compare A* AI plans for A-Level revision. Economics (Edexcel, AQA, CIE), Computer Science (OCR) & Physics (OCR). Free tier or Deluxe with full past paper training. £24.99 one-time."
         canonical="https://astarai.co.uk/compare"
       />
       <Header showNavLinks />
