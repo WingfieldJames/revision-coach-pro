@@ -12,26 +12,23 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { BackgroundPaths } from '@/components/ui/background-paths';
 import { HeroBackgroundPaths } from '@/components/ui/hero-background-paths';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
-
 export const HomePage = () => {
-  const { user, profile } = useAuth();
+  const {
+    user,
+    profile
+  } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-
   return <div className="min-h-screen bg-background font-sans">
-      <SEOHead 
-        title="A* AI – the AI BUILT for your exam board. A-Level Economics, Computer Science, Physics & more"
-        description="Join 1000+ students using A* AI for A-Level revision. Economics (Edexcel, AQA, CIE), Computer Science (OCR) & Physics (OCR). Trained on past papers (2017-2025). Free to try."
-        canonical="https://astarai.co.uk/"
-      />
+      <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
       <Header showNavLinks />
       
       {/* Hero Scroll Animation Section */}
       <section className="overflow-hidden pb-0 mt-4 sm:-mt-8 md:-mt-8">
         <HeroBackgroundPaths>
-          {isMobile ? (
-            // Mobile version - simple image without scroll animation
-            <div className="pt-4 px-6">
+          {isMobile ?
+        // Mobile version - simple image without scroll animation
+        <div className="pt-4 px-6">
               <ScrollReveal className="text-left max-w-5xl mx-auto pt-4">
                 <div className="bg-secondary text-foreground text-xs px-3 py-1.5 rounded-full inline-block mb-4 text-center whitespace-nowrap">
                   ⭐ Loved by 300+ users with a 4.9 star rating
@@ -49,28 +46,18 @@ export const HomePage = () => {
               </ScrollReveal>
               
               <ScrollReveal delay={0.2} className="mb-6">
-                <img 
-                  src="/lovable-uploads/hero-mobile-phone-transparent.png" 
-                  alt="A* AI Demo - A Star AI mobile interface for A-Level Economics revision" 
-                  className="mx-auto rounded-2xl object-contain w-full max-w-[360px]" 
-                />
+                <img src="/lovable-uploads/hero-mobile-phone-transparent.png" alt="A* AI Demo - A Star AI mobile interface for A-Level Economics revision" className="mx-auto rounded-2xl object-contain w-full max-w-[360px]" />
               </ScrollReveal>
               
               <ScrollReveal delay={0.3} className="text-center mb-8">
-                <InteractiveHoverButton 
-                  text="Get started today →" 
-                  variant="default"
-                  onClick={() => navigate('/compare')}
-                  className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]"
-                />
+                <InteractiveHoverButton text="Get started today →" variant="default" onClick={() => navigate('/compare')} className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]" />
                 <p className="text-xs text-muted-foreground mt-3">
                   Get started free • No card needed
                 </p>
               </ScrollReveal>
-            </div>
-          ) : (
-            // Desktop version - scroll animation with iPad
-            <>
+            </div> :
+        // Desktop version - scroll animation with iPad
+        <>
               <ContainerScroll titleComponent={<>
                     <div className="text-left max-w-5xl mx-auto px-6 sm:px-8 pt-4 sm:pt-0">
                       <div className="bg-secondary text-foreground text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full inline-block mb-4 md:mb-6 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
@@ -85,26 +72,16 @@ export const HomePage = () => {
               </h2>
                     </div>
                   </>}>
-                <img 
-                  src="/lovable-uploads/hero-ipad-demo.jpg" 
-                  alt="A* AI Demo - A Star AI interface showing A-Level Economics revision features on iPad" 
-                  className="mx-auto rounded-2xl object-contain h-full object-center" 
-                />
+                <img src="/lovable-uploads/hero-ipad-demo.jpg" alt="A* AI Demo - A Star AI interface showing A-Level Economics revision features on iPad" className="mx-auto rounded-2xl object-contain h-full object-center" />
               </ContainerScroll>
               
               <div className="text-center mb-8 -mt-12 md:-mt-20 relative z-50 px-4">
-                <InteractiveHoverButton 
-                  text="Get started today →" 
-                  variant="default"
-                  onClick={() => navigate('/compare')}
-                  className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]"
-                />
+                <InteractiveHoverButton text="Get started today →" variant="default" onClick={() => navigate('/compare')} className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]" />
                 <p className="text-xs sm:text-sm text-muted-foreground mt-3">
                   Get started free • No card needed
                 </p>
               </div>
-            </>
-          )}
+            </>}
         </HeroBackgroundPaths>
       </section>
 
@@ -169,12 +146,7 @@ export const HomePage = () => {
         <div className="max-w-7xl mx-auto px-8">
           {/* Button beneath video */}
           <div className="text-center mt-8 mb-4">
-            <InteractiveHoverButton 
-              text="Try A* AI now →" 
-              variant="reverse"
-              onClick={() => navigate('/compare')}
-              className="pointer-events-auto text-base px-6 py-3 w-[200px]"
-            />
+            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => navigate('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px]" />
           </div>
 
           {/* Disclaimer */}
@@ -201,12 +173,7 @@ export const HomePage = () => {
           {/* Laptop Image */}
           <ScrollReveal direction="left" className="flex-1 text-center">
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
-            <InteractiveHoverButton 
-              text="Try A* AI now →" 
-              variant="reverse"
-              onClick={() => navigate('/compare')}
-              className="pointer-events-auto text-base px-6 py-3 w-[200px] mt-8"
-            />
+            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => navigate('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px] mt-8" />
           </ScrollReveal>
 
           {/* Features */}
@@ -313,7 +280,7 @@ export const HomePage = () => {
                   <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                  <p className="mb-3">We started with A-Level Economics. Now we cover Edexcel, AQA, and CIE exam boards - with Computer Science, Chemistry, and Psychology dropping soon and more subjects in the pipeline.</p>
+                  <p className="mb-3">We started with A-Level Economics. Now we cover Economics, Computer Science and Physics - with Chemistry, English and Psychology dropping soon and many other subjects in the pipeline                          </p>
                   <p className="mb-3">We're growing fast.</p>
                   <p>Tell us what you need next - we're listening.</p>
                 </AccordionContent>
@@ -322,12 +289,7 @@ export const HomePage = () => {
           </ScrollReveal>
           
           <ScrollReveal delay={0.3} className="text-center mt-8">
-            <InteractiveHoverButton 
-              text="Get started today →" 
-              variant="reverse"
-              onClick={() => navigate('/compare')}
-              className="pointer-events-auto text-base px-6 py-3 w-[220px]"
-            />
+            <InteractiveHoverButton text="Get started today →" variant="reverse" onClick={() => navigate('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
           </ScrollReveal>
         </div>
       </section>
@@ -341,7 +303,7 @@ export const HomePage = () => {
               <Instagram size={20} />
             </a>
             <a href="https://www.tiktok.com/@a.star.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
             </a>
           </div>
           
@@ -369,7 +331,7 @@ export const HomePage = () => {
               <Instagram size={24} />
             </a>
             <a href="https://www.tiktok.com/@a.star.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
             </a>
             <p className="text-sm text-muted-foreground">
               © 2025 A* AI
