@@ -20,8 +20,8 @@ export const HomePage = () => {
 
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead 
-        title="A* AI – Get an A* in A-Level Economics | AI Revision Coach"
-        description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today."
+        title="A* AI – the AI BUILT for your exam board. A-Level Economics, Computer Science, Physics & more"
+        description="Join 1000+ students using A* AI for A-Level revision. Economics (Edexcel, AQA, CIE), Computer Science (OCR) & Physics (OCR). Trained on past papers (2017-2025). Free to try."
         canonical="https://astarai.co.uk/"
       />
       <Header showNavLinks />

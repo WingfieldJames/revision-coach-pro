@@ -11,8 +11,8 @@ const BASE_URL = 'https://astarai.co.uk';
 const DEFAULT_IMAGE = `${BASE_URL}/lovable-uploads/fa6e3eef-a0ca-4e4b-ae8e-a54b14afc7f9.png`;
 
 export const SEOHead = ({
-  title = "A* AI – Get an A* in A-Level Economics | AI Revision Coach",
-  description = "Join 1000+ students using A* AI to master Edexcel, AQA and CIE Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today.",
+  title = "A* AI – the AI BUILT for your exam board. A-Level Economics, Computer Science, Physics & more",
+  description = "Join 1000+ students using A* AI for A-Level revision. Economics (Edexcel, AQA, CIE), Computer Science (OCR) & Physics (OCR). Trained on past papers (2017-2025). Free to try.",
   canonical = BASE_URL,
   ogImage = DEFAULT_IMAGE,
 }: SEOHeadProps) => {
