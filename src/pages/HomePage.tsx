@@ -308,7 +308,7 @@ export const HomePage = () => {
           </div>
           
           <p className="text-muted-foreground mb-6">
-            A* AI (A Star AI) - Your AI-powered A-Level revision coach for Edexcel Economics | astarai
+            A* AI (A Star AI) - Your AI-powered A-Level revision coach for Economics, CS, Physics & more | astarai
           </p>
           
           <div className="flex flex-wrap justify-center gap-4 mb-6 text-muted-foreground">
