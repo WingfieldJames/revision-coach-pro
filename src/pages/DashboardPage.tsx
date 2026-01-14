@@ -92,8 +92,13 @@ export const DashboardPage = () => {
           subs.forEach((sub: any) => {
             const slug = sub.products?.slug;
             if (slug) {
-              // Handle both economics and computer science slugs
-              const key = slug.replace('-economics', '').replace('-computer-science', '');
+              // Map slugs to consistent keys
+              let key = slug;
+              if (slug === 'edexcel-economics') key = 'edexcel';
+              else if (slug === 'aqa-economics') key = 'aqa';
+              else if (slug === 'cie-economics') key = 'cie';
+              else if (slug === 'ocr-computer-science') key = 'ocr-cs';
+              else if (slug === 'ocr-physics') key = 'ocr-physics';
               details[key] = sub;
             }
           });
@@ -104,7 +109,7 @@ export const DashboardPage = () => {
       }
     };
     checkAccess();
-  }, [user]);
+  }, [user, subject]);
 
   // Cancel subscription handler
   const handleCancelSubscription = async (productKey: string) => {
@@ -139,15 +144,19 @@ export const DashboardPage = () => {
       
       // Refresh access
       refreshProfile();
-      const [edexcelAccess, aqaAccess, cieAccess] = await Promise.all([
+      const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess, ocrPhysicsAccess] = await Promise.all([
         checkProductAccess(user!.id, 'edexcel-economics'),
         checkProductAccess(user!.id, 'aqa-economics'),
         checkProductAccess(user!.id, 'cie-economics'),
+        checkProductAccess(user!.id, 'ocr-computer-science'),
+        checkProductAccess(user!.id, 'ocr-physics'),
       ]);
       setProductAccess({
         'edexcel': edexcelAccess,
         'aqa': aqaAccess,
         'cie': cieAccess,
+        'ocr-cs': ocrCsAccess,
+        'ocr-physics': ocrPhysicsAccess,
       });
     } catch (error: any) {
       console.error('Cancel error:', error);
@@ -523,18 +532,24 @@ export const DashboardPage = () => {
               <div>
                 <p className="text-sm font-medium mb-2">Subscription Status</p>
                 <div className="space-y-3">
-                  {(['edexcel', 'aqa', 'cie'] as const).map((board) => {
+                  {(['edexcel', 'aqa', 'cie', 'ocr-cs', 'ocr-physics'] as const).map((board) => {
                     const access = productAccess[board];
                     const sub = subscriptionDetails[board];
                     if (!access?.hasAccess) return null;
                     
                     const isMonthly = sub?.payment_type === 'monthly';
-                    const boardName = board === 'edexcel' ? 'Edexcel' : board === 'aqa' ? 'AQA' : 'CIE';
+                    const boardName = {
+                      'edexcel': 'Edexcel Economics',
+                      'aqa': 'AQA Economics',
+                      'cie': 'CIE Economics',
+                      'ocr-cs': 'OCR Computer Science',
+                      'ocr-physics': 'OCR Physics',
+                    }[board];
                     
                     return (
                       <div key={board} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                         <div>
-                          <span className="font-medium">{boardName} Economics Deluxe</span>
+                          <span className="font-medium">{boardName} Deluxe</span>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800">
                               {isMonthly ? 'Monthly' : 'Lifetime'}
@@ -561,7 +576,7 @@ export const DashboardPage = () => {
                     );
                   })}
                   
-                  {!productAccess['edexcel']?.hasAccess && !productAccess['aqa']?.hasAccess && !productAccess['cie']?.hasAccess && (
+                  {!productAccess['edexcel']?.hasAccess && !productAccess['aqa']?.hasAccess && !productAccess['cie']?.hasAccess && !productAccess['ocr-cs']?.hasAccess && !productAccess['ocr-physics']?.hasAccess && (
                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                       Free
                     </span>
