@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Bot, User } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -19,7 +19,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 
 export const RAGChat: React.FC<RAGChatProps> = ({ 
   productId, 
-  placeholder = "Ask me anything about OCR Physics..." 
+  placeholder = "Ask me anything..." 
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -52,7 +52,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         body: JSON.stringify({
           message: userMessage.content,
           product_id: productId,
-          history: messages.slice(-10), // Send last 10 messages for context
+          history: messages.slice(-10),
         }),
       });
 
@@ -137,10 +137,19 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       <ScrollArea ref={scrollRef} className="flex-1 p-4">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Bot className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium">OCR Physics AI Tutor</p>
-              <p className="text-sm">Ask me anything about OCR A-Level Physics!</p>
+            <div className="text-center py-16">
+              {/* A* AI Logo */}
+              <img 
+                src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
+                alt="A* AI" 
+                className="h-16 mx-auto mb-6"
+              />
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] bg-clip-text text-transparent mb-2">
+                OCR Physics Deluxe
+              </h2>
+              <p className="text-muted-foreground">
+                Your personal A* Physics tutor. Ask me anything!
+              </p>
             </div>
           )}
           
@@ -148,36 +157,41 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             <div
               key={index}
               className={cn(
-                "flex gap-3 p-4 rounded-lg",
+                "flex gap-3 p-4 rounded-xl",
                 message.role === 'user' 
-                  ? "bg-primary/10 ml-8" 
+                  ? "bg-gradient-to-r from-primary/10 to-[hsl(270,67%,60%)]/10 ml-8" 
                   : "bg-muted mr-8"
               )}
             >
               <div className="flex-shrink-0">
                 {message.role === 'user' ? (
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                    <User className="w-4 h-4 text-primary-foreground" />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">You</span>
                   </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-secondary-foreground" />
-                  </div>
+                  <img 
+                    src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
+                    alt="A* AI" 
+                    className="w-8 h-8 object-contain"
+                  />
                 )}
               </div>
               <div className="flex-1 prose prose-sm dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                <p className="whitespace-pre-wrap m-0">{message.content}</p>
               </div>
             </div>
           ))}
           
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
-            <div className="flex gap-3 p-4 rounded-lg bg-muted mr-8">
-              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                <Loader2 className="w-4 h-4 animate-spin text-secondary-foreground" />
-              </div>
-              <div className="flex-1">
-                <p className="text-muted-foreground">Thinking...</p>
+            <div className="flex gap-3 p-4 rounded-xl bg-muted mr-8">
+              <img 
+                src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
+                alt="A* AI" 
+                className="w-8 h-8 object-contain"
+              />
+              <div className="flex-1 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span className="text-muted-foreground">Thinking...</span>
               </div>
             </div>
           )}
@@ -185,7 +199,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       </ScrollArea>
 
       {/* Input area */}
-      <div className="border-t p-4">
+      <div className="border-t p-4 bg-background">
         <div className="max-w-3xl mx-auto flex gap-2">
           <Textarea
             value={input}
@@ -193,14 +207,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             disabled={isLoading}
-            className="min-h-[60px] max-h-[200px] resize-none"
+            className="min-h-[60px] max-h-[200px] resize-none rounded-xl border-2 focus:border-primary"
             rows={2}
           />
           <Button 
             onClick={handleSend} 
             disabled={!input.trim() || isLoading}
-            size="icon"
-            className="h-[60px] w-[60px]"
+            className="h-[60px] w-[60px] rounded-xl bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] hover:opacity-90 transition-opacity"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -209,6 +222,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             )}
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground text-center mt-2">
+          Powered by A* AI • Trained on OCR Physics past papers & mark schemes
+        </p>
       </div>
     </div>
   );
