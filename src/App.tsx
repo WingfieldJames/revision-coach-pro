@@ -20,6 +20,7 @@ import { OCRCSFreeVersionPage } from "./pages/OCRCSFreeVersionPage";
 import { OCRCSPremiumPage } from "./pages/OCRCSPremiumPage";
 import { OCRPhysicsFreeVersionPage } from "./pages/OCRPhysicsFreeVersionPage";
 import { OCRPhysicsPremiumPage } from "./pages/OCRPhysicsPremiumPage";
+import { TestRAGChatPage } from "./pages/TestRAGChatPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/ocr-physics-premium" element={<OCRPhysicsPremiumPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/test-rag" element={<TestRAGChatPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
