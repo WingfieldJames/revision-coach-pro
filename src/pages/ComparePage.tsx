@@ -55,7 +55,7 @@ export const ComparePage = () => {
     'aqa-economics': '17ade690-8c44-4961-83b5-0edf42a9faea',
     'cie-economics': '9a710cf9-0523-4c1f-82c6-0e02b19087e5',
     'ocr-computer-science': '5d05830b-de7b-4206-8f49-6d3695324eb6',
-    'ocr-physics': '' // To be added when product is created in DB
+    'ocr-physics': 'ecd5978d-3bf4-4b9c-993f-30b7f3a0f197'
   };
 
   // Get current product slug based on subject and exam board
@@ -74,7 +74,7 @@ export const ComparePage = () => {
   const isComingSoon = false;
   
   // Check if Deluxe is coming soon (Free may still be available)
-  const isDeluxeComingSoon = subject === 'physics';
+  const isDeluxeComingSoon = false; // Physics is now live!
 
   // Subject display names
   const subjectLabels: Record<Subject, string> = {
