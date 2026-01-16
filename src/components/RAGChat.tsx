@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -24,12 +27,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSend = async () => {
@@ -132,9 +135,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Messages area */}
-      <ScrollArea ref={scrollRef} className="flex-1 p-4">
+    <div className="flex flex-col h-full bg-background relative">
+      {/* Messages area - scrollable */}
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 pb-[140px]"
+      >
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
             <div className="text-center py-16">
@@ -176,8 +182,46 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   />
                 )}
               </div>
-              <div className="flex-1 prose prose-sm dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap m-0">{message.content}</p>
+              <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
+                <ReactMarkdown
+                  remarkPlugins={[remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={{
+                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
+                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                    code: ({ className, children, ...props }) => {
+                      const isInline = !className;
+                      if (isInline) {
+                        return (
+                          <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                            {children}
+                          </code>
+                        );
+                      }
+                      return (
+                        <pre className="bg-muted p-3 rounded-lg overflow-x-auto my-2">
+                          <code className={cn("text-sm font-mono", className)} {...props}>
+                            {children}
+                          </code>
+                        </pre>
+                      );
+                    },
+                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                    h1: ({ children }) => <h1 className="text-xl font-bold mb-2 mt-4">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-base font-bold mb-2 mt-2">{children}</h3>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-primary pl-4 italic my-2">
+                        {children}
+                      </blockquote>
+                    ),
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
               </div>
             </div>
           ))}
@@ -195,11 +239,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               </div>
             </div>
           )}
+          
+          {/* Invisible element to scroll to */}
+          <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
-      {/* Input area */}
-      <div className="border-t p-4 bg-background">
+      {/* Input area - fixed at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 border-t bg-background p-4">
         <div className="max-w-3xl mx-auto flex gap-2">
           <Textarea
             value={input}
