@@ -15,13 +15,19 @@ interface Message {
 
 interface RAGChatProps {
   productId: string;
+  subjectName: string;
+  subjectDescription?: string;
+  footerText?: string;
   placeholder?: string;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 
 export const RAGChat: React.FC<RAGChatProps> = ({ 
-  productId, 
+  productId,
+  subjectName,
+  subjectDescription = "Your personal A* tutor. Ask me anything!",
+  footerText = "Powered by A* AI",
   placeholder = "Ask me anything..." 
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -151,10 +157,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 className="h-16 mx-auto mb-6"
               />
               <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] bg-clip-text text-transparent mb-2">
-                OCR Physics Deluxe
+                {subjectName}
               </h2>
               <p className="text-muted-foreground">
-                Your personal A* Physics tutor. Ask me anything!
+                {subjectDescription}
               </p>
             </div>
           )}
@@ -270,7 +276,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           </Button>
         </div>
         <p className="text-xs text-muted-foreground text-center mt-2">
-          Powered by A* AI • Trained on OCR Physics past papers & mark schemes
+          {footerText}
         </p>
       </div>
     </div>
