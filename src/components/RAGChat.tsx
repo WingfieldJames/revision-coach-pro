@@ -245,8 +245,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         </div>
       </div>
 
-      {/* Input area - fixed at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 border-t bg-background p-4">
+      {/* Input area - fixed at bottom of viewport */}
+      <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4 z-50">
         <div className="max-w-3xl mx-auto flex gap-2">
           <Textarea
             value={input}
