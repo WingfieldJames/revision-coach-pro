@@ -18,7 +18,10 @@ export const TestRAGChatPage = () => {
       
       <div className="flex-1">
         <RAGChat 
-          productId={OCR_PHYSICS_PRODUCT_ID} 
+          productId={OCR_PHYSICS_PRODUCT_ID}
+          subjectName="OCR Physics (Test)"
+          subjectDescription="Test RAG chatbot for OCR Physics"
+          footerText="Powered by A* AI • Test Mode"
           placeholder="Ask me anything about OCR Physics A-Level..."
         />
       </div>

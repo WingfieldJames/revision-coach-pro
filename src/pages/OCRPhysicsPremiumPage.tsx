@@ -146,7 +146,10 @@ export const OCRPhysicsPremiumPage = () => {
       
       <div className="flex-1">
         <RAGChat 
-          productId={productId} 
+          productId={productId}
+          subjectName="OCR Physics Deluxe"
+          subjectDescription="Your personal A* Physics tutor. Ask me anything!"
+          footerText="Powered by A* AI • Trained on OCR Physics past papers & mark schemes"
           placeholder="Ask me anything about OCR Physics A-Level..."
         />
       </div>
