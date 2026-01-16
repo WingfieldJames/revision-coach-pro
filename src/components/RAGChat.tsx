@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2 } from 'lucide-react';
@@ -11,6 +11,7 @@ import 'katex/dist/katex.min.css';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  displayedContent?: string; // For smooth animation
 }
 
 interface RAGChatProps {
@@ -23,6 +24,9 @@ interface RAGChatProps {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 
+// Word-by-word animation delay in ms (lower = faster typing)
+const WORD_DELAY_MS = 30;
+
 export const RAGChat: React.FC<RAGChatProps> = ({ 
   productId,
   subjectName,
@@ -33,23 +37,83 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Animation refs
+  const bufferRef = useRef('');
+  const animationRef = useRef<number | null>(null);
+  const fullContentRef = useRef('');
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Cleanup animation on unmount
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        clearTimeout(animationRef.current);
+      }
+    };
+  }, []);
+
+  // Animate words from buffer to displayed content
+  const animateNextWord = useCallback(() => {
+    if (bufferRef.current.length === 0) {
+      setIsAnimating(false);
+      return;
+    }
+
+    // Match next word (including trailing whitespace)
+    const match = bufferRef.current.match(/^(\S+\s*|\s+)/);
+    if (match) {
+      const word = match[1];
+      bufferRef.current = bufferRef.current.slice(word.length);
+
+      setMessages(prev => {
+        const lastIndex = prev.length - 1;
+        if (lastIndex >= 0 && prev[lastIndex]?.role === 'assistant') {
+          return prev.map((m, i) => 
+            i === lastIndex 
+              ? { ...m, displayedContent: (m.displayedContent || '') + word }
+              : m
+          );
+        }
+        return prev;
+      });
+
+      // Schedule next word
+      animationRef.current = window.setTimeout(animateNextWord, WORD_DELAY_MS);
+    } else {
+      setIsAnimating(false);
+    }
+  }, []);
+
+  // Start animation if not already running
+  const startAnimation = useCallback(() => {
+    if (!isAnimating && bufferRef.current.length > 0) {
+      setIsAnimating(true);
+      animateNextWord();
+    }
+  }, [isAnimating, animateNextWord]);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+
+    // Reset animation state
+    bufferRef.current = '';
+    fullContentRef.current = '';
+    if (animationRef.current) {
+      clearTimeout(animationRef.current);
+    }
 
     const userMessage: Message = { role: 'user', content: input.trim() };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
-
-    let assistantContent = '';
 
     try {
       const response = await fetch(CHAT_URL, {
@@ -61,7 +125,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         body: JSON.stringify({
           message: userMessage.content,
           product_id: productId,
-          history: messages.slice(-10),
+          history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
         }),
       });
 
@@ -76,17 +140,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       const decoder = new TextDecoder();
       let buffer = '';
 
-      const updateAssistantMessage = (content: string) => {
-        setMessages(prev => {
-          const last = prev[prev.length - 1];
-          if (last?.role === 'assistant') {
-            return prev.map((m, i) => 
-              i === prev.length - 1 ? { ...m, content } : m
-            );
-          }
-          return [...prev, { role: 'assistant', content }];
-        });
-      };
+      // Add empty assistant message to start
+      setMessages(prev => [...prev, { role: 'assistant', content: '', displayedContent: '' }]);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -110,8 +165,28 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (content) {
-              assistantContent += content;
-              updateAssistantMessage(assistantContent);
+              // Store full content
+              fullContentRef.current += content;
+              
+              // Update the full content in message (for final state)
+              setMessages(prev => {
+                const lastIndex = prev.length - 1;
+                if (lastIndex >= 0 && prev[lastIndex]?.role === 'assistant') {
+                  return prev.map((m, i) => 
+                    i === lastIndex ? { ...m, content: fullContentRef.current } : m
+                  );
+                }
+                return prev;
+              });
+
+              // Add to animation buffer
+              bufferRef.current += content;
+              
+              // Start animation if not already running
+              if (!animationRef.current || bufferRef.current.length === content.length) {
+                setIsAnimating(true);
+                animationRef.current = window.setTimeout(animateNextWord, WORD_DELAY_MS);
+              }
             }
           } catch {
             buffer = line + '\n' + buffer;
@@ -119,13 +194,21 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           }
         }
       }
+
+      // Ensure any remaining buffer is animated
+      if (bufferRef.current.length > 0 && !animationRef.current) {
+        setIsAnimating(true);
+        animateNextWord();
+      }
+
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [
         ...prev,
         { 
           role: 'assistant', 
-          content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.` 
+          content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
+          displayedContent: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`
         },
       ]);
     } finally {
@@ -138,6 +221,20 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       e.preventDefault();
       handleSend();
     }
+  };
+
+  // Get the content to display for a message (animated or final)
+  const getDisplayContent = (message: Message, index: number) => {
+    const isLastMessage = index === messages.length - 1;
+    const isAssistant = message.role === 'assistant';
+    
+    // For the last assistant message that's being animated, show displayedContent
+    if (isLastMessage && isAssistant && (isLoading || isAnimating)) {
+      return message.displayedContent || '';
+    }
+    
+    // For completed messages, show full content
+    return message.content;
   };
 
   return (
@@ -165,72 +262,82 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             </div>
           )}
           
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={cn(
-                "flex gap-3 p-4 rounded-xl",
-                message.role === 'user' 
-                  ? "bg-gradient-to-r from-primary/10 to-[hsl(270,67%,60%)]/10 ml-8" 
-                  : "bg-muted mr-8"
-              )}
-            >
-              <div className="flex-shrink-0">
-                {message.role === 'user' ? (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">You</span>
-                  </div>
-                ) : (
-                  <img 
-                    src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
-                    alt="A* AI" 
-                    className="w-8 h-8 object-contain"
-                  />
+          {messages.map((message, index) => {
+            const displayContent = getDisplayContent(message, index);
+            const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
+            const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
+            
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "flex gap-3 p-4 rounded-xl",
+                  message.role === 'user' 
+                    ? "bg-gradient-to-r from-primary/10 to-[hsl(270,67%,60%)]/10 ml-8" 
+                    : "bg-muted mr-8"
                 )}
-              </div>
-              <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
-                <ReactMarkdown
-                  remarkPlugins={[remarkMath]}
-                  rehypePlugins={[rehypeKatex]}
-                  components={{
-                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                    ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
-                    ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
-                    li: ({ children }) => <li className="mb-1">{children}</li>,
-                    code: ({ className, children, ...props }) => {
-                      const isInline = !className;
-                      if (isInline) {
+              >
+                <div className="flex-shrink-0">
+                  {message.role === 'user' ? (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center">
+                      <span className="text-xs font-bold text-white">You</span>
+                    </div>
+                  ) : (
+                    <img 
+                      src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
+                      alt="A* AI" 
+                      className="w-8 h-8 object-contain"
+                    />
+                  )}
+                </div>
+                <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                      code: ({ className, children, ...props }) => {
+                        const isInline = !className;
+                        if (isInline) {
+                          return (
+                            <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                              {children}
+                            </code>
+                          );
+                        }
                         return (
-                          <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
-                            {children}
-                          </code>
+                          <pre className="bg-muted p-3 rounded-lg overflow-x-auto my-2">
+                            <code className={cn("text-sm font-mono", className)} {...props}>
+                              {children}
+                            </code>
+                          </pre>
                         );
-                      }
-                      return (
-                        <pre className="bg-muted p-3 rounded-lg overflow-x-auto my-2">
-                          <code className={cn("text-sm font-mono", className)} {...props}>
-                            {children}
-                          </code>
-                        </pre>
-                      );
-                    },
-                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                    em: ({ children }) => <em className="italic">{children}</em>,
-                    h1: ({ children }) => <h1 className="text-xl font-bold mb-2 mt-4">{children}</h1>,
-                    h2: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>,
-                    h3: ({ children }) => <h3 className="text-base font-bold mb-2 mt-2">{children}</h3>,
-                    blockquote: ({ children }) => (
-                      <blockquote className="border-l-4 border-primary pl-4 italic my-2">
-                        {children}
-                      </blockquote>
-                    ),
-                  }}
-                >
-                  {message.content}
-                </ReactMarkdown>
+                      },
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                      h1: ({ children }) => <h1 className="text-xl font-bold mb-2 mt-4">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-base font-bold mb-2 mt-2">{children}</h3>,
+                      blockquote: ({ children }) => (
+                        <blockquote className="border-l-4 border-primary pl-4 italic my-2">
+                          {children}
+                        </blockquote>
+                      ),
+                    }}
+                  >
+                    {displayContent}
+                  </ReactMarkdown>
+                  {/* Blinking cursor while typing */}
+                  {showCursor && (
+                    <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 align-middle" />
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
             <div className="flex gap-3 p-4 rounded-xl bg-muted mr-8">
