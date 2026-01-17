@@ -238,7 +238,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background relative">
+    <div className="flex flex-col h-full relative">
       {/* Messages area - scrollable */}
       <div 
         ref={messagesContainerRef}
