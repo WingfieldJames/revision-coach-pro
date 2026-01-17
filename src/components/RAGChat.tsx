@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, Plus, Image, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -38,8 +41,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [imageUploadOpen, setImageUploadOpen] = useState(false);
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Animation refs
   const bufferRef = useRef('');
@@ -223,6 +229,62 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     }
   };
 
+  // Image upload handler
+  const handleImageUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image must be less than 10MB');
+      return;
+    }
+
+    setIsAnalyzingImage(true);
+    setImageUploadOpen(false);
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        
+        const { data, error } = await supabase.functions.invoke('analyze-image', {
+          body: { 
+            image: base64,
+            imageType: 'exam_question'
+          }
+        });
+
+        if (error) throw error;
+
+        if (data?.text) {
+          setInput(prev => prev ? `${prev}\n\n${data.text}` : data.text);
+          toast.success('Text extracted from image');
+        } else {
+          toast.error('Could not extract text from image');
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Image analysis error:', error);
+      toast.error('Failed to analyze image');
+    } finally {
+      setIsAnalyzingImage(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   // Get the content to display for a message (animated or final)
   const getDisplayContent = (message: Message, index: number) => {
     const isLastMessage = index === messages.length - 1;
@@ -360,20 +422,60 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
       {/* Input area - fixed at bottom of viewport */}
       <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4 z-50">
-        <div className="max-w-3xl mx-auto flex gap-2">
+        <div className="max-w-3xl mx-auto flex gap-2 items-end">
+          {/* Image upload button */}
+          <Popover open={imageUploadOpen} onOpenChange={setImageUploadOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-[60px] w-[60px] rounded-xl flex-shrink-0"
+                disabled={isLoading || isAnalyzingImage}
+              >
+                {isAnalyzingImage ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Plus className="w-5 h-5" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              className="w-48 p-2 bg-background border border-border shadow-xl" 
+              align="start"
+              side="top"
+              sideOffset={8}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Image className="w-4 h-4" />
+                Upload Image
+              </Button>
+            </PopoverContent>
+          </Popover>
+
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             disabled={isLoading}
-            className="min-h-[60px] max-h-[200px] resize-none rounded-xl border-2 focus:border-primary"
+            className="min-h-[60px] max-h-[200px] resize-none rounded-xl border-2 focus:border-primary flex-1"
             rows={2}
           />
           <Button 
             onClick={handleSend} 
             disabled={!input.trim() || isLoading}
-            className="h-[60px] w-[60px] rounded-xl bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] hover:opacity-90 transition-opacity"
+            className="h-[60px] w-[60px] rounded-xl bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] hover:opacity-90 transition-opacity flex-shrink-0"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
