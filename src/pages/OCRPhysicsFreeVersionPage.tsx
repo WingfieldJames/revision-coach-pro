@@ -14,7 +14,7 @@ export const OCRPhysicsFreeVersionPage = () => {
         description="Try A* AI free for OCR Physics. AI trained on OCR Physics past papers for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/ocr-physics-free-version"
       />
-      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked />
+      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
       
       <div className="flex-1 relative">
         <iframe

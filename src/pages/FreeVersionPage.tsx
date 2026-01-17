@@ -35,7 +35,7 @@ export const FreeVersionPage = () => {
         description="Try A* AI free – AI trained on Edexcel Economics past papers. Get spec-aligned responses and quick practice. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/free-version"
       />
-      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked />
+      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
       
       <div className="flex-1 relative">
         {chatbotUrl ? (

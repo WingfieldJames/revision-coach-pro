@@ -11,7 +11,7 @@ export const OCRCSFreeVersionPage = () => {
         description="Try A* AI free for OCR Computer Science. AI trained on OCR CS specification for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/ocr-cs-free-version"
       />
-      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked />
+      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
       
       <div className="flex-1 relative">
         <RAGChat 

@@ -82,7 +82,7 @@ export const AQAPremiumPage = () => {
         canonical="https://astarai.co.uk/aqa-premium"
       />
       <div className="relative z-10">
-        <Header showNavLinks showImageTool showDiagramTool />
+        <Header showNavLinks showImageTool showDiagramTool hideUserDetails />
       </div>
       
       <div className="flex-1 relative">

@@ -35,7 +35,7 @@ export const AQAFreeVersionPage = () => {
         description="Try A* AI free for AQA Economics. AI trained on AQA past papers for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/aqa-free-version"
       />
-      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked />
+      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
       
       <div className="flex-1 relative">
         {chatbotUrl ? (
