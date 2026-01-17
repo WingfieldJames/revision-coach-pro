@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, ITab } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ImageUploadTool } from '@/components/ImageUploadTool';
+
 import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
-import { Camera, BarChart2, PenLine, Lock } from 'lucide-react';
+import { Sparkles, BarChart2, PenLine, Lock } from 'lucide-react';
 
 // Global flag to track when file dialog is open (set by ImageUploadTool)
 export const fileDialogOpen = { current: false };
@@ -141,25 +141,21 @@ export const Header: React.FC<HeaderProps> = ({
                 size="sm" 
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
               >
-                <Camera className="h-4 w-4" />
-                <span className="hidden sm:inline">Image to Text</span>
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden sm:inline">My AI</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent 
               className="w-[90vw] max-w-md p-0 bg-background border border-border shadow-xl" 
               align="start"
               sideOffset={8}
-              onPointerDownOutside={(e) => {
-                // Prevent closing when clicking outside (e.g., file dialog)
-                e.preventDefault();
-              }}
-              onInteractOutside={(e) => {
-                // Prevent closing on any interaction outside
-                e.preventDefault();
-              }}
             >
-              <div className="p-4">
-                {toolsLocked ? <LockedToolContent /> : <ImageUploadTool />}
+              <div className="text-center py-6 px-4">
+                <Sparkles className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
+                <h3 className="font-semibold text-lg mb-2">Coming Soon</h3>
+                <p className="text-muted-foreground text-sm">
+                  This feature is currently in development.
+                </p>
               </div>
             </PopoverContent>
           </Popover>
