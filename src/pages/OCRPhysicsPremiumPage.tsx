@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
+import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
 import { RAGChat } from '@/components/RAGChat';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -142,9 +143,12 @@ export const OCRPhysicsPremiumPage = () => {
         description="Your personal OCR Physics A* tutor. AI trained on past papers, mark schemes, and specifications."
         canonical="https://astarai.co.uk/ocr-physics-premium"
       />
-      <Header showNavLinks hideUserDetails />
+      <ChatbotBackgroundPaths />
+      <div className="relative z-10">
+        <Header showNavLinks hideUserDetails />
+      </div>
       
-      <div className="flex-1">
+      <div className="flex-1 relative z-10">
         <RAGChat 
           productId={productId}
           subjectName="OCR Physics Deluxe"
