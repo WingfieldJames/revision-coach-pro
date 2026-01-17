@@ -22,10 +22,9 @@ function FloatingPaths({ position }: { position: number }) {
     return (
         <svg
             className="absolute inset-0 w-full h-full"
-            viewBox="-200 0 1600 500"
+            viewBox="-200 -400 1800 1200"
             fill="none"
-            preserveAspectRatio="xMidYMid slice"
-            style={{ minWidth: '100vw', minHeight: '100vh' }}
+            preserveAspectRatio="none"
         >
             <title>Background Paths</title>
             {paths.map((path) => (
