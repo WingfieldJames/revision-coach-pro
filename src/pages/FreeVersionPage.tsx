@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
+import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
 import { supabase } from '@/integrations/supabase/client';
 
 export const FreeVersionPage = () => {
@@ -35,9 +36,12 @@ export const FreeVersionPage = () => {
         description="Try A* AI free – AI trained on Edexcel Economics past papers. Get spec-aligned responses and quick practice. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/free-version"
       />
-      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
+      <ChatbotBackgroundPaths />
+      <div className="relative z-10">
+        <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
+      </div>
       
-      <div className="flex-1 relative">
+      <div className="flex-1 relative z-10">
         {chatbotUrl ? (
           <iframe
             src={chatbotUrl}

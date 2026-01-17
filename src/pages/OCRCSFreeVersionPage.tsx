@@ -1,6 +1,7 @@
 import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
+import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
 import { RAGChat } from '@/components/RAGChat';
 
 export const OCRCSFreeVersionPage = () => {
@@ -11,9 +12,12 @@ export const OCRCSFreeVersionPage = () => {
         description="Try A* AI free for OCR Computer Science. AI trained on OCR CS specification for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/ocr-cs-free-version"
       />
-      <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
+      <ChatbotBackgroundPaths />
+      <div className="relative z-10">
+        <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
+      </div>
       
-      <div className="flex-1 relative">
+      <div className="flex-1 relative z-10">
         <RAGChat 
           productId="5d05830b-de7b-4206-8f49-6d3695324eb6"
           subjectName="OCR Computer Science"

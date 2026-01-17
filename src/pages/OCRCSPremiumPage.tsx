@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
+import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -81,11 +82,12 @@ export const OCRCSPremiumPage = () => {
         description="Access A* AI Deluxe for OCR Computer Science. Full training on 2017-2025 past papers, mark schemes, A* technique & unlimited prompts."
         canonical="https://astarai.co.uk/ocr-cs-premium"
       />
+      <ChatbotBackgroundPaths />
       <div className="relative z-10">
         <Header showNavLinks showImageTool showDiagramTool hideUserDetails />
       </div>
       
-      <div className="flex-1 relative">
+      <div className="flex-1 relative z-10">
         <iframe
           src={chatbotUrl}
           width="100%"
