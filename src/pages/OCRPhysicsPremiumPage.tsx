@@ -142,7 +142,7 @@ export const OCRPhysicsPremiumPage = () => {
         description="Your personal OCR Physics A* tutor. AI trained on past papers, mark schemes, and specifications."
         canonical="https://astarai.co.uk/ocr-physics-premium"
       />
-      <Header showNavLinks />
+      <Header showNavLinks hideUserDetails />
       
       <div className="flex-1">
         <RAGChat 

@@ -18,6 +18,7 @@ interface HeaderProps {
   showDiagramTool?: boolean;
   showEssayMarker?: boolean;
   toolsLocked?: boolean;
+  hideUserDetails?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -25,7 +26,8 @@ export const Header: React.FC<HeaderProps> = ({
   showImageTool = false,
   showDiagramTool = false,
   showEssayMarker = false,
-  toolsLocked = false
+  toolsLocked = false,
+  hideUserDetails = false
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -213,7 +215,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
       
       {showNavLinks && (
-        <div className="flex-1 flex justify-center px-2 min-w-0">
+        <div className={`flex-1 flex justify-center min-w-0 ${hideUserDetails ? 'justify-end pr-4' : 'px-2'}`}>
           <Tabs 
             selected={selectedTab} 
             setSelected={handleTabChange} 
@@ -223,7 +225,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      {user && (
+      {user && !hideUserDetails && (
         <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
           <span className="text-xs sm:text-sm text-muted-foreground truncate max-w-[80px] sm:max-w-[120px] md:max-w-none hidden sm:block">
             {user.email}

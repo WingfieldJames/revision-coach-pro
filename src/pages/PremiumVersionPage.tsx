@@ -85,7 +85,7 @@ export const PremiumVersionPage = () => {
         canonical="https://astarai.co.uk/premium"
       />
       <div className="relative z-10">
-        <Header showNavLinks showImageTool showDiagramTool showEssayMarker />
+        <Header showNavLinks showImageTool showDiagramTool showEssayMarker hideUserDetails />
       </div>
       
       <div className="flex-1 relative">
