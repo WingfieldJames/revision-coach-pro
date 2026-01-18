@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
+import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { Sparkles, BarChart2, PenLine, Lock } from 'lucide-react';
 
 // Global flag to track when file dialog is open (set by ImageUploadTool)
@@ -146,17 +147,11 @@ export const Header: React.FC<HeaderProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent 
-              className="w-[90vw] max-w-md p-0 bg-background border border-border shadow-xl" 
+              className="w-[90vw] max-w-md p-4 bg-background border border-border shadow-xl" 
               align="start"
               sideOffset={8}
             >
-              <div className="text-center py-6 px-4">
-                <Sparkles className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-                <h3 className="font-semibold text-lg mb-2">Coming Soon</h3>
-                <p className="text-muted-foreground text-sm">
-                  This feature is currently in development.
-                </p>
-              </div>
+              <MyAIPreferences />
             </PopoverContent>
           </Popover>
         )}
