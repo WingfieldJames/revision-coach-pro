@@ -417,7 +417,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       </div>
 
       {/* Fixed bottom composer - two line layout */}
-      <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4 z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-background p-4 z-50">
         <div className="max-w-3xl mx-auto">
           {/* Two-line pill container */}
           <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
@@ -433,7 +433,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             />
             
             {/* Line 2: Buttons row */}
-            <div className="flex items-center justify-between px-3 py-2 border-t border-border/50 bg-muted/30">
+            <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
               {/* Plus button on left */}
               <Popover open={imageUploadOpen} onOpenChange={setImageUploadOpen}>
                 <PopoverTrigger asChild>
