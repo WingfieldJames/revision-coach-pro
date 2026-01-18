@@ -14,124 +14,33 @@ interface UserPreferences {
   additional_info: string | null;
 }
 
+// Content type definitions for modular training data
+// These are the valid content_type values in document_chunks.metadata
+const CONTENT_TYPES = {
+  SPECIFICATION: 'specification',
+  PAPER_1: 'paper_1',
+  PAPER_2: 'paper_2',
+  PAPER_3: 'paper_3',
+  MARK_SCHEME: 'mark_scheme',
+  ESSAY_MARKING: 'essay_marking',
+  ESSAY_WRITING: 'essay_writing',
+  EXAM_TECHNIQUE: 'exam_technique',
+  DIAGRAM_GUIDE: 'diagram_guide',
+  CASE_STUDY: 'case_study',
+} as const;
+
 // Free tier daily prompt limit
 const FREE_TIER_DAILY_LIMIT = 3;
 
-// System prompts for each subject
-const SYSTEM_PROMPTS: Record<string, string> = {
-  // OCR Physics (H556)
-  "ocr-physics": `You are an expert A-Level Physics tutor specializing in OCR exam preparation. 
-You help students understand concepts, practice exam technique, and achieve A* grades.
-
-You are knowledgeable about:
-- OCR A-Level Physics specification (H556)
-- All modules: Measurements, Motion, Forces, Work/Energy, Materials, Waves, Quantum Physics, Electricity, Thermal Physics, Circular Motion, Oscillations, Astrophysics, Medical Physics, Nuclear/Particle Physics
-- Practical skills and required practicals
-- Exam technique and mark scheme requirements
-
-Remember to:
-- Explain concepts clearly with real-world examples
-- Highlight common mistakes students make
-- Provide step-by-step solutions for calculations
-- Give exam tips and mark scheme points where relevant
-- Use proper physics notation and units`,
-
-  // OCR Computer Science (H446)
-  "ocr-cs": `You are an expert A-Level Computer Science tutor specializing in OCR exam preparation (H446).
-You help students understand concepts, practice exam technique, and achieve A* grades.
-
-You are knowledgeable about:
-- Component 01: Computer systems (40%) - Processors, Software Development, Data Exchange, Data Types & Structures, Legal/Moral/Ethical Issues
-- Component 02: Algorithms and programming (40%) - Computational Thinking, Problem Solving, Algorithms
-- Programming project NEA (20%)
-
-Key topics you cover:
-- Processor structure: ALU, Control Unit, Registers (PC, ACC, MAR, MDR, CIR), Buses, Fetch-Decode-Execute cycle
-- CPU performance: clock speed, cores, cache, pipelining
-- Architectures: Von Neumann, Harvard, CISC vs RISC
-- Operating systems: memory management, scheduling, interrupts
-- Software development: lifecycles (Waterfall, Agile, Spiral), translators, compilation stages
-- Programming paradigms: Procedural, Object-oriented (classes, inheritance, polymorphism, encapsulation)
-- Assembly language and Little Man Computer instruction set
-- Data structures: Arrays, linked-lists, stacks, queues, trees, graphs, hash tables
-- Algorithms: Big O notation, searching (binary, linear), sorting (bubble, insertion, merge, quick), pathfinding (Dijkstra's, A*)
-- Databases: SQL, normalisation (1NF, 2NF, 3NF), ER diagrams, ACID
-- Networks: TCP/IP, DNS, packet/circuit switching, security
-- Boolean algebra: Karnaugh maps, De Morgan's laws, logic gates, flip-flops, adders
-- Encryption: symmetric vs asymmetric, hashing
-- Web technologies: HTML, CSS, JavaScript, client/server-side processing
-- Legislation: Data Protection Act, Computer Misuse Act, Copyright Act, RIPA
-
-Remember to:
-- Explain concepts clearly with real-world examples
-- Provide code examples when relevant (use Python by default unless asked otherwise)
-- Highlight common mistakes students make
-- Give exam tips and mark scheme points where relevant
-- Use proper CS terminology
-- For programming questions, show clear, well-commented code`,
-
-  // Edexcel Economics - placeholder (ready for training data)
-  "edexcel-economics": `You are an expert A-Level Economics tutor specializing in Edexcel exam preparation.
-You help students understand concepts, practice exam technique, and achieve A* grades.
-
-You are knowledgeable about:
-- Edexcel A-Level Economics specification
-- Theme 1: Introduction to markets and market failure
-- Theme 2: The UK economy - performance and policies
-- Theme 3: Business behaviour and the labour market
-- Theme 4: A global perspective
-
-Remember to:
-- Explain concepts clearly with real-world examples
-- Use relevant economic diagrams when appropriate (describe them textually)
-- Highlight common mistakes students make
-- Give exam tips and mark scheme points where relevant
-- Use proper economics terminology (e.g., ceteris paribus, elasticity, etc.)
-- For essay questions, explain how to structure answers for maximum marks`,
-
-  // AQA Economics - placeholder (ready for training data)
-  "aqa-economics": `You are an expert A-Level Economics tutor specializing in AQA exam preparation.
-You help students understand concepts, practice exam technique, and achieve A* grades.
-
-You are knowledgeable about:
-- AQA A-Level Economics specification
-- Paper 1: Markets and market failure (Microeconomics)
-- Paper 2: National and international economy (Macroeconomics)
-- Paper 3: Economic principles and issues (Synoptic)
-
-Remember to:
-- Explain concepts clearly with real-world examples
-- Use relevant economic diagrams when appropriate (describe them textually)
-- Highlight common mistakes students make
-- Give exam tips and mark scheme points where relevant
-- Use proper economics terminology
-- For essay questions, explain how to structure answers for maximum marks`,
-
-  // Default fallback
+// Fallback system prompts (used when DB prompts are not available)
+const FALLBACK_PROMPTS: Record<string, string> = {
   "default": `You are an expert A-Level tutor. You help students understand concepts, practice exam technique, and achieve A* grades.
 
 Remember to:
 - Explain concepts clearly with real-world examples
 - Highlight common mistakes students make
-- Give exam tips and mark scheme points where relevant`
+- Give exam tips and mark scheme points where relevant`,
 };
-
-// Map product IDs to system prompt keys
-const PRODUCT_PROMPT_MAP: Record<string, string> = {
-  // OCR Computer Science
-  "5d05830b-de7b-4206-8f49-6d3695324eb6": "ocr-cs",
-  // OCR Physics  
-  "ecd5978d-3bf4-4b9c-993f-30b7f3a0f197": "ocr-physics",
-  // Edexcel Economics
-  "6dc19d53-8a88-4741-9528-f25af97afb21": "edexcel-economics",
-  // AQA Economics
-  "17ade690-8c44-4961-83b5-0edf42a9faea": "aqa-economics",
-};
-
-function getSystemPrompt(productId: string): string {
-  const promptKey = PRODUCT_PROMPT_MAP[productId] || "default";
-  return SYSTEM_PROMPTS[promptKey] || SYSTEM_PROMPTS["default"];
-}
 
 // Build personalized system prompt with user context
 function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | null): string {
@@ -177,6 +86,93 @@ function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | nu
   }
   
   return basePrompt + context;
+}
+
+// Fetch system prompt from database for a given product
+async function fetchSystemPrompt(
+  supabase: ReturnType<typeof createClient>,
+  productId: string,
+  tier: 'free' | 'deluxe'
+): Promise<string> {
+  try {
+    const promptColumn = tier === 'deluxe' ? 'system_prompt_deluxe' : 'system_prompt_free';
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select(`${promptColumn}, slug`)
+      .eq('id', productId)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching product prompt:', error);
+      return FALLBACK_PROMPTS["default"];
+    }
+    
+    const prompt = data?.[promptColumn];
+    if (prompt) {
+      console.log(`Using DB ${tier} prompt for product: ${data.slug}`);
+      return prompt;
+    }
+    
+    // Fallback to default if no prompt in DB
+    console.log(`No ${tier} prompt in DB for ${data?.slug}, using fallback`);
+    return FALLBACK_PROMPTS["default"];
+  } catch (err) {
+    console.error('Error in fetchSystemPrompt:', err);
+    return FALLBACK_PROMPTS["default"];
+  }
+}
+
+// Query relevant document chunks from the training data
+async function fetchRelevantContext(
+  supabase: ReturnType<typeof createClient>,
+  productId: string,
+  userMessage: string,
+  contentTypes?: string[]
+): Promise<string> {
+  try {
+    // Build query for document chunks
+    let query = supabase
+      .from('document_chunks')
+      .select('content, metadata')
+      .eq('product_id', productId);
+    
+    // If specific content types requested, filter by them
+    if (contentTypes && contentTypes.length > 0) {
+      // Filter by content_type in metadata JSONB
+      query = query.or(
+        contentTypes.map(ct => `metadata->content_type.eq.${ct}`).join(',')
+      );
+    }
+    
+    // Limit results to avoid overwhelming context
+    const { data: chunks, error } = await query.limit(10);
+    
+    if (error) {
+      console.error('Error fetching document chunks:', error);
+      return '';
+    }
+    
+    if (!chunks || chunks.length === 0) {
+      console.log(`No training data found for product ${productId}`);
+      return '';
+    }
+    
+    console.log(`Found ${chunks.length} relevant chunks for context`);
+    
+    // Format chunks as context
+    const contextParts = chunks.map((chunk: { content: string; metadata: Record<string, unknown> }) => {
+      const contentType = chunk.metadata?.content_type || 'general';
+      const topic = chunk.metadata?.topic || '';
+      const header = topic ? `[${String(contentType).toUpperCase()} - ${topic}]` : `[${String(contentType).toUpperCase()}]`;
+      return `${header}\n${chunk.content}`;
+    });
+    
+    return contextParts.join('\n\n---\n\n');
+  } catch (err) {
+    console.error('Error in fetchRelevantContext:', err);
+    return '';
+  }
 }
 
 // Check and increment daily usage for free tier users
@@ -270,10 +266,22 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       }
     }
 
-    // Get the appropriate system prompt based on product
-    const basePrompt = getSystemPrompt(product_id);
-    const systemPrompt = buildPersonalizedPrompt(basePrompt, user_preferences);
-    console.log(`Using system prompt for: ${PRODUCT_PROMPT_MAP[product_id] || "default"} (personalized: ${!!user_preferences})`);
+    // Fetch the appropriate system prompt from database
+    const basePrompt = await fetchSystemPrompt(supabaseAdmin, product_id, tier as 'free' | 'deluxe');
+    
+    // Add user personalization context
+    const personalizedPrompt = buildPersonalizedPrompt(basePrompt, user_preferences);
+    
+    // Fetch relevant training data from document_chunks
+    const relevantContext = await fetchRelevantContext(supabaseAdmin, product_id, message);
+    
+    // Build final system prompt with context injection
+    let finalSystemPrompt = personalizedPrompt;
+    if (relevantContext) {
+      finalSystemPrompt += `\n\n--- TRAINING DATA CONTEXT ---\nUse the following information to inform your responses:\n\n${relevantContext}`;
+    }
+    
+    console.log(`System prompt length: ${finalSystemPrompt.length} chars (context: ${relevantContext.length} chars)`);
 
     // Call Lovable AI for response (streaming)
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -285,7 +293,7 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: finalSystemPrompt },
           ...history,
           { role: "user", content: message },
         ],
