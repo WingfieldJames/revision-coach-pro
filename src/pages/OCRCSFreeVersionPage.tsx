@@ -24,6 +24,7 @@ export const OCRCSFreeVersionPage = () => {
           subjectDescription="Your personal A* Computer Science tutor. Ask me anything!"
           footerText="Powered by A* AI • Trained on OCR Computer Science specification"
           placeholder="Ask about algorithms, data structures, programming..."
+          tier="free"
         />
       </div>
     </div>

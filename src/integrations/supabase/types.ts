@@ -108,6 +108,44 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_prompt_usage: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string | null
+          prompt_count: number
+          updated_at: string
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          prompt_count?: number
+          updated_at?: string
+          usage_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          prompt_count?: number
+          updated_at?: string
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_prompt_usage_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_chunks: {
         Row: {
           content: string
@@ -367,6 +405,10 @@ export type Database = {
       }
     }
     Functions: {
+      increment_prompt_usage: {
+        Args: { p_limit?: number; p_product_id: string; p_user_id: string }
+        Returns: Json
+      }
       match_documents: {
         Args: {
           filter_product_id?: string

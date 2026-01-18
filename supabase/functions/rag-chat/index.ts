@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +13,9 @@ interface UserPreferences {
   target_grade: string;
   additional_info: string | null;
 }
+
+// Free tier daily prompt limit
+const FREE_TIER_DAILY_LIMIT = 3;
 
 // System prompts for each subject
 const SYSTEM_PROMPTS: Record<string, string> = {
@@ -175,6 +179,36 @@ function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | nu
   return basePrompt + context;
 }
 
+// Check and increment daily usage for free tier users
+async function checkAndIncrementUsage(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  userId: string,
+  productId: string
+): Promise<{ allowed: boolean; count: number; limit: number }> {
+  try {
+    const { data, error } = await supabaseAdmin.rpc('increment_prompt_usage', {
+      p_user_id: userId,
+      p_product_id: productId,
+      p_limit: FREE_TIER_DAILY_LIMIT,
+    });
+
+    if (error) {
+      console.error('Error checking usage:', error);
+      // Allow on error to prevent blocking legitimate users
+      return { allowed: true, count: 0, limit: FREE_TIER_DAILY_LIMIT };
+    }
+
+    return {
+      allowed: !data.exceeded,
+      count: data.count,
+      limit: data.limit,
+    };
+  } catch (err) {
+    console.error('Usage check error:', err);
+    return { allowed: true, count: 0, limit: FREE_TIER_DAILY_LIMIT };
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -182,16 +216,58 @@ serve(async (req) => {
 
   try {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const { message, product_id, user_preferences, history = [] } = await req.json();
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { message, product_id, user_preferences, history = [], tier = 'free', user_id } = await req.json();
 
     if (!message) {
       throw new Error("message is required");
     }
 
-    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..."`);
+    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (tier: ${tier})`);
     if (user_preferences) {
       console.log(`User preferences: Year ${user_preferences.year}, Predicted: ${user_preferences.predicted_grade}, Target: ${user_preferences.target_grade}`);
+    }
+
+    // Check daily usage limit for FREE tier only
+    if (tier === 'free' && user_id && product_id) {
+      const usageResult = await checkAndIncrementUsage(supabaseAdmin, user_id, product_id);
+      
+      console.log(`Usage check for ${user_id}: ${usageResult.count}/${usageResult.limit} (allowed: ${usageResult.allowed})`);
+      
+      if (!usageResult.allowed) {
+        // Return a special response for limit exceeded
+        const limitMessage = `🔒 **You've used all ${usageResult.limit} free prompts for today!**
+
+To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
+- ✨ Unlimited daily prompts
+- 📊 Diagram Generator tool
+- 📝 Essay Marker with detailed feedback
+- 🖼️ Image-to-text analysis
+- 🎯 Personalized learning based on your goals
+
+**[Upgrade to Deluxe](/compare)** to keep revising!
+
+*Your free prompts reset at midnight.*`;
+
+        return new Response(
+          JSON.stringify({ 
+            error: "limit_exceeded",
+            message: limitMessage,
+            usage: {
+              count: usageResult.count,
+              limit: usageResult.limit,
+            }
+          }),
+          { 
+            status: 429, 
+            headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          }
+        );
+      }
     }
 
     // Get the appropriate system prompt based on product

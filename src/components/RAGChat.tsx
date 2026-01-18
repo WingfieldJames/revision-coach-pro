@@ -31,6 +31,7 @@ interface RAGChatProps {
   subjectDescription?: string;
   footerText?: string;
   placeholder?: string;
+  tier?: 'free' | 'deluxe';
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
@@ -42,7 +43,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   subjectName,
   subjectDescription = "Your personal A* tutor. Ask me anything!",
   footerText = "Powered by A* AI",
-  placeholder = "Ask me anything..." 
+  placeholder = "Ask me anything...",
+  tier = 'deluxe'
 }) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -185,11 +187,28 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           product_id: productId,
           user_preferences: userPreferences,
           history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
+          tier: tier,
+          user_id: user?.id,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        
+        // Handle limit exceeded for free tier
+        if (errorData.error === 'limit_exceeded' && errorData.message) {
+          setMessages(prev => [
+            ...prev,
+            { 
+              role: 'assistant', 
+              content: errorData.message,
+              displayedContent: errorData.message
+            },
+          ]);
+          setIsLoading(false);
+          return;
+        }
+        
         throw new Error(errorData.error || 'Failed to get response');
       }
 
