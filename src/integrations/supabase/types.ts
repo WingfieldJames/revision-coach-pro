@@ -194,6 +194,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_preferences: {
+        Row: {
+          additional_info: string | null
+          created_at: string
+          id: string
+          predicted_grade: string
+          target_grade: string
+          updated_at: string
+          user_id: string
+          year: string
+        }
+        Insert: {
+          additional_info?: string | null
+          created_at?: string
+          id?: string
+          predicted_grade?: string
+          target_grade?: string
+          updated_at?: string
+          user_id: string
+          year?: string
+        }
+        Update: {
+          additional_info?: string | null
+          created_at?: string
+          id?: string
+          predicted_grade?: string
+          target_grade?: string
+          updated_at?: string
+          user_id?: string
+          year?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           active: boolean | null
