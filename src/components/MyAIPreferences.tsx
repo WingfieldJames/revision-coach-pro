@@ -18,7 +18,11 @@ interface UserPreferences {
   additional_info: string | null;
 }
 
-export const MyAIPreferences: React.FC = () => {
+interface MyAIPreferencesProps {
+  productId?: string; // Optional - if provided, saves product-specific prefs
+}
+
+export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -31,7 +35,7 @@ export const MyAIPreferences: React.FC = () => {
     additional_info: null,
   });
 
-  // Fetch existing preferences
+  // Fetch existing preferences (product-specific or global)
   useEffect(() => {
     const fetchPreferences = async () => {
       if (!user) {
@@ -40,11 +44,19 @@ export const MyAIPreferences: React.FC = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        // Build query based on whether we're fetching product-specific or global prefs
+        let query = supabase
           .from('user_preferences')
           .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
+          .eq('user_id', user.id);
+
+        if (productId) {
+          query = query.eq('product_id', productId);
+        } else {
+          query = query.is('product_id', null);
+        }
+
+        const { data, error } = await query.maybeSingle();
 
         if (error) throw error;
 
@@ -64,7 +76,7 @@ export const MyAIPreferences: React.FC = () => {
     };
 
     fetchPreferences();
-  }, [user]);
+  }, [user, productId]);
 
   // Auto-save function with debounce
   const savePreferences = useCallback(async (newPreferences: UserPreferences) => {
@@ -78,9 +90,10 @@ export const MyAIPreferences: React.FC = () => {
         .from('user_preferences')
         .upsert({
           user_id: user.id,
+          product_id: productId || null,
           ...newPreferences,
         }, {
-          onConflict: 'user_id',
+          onConflict: 'user_id,product_id',
         });
 
       if (error) throw error;
@@ -92,7 +105,7 @@ export const MyAIPreferences: React.FC = () => {
     } finally {
       setSaving(false);
     }
-  }, [user]);
+  }, [user, productId]);
 
   // Debounced save for text input
   useEffect(() => {

@@ -158,6 +158,8 @@ export type Database = {
           stripe_lifetime_price_id: string | null
           stripe_monthly_price_id: string | null
           subject: string
+          system_prompt_deluxe: string | null
+          system_prompt_free: string | null
           updated_at: string | null
         }
         Insert: {
@@ -174,6 +176,8 @@ export type Database = {
           stripe_lifetime_price_id?: string | null
           stripe_monthly_price_id?: string | null
           subject: string
+          system_prompt_deluxe?: string | null
+          system_prompt_free?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -190,6 +194,8 @@ export type Database = {
           stripe_lifetime_price_id?: string | null
           stripe_monthly_price_id?: string | null
           subject?: string
+          system_prompt_deluxe?: string | null
+          system_prompt_free?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -200,6 +206,7 @@ export type Database = {
           created_at: string
           id: string
           predicted_grade: string
+          product_id: string | null
           target_grade: string
           updated_at: string
           user_id: string
@@ -210,6 +217,7 @@ export type Database = {
           created_at?: string
           id?: string
           predicted_grade?: string
+          product_id?: string | null
           target_grade?: string
           updated_at?: string
           user_id: string
@@ -220,12 +228,21 @@ export type Database = {
           created_at?: string
           id?: string
           predicted_grade?: string
+          product_id?: string | null
           target_grade?: string
           updated_at?: string
           user_id?: string
           year?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_subscriptions: {
         Row: {

@@ -5,6 +5,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// User preferences interface
+interface UserPreferences {
+  year: string;
+  predicted_grade: string;
+  target_grade: string;
+  additional_info: string | null;
+}
+
 // System prompts for each subject
 const SYSTEM_PROMPTS: Record<string, string> = {
   // OCR Physics (H556)
@@ -81,6 +89,52 @@ function getSystemPrompt(productId: string): string {
   return SYSTEM_PROMPTS[promptKey] || SYSTEM_PROMPTS["default"];
 }
 
+// Build personalized system prompt with user context
+function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | null): string {
+  if (!prefs) return basePrompt;
+  
+  let context = `\n\n--- STUDENT CONTEXT ---`;
+  context += `\nThis student is in ${prefs.year}.`;
+  context += `\nTheir predicted grade is ${prefs.predicted_grade}.`;
+  context += `\nTheir target grade is ${prefs.target_grade}.`;
+  
+  if (prefs.additional_info) {
+    context += `\nAdditional notes from the student: "${prefs.additional_info}"`;
+  }
+  
+  context += `\n\n--- PERSONALIZATION INSTRUCTIONS ---`;
+  
+  // Add personalization based on grade gap
+  const gradeOrder = ['D', 'C', 'B', 'A', 'A*'];
+  const predictedIdx = gradeOrder.indexOf(prefs.predicted_grade);
+  const targetIdx = gradeOrder.indexOf(prefs.target_grade);
+  
+  if (targetIdx > predictedIdx) {
+    context += `\n- The student is aiming to improve from ${prefs.predicted_grade} to ${prefs.target_grade}. Focus on improvement strategies and exam technique.`;
+  } else if (targetIdx === predictedIdx) {
+    context += `\n- The student is aiming to maintain their ${prefs.predicted_grade} grade. Help them consolidate their knowledge.`;
+  }
+  
+  // Year-specific guidance
+  if (prefs.year === 'Year 12') {
+    context += `\n- This is a Year 12 student. Include more foundational explanations and build from basics.`;
+    context += `\n- They may not have covered all topics yet, so check their understanding of prerequisites.`;
+  } else if (prefs.year === 'Year 13') {
+    context += `\n- This is a Year 13 student preparing for final exams.`;
+    context += `\n- Emphasize exam technique, past paper practice, and synoptic links between topics.`;
+    context += `\n- Be more direct about mark scheme requirements and examiner expectations.`;
+  }
+  
+  // Target grade specific guidance
+  if (prefs.target_grade === 'A*') {
+    context += `\n- For A* target: Include extension material, encourage deeper analysis, and highlight the nuances that differentiate A from A* answers.`;
+  } else if (prefs.target_grade === 'A') {
+    context += `\n- For A target: Focus on thoroughness, clear explanations, and avoiding common pitfalls.`;
+  }
+  
+  return basePrompt + context;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -89,17 +143,21 @@ serve(async (req) => {
   try {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
 
-    const { message, product_id, history = [] } = await req.json();
+    const { message, product_id, user_preferences, history = [] } = await req.json();
 
     if (!message) {
       throw new Error("message is required");
     }
 
     console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..."`);
+    if (user_preferences) {
+      console.log(`User preferences: Year ${user_preferences.year}, Predicted: ${user_preferences.predicted_grade}, Target: ${user_preferences.target_grade}`);
+    }
 
     // Get the appropriate system prompt based on product
-    const systemPrompt = getSystemPrompt(product_id);
-    console.log(`Using system prompt for: ${PRODUCT_PROMPT_MAP[product_id] || "default"}`);
+    const basePrompt = getSystemPrompt(product_id);
+    const systemPrompt = buildPersonalizedPrompt(basePrompt, user_preferences);
+    console.log(`Using system prompt for: ${PRODUCT_PROMPT_MAP[product_id] || "default"} (personalized: ${!!user_preferences})`);
 
     // Call Lovable AI for response (streaming)
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
