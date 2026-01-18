@@ -10,7 +10,6 @@ import 'katex/dist/katex.min.css';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -43,7 +42,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [imageUploadOpen, setImageUploadOpen] = useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
-  const [hasMessages, setHasMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,13 +55,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // Update hasMessages when messages change
-  useEffect(() => {
-    if (messages.length > 0 && !hasMessages) {
-      setHasMessages(true);
-    }
-  }, [messages, hasMessages]);
 
   // Cleanup animation on unmount
   useEffect(() => {
@@ -307,95 +298,16 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     return message.content;
   };
 
-  // Composer component for reuse
-  const Composer = () => (
-    <div className="w-full max-w-[980px] mx-auto px-4">
-      <div className="flex items-end gap-2 bg-background/80 backdrop-blur-sm border-2 border-border rounded-[26px] p-2 shadow-lg">
-        {/* Image upload button */}
-        <Popover open={imageUploadOpen} onOpenChange={setImageUploadOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full flex-shrink-0 hover:bg-primary/10"
-              disabled={isLoading || isAnalyzingImage}
-            >
-              {isAnalyzingImage ? (
-                <Loader2 className="w-5 h-5 animate-spin text-primary" />
-              ) : (
-                <Plus className="w-5 h-5 text-muted-foreground" />
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent 
-            className="w-48 p-2 bg-background border border-border shadow-xl" 
-            align="start"
-            side="top"
-            sideOffset={8}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-2"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Image className="w-4 h-4" />
-              Upload Image
-            </Button>
-          </PopoverContent>
-        </Popover>
-
-        {/* Text input */}
-        <Textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          disabled={isLoading}
-          className="flex-1 min-h-[40px] max-h-[30vh] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-base leading-relaxed py-2"
-          rows={1}
-        />
-
-        {/* Send button */}
-        <Button 
-          onClick={handleSend} 
-          disabled={!input.trim() || isLoading}
-          size="icon"
-          className="h-10 w-10 rounded-full flex-shrink-0 bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] hover:opacity-90 transition-opacity disabled:opacity-50"
-        >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin text-white" />
-          ) : (
-            <Send className="w-5 h-5 text-white" />
-          )}
-        </Button>
-      </div>
-      <p className="text-xs text-muted-foreground text-center mt-3">
-        {footerText}
-      </p>
-    </div>
-  );
-
   return (
     <div className="flex flex-col h-full relative">
-      <AnimatePresence mode="wait">
-        {!hasMessages ? (
-          // STATE A: Landing - composer under hero
-          <motion.div
-            key="landing"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col items-center justify-start pt-16 md:pt-24 px-4 h-full"
-          >
-            {/* Hero section */}
-            <div className="text-center mb-10">
+      {/* Messages area - scrollable */}
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 pb-[160px]"
+      >
+        <div className="max-w-3xl mx-auto space-y-4">
+          {messages.length === 0 && (
+            <div className="text-center py-16">
               <img 
                 src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
                 alt="A* AI" 
@@ -408,133 +320,181 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 {subjectDescription}
               </p>
             </div>
-
-            {/* Composer under hero */}
-            <div className="w-full max-w-[980px]">
-              <Composer />
-            </div>
-          </motion.div>
-        ) : (
-          // STATE B: Chat - messages with fixed bottom composer
-          <motion.div
-            key="chat"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col h-full"
-          >
-            {/* Messages area */}
-            <div 
-              ref={messagesContainerRef}
-              className="flex-1 overflow-y-auto p-4 pb-[160px]"
-            >
-              <div className="max-w-3xl mx-auto space-y-4">
-                {messages.map((message, index) => {
-                  const displayContent = getDisplayContent(message, index);
-                  const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
-                  const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
-                  
-                  return (
-                    <div
-                      key={index}
-                      className={cn(
-                        "flex gap-3 p-4 rounded-xl",
-                        message.role === 'user' 
-                          ? "bg-gradient-to-r from-primary/10 to-[hsl(270,67%,60%)]/10 ml-8" 
-                          : "bg-muted mr-8"
-                      )}
-                    >
-                      <div className="flex-shrink-0">
-                        {message.role === 'user' ? (
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center">
-                            <span className="text-xs font-bold text-white">You</span>
-                          </div>
-                        ) : (
-                          <img 
-                            src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
-                            alt="A* AI" 
-                            className="w-8 h-8 object-contain"
-                          />
-                        )}
-                      </div>
-                      <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                          components={{
-                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                            ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
-                            ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
-                            li: ({ children }) => <li className="mb-1">{children}</li>,
-                            code: ({ className, children, ...props }) => {
-                              const isInline = !className;
-                              if (isInline) {
-                                return (
-                                  <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
-                                    {children}
-                                  </code>
-                                );
-                              }
-                              return (
-                                <pre className="bg-muted p-3 rounded-lg overflow-x-auto my-2">
-                                  <code className={cn("text-sm font-mono", className)} {...props}>
-                                    {children}
-                                  </code>
-                                </pre>
-                              );
-                            },
-                            strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                            em: ({ children }) => <em className="italic">{children}</em>,
-                            h1: ({ children }) => <h1 className="text-xl font-bold mb-2 mt-4">{children}</h1>,
-                            h2: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>,
-                            h3: ({ children }) => <h3 className="text-base font-bold mb-2 mt-2">{children}</h3>,
-                            blockquote: ({ children }) => (
-                              <blockquote className="border-l-4 border-primary pl-4 italic my-2">
-                                {children}
-                              </blockquote>
-                            ),
-                          }}
-                        >
-                          {displayContent}
-                        </ReactMarkdown>
-                        {showCursor && (
-                          <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 align-middle" />
-                        )}
-                      </div>
+          )}
+          
+          {messages.map((message, index) => {
+            const displayContent = getDisplayContent(message, index);
+            const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
+            const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
+            
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "flex gap-3 p-4 rounded-xl",
+                  message.role === 'user' 
+                    ? "bg-gradient-to-r from-primary/10 to-[hsl(270,67%,60%)]/10 ml-8" 
+                    : "bg-muted mr-8"
+                )}
+              >
+                <div className="flex-shrink-0">
+                  {message.role === 'user' ? (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center">
+                      <span className="text-xs font-bold text-white">You</span>
                     </div>
-                  );
-                })}
-                
-                {isLoading && messages[messages.length - 1]?.role === 'user' && (
-                  <div className="flex gap-3 p-4 rounded-xl bg-muted mr-8">
+                  ) : (
                     <img 
                       src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
                       alt="A* AI" 
                       className="w-8 h-8 object-contain"
                     />
-                    <div className="flex-1 flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      <span className="text-muted-foreground">Thinking...</span>
-                    </div>
-                  </div>
-                )}
-                
-                <div ref={messagesEndRef} />
+                  )}
+                </div>
+                <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                      code: ({ className, children, ...props }) => {
+                        const isInline = !className;
+                        if (isInline) {
+                          return (
+                            <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                              {children}
+                            </code>
+                          );
+                        }
+                        return (
+                          <pre className="bg-muted p-3 rounded-lg overflow-x-auto my-2">
+                            <code className={cn("text-sm font-mono", className)} {...props}>
+                              {children}
+                            </code>
+                          </pre>
+                        );
+                      },
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                      h1: ({ children }) => <h1 className="text-xl font-bold mb-2 mt-4">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-base font-bold mb-2 mt-2">{children}</h3>,
+                      blockquote: ({ children }) => (
+                        <blockquote className="border-l-4 border-primary pl-4 italic my-2">
+                          {children}
+                        </blockquote>
+                      ),
+                    }}
+                  >
+                    {displayContent}
+                  </ReactMarkdown>
+                  {showCursor && (
+                    <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 align-middle" />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          
+          {isLoading && messages[messages.length - 1]?.role === 'user' && (
+            <div className="flex gap-3 p-4 rounded-xl bg-muted mr-8">
+              <img 
+                src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
+                alt="A* AI" 
+                className="w-8 h-8 object-contain"
+              />
+              <div className="flex-1 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span className="text-muted-foreground">Thinking...</span>
               </div>
             </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
 
-            {/* Fixed bottom composer */}
-            <motion.div 
-              initial={{ y: -200, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t py-4 z-50"
-            >
-              <Composer />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Fixed bottom composer - two line layout */}
+      <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4 z-50">
+        <div className="max-w-3xl mx-auto">
+          {/* Two-line pill container */}
+          <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
+            {/* Line 1: Text input */}
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              disabled={isLoading}
+              className="w-full min-h-[48px] max-h-[200px] resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-base"
+              rows={1}
+            />
+            
+            {/* Line 2: Buttons row */}
+            <div className="flex items-center justify-between px-3 py-2 border-t border-border/50 bg-muted/30">
+              {/* Plus button on left */}
+              <Popover open={imageUploadOpen} onOpenChange={setImageUploadOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-full hover:bg-primary/10"
+                    disabled={isLoading || isAnalyzingImage}
+                  >
+                    {isAnalyzingImage ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    ) : (
+                      <Plus className="w-5 h-5 text-muted-foreground" />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  className="w-48 p-2 bg-background border border-border shadow-xl" 
+                  align="start"
+                  side="top"
+                  sideOffset={8}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Image className="w-4 h-4" />
+                    Upload Image
+                  </Button>
+                </PopoverContent>
+              </Popover>
+
+              {/* Send button on right */}
+              <Button 
+                onClick={handleSend} 
+                disabled={!input.trim() || isLoading}
+                size="icon"
+                className="h-9 w-9 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] hover:opacity-90 transition-opacity"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                ) : (
+                  <Send className="w-4 h-4 text-white" />
+                )}
+              </Button>
+            </div>
+          </div>
+          
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            {footerText}
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
