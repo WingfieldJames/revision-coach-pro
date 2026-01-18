@@ -10,11 +10,19 @@ import 'katex/dist/katex.min.css';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   displayedContent?: string;
+}
+
+interface UserPreferences {
+  year: string;
+  predicted_grade: string;
+  target_grade: string;
+  additional_info: string | null;
 }
 
 interface RAGChatProps {
@@ -36,12 +44,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   footerText = "Powered by A* AI",
   placeholder = "Ask me anything..." 
 }) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [imageUploadOpen, setImageUploadOpen] = useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
+  const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +60,49 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const bufferRef = useRef('');
   const animationRef = useRef<number | null>(null);
   const fullContentRef = useRef('');
+
+  // Fetch user preferences for this product
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      if (!user) {
+        setUserPreferences(null);
+        return;
+      }
+
+      try {
+        // First try to get product-specific preferences
+        let { data, error } = await supabase
+          .from('user_preferences')
+          .select('year, predicted_grade, target_grade, additional_info')
+          .eq('user_id', user.id)
+          .eq('product_id', productId)
+          .maybeSingle();
+
+        // If no product-specific prefs, fall back to global prefs
+        if (!data && !error) {
+          const globalResult = await supabase
+            .from('user_preferences')
+            .select('year, predicted_grade, target_grade, additional_info')
+            .eq('user_id', user.id)
+            .is('product_id', null)
+            .maybeSingle();
+          
+          data = globalResult.data;
+          error = globalResult.error;
+        }
+
+        if (error) throw error;
+
+        if (data) {
+          setUserPreferences(data);
+        }
+      } catch (error) {
+        console.error('Error fetching user preferences:', error);
+      }
+    };
+
+    fetchPreferences();
+  }, [user, productId]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -130,6 +183,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         body: JSON.stringify({
           message: userMessage.content,
           product_id: productId,
+          user_preferences: userPreferences,
           history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
         }),
       });
@@ -479,18 +533,19 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 onClick={handleSend} 
                 disabled={!input.trim() || isLoading}
                 size="icon"
-                className="h-9 w-9 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] hover:opacity-90 transition-opacity"
+                className="h-9 w-9 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] hover:opacity-90"
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <Send className="w-4 h-4 text-white" />
+                  <Send className="w-4 h-4" />
                 )}
               </Button>
             </div>
           </div>
           
-          <p className="text-xs text-muted-foreground text-center mt-2">
+          {/* Footer text */}
+          <p className="text-center text-xs text-muted-foreground mt-2">
             {footerText}
           </p>
         </div>
