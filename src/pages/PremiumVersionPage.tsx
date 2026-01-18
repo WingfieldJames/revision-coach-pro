@@ -2,16 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
+import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { RAGChat } from '@/components/RAGChat';
+import { checkProductAccess } from '@/lib/productAccess';
+
+const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
 export const PremiumVersionPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
-  const [chatbotUrl, setChatbotUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const verifyAccess = async () => {
@@ -22,20 +25,13 @@ export const PremiumVersionPage = () => {
         }
         
         try {
-          // Get session for auth header
-          const { data: sessionData } = await supabase.auth.getSession();
-          
-          const { data, error } = await supabase.functions.invoke('get-chatbot-url', {
-            body: { productSlug: 'edexcel-economics', tier: 'premium' },
-          });
-          
-          if (error || !data?.url) {
-            console.error('Access check failed:', error || data?.error);
+          const access = await checkProductAccess(user.id, 'edexcel-economics');
+          if (!access.hasAccess || access.tier !== 'deluxe') {
             navigate('/compare');
             return;
           }
           
-          setChatbotUrl(data.url);
+          setHasAccess(true);
           setCheckingAccess(false);
         } catch (err) {
           console.error('Error verifying access:', err);
@@ -46,10 +42,6 @@ export const PremiumVersionPage = () => {
     
     verifyAccess();
   }, [user, loading, navigate]);
-
-  useEffect(() => {
-    window.scrollTo(0, document.body.scrollHeight);
-  }, []);
 
   if (loading || checkingAccess) {
     return (
@@ -62,7 +54,7 @@ export const PremiumVersionPage = () => {
     );
   }
 
-  if (!user || !chatbotUrl) {
+  if (!user || !hasAccess) {
     return (
       <div className="h-screen w-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -85,20 +77,18 @@ export const PremiumVersionPage = () => {
         description="Access A* AI Deluxe for Edexcel Economics. Full training on 2017-2025 past papers, mark schemes, A* technique & unlimited prompts."
         canonical="https://astarai.co.uk/premium"
       />
-      <ChatbotBackgroundPaths />
+      <ChatbotFullscreenPaths />
       <div className="relative z-10">
         <Header showNavLinks showImageTool showDiagramTool showEssayMarker hideUserDetails />
       </div>
       
       <div className="flex-1 relative z-10">
-        <iframe
-          src={chatbotUrl}
-          width="100%"
-          style={{ height: '100%', minHeight: '700px' }}
-          frameBorder="0"
-          allow="clipboard-write"
-          title="A* AI Premium Version Chatbot"
-          className="absolute inset-0"
+        <RAGChat 
+          productId={EDEXCEL_PRODUCT_ID}
+          subjectName="Edexcel Economics"
+          subjectDescription="Your personal A* Economics tutor. Ask me anything about Edexcel A-Level Economics!"
+          footerText="Powered by A* AI • Trained on Edexcel Economics specification"
+          placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..."
         />
       </div>
     </div>
