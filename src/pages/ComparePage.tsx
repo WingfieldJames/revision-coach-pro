@@ -568,12 +568,12 @@ export const ComparePage = () => {
             </Button>
           </StaggerItem>
 
-          {/* Lifetime Plan */}
+          {/* Exam Season Pass */}
           <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-md w-full shadow-card text-left border-2 border-primary relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs lg:text-sm font-semibold px-4 py-1.5 rounded-full">
               {isDeluxeComingSoon ? 'COMING SOON' : 'BEST VALUE'}
             </div>
-            <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Deluxe Lifetime</h2>
+            <h2 className="text-xl lg:text-2xl font-semibold mb-2">🔥 Exam Season Pass</h2>
             {isDeluxeComingSoon ? (
               <>
                 <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
@@ -582,7 +582,7 @@ export const ComparePage = () => {
             ) : (
               <>
                 <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£49.99</span> £24.99</p>
-                <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Save 67% yearly</p>
+                <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Expires 30th June 2026</p>
               </>
             )}
             <ul className="space-y-4 mb-8 text-sm lg:text-base">
@@ -618,7 +618,7 @@ export const ComparePage = () => {
               onClick={() => handlePremiumClick('lifetime')}
               disabled={isDeluxeComingSoon}
             >
-              {isDeluxeComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Lifetime'}
+              {isDeluxeComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Season Pass'}
             </Button>
           </StaggerItem>
         </StaggerContainer>
