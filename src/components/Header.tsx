@@ -8,7 +8,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
-import { Sparkles, BarChart2, PenLine, Lock } from 'lucide-react';
+import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
+import { Sparkles, BarChart2, PenLine, Lock, Calendar } from 'lucide-react';
 
 // Global flag to track when file dialog is open (set by ImageUploadTool)
 export const fileDialogOpen = { current: false };
@@ -18,6 +19,9 @@ interface HeaderProps {
   showImageTool?: boolean;
   showDiagramTool?: boolean;
   showEssayMarker?: boolean;
+  showExamCountdown?: boolean;
+  examDates?: ExamDate[];
+  examSubjectName?: string;
   toolsLocked?: boolean;
   hideUserDetails?: boolean;
 }
@@ -27,6 +31,9 @@ export const Header: React.FC<HeaderProps> = ({
   showImageTool = false,
   showDiagramTool = false,
   showEssayMarker = false,
+  showExamCountdown = false,
+  examDates = [],
+  examSubjectName = "Exams",
   toolsLocked = false,
   hideUserDetails = false
 }) => {
@@ -36,6 +43,12 @@ export const Header: React.FC<HeaderProps> = ({
   const [imageToolOpen, setImageToolOpen] = useState(false);
   const [diagramToolOpen, setDiagramToolOpen] = useState(false);
   const [essayMarkerOpen, setEssayMarkerOpen] = useState(false);
+  const [examCountdownOpen, setExamCountdownOpen] = useState(false);
+
+  // Calculate days until first exam for the button
+  const daysUntilFirstExam = examDates.length > 0 
+    ? Math.ceil((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24))
+    : 0;
 
   const LockedToolContent = () => (
     <div className="text-center py-6 px-4">
@@ -51,6 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
           setImageToolOpen(false);
           setDiagramToolOpen(false);
           setEssayMarkerOpen(false);
+          setExamCountdownOpen(false);
           navigate('/compare');
         }}
       >
@@ -70,6 +84,7 @@ export const Header: React.FC<HeaderProps> = ({
       setImageToolOpen(false);
       setDiagramToolOpen(false);
       setEssayMarkerOpen(false);
+      setExamCountdownOpen(false);
     };
 
     window.addEventListener('blur', closeAllPopovers);
@@ -200,6 +215,29 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="p-4">
                 {toolsLocked ? <LockedToolContent /> : <EssayMarkerTool />}
               </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {showExamCountdown && examDates.length > 0 && (
+          <Popover open={examCountdownOpen} onOpenChange={setExamCountdownOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
+              >
+                <Calendar className="h-4 w-4" />
+                <span className="hidden sm:inline">{daysUntilFirstExam} days</span>
+                <span className="sm:hidden">{daysUntilFirstExam}d</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              className="w-[90vw] max-w-sm p-4 bg-background border border-border shadow-xl" 
+              align="start"
+              sideOffset={8}
+            >
+              <ExamCountdown exams={examDates} subjectName={examSubjectName} />
             </PopoverContent>
           </Popover>
         )}
