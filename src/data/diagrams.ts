@@ -179,5 +179,59 @@ export const diagrams: Diagram[] = [
     title: 'Short Run Phillips Curve',
     keywords: ['phillips curve', 'short run phillips curve', 'SRPC', 'inflation unemployment trade-off', 'inverse relationship inflation unemployment', 'demand side policies phillips', 'expectations augmented', 'natural rate of unemployment'],
     imagePath: '/diagrams/short-run-phillips-curve.jpg'
+  },
+  {
+    id: 'profit-maximisation',
+    title: 'Profit Maximisation',
+    keywords: ['profit maximisation', 'profit maximization', 'MC=MR', 'marginal cost equals marginal revenue', 'supernormal profit', 'abnormal profit', 'profit max point', 'AR', 'AC', 'MC', 'MR', 'firm objective', 'monopoly profit'],
+    imagePath: '/diagrams/profit-maximisation.jpg'
+  },
+  {
+    id: 'revenue-maximisation',
+    title: 'Revenue Maximisation',
+    keywords: ['revenue maximisation', 'revenue maximization', 'MR=0', 'marginal revenue equals zero', 'total revenue maximisation', 'Baumol', 'sales revenue', 'firm objective', 'managerial objective'],
+    imagePath: '/diagrams/revenue-maximisation.jpg'
+  },
+  {
+    id: 'sales-maximisation',
+    title: 'Sales Maximisation',
+    keywords: ['sales maximisation', 'sales maximization', 'AR=AC', 'average revenue equals average cost', 'normal profit constraint', 'Baumol', 'output maximisation', 'firm objective', 'managerial theories'],
+    imagePath: '/diagrams/sales-maximisation.jpg'
+  },
+  {
+    id: 'mp-ap-diminishing-returns',
+    title: 'MP and AP (Diminishing Returns)',
+    keywords: ['marginal product', 'average product', 'MP', 'AP', 'diminishing returns', 'law of diminishing returns', 'diminishing marginal returns', 'variable factor', 'labour productivity', 'short run production'],
+    imagePath: '/diagrams/mp-ap-diminishing-returns.jpg'
+  },
+  {
+    id: 'ac-avc-mc',
+    title: 'AC, AVC and MC',
+    keywords: ['average cost', 'average variable cost', 'marginal cost', 'AC', 'AVC', 'MC', 'AFC', 'average fixed cost', 'cost curves', 'U-shaped cost curves', 'short run costs', 'diminishing returns cost'],
+    imagePath: '/diagrams/ac-avc-mc.jpg'
+  },
+  {
+    id: 'internal-economies-of-scale',
+    title: 'Internal Economies of Scale',
+    keywords: ['internal economies of scale', 'LRAC', 'long run average cost', 'economies of scale', 'falling LRAC', 'minimum efficient scale', 'MES', 'diseconomies of scale', 'technical economies', 'financial economies', 'managerial economies'],
+    imagePath: '/diagrams/internal-economies-of-scale.jpg'
+  },
+  {
+    id: 'external-economies-of-scale',
+    title: 'External Economies of Scale',
+    keywords: ['external economies of scale', 'LRAC shift down', 'long run average cost shift', 'industry growth', 'agglomeration', 'clustering', 'infrastructure', 'skilled labour pool'],
+    imagePath: '/diagrams/external-economies-of-scale.jpg'
+  },
+  {
+    id: 'short-run-shut-down',
+    title: 'Short Run Shut Down Point',
+    keywords: ['short run shut down', 'shut down point', 'P below AVC', 'price below average variable cost', 'loss minimisation', 'continue or shut down', 'covering variable costs', 'making a loss'],
+    imagePath: '/diagrams/short-run-shut-down.jpg'
+  },
+  {
+    id: 'long-run-shut-down',
+    title: 'Long Run Shut Down Point',
+    keywords: ['long run shut down', 'exit point', 'P below AC', 'price below average cost', 'subnormal profit', 'leaving the industry', 'long run losses', 'exit the market'],
+    imagePath: '/diagrams/long-run-shut-down.jpg'
   }
 ];
