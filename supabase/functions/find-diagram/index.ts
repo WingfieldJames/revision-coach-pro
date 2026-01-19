@@ -197,6 +197,41 @@ const availableDiagrams = [
     id: 'long-run-shut-down',
     title: 'Long Run Shut Down Point',
     keywords: ['long run shut down', 'exit point', 'P below AC', 'price below average cost', 'subnormal profit', 'leaving the industry', 'long run losses', 'exit the market']
+  },
+  {
+    id: 'allocative-efficiency',
+    title: 'Allocative Efficiency',
+    keywords: ['allocative efficiency', 'P=MC', 'AR=MC', 'price equals marginal cost', 'social optimum', 'welfare maximisation', 'consumer welfare', 'pareto efficiency', 'resource allocation']
+  },
+  {
+    id: 'productive-efficiency',
+    title: 'Productive Efficiency',
+    keywords: ['productive efficiency', 'MC=AC', 'marginal cost equals average cost', 'lowest point AC', 'minimum average cost', 'cost minimisation', 'technical efficiency', 'X-efficiency']
+  },
+  {
+    id: 'dynamic-efficiency',
+    title: 'Dynamic Efficiency',
+    keywords: ['dynamic efficiency', 'supernormal profit reinvestment', 'innovation', 'R&D', 'research and development', 'long run efficiency', 'technological progress', 'investment in new technology']
+  },
+  {
+    id: 'perfect-competition-equilibrium',
+    title: 'Perfect Competition Equilibrium',
+    keywords: ['perfect competition', 'perfect competition equilibrium', 'long run equilibrium', 'normal profit', 'AR=MR=D', 'price taker', 'horizontal demand curve', 'perfectly competitive firm']
+  },
+  {
+    id: 'perfect-competition-entry',
+    title: 'Perfect Competition - Supernormal to Normal Profit (Entry)',
+    keywords: ['perfect competition entry', 'supernormal profit', 'firm entry', 'new firms enter', 'supply increases', 'price falls', 'abnormal profit attracts', 'long run adjustment entry']
+  },
+  {
+    id: 'perfect-competition-exit',
+    title: 'Perfect Competition - Subnormal to Normal Profit (Exit)',
+    keywords: ['perfect competition exit', 'subnormal profit', 'firm exit', 'firms leave', 'supply decreases', 'price rises', 'losses cause exit', 'long run adjustment exit']
+  },
+  {
+    id: 'price-discrimination',
+    title: 'Price Discrimination',
+    keywords: ['price discrimination', 'third degree price discrimination', 'different prices different markets', 'inelastic market', 'elastic market', 'market segmentation', 'consumer surplus extraction', 'monopoly pricing']
   }
 ];
 
