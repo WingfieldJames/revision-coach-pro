@@ -233,5 +233,47 @@ export const diagrams: Diagram[] = [
     title: 'Long Run Shut Down Point',
     keywords: ['long run shut down', 'exit point', 'P below AC', 'price below average cost', 'subnormal profit', 'leaving the industry', 'long run losses', 'exit the market'],
     imagePath: '/diagrams/long-run-shut-down.jpg'
+  },
+  {
+    id: 'allocative-efficiency',
+    title: 'Allocative Efficiency',
+    keywords: ['allocative efficiency', 'P=MC', 'AR=MC', 'price equals marginal cost', 'social optimum', 'welfare maximisation', 'consumer welfare', 'pareto efficiency', 'resource allocation'],
+    imagePath: '/diagrams/allocative-efficiency.jpg'
+  },
+  {
+    id: 'productive-efficiency',
+    title: 'Productive Efficiency',
+    keywords: ['productive efficiency', 'MC=AC', 'marginal cost equals average cost', 'lowest point AC', 'minimum average cost', 'cost minimisation', 'technical efficiency', 'X-efficiency'],
+    imagePath: '/diagrams/productive-efficiency.jpg'
+  },
+  {
+    id: 'dynamic-efficiency',
+    title: 'Dynamic Efficiency',
+    keywords: ['dynamic efficiency', 'supernormal profit reinvestment', 'innovation', 'R&D', 'research and development', 'long run efficiency', 'technological progress', 'investment in new technology'],
+    imagePath: '/diagrams/dynamic-efficiency.jpg'
+  },
+  {
+    id: 'perfect-competition-equilibrium',
+    title: 'Perfect Competition Equilibrium',
+    keywords: ['perfect competition', 'perfect competition equilibrium', 'long run equilibrium', 'normal profit', 'AR=MR=D', 'price taker', 'horizontal demand curve', 'perfectly competitive firm'],
+    imagePath: '/diagrams/perfect-competition-equilibrium.jpg'
+  },
+  {
+    id: 'perfect-competition-entry',
+    title: 'Perfect Competition - Supernormal to Normal Profit (Entry)',
+    keywords: ['perfect competition entry', 'supernormal profit', 'firm entry', 'new firms enter', 'supply increases', 'price falls', 'abnormal profit attracts', 'long run adjustment entry'],
+    imagePath: '/diagrams/perfect-competition-entry.jpg'
+  },
+  {
+    id: 'perfect-competition-exit',
+    title: 'Perfect Competition - Subnormal to Normal Profit (Exit)',
+    keywords: ['perfect competition exit', 'subnormal profit', 'firm exit', 'firms leave', 'supply decreases', 'price rises', 'losses cause exit', 'long run adjustment exit'],
+    imagePath: '/diagrams/perfect-competition-exit.jpg'
+  },
+  {
+    id: 'price-discrimination',
+    title: 'Price Discrimination',
+    keywords: ['price discrimination', 'third degree price discrimination', 'different prices different markets', 'inelastic market', 'elastic market', 'market segmentation', 'consumer surplus extraction', 'monopoly pricing'],
+    imagePath: '/diagrams/price-discrimination.jpg'
   }
 ];
