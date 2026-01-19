@@ -11,6 +11,7 @@ import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.png';
 import amiraImage from '@/assets/amira-lse.jpg';
+import matanImage from '@/assets/matan-g.png';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -535,11 +536,11 @@ export const ComparePage = () => {
       text: "\"A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick\""
     }, {
       author: {
-        name: "Elliot S",
+        name: "Matan G",
         handle: "Year 13",
-        avatar: hannahImage
+        avatar: matanImage
       },
-      text: "\"No fluff, no wasted time — A* AI helped me revise with focus. Being able to search by topic and command word made past paper practice 10x more efficient.\""
+      text: "\"A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.\""
     }, {
       author: {
         name: "Amira",
