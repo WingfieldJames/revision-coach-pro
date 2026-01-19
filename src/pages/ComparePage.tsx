@@ -475,7 +475,7 @@ export const ComparePage = () => {
         {/* Desktop: 3 columns, Mobile: stack */}
         <StaggerContainer className="flex flex-col lg:flex-row gap-6 justify-center">
           {/* Free Plan */}
-          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-lg w-full shadow-card text-left">
+          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl w-full lg:w-[340px] shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-6">🎓 Free Plan</h2>
             {isComingSoon ? (
               <>
@@ -518,7 +518,7 @@ export const ComparePage = () => {
           </StaggerItem>
 
           {/* Monthly Plan - Desktop only */}
-          <StaggerItem className="hidden lg:block bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-lg w-full shadow-card text-left">
+          <StaggerItem className="hidden lg:block bg-muted p-6 lg:p-10 rounded-xl w-full lg:w-[340px] shadow-card text-left">
             <h2 className="text-xl lg:text-2xl font-semibold mb-2 whitespace-nowrap">🔥 Deluxe Monthly</h2>
             {isDeluxeComingSoon ? (
               <>
@@ -569,7 +569,7 @@ export const ComparePage = () => {
           </StaggerItem>
 
           {/* Exam Season Pass */}
-          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl max-w-md lg:max-w-lg w-full shadow-card text-left border-2 border-primary relative">
+          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl w-full lg:w-[340px] shadow-card text-left border-2 border-primary relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs lg:text-sm font-semibold px-4 py-1.5 rounded-full">
               {isDeluxeComingSoon ? 'COMING SOON' : 'BEST VALUE'}
             </div>

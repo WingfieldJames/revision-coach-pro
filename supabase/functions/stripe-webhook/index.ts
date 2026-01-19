@@ -120,8 +120,10 @@ serve(async (req) => {
                 subscriptionEnd 
               });
             } else {
-              // Lifetime (one-time payment) - no expiration
-              logStep("Setting up lifetime access", { paymentType });
+              // Exam Season Pass (one-time payment) - expires June 30, 2026
+              // Note: Existing lifetime users purchased before this change retain unlimited access (no subscription_end set for them)
+              subscriptionEnd = '2026-06-30T23:59:59.000Z';
+              logStep("Setting up Exam Season Pass access", { paymentType, expiresAt: subscriptionEnd });
             }
             
             // Create entry in new user_subscriptions table

@@ -189,15 +189,15 @@ serve(async (req) => {
         },
       ];
     } else {
-      // Lifetime (one-time payment)
+      // Exam Season Pass (one-time payment) - expires June 30, 2026
       sessionConfig.mode = 'payment';
       sessionConfig.line_items = [
         {
           price_data: {
             currency: "gbp",
             product_data: { 
-              name: `${productName} (Lifetime)`,
-              description: "Premium AI-powered academic assistance - Lifetime access"
+              name: `${productName} (Exam Season Pass)`,
+              description: "Premium AI-powered academic assistance - Access until June 30, 2026"
             },
             unit_amount: product?.lifetime_price || 3499, // £34.99 in pence
           },
