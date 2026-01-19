@@ -3,6 +3,7 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
 import { supabase } from '@/integrations/supabase/client';
+import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 export const FreeVersionPage = () => {
   const [chatbotUrl, setChatbotUrl] = useState<string | null>(null);
@@ -38,7 +39,16 @@ export const FreeVersionPage = () => {
       />
       <ChatbotBackgroundPaths />
       <div className="relative z-10">
-        <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
+        <Header 
+          showImageTool 
+          showDiagramTool 
+          showEssayMarker 
+          showExamCountdown
+          examDates={AQA_ECONOMICS_EXAMS}
+          examSubjectName="Edexcel Economics"
+          toolsLocked 
+          hideUserDetails 
+        />
       </div>
       
       <div className="flex-1 relative z-10">
