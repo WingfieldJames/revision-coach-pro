@@ -95,5 +95,65 @@ export const diagrams: Diagram[] = [
     title: 'Positive Externality of Consumption',
     keywords: ['positive externality', 'externality of consumption', 'MSB', 'MPB', 'marginal social benefit', 'marginal private benefit', 'merit good', 'underconsumption', 'welfare gain', 'education', 'healthcare'],
     imagePath: '/diagrams/positive-externality-consumption.jpg'
+  },
+  {
+    id: 'ad-sras-ad-shifts-right',
+    title: 'AD-SRAS (AD Shifts Right)',
+    keywords: ['AD shifts right', 'aggregate demand increase', 'AD increase', 'rightward shift AD', 'expansionary', 'fiscal policy', 'monetary policy', 'consumption increase', 'investment increase', 'government spending increase', 'exports increase', 'AD1 to AD2', 'SRAS AD model'],
+    imagePath: '/diagrams/ad-sras-ad-shifts-right.jpg'
+  },
+  {
+    id: 'demand-pull-inflation',
+    title: 'Demand Pull Inflation',
+    keywords: ['demand pull inflation', 'demand-pull', 'inflation caused by demand', 'excess demand', 'AD increase inflation', 'too much money chasing too few goods', 'overheating economy', 'inflationary gap', 'price level increase demand'],
+    imagePath: '/diagrams/demand-pull-inflation.jpg'
+  },
+  {
+    id: 'ad-sras-ad-shifts-left',
+    title: 'AD-SRAS (AD Shifts Left)',
+    keywords: ['AD shifts left', 'aggregate demand decrease', 'AD decrease', 'leftward shift AD', 'contractionary', 'recession', 'consumption fall', 'investment fall', 'government spending cut', 'exports fall', 'AD2 to AD1', 'deflationary'],
+    imagePath: '/diagrams/ad-sras-ad-shifts-left.jpg'
+  },
+  {
+    id: 'ad-sras-sras-shifts-right',
+    title: 'AD-SRAS (SRAS Shifts Right)',
+    keywords: ['SRAS shifts right', 'short run aggregate supply increase', 'SRAS increase', 'rightward shift SRAS', 'lower production costs', 'productivity increase', 'wage decrease', 'raw material cost decrease', 'SRAS1 to SRAS2', 'supply side improvement'],
+    imagePath: '/diagrams/ad-sras-sras-shifts-right.jpg'
+  },
+  {
+    id: 'ad-sras-sras-shifts-left',
+    title: 'AD-SRAS (SRAS Shifts Left)',
+    keywords: ['SRAS shifts left', 'short run aggregate supply decrease', 'SRAS decrease', 'leftward shift SRAS', 'higher production costs', 'wage increase', 'raw material cost increase', 'oil price shock', 'supply shock', 'SRAS2 to SRAS1'],
+    imagePath: '/diagrams/ad-sras-sras-shifts-left.jpg'
+  },
+  {
+    id: 'cost-push-inflation',
+    title: 'Cost Push Inflation',
+    keywords: ['cost push inflation', 'cost-push', 'inflation caused by supply', 'supply side inflation', 'SRAS decrease inflation', 'wage push inflation', 'oil price inflation', 'raw material costs', 'stagflation', 'price level increase supply'],
+    imagePath: '/diagrams/cost-push-inflation.jpg'
+  },
+  {
+    id: 'circular-flow-of-income',
+    title: 'Circular Flow of Income',
+    keywords: ['circular flow', 'circular flow of income', 'households', 'firms', 'factor market', 'goods market', 'injections', 'withdrawals', 'leakages', 'savings', 'taxation', 'imports', 'investment', 'government spending', 'exports', 'national income'],
+    imagePath: '/diagrams/circular-flow-of-income.jpg'
+  },
+  {
+    id: 'keynesian-lras',
+    title: 'Keynesian Long Run AS',
+    keywords: ['Keynesian', 'Keynesian LRAS', 'Keynesian long run aggregate supply', 'L-shaped AS', 'horizontal AS', 'spare capacity', 'unemployment', 'full employment', 'classical vs keynesian', 'backward bending AS'],
+    imagePath: '/diagrams/keynesian-lras.jpg'
+  },
+  {
+    id: 'classical-positive-output-gap',
+    title: 'Classical Positive Output Gap',
+    keywords: ['positive output gap', 'inflationary gap', 'actual GDP above potential', 'overheating', 'above full employment', 'classical LRAS', 'Y greater than Yfe', 'boom', 'excess demand economy'],
+    imagePath: '/diagrams/classical-positive-output-gap.jpg'
+  },
+  {
+    id: 'classical-negative-output-gap',
+    title: 'Classical Negative Output Gap',
+    keywords: ['negative output gap', 'deflationary gap', 'recessionary gap', 'actual GDP below potential', 'below full employment', 'classical LRAS', 'Y less than Yfe', 'recession', 'spare capacity', 'unemployment gap'],
+    imagePath: '/diagrams/classical-negative-output-gap.jpg'
   }
 ];
