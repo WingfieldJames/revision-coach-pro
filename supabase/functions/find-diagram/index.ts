@@ -132,6 +132,26 @@ const availableDiagrams = [
     id: 'classical-negative-output-gap',
     title: 'Classical Negative Output Gap',
     keywords: ['negative output gap', 'deflationary gap', 'recessionary gap', 'actual GDP below potential', 'below full employment', 'classical LRAS', 'Y less than Yfe', 'recession', 'spare capacity', 'unemployment gap']
+  },
+  {
+    id: 'keynesian-negative-output-gap',
+    title: 'Keynesian Negative Output Gap',
+    keywords: ['keynesian negative output gap', 'keynesian deflationary gap', 'keynesian recessionary gap', 'keynesian below full employment', 'spare capacity keynesian', 'Y1 below Yfe keynesian', 'unemployment keynesian model']
+  },
+  {
+    id: 'keynesian-economic-growth',
+    title: 'Keynesian Economic Growth (LRAS Shifts Right)',
+    keywords: ['keynesian economic growth', 'keynesian LRAS shift right', 'long run growth keynesian', 'potential output increase keynesian', 'productive capacity keynesian', 'LRAS1 to LRAS2 keynesian', 'supply side policies keynesian']
+  },
+  {
+    id: 'trade-cycle',
+    title: 'Trade Cycle (Business Cycle)',
+    keywords: ['trade cycle', 'business cycle', 'economic cycle', 'boom', 'recession', 'slump', 'recovery', 'expansion', 'contraction', 'peak', 'trough', 'trend growth', 'actual growth', 'GDP fluctuations', 'cyclical fluctuations']
+  },
+  {
+    id: 'short-run-phillips-curve',
+    title: 'Short Run Phillips Curve',
+    keywords: ['phillips curve', 'short run phillips curve', 'SRPC', 'inflation unemployment trade-off', 'inverse relationship inflation unemployment', 'demand side policies phillips', 'expectations augmented', 'natural rate of unemployment']
   }
 ];
 
