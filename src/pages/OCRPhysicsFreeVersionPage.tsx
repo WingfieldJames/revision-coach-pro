@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
+import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 export const OCRPhysicsFreeVersionPage = () => {
   useEffect(() => {
@@ -17,7 +18,16 @@ export const OCRPhysicsFreeVersionPage = () => {
       />
       <ChatbotBackgroundPaths />
       <div className="relative z-10">
-        <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
+        <Header 
+          showImageTool 
+          showDiagramTool 
+          showEssayMarker 
+          showExamCountdown
+          examDates={AQA_ECONOMICS_EXAMS}
+          examSubjectName="OCR Physics"
+          toolsLocked 
+          hideUserDetails 
+        />
       </div>
       
       <div className="flex-1 relative z-10">

@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 // OCR Physics product ID - we'll fetch this dynamically
 const OCR_PHYSICS_SLUG = 'ocr-physics';
@@ -72,7 +73,7 @@ export const OCRPhysicsPremiumPage = () => {
   if (loading || checkingAccess) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <Header showNavLinks />
+        <Header />
         <div className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -89,7 +90,7 @@ export const OCRPhysicsPremiumPage = () => {
           description="Sign in to access your OCR Physics Deluxe subscription."
           canonical="https://astarai.co.uk/ocr-physics-premium"
         />
-        <Header showNavLinks />
+        <Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center max-w-md px-6">
             <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
@@ -114,7 +115,7 @@ export const OCRPhysicsPremiumPage = () => {
           description="Upgrade to access OCR Physics Deluxe with AI trained on past papers."
           canonical="https://astarai.co.uk/ocr-physics-premium"
         />
-        <Header showNavLinks />
+        <Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center max-w-md px-6">
             <h1 className="text-2xl font-bold mb-4">Premium Access Required</h1>
@@ -145,7 +146,12 @@ export const OCRPhysicsPremiumPage = () => {
       />
       <ChatbotBackgroundPaths />
       <div className="relative z-10">
-        <Header showNavLinks hideUserDetails />
+        <Header 
+          showExamCountdown
+          examDates={AQA_ECONOMICS_EXAMS}
+          examSubjectName="OCR Physics"
+          hideUserDetails 
+        />
       </div>
       
       <div className="flex-1 relative z-10">

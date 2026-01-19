@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { RAGChat } from '@/components/RAGChat';
 import { checkProductAccess } from '@/lib/productAccess';
+import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
@@ -79,7 +80,15 @@ export const PremiumVersionPage = () => {
       />
       <ChatbotFullscreenPaths />
       <div className="relative z-10">
-        <Header showNavLinks showImageTool showDiagramTool showEssayMarker hideUserDetails />
+        <Header 
+          showImageTool 
+          showDiagramTool 
+          showEssayMarker 
+          showExamCountdown
+          examDates={AQA_ECONOMICS_EXAMS}
+          examSubjectName="Edexcel Economics"
+          hideUserDetails 
+        />
       </div>
       
       <div className="flex-1 relative z-10">

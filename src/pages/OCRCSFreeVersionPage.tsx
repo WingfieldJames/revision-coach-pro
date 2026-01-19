@@ -3,6 +3,7 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
 import { RAGChat } from '@/components/RAGChat';
+import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 export const OCRCSFreeVersionPage = () => {
   return (
@@ -14,7 +15,16 @@ export const OCRCSFreeVersionPage = () => {
       />
       <ChatbotFullscreenPaths />
       <div className="relative z-10">
-        <Header showNavLinks showImageTool showDiagramTool showEssayMarker toolsLocked hideUserDetails />
+        <Header 
+          showImageTool 
+          showDiagramTool 
+          showEssayMarker 
+          showExamCountdown
+          examDates={AQA_ECONOMICS_EXAMS}
+          examSubjectName="OCR Computer Science"
+          toolsLocked 
+          hideUserDetails 
+        />
       </div>
       
       <div className="flex-1 relative z-10">

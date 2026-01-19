@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar } from 'lucide-react';
+import { Timer } from 'lucide-react';
 
 export interface ExamDate {
   name: string;
@@ -51,7 +51,7 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-gradient-brand">
-          <Calendar className="w-5 h-5 text-primary-foreground" />
+          <Timer className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
           <h3 className="font-semibold text-foreground">{subjectName} Timeline</h3>

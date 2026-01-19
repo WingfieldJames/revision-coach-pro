@@ -9,7 +9,7 @@ import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
-import { Sparkles, BarChart2, PenLine, Lock, Calendar } from 'lucide-react';
+import { Sparkles, BarChart2, PenLine, Lock, Timer } from 'lucide-react';
 
 // Global flag to track when file dialog is open (set by ImageUploadTool)
 export const fileDialogOpen = { current: false };
@@ -227,7 +227,7 @@ export const Header: React.FC<HeaderProps> = ({
                 size="sm" 
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
               >
-                <Calendar className="h-4 w-4" />
+                <Timer className="h-4 w-4" />
                 <span className="hidden sm:inline">{daysUntilFirstExam} days</span>
                 <span className="sm:hidden">{daysUntilFirstExam}d</span>
               </Button>
