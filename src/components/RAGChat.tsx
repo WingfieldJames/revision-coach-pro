@@ -391,7 +391,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           const displayContent = getDisplayContent(message, index);
           const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
           const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
-          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? "bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(270,67%,60%)] text-white ml-auto max-w-[70%]" : "bg-muted max-w-[90%]")}>
+          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? "bg-gradient-to-r from-[hsl(262,83%,90%)] to-[hsl(270,67%,88%)] text-foreground ml-auto max-w-[70%]" : "bg-muted max-w-[90%]")}>
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
                     <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="w-8 h-8 object-contain" />
