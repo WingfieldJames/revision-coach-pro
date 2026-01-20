@@ -11,6 +11,13 @@ import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 const AQA_PRODUCT_ID = "17ade690-8c44-4961-83b5-0edf42a9faea";
 
+const AQA_ECONOMICS_PROMPTS = [
+  { text: "Explain Spec Point (4.1.5 Market Structures)" },
+  { text: "Find all past exam questions on Economic Growth" },
+  { text: "Layout the structure of the exam" },
+  { text: "Create me a full revision plan", usesPersonalization: true },
+];
+
 export const AQAPremiumPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -98,6 +105,7 @@ export const AQAPremiumPage = () => {
           subjectDescription="Your personal A* Economics tutor. Ask me anything about AQA A-Level Economics!"
           footerText="Powered by A* AI • Trained on AQA Economics specification"
           placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..."
+          suggestedPrompts={AQA_ECONOMICS_PROMPTS}
         />
       </div>
     </div>

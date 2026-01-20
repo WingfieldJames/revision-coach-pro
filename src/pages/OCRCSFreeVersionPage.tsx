@@ -5,6 +5,13 @@ import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths
 import { RAGChat } from '@/components/RAGChat';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
+const OCR_CS_PROMPTS = [
+  { text: "Explain binary search algorithm" },
+  { text: "What are the different data types?" },
+  { text: "How do I structure a long answer question?" },
+  { text: "Create me a full revision plan", usesPersonalization: true },
+];
+
 export const OCRCSFreeVersionPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -35,6 +42,7 @@ export const OCRCSFreeVersionPage = () => {
           footerText="Powered by A* AI • Trained on OCR Computer Science specification"
           placeholder="Ask about algorithms, data structures, programming..."
           tier="free"
+          suggestedPrompts={OCR_CS_PROMPTS}
         />
       </div>
     </div>
