@@ -167,8 +167,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     }
   }, [isAnimating, animateNextWord]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSendWithMessage = async (messageText: string) => {
+    if (!messageText.trim() || isLoading) return;
 
     // Reset animation state
     bufferRef.current = '';
@@ -177,9 +177,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       clearTimeout(animationRef.current);
     }
 
-    const userMessage: Message = { role: 'user', content: input.trim() };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
     setIsLoading(true);
 
     try {
@@ -190,7 +187,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
-          message: userMessage.content,
+          message: messageText,
           product_id: productId,
           user_preferences: userPreferences,
           history: messages.slice(-10).map(m => ({ role: m.role, content: m.content })),
@@ -202,7 +199,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         
-        // Handle limit exceeded for free tier
         if (errorData.error === 'limit_exceeded' && errorData.message) {
           setMessages(prev => [
             ...prev,
@@ -225,7 +221,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       const decoder = new TextDecoder();
       let buffer = '';
 
-      // Add empty assistant message to start
       setMessages(prev => [...prev, { role: 'assistant', content: '', displayedContent: '' }]);
 
       while (true) {
@@ -250,10 +245,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (content) {
-              // Store full content
               fullContentRef.current += content;
               
-              // Update the full content in message (for final state)
               setMessages(prev => {
                 const lastIndex = prev.length - 1;
                 if (lastIndex >= 0 && prev[lastIndex]?.role === 'assistant') {
@@ -264,10 +257,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 return prev;
               });
 
-              // Add to animation buffer
               bufferRef.current += content;
               
-              // Start animation if not already running
               if (!animationRef.current || bufferRef.current.length === content.length) {
                 setIsAnimating(true);
                 animationRef.current = window.setTimeout(animateNextWord, WORD_DELAY_MS);
@@ -280,7 +271,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         }
       }
 
-      // Ensure any remaining buffer is animated
       if (bufferRef.current.length > 0 && !animationRef.current) {
         setIsAnimating(true);
         animateNextWord();
@@ -299,6 +289,34 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const messageText = input.trim();
+    const userMessage: Message = { role: 'user', content: messageText };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    
+    // Use the shared send logic
+    handleSendWithMessage(messageText);
+  };
+
+  // Handle suggested prompt click - adds user message and sends
+  const handleSuggestedPrompt = (prompt: { text: string; usesPersonalization?: boolean }) => {
+    if (isLoading) return;
+    
+    let finalPrompt: string;
+    if (prompt.usesPersonalization && userPreferences) {
+      finalPrompt = `Create me a full revision plan. I am currently in ${userPreferences.year}, my predicted grade is ${userPreferences.predicted_grade}, and my target grade is ${userPreferences.target_grade}. Today's date is ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
+    } else {
+      finalPrompt = prompt.text;
+    }
+    
+    const userMessage: Message = { role: 'user', content: finalPrompt };
+    setMessages(prev => [...prev, userMessage]);
+    handleSendWithMessage(finalPrompt);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -498,23 +516,16 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
       {/* Fixed bottom composer - two line layout */}
       <div className="fixed bottom-0 left-0 right-0 bg-background p-4 z-50">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* Suggested prompts - only show when no messages */}
           {messages.length === 0 && suggestedPrompts.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3 justify-center">
+            <div className="flex gap-2 mb-3 justify-center overflow-x-auto pb-1">
               {suggestedPrompts.map((prompt, idx) => (
                 <button
                   key={idx}
-                  onClick={() => {
-                    // For revision plan prompt, inject personalization
-                    if (prompt.usesPersonalization && userPreferences) {
-                      const personalizedPrompt = `Create me a full revision plan. I am currently in ${userPreferences.year}, my predicted grade is ${userPreferences.predicted_grade}, and my target grade is ${userPreferences.target_grade}. Today's date is ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
-                      setInput(personalizedPrompt);
-                    } else {
-                      setInput(prompt.text);
-                    }
-                  }}
-                  className="px-4 py-2 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
+                  onClick={() => handleSuggestedPrompt(prompt)}
+                  disabled={isLoading}
+                  className="px-4 py-2 rounded-full bg-primary text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap flex-shrink-0 disabled:opacity-50"
                 >
                   {prompt.text}
                 </button>
