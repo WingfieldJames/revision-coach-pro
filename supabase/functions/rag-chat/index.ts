@@ -43,19 +43,20 @@ Remember to:
 };
 
 // Build personalized system prompt with user context
-function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | null): string {
+function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | null, userMessage: string): string {
   if (!prefs) return basePrompt;
   
   let context = `\n\n--- STUDENT CONTEXT ---`;
   context += `\nThis student is in ${prefs.year}.`;
-  context += `\nTheir predicted grade is ${prefs.predicted_grade}.`;
+  context += `\nTheir current/predicted grade is ${prefs.predicted_grade}.`;
   context += `\nTheir target grade is ${prefs.target_grade}.`;
   
   if (prefs.additional_info) {
     context += `\nAdditional notes from the student: "${prefs.additional_info}"`;
   }
   
-  context += `\n\n--- PERSONALIZATION INSTRUCTIONS ---`;
+  context += `\n\n--- PERSONALIZATION INSTRUCTIONS (CRITICAL) ---`;
+  context += `\nYou MUST actively reference and acknowledge the student's grades in your responses. This is essential for personalization.`;
   
   // Add personalization based on grade gap
   const gradeOrder = ['D', 'C', 'B', 'A', 'A*'];
@@ -63,9 +64,23 @@ function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | nu
   const targetIdx = gradeOrder.indexOf(prefs.target_grade);
   
   if (targetIdx > predictedIdx) {
-    context += `\n- The student is aiming to improve from ${prefs.predicted_grade} to ${prefs.target_grade}. Focus on improvement strategies and exam technique.`;
+    context += `\n- The student is aiming to improve from ${prefs.predicted_grade} to ${prefs.target_grade}. When giving advice, explicitly mention what a ${prefs.predicted_grade} student typically does vs what a ${prefs.target_grade} student does differently.`;
+    context += `\n- When discussing technique or exam skills, say things like "As someone moving from ${prefs.predicted_grade} to ${prefs.target_grade}, you need to focus on..."`;
   } else if (targetIdx === predictedIdx) {
-    context += `\n- The student is aiming to maintain their ${prefs.predicted_grade} grade. Help them consolidate their knowledge.`;
+    context += `\n- The student is aiming to maintain their ${prefs.predicted_grade} grade. Acknowledge this and help them consolidate.`;
+  }
+  
+  // Detect if the question is about technique/exam skills
+  const techniqueKeywords = ['technique', 'how to answer', 'structure', 'marks', 'improve', 'essay', 'exam', 'approach', 'tips', 'advice'];
+  const isAboutTechnique = techniqueKeywords.some(kw => userMessage.toLowerCase().includes(kw));
+  
+  if (isAboutTechnique) {
+    context += `\n\n--- TECHNIQUE QUESTION DETECTED ---`;
+    context += `\nThis student is asking about exam technique. You MUST:`;
+    context += `\n1. Directly reference their current grade (${prefs.predicted_grade}) and target grade (${prefs.target_grade}) in your response.`;
+    context += `\n2. Explain what separates ${prefs.predicted_grade} answers from ${prefs.target_grade} answers specifically.`;
+    context += `\n3. Give concrete examples of what examiners look for at the ${prefs.target_grade} level.`;
+    context += `\n4. Use phrases like "To move from your ${prefs.predicted_grade} to your target ${prefs.target_grade}..." or "Currently at ${prefs.predicted_grade}, you likely..."`;
   }
   
   // Year-specific guidance
@@ -81,8 +96,11 @@ function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | nu
   // Target grade specific guidance
   if (prefs.target_grade === 'A*') {
     context += `\n- For A* target: Include extension material, encourage deeper analysis, and highlight the nuances that differentiate A from A* answers.`;
+    context += `\n- Mention specific A* techniques: original evaluation, chain of reasoning, sophisticated analysis.`;
   } else if (prefs.target_grade === 'A') {
     context += `\n- For A target: Focus on thoroughness, clear explanations, and avoiding common pitfalls.`;
+  } else if (['B', 'C', 'D'].includes(prefs.target_grade)) {
+    context += `\n- Focus on building solid foundations, getting the basics right, and avoiding common mistakes.`;
   }
   
   return basePrompt + context;
@@ -269,8 +287,8 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
     // Fetch the appropriate system prompt from database
     const basePrompt = await fetchSystemPrompt(supabaseAdmin, product_id, tier as 'free' | 'deluxe');
     
-    // Add user personalization context
-    const personalizedPrompt = buildPersonalizedPrompt(basePrompt, user_preferences);
+    // Add user personalization context (pass message for technique detection)
+    const personalizedPrompt = buildPersonalizedPrompt(basePrompt, user_preferences, message);
     
     // Fetch relevant training data from document_chunks
     const relevantContext = await fetchRelevantContext(supabaseAdmin, product_id, message);
