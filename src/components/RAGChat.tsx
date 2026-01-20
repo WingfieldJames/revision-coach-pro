@@ -96,12 +96,16 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     fetchPreferences();
   }, [user, productId]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll only for user messages (not during AI response)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: 'smooth'
-    });
-  }, [messages]);
+    // Only scroll when user sends a message (last message is from user)
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.role === 'user') {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+  }, [messages.length]);
 
   // Cleanup animation on unmount
   useEffect(() => {
@@ -387,12 +391,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           const displayContent = getDisplayContent(message, index);
           const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
           const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
-          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? "bg-gradient-to-r from-primary/10 to-[hsl(270,67%,60%)]/10 ml-8" : "bg-muted mr-8")}>
-                <div className="flex-shrink-0">
-                  {message.role === 'user' ? <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center">
-                      <span className="text-xs font-bold text-white">You</span>
-                    </div> : <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="w-8 h-8 object-contain" />}
-                </div>
+          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? "bg-gradient-to-r from-primary/10 to-[hsl(270,67%,60%)]/10 ml-auto max-w-[85%]" : "bg-muted mr-auto max-w-[85%]")}>
+                {message.role === 'assistant' && (
+                  <div className="flex-shrink-0">
+                    <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="w-8 h-8 object-contain" />
+                  </div>
+                )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
                   <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={{
                 p: ({
@@ -452,7 +456,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               </div>;
         })}
           
-          {isLoading && messages[messages.length - 1]?.role === 'user' && <div className="flex gap-3 p-4 rounded-xl bg-muted mr-8">
+          {isLoading && messages[messages.length - 1]?.role === 'user' && <div className="flex gap-3 p-4 rounded-xl bg-muted mr-auto max-w-[85%]">
               <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="w-8 h-8 object-contain" />
               <div className="flex-1 flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-primary" />
