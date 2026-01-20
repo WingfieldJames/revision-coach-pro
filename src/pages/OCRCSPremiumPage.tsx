@@ -84,8 +84,8 @@ export const OCRCSPremiumPage = () => {
         canonical="https://astarai.co.uk/ocr-cs-premium"
       />
       <ChatbotBackgroundPaths />
-      <div className="relative z-10">
-        <Header 
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+        <Header
           showImageTool 
           showDiagramTool 
           showExamCountdown

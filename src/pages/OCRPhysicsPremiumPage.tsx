@@ -152,8 +152,8 @@ export const OCRPhysicsPremiumPage = () => {
         canonical="https://astarai.co.uk/ocr-physics-premium"
       />
       <ChatbotBackgroundPaths />
-      <div className="relative z-10">
-        <Header 
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+        <Header
           showExamCountdown
           examDates={AQA_ECONOMICS_EXAMS}
           examSubjectName="OCR Physics"
