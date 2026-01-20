@@ -516,16 +516,16 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
       {/* Fixed bottom composer - two line layout */}
       <div className="fixed bottom-0 left-0 right-0 bg-background p-4 z-50">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Suggested prompts - only show when no messages */}
           {messages.length === 0 && suggestedPrompts.length > 0 && (
-            <div className="flex gap-2 mb-3 justify-center overflow-x-auto pb-1">
+            <div className="flex gap-2 mb-3 justify-center">
               {suggestedPrompts.map((prompt, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSuggestedPrompt(prompt)}
                   disabled={isLoading}
-                  className="px-4 py-2 rounded-full bg-primary text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap flex-shrink-0 disabled:opacity-50"
+                  className="px-4 py-2 rounded-full bg-[hsl(270,67%,60%)] text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap flex-shrink-0 disabled:opacity-50"
                 >
                   {prompt.text}
                 </button>
