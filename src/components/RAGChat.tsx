@@ -25,6 +25,11 @@ interface UserPreferences {
   additional_info: string | null;
 }
 
+interface SuggestedPrompt {
+  text: string;
+  usesPersonalization?: boolean;
+}
+
 interface RAGChatProps {
   productId: string;
   subjectName: string;
@@ -32,6 +37,7 @@ interface RAGChatProps {
   footerText?: string;
   placeholder?: string;
   tier?: 'free' | 'deluxe';
+  suggestedPrompts?: SuggestedPrompt[];
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
@@ -44,7 +50,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   subjectDescription = "Your personal A* tutor. Ask me anything!",
   footerText = "Powered by A* AI",
   placeholder = "Ask me anything...",
-  tier = 'deluxe'
+  tier = 'deluxe',
+  suggestedPrompts = []
 }) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -492,6 +499,29 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       {/* Fixed bottom composer - two line layout */}
       <div className="fixed bottom-0 left-0 right-0 bg-background p-4 z-50">
         <div className="max-w-3xl mx-auto">
+          {/* Suggested prompts - only show when no messages */}
+          {messages.length === 0 && suggestedPrompts.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3 justify-center">
+              {suggestedPrompts.map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    // For revision plan prompt, inject personalization
+                    if (prompt.usesPersonalization && userPreferences) {
+                      const personalizedPrompt = `Create me a full revision plan. I am currently in ${userPreferences.year}, my predicted grade is ${userPreferences.predicted_grade}, and my target grade is ${userPreferences.target_grade}. Today's date is ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
+                      setInput(personalizedPrompt);
+                    } else {
+                      setInput(prompt.text);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
+                >
+                  {prompt.text}
+                </button>
+              ))}
+            </div>
+          )}
+          
           {/* Two-line pill container */}
           <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
             {/* Line 1: Text input */}

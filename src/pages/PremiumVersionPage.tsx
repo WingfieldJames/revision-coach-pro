@@ -11,6 +11,13 @@ import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
+const EDEXCEL_ECONOMICS_PROMPTS = [
+  { text: "Explain Spec Point (4.1.5 Market Structures)" },
+  { text: "Find all past exam questions on Economic Growth" },
+  { text: "Layout the structure of the exam" },
+  { text: "Create me a full revision plan", usesPersonalization: true },
+];
+
 export const PremiumVersionPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -98,6 +105,7 @@ export const PremiumVersionPage = () => {
           subjectDescription="Your personal A* Economics tutor. Ask me anything about Edexcel A-Level Economics!"
           footerText="Powered by A* AI • Trained on Edexcel Economics specification"
           placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..."
+          suggestedPrompts={EDEXCEL_ECONOMICS_PROMPTS}
         />
       </div>
     </div>

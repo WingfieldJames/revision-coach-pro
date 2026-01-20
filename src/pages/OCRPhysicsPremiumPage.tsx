@@ -13,6 +13,13 @@ import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 // OCR Physics product ID - we'll fetch this dynamically
 const OCR_PHYSICS_SLUG = 'ocr-physics';
 
+const OCR_PHYSICS_PROMPTS = [
+  { text: "Explain the photoelectric effect" },
+  { text: "Find past exam questions on waves" },
+  { text: "How do I structure a 6-mark answer?" },
+  { text: "Create me a full revision plan", usesPersonalization: true },
+];
+
 export const OCRPhysicsPremiumPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -161,6 +168,7 @@ export const OCRPhysicsPremiumPage = () => {
           subjectDescription="Your personal A* Physics tutor. Ask me anything!"
           footerText="Powered by A* AI • Trained on OCR Physics past papers & mark schemes"
           placeholder="Ask me anything about OCR Physics A-Level..."
+          suggestedPrompts={OCR_PHYSICS_PROMPTS}
         />
       </div>
     </div>
