@@ -126,9 +126,9 @@ export const AQA_ECONOMICS_EXAMS: ExamDate[] = [
 ];
 
 export const EDEXCEL_ECONOMICS_EXAMS: ExamDate[] = [
-  { name: "Paper 1", date: new Date(2026, 4, 20), description: "Markets and Business Behaviour" },
-  { name: "Paper 2", date: new Date(2026, 5, 3), description: "The National and Global Economy" },
-  { name: "Paper 3", date: new Date(2026, 5, 15), description: "Microeconomics and Macroeconomics" },
+  { name: "Paper 1 (Markets and Business Behaviour)", date: new Date(2026, 4, 11), description: "Markets and Business Behaviour" },
+  { name: "Paper 2 (The National and Global Economy)", date: new Date(2026, 4, 18), description: "The National and Global Economy" },
+  { name: "Paper 3 (Microeconomics and Macroeconomics)", date: new Date(2026, 5, 4), description: "Microeconomics and Macroeconomics" },
 ];
 
 export const OCR_CS_EXAMS: ExamDate[] = [
