@@ -130,3 +130,8 @@ export const EDEXCEL_ECONOMICS_EXAMS: ExamDate[] = [
   { name: "Paper 2", date: new Date(2026, 5, 3), description: "The National and Global Economy" },
   { name: "Paper 3", date: new Date(2026, 5, 15), description: "Microeconomics and Macroeconomics" },
 ];
+
+export const OCR_CS_EXAMS: ExamDate[] = [
+  { name: "Paper 1 (Computer Systems)", date: new Date(2026, 5, 10), description: "Computer Systems" },
+  { name: "Paper 2 (Algorithms & Programming)", date: new Date(2026, 5, 17), description: "Algorithms and Programming" },
+];
