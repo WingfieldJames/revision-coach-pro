@@ -3,7 +3,7 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
 import { supabase } from '@/integrations/supabase/client';
-import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 export const FreeVersionPage = () => {
   const [chatbotUrl, setChatbotUrl] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export const FreeVersionPage = () => {
           showDiagramTool 
           showEssayMarker 
           showExamCountdown
-          examDates={AQA_ECONOMICS_EXAMS}
+          examDates={EDEXCEL_ECONOMICS_EXAMS}
           examSubjectName="Edexcel Economics"
           toolsLocked 
           hideUserDetails 
