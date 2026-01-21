@@ -3,7 +3,7 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
 import { RAGChat } from '@/components/RAGChat';
-import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import { OCR_CS_EXAMS } from '@/components/ExamCountdown';
 
 const OCR_CS_PROMPTS = [
   { text: "Explain binary search algorithm" },
@@ -27,7 +27,7 @@ export const OCRCSFreeVersionPage = () => {
           showDiagramTool 
           showEssayMarker 
           showExamCountdown
-          examDates={AQA_ECONOMICS_EXAMS}
+          examDates={OCR_CS_EXAMS}
           examSubjectName="OCR Computer Science"
           toolsLocked 
           hideUserDetails 

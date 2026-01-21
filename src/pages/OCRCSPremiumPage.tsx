@@ -6,7 +6,7 @@ import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import { OCR_CS_EXAMS } from '@/components/ExamCountdown';
 
 export const OCRCSPremiumPage = () => {
   const { user, loading } = useAuth();
@@ -89,7 +89,7 @@ export const OCRCSPremiumPage = () => {
           showImageTool 
           showDiagramTool 
           showExamCountdown
-          examDates={AQA_ECONOMICS_EXAMS}
+          examDates={OCR_CS_EXAMS}
           examSubjectName="OCR Computer Science"
           hideUserDetails 
         />
