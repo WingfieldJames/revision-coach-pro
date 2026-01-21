@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
 
 // OCR Physics product ID - we'll fetch this dynamically
 const OCR_PHYSICS_SLUG = 'ocr-physics';
@@ -155,7 +155,7 @@ export const OCRPhysicsPremiumPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showExamCountdown
-          examDates={AQA_ECONOMICS_EXAMS}
+          examDates={OCR_PHYSICS_EXAMS}
           examSubjectName="OCR Physics"
           hideUserDetails 
         />

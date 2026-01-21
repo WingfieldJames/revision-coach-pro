@@ -135,3 +135,9 @@ export const OCR_CS_EXAMS: ExamDate[] = [
   { name: "Paper 1 (Computer Systems)", date: new Date(2026, 5, 10), description: "Computer Systems" },
   { name: "Paper 2 (Algorithms & Programming)", date: new Date(2026, 5, 17), description: "Algorithms and Programming" },
 ];
+
+export const OCR_PHYSICS_EXAMS: ExamDate[] = [
+  { name: "Paper 1 (Modelling Physics)", date: new Date(2026, 4, 20), description: "Modelling Physics" },
+  { name: "Paper 2 (Exploring Physics)", date: new Date(2026, 5, 1), description: "Exploring Physics" },
+  { name: "Paper 3 (Unified Physics)", date: new Date(2026, 5, 8), description: "Unified Physics" },
+];

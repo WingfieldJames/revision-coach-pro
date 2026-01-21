@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
-import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
 
 export const OCRPhysicsFreeVersionPage = () => {
   useEffect(() => {
@@ -23,7 +23,7 @@ export const OCRPhysicsFreeVersionPage = () => {
           showDiagramTool 
           showEssayMarker 
           showExamCountdown
-          examDates={AQA_ECONOMICS_EXAMS}
+          examDates={OCR_PHYSICS_EXAMS}
           examSubjectName="OCR Physics"
           toolsLocked 
           hideUserDetails 
