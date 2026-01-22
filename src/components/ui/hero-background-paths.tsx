@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-function HeroFloatingPaths({ position }: { position: number }) {
+function HeroFloatingPaths({ position, mobileOnly = false }: { position: number; mobileOnly?: boolean }) {
     const paths = Array.from({ length: 28 }, (_, i) => ({
         id: i,
         // More horizontal, sweeping wave pattern that flows through the hero
@@ -22,8 +22,10 @@ function HeroFloatingPaths({ position }: { position: number }) {
         width: 0.8 + i * 0.06,
     }));
 
+    const visibilityClass = mobileOnly ? "block md:hidden" : "hidden md:block";
+
     return (
-        <div className="absolute inset-0 pointer-events-none overflow-visible hidden md:block">
+        <div className={`absolute inset-0 pointer-events-none overflow-visible ${visibilityClass}`}>
             <svg
                 className="w-full h-full"
                 viewBox="-400 0 2000 500"
@@ -67,8 +69,12 @@ function HeroFloatingPaths({ position }: { position: number }) {
 export function HeroBackgroundPaths({ children }: { children?: React.ReactNode }) {
     return (
         <div className="relative w-screen overflow-visible" style={{ marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)' }}>
+            {/* Desktop paths */}
             <HeroFloatingPaths position={1} />
             <HeroFloatingPaths position={-1} />
+            {/* Mobile paths */}
+            <HeroFloatingPaths position={1} mobileOnly />
+            <HeroFloatingPaths position={-1} mobileOnly />
             <div className="relative z-10 max-w-7xl mx-auto">
                 {children}
             </div>
