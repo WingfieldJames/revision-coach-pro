@@ -362,31 +362,18 @@ export const DashboardPage = () => {
 
           {/* Deluxe Plan */}
           <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : productAccess[productType]?.hasAccess) ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
-            <h2 className="text-2xl font-semibold mb-6">
-              {subject === 'computer-science' ? (
-                <>
-                  🔥 Deluxe Plan (OCR CS) — <span className="line-through text-red-500">£49.99</span> £24.99 (Lifetime Access)
-                  {productAccess['ocr-cs']?.hasAccess && (
-                    <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
-                      ACTIVE
-                    </span>
-                  )}
-                </>
-              ) : subject === 'physics' ? (
-                <>
-                  🔥 Deluxe Plan (OCR Physics) — Coming Soon
-                </>
-              ) : (
-                <>
-                  🔥 Deluxe Plan {productType === 'edexcel' ? '(Edexcel)' : productType === 'aqa' ? '(AQA)' : '(CIE)'} — <span className="line-through text-red-500">£49.99</span> £24.99 (Lifetime Access)
-                  {productAccess[productType]?.hasAccess && (
-                    <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
-                      ACTIVE
-                    </span>
-                  )}
-                </>
+            <h2 className="text-2xl font-semibold mb-2">
+              💎 Exam Season Pass {subject === 'computer-science' ? '(OCR CS)' : subject === 'physics' ? '(OCR Physics)' : productType === 'edexcel' ? '(Edexcel)' : productType === 'aqa' ? '(AQA)' : '(CIE)'}
+              {(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : productAccess[productType]?.hasAccess) && (
+                <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
+                  ACTIVE
+                </span>
               )}
             </h2>
+            <p className="text-3xl font-bold mb-2">
+              <span className="line-through text-red-500 text-lg">£49.99</span> £24.99
+            </p>
+            <p className="text-sm text-muted-foreground mb-6">One-time payment • Expires 30th June 2026</p>
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -428,7 +415,7 @@ export const DashboardPage = () => {
               </li>
             </ul>
             
-            {(subject === 'computer-science' ? productAccess['ocr']?.hasAccess : productAccess[productType]?.hasAccess) ? (
+            {(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : productAccess[productType]?.hasAccess) ? (
               <Button 
                 variant="brand" 
                 size="lg" 
@@ -438,6 +425,8 @@ export const DashboardPage = () => {
                 <Link to={
                   subject === 'computer-science' 
                     ? '/ocr-cs-premium' 
+                    : subject === 'physics'
+                    ? '/ocr-physics-premium'
                     : productType === 'edexcel' ? '/premium' : productType === 'aqa' ? '/aqa-premium' : '/cie-premium'
                 }>Launch Deluxe Version</Link>
               </Button>
@@ -471,6 +460,8 @@ export const DashboardPage = () => {
                     // Map product type to product slug
                     const productSlug = subject === 'computer-science' 
                       ? 'ocr-computer-science'
+                      : subject === 'physics'
+                      ? 'ocr-physics'
                       : productType === 'edexcel' ? 'edexcel-economics' 
                         : productType === 'aqa' ? 'aqa-economics' 
                         : 'cie-economics';
@@ -507,14 +498,14 @@ export const DashboardPage = () => {
                   }
                 }}
               >
-                {checkingAccess ? 'Checking access...' : 'Upgrade to Deluxe'}
+                {checkingAccess ? 'Checking access...' : 'Get Season Pass'}
               </Button>
             )}
           </div>
         </div>
         
         <p className="text-sm text-muted-foreground text-center mt-6">
-          One-time payment • Lifetime access • Secure checkout via Stripe
+          One-time payment • Expires 30th June 2026 • Secure checkout via Stripe
         </p>
 
         {/* Account Info */}
