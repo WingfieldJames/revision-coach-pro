@@ -468,27 +468,24 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         </div>
       </div>
 
-      {/* Suggested prompts - full width above composer */}
-      {messages.length === 0 && suggestedPrompts.length > 0 && (
-        <div className="fixed bottom-[140px] left-0 right-0 z-50 px-4">
-          <div className="flex gap-2 w-full overflow-x-auto scrollbar-thin pb-1">
-            {suggestedPrompts.map((prompt, idx) => (
-              <button 
-                key={idx} 
-                onClick={() => handleSuggestedPrompt(prompt)} 
-                disabled={isLoading} 
-                className="px-4 py-2 rounded-full text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap flex-shrink-0 disabled:opacity-50 bg-violet"
-              >
-                {prompt.text}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Fixed bottom composer - two line layout */}
       <div className="fixed bottom-0 left-0 right-0 bg-background p-4 z-50">
         <div className="max-w-5xl mx-auto">
+          {/* Suggested prompts - centered, above input */}
+          {messages.length === 0 && suggestedPrompts.length > 0 && (
+            <div className="flex justify-center gap-2 mb-3 w-full overflow-x-auto scrollbar-thin pb-1">
+              {suggestedPrompts.map((prompt, idx) => (
+                <button 
+                  key={idx} 
+                  onClick={() => handleSuggestedPrompt(prompt)} 
+                  disabled={isLoading} 
+                  className="px-4 py-2 rounded-full text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap flex-shrink-0 disabled:opacity-50 bg-violet"
+                >
+                  {prompt.text}
+                </button>
+              ))}
+            </div>
+          )}
           
           {/* Two-line pill container */}
           <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
