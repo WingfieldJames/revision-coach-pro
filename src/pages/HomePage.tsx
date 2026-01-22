@@ -29,7 +29,7 @@ export const HomePage = () => {
           {isMobile ?
         // Mobile version - simple image without scroll animation
         <div className="pt-4 px-6">
-              <ScrollReveal className="text-left max-w-5xl mx-auto pt-4">
+              <div className="text-left max-w-5xl mx-auto pt-4">
                 <div className="bg-secondary text-foreground text-xs px-3 py-1.5 rounded-full inline-block mb-4 text-center whitespace-nowrap">
                   ⭐ Loved by 300+ users with a 4.9 star rating
                 </div>
@@ -40,9 +40,9 @@ export const HomePage = () => {
                 <h2 className="text-4xl font-medium text-foreground mb-6 leading-tight">
                   Your AI-powered coach for A-Levels
                 </h2>
-              </ScrollReveal>
+              </div>
               
-              <ScrollReveal delay={0.2} className="mb-6">
+              <div className="mb-6">
                 <div className="relative w-full aspect-video rounded-lg overflow-hidden">
                   <iframe 
                     src="https://player.vimeo.com/video/1157200471?background=1&autoplay=1&loop=1&muted=1" 
@@ -53,20 +53,20 @@ export const HomePage = () => {
                     title="A* AI Demo Video" 
                   />
                 </div>
-              </ScrollReveal>
+              </div>
 
-              <ScrollReveal delay={0.25} className="text-left max-w-5xl mx-auto">
+              <div className="text-left max-w-5xl mx-auto">
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
                   Trained on past papers, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
                 </p>
-              </ScrollReveal>
+              </div>
               
-              <ScrollReveal delay={0.3} className="text-center mb-8">
+              <div className="text-center mb-8">
                 <InteractiveHoverButton text="Get started today →" variant="default" onClick={() => navigate('/compare')} className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]" />
                 <p className="text-xs text-muted-foreground mt-3">
                   Get started free • No card needed
                 </p>
-              </ScrollReveal>
+              </div>
             </div> :
         // Desktop version - scroll animation with iPad
         <>
