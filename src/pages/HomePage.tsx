@@ -40,9 +40,6 @@ export const HomePage = () => {
                 <h2 className="text-4xl font-medium text-foreground mb-6 leading-tight">
                   Your AI-powered coach for A-Levels
                 </h2>
-                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                  Trained on past papers, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
-                </p>
               </ScrollReveal>
               
               <ScrollReveal delay={0.2} className="mb-6">
@@ -56,6 +53,12 @@ export const HomePage = () => {
                     title="A* AI Demo Video" 
                   />
                 </div>
+              </ScrollReveal>
+
+              <ScrollReveal delay={0.25} className="text-left max-w-5xl mx-auto">
+                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+                  Trained on past papers, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
+                </p>
               </ScrollReveal>
               
               <ScrollReveal delay={0.3} className="text-center mb-8">
