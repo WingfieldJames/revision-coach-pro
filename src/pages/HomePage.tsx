@@ -46,7 +46,18 @@ export const HomePage = () => {
               </ScrollReveal>
               
               <ScrollReveal delay={0.2} className="mb-6">
-                <img src="/lovable-uploads/hero-mobile-phone-transparent.png" alt="A* AI Demo - A Star AI mobile interface for A-Level Economics revision" className="mx-auto rounded-2xl object-contain w-full max-w-[360px]" />
+                <BackgroundPaths>
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                    <iframe 
+                      src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1" 
+                      className="absolute top-0 left-0 w-full h-full" 
+                      frameBorder="0" 
+                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
+                      referrerPolicy="strict-origin-when-cross-origin" 
+                      title="A* AI Demo Video" 
+                    />
+                  </div>
+                </BackgroundPaths>
               </ScrollReveal>
               
               <ScrollReveal delay={0.3} className="text-center mb-8">
@@ -138,7 +149,7 @@ export const HomePage = () => {
         <ScrollReveal delay={0.2}>
           <BackgroundPaths>
             <div className="relative w-full aspect-video rounded-lg overflow-hidden">
-              <iframe src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
+              <iframe src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&muted=1&loop=1" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
             </div>
           </BackgroundPaths>
         </ScrollReveal>
