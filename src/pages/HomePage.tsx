@@ -19,7 +19,6 @@ export const HomePage = () => {
   } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
       <Header showNavLinks />
@@ -32,7 +31,7 @@ export const HomePage = () => {
         <div className="pt-4 px-6">
               <div className="text-left max-w-5xl mx-auto pt-4">
                 <div className="bg-secondary text-foreground text-xs px-3 py-1.5 rounded-full inline-block mb-4 text-center whitespace-nowrap">
-                  ⭐ Loved by 300+ users with a 4.9 star rating
+                  ⭐ Loved by 700+ users with a 4.9 star rating
                 </div>
                 <h1 className="text-6xl font-bold mb-3 flex flex-wrap items-center gap-2">
                   Meet 
@@ -46,20 +45,9 @@ export const HomePage = () => {
               <div className="mb-6">
                 <div className="relative w-full rounded-lg overflow-hidden">
                   {/* Poster image shows instantly */}
-                  <img 
-                    src="/video-poster.png" 
-                    alt="" 
-                    className="w-full h-auto"
-                  />
+                  <img src="/video-poster.png" alt="" className="w-full h-auto" />
                   {/* Video plays on top with identical sizing */}
-                  <iframe 
-                    src="https://player.vimeo.com/video/1157200471?background=1&autoplay=1&loop=1&muted=1" 
-                    className="absolute inset-0 w-full h-full"
-                    frameBorder="0" 
-                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
-                    referrerPolicy="strict-origin-when-cross-origin" 
-                    title="A* AI Demo Video"
-                  />
+                  <iframe src="https://player.vimeo.com/video/1157200471?background=1&autoplay=1&loop=1&muted=1" className="absolute inset-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
                 </div>
               </div>
 
