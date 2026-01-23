@@ -38,7 +38,7 @@ export const HomePage = () => {
                   <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-16" />
                 </h1>
                 <h2 className="text-4xl font-medium text-foreground mb-6 leading-tight">
-                  Your AI-powered coach for A-Levels
+                  ​The AI built for your exam board
                 </h2>
               </div>
               
