@@ -37,7 +37,7 @@ export const HomePage = () => {
                   Meet 
                   <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-16" />
                 </h1>
-                <h2 className="text-4xl font-medium text-foreground mb-6 leading-tight">
+                <h2 className="text-2xl sm:text-4xl font-medium text-foreground mb-6 leading-tight whitespace-nowrap">
                   ​The AI built for your exam board
                 </h2>
               </div>
