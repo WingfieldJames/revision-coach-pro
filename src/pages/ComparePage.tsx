@@ -419,7 +419,7 @@ export const ComparePage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                5 free prompts daily
+                3 free prompts daily
               </li>
             </ul>
             <Button variant="brand" size="lg" className="w-full" onClick={handleFreeClick} disabled={isComingSoon}>
