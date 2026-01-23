@@ -51,14 +51,8 @@ export const HomePage = () => {
                 </div>
               </div>
 
-              <div className="text-left max-w-5xl mx-auto">
-                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                  Trained on past papers, mark schemes, specifications and A* technique - giving you everything you need to hit that top grade all in one place
-                </p>
-              </div>
-              
               <div className="text-center mb-8">
-                <InteractiveHoverButton text="Get started today →" variant="default" onClick={() => navigate('/compare')} className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]" />
+                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => navigate('/compare')} className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]" />
                 <p className="text-xs text-muted-foreground mt-3">
                   Get started free • No card needed
                 </p>
