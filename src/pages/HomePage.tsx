@@ -43,7 +43,14 @@ export const HomePage = () => {
               </div>
               
               <div className="mb-6">
-                <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-secondary">
+                  {/* Poster image shows instantly while video loads */}
+                  <img 
+                    src="/lovable-uploads/hero-mobile-app-screenshot.jpg" 
+                    alt="" 
+                    className="absolute top-0 left-0 w-full h-full object-cover"
+                  />
+                  {/* Video loads on top */}
                   <iframe 
                     src="https://player.vimeo.com/video/1157200471?background=1&autoplay=1&loop=1&muted=1" 
                     className="absolute top-0 left-0 w-full h-full" 
