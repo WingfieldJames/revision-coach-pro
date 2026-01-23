@@ -46,7 +46,7 @@ export const HomePage = () => {
                 <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-secondary">
                   {/* Poster image shows instantly while video loads */}
                   <img 
-                    src="/lovable-uploads/hero-mobile-app-screenshot.jpg" 
+                    src="/video-poster.png" 
                     alt="" 
                     className="absolute top-0 left-0 w-full h-full object-cover"
                   />
