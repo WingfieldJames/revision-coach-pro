@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
@@ -19,7 +19,7 @@ export const HomePage = () => {
   } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [videoLoaded, setVideoLoaded] = useState(false);
+  
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
       <Header showNavLinks />
@@ -44,22 +44,21 @@ export const HomePage = () => {
               </div>
               
               <div className="mb-6">
-                <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-secondary">
-                  {/* Poster image - fades out when video loads */}
+                <div className="relative w-full rounded-lg overflow-hidden">
+                  {/* Poster image shows instantly */}
                   <img 
                     src="/video-poster.png" 
                     alt="" 
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}
+                    className="w-full h-auto"
                   />
-                  {/* Video - fades in when loaded */}
+                  {/* Video plays on top with identical sizing */}
                   <iframe 
                     src="https://player.vimeo.com/video/1157200471?background=1&autoplay=1&loop=1&muted=1" 
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    className="absolute inset-0 w-full h-full"
                     frameBorder="0" 
                     allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
                     referrerPolicy="strict-origin-when-cross-origin" 
                     title="A* AI Demo Video"
-                    onLoad={() => setVideoLoaded(true)}
                   />
                 </div>
               </div>
