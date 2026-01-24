@@ -12,6 +12,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { BackgroundPaths } from '@/components/ui/background-paths';
 import { HeroBackgroundPaths } from '@/components/ui/hero-background-paths';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
+import { FoundersCarousel } from '@/components/FoundersCarousel';
 export const HomePage = () => {
   const {
     user,
@@ -206,24 +207,10 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Powered by AI Models Section */}
-      <section className="py-16 px-8 bg-muted">
-        <ScrollReveal className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-12">
-            Powered by leading AI models ⬇️
-          </h2>
-          
-          <div className="flex items-center justify-center gap-4 md:gap-8 lg:gap-12 mb-6">
-            <img src="/logos/openai-final.svg" alt="OpenAI" className="h-8 md:h-10 lg:h-12 object-contain" />
-            <img src="/logos/gemini-final.png" alt="Gemini" className="h-8 md:h-10 lg:h-12 object-contain" />
-            <img src="/logos/deepseek-final.png" alt="DeepSeek" className="h-8 md:h-10 lg:h-12 object-contain" />
-          </div>
-          
-          <p className="text-sm text-muted-foreground">
-            * A* AI is currently deployed using OpenAI. Other AI models are available for testing upon request.
-          </p>
-        </ScrollReveal>
-      </section>
+      {/* Trained by A* Students Section - Desktop only */}
+      <div className="hidden md:block">
+        <FoundersCarousel />
+      </div>
 
       {/* FAQ Section */}
       <section className="py-16 px-8 bg-background">
