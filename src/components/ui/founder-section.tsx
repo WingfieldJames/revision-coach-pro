@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Quote, GraduationCap, Award, BookOpen, Trophy } from 'lucide-react';
 import jamesFounder from '@/assets/james-founder.png';
 import namanFounder from '@/assets/naman-founder.png';
+import tudorFounder from '@/assets/tudor-founder.jpg';
 import etienneFounder from '@/assets/etienne-founder.png';
 import carlFounder from '@/assets/carl-founder.png';
 
@@ -113,9 +114,9 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg bg-muted">
                   {isPhysics ? (
                     <img 
-                      src={namanFounder} 
-                      alt="Naman - Founder"
-                      className="w-full h-full object-cover object-top"
+                      src={tudorFounder} 
+                      alt="Tudor - Physics Lead"
+                      className="w-full h-full object-cover object-[center_25%] scale-110"
                     />
                   ) : isCS ? (
                     <img 
