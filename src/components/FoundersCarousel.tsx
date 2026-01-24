@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Award, GraduationCap, BookOpen, Trophy } fro
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import jamesFounder from '@/assets/james-founder.png';
 import namanFounder from '@/assets/naman-founder.png';
+import tudorFounder from '@/assets/tudor-founder.jpg';
 
 interface Founder {
   id: string;
@@ -31,7 +32,7 @@ const founders: Founder[] = [
     id: 'tudor',
     name: 'Tudor',
     status: 'Gap Year Student',
-    image: namanFounder, // Placeholder - using Naman's image as mentioned in memory
+    image: tudorFounder,
     quote: "Hi, I'm Tudor. 4 A* grades at A-Level and 9 Grade 9s at GCSE, including perfect scores of 200/200 in Physics, 197/200 in Chemistry, and 236/240 in Mathematics. Through A* AI, you'll gain access to the exact revision strategies that drove some of the strongest Physics results in the country.",
     achievements: [
       { icon: Award, text: "A*A*A*A* at A-Level" },
@@ -114,7 +115,7 @@ export function FoundersCarousel() {
                       <img 
                         src={currentFounder.image} 
                         alt={`${currentFounder.name} - Founder`}
-                        className="w-full h-full object-cover object-top"
+                        className="w-full h-full object-cover object-center scale-110"
                       />
                     </div>
                   </div>
