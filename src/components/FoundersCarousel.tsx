@@ -115,7 +115,7 @@ export function FoundersCarousel() {
                       <img 
                         src={currentFounder.image} 
                         alt={`${currentFounder.name} - Founder`}
-                        className="w-full h-full object-cover object-center scale-110"
+                        className="w-full h-full object-cover object-[center_25%] scale-110"
                       />
                     </div>
                   </div>
