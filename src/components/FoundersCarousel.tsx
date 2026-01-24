@@ -73,8 +73,8 @@ export function FoundersCarousel() {
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
             Trained by real A* students
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Our AI learns from students who scored 4 A*s and got into Oxbridge - so you get proven techniques, not generic answers.
+          <p className="text-muted-foreground max-w-3xl mx-auto">
+            We searched the country for the sharpest A-Level students - 4 A*s, Oxbridge offers, top exam scores - and trained our AI on their proven techniques.
           </p>
         </ScrollReveal>
 
