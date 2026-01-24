@@ -159,6 +159,11 @@ export const HomePage = () => {
         </div>
       </section>
 
+      {/* Trained by A* Students Section - Desktop only */}
+      <div className="hidden md:block">
+        <FoundersCarousel />
+      </div>
+
       {/* How A* AI helps you revise smarter Section */}
       <section className="py-8 md:py-16 px-8 max-w-7xl mx-auto">
         <ScrollReveal>
@@ -206,11 +211,6 @@ export const HomePage = () => {
           </StaggerContainer>
         </div>
       </section>
-
-      {/* Trained by A* Students Section - Desktop only */}
-      <div className="hidden md:block">
-        <FoundersCarousel />
-      </div>
 
       {/* FAQ Section */}
       <section className="py-16 px-8 bg-background">
