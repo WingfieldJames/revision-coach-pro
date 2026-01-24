@@ -229,7 +229,7 @@ export const HomePage = () => {
               <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
                 <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
                   <span>Why is this better than ChatGPT or a normal AI?</span>
-                  <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                  <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                   <p className="mb-3">ChatGPT knows a bit about everything. A*AI knows everything about your exam - from paper layout to the small tricks that push you towards top grades.</p>
@@ -241,7 +241,7 @@ export const HomePage = () => {
               <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
                 <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
                   <span>How do the plans work?</span>
-                  <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                  <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                   <p className="mb-3">Free gives you a taste - limited training data and general AI help to try it out.</p>
@@ -254,7 +254,7 @@ export const HomePage = () => {
               <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
                 <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
                   <span>What's included in the Deluxe version?</span>
-                  <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                  <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                   <p className="mb-3">We sat down with A* students from LSE, Cambridge, and Imperial and got them to teach the AI everything - how they structured essays, which examples impressed examiners, the timing tricks that saved them marks.</p>
@@ -266,7 +266,7 @@ export const HomePage = () => {
               <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
                 <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
                   <span>Does it work for other exam boards or subjects?</span>
-                  <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                  <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
                 </AccordionTrigger>
                 <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
                   <p className="mb-3">We started with A-Level Economics. Now we cover Economics, Computer Science and Physics - with Chemistry, English and Psychology dropping soon and many other subjects in the pipeline                          </p>
