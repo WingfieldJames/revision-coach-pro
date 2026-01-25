@@ -393,9 +393,9 @@ export const ComparePage = () => {
         </ScrollReveal>
 
         {/* Desktop: 3 columns, Mobile: stack */}
-        <StaggerContainer className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full max-w-7xl mx-auto px-4">
+        <StaggerContainer className="flex flex-col lg:flex-row gap-6 justify-center w-full max-w-6xl mx-auto">
           {/* Free Plan */}
-          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl shadow-card text-left flex flex-col">
+          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl w-full lg:flex-1 shadow-card text-left flex flex-col">
             <h2 className="text-xl lg:text-2xl font-semibold mb-6">🎓 Free Plan</h2>
             {isComingSoon ? <>
                 <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
@@ -407,19 +407,19 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base flex-1">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>AI trained on 2025-2024 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : examBoard === 'cie' ? 'CIE Economics' : `OCR ${subjectLabels[subject]}`} past papers</span>
+                <span className="line-clamp-2">AI trained on 2025-2024 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : examBoard === 'cie' ? 'CIE Economics' : `OCR ${subjectLabels[subject]}`} past papers</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Spec-aligned responses and quick practice</span>
+                <span className="line-clamp-2">Spec-aligned responses and quick practice</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Basic help only (no mark-scheme feedback)</span>
+                <span className="line-clamp-2">Basic help only (no mark-scheme feedback)</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>3 free prompts daily</span>
+                <span className="line-clamp-2">3 free prompts daily</span>
               </li>
             </ul>
             <Button variant="brand" size="lg" className="w-full mt-auto" onClick={handleFreeClick} disabled={isComingSoon}>
@@ -428,7 +428,7 @@ export const ComparePage = () => {
           </StaggerItem>
 
           {/* Monthly Plan - Desktop only */}
-          <StaggerItem className="hidden lg:flex bg-muted p-6 lg:p-10 rounded-xl shadow-card text-left flex-col">
+          <StaggerItem className="hidden lg:flex bg-muted p-6 lg:p-10 rounded-xl w-full lg:flex-1 shadow-card text-left flex-col">
             <h2 className="text-xl lg:text-2xl font-semibold mb-2 whitespace-nowrap"> 💎 Deluxe Monthly</h2>
             {isDeluxeComingSoon ? <>
                 <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
@@ -440,27 +440,27 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base flex-1">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
+                <span className="line-clamp-2">AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Official examiner mark schemes built-in</span>
+                <span className="line-clamp-2">Official examiner mark schemes built-in</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Trained on full A* exam technique + essay structures</span>
+                <span className="line-clamp-2">Trained on full A* exam technique + essay structures</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
+                <span className="line-clamp-2">Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Image uploads supported</span>
+                <span className="line-clamp-2">Image uploads supported</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Unlimited daily prompts</span>
+                <span className="line-clamp-2">Unlimited daily prompts</span>
               </li>
             </ul>
             <Button variant="brand" size="lg" className="w-full mt-auto" onClick={() => handlePremiumClick('monthly')} disabled={isDeluxeComingSoon}>
@@ -469,7 +469,7 @@ export const ComparePage = () => {
           </StaggerItem>
 
           {/* Exam Season Pass */}
-          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl shadow-card text-left border-2 border-primary relative flex flex-col">
+          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl w-full lg:flex-1 shadow-card text-left border-2 border-primary relative flex flex-col">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs lg:text-sm font-semibold px-4 py-1.5 rounded-full">
               {isDeluxeComingSoon ? 'COMING SOON' : 'BEST VALUE'}
             </div>
@@ -484,27 +484,27 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base flex-1">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
+                <span className="line-clamp-2">AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Official examiner mark schemes built-in</span>
+                <span className="line-clamp-2">Official examiner mark schemes built-in</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Trained on full A* exam technique + essay structures</span>
+                <span className="line-clamp-2">Trained on full A* exam technique + essay structures</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
+                <span className="line-clamp-2">Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Image uploads supported</span>
+                <span className="line-clamp-2">Image uploads supported</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span>Unlimited daily prompts</span>
+                <span className="line-clamp-2">Unlimited daily prompts</span>
               </li>
             </ul>
             <Button variant="brand" size="lg" className="w-full mt-auto" onClick={() => handlePremiumClick('lifetime')} disabled={isDeluxeComingSoon}>
