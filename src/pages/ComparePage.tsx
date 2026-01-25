@@ -393,9 +393,9 @@ export const ComparePage = () => {
         </ScrollReveal>
 
         {/* Desktop: 3 columns, Mobile: stack */}
-        <StaggerContainer className="flex flex-col lg:flex-row gap-6 justify-center">
+        <StaggerContainer className="flex flex-col lg:flex-row gap-6 justify-center w-full max-w-6xl mx-auto">
           {/* Free Plan */}
-          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl w-full lg:w-[340px] shadow-card text-left">
+          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl w-full lg:flex-1 shadow-card text-left flex flex-col">
             <h2 className="text-xl lg:text-2xl font-semibold mb-6">🎓 Free Plan</h2>
             {isComingSoon ? <>
                 <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
@@ -404,31 +404,31 @@ export const ComparePage = () => {
                 <p className="text-3xl lg:text-4xl font-bold mb-2">£0</p>
                 <p className="text-sm lg:text-base text-muted-foreground mb-6">Forever free</p>
               </>}
-            <ul className="space-y-4 mb-8 text-sm lg:text-base">
+            <ul className="space-y-4 mb-8 text-sm lg:text-base flex-1">
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on 2025-2024 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : examBoard === 'cie' ? 'CIE Economics' : `OCR ${subjectLabels[subject]}`} past papers
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">AI trained on 2025-2024 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : examBoard === 'cie' ? 'CIE Economics' : `OCR ${subjectLabels[subject]}`} past papers</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Spec-aligned responses and quick practice
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Spec-aligned responses and quick practice</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Basic help only (no mark-scheme feedback)
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Basic help only (no mark-scheme feedback)</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                3 free prompts daily
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">3 free prompts daily</span>
               </li>
             </ul>
-            <Button variant="brand" size="lg" className="w-full" onClick={handleFreeClick} disabled={isComingSoon}>
+            <Button variant="brand" size="lg" className="w-full mt-auto" onClick={handleFreeClick} disabled={isComingSoon}>
               {isComingSoon ? 'Coming Soon' : 'Try free now'}
             </Button>
           </StaggerItem>
 
           {/* Monthly Plan - Desktop only */}
-          <StaggerItem className="hidden lg:block bg-muted p-6 lg:p-10 rounded-xl w-full lg:w-[340px] shadow-card text-left">
+          <StaggerItem className="hidden lg:flex bg-muted p-6 lg:p-10 rounded-xl w-full lg:flex-1 shadow-card text-left flex-col">
             <h2 className="text-xl lg:text-2xl font-semibold mb-2 whitespace-nowrap"> 💎 Deluxe Monthly</h2>
             {isDeluxeComingSoon ? <>
                 <p className="text-3xl lg:text-4xl font-bold mb-2 text-muted-foreground">Coming Soon</p>
@@ -437,39 +437,39 @@ export const ComparePage = () => {
                 <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£9.99</span> £4.99<span className="text-base lg:text-lg font-normal">/mo</span></p>
                 <p className="text-sm lg:text-base text-muted-foreground mb-6">Cancel anytime</p>
               </>}
-            <ul className="space-y-4 mb-8 text-sm lg:text-base">
+            <ul className="space-y-4 mb-8 text-sm lg:text-base flex-1">
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Official examiner mark schemes built-in
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Official examiner mark schemes built-in</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Trained on full A* exam technique + essay structures
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Trained on full A* exam technique + essay structures</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Image uploads supported
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Image uploads supported</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Unlimited daily prompts
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Unlimited daily prompts</span>
               </li>
             </ul>
-            <Button variant="brand" size="lg" className="w-full" onClick={() => handlePremiumClick('monthly')} disabled={isDeluxeComingSoon}>
+            <Button variant="brand" size="lg" className="w-full mt-auto" onClick={() => handlePremiumClick('monthly')} disabled={isDeluxeComingSoon}>
               {isDeluxeComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Monthly'}
             </Button>
           </StaggerItem>
 
           {/* Exam Season Pass */}
-          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl w-full lg:w-[340px] shadow-card text-left border-2 border-primary relative">
+          <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl w-full lg:flex-1 shadow-card text-left border-2 border-primary relative flex flex-col">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs lg:text-sm font-semibold px-4 py-1.5 rounded-full">
               {isDeluxeComingSoon ? 'COMING SOON' : 'BEST VALUE'}
             </div>
@@ -481,33 +481,33 @@ export const ComparePage = () => {
                 <p className="text-3xl lg:text-4xl font-bold mb-2"><span className="line-through text-red-500 text-lg lg:text-xl">£49.99</span> £24.99</p>
                 <p className="text-sm lg:text-base text-muted-foreground mb-6">One-time payment • Expires 30th June 2026</p>
               </>}
-            <ul className="space-y-4 mb-8 text-sm lg:text-base">
+            <ul className="space-y-4 mb-8 text-sm lg:text-base flex-1">
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Official examiner mark schemes built-in
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Official examiner mark schemes built-in</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Trained on full A* exam technique + essay structures
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Trained on full A* exam technique + essay structures</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Image uploads supported
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Image uploads supported</span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-500 font-bold mr-2">✓</span>
-                Unlimited daily prompts
+                <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
+                <span className="line-clamp-2">Unlimited daily prompts</span>
               </li>
             </ul>
-            <Button variant="brand" size="lg" className="w-full" onClick={() => handlePremiumClick('lifetime')} disabled={isDeluxeComingSoon}>
+            <Button variant="brand" size="lg" className="w-full mt-auto" onClick={() => handlePremiumClick('lifetime')} disabled={isDeluxeComingSoon}>
               {isDeluxeComingSoon ? 'Coming Soon' : hasProductAccess ? 'Launch Deluxe' : 'Get Season Pass'}
             </Button>
           </StaggerItem>
