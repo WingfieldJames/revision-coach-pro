@@ -393,7 +393,7 @@ export const ComparePage = () => {
         </ScrollReveal>
 
         {/* Desktop: 3 columns, Mobile: stack */}
-        <StaggerContainer className="flex flex-col lg:flex-row gap-6 justify-center w-full max-w-6xl mx-auto">
+        <StaggerContainer className="flex flex-col lg:flex-row gap-6 justify-center w-full max-w-7xl mx-auto px-4">
           {/* Free Plan */}
           <StaggerItem className="bg-muted p-6 lg:p-10 rounded-xl w-full lg:flex-1 shadow-card text-left flex flex-col">
             <h2 className="text-xl lg:text-2xl font-semibold mb-6">🎓 Free Plan</h2>
@@ -407,19 +407,19 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base flex-1">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">AI trained on 2025-2024 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : examBoard === 'cie' ? 'CIE Economics' : `OCR ${subjectLabels[subject]}`} past papers</span>
+                <span>AI trained on 2025-2024 {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA Economics' : examBoard === 'cie' ? 'CIE Economics' : `OCR ${subjectLabels[subject]}`} past papers</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Spec-aligned responses and quick practice</span>
+                <span>Spec-aligned responses and quick practice</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Basic help only (no mark-scheme feedback)</span>
+                <span>Basic help only (no mark-scheme feedback)</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">3 free prompts daily</span>
+                <span>3 free prompts daily</span>
               </li>
             </ul>
             <Button variant="brand" size="lg" className="w-full mt-auto" onClick={handleFreeClick} disabled={isComingSoon}>
@@ -440,27 +440,27 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base flex-1">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
+                <span>AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Official examiner mark schemes built-in</span>
+                <span>Official examiner mark schemes built-in</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Trained on full A* exam technique + essay structures</span>
+                <span>Trained on full A* exam technique + essay structures</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
+                <span>Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Image uploads supported</span>
+                <span>Image uploads supported</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Unlimited daily prompts</span>
+                <span>Unlimited daily prompts</span>
               </li>
             </ul>
             <Button variant="brand" size="lg" className="w-full mt-auto" onClick={() => handlePremiumClick('monthly')} disabled={isDeluxeComingSoon}>
@@ -484,27 +484,27 @@ export const ComparePage = () => {
             <ul className="space-y-4 mb-8 text-sm lg:text-base flex-1">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
+                <span>AI trained on all {examBoard === 'edexcel' ? 'Edexcel Economics A' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : `OCR ${subjectLabels[subject]}`} past papers</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Official examiner mark schemes built-in</span>
+                <span>Official examiner mark schemes built-in</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Trained on full A* exam technique + essay structures</span>
+                <span>Trained on full A* exam technique + essay structures</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
+                <span>Covers the entire {examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : examBoard === 'cie' ? 'CIE' : 'OCR'} specification</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Image uploads supported</span>
+                <span>Image uploads supported</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2 shrink-0">✓</span>
-                <span className="line-clamp-2">Unlimited daily prompts</span>
+                <span>Unlimited daily prompts</span>
               </li>
             </ul>
             <Button variant="brand" size="lg" className="w-full mt-auto" onClick={() => handlePremiumClick('lifetime')} disabled={isDeluxeComingSoon}>
