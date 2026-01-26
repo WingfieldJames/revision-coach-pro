@@ -141,13 +141,19 @@ async function fetchSystemPrompt(
   }
 }
 
+// Result type for document fetching
+interface FetchContextResult {
+  context: string;
+  sourcesSearched: Array<{ type: string; topic: string }>;
+}
+
 // Query relevant document chunks from the training data
 async function fetchRelevantContext(
   supabase: ReturnType<typeof createClient>,
   productId: string,
   userMessage: string,
   contentTypes?: string[]
-): Promise<string> {
+): Promise<FetchContextResult> {
   try {
     // Build query for document chunks
     let query = supabase
@@ -168,28 +174,41 @@ async function fetchRelevantContext(
     
     if (error) {
       console.error('Error fetching document chunks:', error);
-      return '';
+      return { context: '', sourcesSearched: [] };
     }
     
     if (!chunks || chunks.length === 0) {
       console.log(`No training data found for product ${productId}`);
-      return '';
+      return { context: '', sourcesSearched: [] };
     }
     
     console.log(`Found ${chunks.length} relevant chunks for context`);
+    
+    // Track unique sources searched
+    const sourcesMap = new Map<string, { type: string; topic: string }>();
     
     // Format chunks as context
     const contextParts = chunks.map((chunk: { content: string; metadata: Record<string, unknown> }) => {
       const contentType = chunk.metadata?.content_type || 'general';
       const topic = chunk.metadata?.topic || '';
       const header = topic ? `[${String(contentType).toUpperCase()} - ${topic}]` : `[${String(contentType).toUpperCase()}]`;
+      
+      // Track this source
+      const sourceKey = `${contentType}-${topic}`;
+      if (!sourcesMap.has(sourceKey)) {
+        sourcesMap.set(sourceKey, { type: String(contentType), topic: String(topic) });
+      }
+      
       return `${header}\n${chunk.content}`;
     });
     
-    return contextParts.join('\n\n---\n\n');
+    return {
+      context: contextParts.join('\n\n---\n\n'),
+      sourcesSearched: Array.from(sourcesMap.values()),
+    };
   } catch (err) {
     console.error('Error in fetchRelevantContext:', err);
-    return '';
+    return { context: '', sourcesSearched: [] };
   }
 }
 
@@ -291,7 +310,7 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
     const personalizedPrompt = buildPersonalizedPrompt(basePrompt, user_preferences, message);
     
     // Fetch relevant training data from document_chunks
-    const relevantContext = await fetchRelevantContext(supabaseAdmin, product_id, message);
+    const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(supabaseAdmin, product_id, message);
     
     // Build final system prompt with context injection
     let finalSystemPrompt = personalizedPrompt;
@@ -300,6 +319,7 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
     }
     
     console.log(`System prompt length: ${finalSystemPrompt.length} chars (context: ${relevantContext.length} chars)`);
+    console.log(`Sources searched: ${sourcesSearched.map(s => s.topic || s.type).join(', ')}`);
 
     // Call Lovable AI for response (streaming)
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -336,8 +356,32 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       throw new Error(`AI API error: ${error}`);
     }
 
-    // Stream the response back
-    return new Response(response.body, {
+    // Create a custom stream that prepends sources metadata
+    const encoder = new TextEncoder();
+    const sourcesEvent = `data: ${JSON.stringify({ sources_searched: sourcesSearched })}\n\n`;
+    
+    // Combine sources event with the AI response stream
+    const combinedStream = new ReadableStream({
+      async start(controller) {
+        // Send sources metadata first
+        controller.enqueue(encoder.encode(sourcesEvent));
+        
+        // Then pipe through the AI response
+        const reader = response.body!.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            controller.enqueue(value);
+          }
+        } finally {
+          reader.releaseLock();
+          controller.close();
+        }
+      }
+    });
+    
+    return new Response(combinedStream, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (error) {
