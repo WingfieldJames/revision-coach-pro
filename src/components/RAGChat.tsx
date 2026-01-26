@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Plus, Image } from 'lucide-react';
+import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -26,6 +26,11 @@ interface SuggestedPrompt {
   text: string;
   usesPersonalization?: boolean;
 }
+interface SearchedSource {
+  type: string;
+  topic: string;
+}
+
 interface RAGChatProps {
   productId: string;
   subjectName: string;
@@ -37,6 +42,32 @@ interface RAGChatProps {
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
+
+// Helper to format source names nicely
+const formatSourceName = (name: string): string => {
+  if (!name) return 'Training Data';
+  // Convert snake_case or kebab-case to Title Case
+  return name
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+};
+
+// Animated searching item component
+const SearchingSourceItem: React.FC<{
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  source: string;
+  delay?: number;
+}> = ({ icon: Icon, label, source, delay = 0 }) => (
+  <div 
+    className="flex items-center gap-2 text-xs text-muted-foreground animate-in fade-in slide-in-from-left-2"
+    style={{ animationDelay: `${delay}ms`, animationFillMode: 'backwards' }}
+  >
+    <Icon className="w-3.5 h-3.5 text-primary animate-pulse" />
+    <span className="text-muted-foreground">{label}</span>
+    <span className="font-medium text-foreground/80">{source}</span>
+  </div>
+);
 export const RAGChat: React.FC<RAGChatProps> = ({
   productId,
   subjectName,
@@ -52,6 +83,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchedSources, setSearchedSources] = useState<SearchedSource[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [imageUploadOpen, setImageUploadOpen] = useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
@@ -163,6 +196,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       clearTimeout(animationRef.current);
     }
     setIsLoading(true);
+    setIsSearching(true);
+    setSearchedSources([]);
     try {
       const response = await fetch(CHAT_URL, {
         method: 'POST',
@@ -224,6 +259,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           if (jsonStr === '[DONE]') break;
           try {
             const parsed = JSON.parse(jsonStr);
+            
+            // Check if this is sources metadata
+            if (parsed.sources_searched) {
+              setSearchedSources(parsed.sources_searched);
+              setIsSearching(false);
+              continue;
+            }
+            
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (content) {
               fullContentRef.current += content;
@@ -262,6 +305,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       }]);
     } finally {
       setIsLoading(false);
+      setIsSearching(false);
     }
   };
   const handleSend = async () => {
@@ -457,10 +501,42 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         })}
           
           {isLoading && messages[messages.length - 1]?.role === 'user' && <div className="flex gap-3 p-4 rounded-xl bg-muted mr-auto max-w-[85%]">
-              <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="w-8 h-8 object-contain" />
-              <div className="flex-1 flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                <span className="text-muted-foreground">Thinking...</span>
+              <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
+              <div className="flex-1 flex flex-col gap-2">
+                {isSearching ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <FileSearch className="w-4 h-4 animate-pulse text-primary" />
+                      <span className="text-sm font-medium text-foreground">Searching knowledge base...</span>
+                    </div>
+                    <div className="space-y-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
+                      <SearchingSourceItem icon={BookOpen} label="Searching" source={`${subjectName} Specification`} delay={0} />
+                      <SearchingSourceItem icon={FileText} label="Searching" source={`${subjectName} Exam Structure`} delay={100} />
+                      <SearchingSourceItem icon={GraduationCap} label="Searching" source={`${subjectName} Structured Response Guide`} delay={200} />
+                      <SearchingSourceItem icon={FileText} label="Searching" source="Past Paper Questions" delay={300} />
+                    </div>
+                  </>
+                ) : searchedSources.length > 0 ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      <span className="text-sm font-medium text-foreground">Generating response...</span>
+                    </div>
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      {searchedSources.slice(0, 5).map((source, idx) => (
+                        <div key={idx} className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2" style={{ animationDelay: `${idx * 50}ms` }}>
+                          <FileText className="w-3 h-3 text-primary" />
+                          <span>Found: {formatSourceName(source.topic || source.type)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span className="text-muted-foreground">Thinking...</span>
+                  </div>
+                )}
               </div>
             </div>}
           
