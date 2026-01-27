@@ -6,8 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Available diagrams with their keywords for AI matching
-const availableDiagrams = [
+// Economics diagrams
+const economicsDiagrams = [
   {
     id: 'ppf',
     title: 'Production Possibility Frontier (PPF)',
@@ -235,6 +235,50 @@ const availableDiagrams = [
   }
 ];
 
+// Computer Science diagrams
+const csDiagrams = [
+  {
+    id: 'von-neumann-architecture',
+    title: 'Von Neumann Architecture',
+    keywords: ['von neumann', 'cpu', 'processor', 'RAM', 'memory', 'bus', 'data bus', 'address bus', 'control bus', 'ALU', 'arithmetic logic unit', 'control unit', 'CU', 'registers', 'MAR', 'MDR', 'PC', 'program counter', 'CIR', 'current instruction register', 'accumulator', 'ACC', 'fetch decode execute', 'FDE cycle', 'stored program concept', 'general purpose registers']
+  },
+  {
+    id: 'and-gate',
+    title: 'AND Gate',
+    keywords: ['AND gate', 'AND logic gate', 'logic gate', 'boolean AND', 'conjunction', 'A AND B', 'A.B', 'A∧B', 'truth table AND', 'both inputs high', 'logic circuit', 'digital logic', 'binary AND']
+  },
+  {
+    id: 'or-gate',
+    title: 'OR Gate',
+    keywords: ['OR gate', 'OR logic gate', 'logic gate', 'boolean OR', 'disjunction', 'A OR B', 'A+B', 'A∨B', 'truth table OR', 'either input high', 'logic circuit', 'digital logic', 'binary OR', 'inclusive OR']
+  },
+  {
+    id: 'xor-gate',
+    title: 'XOR Gate',
+    keywords: ['XOR gate', 'XOR logic gate', 'exclusive OR', 'logic gate', 'boolean XOR', 'A XOR B', 'A⊕B', 'truth table XOR', 'different inputs', 'logic circuit', 'digital logic', 'binary XOR', 'exclusive disjunction']
+  },
+  {
+    id: 'not-gate',
+    title: 'NOT Gate',
+    keywords: ['NOT gate', 'NOT logic gate', 'inverter', 'logic gate', 'boolean NOT', 'negation', 'A NOT', '¬A', 'Ā', 'truth table NOT', 'invert', 'logic circuit', 'digital logic', 'binary NOT', 'complement']
+  },
+  {
+    id: 'half-adder',
+    title: 'Half Adder',
+    keywords: ['half adder', 'adder circuit', 'binary addition', 'sum bit', 'carry bit', 'XOR AND combination', 'half-adder', 'logic circuit', 'arithmetic circuit', 'binary arithmetic', 'S and C outputs', 'adding two bits']
+  },
+  {
+    id: 'full-adder',
+    title: 'Full Adder',
+    keywords: ['full adder', 'adder circuit', 'binary addition', 'sum bit', 'carry in', 'carry out', 'Cin', 'Cout', 'full-adder', 'logic circuit', 'arithmetic circuit', 'binary arithmetic', 'three input adder', 'cascading adders', 'ripple carry']
+  },
+  {
+    id: 'd-flip-flop',
+    title: 'D Flip-Flop (Clock)',
+    keywords: ['D flip-flop', 'D flip flop', 'flip-flop', 'flip flop', 'latch', 'clock', 'clock signal', 'edge triggered', 'data input', 'Q output', 'not Q', 'memory element', 'sequential circuit', 'register', 'storage element', 'synchronous', 'clock pulse']
+  }
+];
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -268,7 +312,7 @@ serve(async (req) => {
 
     console.log("Authenticated user:", user.id);
 
-    const { text } = await req.json();
+    const { text, subject = 'economics' } = await req.json();
     
     if (!text || typeof text !== 'string') {
       return new Response(
@@ -276,6 +320,11 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Select the appropriate diagram set based on subject
+    const availableDiagrams = subject === 'cs' ? csDiagrams : economicsDiagrams;
+    const subjectName = subject === 'cs' ? 'Computer Science' : 'Economics';
+    const diagramBasePath = subject === 'cs' ? '/diagrams/cs/' : '/diagrams/';
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -291,13 +340,13 @@ serve(async (req) => {
       `- ID: "${d.id}" | Title: "${d.title}" | Keywords: ${d.keywords.join(', ')}`
     ).join('\n');
 
-    const systemPrompt = `You are an economics diagram matcher. Given a user's question or topic text, determine which economics diagram would be most appropriate to illustrate the concept.
+    const systemPrompt = `You are a ${subjectName} diagram matcher. Given a user's question or topic text, determine which ${subjectName} diagram would be most appropriate to illustrate the concept.
 
 Available diagrams:
 ${diagramList}
 
 Rules:
-1. Analyze the user's text to understand what economics concept is being discussed
+1. Analyze the user's text to understand what ${subjectName} concept is being discussed
 2. Return ONLY a JSON object with the matching diagram ID
 3. If no diagram matches well, return null for diagramId
 4. Be generous in matching - if the text relates to any of the diagram topics, match it
@@ -305,7 +354,7 @@ Rules:
 Response format (JSON only, no explanation):
 {"diagramId": "diagram-id-here"} or {"diagramId": null}`;
 
-    console.log('Sending request to Lovable AI for diagram matching, user:', user.id);
+    console.log(`Sending request to Lovable AI for ${subject} diagram matching, user:`, user.id);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
