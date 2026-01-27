@@ -24,6 +24,7 @@ interface HeaderProps {
   examSubjectName?: string;
   toolsLocked?: boolean;
   hideUserDetails?: boolean;
+  diagramSubject?: 'economics' | 'cs';
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -35,7 +36,8 @@ export const Header: React.FC<HeaderProps> = ({
   examDates = [],
   examSubjectName = "Exams",
   toolsLocked = false,
-  hideUserDetails = false
+  hideUserDetails = false,
+  diagramSubject = 'economics'
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -189,7 +191,7 @@ export const Header: React.FC<HeaderProps> = ({
               sideOffset={8}
             >
               <div className="p-4">
-                {toolsLocked ? <LockedToolContent /> : <DiagramFinderTool />}
+                {toolsLocked ? <LockedToolContent /> : <DiagramFinderTool subject={diagramSubject} />}
               </div>
             </PopoverContent>
           </Popover>
