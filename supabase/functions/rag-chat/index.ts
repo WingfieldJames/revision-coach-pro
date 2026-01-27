@@ -29,6 +29,42 @@ const CONTENT_TYPES = {
   CASE_STUDY: 'case_study',
 } as const;
 
+// CS Diagrams for inline rendering
+const CS_DIAGRAMS = [
+  { id: 'von-neumann-architecture', title: 'Von Neumann Architecture', keywords: ['von neumann', 'cpu', 'processor', 'ram', 'memory', 'bus', 'data bus', 'address bus', 'control bus', 'alu', 'control unit', 'registers', 'mar', 'mdr', 'pc', 'program counter', 'cir', 'accumulator', 'fetch decode execute', 'fde'], imagePath: '/diagrams/cs/von-neumann-architecture.jpg' },
+  { id: 'and-gate', title: 'AND Gate', keywords: ['and gate', 'logic gate', 'boolean and', 'truth table and'], imagePath: '/diagrams/cs/and-gate.jpg' },
+  { id: 'or-gate', title: 'OR Gate', keywords: ['or gate', 'logic gate', 'boolean or', 'truth table or'], imagePath: '/diagrams/cs/or-gate.jpg' },
+  { id: 'xor-gate', title: 'XOR Gate', keywords: ['xor gate', 'exclusive or', 'logic gate'], imagePath: '/diagrams/cs/xor-gate.jpg' },
+  { id: 'not-gate', title: 'NOT Gate', keywords: ['not gate', 'inverter', 'logic gate', 'negation'], imagePath: '/diagrams/cs/not-gate.jpg' },
+  { id: 'half-adder', title: 'Half Adder', keywords: ['half adder', 'adder', 'binary addition', 'sum bit', 'carry bit'], imagePath: '/diagrams/cs/half-adder.jpg' },
+  { id: 'full-adder', title: 'Full Adder', keywords: ['full adder', 'adder', 'carry in', 'carry out', 'ripple carry'], imagePath: '/diagrams/cs/full-adder.jpg' },
+  { id: 'd-flip-flop', title: 'D Flip-Flop (Clock)', keywords: ['flip-flop', 'flip flop', 'latch', 'clock', 'd flip-flop', 'register', 'memory element'], imagePath: '/diagrams/cs/d-flip-flop.jpg' },
+  { id: 'array', title: 'Array', keywords: ['array', 'data structure', 'index', 'element', 'contiguous memory'], imagePath: '/diagrams/cs/array.jpg' },
+  { id: 'stack', title: 'Stack', keywords: ['stack', 'push', 'pop', 'lifo', 'last in first out', 'top pointer'], imagePath: '/diagrams/cs/stack.jpg' },
+  { id: 'queue', title: 'Queue', keywords: ['queue', 'enqueue', 'dequeue', 'fifo', 'first in first out', 'front pointer', 'rear pointer'], imagePath: '/diagrams/cs/queue.jpg' },
+  { id: 'graph', title: 'Graph', keywords: ['graph', 'node', 'vertex', 'edge', 'adjacency'], imagePath: '/diagrams/cs/graph.jpg' },
+  { id: 'tree', title: 'Tree', keywords: ['tree', 'root', 'parent', 'child', 'leaf', 'node', 'hierarchical'], imagePath: '/diagrams/cs/tree.jpg' },
+  { id: 'binary-search-tree', title: 'Binary Search Tree', keywords: ['binary search tree', 'bst', 'binary tree', 'ordered tree'], imagePath: '/diagrams/cs/binary-search-tree.jpg' },
+  { id: 'post-order-traversal', title: 'Post Order Traversal', keywords: ['post order', 'postorder', 'tree traversal', 'traversal', 'left right root'], imagePath: '/diagrams/cs/post-order-traversal.jpg' },
+];
+
+// Find relevant diagram based on message content
+function findRelevantDiagram(message: string, subject: string): { id: string; title: string; imagePath: string } | null {
+  if (subject !== 'cs') return null;
+  
+  const lowerMessage = message.toLowerCase();
+  
+  for (const diagram of CS_DIAGRAMS) {
+    for (const keyword of diagram.keywords) {
+      if (lowerMessage.includes(keyword)) {
+        return { id: diagram.id, title: diagram.title, imagePath: diagram.imagePath };
+      }
+    }
+  }
+  
+  return null;
+}
+
 // Free tier daily prompt limit
 const FREE_TIER_DAILY_LIMIT = 3;
 
@@ -254,13 +290,13 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { message, product_id, user_preferences, history = [], tier = 'free', user_id } = await req.json();
+    const { message, product_id, user_preferences, history = [], tier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics' } = await req.json();
 
     if (!message) {
       throw new Error("message is required");
     }
 
-    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (tier: ${tier})`);
+    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (tier: ${tier}, diagrams: ${enable_diagrams})`);
     if (user_preferences) {
       console.log(`User preferences: Year ${user_preferences.year}, Predicted: ${user_preferences.predicted_grade}, Target: ${user_preferences.target_grade}`);
     }
@@ -312,15 +348,31 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
     // Fetch relevant training data from document_chunks
     const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(supabaseAdmin, product_id, message);
     
+    // Find relevant diagram for deluxe users
+    let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
+    if (enable_diagrams && tier === 'deluxe') {
+      relevantDiagram = findRelevantDiagram(message, diagram_subject);
+      if (relevantDiagram) {
+        console.log(`Found relevant diagram: ${relevantDiagram.title}`);
+      }
+    }
+    
     // Build final system prompt with context injection
     let finalSystemPrompt = personalizedPrompt;
     if (relevantContext) {
       finalSystemPrompt += `\n\n--- TRAINING DATA CONTEXT ---\nUse the following information to inform your responses:\n\n${relevantContext}`;
     }
     
+    // Add diagram instruction for deluxe users if relevant
+    if (relevantDiagram) {
+      finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---\nA relevant diagram is available for this topic: "${relevantDiagram.title}". The system will display this diagram automatically. Reference it in your explanation where appropriate.`;
+    }
+    
     console.log(`System prompt length: ${finalSystemPrompt.length} chars (context: ${relevantContext.length} chars)`);
     console.log(`Sources searched: ${sourcesSearched.map(s => s.topic || s.type).join(', ')}`);
-
+    if (relevantDiagram) {
+      console.log(`Diagram included: ${relevantDiagram.id}`);
+    }
     // Call Lovable AI for response (streaming)
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -356,15 +408,17 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       throw new Error(`AI API error: ${error}`);
     }
 
-    // Create a custom stream that prepends sources metadata
+    // Create a custom stream that prepends sources metadata and diagram info
     const encoder = new TextEncoder();
-    const sourcesEvent = `data: ${JSON.stringify({ sources_searched: sourcesSearched })}\n\n`;
+    const metadataEvent = `data: ${JSON.stringify({ 
+      sources_searched: sourcesSearched,
+      diagram: relevantDiagram 
+    })}\n\n`;
     
-    // Combine sources event with the AI response stream
     const combinedStream = new ReadableStream({
       async start(controller) {
-        // Send sources metadata first
-        controller.enqueue(encoder.encode(sourcesEvent));
+        // Send metadata (sources + diagram) first
+        controller.enqueue(encoder.encode(metadataEvent));
         
         // Then pipe through the AI response
         const reader = response.body!.getReader();

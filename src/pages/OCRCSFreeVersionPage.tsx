@@ -31,6 +31,7 @@ export const OCRCSFreeVersionPage = () => {
           examSubjectName="OCR Computer Science"
           toolsLocked 
           hideUserDetails 
+          diagramSubject="cs"
         />
       </div>
       

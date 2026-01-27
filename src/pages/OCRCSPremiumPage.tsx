@@ -1,81 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
+import { RAGChat } from '@/components/RAGChat';
 import { OCR_CS_EXAMS } from '@/components/ExamCountdown';
 
+const OCR_CS_PROMPTS = [
+  { text: "Explain binary search algorithm" },
+  { text: "What are the different data types?" },
+  { text: "How do I structure a long answer question?" },
+  { text: "Create me a full revision plan", usesPersonalization: true },
+];
+
 export const OCRCSPremiumPage = () => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const [checkingAccess, setCheckingAccess] = useState(true);
-  const [chatbotUrl, setChatbotUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const verifyAccess = async () => {
-      if (!loading) {
-        if (!user) {
-          navigate('/login?redirect=ocr-cs-premium');
-          return;
-        }
-        
-        try {
-          const { data, error } = await supabase.functions.invoke('get-chatbot-url', {
-            body: { productSlug: 'ocr-computer-science', tier: 'premium' },
-          });
-          
-          if (error || !data?.url) {
-            console.error('Access check failed:', error || data?.error);
-            navigate('/compare');
-            return;
-          }
-          
-          setChatbotUrl(data.url);
-          setCheckingAccess(false);
-        } catch (err) {
-          console.error('Error verifying access:', err);
-          navigate('/compare');
-        }
-      }
-    };
-    
-    verifyAccess();
-  }, [user, loading, navigate]);
-
-  useEffect(() => {
-    window.scrollTo(0, document.body.scrollHeight);
-  }, []);
-
-  if (loading || checkingAccess) {
-    return (
-      <div className="h-screen w-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user || !chatbotUrl) {
-    return (
-      <div className="h-screen w-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Premium Access Required</h1>
-          <p className="text-muted-foreground mb-6">
-            You need a premium subscription to access this content.
-          </p>
-          <Button variant="brand" onClick={() => navigate('/compare')}>
-            Upgrade to Premium
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -83,7 +20,7 @@ export const OCRCSPremiumPage = () => {
         description="Access A* AI Deluxe for OCR Computer Science. Full training on 2017-2025 past papers, mark schemes, A* technique & unlimited prompts."
         canonical="https://astarai.co.uk/ocr-cs-premium"
       />
-      <ChatbotBackgroundPaths />
+      <ChatbotFullscreenPaths />
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
@@ -92,18 +29,21 @@ export const OCRCSPremiumPage = () => {
           examDates={OCR_CS_EXAMS}
           examSubjectName="OCR Computer Science"
           hideUserDetails 
+          diagramSubject="cs"
         />
       </div>
       
       <div className="flex-1 relative z-10">
-        <iframe
-          src={chatbotUrl}
-          width="100%"
-          style={{ height: '100%', minHeight: '700px' }}
-          frameBorder="0"
-          allow="clipboard-write"
-          title="A* AI OCR Computer Science Premium Version Chatbot"
-          className="absolute inset-0"
+        <RAGChat 
+          productId="5d05830b-de7b-4206-8f49-6d3695324eb6"
+          subjectName="OCR Computer Science Deluxe"
+          subjectDescription="Your personal A* Computer Science tutor with full diagram access. Ask me anything!"
+          footerText="Powered by A* AI • Trained on OCR Computer Science specification (2017-2025)"
+          placeholder="Ask about algorithms, data structures, programming..."
+          tier="deluxe"
+          suggestedPrompts={OCR_CS_PROMPTS}
+          enableDiagrams
+          diagramSubject="cs"
         />
       </div>
     </div>

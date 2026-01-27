@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch } from 'lucide-react';
+import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -11,6 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { diagrams } from '@/data/diagrams';
+import { csDiagrams } from '@/data/csDiagrams';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -30,6 +32,11 @@ interface SearchedSource {
   type: string;
   topic: string;
 }
+interface DiagramData {
+  id: string;
+  title: string;
+  imagePath: string;
+}
 
 interface RAGChatProps {
   productId: string;
@@ -39,6 +46,8 @@ interface RAGChatProps {
   placeholder?: string;
   tier?: 'free' | 'deluxe';
   suggestedPrompts?: SuggestedPrompt[];
+  enableDiagrams?: boolean;
+  diagramSubject?: 'economics' | 'cs';
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
@@ -75,7 +84,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   footerText = "Powered by A* AI",
   placeholder = "Ask me anything...",
   tier = 'deluxe',
-  suggestedPrompts = []
+  suggestedPrompts = [],
+  enableDiagrams = false,
+  diagramSubject = 'economics'
 }) => {
   const {
     user
@@ -85,6 +96,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchedSources, setSearchedSources] = useState<SearchedSource[]>([]);
+  const [currentDiagram, setCurrentDiagram] = useState<DiagramData | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [imageUploadOpen, setImageUploadOpen] = useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
@@ -198,6 +210,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     setIsLoading(true);
     setIsSearching(true);
     setSearchedSources([]);
+    setCurrentDiagram(null);
     try {
       const response = await fetch(CHAT_URL, {
         method: 'POST',
@@ -214,7 +227,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             content: m.content
           })),
           tier: tier,
-          user_id: user?.id
+          user_id: user?.id,
+          enable_diagrams: enableDiagrams,
+          diagram_subject: diagramSubject
         })
       });
       if (!response.ok) {
@@ -260,10 +275,15 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           try {
             const parsed = JSON.parse(jsonStr);
             
-            // Check if this is sources metadata
+            // Check if this is metadata (sources + diagram)
             if (parsed.sources_searched) {
               setSearchedSources(parsed.sources_searched);
               setIsSearching(false);
+              
+              // Handle diagram if present
+              if (parsed.diagram) {
+                setCurrentDiagram(parsed.diagram);
+              }
               continue;
             }
             
@@ -496,6 +516,21 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     {displayContent}
                   </ReactMarkdown>
                   {showCursor && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
+                  
+                  {/* Show diagram for last assistant message if available */}
+                  {isLastAssistant && currentDiagram && !isLoading && !isAnimating && (
+                    <div className="mt-4 p-3 rounded-lg border border-border bg-background">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BarChart2 className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-medium">{currentDiagram.title}</span>
+                      </div>
+                      <img 
+                        src={currentDiagram.imagePath} 
+                        alt={currentDiagram.title} 
+                        className="w-full max-w-md rounded-lg border border-border"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>;
         })}

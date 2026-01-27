@@ -4,11 +4,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { BarChart2, Search, Loader2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { diagrams, Diagram } from '@/data/diagrams';
+import { csDiagrams, CSDiagram } from '@/data/csDiagrams';
 
-export const DiagramFinderTool: React.FC = () => {
+interface DiagramFinderToolProps {
+  subject?: 'economics' | 'cs';
+}
+
+export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({ subject = 'economics' }) => {
   const [inputText, setInputText] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [matchedDiagram, setMatchedDiagram] = useState<Diagram | null>(null);
+  const [matchedDiagram, setMatchedDiagram] = useState<Diagram | CSDiagram | null>(null);
   const [noMatch, setNoMatch] = useState(false);
 
   const findDiagram = async () => {
@@ -22,7 +27,7 @@ export const DiagramFinderTool: React.FC = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('find-diagram', {
-        body: { text: inputText }
+        body: { text: inputText, subject }
       });
 
       if (error) {
@@ -31,7 +36,9 @@ export const DiagramFinderTool: React.FC = () => {
       }
 
       if (data?.diagramId) {
-        const found = diagrams.find(d => d.id === data.diagramId);
+        // Search in the appropriate diagram set
+        const diagramSet = subject === 'cs' ? csDiagrams : diagrams;
+        const found = diagramSet.find(d => d.id === data.diagramId);
         if (found) {
           setMatchedDiagram(found);
         } else {
@@ -53,6 +60,8 @@ export const DiagramFinderTool: React.FC = () => {
     setNoMatch(false);
   };
 
+  const subjectLabel = subject === 'cs' ? 'Computer Science' : 'Economics';
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -63,7 +72,7 @@ export const DiagramFinderTool: React.FC = () => {
         <div>
           <h3 className="font-semibold text-foreground">Diagram Generator</h3>
           <p className="text-xs text-muted-foreground">
-            Paste question text to find the right diagram
+            Paste question text to find the right {subjectLabel} diagram
           </p>
         </div>
       </div>
@@ -72,7 +81,10 @@ export const DiagramFinderTool: React.FC = () => {
       {!matchedDiagram && (
         <div className="space-y-3">
           <Textarea
-            placeholder="Paste your question or topic here... e.g. 'Explain using a diagram what happens when aggregate demand increases'"
+            placeholder={subject === 'cs' 
+              ? "Paste your question or topic here... e.g. 'Explain how a stack data structure works'"
+              : "Paste your question or topic here... e.g. 'Explain using a diagram what happens when aggregate demand increases'"
+            }
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             className="min-h-[100px] resize-none text-sm"
