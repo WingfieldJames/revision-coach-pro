@@ -13,6 +13,7 @@ import { BackgroundPaths } from '@/components/ui/background-paths';
 import { HeroBackgroundPaths } from '@/components/ui/hero-background-paths';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
 import { FoundersCarousel } from '@/components/FoundersCarousel';
+import { MobileFoundersSection } from '@/components/MobileFoundersSection';
 export const HomePage = () => {
   const {
     user,
@@ -163,6 +164,9 @@ export const HomePage = () => {
       <div className="hidden md:block">
         <FoundersCarousel />
       </div>
+
+      {/* Mobile Founders Section - Above "How A* AI helps" */}
+      <MobileFoundersSection />
 
       {/* How A* AI helps you revise smarter Section */}
       <section className="py-8 md:py-16 px-8 max-w-7xl mx-auto">
