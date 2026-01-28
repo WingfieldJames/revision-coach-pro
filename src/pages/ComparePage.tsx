@@ -258,7 +258,7 @@ export const ComparePage = () => {
       <Header showNavLinks />
       
       {/* Instagram Follow Banner */}
-      <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 py-3 px-4 text-center text-white">
+      <div className="hidden md:block bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 py-3 px-4 text-center text-white">
         <p className="text-sm font-medium flex items-center justify-center gap-2 flex-wrap">
           <Instagram className="h-4 w-4" />
           {/* Mobile: Full text with link */}
