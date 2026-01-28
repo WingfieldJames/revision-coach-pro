@@ -565,7 +565,7 @@ export const ComparePage = () => {
           </h2>
         </ScrollReveal>
 
-        <LatestFeaturesSection />
+        <LatestFeaturesSection subject={subject} />
       </section>
 
       {/* Screenshot Testimonials */}
