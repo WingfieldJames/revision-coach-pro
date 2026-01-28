@@ -276,6 +276,41 @@ const csDiagrams = [
     id: 'd-flip-flop',
     title: 'D Flip-Flop (Clock)',
     keywords: ['D flip-flop', 'D flip flop', 'flip-flop', 'flip flop', 'latch', 'clock', 'clock signal', 'edge triggered', 'data input', 'Q output', 'not Q', 'memory element', 'sequential circuit', 'register', 'storage element', 'synchronous', 'clock pulse']
+  },
+  {
+    id: 'array',
+    title: 'Array',
+    keywords: ['array', 'arrays', 'data structure', 'index', 'indexing', 'element', 'first element', 'array length', 'zero indexed', '0 indexed', 'contiguous memory', 'fixed size', 'random access', 'subscript', 'array notation', 'array[0]', 'array elements']
+  },
+  {
+    id: 'stack',
+    title: 'Stack',
+    keywords: ['stack', 'stacks', 'push', 'pop', 'LIFO', 'last in first out', 'top pointer', 'top counter', 'stack pointer', 'data structure', 'call stack', 'stack overflow', 'stack underflow', 'peek', 'isEmpty', 'isFull']
+  },
+  {
+    id: 'queue',
+    title: 'Queue',
+    keywords: ['queue', 'queues', 'enqueue', 'dequeue', 'FIFO', 'first in first out', 'front pointer', 'rear pointer', 'head', 'tail', 'data structure', 'circular queue', 'priority queue', 'linear queue', 'isEmpty', 'isFull']
+  },
+  {
+    id: 'graph',
+    title: 'Graph',
+    keywords: ['graph', 'graphs', 'node', 'nodes', 'vertex', 'vertices', 'edge', 'edges', 'adjacency', 'adjacency list', 'adjacency matrix', 'weighted graph', 'unweighted graph', 'directed graph', 'undirected graph', 'connected', 'path', 'cycle', 'data structure']
+  },
+  {
+    id: 'tree',
+    title: 'Tree',
+    keywords: ['tree', 'trees', 'root', 'root node', 'parent', 'parent node', 'child', 'child node', 'leaf', 'leaf node', 'branch', 'subtree', 'hierarchical', 'data structure', 'node', 'nodes', 'depth', 'height', 'level']
+  },
+  {
+    id: 'binary-search-tree',
+    title: 'Binary Search Tree',
+    keywords: ['binary search tree', 'BST', 'binary tree', 'left subtree', 'right subtree', 'root', 'node', 'leaf', 'ordered tree', 'sorted tree', 'search tree', 'balanced tree', 'unbalanced tree', 'insert', 'delete', 'search', 'traversal', 'in-order', 'data structure']
+  },
+  {
+    id: 'post-order-traversal',
+    title: 'Post Order Traversal',
+    keywords: ['post order', 'post-order', 'postorder', 'tree traversal', 'traversal', 'left right root', 'LRN', 'depth first', 'DFS', 'binary tree traversal', 'visiting nodes', 'recursive traversal', 'in order', 'pre order', 'tree walk']
   }
 ];
 
