@@ -372,6 +372,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     }
   };
 
+  // State for upgrade prompt dialog
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+
   // Image upload handler
   const handleImageUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -398,8 +401,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           }
         });
         if (error) throw error;
-        if (data?.text) {
-          setInput(prev => prev ? `${prev}\n\n${data.text}` : data.text);
+        // Fix: the edge function returns 'extractedText', not 'text'
+        if (data?.extractedText) {
+          setInput(prev => prev ? `${prev}\n\n${data.extractedText}` : data.extractedText);
           toast.success('Text extracted from image');
         } else {
           toast.error('Could not extract text from image');
@@ -421,6 +425,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  // Handle plus button click - show upgrade prompt for free tier
+  const handlePlusClick = () => {
+    if (tier === 'free') {
+      setShowUpgradePrompt(true);
+      setImageUploadOpen(false);
     }
   };
 
@@ -606,20 +618,100 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             {/* Line 2: Buttons row */}
             <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
               {/* Plus button on left */}
-              <Popover open={imageUploadOpen} onOpenChange={setImageUploadOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-primary/10" disabled={isLoading || isAnalyzingImage}>
-                    {isAnalyzingImage ? <Loader2 className="w-5 h-5 animate-spin text-primary" /> : <Plus className="w-5 h-5 text-muted-foreground" />}
+              {tier === 'free' ? (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 rounded-full hover:bg-primary/10" 
+                    disabled={isLoading}
+                    onClick={handlePlusClick}
+                  >
+                    <Plus className="w-5 h-5 text-muted-foreground" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 p-2 bg-background border border-border shadow-xl" align="start" side="top" sideOffset={8}>
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                  <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => fileInputRef.current?.click()}>
-                    <Image className="w-4 h-4" />
-                    Upload Image
-                  </Button>
-                </PopoverContent>
-              </Popover>
+                  
+                  {/* Upgrade prompt dialog for free users */}
+                  {showUpgradePrompt && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]" onClick={() => setShowUpgradePrompt(false)}>
+                      <div 
+                        className="bg-background border border-border rounded-2xl p-6 max-w-md mx-4 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="text-center mb-4">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center mx-auto mb-3">
+                            <Image className="w-6 h-6 text-white" />
+                          </div>
+                          <h3 className="text-xl font-bold mb-2">Unlock Image Upload</h3>
+                          <p className="text-muted-foreground text-sm">
+                            Upgrade to Deluxe to upload exam questions and get instant AI analysis.
+                          </p>
+                        </div>
+                        
+                        <div className="bg-muted/50 rounded-xl p-4 mb-4">
+                          <p className="font-semibold text-sm mb-3">Deluxe Features:</p>
+                          <ul className="space-y-2 text-sm">
+                            <li className="flex items-center gap-2">
+                              <span className="text-primary">✓</span>
+                              <span>Image-to-text OCR for exam questions</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <span className="text-primary">✓</span>
+                              <span>Full 2017-2025 past paper training</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <span className="text-primary">✓</span>
+                              <span>Unlimited daily prompts</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <span className="text-primary">✓</span>
+                              <span>A* essay structures & technique</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <span className="text-primary">✓</span>
+                              <span>AI-powered diagram generator</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <span className="text-primary">✓</span>
+                              <span>Mark scheme feedback on answers</span>
+                            </li>
+                          </ul>
+                        </div>
+                        
+                        <div className="flex gap-3">
+                          <Button 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => setShowUpgradePrompt(false)}
+                          >
+                            Maybe Later
+                          </Button>
+                          <Button 
+                            className="flex-1 bg-gradient-to-r from-primary to-[hsl(270,67%,60%)]"
+                            onClick={() => window.location.href = '/compare'}
+                          >
+                            Upgrade Now
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Popover open={imageUploadOpen} onOpenChange={setImageUploadOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-primary/10" disabled={isLoading || isAnalyzingImage}>
+                      {isAnalyzingImage ? <Loader2 className="w-5 h-5 animate-spin text-primary" /> : <Plus className="w-5 h-5 text-muted-foreground" />}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2 bg-background border border-border shadow-xl" align="start" side="top" sideOffset={8}>
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+                    <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => fileInputRef.current?.click()}>
+                      <Image className="w-4 h-4" />
+                      Upload Image
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              )}
 
               {/* Send button on right */}
               <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-9 w-9 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] hover:opacity-90">
