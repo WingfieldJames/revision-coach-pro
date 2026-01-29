@@ -1,35 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
-import { supabase } from '@/integrations/supabase/client';
+import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
+import { RAGChat } from '@/components/RAGChat';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
+const CIE_PRODUCT_ID = "c3e5f8a1-9d4b-4c2e-8f1a-6b7c8d9e0f1a";
+
+const CIE_ECONOMICS_FREE_PROMPTS = [
+  { text: "Explain the difference between demand-pull and cost-push inflation" },
+  { text: "What are the characteristics of perfect competition?" },
+  { text: "Help me understand the Phillips Curve" },
+  { text: "What causes market failure?" },
+];
+
 export const CIEFreeVersionPage = () => {
-  const [chatbotUrl, setChatbotUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUrl = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('get-chatbot-url', {
-          body: { productSlug: 'cie-economics', tier: 'free' },
-        });
-        
-        if (!error && data?.url) {
-          setChatbotUrl(data.url);
-        }
-      } catch (err) {
-        console.error('Error fetching chatbot URL:', err);
-      }
-    };
-    
-    fetchUrl();
-  }, []);
-
-  useEffect(() => {
-    window.scrollTo(0, document.body.scrollHeight);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -37,7 +22,7 @@ export const CIEFreeVersionPage = () => {
         description="Try A* AI free for CIE/Cambridge Economics. AI trained on CIE past papers for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/cie-free-version"
       />
-      <ChatbotBackgroundPaths />
+      <ChatbotFullscreenPaths />
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
@@ -48,25 +33,20 @@ export const CIEFreeVersionPage = () => {
           examSubjectName="CIE Economics"
           toolsLocked 
           hideUserDetails 
+          productId={CIE_PRODUCT_ID}
         />
       </div>
       
       <div className="flex-1 relative z-10">
-        {chatbotUrl ? (
-          <iframe
-            src={chatbotUrl}
-            width="100%"
-            style={{ height: '100%', minHeight: '700px' }}
-            frameBorder="0"
-            allow="clipboard-write"
-            title="A* AI CIE Free Version Chatbot"
-            className="absolute inset-0"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        )}
+        <RAGChat 
+          productId={CIE_PRODUCT_ID}
+          subjectName="CIE Economics"
+          subjectDescription="Your free CIE Economics revision assistant"
+          footerText="A* AI can make mistakes. Verify important info."
+          placeholder="Ask any CIE Economics question..."
+          suggestedPrompts={CIE_ECONOMICS_FREE_PROMPTS}
+          tier="free"
+        />
       </div>
     </div>
   );

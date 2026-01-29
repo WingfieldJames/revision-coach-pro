@@ -9,7 +9,7 @@ import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
-import { Sparkles, BarChart2, PenLine, Lock, Timer } from 'lucide-react';
+import { Sparkles, BarChart2, PenLine, Timer } from 'lucide-react';
 
 // Global flag to track when file dialog is open (set by ImageUploadTool)
 export const fileDialogOpen = { current: false };
@@ -25,6 +25,7 @@ interface HeaderProps {
   toolsLocked?: boolean;
   hideUserDetails?: boolean;
   diagramSubject?: 'economics' | 'cs';
+  productId?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -37,7 +38,8 @@ export const Header: React.FC<HeaderProps> = ({
   examSubjectName = "Exams",
   toolsLocked = false,
   hideUserDetails = false,
-  diagramSubject = 'economics'
+  diagramSubject = 'economics',
+  productId
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -52,28 +54,8 @@ export const Header: React.FC<HeaderProps> = ({
     ? Math.ceil((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24))
     : 0;
 
-  const LockedToolContent = () => (
-    <div className="text-center py-6 px-4">
-      <Lock className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-      <h3 className="font-semibold text-lg mb-2">Deluxe Feature</h3>
-      <p className="text-muted-foreground text-sm mb-4">
-        To access this feature, you need to upgrade to the Deluxe plan.
-      </p>
-      <Button 
-        variant="brand" 
-        size="sm"
-        onClick={() => {
-          setImageToolOpen(false);
-          setDiagramToolOpen(false);
-          setEssayMarkerOpen(false);
-          setExamCountdownOpen(false);
-          navigate('/compare');
-        }}
-      >
-        Upgrade to Deluxe
-      </Button>
-    </div>
-  );
+  // Determine tier based on toolsLocked prop
+  const tier = toolsLocked ? 'free' : 'deluxe';
 
   // Close all popovers when clicking on iframe (detected via window blur)
   // Skip if file dialog is open to prevent closing when picking a file
@@ -191,7 +173,7 @@ export const Header: React.FC<HeaderProps> = ({
               sideOffset={8}
             >
               <div className="p-4">
-                {toolsLocked ? <LockedToolContent /> : <DiagramFinderTool subject={diagramSubject} />}
+                <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} />
               </div>
             </PopoverContent>
           </Popover>
@@ -215,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({
               sideOffset={8}
             >
               <div className="p-4">
-                {toolsLocked ? <LockedToolContent /> : <EssayMarkerTool />}
+                <EssayMarkerTool tier={tier} productId={productId} />
               </div>
             </PopoverContent>
           </Popover>

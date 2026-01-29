@@ -374,8 +374,47 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
   // State for upgrade prompt dialog
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
-  // Image upload handler
+  // Handle upgrade to Stripe checkout
+  const handleUpgrade = async () => {
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+
+    setIsCheckingOut(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        window.location.href = '/login';
+        return;
+      }
+
+      const affiliateCode = localStorage.getItem('affiliate_code') || undefined;
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers: {
+          Authorization: `Bearer ${sessionData.session.access_token}`
+        },
+        body: {
+          paymentType: 'lifetime',
+          productId: productId,
+          affiliateCode
+        }
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Failed to start checkout. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
   const handleImageUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
@@ -682,14 +721,23 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                             variant="outline" 
                             className="flex-1"
                             onClick={() => setShowUpgradePrompt(false)}
+                            disabled={isCheckingOut}
                           >
                             Maybe Later
                           </Button>
                           <Button 
                             className="flex-1 bg-gradient-to-r from-primary to-[hsl(270,67%,60%)]"
-                            onClick={() => window.location.href = '/compare'}
+                            onClick={handleUpgrade}
+                            disabled={isCheckingOut}
                           >
-                            Upgrade Now
+                            {isCheckingOut ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Loading...
+                              </>
+                            ) : (
+                              'Upgrade Now'
+                            )}
                           </Button>
                         </div>
                       </div>

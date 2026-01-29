@@ -1,20 +1,133 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { BarChart2, Search, Loader2, X } from 'lucide-react';
+import { BarChart2, Search, Loader2, X, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { diagrams, Diagram } from '@/data/diagrams';
 import { csDiagrams, CSDiagram } from '@/data/csDiagrams';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface DiagramFinderToolProps {
   subject?: 'economics' | 'cs';
+  tier?: 'free' | 'deluxe';
+  productId?: string;
 }
 
-export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({ subject = 'economics' }) => {
+export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({ 
+  subject = 'economics',
+  tier = 'deluxe',
+  productId
+}) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [inputText, setInputText] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [matchedDiagram, setMatchedDiagram] = useState<Diagram | CSDiagram | null>(null);
   const [noMatch, setNoMatch] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const handleUpgrade = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setIsCheckingOut(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        navigate('/login');
+        return;
+      }
+
+      const affiliateCode = localStorage.getItem('affiliate_code') || undefined;
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers: {
+          Authorization: `Bearer ${sessionData.session.access_token}`
+        },
+        body: {
+          paymentType: 'lifetime',
+          productId: productId,
+          affiliateCode
+        }
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Failed to start checkout. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
+  // Show upgrade prompt for free tier
+  if (tier === 'free') {
+    return (
+      <div className="space-y-4">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center mx-auto mb-3">
+            <BarChart2 className="w-6 h-6 text-white" />
+          </div>
+          <h3 className="text-xl font-bold mb-2">Unlock Diagram Generator</h3>
+          <p className="text-muted-foreground text-sm">
+            Upgrade to Deluxe to instantly find the perfect diagram for any exam question.
+          </p>
+        </div>
+        
+        <div className="bg-muted/50 rounded-xl p-4">
+          <p className="font-semibold text-sm mb-3">Deluxe Features:</p>
+          <ul className="space-y-2 text-sm">
+            <li className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>AI-powered diagram generator</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>Image-to-text OCR for exam questions</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>Full 2017-2025 past paper training</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>Unlimited daily prompts</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>A* essay structures & technique</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-primary">✓</span>
+              <span>Mark scheme feedback on answers</span>
+            </li>
+          </ul>
+        </div>
+        
+        <Button 
+          className="w-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)]"
+          onClick={handleUpgrade}
+          disabled={isCheckingOut}
+        >
+          {isCheckingOut ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Loading...
+            </>
+          ) : (
+            'Upgrade to Deluxe'
+          )}
+        </Button>
+      </div>
+    );
+  }
 
   const findDiagram = async () => {
     if (!inputText.trim()) {

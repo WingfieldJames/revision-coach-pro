@@ -33,6 +33,7 @@ export const FreeVersionPage = () => {
           examSubjectName="Edexcel Economics"
           toolsLocked 
           hideUserDetails 
+          productId={EDEXCEL_PRODUCT_ID}
         />
       </div>
       

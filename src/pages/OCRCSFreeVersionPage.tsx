@@ -5,6 +5,8 @@ import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths
 import { RAGChat } from '@/components/RAGChat';
 import { OCR_CS_EXAMS } from '@/components/ExamCountdown';
 
+const OCR_CS_PRODUCT_ID = "5d05830b-de7b-4206-8f49-6d3695324eb6";
+
 const OCR_CS_PROMPTS = [
   { text: "Explain binary search algorithm" },
   { text: "What are the different data types?" },
@@ -32,12 +34,13 @@ export const OCRCSFreeVersionPage = () => {
           toolsLocked 
           hideUserDetails 
           diagramSubject="cs"
+          productId={OCR_CS_PRODUCT_ID}
         />
       </div>
       
       <div className="flex-1 relative z-10">
         <RAGChat 
-          productId="5d05830b-de7b-4206-8f49-6d3695324eb6"
+          productId={OCR_CS_PRODUCT_ID}
           subjectName="OCR Computer Science"
           subjectDescription="Your personal A* Computer Science tutor. Ask me anything!"
           footerText="Powered by A* AI • Trained on OCR Computer Science specification"

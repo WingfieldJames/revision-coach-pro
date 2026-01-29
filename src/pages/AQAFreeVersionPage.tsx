@@ -33,6 +33,7 @@ export const AQAFreeVersionPage = () => {
           examSubjectName="AQA Economics"
           toolsLocked 
           hideUserDetails 
+          productId={AQA_PRODUCT_ID}
         />
       </div>
       
