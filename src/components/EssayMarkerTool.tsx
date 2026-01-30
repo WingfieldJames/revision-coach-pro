@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { PenLine, Copy, Check, Loader2 } from 'lucide-react';
+import { PenLine, Loader2, Image, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,19 +22,25 @@ const markPrompts: Record<number, string> = {
 interface EssayMarkerToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
+  onSubmitToChat?: (message: string) => void;
+  onClose?: () => void;
 }
 
 export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   tier = 'deluxe',
-  productId
+  productId,
+  onSubmitToChat,
+  onClose
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedMark, setSelectedMark] = useState<number>(15);
   const [essayText, setEssayText] = useState('');
-  const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [inputMode, setInputMode] = useState<'text' | 'image'>('text');
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUpgrade = async () => {
     if (!user) {
@@ -137,38 +143,96 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     );
   }
 
-  const generatePrompt = () => {
+  const handleImageUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image must be less than 10MB');
+      return;
+    }
+    
+    setIsAnalyzingImage(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        const { data, error } = await supabase.functions.invoke('analyze-image', {
+          body: {
+            image: base64,
+            imageType: 'exam_question'
+          }
+        });
+        
+        if (error) throw error;
+        if (data?.extractedText) {
+          setEssayText(prev => prev ? `${prev}\n\n${data.extractedText}` : data.extractedText);
+          toast.success('Text extracted from image');
+        } else {
+          toast.error('Could not extract text from image');
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Image analysis error:', error);
+      toast.error('Failed to analyze image');
+    } finally {
+      setIsAnalyzingImage(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleMarkEssay = () => {
     if (!essayText.trim()) {
-      toast.error('Please paste your essay first');
+      toast.error('Please enter your essay first');
       return;
     }
 
     const prompt = `${markPrompts[selectedMark]}\n\n${essayText}`;
-    setGeneratedPrompt(prompt);
-    toast.success('Prompt generated! Copy and paste into the chatbot.');
-  };
-
-  const copyToClipboard = async () => {
-    if (!generatedPrompt) return;
     
-    try {
-      await navigator.clipboard.writeText(generatedPrompt);
-      setCopied(true);
-      toast.success('Copied to clipboard!');
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      toast.error('Failed to copy');
+    if (onSubmitToChat) {
+      setIsSubmitting(true);
+      onSubmitToChat(prompt);
+      // Close the popover after submitting
+      if (onClose) {
+        onClose();
+      }
+      // Reset state
+      setEssayText('');
+      setIsSubmitting(false);
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(prompt);
+      toast.success('Prompt copied! Paste into the chatbot.');
     }
   };
 
   const reset = () => {
     setEssayText('');
-    setGeneratedPrompt(null);
-    setCopied(false);
+    setInputMode('text');
   };
 
   return (
     <div className="space-y-4">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-gradient-brand">
@@ -177,34 +241,63 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
         <div>
           <h3 className="font-semibold text-foreground">Essay Marker</h3>
           <p className="text-xs text-muted-foreground">
-            Generate a marking prompt for your essay
+            Upload a photo or paste your essay
           </p>
         </div>
       </div>
 
-      {!generatedPrompt ? (
-        <div className="space-y-4">
-          {/* Mark Selector */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Number of Marks</label>
-            <div className="flex flex-wrap gap-2">
-              {MARK_OPTIONS.map((mark) => (
-                <button
-                  key={mark}
-                  onClick={() => setSelectedMark(mark)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                    selectedMark === mark
-                      ? 'bg-gradient-brand text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {mark}
-                </button>
-              ))}
-            </div>
+      <div className="space-y-4">
+        {/* Mark Selector */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Number of Marks</label>
+          <div className="flex flex-wrap gap-2">
+            {MARK_OPTIONS.map((mark) => (
+              <button
+                key={mark}
+                onClick={() => setSelectedMark(mark)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  selectedMark === mark
+                    ? 'bg-gradient-brand text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                {mark}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* Essay Input */}
+        {/* Input Mode Toggle */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Input Method</label>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setInputMode('text')}
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                inputMode === 'text'
+                  ? 'bg-gradient-brand text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              Type/Paste
+            </button>
+            <button
+              onClick={() => setInputMode('image')}
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                inputMode === 'image'
+                  ? 'bg-gradient-brand text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              <Image className="w-4 h-4" />
+              Upload Photo
+            </button>
+          </div>
+        </div>
+
+        {/* Input Area */}
+        {inputMode === 'text' ? (
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Your Essay</label>
             <Textarea
@@ -214,70 +307,71 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
               className="min-h-[150px] resize-none text-sm"
             />
           </div>
-
-          {/* Generate Button */}
-          <Button
-            onClick={generatePrompt}
-            disabled={!essayText.trim()}
-            className="w-full bg-gradient-brand hover:opacity-90 text-primary-foreground"
-            size="sm"
-          >
-            <PenLine className="w-4 h-4 mr-2" />
-            Generate Marking Prompt
-          </Button>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {/* Generated Prompt Display */}
+        ) : (
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-foreground">Generated Prompt</label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={copyToClipboard}
-                className="h-8 px-2"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 mr-1 text-green-500" />
-                    <span className="text-green-500">Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 mr-1" />
-                    Copy
-                  </>
-                )}
-              </Button>
+            <label className="text-sm font-medium text-foreground">Upload Photo</label>
+            <div 
+              className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {isAnalyzingImage ? (
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Extracting text...</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <Image className="w-8 h-8 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Click to upload a photo of your essay
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PNG, JPG up to 10MB
+                  </p>
+                </div>
+              )}
             </div>
-            <div className="p-3 bg-muted rounded-lg max-h-[200px] overflow-y-auto">
-              <pre className="text-xs text-foreground whitespace-pre-wrap font-mono">
-                {generatedPrompt}
-              </pre>
-            </div>
+            {essayText && (
+              <div className="mt-3 p-3 bg-muted rounded-lg">
+                <p className="text-xs font-medium text-foreground mb-1">Extracted Text:</p>
+                <p className="text-xs text-muted-foreground line-clamp-3">{essayText}</p>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-2">
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          {essayText && (
             <Button
               variant="outline"
               size="sm"
               onClick={reset}
               className="flex-1"
             >
-              New Essay
+              Clear
             </Button>
-            <Button
-              onClick={copyToClipboard}
-              size="sm"
-              className="flex-1 bg-gradient-brand hover:opacity-90 text-primary-foreground"
-            >
-              {copied ? 'Copied!' : 'Copy to Clipboard'}
-            </Button>
-          </div>
+          )}
+          <Button
+            onClick={handleMarkEssay}
+            disabled={!essayText.trim() || isSubmitting}
+            className={`${essayText ? 'flex-1' : 'w-full'} bg-gradient-brand hover:opacity-90 text-primary-foreground`}
+            size="sm"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <PenLine className="w-4 h-4 mr-2" />
+                Mark Essay
+              </>
+            )}
+          </Button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

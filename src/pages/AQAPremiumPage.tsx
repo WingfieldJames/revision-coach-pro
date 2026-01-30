@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { checkProductAccess } from '@/lib/productAccess';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
@@ -23,6 +23,7 @@ export const AQAPremiumPage = () => {
   const navigate = useNavigate();
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const chatRef = useRef<RAGChatRef>(null);
 
   useEffect(() => {
     const verifyAccess = async () => {
@@ -50,6 +51,10 @@ export const AQAPremiumPage = () => {
     
     verifyAccess();
   }, [user, loading, navigate]);
+
+  const handleEssayMarkerSubmit = (message: string) => {
+    chatRef.current?.submitMessage(message);
+  };
 
   if (loading || checkingAccess) {
     return (
@@ -95,6 +100,7 @@ export const AQAPremiumPage = () => {
           examDates={AQA_ECONOMICS_EXAMS}
           examSubjectName="AQA Economics"
           hideUserDetails 
+          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -106,6 +112,7 @@ export const AQAPremiumPage = () => {
           footerText="Powered by A* AI • Trained on AQA Economics specification"
           placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..."
           suggestedPrompts={AQA_ECONOMICS_PROMPTS}
+          chatRef={chatRef}
         />
       </div>
     </div>

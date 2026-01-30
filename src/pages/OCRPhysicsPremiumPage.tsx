@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { ChatbotBackgroundPaths } from '@/components/ui/chatbot-background-paths';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
@@ -26,6 +26,7 @@ export const OCRPhysicsPremiumPage = () => {
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const chatRef = useRef<RAGChatRef>(null);
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -75,6 +76,10 @@ export const OCRPhysicsPremiumPage = () => {
       checkAccess();
     }
   }, [user, loading]);
+
+  const handleEssayMarkerSubmit = (message: string) => {
+    chatRef.current?.submitMessage(message);
+  };
 
   // Loading state
   if (loading || checkingAccess) {
@@ -154,10 +159,14 @@ export const OCRPhysicsPremiumPage = () => {
       <ChatbotBackgroundPaths />
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
+          showImageTool
+          showEssayMarker
           showExamCountdown
           examDates={OCR_PHYSICS_EXAMS}
           examSubjectName="OCR Physics"
           hideUserDetails 
+          productId={productId}
+          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -169,6 +178,7 @@ export const OCRPhysicsPremiumPage = () => {
           footerText="Powered by A* AI • Trained on OCR Physics past papers & mark schemes"
           placeholder="Ask me anything about OCR Physics A-Level..."
           suggestedPrompts={OCR_PHYSICS_PROMPTS}
+          chatRef={chatRef}
         />
       </div>
     </div>
