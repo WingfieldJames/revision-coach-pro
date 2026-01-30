@@ -38,6 +38,10 @@ interface DiagramData {
   imagePath: string;
 }
 
+export interface RAGChatRef {
+  submitMessage: (message: string) => void;
+}
+
 interface RAGChatProps {
   productId: string;
   subjectName: string;
@@ -48,6 +52,7 @@ interface RAGChatProps {
   suggestedPrompts?: SuggestedPrompt[];
   enableDiagrams?: boolean;
   diagramSubject?: 'economics' | 'cs';
+  chatRef?: React.RefObject<RAGChatRef>;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
@@ -86,7 +91,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   tier = 'deluxe',
   suggestedPrompts = [],
   enableDiagrams = false,
-  diagramSubject = 'economics'
+  diagramSubject = 'economics',
+  chatRef
 }) => {
   const {
     user
@@ -341,6 +347,23 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     // Use the shared send logic
     handleSendWithMessage(messageText);
   };
+
+  // Expose submitMessage function via ref for external components (like Essay Marker)
+  useEffect(() => {
+    if (chatRef) {
+      (chatRef as React.MutableRefObject<RAGChatRef>).current = {
+        submitMessage: (messageText: string) => {
+          if (!messageText.trim() || isLoading) return;
+          const userMessage: Message = {
+            role: 'user',
+            content: messageText
+          };
+          setMessages(prev => [...prev, userMessage]);
+          handleSendWithMessage(messageText);
+        }
+      };
+    }
+  }, [chatRef, isLoading]);
 
   // Handle suggested prompt click - adds user message and sends
   const handleSuggestedPrompt = (prompt: {

@@ -26,6 +26,7 @@ interface HeaderProps {
   hideUserDetails?: boolean;
   diagramSubject?: 'economics' | 'cs';
   productId?: string;
+  onEssayMarkerSubmit?: (message: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -39,7 +40,8 @@ export const Header: React.FC<HeaderProps> = ({
   toolsLocked = false,
   hideUserDetails = false,
   diagramSubject = 'economics',
-  productId
+  productId,
+  onEssayMarkerSubmit
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -197,7 +199,12 @@ export const Header: React.FC<HeaderProps> = ({
               sideOffset={8}
             >
               <div className="p-4">
-                <EssayMarkerTool tier={tier} productId={productId} />
+                <EssayMarkerTool 
+                  tier={tier} 
+                  productId={productId} 
+                  onSubmitToChat={onEssayMarkerSubmit}
+                  onClose={() => setEssayMarkerOpen(false)}
+                />
               </div>
             </PopoverContent>
           </Popover>
