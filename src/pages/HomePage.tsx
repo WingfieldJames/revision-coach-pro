@@ -80,7 +80,7 @@ export const HomePage = () => {
               </ContainerScroll>
               
               <div className="text-center mb-8 -mt-12 md:-mt-20 relative z-50 px-4">
-                <InteractiveHoverButton text="Get started today →" variant="default" onClick={() => navigate('/compare')} className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]" />
+                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => navigate('/compare')} className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]" />
                 <p className="text-xs sm:text-sm text-muted-foreground mt-3">
                   Get started free • No card needed
                 </p>
@@ -282,7 +282,7 @@ export const HomePage = () => {
           </ScrollReveal>
           
           <ScrollReveal delay={0.3} className="text-center mt-8">
-            <InteractiveHoverButton text="Get started today →" variant="reverse" onClick={() => navigate('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
+            <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={() => navigate('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
           </ScrollReveal>
         </div>
       </section>
