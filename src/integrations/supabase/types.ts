@@ -181,6 +181,47 @@ export type Database = {
           },
         ]
       }
+      monthly_tool_usage: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string | null
+          tool_type: string
+          updated_at: string
+          usage_count: number
+          usage_month: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          tool_type: string
+          updated_at?: string
+          usage_count?: number
+          usage_month?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          tool_type?: string
+          updated_at?: string
+          usage_count?: number
+          usage_month?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_tool_usage_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           active: boolean | null
@@ -405,8 +446,21 @@ export type Database = {
       }
     }
     Functions: {
+      get_tool_usage: {
+        Args: { p_product_id: string; p_tool_type: string; p_user_id: string }
+        Returns: Json
+      }
       increment_prompt_usage: {
         Args: { p_limit?: number; p_product_id: string; p_user_id: string }
+        Returns: Json
+      }
+      increment_tool_usage: {
+        Args: {
+          p_limit: number
+          p_product_id: string
+          p_tool_type: string
+          p_user_id: string
+        }
         Returns: Json
       }
       match_documents: {

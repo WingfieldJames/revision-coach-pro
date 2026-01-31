@@ -89,40 +89,10 @@ export const HomePage = () => {
         </HeroBackgroundPaths>
       </section>
 
-      {/* Testimonials Section */}
-      <section data-section="testimonials" className="hidden md:block py-16 px-8 text-center bg-muted">
-        <ScrollReveal>
-          <h2 className="text-xl md:text-3xl font-bold mb-8">
-            Used by your favourite study influencers & top students 👀
-          </h2>
-        </ScrollReveal>
-        
-        <StaggerContainer className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
-          <StaggerItem className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png" alt="Mahmudur Rahman" className="w-full h-48 object-cover" />
-            <div className="p-4 text-left">
-              <strong className="text-card-foreground">Mahmudur Rahman</strong><br />
-              <span className="text-sm text-muted-foreground">15m views & 1.5m+ likes</span>
-            </div>
-          </StaggerItem>
-
-          <StaggerItem className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png" alt="Sina Naderi" className="w-full h-48 object-cover object-[center_20%]" />
-            <div className="p-4 text-left">
-              <strong className="text-card-foreground">Sina Naderi</strong><br />
-              <span className="text-sm text-muted-foreground">BA Economics, Cambridge</span>
-            </div>
-          </StaggerItem>
-
-          <StaggerItem className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/tanuj-kakumani-updated.jpg" alt="Tanuj Kakumani" className="w-full h-48 object-cover object-[center_30%]" />
-            <div className="p-4 text-left">
-              <strong className="text-card-foreground">Tanuj Kakumani</strong><br />
-              <span className="text-sm text-muted-foreground">BSc EFDS, Imperial & Founder of EconBridge</span>
-            </div>
-          </StaggerItem>
-        </StaggerContainer>
-      </section>
+      {/* Trained by A* Students Section - Desktop only (moved up) */}
+      <div className="hidden md:block">
+        <FoundersCarousel />
+      </div>
 
       {/* Video Demo Section - Desktop only */}
       <section className="hidden md:block py-16 bg-background">
@@ -160,10 +130,40 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Trained by A* Students Section - Desktop only */}
-      <div className="hidden md:block">
-        <FoundersCarousel />
-      </div>
+      {/* Testimonials Section (moved down) */}
+      <section data-section="testimonials" className="hidden md:block py-16 px-8 text-center bg-muted">
+        <ScrollReveal>
+          <h2 className="text-xl md:text-3xl font-bold mb-8">
+            Used by your favourite study influencers & top students 👀
+          </h2>
+        </ScrollReveal>
+        
+        <StaggerContainer className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
+          <StaggerItem className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
+            <img src="/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png" alt="Mahmudur Rahman" className="w-full h-48 object-cover" />
+            <div className="p-4 text-left">
+              <strong className="text-card-foreground">Mahmudur Rahman</strong><br />
+              <span className="text-sm text-muted-foreground">15m views & 1.5m+ likes</span>
+            </div>
+          </StaggerItem>
+
+          <StaggerItem className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
+            <img src="/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png" alt="Sina Naderi" className="w-full h-48 object-cover object-[center_20%]" />
+            <div className="p-4 text-left">
+              <strong className="text-card-foreground">Sina Naderi</strong><br />
+              <span className="text-sm text-muted-foreground">BA Economics, Cambridge</span>
+            </div>
+          </StaggerItem>
+
+          <StaggerItem className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
+            <img src="/lovable-uploads/tanuj-kakumani-updated.jpg" alt="Tanuj Kakumani" className="w-full h-48 object-cover object-[center_30%]" />
+            <div className="p-4 text-left">
+              <strong className="text-card-foreground">Tanuj Kakumani</strong><br />
+              <span className="text-sm text-muted-foreground">BSc EFDS, Imperial & Founder of EconBridge</span>
+            </div>
+          </StaggerItem>
+        </StaggerContainer>
+      </section>
 
       {/* Mobile Founders Section - Above "How A* AI helps" */}
       <MobileFoundersSection />

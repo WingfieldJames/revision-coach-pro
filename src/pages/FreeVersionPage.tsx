@@ -28,6 +28,7 @@ export const FreeVersionPage = () => {
           showImageTool 
           showDiagramTool 
           showEssayMarker 
+          showPastPaperFinder
           showExamCountdown
           examDates={EDEXCEL_ECONOMICS_EXAMS}
           examSubjectName="Edexcel Economics"

@@ -28,6 +28,7 @@ export const CIEFreeVersionPage = () => {
           showImageTool 
           showDiagramTool 
           showEssayMarker 
+          showPastPaperFinder
           showExamCountdown
           examDates={AQA_ECONOMICS_EXAMS}
           examSubjectName="CIE Economics"

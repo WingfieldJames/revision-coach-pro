@@ -161,6 +161,7 @@ export const OCRPhysicsPremiumPage = () => {
         <Header
           showImageTool
           showEssayMarker
+          showPastPaperFinder
           showExamCountdown
           examDates={OCR_PHYSICS_EXAMS}
           examSubjectName="OCR Physics"

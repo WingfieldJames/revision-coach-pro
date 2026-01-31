@@ -78,68 +78,31 @@ Remember to:
 - Give exam tips and mark scheme points where relevant`,
 };
 
-// Build personalized system prompt with user context
+// Build personalized system prompt with user context - PREPENDED to start
 function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | null, userMessage: string): string {
   if (!prefs) return basePrompt;
   
-  let context = `\n\n--- STUDENT CONTEXT ---`;
-  context += `\nThis student is in ${prefs.year}.`;
-  context += `\nTheir current/predicted grade is ${prefs.predicted_grade}.`;
-  context += `\nTheir target grade is ${prefs.target_grade}.`;
-  
-  if (prefs.additional_info) {
-    context += `\nAdditional notes from the student: "${prefs.additional_info}"`;
-  }
-  
-  context += `\n\n--- PERSONALIZATION INSTRUCTIONS (CRITICAL) ---`;
-  context += `\nYou MUST actively reference and acknowledge the student's grades in your responses. This is essential for personalization.`;
-  
-  // Add personalization based on grade gap
-  const gradeOrder = ['D', 'C', 'B', 'A', 'A*'];
-  const predictedIdx = gradeOrder.indexOf(prefs.predicted_grade);
-  const targetIdx = gradeOrder.indexOf(prefs.target_grade);
-  
-  if (targetIdx > predictedIdx) {
-    context += `\n- The student is aiming to improve from ${prefs.predicted_grade} to ${prefs.target_grade}. When giving advice, explicitly mention what a ${prefs.predicted_grade} student typically does vs what a ${prefs.target_grade} student does differently.`;
-    context += `\n- When discussing technique or exam skills, say things like "As someone moving from ${prefs.predicted_grade} to ${prefs.target_grade}, you need to focus on..."`;
-  } else if (targetIdx === predictedIdx) {
-    context += `\n- The student is aiming to maintain their ${prefs.predicted_grade} grade. Acknowledge this and help them consolidate.`;
-  }
-  
-  // Detect if the question is about technique/exam skills
-  const techniqueKeywords = ['technique', 'how to answer', 'structure', 'marks', 'improve', 'essay', 'exam', 'approach', 'tips', 'advice'];
-  const isAboutTechnique = techniqueKeywords.some(kw => userMessage.toLowerCase().includes(kw));
-  
-  if (isAboutTechnique) {
-    context += `\n\n--- TECHNIQUE QUESTION DETECTED ---`;
-    context += `\nThis student is asking about exam technique. You MUST:`;
-    context += `\n1. Directly reference their current grade (${prefs.predicted_grade}) and target grade (${prefs.target_grade}) in your response.`;
-    context += `\n2. Explain what separates ${prefs.predicted_grade} answers from ${prefs.target_grade} answers specifically.`;
-    context += `\n3. Give concrete examples of what examiners look for at the ${prefs.target_grade} level.`;
-    context += `\n4. Use phrases like "To move from your ${prefs.predicted_grade} to your target ${prefs.target_grade}..." or "Currently at ${prefs.predicted_grade}, you likely..."`;
-  }
-  
-  // Year-specific guidance
-  if (prefs.year === 'Year 12') {
-    context += `\n- This is a Year 12 student. Include more foundational explanations and build from basics.`;
-    context += `\n- They may not have covered all topics yet, so check their understanding of prerequisites.`;
-  } else if (prefs.year === 'Year 13') {
-    context += `\n- This is a Year 13 student preparing for final exams.`;
-    context += `\n- Emphasize exam technique, past paper practice, and synoptic links between topics.`;
-    context += `\n- Be more direct about mark scheme requirements and examiner expectations.`;
-  }
-  
-  // Target grade specific guidance
-  if (prefs.target_grade === 'A*') {
-    context += `\n- For A* target: Include extension material, encourage deeper analysis, and highlight the nuances that differentiate A from A* answers.`;
-    context += `\n- Mention specific A* techniques: original evaluation, chain of reasoning, sophisticated analysis.`;
-  } else if (prefs.target_grade === 'A') {
-    context += `\n- For A target: Focus on thoroughness, clear explanations, and avoiding common pitfalls.`;
-  } else if (['B', 'C', 'D'].includes(prefs.target_grade)) {
-    context += `\n- Focus on building solid foundations, getting the basics right, and avoiding common mistakes.`;
-  }
-  
-  return basePrompt + context;
+  // Build student context block to PREPEND to the start of the system prompt
+  let studentContext = `--- STUDENT CONTEXT ---
+- Year Group: ${prefs.year}
+- Current Predicted Grade: ${prefs.predicted_grade}
+- Target Grade: ${prefs.target_grade}
+- Additional Context: ${prefs.additional_info || 'None provided'}
+
+--- INSTRUCTIONS FOR PERSONALIZATION ---
+The predicted grade is what the user is currently set to achieve whilst the target grade is the user's aim. Help bridge the gap between their predicted and target grades. Naturally mention the exact grades in your responses so they know the feature works.
+
+Year-specific context:
+- If Year 13: Their final A Level exams are this year. Focus on exam technique and past paper practice.
+- If Year 12: They are only studying Theme 1 and 2 and have predicted grade exams. Include more foundational explanations.
+
+Apply the additional context naturally depending on the user's question - do not bring this up constantly.
+---
+
+`;
+
+  // PREPEND student context to the START of the system prompt (not append to end)
+  return studentContext + basePrompt;
 }
 
 // Fetch system prompt from database for a given product

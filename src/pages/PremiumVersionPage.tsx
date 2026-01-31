@@ -96,6 +96,7 @@ export const PremiumVersionPage = () => {
           showImageTool 
           showDiagramTool 
           showEssayMarker 
+          showPastPaperFinder
           showExamCountdown
           examDates={EDEXCEL_ECONOMICS_EXAMS}
           examSubjectName="Edexcel Economics"
