@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { PenLine, Loader2, Image, FileText } from 'lucide-react';
@@ -8,6 +8,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
+const FREE_MONTHLY_ESSAY_LIMIT = 1;
+
+interface ToolUsageResponse {
+  count: number;
+}
+
+interface IncrementToolUsageResponse {
+  count: number;
+  limit: number;
+  exceeded: boolean;
+}
 
 // Custom prompts for each mark type - easily customizable later
 const markPrompts: Record<number, string> = {
@@ -40,7 +51,38 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [monthlyUsage, setMonthlyUsage] = useState<number>(0);
+  const [isLoadingUsage, setIsLoadingUsage] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load current month's usage for free tier
+  useEffect(() => {
+    const loadUsage = async () => {
+      if (tier !== 'free' || !user) {
+        setIsLoadingUsage(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('get_tool_usage', {
+          p_user_id: user.id,
+          p_product_id: productId || null,
+          p_tool_type: 'essay_marker'
+        });
+
+        if (!error && data) {
+          const typedData = data as unknown as ToolUsageResponse;
+          setMonthlyUsage(typedData.count || 0);
+        }
+      } catch (err) {
+        console.error('Error loading tool usage:', err);
+      } finally {
+        setIsLoadingUsage(false);
+      }
+    };
+
+    loadUsage();
+  }, [tier, user, productId]);
 
   const handleUpgrade = async () => {
     if (!user) {
@@ -81,17 +123,21 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     }
   };
 
-  // Show upgrade prompt for free tier
-  if (tier === 'free') {
+  // Check if user has exceeded monthly limit (free tier only)
+  const hasExceededLimit = tier === 'free' && monthlyUsage >= FREE_MONTHLY_ESSAY_LIMIT;
+  const remainingUses = FREE_MONTHLY_ESSAY_LIMIT - monthlyUsage;
+
+  // Show upgrade prompt when limit exceeded for free tier
+  if (tier === 'free' && hasExceededLimit && !isLoadingUsage) {
     return (
       <div className="space-y-4">
         <div className="text-center">
           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center mx-auto mb-3">
             <PenLine className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-xl font-bold mb-2">Unlock Essay Marker</h3>
+          <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
           <p className="text-muted-foreground text-sm">
-            Upgrade to Deluxe to get AI-powered essay marking with detailed feedback.
+            You've used your {FREE_MONTHLY_ESSAY_LIMIT} free essay marking this month. Upgrade to Deluxe for unlimited access.
           </p>
         </div>
         
@@ -100,15 +146,11 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           <ul className="space-y-2 text-sm">
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
-              <span>Mark scheme feedback on answers</span>
+              <span>Unlimited essay marking</span>
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
-              <span>A* essay structures & technique</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Image-to-text OCR for exam questions</span>
+              <span>Unlimited diagram searches</span>
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
@@ -117,10 +159,6 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
               <span>Unlimited daily prompts</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>AI-powered diagram generator</span>
             </li>
           </ul>
         </div>
@@ -139,6 +177,10 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
             'Upgrade to Deluxe'
           )}
         </Button>
+        
+        <p className="text-xs text-center text-muted-foreground">
+          Your free uses reset at the start of each month
+        </p>
       </div>
     );
   }
@@ -192,10 +234,35 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     }
   };
 
-  const handleMarkEssay = () => {
+  const handleMarkEssay = async () => {
     if (!essayText.trim()) {
       toast.error('Please enter your essay first');
       return;
+    }
+
+    // For free tier, check and increment usage
+    if (tier === 'free' && user) {
+      try {
+        const { data, error } = await supabase.rpc('increment_tool_usage', {
+          p_user_id: user.id,
+          p_product_id: productId || null,
+          p_tool_type: 'essay_marker',
+          p_limit: FREE_MONTHLY_ESSAY_LIMIT
+        });
+
+        if (error) {
+          console.error('Error incrementing usage:', error);
+        } else if (data) {
+          const typedData = data as unknown as IncrementToolUsageResponse;
+          setMonthlyUsage(typedData.count);
+          if (typedData.exceeded) {
+            toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Usage tracking error:', err);
+      }
     }
 
     const prompt = `${markPrompts[selectedMark]}\n\n${essayText}`;
@@ -245,6 +312,15 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           </p>
         </div>
       </div>
+
+      {/* Free tier usage indicator */}
+      {tier === 'free' && !isLoadingUsage && (
+        <div className="bg-muted/50 rounded-lg p-2 text-center">
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium">{remainingUses}</span> free {remainingUses === 1 ? 'use' : 'uses'} remaining this month
+          </p>
+        </div>
+      )}
 
       <div className="space-y-4">
         {/* Mark Selector */}
@@ -354,7 +430,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           )}
           <Button
             onClick={handleMarkEssay}
-            disabled={!essayText.trim() || isSubmitting}
+            disabled={!essayText.trim() || isSubmitting || isLoadingUsage}
             className={`${essayText ? 'flex-1' : 'w-full'} bg-gradient-brand hover:opacity-90 text-primary-foreground`}
             size="sm"
           >

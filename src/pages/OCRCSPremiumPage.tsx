@@ -34,6 +34,7 @@ export const OCRCSPremiumPage = () => {
           showImageTool 
           showDiagramTool 
           showEssayMarker
+          showPastPaperFinder
           showExamCountdown
           examDates={OCR_CS_EXAMS}
           examSubjectName="OCR Computer Science"

@@ -28,6 +28,7 @@ export const OCRPhysicsFreeVersionPage = () => {
           showImageTool 
           showDiagramTool 
           showEssayMarker 
+          showPastPaperFinder
           showExamCountdown
           examDates={OCR_PHYSICS_EXAMS}
           examSubjectName="OCR Physics"

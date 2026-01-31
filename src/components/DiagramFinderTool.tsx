@@ -1,13 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { BarChart2, Search, Loader2, X, Lock } from 'lucide-react';
+import { BarChart2, Search, Loader2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { diagrams, Diagram } from '@/data/diagrams';
 import { csDiagrams, CSDiagram } from '@/data/csDiagrams';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+
+interface ToolUsageResponse {
+  count: number;
+}
+
+interface IncrementToolUsageResponse {
+  count: number;
+  limit: number;
+  exceeded: boolean;
+}
+
+const FREE_MONTHLY_DIAGRAM_LIMIT = 3;
 
 interface DiagramFinderToolProps {
   subject?: 'economics' | 'cs';
@@ -27,6 +39,37 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
   const [matchedDiagram, setMatchedDiagram] = useState<Diagram | CSDiagram | null>(null);
   const [noMatch, setNoMatch] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [monthlyUsage, setMonthlyUsage] = useState<number>(0);
+  const [isLoadingUsage, setIsLoadingUsage] = useState(true);
+
+  // Load current month's usage for free tier
+  useEffect(() => {
+    const loadUsage = async () => {
+      if (tier !== 'free' || !user) {
+        setIsLoadingUsage(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('get_tool_usage', {
+          p_user_id: user.id,
+          p_product_id: productId || null,
+          p_tool_type: 'diagram_generator'
+        });
+
+        if (!error && data) {
+          const typedData = data as unknown as ToolUsageResponse;
+          setMonthlyUsage(typedData.count || 0);
+        }
+      } catch (err) {
+        console.error('Error loading tool usage:', err);
+      } finally {
+        setIsLoadingUsage(false);
+      }
+    };
+
+    loadUsage();
+  }, [tier, user, productId]);
 
   const handleUpgrade = async () => {
     if (!user) {
@@ -67,17 +110,21 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
     }
   };
 
-  // Show upgrade prompt for free tier
-  if (tier === 'free') {
+  // Check if user has exceeded monthly limit (free tier only)
+  const hasExceededLimit = tier === 'free' && monthlyUsage >= FREE_MONTHLY_DIAGRAM_LIMIT;
+  const remainingUses = FREE_MONTHLY_DIAGRAM_LIMIT - monthlyUsage;
+
+  // Show upgrade prompt when limit exceeded for free tier
+  if (tier === 'free' && hasExceededLimit && !isLoadingUsage) {
     return (
       <div className="space-y-4">
         <div className="text-center">
           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center mx-auto mb-3">
             <BarChart2 className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-xl font-bold mb-2">Unlock Diagram Generator</h3>
+          <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
           <p className="text-muted-foreground text-sm">
-            Upgrade to Deluxe to instantly find the perfect diagram for any exam question.
+            You've used all {FREE_MONTHLY_DIAGRAM_LIMIT} free diagram searches this month. Upgrade to Deluxe for unlimited access.
           </p>
         </div>
         
@@ -86,11 +133,11 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
           <ul className="space-y-2 text-sm">
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
-              <span>AI-powered diagram generator</span>
+              <span>Unlimited diagram searches</span>
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
-              <span>Image-to-text OCR for exam questions</span>
+              <span>Unlimited essay marking</span>
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
@@ -99,14 +146,6 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
               <span>Unlimited daily prompts</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>A* essay structures & technique</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Mark scheme feedback on answers</span>
             </li>
           </ul>
         </div>
@@ -125,6 +164,10 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
             'Upgrade to Deluxe'
           )}
         </Button>
+        
+        <p className="text-xs text-center text-muted-foreground">
+          Your free uses reset at the start of each month
+        </p>
       </div>
     );
   }
@@ -132,6 +175,31 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
   const findDiagram = async () => {
     if (!inputText.trim()) {
       return;
+    }
+
+    // For free tier, check and increment usage
+    if (tier === 'free' && user) {
+      try {
+        const { data, error } = await supabase.rpc('increment_tool_usage', {
+          p_user_id: user.id,
+          p_product_id: productId || null,
+          p_tool_type: 'diagram_generator',
+          p_limit: FREE_MONTHLY_DIAGRAM_LIMIT
+        });
+
+        if (error) {
+          console.error('Error incrementing usage:', error);
+        } else if (data) {
+          const typedData = data as unknown as IncrementToolUsageResponse;
+          setMonthlyUsage(typedData.count);
+          if (typedData.exceeded) {
+            toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Usage tracking error:', err);
+      }
     }
 
     setIsSearching(true);
@@ -190,6 +258,15 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
         </div>
       </div>
 
+      {/* Free tier usage indicator */}
+      {tier === 'free' && !isLoadingUsage && (
+        <div className="bg-muted/50 rounded-lg p-2 text-center">
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium">{remainingUses}</span> free {remainingUses === 1 ? 'use' : 'uses'} remaining this month
+          </p>
+        </div>
+      )}
+
       {/* Input Area */}
       {!matchedDiagram && (
         <div className="space-y-3">
@@ -205,7 +282,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
           
           <Button
             onClick={findDiagram}
-            disabled={isSearching || !inputText.trim()}
+            disabled={isSearching || !inputText.trim() || isLoadingUsage}
             className="w-full bg-gradient-brand hover:opacity-90 text-primary-foreground"
             size="sm"
           >
