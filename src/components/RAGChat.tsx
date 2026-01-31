@@ -110,6 +110,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Animation refs
   const bufferRef = useRef('');
@@ -157,6 +158,19 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       });
     }
   }, [messages.length]);
+
+  // Auto-resize textarea as user types
+  const adjustTextareaHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+    }
+  }, []);
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [input, adjustTextareaHeight]);
 
   // Cleanup animation on unmount
   useEffect(() => {
@@ -675,7 +689,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           {/* Two-line pill container */}
           <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
             {/* Line 1: Text input */}
-            <Textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder={placeholder} disabled={isLoading} className="w-full min-h-[48px] max-h-[200px] resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-base" rows={1} />
+            <Textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder={placeholder} disabled={isLoading} className="w-full min-h-[48px] max-h-[200px] resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-base overflow-y-auto" rows={1} />
             
             {/* Line 2: Buttons row */}
             <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
