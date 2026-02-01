@@ -132,7 +132,7 @@ export const LoginPage = () => {
       />
       <Header showNavLinks />
       
-      <div className="flex items-start justify-center pt-2 pb-12 px-4">
+      <div className="max-w-md mx-auto pt-2 pb-12 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
