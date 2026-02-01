@@ -9,6 +9,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Instagram } from 'lucide-react';
+import { DottedSurface } from '@/components/ui/dotted-surface';
 import {
   Dialog,
   DialogContent,
@@ -117,7 +118,8 @@ export const LoginPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <DottedSurface />
       <SEOHead 
         title="Sign In to A* AI | A-Level Economics Revision"
         description="Sign in to your A* AI account to access your AI-powered A-Level Economics revision coach. Continue your journey to an A*."
@@ -125,7 +127,7 @@ export const LoginPage = () => {
       />
       <Header showNavLinks />
       
-      <div className="max-w-md mx-auto pt-2 pb-12 px-4">
+      <div className="max-w-md mx-auto pt-2 pb-12 px-4 relative z-10">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
