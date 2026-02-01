@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { motion } from "motion/react";
+import matanImage from '@/assets/matan-g.png';
 
 interface Testimonial {
   text: string;
@@ -21,10 +22,10 @@ export const TestimonialsColumn = ({
   reverse?: boolean;
 }) => {
   return (
-    <div className={`w-[280px] flex-shrink-0 ${className || ''}`}>
+    <div className={`flex-1 ${className || ''}`}>
       <motion.div
-        animate={{ translateY: reverse ? "0%" : "-50%" }}
-        initial={{ translateY: reverse ? "-50%" : "0%" }}
+        animate={{ translateY: reverse ? "-50%" : "0%" }}
+        initial={{ translateY: reverse ? "0%" : "-50%" }}
         transition={{
           duration,
           repeat: Infinity,
@@ -38,9 +39,9 @@ export const TestimonialsColumn = ({
             {testimonials.map(({ text, image, name, role }, i) => (
               <div
                 key={`${index}-${i}`}
-                className="bg-card rounded-2xl p-5 shadow-card border border-border/30 aspect-square flex flex-col justify-between"
+                className="bg-card rounded-3xl p-5 shadow-card border border-border/30 aspect-square flex flex-col justify-between"
               >
-                <p className="text-foreground leading-relaxed text-sm line-clamp-5">{text}</p>
+                <p className="text-foreground leading-relaxed text-sm line-clamp-6">{text}</p>
                 <div className="flex items-center gap-3 mt-auto pt-3">
                   <img
                     src={image}
@@ -61,7 +62,7 @@ export const TestimonialsColumn = ({
   );
 };
 
-// Testimonial data - 4 per column for better scrolling
+// Testimonial data - influencers + students from pricing page
 export const firstColumn: Testimonial[] = [
   {
     text: "A* AI has completely transformed how I revise. The diagram generator saves me hours!",
@@ -70,10 +71,10 @@ export const firstColumn: Testimonial[] = [
     role: "15m views & 1.5m+ likes",
   },
   {
-    text: "The essay marker gives feedback that actually helps you improve. Game changer.",
-    image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
-    name: "Sina Naderi",
-    role: "BA Economics, Cambridge",
+    text: "The Diagram Generator is actually so useful - I use it to find specific diagrams for 25 markers.",
+    image: matanImage,
+    name: "Matan G",
+    role: "Year 13 Student",
   },
   {
     text: "Finally an AI that understands A-Level Economics mark schemes properly.",
@@ -82,10 +83,10 @@ export const firstColumn: Testimonial[] = [
     role: "BSc EFDS, Imperial",
   },
   {
-    text: "Used this for my entire Year 13. Best investment I made for my A-Levels.",
-    image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
-    name: "Mahmudur Rahman",
-    role: "15m views & 1.5m+ likes",
+    text: "The essay marker gives feedback that actually helps you improve. Game changer.",
+    image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
+    name: "Sina Naderi",
+    role: "BA Economics, Cambridge",
   },
 ];
 
@@ -109,10 +110,10 @@ export const secondColumn: Testimonial[] = [
     role: "15m views & 1.5m+ likes",
   },
   {
-    text: "The KAA chains it generates are spot on. Perfect for exam prep.",
-    image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
-    name: "Sina Naderi",
-    role: "BA Economics, Cambridge",
+    text: "Perfect for revision - the feedback on my KAA chains is exactly what I needed.",
+    image: matanImage,
+    name: "Matan G",
+    role: "Year 13 Student",
   },
 ];
 
@@ -137,8 +138,8 @@ export const thirdColumn: Testimonial[] = [
   },
   {
     text: "The personalised feedback is like having a private tutor available 24/7.",
-    image: "/lovable-uploads/tanuj-kakumani-updated.jpg",
-    name: "Tanuj Kakumani",
-    role: "BSc EFDS, Imperial",
+    image: matanImage,
+    name: "Matan G",
+    role: "Year 13 Student",
   },
 ];

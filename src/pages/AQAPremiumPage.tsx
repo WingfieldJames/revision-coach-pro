@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
+import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
@@ -90,7 +90,7 @@ export const AQAPremiumPage = () => {
         description="Access A* AI Deluxe for AQA Economics. Full training on 2017-2025 past papers, mark schemes, A* technique & unlimited prompts."
         canonical="https://astarai.co.uk/aqa-premium"
       />
-      <ChatbotFullscreenPaths />
+      <RandomChatbotBackground />
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
