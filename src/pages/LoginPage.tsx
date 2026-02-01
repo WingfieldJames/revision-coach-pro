@@ -42,28 +42,19 @@ export const LoginPage = () => {
         description: "You've been logged in successfully!",
       });
 
-      // Handle different redirect scenarios
+      // Handle different redirect scenarios - all go back to subjects/compare page
       if (redirect === 'stripe') {
         // User wanted to access premium, redirect to stripe checkout
         navigate('/compare?checkout=true');
-      } else if (redirect === 'compare') {
-        // User wanted subjects/pricing page
+      } else if (redirect === 'compare' || redirect === 'free-version' || redirect === 'aqa-free-version' || redirect === 'cie-free-version' || redirect === 'ocr-cs-free-version' || redirect === 'ocr-physics-free-version') {
+        // All paths redirect back to subjects/pricing page
         navigate('/compare');
-      } else if (redirect === 'premium') {
-        // User wanted premium version, check if they have access
-        navigate('/premium');
-      } else if (redirect === 'aqa-premium') {
-        // User wanted AQA premium version
-        navigate('/aqa-premium');
-      } else if (redirect === 'free-version') {
-        // User wanted free version, redirect to free chatbot
-        navigate('/free-version');
-      } else if (redirect === 'aqa-free-version') {
-        // User wanted AQA free version
-        navigate('/aqa-free-version');
+      } else if (redirect === 'premium' || redirect === 'aqa-premium' || redirect === 'cie-premium' || redirect === 'ocr-cs-premium' || redirect === 'ocr-physics-premium') {
+        // Premium redirects also go to compare page
+        navigate('/compare');
       } else {
-        // Default redirect to dashboard
-        navigate('/dashboard');
+        // Default redirect to compare/subjects page
+        navigate('/compare');
       }
     } catch (error: any) {
       toast({
@@ -118,9 +109,11 @@ export const LoginPage = () => {
     }
   };
 
-  // Scroll to top when page loads
+  // Scroll to top immediately when page loads
   React.useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }, []);
 
   return (
