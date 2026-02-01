@@ -1,7 +1,7 @@
 import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
+import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
 import { OCR_CS_EXAMS } from '@/components/ExamCountdown';
 
@@ -22,7 +22,7 @@ export const OCRCSFreeVersionPage = () => {
         description="Try A* AI free for OCR Computer Science. AI trained on OCR CS specification for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/ocr-cs-free-version"
       />
-      <ChatbotFullscreenPaths />
+      <RandomChatbotBackground />
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 

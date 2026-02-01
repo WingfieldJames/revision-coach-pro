@@ -1,7 +1,7 @@
 import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
+import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
@@ -22,7 +22,7 @@ export const FreeVersionPage = () => {
         description="Try A* AI free – AI trained on Edexcel Economics past papers. Get spec-aligned responses and quick practice. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/free-version"
       />
-      <ChatbotFullscreenPaths />
+      <RandomChatbotBackground />
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 

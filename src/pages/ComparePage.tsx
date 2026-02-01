@@ -6,7 +6,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Check, Star, Instagram } from 'lucide-react';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.png';
@@ -18,12 +18,12 @@ import { checkProductAccess } from '@/lib/productAccess';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Star, Instagram } from 'lucide-react';
 import { TestimonialsSection } from '@/components/ui/testimonials-with-marquee';
 import { FounderSection } from '@/components/ui/founder-section';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
 import { ScreenshotTestimonials } from '@/components/ui/screenshot-testimonials';
 import { LatestFeaturesSection } from '@/components/LatestFeaturesSection';
+import { FlowFieldBackground } from '@/components/ui/flow-field-background';
 type Subject = 'economics' | 'computer-science' | 'physics';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 export const ComparePage = () => {
@@ -253,32 +253,12 @@ export const ComparePage = () => {
       alert(`Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
-  return <div className="min-h-screen bg-background font-sans">
+  return <div className="min-h-screen bg-background font-sans relative">
       <SEOHead title="Choose Your A* AI Plan | A-Level Economics, Computer Science & Physics" description="Compare A* AI plans for A-Level revision. Economics (Edexcel, AQA, CIE), Computer Science (OCR) & Physics (OCR). Free tier or Deluxe with full past paper training. £24.99 one-time." canonical="https://astarai.co.uk/compare" />
+      <FlowFieldBackground color="#a855f7" trailOpacity={0.04} particleCount={400} />
       <Header showNavLinks />
       
-      {/* Instagram Follow Banner */}
-      <div className="hidden md:block bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 py-3 px-4 text-center text-white">
-        <p className="text-sm font-medium flex items-center justify-center gap-2 flex-wrap">
-          <Instagram className="h-4 w-4" />
-          {/* Mobile: Full text with link */}
-          <span className="md:hidden">
-            <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:opacity-80 transition-opacity">
-              Follow us
-            </a>
-            {' '}for A* study tips and exclusive deals
-          </span>
-          {/* Desktop: Simple "Follow us" with underlined link */}
-          <span className="hidden md:inline">
-            <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:opacity-80 transition-opacity">
-              Follow us
-            </a>
-            {' '}for daily A* study tips, new features and exclusive deals
-          </span>
-        </p>
-      </div>
-      
-      <main className="py-8 px-8 max-w-4xl mx-auto text-center">
+      <main className="py-8 px-8 max-w-4xl mx-auto text-center relative z-10">
         <ScrollReveal>
           <h1 className="text-2xl md:text-4xl font-bold mb-8 flex items-center justify-center gap-2 md:gap-3 flex-nowrap">
             Choose Your 

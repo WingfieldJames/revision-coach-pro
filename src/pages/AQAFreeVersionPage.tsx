@@ -1,7 +1,7 @@
 import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
+import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
@@ -22,7 +22,7 @@ export const AQAFreeVersionPage = () => {
         description="Try A* AI free for AQA Economics. AI trained on AQA past papers for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
         canonical="https://astarai.co.uk/aqa-free-version"
       />
-      <ChatbotFullscreenPaths />
+      <RandomChatbotBackground />
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 

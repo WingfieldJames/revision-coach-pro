@@ -9,7 +9,6 @@ import { ChevronDown, Instagram, Music } from 'lucide-react';
 import { ContainerScroll } from '@/components/ui/container-scroll-animation';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { BackgroundPaths } from '@/components/ui/background-paths';
 import { HeroBackgroundPaths } from '@/components/ui/hero-background-paths';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
 import { FoundersCarousel } from '@/components/FoundersCarousel';
@@ -22,6 +21,15 @@ export const HomePage = () => {
   } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+
+  // Helper to require sign-in before navigation
+  const handleProtectedNavigation = (destination: string) => {
+    if (!user) {
+      navigate('/login?redirect=compare');
+    } else {
+      navigate(destination);
+    }
+  };
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
       <Header showNavLinks />
@@ -55,7 +63,7 @@ export const HomePage = () => {
               </div>
 
               <div className="text-center mb-8">
-                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => navigate('/compare')} className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]" />
+                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]" />
                 <p className="text-xs text-muted-foreground mt-3">
                   Get started free • No card needed
                 </p>
@@ -81,7 +89,7 @@ export const HomePage = () => {
               </ContainerScroll>
               
               <div className="text-center mb-8 -mt-12 md:-mt-20 relative z-50 px-4">
-                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => navigate('/compare')} className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]" />
+                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]" />
                 <p className="text-xs sm:text-sm text-muted-foreground mt-3">
                   Get started free • No card needed
                 </p>
@@ -95,7 +103,7 @@ export const HomePage = () => {
         <FoundersCarousel />
       </div>
 
-      {/* Video Demo Section - Desktop only */}
+      {/* Video Demo Section - Desktop only - NO animation background */}
       <section className="hidden md:block py-16 bg-background">
         <div className="max-w-7xl mx-auto px-8">
           <ScrollReveal>
@@ -111,17 +119,17 @@ export const HomePage = () => {
         </div>
         
         <ScrollReveal delay={0.2}>
-          <BackgroundPaths>
+          <div className="max-w-7xl mx-auto px-8">
             <div className="relative w-full aspect-video rounded-lg overflow-hidden">
               <iframe src="https://player.vimeo.com/video/1157200471?background=1&loop=1&muted=1" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
             </div>
-          </BackgroundPaths>
+          </div>
         </ScrollReveal>
 
         <div className="max-w-7xl mx-auto px-8">
           {/* Button beneath video */}
           <div className="text-center mt-8 mb-4">
-            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => navigate('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px]" />
+            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px]" />
           </div>
 
           {/* Disclaimer */}
@@ -131,13 +139,10 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials Section - 3 columns moving UP */}
       <section data-section="testimonials" className="hidden md:block py-16 px-8 bg-muted overflow-hidden">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <ScrollReveal className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-medium mb-4">
-              Testimonials
-            </span>
             <h2 className="text-2xl md:text-3xl font-bold mb-4">
               What our users say
             </h2>
@@ -146,10 +151,10 @@ export const HomePage = () => {
             </p>
           </ScrollReveal>
 
-          <div className="flex justify-center gap-6 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
-            <TestimonialsColumn testimonials={firstColumn} duration={25} className="hidden lg:block" />
+          <div className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
+            <TestimonialsColumn testimonials={firstColumn} duration={25} />
             <TestimonialsColumn testimonials={secondColumn} duration={20} reverse />
-            <TestimonialsColumn testimonials={thirdColumn} duration={28} className="hidden lg:block" />
+            <TestimonialsColumn testimonials={thirdColumn} duration={28} />
           </div>
         </div>
       </section>
@@ -174,7 +179,7 @@ export const HomePage = () => {
           {/* Laptop Image */}
           <ScrollReveal direction="left" className="flex-1 text-center">
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
-            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => navigate('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px] mt-8" />
+            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px] mt-8" />
           </ScrollReveal>
 
           {/* Features */}
@@ -271,7 +276,7 @@ export const HomePage = () => {
           </ScrollReveal>
           
           <ScrollReveal delay={0.3} className="text-center mt-8">
-            <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={() => navigate('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
+            <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
           </ScrollReveal>
         </div>
       </section>

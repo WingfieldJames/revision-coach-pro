@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { ChatbotFullscreenPaths } from '@/components/ui/chatbot-fullscreen-paths';
+import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { OCR_CS_EXAMS } from '@/components/ExamCountdown';
 
@@ -28,7 +28,7 @@ export const OCRCSPremiumPage = () => {
         description="Access A* AI Deluxe for OCR Computer Science. Full training on 2017-2025 past papers, mark schemes, A* technique & unlimited prompts."
         canonical="https://astarai.co.uk/ocr-cs-premium"
       />
-      <ChatbotFullscreenPaths />
+      <RandomChatbotBackground />
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
