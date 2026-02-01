@@ -118,18 +118,15 @@ export const LoginPage = () => {
       />
       
       {/* Animated Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0">
-          <CanvasRevealEffect
-            animationSpeed={3}
-            containerClassName="bg-white"
-            colors={[[147, 51, 234], [168, 85, 247]]}
-            opacities={[0.1, 0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.5, 0.6, 0.8]}
-            dotSize={3}
-            showGradient={true}
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent" />
+      <div className="absolute inset-0 bg-white">
+        <CanvasRevealEffect
+          animationSpeed={3}
+          containerClassName="bg-white"
+          colors={[[147, 51, 234], [168, 85, 247]]}
+          opacities={[0.1, 0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.5, 0.6, 0.8]}
+          dotSize={3}
+          showGradient={false}
+        />
       </div>
 
       {/* Content Layer */}
