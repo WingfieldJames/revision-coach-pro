@@ -161,13 +161,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const redirect = urlParams.get('redirect');
     
-    let redirectTo = `${window.location.origin}/dashboard`;
-    if (redirect === 'free-version') {
-      redirectTo = `${window.location.origin}/free-version`;
-    } else if (redirect === 'stripe') {
+    // Default to compare page, or handle specific redirects
+    let redirectTo = `${window.location.origin}/compare`;
+    if (redirect === 'stripe') {
       redirectTo = `${window.location.origin}/compare?checkout=true`;
-    } else if (redirect === 'premium') {
-      redirectTo = `${window.location.origin}/premium-version`;
     }
 
     const { error } = await supabase.auth.signInWithOAuth({
