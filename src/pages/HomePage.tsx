@@ -147,9 +147,9 @@ export const HomePage = () => {
           </ScrollReveal>
 
           <div className="flex justify-center gap-6 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
-            <TestimonialsColumn testimonials={firstColumn} duration={18} className="hidden lg:block" />
-            <TestimonialsColumn testimonials={secondColumn} duration={22} />
-            <TestimonialsColumn testimonials={thirdColumn} duration={20} className="hidden lg:block" />
+            <TestimonialsColumn testimonials={firstColumn} duration={25} className="hidden lg:block" />
+            <TestimonialsColumn testimonials={secondColumn} duration={20} reverse />
+            <TestimonialsColumn testimonials={thirdColumn} duration={28} className="hidden lg:block" />
           </div>
         </div>
       </section>
