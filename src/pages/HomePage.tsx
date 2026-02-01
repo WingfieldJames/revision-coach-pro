@@ -14,6 +14,7 @@ import { HeroBackgroundPaths } from '@/components/ui/hero-background-paths';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
 import { FoundersCarousel } from '@/components/FoundersCarousel';
 import { MobileFoundersSection } from '@/components/MobileFoundersSection';
+import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from '@/components/ui/testimonials-columns';
 export const HomePage = () => {
   const {
     user,
@@ -130,39 +131,27 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials Section (moved down) */}
-      <section data-section="testimonials" className="hidden md:block py-16 px-8 text-center bg-muted">
-        <ScrollReveal>
-          <h2 className="text-xl md:text-3xl font-bold mb-8">
-            Used by your favourite study influencers & top students 👀
-          </h2>
-        </ScrollReveal>
-        
-        <StaggerContainer className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
-          <StaggerItem className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png" alt="Mahmudur Rahman" className="w-full h-48 object-cover" />
-            <div className="p-4 text-left">
-              <strong className="text-card-foreground">Mahmudur Rahman</strong><br />
-              <span className="text-sm text-muted-foreground">15m views & 1.5m+ likes</span>
-            </div>
-          </StaggerItem>
+      {/* Testimonials Section */}
+      <section data-section="testimonials" className="hidden md:block py-16 px-8 bg-muted overflow-hidden">
+        <div className="max-w-6xl mx-auto">
+          <ScrollReveal className="text-center mb-12">
+            <span className="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-medium mb-4">
+              Testimonials
+            </span>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+              What our users say
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Join thousands of students achieving A* grades with our AI-powered revision tools
+            </p>
+          </ScrollReveal>
 
-          <StaggerItem className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png" alt="Sina Naderi" className="w-full h-48 object-cover object-[center_20%]" />
-            <div className="p-4 text-left">
-              <strong className="text-card-foreground">Sina Naderi</strong><br />
-              <span className="text-sm text-muted-foreground">BA Economics, Cambridge</span>
-            </div>
-          </StaggerItem>
-
-          <StaggerItem className="w-60 bg-card rounded-xl shadow-card overflow-hidden">
-            <img src="/lovable-uploads/tanuj-kakumani-updated.jpg" alt="Tanuj Kakumani" className="w-full h-48 object-cover object-[center_30%]" />
-            <div className="p-4 text-left">
-              <strong className="text-card-foreground">Tanuj Kakumani</strong><br />
-              <span className="text-sm text-muted-foreground">BSc EFDS, Imperial & Founder of EconBridge</span>
-            </div>
-          </StaggerItem>
-        </StaggerContainer>
+          <div className="flex justify-center gap-6 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
+            <TestimonialsColumn testimonials={firstColumn} duration={18} className="hidden lg:block" />
+            <TestimonialsColumn testimonials={secondColumn} duration={22} />
+            <TestimonialsColumn testimonials={thirdColumn} duration={20} className="hidden lg:block" />
+          </div>
+        </div>
       </section>
 
       {/* Mobile Founders Section - Above "How A* AI helps" */}
