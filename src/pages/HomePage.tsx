@@ -22,13 +22,9 @@ export const HomePage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Require login before navigating to subjects/pricing page
+  // Navigate directly to subjects/pricing page
   const handleNavigation = (destination: string) => {
-    if (!user) {
-      navigate('/login?redirect=compare');
-    } else {
-      navigate(destination);
-    }
+    navigate(destination);
   };
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
