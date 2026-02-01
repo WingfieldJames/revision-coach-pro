@@ -146,30 +146,81 @@ interface FetchContextResult {
   sourcesSearched: Array<{ type: string; topic: string }>;
 }
 
+// Detect content type priorities based on user message keywords
+function detectContentTypePriorities(userMessage: string): string[] {
+  const lowerMessage = userMessage.toLowerCase();
+  const priorities: string[] = [];
+  
+  // Exam technique keywords
+  if (lowerMessage.includes('exam') || lowerMessage.includes('technique') || 
+      lowerMessage.includes('how to answer') || lowerMessage.includes('marks') ||
+      lowerMessage.includes('structure') || lowerMessage.includes('essay')) {
+    priorities.push(CONTENT_TYPES.EXAM_TECHNIQUE, CONTENT_TYPES.ESSAY_WRITING, CONTENT_TYPES.MARK_SCHEME);
+  }
+  
+  // Past paper / practice question keywords
+  if (lowerMessage.includes('practice') || lowerMessage.includes('question') ||
+      lowerMessage.includes('past paper') || lowerMessage.includes('example')) {
+    priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3);
+  }
+  
+  // Definition / concept keywords
+  if (lowerMessage.includes('define') || lowerMessage.includes('what is') ||
+      lowerMessage.includes('explain') || lowerMessage.includes('meaning')) {
+    priorities.push(CONTENT_TYPES.SPECIFICATION);
+  }
+  
+  // Mark scheme keywords
+  if (lowerMessage.includes('mark scheme') || lowerMessage.includes('marking') ||
+      lowerMessage.includes('how many marks')) {
+    priorities.push(CONTENT_TYPES.MARK_SCHEME);
+  }
+  
+  // Default: specification is always useful
+  if (!priorities.includes(CONTENT_TYPES.SPECIFICATION)) {
+    priorities.push(CONTENT_TYPES.SPECIFICATION);
+  }
+  
+  return priorities;
+}
+
 // Query relevant document chunks from the training data
+// Now with tier filtering and smart content routing
 async function fetchRelevantContext(
   supabase: ReturnType<typeof createClient>,
   productId: string,
   userMessage: string,
+  tier: 'free' | 'deluxe',
   contentTypes?: string[]
 ): Promise<FetchContextResult> {
   try {
-    // Build query for document chunks
+    // Detect content type priorities if not explicitly provided
+    const effectiveContentTypes = contentTypes && contentTypes.length > 0 
+      ? contentTypes 
+      : detectContentTypePriorities(userMessage);
+    
+    console.log(`Content type priorities: ${effectiveContentTypes.join(', ')}`);
+    console.log(`Fetching context for tier: ${tier}`);
+    
+    // Build query for document chunks - ALWAYS filter by product_id first
     let query = supabase
       .from('document_chunks')
       .select('content, metadata')
       .eq('product_id', productId);
     
-    // If specific content types requested, filter by them
-    if (contentTypes && contentTypes.length > 0) {
-      // Filter by content_type in metadata JSONB
-      query = query.or(
-        contentTypes.map(ct => `metadata->content_type.eq.${ct}`).join(',')
-      );
+    // CRITICAL: Apply tier filtering for free users
+    // Free users only get: tier='free' OR tier IS NULL (backwards compat)
+    // Deluxe users get everything (no tier filter)
+    if (tier === 'free') {
+      // Use raw filter for JSONB tier field
+      query = query.or('metadata->tier.eq.free,metadata->tier.is.null');
+      console.log('Applied free tier filter: metadata->tier = free OR null');
+    } else {
+      console.log('Deluxe tier: no tier filter applied (gets all content)');
     }
     
     // Limit results to avoid overwhelming context
-    const { data: chunks, error } = await query.limit(10);
+    const { data: chunks, error } = await query.limit(15);
     
     if (error) {
       console.error('Error fetching document chunks:', error);
@@ -177,11 +228,11 @@ async function fetchRelevantContext(
     }
     
     if (!chunks || chunks.length === 0) {
-      console.log(`No training data found for product ${productId}`);
+      console.log(`No training data found for product ${productId} (tier: ${tier})`);
       return { context: '', sourcesSearched: [] };
     }
     
-    console.log(`Found ${chunks.length} relevant chunks for context`);
+    console.log(`Found ${chunks.length} relevant chunks for context (tier: ${tier})`);
     
     // Track unique sources searched
     const sourcesMap = new Map<string, { type: string; topic: string }>();
@@ -190,7 +241,10 @@ async function fetchRelevantContext(
     const contextParts = chunks.map((chunk: { content: string; metadata: Record<string, unknown> }) => {
       const contentType = chunk.metadata?.content_type || 'general';
       const topic = chunk.metadata?.topic || '';
-      const header = topic ? `[${String(contentType).toUpperCase()} - ${topic}]` : `[${String(contentType).toUpperCase()}]`;
+      const chunkTier = chunk.metadata?.tier || 'free';
+      const header = topic 
+        ? `[${String(contentType).toUpperCase()} - ${topic}]` 
+        : `[${String(contentType).toUpperCase()}]`;
       
       // Track this source
       const sourceKey = `${contentType}-${topic}`;
@@ -308,8 +362,13 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
     // Add user personalization context (pass message for technique detection)
     const personalizedPrompt = buildPersonalizedPrompt(basePrompt, user_preferences, message);
     
-    // Fetch relevant training data from document_chunks
-    const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(supabaseAdmin, product_id, message);
+    // Fetch relevant training data from document_chunks WITH TIER FILTERING
+    const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(
+      supabaseAdmin, 
+      product_id, 
+      message, 
+      tier as 'free' | 'deluxe'
+    );
     
     // Find relevant diagram for deluxe users
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
