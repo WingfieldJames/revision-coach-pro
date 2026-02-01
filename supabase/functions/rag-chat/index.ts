@@ -212,9 +212,10 @@ async function fetchRelevantContext(
     // Free users only get: tier='free' OR tier IS NULL (backwards compat)
     // Deluxe users get everything (no tier filter)
     if (tier === 'free') {
-      // Use raw filter for JSONB tier field
-      query = query.or('metadata->tier.eq.free,metadata->tier.is.null');
-      console.log('Applied free tier filter: metadata->tier = free OR null');
+      // Use ->> operator for JSONB text extraction (PostgREST syntax)
+      // metadata->>tier extracts the tier value as text
+      query = query.or('metadata->>tier.eq.free,metadata->>tier.is.null');
+      console.log('Applied free tier filter: metadata->>tier = free OR null');
     } else {
       console.log('Deluxe tier: no tier filter applied (gets all content)');
     }
