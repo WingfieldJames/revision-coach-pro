@@ -500,41 +500,45 @@ export const ComparePage = () => {
         </ScrollReveal>
       </main>
 
-      <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" testimonials={[{
-      author: {
-        name: "Lucy W",
-        handle: "Year 12",
-        avatar: lucyImage
-      },
-      text: "\"I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩\""
-    }, {
-      author: {
-        name: "James W",
-        handle: "LSE",
-        avatar: jamesImage
-      },
-      text: "\"A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick\""
-    }, {
-      author: {
-        name: "Matan G",
-        handle: "Year 13",
-        avatar: matanImage
-      },
-      text: "\"A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.\""
-    }, {
-      author: {
-        name: "Amira",
-        handle: "LSE Offer Holder",
-        avatar: amiraImage
-      },
-      text: "\"I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant.\""
-    }]} />
+      <div className="relative z-10 bg-muted">
+        <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" testimonials={[{
+        author: {
+          name: "Lucy W",
+          handle: "Year 12",
+          avatar: lucyImage
+        },
+        text: "\"I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩\""
+      }, {
+        author: {
+          name: "James W",
+          handle: "LSE",
+          avatar: jamesImage
+        },
+        text: "\"A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick\""
+      }, {
+        author: {
+          name: "Matan G",
+          handle: "Year 13",
+          avatar: matanImage
+        },
+        text: "\"A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.\""
+      }, {
+        author: {
+          name: "Amira",
+          handle: "LSE Offer Holder",
+          avatar: amiraImage
+        },
+        text: "\"I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant.\""
+      }]} />
+      </div>
 
       {/* Founder Section - Show for Economics, Computer Science, and Physics */}
-      {(subject === 'economics' || subject === 'computer-science' || subject === 'physics') && <FounderSection subject={subject} examBoard={examBoard} />}
+      <div className="relative z-10 bg-background">
+        {(subject === 'economics' || subject === 'computer-science' || subject === 'physics') && <FounderSection subject={subject} examBoard={examBoard} />}
+      </div>
 
       {/* Latest Features Section */}
-      <section className="py-8 md:py-16 px-4 md:px-8">
+      <section className="py-8 md:py-16 px-4 md:px-8 relative z-10 bg-background">
         <ScrollReveal>
           <h2 className="text-xl md:text-3xl font-bold text-center mb-6 md:mb-12">
             <div className="flex flex-nowrap items-center justify-center gap-1 md:gap-2">
@@ -549,9 +553,11 @@ export const ComparePage = () => {
       </section>
 
       {/* Screenshot Testimonials */}
-      <ScreenshotTestimonials />
+      <div className="relative z-10 bg-muted">
+        <ScreenshotTestimonials />
+      </div>
 
-      {!user && <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12">
+      {!user && <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12 relative z-10">
           <div className="p-6 bg-secondary rounded-lg">
             <p className="text-muted-foreground mb-4 text-center">
               New to A* AI? Create an account to track your progress and access premium features.
@@ -568,7 +574,7 @@ export const ComparePage = () => {
         </ScrollReveal>}
 
       {/* Footer */}
-      <footer className="bg-muted py-16 px-8 text-center">
+      <footer className="bg-muted py-16 px-8 text-center relative z-10">
         <ScrollReveal className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
             <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-8" />
