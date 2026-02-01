@@ -124,7 +124,7 @@ export const LoginPage = () => {
       />
       <Header showNavLinks />
       
-      <div className="flex items-center justify-center py-12 px-4">
+      <div className="flex items-start justify-center pt-8 pb-12 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
