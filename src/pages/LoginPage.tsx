@@ -4,8 +4,6 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -112,7 +110,7 @@ export const LoginPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-background relative overflow-hidden">
+    <div className="min-h-screen w-full bg-white relative overflow-hidden">
       <SEOHead 
         title="Sign In to A* AI | A-Level Economics Revision"
         description="Sign in to your A* AI account to access your AI-powered A-Level Economics revision coach. Continue your journey to an A*."
@@ -120,122 +118,55 @@ export const LoginPage = () => {
       />
       
       {/* Animated Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <CanvasRevealEffect
-          animationSpeed={3}
-          containerClassName="bg-background"
-          colors={[[147, 51, 234], [168, 85, 247]]}
-          opacities={[0.05, 0.05, 0.1, 0.1, 0.15, 0.15, 0.2, 0.2, 0.25, 0.3]}
-          dotSize={3}
-          showGradient={false}
-        />
+      <div className="absolute inset-0">
+        <div className="absolute inset-0">
+          <CanvasRevealEffect
+            animationSpeed={3}
+            containerClassName="bg-white"
+            colors={[[147, 51, 234], [168, 85, 247]]}
+            opacities={[0.1, 0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.5, 0.6, 0.8]}
+            dotSize={3}
+            showGradient={true}
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent" />
       </div>
 
-      {/* Header */}
-      <Header showNavLinks />
-
       {/* Content Layer */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-4 pt-2 pb-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
-        >
-          <Card className="w-full">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-              <CardDescription>
-                Sign in to your A* AI account
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                    <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button variant="link" className="px-0 text-sm h-auto">
-                          Forgot password?
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Reset Password</DialogTitle>
-                          <DialogDescription>
-                            Enter your email address and we'll send you a link to reset your password.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={handleResetPassword} className="space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="reset-email">Email</Label>
-                            <Input
-                              id="reset-email"
-                              type="email"
-                              placeholder="your@email.com"
-                              value={resetEmail}
-                              onChange={(e) => setResetEmail(e.target.value)}
-                              required
-                            />
-                          </div>
-                          <Button type="submit" variant="brand" className="w-full" disabled={loading}>
-                            {loading ? "Sending..." : "Send Reset Link"}
-                          </Button>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Top navigation */}
+        <div className="p-6">
+          <Link to="/" className="inline-flex items-center gap-2">
+            <img 
+              src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
+              alt="A* AI" 
+              className="h-8" 
+            />
+          </Link>
+        </div>
 
-                <Button 
-                  type="submit"
-                  variant="brand" 
-                  size="lg" 
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading ? 'Signing in...' : 'Sign In'}
-                </Button>
-              </form>
+        {/* Main content container */}
+        <div className="flex-1 flex items-center justify-center px-4 pb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md"
+          >
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-foreground mb-2">Welcome back</h1>
+              <p className="text-muted-foreground">Sign in to your A* AI account</p>
+            </div>
 
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-                </div>
-              </div>
-
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="w-full"
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Google Sign In */}
+              <button
+                type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
+                className="w-full flex items-center justify-center gap-3 bg-black/5 backdrop-blur-sm border border-black/10 rounded-full py-3 px-4 text-foreground hover:bg-black/10 transition-all duration-200"
               >
-                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                <svg className="h-5 w-5" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                     fill="#4285F4"
@@ -253,23 +184,119 @@ export const LoginPage = () => {
                     fill="#EA4335"
                   />
                 </svg>
-                Continue with Google
-              </Button>
+                Sign in with Google
+              </button>
 
-              <div className="mt-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Don't have an account?{' '}
-                  <Link 
-                    to={`/signup${redirect ? `?redirect=${redirect}` : ''}`}
-                    className="text-primary hover:underline font-medium"
-                  >
-                    Create one here
-                  </Link>
-                </p>
+              {/* Divider */}
+              <div className="flex items-center gap-4 my-6">
+                <div className="flex-1 h-px bg-black/10" />
+                <span className="text-muted-foreground text-sm">or</span>
+                <div className="flex-1 h-px bg-black/10" />
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+
+              {/* Email Input */}
+              <div className="space-y-2">
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full backdrop-blur-sm text-foreground bg-black/5 border border-black/10 rounded-full py-3 px-4 focus:outline-none focus:border-black/30 placeholder:text-muted-foreground"
+                />
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full backdrop-blur-sm text-foreground bg-black/5 border border-black/10 rounded-full py-3 px-4 focus:outline-none focus:border-black/30 placeholder:text-muted-foreground"
+                  />
+                </div>
+              </div>
+
+              {/* Forgot Password */}
+              <div className="flex justify-end">
+                <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+                  <DialogTrigger asChild>
+                    <button type="button" className="text-sm text-primary hover:text-primary/80 transition-colors">
+                      Forgot password?
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Reset Password</DialogTitle>
+                      <DialogDescription>
+                        Enter your email address and we'll send you a link to reset your password.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleResetPassword} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="reset-email">Email</Label>
+                        <Input
+                          id="reset-email"
+                          type="email"
+                          placeholder="your@email.com"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <Button 
+                        type="submit" 
+                        variant="brand"
+                        className="w-full rounded-full" 
+                        disabled={loading}
+                      >
+                        {loading ? "Sending..." : "Send Reset Link"}
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading || !email || !password}
+                className={`w-full rounded-full py-3 px-4 font-medium transition-all duration-200 ${
+                  email && password
+                    ? "bg-foreground text-background hover:bg-foreground/90 cursor-pointer"
+                    : "bg-black/10 text-muted-foreground border border-black/10 cursor-not-allowed"
+                }`}
+              >
+                {loading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
+
+            {/* Sign up link */}
+            <div className="mt-8 text-center">
+              <p className="text-muted-foreground text-sm">
+                Don't have an account?{' '}
+                <Link 
+                  to={`/signup${redirect ? `?redirect=${redirect}` : ''}`}
+                  className="text-primary hover:text-primary/80 transition-colors font-medium"
+                >
+                  Create one here
+                </Link>
+              </p>
+            </div>
+
+            {/* Terms */}
+            <div className="mt-6 text-center">
+              <p className="text-muted-foreground/60 text-xs">
+                By signing in, you agree to our Terms of Service and Privacy Policy.
+              </p>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
