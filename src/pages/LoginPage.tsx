@@ -46,6 +46,9 @@ export const LoginPage = () => {
       if (redirect === 'stripe') {
         // User wanted to access premium, redirect to stripe checkout
         navigate('/compare?checkout=true');
+      } else if (redirect === 'compare') {
+        // User wanted subjects/pricing page
+        navigate('/compare');
       } else if (redirect === 'premium') {
         // User wanted premium version, check if they have access
         navigate('/premium');
@@ -115,6 +118,11 @@ export const LoginPage = () => {
     }
   };
 
+  // Scroll to top when page loads
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead 
@@ -124,7 +132,7 @@ export const LoginPage = () => {
       />
       <Header showNavLinks />
       
-      <div className="flex items-start justify-center pb-12 px-4">
+      <div className="flex items-start justify-center pt-2 pb-12 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
