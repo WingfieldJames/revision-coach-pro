@@ -5,7 +5,8 @@ import { RandomChatbotBackground } from '@/components/ui/random-chatbot-backgrou
 import { RAGChat } from '@/components/RAGChat';
 import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
 
-const OCR_PHYSICS_PRODUCT_ID = "a59c3bd2-f82d-4e44-a4ad-2c418ab61ea2";
+// Correct OCR Physics product ID from database
+const OCR_PHYSICS_PRODUCT_ID = "ecd5978d-3bf4-4b9c-993f-30b7f3a0f197";
 
 const OCR_PHYSICS_PROMPTS = [
   { text: "Explain Newton's laws of motion" },
