@@ -22,13 +22,9 @@ export const HomePage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Helper to require sign-in before navigation
-  const handleProtectedNavigation = (destination: string) => {
-    if (!user) {
-      navigate('/login?redirect=compare');
-    } else {
-      navigate(destination);
-    }
+  // Navigate directly to destination (subjects/pricing page)
+  const handleNavigation = (destination: string) => {
+    navigate(destination);
   };
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
@@ -63,7 +59,7 @@ export const HomePage = () => {
               </div>
 
               <div className="text-center mb-8">
-                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]" />
+                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => handleNavigation('/compare')} className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]" />
                 <p className="text-xs text-muted-foreground mt-3">
                   Get started free • No card needed
                 </p>
@@ -89,7 +85,7 @@ export const HomePage = () => {
               </ContainerScroll>
               
               <div className="text-center mb-8 -mt-12 md:-mt-20 relative z-50 px-4">
-                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]" />
+                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => handleNavigation('/compare')} className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]" />
                 <p className="text-xs sm:text-sm text-muted-foreground mt-3">
                   Get started free • No card needed
                 </p>
@@ -129,7 +125,7 @@ export const HomePage = () => {
         <div className="max-w-7xl mx-auto px-8">
           {/* Button beneath video */}
           <div className="text-center mt-8 mb-4">
-            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px]" />
+            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => handleNavigation('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px]" />
           </div>
 
           {/* Disclaimer */}
@@ -179,7 +175,7 @@ export const HomePage = () => {
           {/* Laptop Image */}
           <ScrollReveal direction="left" className="flex-1 text-center">
             <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
-            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px] mt-8" />
+            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => handleNavigation('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[200px] mt-8" />
           </ScrollReveal>
 
           {/* Features */}
@@ -276,7 +272,7 @@ export const HomePage = () => {
           </ScrollReveal>
           
           <ScrollReveal delay={0.3} className="text-center mt-8">
-            <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={() => handleProtectedNavigation('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
+            <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={() => handleNavigation('/compare')} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
           </ScrollReveal>
         </div>
       </section>
