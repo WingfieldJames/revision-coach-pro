@@ -13,15 +13,18 @@ export const TestimonialsColumn = ({
   className,
   testimonials,
   duration = 15,
+  reverse = false,
 }: {
   className?: string;
   testimonials: Testimonial[];
   duration?: number;
+  reverse?: boolean;
 }) => {
   return (
     <div className={className}>
       <motion.div
-        animate={{ translateY: "-50%" }}
+        animate={{ translateY: reverse ? "0%" : "-50%" }}
+        initial={{ translateY: reverse ? "-50%" : "0%" }}
         transition={{
           duration,
           repeat: Infinity,
@@ -35,14 +38,14 @@ export const TestimonialsColumn = ({
             {testimonials.map(({ text, image, name, role }, i) => (
               <div
                 key={`${index}-${i}`}
-                className="bg-card rounded-2xl p-6 shadow-card border border-border/50"
+                className="bg-card rounded-3xl p-6 shadow-card border border-border/30"
               >
-                <p className="text-muted-foreground leading-relaxed">{text}</p>
-                <div className="flex items-center gap-3 mt-4">
+                <p className="text-foreground leading-relaxed text-[15px]">{text}</p>
+                <div className="flex items-center gap-3 mt-5">
                   <img
                     src={image}
                     alt={name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-11 h-11 rounded-full object-cover object-[center_20%]"
                   />
                   <div>
                     <p className="font-semibold text-foreground text-sm">{name}</p>
@@ -60,6 +63,7 @@ export const TestimonialsColumn = ({
 
 // Testimonial data combining influencers and student reviews
 export const testimonials: Testimonial[] = [
+  // Column 1 testimonials
   {
     text: "A* AI has completely transformed how I revise. The diagram generator saves me hours and the essay feedback is incredibly detailed.",
     image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
@@ -78,41 +82,43 @@ export const testimonials: Testimonial[] = [
     name: "Tanuj Kakumani",
     role: "BSc EFDS, Imperial",
   },
+  // Column 2 testimonials
   {
     text: "Literally the best A-Level tool I've used. The essay marker gives feedback that actually helps you improve.",
-    image: "https://randomuser.me/api/portraits/women/44.jpg",
-    name: "Zara Ahmed",
-    role: "Year 13 Student",
+    image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
+    name: "Mahmudur Rahman",
+    role: "15m views & 1.5m+ likes",
   },
   {
     text: "Copy-paste formatting is awesome! Makes my essays look professional and saves so much time.",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-    name: "Pawel K.",
-    role: "A-Level Economics",
+    image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
+    name: "Sina Naderi",
+    role: "BA Economics, Cambridge",
   },
   {
     text: "This AI understands the mark scheme better than most teachers. Went from predicted B to A* in my mocks.",
-    image: "https://randomuser.me/api/portraits/women/68.jpg",
-    name: "Maisam Hussain",
-    role: "Year 13 Student",
+    image: "/lovable-uploads/tanuj-kakumani-updated.jpg",
+    name: "Tanuj Kakumani",
+    role: "BSc EFDS, Imperial",
   },
+  // Column 3 testimonials
   {
     text: "The diagram explanations are clear and exam-ready. Perfect for last-minute revision sessions.",
-    image: "https://randomuser.me/api/portraits/men/75.jpg",
-    name: "Aryaan R.",
-    role: "Year 12 Student",
+    image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
+    name: "Mahmudur Rahman",
+    role: "15m views & 1.5m+ likes",
   },
   {
     text: "Finally an AI that actually knows A-Level Economics. The KAA chains it generates are spot on.",
-    image: "https://randomuser.me/api/portraits/women/89.jpg",
-    name: "Sophie Chen",
-    role: "A* Economics Student",
+    image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
+    name: "Sina Naderi",
+    role: "BA Economics, Cambridge",
   },
   {
     text: "Used this for my entire Year 13. Best investment I made for my A-Levels by far.",
-    image: "https://randomuser.me/api/portraits/men/45.jpg",
-    name: "David O.",
-    role: "LSE Offer Holder",
+    image: "/lovable-uploads/tanuj-kakumani-updated.jpg",
+    name: "Tanuj Kakumani",
+    role: "BSc EFDS, Imperial",
   },
 ];
 
