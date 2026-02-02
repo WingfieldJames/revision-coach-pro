@@ -14,18 +14,16 @@ export const TestimonialsColumn = ({
   className,
   testimonials,
   duration = 15,
-  reverse = false,
 }: {
   className?: string;
   testimonials: Testimonial[];
   duration?: number;
-  reverse?: boolean;
 }) => {
   return (
     <div className={`flex-1 ${className || ''}`}>
       <motion.div
-        animate={{ translateY: reverse ? "-50%" : "0%" }}
-        initial={{ translateY: reverse ? "0%" : "-50%" }}
+        animate={{ translateY: "-50%" }}
+        initial={{ translateY: "0%" }}
         transition={{
           duration,
           repeat: Infinity,
@@ -62,82 +60,64 @@ export const TestimonialsColumn = ({
   );
 };
 
-// Testimonial data - influencers + students from pricing page
+// Real testimonials from students
 export const firstColumn: Testimonial[] = [
   {
-    text: "A* AI has completely transformed how I revise. The diagram generator saves me hours!",
-    image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
-    name: "Mahmudur Rahman",
-    role: "15m views & 1.5m+ likes",
-  },
-  {
-    text: "The Diagram Generator is actually so useful - I use it to find specific diagrams for 25 markers.",
+    text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
     image: matanImage,
     name: "Matan G",
     role: "Year 13 Student",
   },
   {
-    text: "Finally an AI that understands A-Level Economics mark schemes properly.",
-    image: "/lovable-uploads/tanuj-kakumani-updated.jpg",
-    name: "Tanuj Kakumani",
-    role: "BSc EFDS, Imperial",
-  },
-  {
-    text: "The essay marker gives feedback that actually helps you improve. Game changer.",
+    text: "I used an early version of A* AI before its official launch. In those final weeks before the exam it was a lifesaver helping me match my knowledge to exact mark schemes helping me achieve A*s in Econ, Maths and Politics.",
     image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
     name: "Sina Naderi",
     role: "BA Economics, Cambridge",
+  },
+  {
+    text: "Having been in the EdTech space for 3+ years this might be one of the most exciting projects I've seen.",
+    image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
+    name: "Mahmudur Rahman",
+    role: "15m views & 1.5m+ likes",
   },
 ];
 
 export const secondColumn: Testimonial[] = [
   {
-    text: "The Diagram Generator is genuinely so good - every diagram comes out clean and accurate.",
-    image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
-    name: "Sina Naderi",
-    role: "BA Economics, Cambridge",
-  },
-  {
-    text: "Went from predicted B to A* in my mocks. This AI understands the mark scheme.",
-    image: "/lovable-uploads/tanuj-kakumani-updated.jpg",
-    name: "Tanuj Kakumani",
-    role: "BSc EFDS, Imperial",
-  },
-  {
-    text: "Copy-paste formatting is awesome! Makes my essays look professional.",
+    text: "Having been in the EdTech space for 3+ years this might be one of the most exciting projects I've seen.",
     image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
     name: "Mahmudur Rahman",
     role: "15m views & 1.5m+ likes",
   },
   {
-    text: "Perfect for revision - the feedback on my KAA chains is exactly what I needed.",
+    text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
     image: matanImage,
     name: "Matan G",
     role: "Year 13 Student",
+  },
+  {
+    text: "I used an early version of A* AI before its official launch. In those final weeks before the exam it was a lifesaver helping me match my knowledge to exact mark schemes helping me achieve A*s in Econ, Maths and Politics.",
+    image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
+    name: "Sina Naderi",
+    role: "BA Economics, Cambridge",
   },
 ];
 
 export const thirdColumn: Testimonial[] = [
   {
-    text: "Using A* AI helped me bridge the gap from a B to an A*. Like having a private tutor.",
-    image: "/lovable-uploads/tanuj-kakumani-updated.jpg",
-    name: "Tanuj Kakumani",
-    role: "BSc EFDS, Imperial",
-  },
-  {
-    text: "The diagram explanations are clear and exam-ready. Perfect for revision.",
-    image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
-    name: "Mahmudur Rahman",
-    role: "15m views & 1.5m+ likes",
-  },
-  {
-    text: "Literally the best A-Level tool I've used. The feedback is incredibly detailed.",
+    text: "I used an early version of A* AI before its official launch. In those final weeks before the exam it was a lifesaver helping me match my knowledge to exact mark schemes helping me achieve A*s in Econ, Maths and Politics.",
     image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
     name: "Sina Naderi",
     role: "BA Economics, Cambridge",
   },
   {
-    text: "The personalised feedback is like having a private tutor available 24/7.",
+    text: "Having been in the EdTech space for 3+ years this might be one of the most exciting projects I've seen.",
+    image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
+    name: "Mahmudur Rahman",
+    role: "15m views & 1.5m+ likes",
+  },
+  {
+    text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
     image: matanImage,
     name: "Matan G",
     role: "Year 13 Student",
