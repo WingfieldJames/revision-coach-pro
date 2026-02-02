@@ -153,7 +153,7 @@ export const HomePage = () => {
 
           <div className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
             <TestimonialsColumn testimonials={firstColumn} duration={25} />
-            <TestimonialsColumn testimonials={secondColumn} duration={20} reverse />
+            <TestimonialsColumn testimonials={secondColumn} duration={20} />
             <TestimonialsColumn testimonials={thirdColumn} duration={28} />
           </div>
         </div>
