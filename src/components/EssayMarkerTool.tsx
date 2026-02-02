@@ -35,17 +35,21 @@ interface EssayMarkerToolProps {
   productId?: string;
   onSubmitToChat?: (message: string) => void;
   onClose?: () => void;
+  fixedMark?: number;
+  toolLabel?: string;
 }
 
 export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   tier = 'deluxe',
   productId,
   onSubmitToChat,
-  onClose
+  onClose,
+  fixedMark,
+  toolLabel = "Essay Marker"
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [selectedMark, setSelectedMark] = useState<number>(15);
+  const [selectedMark, setSelectedMark] = useState<number>(fixedMark ?? 15);
   const [essayText, setEssayText] = useState('');
   const [inputMode, setInputMode] = useState<'text' | 'image'>('text');
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
@@ -265,7 +269,9 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
       }
     }
 
-    const prompt = `${markPrompts[selectedMark]}\n\n${essayText}`;
+    // Use fixedMark if provided, otherwise use selectedMark
+    const markToUse = fixedMark ?? selectedMark;
+    const prompt = `Mark my ${markToUse} marker. Use exact marking criteria.\n\n${essayText}`;
     
     if (onSubmitToChat) {
       setIsSubmitting(true);
@@ -306,9 +312,9 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           <PenLine className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Essay Marker</h3>
+          <h3 className="font-semibold text-foreground">{toolLabel}</h3>
           <p className="text-xs text-muted-foreground">
-            Upload a photo or paste your essay
+            Upload a photo or paste your {fixedMark ? `${fixedMark}-marker` : 'essay'}
           </p>
         </div>
       </div>
@@ -323,25 +329,27 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
       )}
 
       <div className="space-y-4">
-        {/* Mark Selector */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Number of Marks</label>
-          <div className="flex flex-wrap gap-2">
-            {MARK_OPTIONS.map((mark) => (
-              <button
-                key={mark}
-                onClick={() => setSelectedMark(mark)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  selectedMark === mark
-                    ? 'bg-gradient-brand text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                {mark}
-              </button>
-            ))}
+        {/* Mark Selector - only show if no fixedMark */}
+        {!fixedMark && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Number of Marks</label>
+            <div className="flex flex-wrap gap-2">
+              {MARK_OPTIONS.map((mark) => (
+                <button
+                  key={mark}
+                  onClick={() => setSelectedMark(mark)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    selectedMark === mark
+                      ? 'bg-gradient-brand text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {mark}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Input Mode Toggle */}
         <div className="space-y-2">

@@ -28,6 +28,8 @@ interface HeaderProps {
   diagramSubject?: 'economics' | 'cs';
   productId?: string;
   onEssayMarkerSubmit?: (message: string) => void;
+  essayMarkerLabel?: string;
+  essayMarkerFixedMark?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -43,7 +45,9 @@ export const Header: React.FC<HeaderProps> = ({
   hideUserDetails = false,
   diagramSubject = 'economics',
   productId,
-  onEssayMarkerSubmit
+  onEssayMarkerSubmit,
+  essayMarkerLabel = "Essay Marker",
+  essayMarkerFixedMark
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -192,7 +196,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
               >
                 <PenLine className="h-4 w-4" />
-                <span className="hidden sm:inline">Essay Marker</span>
+                <span className="hidden sm:inline">{essayMarkerLabel}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent 
@@ -206,6 +210,8 @@ export const Header: React.FC<HeaderProps> = ({
                   productId={productId} 
                   onSubmitToChat={onEssayMarkerSubmit}
                   onClose={() => setEssayMarkerOpen(false)}
+                  fixedMark={essayMarkerFixedMark}
+                  toolLabel={essayMarkerLabel}
                 />
               </div>
             </PopoverContent>

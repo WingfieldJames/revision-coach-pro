@@ -168,6 +168,8 @@ export const OCRPhysicsPremiumPage = () => {
           hideUserDetails 
           productId={productId}
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
+          essayMarkerLabel="6-Marker Analysis"
+          essayMarkerFixedMark={6}
         />
       </div>
       
