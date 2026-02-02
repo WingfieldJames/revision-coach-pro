@@ -30,24 +30,24 @@ export const TestimonialsColumn = ({
           ease: "linear",
           repeatType: "loop",
         }}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-3"
       >
         {[...new Array(2)].map((_, index) => (
           <React.Fragment key={index}>
             {testimonials.map(({ text, image, name, role }, i) => (
               <div
                 key={`${index}-${i}`}
-                className="bg-card rounded-3xl p-5 shadow-card border border-border/30 aspect-square flex flex-col justify-between"
+                className="bg-card rounded-2xl p-3 shadow-card border border-border/30"
               >
-                <p className="text-foreground leading-relaxed text-sm line-clamp-6">{text}</p>
-                <div className="flex items-center gap-3 mt-auto pt-3">
+                <p className="text-foreground leading-snug text-sm">{text}</p>
+                <div className="flex items-center gap-2 mt-2">
                   <img
                     src={image}
                     alt={name}
-                    className="w-10 h-10 rounded-full object-cover object-[center_20%]"
+                    className="w-8 h-8 rounded-full object-cover object-[center_20%]"
                   />
                   <div className="min-w-0">
-                    <p className="font-semibold text-foreground text-sm truncate">{name}</p>
+                    <p className="font-semibold text-foreground text-xs truncate">{name}</p>
                     <p className="text-xs text-muted-foreground truncate">{role}</p>
                   </div>
                 </div>
@@ -80,6 +80,12 @@ export const firstColumn: Testimonial[] = [
     name: "Mahmudur Rahman",
     role: "15m views & 1.5m+ likes",
   },
+  {
+    text: "I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩",
+    image: "/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png",
+    name: "Lucy W",
+    role: "Year 12",
+  },
 ];
 
 export const secondColumn: Testimonial[] = [
@@ -88,6 +94,12 @@ export const secondColumn: Testimonial[] = [
     image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
     name: "Mahmudur Rahman",
     role: "15m views & 1.5m+ likes",
+  },
+  {
+    text: "I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩",
+    image: "/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png",
+    name: "Lucy W",
+    role: "Year 12",
   },
   {
     text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
@@ -115,6 +127,12 @@ export const thirdColumn: Testimonial[] = [
     image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
     name: "Mahmudur Rahman",
     role: "15m views & 1.5m+ likes",
+  },
+  {
+    text: "I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩",
+    image: "/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png",
+    name: "Lucy W",
+    role: "Year 12",
   },
   {
     text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
