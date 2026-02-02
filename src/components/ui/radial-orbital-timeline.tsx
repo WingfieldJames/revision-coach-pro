@@ -155,11 +155,9 @@ export default function RadialOrbitalTimeline({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[600px] flex items-center justify-center overflow-visible"
+      className="relative w-full h-[600px] flex items-center justify-center overflow-visible bg-white"
       onClick={handleContainerClick}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-primary-variant/10" />
-
       <div
         ref={orbitRef}
         className="relative w-[500px] h-[500px] flex items-center justify-center"
@@ -169,9 +167,10 @@ export default function RadialOrbitalTimeline({
         <div className="absolute w-[300px] h-[300px] rounded-full border border-primary/15" />
         <div className="absolute w-[200px] h-[200px] rounded-full border border-primary/10" />
 
-        {/* Center pulse */}
-        <div className="absolute w-4 h-4 bg-primary rounded-full animate-pulse" />
-        <div className="absolute w-8 h-8 bg-primary/30 rounded-full animate-ping" />
+        {/* Center circle with brand gradient */}
+        <div className="absolute w-24 h-24 rounded-full bg-gradient-brand flex items-center justify-center shadow-lg">
+          <div className="w-16 h-16 rounded-full bg-gradient-brand opacity-80" />
+        </div>
 
         {timelineData.map((item, index) => {
           const position = calculateNodePosition(index, timelineData.length);
