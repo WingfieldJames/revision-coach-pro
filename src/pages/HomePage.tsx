@@ -5,7 +5,7 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ChevronDown, Instagram, Music } from 'lucide-react';
+import { ChevronDown, Instagram, Music, Calendar, BookOpen, GraduationCap, Search, FileCheck } from 'lucide-react';
 import { ContainerScroll } from '@/components/ui/container-scroll-animation';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,6 +14,65 @@ import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scr
 import { FoundersCarousel } from '@/components/FoundersCarousel';
 import { MobileFoundersSection } from '@/components/MobileFoundersSection';
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from '@/components/ui/testimonials-columns';
+import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
+
+const revisionFeatures = [
+  {
+    id: 1,
+    title: "Planning",
+    date: "Step 1",
+    content: "Never miss a deadline. AI-powered exam countdown tracks every paper and builds your personalized revision schedule based on your target grade.",
+    category: "Planning",
+    icon: Calendar,
+    relatedIds: [2],
+    status: "completed" as const,
+    energy: 100,
+  },
+  {
+    id: 2,
+    title: "Content Learning",
+    date: "Step 2",
+    content: "Tailored to you. Trained on your exact specification and adapted to your learning style - visual, detailed, or concise explanations on demand.",
+    category: "Learning",
+    icon: BookOpen,
+    relatedIds: [1, 3],
+    status: "completed" as const,
+    energy: 90,
+  },
+  {
+    id: 3,
+    title: "Exam Technique",
+    date: "Step 3",
+    content: "Learn from A* students. Master the proven techniques that got real students into Oxbridge/Imperial/LSE & more - from essay structure to top-band evaluation.",
+    category: "Technique",
+    icon: GraduationCap,
+    relatedIds: [2, 4],
+    status: "in-progress" as const,
+    energy: 80,
+  },
+  {
+    id: 4,
+    title: "Past Paper Finder",
+    date: "Step 4",
+    content: "2,000+ questions searchable instantly. Find any question by topic or keyword, with official mark schemes included.",
+    category: "Practice",
+    icon: Search,
+    relatedIds: [3, 5],
+    status: "pending" as const,
+    energy: 60,
+  },
+  {
+    id: 5,
+    title: "Essay Marker",
+    date: "Step 5",
+    content: "90% teacher accuracy. Upload your essay, get instant breakdown of every AO, see exactly where you gained and lost marks.",
+    category: "Feedback",
+    icon: FileCheck,
+    relatedIds: [4],
+    status: "pending" as const,
+    energy: 40,
+  },
+];
 export const HomePage = () => {
   const {
     user,
@@ -163,9 +222,9 @@ export const HomePage = () => {
       <MobileFoundersSection />
 
       {/* How A* AI helps you revise smarter Section */}
-      <section className="py-8 md:py-16 px-8 max-w-7xl mx-auto">
+      <section className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
         <ScrollReveal>
-          <h2 className="text-lg md:text-3xl font-bold text-center mb-12">
+          <h2 className="text-lg md:text-3xl font-bold text-center mb-8 md:mb-12">
             <div className="flex flex-nowrap md:flex-wrap items-center justify-center gap-1 md:gap-2">
               <span>How</span>
               <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-5 md:h-8" />
@@ -175,38 +234,47 @@ export const HomePage = () => {
           </h2>
         </ScrollReveal>
 
-        <div className="flex flex-col lg:flex-row items-start justify-center max-w-6xl mx-auto gap-12">
-          {/* Laptop Image */}
-          <ScrollReveal direction="left" className="flex-1 text-center">
-            <img src="/lovable-uploads/57ee3730-ed40-48ca-a81c-378b769729de.png" alt="Laptop mockup" className="max-w-full h-auto mx-auto" />
-            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => handleNavigation()} className="pointer-events-auto text-base px-6 py-3 w-[200px] mt-8" />
-          </ScrollReveal>
+        {/* Desktop: Orbital Timeline */}
+        <div className="hidden lg:block">
+          <RadialOrbitalTimeline timelineData={revisionFeatures} />
+          <div className="text-center -mt-8">
+            <InteractiveHoverButton 
+              text="Try A* AI now →" 
+              variant="reverse" 
+              onClick={() => handleNavigation()} 
+              className="pointer-events-auto text-base px-6 py-3 w-[200px]" 
+            />
+          </div>
+        </div>
 
-          {/* Features */}
-          <StaggerContainer className="flex-1 space-y-6">
-            <StaggerItem className="bg-muted rounded-xl p-6">
-              <strong className="text-lg font-semibold">📄 Past Paper Mastery</strong>
-              <p className="text-muted-foreground mt-2 leading-relaxed">
-                Search and retrieve real past paper questions by topic, paper, or command word. 
-                A* AI understands how your exam board organises questions, making practice fully targeted.
-              </p>
-            </StaggerItem>
-            
-            <StaggerItem className="bg-muted rounded-xl p-6">
-              <strong className="text-lg font-semibold">📰 Live Updated Application</strong>
-              <p className="text-muted-foreground mt-2 leading-relaxed">
-                The latest examples and case studies — formatted specifically for 25-mark essays 
-                in Paper 1 and 2. Updated regularly from global economic news to match Edexcel expectations.
-              </p>
-            </StaggerItem>
-            
-            <StaggerItem className="bg-muted rounded-xl p-6">
-              <strong className="text-lg font-semibold">📈 A* Technique</strong>
-              <p className="text-muted-foreground mt-2 leading-relaxed">
-                From 2 markers to 25 markers, A* AI knows exactly how to structure every response. It guides you through KAA, chains of reasoning and evaluation — so you can write those top band answers that examiners love
-              </p>
-            </StaggerItem>
+        {/* Mobile/Tablet: Card Grid */}
+        <div className="lg:hidden">
+          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+            {revisionFeatures.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <StaggerItem key={feature.id} className="bg-muted rounded-xl p-5 md:p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <strong className="text-base md:text-lg font-semibold">{feature.title}</strong>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {feature.content}
+                  </p>
+                </StaggerItem>
+              );
+            })}
           </StaggerContainer>
+          <div className="text-center mt-8">
+            <InteractiveHoverButton 
+              text="Try A* AI now →" 
+              variant="reverse" 
+              onClick={() => handleNavigation()} 
+              className="pointer-events-auto text-base px-6 py-3 w-[200px]" 
+            />
+          </div>
         </div>
       </section>
 
