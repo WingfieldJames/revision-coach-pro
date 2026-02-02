@@ -1,52 +1,82 @@
-# Plan: Fix RAG System Modularity and Tier Isolation ✅ COMPLETED
 
-## Status: IMPLEMENTED
 
-All phases have been completed successfully.
+# 6-Marker Analysis Feature for OCR Physics
 
-## What Was Implemented
+## Summary
+Transform the Essay Marker into a streamlined "6-Marker Analysis" tool specifically for OCR Physics chatbots. This tool will always mark submissions as 6-mark questions (the standard extended response format for OCR Physics), removing the need for mark selection.
 
-### Phase 1: Tier-Based Retrieval ✅
-- Updated `fetchRelevantContext()` in `supabase/functions/rag-chat/index.ts`
-- Free tier: Filters to `metadata->>tier = 'free' OR metadata->>tier IS NULL`
-- Deluxe tier: No filter (gets all content including deluxe-exclusive)
+## Changes Overview
 
-### Phase 2: Database Metadata Standardization ✅
-- Ran migration: All chunks with NULL tier now have `tier: 'free'`
-- OCR Physics retains both 'free' and 'deluxe' tier markers
+### 1. Header Component - Add Customization Props
+**File: `src/components/Header.tsx`**
 
-### Phase 3: Smart Content Routing ✅
-- Added `detectContentTypePriorities()` function
-- Routes queries based on keywords:
-  - "exam technique" → exam_technique, essay_writing, mark_scheme
-  - "practice question" → paper_1, paper_2, paper_3
-  - "define/explain" → specification
-  - Default: specification
+Add two new optional props:
+- `essayMarkerLabel?: string` - Custom button text (default: "Essay Marker")
+- `essayMarkerFixedMark?: number` - When set, passes to EssayMarkerTool to use a fixed mark value
 
-## Data Organization (Current State)
+Pass these props to the EssayMarkerTool component when rendering.
 
+### 2. EssayMarkerTool - Support Fixed Mark Mode
+**File: `src/components/EssayMarkerTool.tsx`**
+
+Add two new optional props:
+- `fixedMark?: number` - When provided, hides the mark selector and uses this value
+- `toolLabel?: string` - Custom header title (default: "Essay Marker")
+
+When `fixedMark` is set:
+- Hide the "Number of Marks" selector section entirely
+- Use the fixed mark value for prompt generation
+- Display the custom `toolLabel` in the header
+
+### 3. OCR Physics Premium Page - Use New Props
+**File: `src/pages/OCRPhysicsPremiumPage.tsx`**
+
+Pass the new props to Header:
+- `essayMarkerLabel="6-Marker Analysis"`
+- `essayMarkerFixedMark={6}`
+
+### 4. OCR Physics Free Page - Use New Props
+**File: `src/pages/OCRPhysicsFreeVersionPage.tsx`**
+
+Pass the same props to Header:
+- `essayMarkerLabel="6-Marker Analysis"`
+- `essayMarkerFixedMark={6}`
+
+---
+
+## Technical Details
+
+### New Header Props Interface
+```typescript
+interface HeaderProps {
+  // ... existing props
+  essayMarkerLabel?: string;      // Custom label for the button
+  essayMarkerFixedMark?: number;  // Fixed mark value - hides selector when set
+}
 ```
-document_chunks table
-├── OCR Physics (product_id: ecd5978d...)
-│   ├── tier: 'free' → 44 chunks (24 past_paper + 20 specification)
-│   └── tier: 'deluxe' → 20 chunks (specification)
-│
-├── OCR Computer Science (product_id: 5d05830b...)
-│   └── tier: 'free' → 28 chunks (specification)
-│
-├── Edexcel Economics (product_id: 6dc19d53...)
-│   └── tier: 'free' → 31 chunks (specification + exam_technique)
-│
-└── AQA Economics (product_id: 17ade690...)
-    └── tier: 'free' → 160 chunks (specification + past papers)
+
+### New EssayMarkerTool Props Interface
+```typescript
+interface EssayMarkerToolProps {
+  // ... existing props
+  fixedMark?: number;   // When set, uses this mark value and hides selector
+  toolLabel?: string;   // Custom header title
+}
 ```
 
-## Verification Tests Passed
-- [x] Free tier filter applied correctly (`metadata->>tier.eq.free,metadata->>tier.is.null`)
-- [x] Deluxe tier gets all content (no filter)
-- [x] Product isolation maintained (each product_id is separate)
-- [x] Smart content routing working (keyword detection)
+### Prompt Generation
+When `fixedMark={6}` is set, the prompt will be:
+```
+Mark my 6 marker. Use exact marking criteria.
 
-## Files Modified
-1. `supabase/functions/rag-chat/index.ts` - Added tier filtering + content routing
-2. Database migration - Standardized tier metadata
+[essay text]
+```
+
+---
+
+## What Won't Change
+- All other subjects (Economics, OCR CS) continue using the full Essay Marker with mark options
+- Image upload/OCR functionality remains available
+- Free tier usage limits still apply
+- The core marking logic in the RAG system remains unchanged
+
