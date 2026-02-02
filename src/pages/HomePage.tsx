@@ -147,13 +147,13 @@ export const HomePage = () => {
               What our users say
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Join thousands of students achieving A* grades with our AI-powered revision tools
+              ​Join 700+ students and teachers achieving real results
             </p>
           </ScrollReveal>
 
           <div className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
             <TestimonialsColumn testimonials={firstColumn} duration={25} />
-            <TestimonialsColumn testimonials={secondColumn} duration={20} />
+            <TestimonialsColumn testimonials={secondColumn} duration={20} reverse />
             <TestimonialsColumn testimonials={thirdColumn} duration={28} />
           </div>
         </div>
