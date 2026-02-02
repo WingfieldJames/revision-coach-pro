@@ -43,7 +43,7 @@ const revisionFeatures = [
     id: 3,
     title: "Exam Technique",
     date: "Step 3",
-    content: "Learn from A* students. Master the proven techniques that got real students into Oxbridge/Imperial/LSE & more - from essay structure to top-band evaluation.",
+    content: "Learn from 4 A* students. Master the proven techniques that got real students into Oxbridge/Imperial/LSE & more - from essay structure to top-band evaluation.",
     category: "Technique",
     icon: GraduationCap,
     relatedIds: [2, 4],
@@ -247,23 +247,32 @@ export const HomePage = () => {
           </div>
         </div>
 
-        {/* Mobile/Tablet: Card Grid */}
+        {/* Mobile/Tablet: Expandable Cards */}
         <div className="lg:hidden">
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
             {revisionFeatures.map((feature) => {
               const Icon = feature.icon;
               return (
-                <StaggerItem key={feature.id} className="bg-muted rounded-xl p-5 md:p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <strong className="text-base md:text-lg font-semibold">{feature.title}</strong>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {feature.content}
-                  </p>
-                </StaggerItem>
+                <Accordion key={feature.id} type="single" collapsible>
+                  <AccordionItem value={`feature-${feature.id}`} className="border-0">
+                    <StaggerItem className="bg-muted rounded-xl overflow-hidden">
+                      <AccordionTrigger hideIcon className="p-5 md:p-6 hover:no-underline w-full">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <Icon className="w-5 h-5 text-primary" />
+                          </div>
+                          <strong className="text-base md:text-lg font-semibold text-left">{feature.title}</strong>
+                          <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0 ml-auto [&[data-state=open]>svg]:rotate-180" />
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-5 pb-5 md:px-6 md:pb-6 pt-0">
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {feature.content}
+                        </p>
+                      </AccordionContent>
+                    </StaggerItem>
+                  </AccordionItem>
+                </Accordion>
               );
             })}
           </StaggerContainer>
