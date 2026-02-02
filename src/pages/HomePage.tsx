@@ -253,16 +253,16 @@ export const HomePage = () => {
             {revisionFeatures.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Accordion key={feature.id} type="single" collapsible>
-                  <AccordionItem value={`feature-${feature.id}`} className="border-0">
-                    <StaggerItem className="bg-muted rounded-xl overflow-hidden">
-                      <AccordionTrigger hideIcon className="p-5 md:p-6 hover:no-underline w-full">
-                        <div className="flex items-center gap-3">
+                <StaggerItem key={feature.id}>
+                  <Accordion type="single" collapsible>
+                    <AccordionItem value={`feature-${feature.id}`} className="border-0 bg-muted rounded-xl overflow-hidden">
+                      <AccordionTrigger hideIcon className="p-5 md:p-6 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180">
+                        <div className="flex items-center gap-3 w-full">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                             <Icon className="w-5 h-5 text-primary" />
                           </div>
-                          <strong className="text-base md:text-lg font-semibold text-left">{feature.title}</strong>
-                          <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0 ml-auto [&[data-state=open]>svg]:rotate-180" />
+                          <strong className="text-base md:text-lg font-semibold text-left flex-1">{feature.title}</strong>
+                          <ChevronDown className="chevron h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="px-5 pb-5 md:px-6 md:pb-6 pt-0">
@@ -270,9 +270,9 @@ export const HomePage = () => {
                           {feature.content}
                         </p>
                       </AccordionContent>
-                    </StaggerItem>
-                  </AccordionItem>
-                </Accordion>
+                    </AccordionItem>
+                  </Accordion>
+                </StaggerItem>
               );
             })}
           </StaggerContainer>

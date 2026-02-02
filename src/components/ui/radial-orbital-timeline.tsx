@@ -155,19 +155,19 @@ export default function RadialOrbitalTimeline({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[600px] flex items-center justify-center overflow-hidden"
+      className="relative w-full h-[600px] flex items-center justify-center overflow-visible"
       onClick={handleContainerClick}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary-variant/5" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-primary-variant/10" />
 
       <div
         ref={orbitRef}
         className="relative w-[500px] h-[500px] flex items-center justify-center"
       >
         {/* Orbital rings */}
-        <div className="absolute w-[400px] h-[400px] rounded-full border border-border/30 opacity-70" />
-        <div className="absolute w-[300px] h-[300px] rounded-full border border-border/20 opacity-50" />
-        <div className="absolute w-[200px] h-[200px] rounded-full border border-border/10 opacity-30" />
+        <div className="absolute w-[400px] h-[400px] rounded-full border-2 border-primary/20" />
+        <div className="absolute w-[300px] h-[300px] rounded-full border border-primary/15" />
+        <div className="absolute w-[200px] h-[200px] rounded-full border border-primary/10" />
 
         {/* Center pulse */}
         <div className="absolute w-4 h-4 bg-primary rounded-full animate-pulse" />
