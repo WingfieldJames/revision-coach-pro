@@ -17,16 +17,18 @@ export const TestimonialsColumn = ({
   className,
   testimonials,
   duration = 15,
+  reverse = false,
 }: {
   className?: string;
   testimonials: Testimonial[];
   duration?: number;
+  reverse?: boolean;
 }) => {
   return (
     <div className={`flex-1 ${className || ''}`}>
       <motion.div
-        animate={{ translateY: "-50%" }}
-        initial={{ translateY: "0%" }}
+        animate={{ translateY: reverse ? "0%" : "-50%" }}
+        initial={{ translateY: reverse ? "-50%" : "0%" }}
         transition={{
           duration,
           repeat: Infinity,

@@ -36,6 +36,8 @@ export const OCRPhysicsFreeVersionPage = () => {
           toolsLocked 
           hideUserDetails 
           productId={OCR_PHYSICS_PRODUCT_ID}
+          essayMarkerLabel="6-Marker Analysis"
+          essayMarkerFixedMark={6}
         />
       </div>
       
