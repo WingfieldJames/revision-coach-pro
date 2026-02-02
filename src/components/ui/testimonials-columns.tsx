@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "motion/react";
 import matanImage from '@/assets/matan-g.png';
 import kathyImage from '@/assets/kathy-kou.png';
+import ryanImage from '@/assets/ryan-davies.png';
 
 interface Testimonial {
   text: string;
@@ -70,6 +71,12 @@ export const firstColumn: Testimonial[] = [
     role: "Year 13 Student",
   },
   {
+    text: "The 25-marker banded marking gave my essay 23/25 - exactly what my teacher gave it. The improvement tips were detailed and helpful. A* AI massively exceeded my expectations",
+    image: ryanImage,
+    name: "Ryan Davies",
+    role: "Year 13",
+  },
+  {
     text: "I used an early version of A* AI before its official launch. In those final weeks before the exam it was a lifesaver helping me match my knowledge to exact mark schemes helping me achieve A*s in Econ, Maths and Politics.",
     image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
     name: "Sina Naderi",
@@ -101,6 +108,12 @@ export const secondColumn: Testimonial[] = [
     image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
     name: "Mahmudur Rahman",
     role: "15m views & 1.5m+ likes",
+  },
+  {
+    text: "The 25-marker banded marking gave my essay 23/25 - exactly what my teacher gave it. The improvement tips were detailed and helpful. A* AI massively exceeded my expectations",
+    image: ryanImage,
+    name: "Ryan Davies",
+    role: "Year 13",
   },
   {
     text: "I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩",
@@ -140,6 +153,12 @@ export const thirdColumn: Testimonial[] = [
     image: kathyImage,
     name: "Kathy Kou",
     role: "Year 12",
+  },
+  {
+    text: "The 25-marker banded marking gave my essay 23/25 - exactly what my teacher gave it. The improvement tips were detailed and helpful. A* AI massively exceeded my expectations",
+    image: ryanImage,
+    name: "Ryan Davies",
+    role: "Year 13",
   },
   {
     text: "Having been in the EdTech space for 3+ years this might be one of the most exciting projects I've seen.",
