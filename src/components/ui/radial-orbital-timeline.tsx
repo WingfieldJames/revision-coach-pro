@@ -167,9 +167,9 @@ export default function RadialOrbitalTimeline({
         <div className="absolute w-[300px] h-[300px] rounded-full border border-primary/15" />
         <div className="absolute w-[200px] h-[200px] rounded-full border border-primary/10" />
 
-        {/* Center circle with brand gradient */}
-        <div className="absolute w-24 h-24 rounded-full bg-gradient-brand flex items-center justify-center shadow-lg">
-          <div className="w-16 h-16 rounded-full bg-gradient-brand opacity-80" />
+        {/* Center circle with white fill and brand glow */}
+        <div className="absolute w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.4)]">
+          <div className="w-16 h-16 rounded-full bg-white opacity-90" />
         </div>
 
         {timelineData.map((item, index) => {
