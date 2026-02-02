@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import matanImage from '@/assets/matan-g.png';
 import kathyImage from '@/assets/kathy-kou.png';
 import ryanImage from '@/assets/ryan-davies.png';
+import alexandruImage from '@/assets/alexandru-leoca.png';
 
 interface Testimonial {
   text: string;
@@ -100,6 +101,12 @@ export const firstColumn: Testimonial[] = [
     name: "Lucy W",
     role: "Year 12",
   },
+  {
+    text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
+    image: alexandruImage,
+    name: "Alexandru Leoca",
+    role: "Year 12",
+  },
 ];
 
 export const secondColumn: Testimonial[] = [
@@ -139,6 +146,12 @@ export const secondColumn: Testimonial[] = [
     name: "Sina Naderi",
     role: "BA Economics, Cambridge",
   },
+  {
+    text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
+    image: alexandruImage,
+    name: "Alexandru Leoca",
+    role: "Year 12",
+  },
 ];
 
 export const thirdColumn: Testimonial[] = [
@@ -177,5 +190,11 @@ export const thirdColumn: Testimonial[] = [
     image: matanImage,
     name: "Matan G",
     role: "Year 13 Student",
+  },
+  {
+    text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
+    image: alexandruImage,
+    name: "Alexandru Leoca",
+    role: "Year 12",
   },
 ];
