@@ -2,6 +2,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import matanImage from '@/assets/matan-g.png';
+import kathyImage from '@/assets/kathy-kou.png';
 
 interface Testimonial {
   text: string;
@@ -30,25 +31,25 @@ export const TestimonialsColumn = ({
           ease: "linear",
           repeatType: "loop",
         }}
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-4"
       >
         {[...new Array(2)].map((_, index) => (
           <React.Fragment key={index}>
             {testimonials.map(({ text, image, name, role }, i) => (
               <div
                 key={`${index}-${i}`}
-                className="bg-card rounded-2xl p-3 shadow-card border border-border/30"
+                className="bg-card rounded-3xl p-5 shadow-card border border-border/30"
               >
-                <p className="text-foreground leading-snug text-sm">{text}</p>
-                <div className="flex items-center gap-2 mt-2">
+                <p className="text-foreground leading-relaxed text-base">{text}</p>
+                <div className="flex items-center gap-3 mt-4">
                   <img
                     src={image}
                     alt={name}
-                    className="w-8 h-8 rounded-full object-cover object-[center_20%]"
+                    className="w-10 h-10 rounded-full object-cover object-[center_20%]"
                   />
                   <div className="min-w-0">
-                    <p className="font-semibold text-foreground text-xs truncate">{name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{role}</p>
+                    <p className="font-semibold text-foreground text-sm truncate">{name}</p>
+                    <p className="text-sm text-muted-foreground truncate">{role}</p>
                   </div>
                 </div>
               </div>
@@ -73,6 +74,12 @@ export const firstColumn: Testimonial[] = [
     image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
     name: "Sina Naderi",
     role: "BA Economics, Cambridge",
+  },
+  {
+    text: "Got my first ever 12/12 on a 12 marker and then 10/10 today with A*AI's help",
+    image: kathyImage,
+    name: "Kathy Kou",
+    role: "Year 12",
   },
   {
     text: "Having been in the EdTech space for 3+ years this might be one of the most exciting projects I've seen.",
@@ -102,6 +109,12 @@ export const secondColumn: Testimonial[] = [
     role: "Year 12",
   },
   {
+    text: "Got my first ever 12/12 on a 12 marker and then 10/10 today with A*AI's help",
+    image: kathyImage,
+    name: "Kathy Kou",
+    role: "Year 12",
+  },
+  {
     text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
     image: matanImage,
     name: "Matan G",
@@ -121,6 +134,12 @@ export const thirdColumn: Testimonial[] = [
     image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
     name: "Sina Naderi",
     role: "BA Economics, Cambridge",
+  },
+  {
+    text: "Got my first ever 12/12 on a 12 marker and then 10/10 today with A*AI's help",
+    image: kathyImage,
+    name: "Kathy Kou",
+    role: "Year 12",
   },
   {
     text: "Having been in the EdTech space for 3+ years this might be one of the most exciting projects I've seen.",
