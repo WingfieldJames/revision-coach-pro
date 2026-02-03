@@ -289,74 +289,76 @@ export const HomePage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-8 bg-background">
-        <div className="max-w-4xl mx-auto">
-          <ScrollReveal>
-            <h2 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2">
-              Frequently asked questions
-            </h2>
-            <p className="text-center text-muted-foreground mb-8 text-lg">
-              Everything you need to know about A* AI and revision.
-            </p>
-          </ScrollReveal>
-          
-          <ScrollReveal delay={0.2}>
-            <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
-              <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
-                <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                  <span>Why is this better than ChatGPT or a normal AI?</span>
-                  <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                  <p className="mb-3">ChatGPT knows a bit about everything. A*AI knows everything about your exam - from paper layout to the small tricks that push you towards top grades.</p>
-                  <p className="mb-3">Trained on every past paper, mark scheme, and spec point for your board. A personalised 24/7 tutor, built specifically for your subject.</p>
-                  <p>We handpick A* students from the UK's top universities and train the AI on exactly how they think - the structures, the shortcuts, the phrases examiners reward. The brain of an A* student, powered by AI.</p>
-                </AccordionContent>
-              </AccordionItem>
+      <section className="py-16 px-8 bg-background relative overflow-hidden">
+        <HeroBackgroundPaths>
+          <div className="max-w-4xl mx-auto relative z-10">
+            <ScrollReveal>
+              <h2 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+                Frequently asked questions
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 text-lg">
+                Everything you need to know about A* AI and revision.
+              </p>
+            </ScrollReveal>
+            
+            <ScrollReveal delay={0.2}>
+              <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
+                <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
+                  <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
+                    <span>Why is this better than ChatGPT or a normal AI?</span>
+                    <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
+                    <p className="mb-3">ChatGPT knows a bit about everything. A*AI knows everything about your exam - from paper layout to the small tricks that push you towards top grades.</p>
+                    <p className="mb-3">Trained on every past paper, mark scheme, and spec point for your board. A personalised 24/7 tutor, built specifically for your subject.</p>
+                    <p>We handpick A* students from the UK's top universities and train the AI on exactly how they think - the structures, the shortcuts, the phrases examiners reward. The brain of an A* student, powered by AI.</p>
+                  </AccordionContent>
+                </AccordionItem>
 
-              <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
-                <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                  <span>How do the plans work?</span>
-                  <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                  <p className="mb-3">Free gives you a taste - limited training data and general AI help to try it out.</p>
-                  <p className="mb-3">Deluxe is the full experience. Trained on every past paper from 2017-2025, official mark schemes, and the complete specification. Plus exam technique trained directly by A* students - the structures, timings, and evaluation phrases that examiners reward.</p>
-                  <p className="mb-3">Deluxe also unlocks premium tools: upload essays and diagrams for instant AI feedback, or use the Diagram Generator to find the exact diagram for any question - all tailored to your subject and exam board.</p>
-                  <p>£24.99 once. Less than half a tutoring session. Access forever. That's it.</p>
-                </AccordionContent>
-              </AccordionItem>
+                <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
+                  <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
+                    <span>How do the plans work?</span>
+                    <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
+                    <p className="mb-3">Free gives you a taste - limited training data and general AI help to try it out.</p>
+                    <p className="mb-3">Deluxe is the full experience. Trained on every past paper from 2017-2025, official mark schemes, and the complete specification. Plus exam technique trained directly by A* students - the structures, timings, and evaluation phrases that examiners reward.</p>
+                    <p className="mb-3">Deluxe also unlocks premium tools: upload essays and diagrams for instant AI feedback, or use the Diagram Generator to find the exact diagram for any question - all tailored to your subject and exam board.</p>
+                    <p>£24.99 once. Less than half a tutoring session. Access forever. That's it.</p>
+                  </AccordionContent>
+                </AccordionItem>
 
-              <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
-                <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                  <span>What's included in the Deluxe version?</span>
-                  <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                  <p className="mb-3">We sat down with A* students from LSE, Cambridge, and Imperial and got them to teach the AI everything - how they structured essays, which examples impressed examiners, the timing tricks that saved them marks.</p>
-                  <p className="mb-3">That's layered on top of every past paper (2017-2025), official mark schemes, and the full spec. Plus diagram guidance, application banks, model structures, and all future updates.</p>
-                  <p>Lifetime access. One payment. Done.</p>
-                </AccordionContent>
-              </AccordionItem>
+                <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
+                  <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
+                    <span>What's included in the Deluxe version?</span>
+                    <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
+                    <p className="mb-3">We sat down with A* students from LSE, Cambridge, and Imperial and got them to teach the AI everything - how they structured essays, which examples impressed examiners, the timing tricks that saved them marks.</p>
+                    <p className="mb-3">That's layered on top of every past paper (2017-2025), official mark schemes, and the full spec. Plus diagram guidance, application banks, model structures, and all future updates.</p>
+                    <p>Lifetime access. One payment. Done.</p>
+                  </AccordionContent>
+                </AccordionItem>
 
-              <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
-                <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                  <span>Does it work for other exam boards or subjects?</span>
-                  <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-200 shrink-0" />
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                  <p className="mb-3">We started with A-Level Economics. Now we cover Economics, Computer Science and Physics - with Chemistry, English and Psychology dropping soon and many other subjects in the pipeline                          </p>
-                  <p className="mb-3">We're growing fast.</p>
-                  <p>Tell us what you need next - we're listening.</p>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </ScrollReveal>
-          
-          <ScrollReveal delay={0.3} className="text-center mt-8">
-            <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={() => handleNavigation()} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
-          </ScrollReveal>
-        </div>
+                <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
+                  <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
+                    <span>Does it work for other exam boards or subjects?</span>
+                    <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
+                    <p className="mb-3">We started with A-Level Economics. Now we cover Economics, Computer Science and Physics - with Chemistry, English and Psychology dropping soon and many other subjects in the pipeline                          </p>
+                    <p className="mb-3">We're growing fast.</p>
+                    <p>Tell us what you need next - we're listening.</p>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </ScrollReveal>
+            
+            <ScrollReveal delay={0.3} className="text-center mt-8">
+              <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={() => handleNavigation()} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
+            </ScrollReveal>
+          </div>
+        </HeroBackgroundPaths>
       </section>
 
       {/* Footer */}
