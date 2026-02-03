@@ -27,8 +27,7 @@ export const OCRPhysicsFreeVersionPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showDiagramTool 
-          showEssayMarker 
+          showEssayMarker
           showPastPaperFinder
           showExamCountdown
           examDates={OCR_PHYSICS_EXAMS}
