@@ -141,3 +141,9 @@ export const OCR_PHYSICS_EXAMS: ExamDate[] = [
   { name: "Paper 2 (Exploring Physics)", date: new Date(2026, 5, 1), description: "Exploring Physics" },
   { name: "Paper 3 (Unified Physics)", date: new Date(2026, 5, 8), description: "Unified Physics" },
 ];
+
+export const AQA_CHEMISTRY_EXAMS: ExamDate[] = [
+  { name: "Paper 1 (Inorganic & Physical)", date: new Date(2026, 4, 13), description: "Inorganic and Physical Chemistry" },
+  { name: "Paper 2 (Organic & Physical)", date: new Date(2026, 4, 20), description: "Organic and Physical Chemistry" },
+  { name: "Paper 3 (Practical)", date: new Date(2026, 5, 10), description: "Practical Chemistry" },
+];

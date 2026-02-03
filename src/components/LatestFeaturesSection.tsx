@@ -4,7 +4,7 @@ import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button
 import { motion, AnimatePresence } from "framer-motion";
 
 interface LatestFeaturesSectionProps {
-  subject?: 'economics' | 'computer-science' | 'physics';
+  subject?: 'economics' | 'computer-science' | 'physics' | 'chemistry';
 }
 
 const economicsFeatures = [
