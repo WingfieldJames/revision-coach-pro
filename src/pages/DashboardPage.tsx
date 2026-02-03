@@ -15,7 +15,7 @@ import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-type Subject = 'economics' | 'computer-science' | 'physics';
+type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 
 export const DashboardPage = () => {
@@ -23,7 +23,7 @@ export const DashboardPage = () => {
   const [searchParams] = useSearchParams();
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
-    return (saved === 'economics' || saved === 'computer-science' || saved === 'physics') ? saved as Subject : 'economics';
+    return (saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry') ? saved as Subject : 'economics';
   });
   const [productType, setProductType] = useState<ExamBoard>(() => {
     const savedSubject = localStorage.getItem('preferred-subject');
@@ -31,6 +31,9 @@ export const DashboardPage = () => {
     // Only use saved exam board if it matches the subject
     if (savedSubject === 'computer-science' || savedSubject === 'physics') {
       return 'ocr';
+    }
+    if (savedSubject === 'chemistry') {
+      return 'aqa';
     }
     return (saved === 'edexcel' || saved === 'aqa' || saved === 'cie') ? saved as ExamBoard : 'edexcel';
   });
@@ -51,6 +54,8 @@ export const DashboardPage = () => {
       }
     } else if (subject === 'computer-science' || subject === 'physics') {
       setProductType('ocr');
+    } else if (subject === 'chemistry') {
+      setProductType('aqa');
     }
   }, [subject]);
 
@@ -64,12 +69,13 @@ export const DashboardPage = () => {
     const checkAccess = async () => {
       if (user) {
         setCheckingAccess(true);
-        const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess, ocrPhysicsAccess] = await Promise.all([
+        const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess, ocrPhysicsAccess, aqaChemistryAccess] = await Promise.all([
           checkProductAccess(user.id, 'edexcel-economics'),
           checkProductAccess(user.id, 'aqa-economics'),
           checkProductAccess(user.id, 'cie-economics'),
           checkProductAccess(user.id, 'ocr-computer-science'),
           checkProductAccess(user.id, 'ocr-physics'),
+          checkProductAccess(user.id, 'aqa-chemistry'),
         ]);
         setProductAccess({
           'edexcel': edexcelAccess,
@@ -78,6 +84,7 @@ export const DashboardPage = () => {
           'ocr': subject === 'physics' ? ocrPhysicsAccess : ocrCsAccess,
           'ocr-cs': ocrCsAccess,
           'ocr-physics': ocrPhysicsAccess,
+          'aqa-chemistry': aqaChemistryAccess,
         });
         
         // Fetch subscription details for monthly subscriptions
@@ -99,6 +106,7 @@ export const DashboardPage = () => {
               else if (slug === 'cie-economics') key = 'cie';
               else if (slug === 'ocr-computer-science') key = 'ocr-cs';
               else if (slug === 'ocr-physics') key = 'ocr-physics';
+              else if (slug === 'aqa-chemistry') key = 'aqa-chemistry';
               details[key] = sub;
             }
           });
@@ -144,12 +152,13 @@ export const DashboardPage = () => {
       
       // Refresh access
       refreshProfile();
-      const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess, ocrPhysicsAccess] = await Promise.all([
+      const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess, ocrPhysicsAccess, aqaChemistryAccess] = await Promise.all([
         checkProductAccess(user!.id, 'edexcel-economics'),
         checkProductAccess(user!.id, 'aqa-economics'),
         checkProductAccess(user!.id, 'cie-economics'),
         checkProductAccess(user!.id, 'ocr-computer-science'),
         checkProductAccess(user!.id, 'ocr-physics'),
+        checkProductAccess(user!.id, 'aqa-chemistry'),
       ]);
       setProductAccess({
         'edexcel': edexcelAccess,
@@ -157,6 +166,7 @@ export const DashboardPage = () => {
         'cie': cieAccess,
         'ocr-cs': ocrCsAccess,
         'ocr-physics': ocrPhysicsAccess,
+        'aqa-chemistry': aqaChemistryAccess,
       });
     } catch (error: any) {
       console.error('Cancel error:', error);
@@ -245,9 +255,9 @@ export const DashboardPage = () => {
           <div className="border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
             {/* Subject Dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild>
                 <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
-                  {subject === 'economics' ? 'Economics' : subject === 'computer-science' ? 'Computer Science' : 'Physics'}
+                  {subject === 'economics' ? 'Economics' : subject === 'computer-science' ? 'Computer Science' : subject === 'physics' ? 'Physics' : 'Chemistry'}
                   <ChevronDown className="h-3 w-3" />
                 </button>
               </DropdownMenuTrigger>
@@ -269,6 +279,12 @@ export const DashboardPage = () => {
                   onClick={() => setSubject('physics')}
                 >
                   Physics
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer hover:bg-muted"
+                  onClick={() => setSubject('chemistry')}
+                >
+                  Chemistry
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -300,7 +316,7 @@ export const DashboardPage = () => {
                   CIE
                 </ToggleGroupItem>
               </ToggleGroup>
-            ) : (
+            ) : subject === 'computer-science' || subject === 'physics' ? (
               <ToggleGroup 
                 type="single" 
                 value="ocr" 
@@ -313,7 +329,20 @@ export const DashboardPage = () => {
                   OCR
                 </ToggleGroupItem>
               </ToggleGroup>
-            )}
+            ) : subject === 'chemistry' ? (
+              <ToggleGroup 
+                type="single" 
+                value="aqa" 
+                className="flex items-center gap-1"
+              >
+                <ToggleGroupItem 
+                  value="aqa" 
+                  className="rounded-full px-4 sm:px-6 py-2.5 text-sm font-semibold bg-gradient-brand !text-white"
+                >
+                  AQA
+                </ToggleGroupItem>
+              </ToggleGroup>
+            ) : null}
           </div>
         </div>
 
@@ -328,7 +357,9 @@ export const DashboardPage = () => {
                   ? `AI trained on the 2025-2024 ${productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA Economics' : 'CIE Economics'} past papers (P1–P3)`
                   : subject === 'computer-science'
                   ? 'AI trained on the 2025-2024 OCR Computer Science past papers'
-                  : 'AI trained on the 2025-2024 OCR Physics past papers'
+                  : subject === 'physics'
+                  ? 'AI trained on the 2025-2024 OCR Physics past papers'
+                  : 'AI trained on the 2025-2024 AQA Chemistry past papers'
                 }
               </li>
               <li className="flex items-start">
@@ -355,16 +386,18 @@ export const DashboardPage = () => {
                   ? '/ocr-cs-free-version'
                   : subject === 'physics'
                   ? '/ocr-physics-free-version'
+                  : subject === 'chemistry'
+                  ? '/aqa-chemistry-free-version'
                   : productType === 'edexcel' ? '/free-version' : productType === 'aqa' ? '/aqa-free-version' : '/cie-free-version'
               }>Launch free</Link>
             </Button>
           </div>
 
           {/* Deluxe Plan */}
-          <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : productAccess[productType]?.hasAccess) ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
+          <div className={`bg-muted p-8 rounded-xl max-w-md w-full shadow-card text-left ${(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : subject === 'chemistry' ? productAccess['aqa-chemistry']?.hasAccess : productAccess[productType]?.hasAccess) ? 'border-2 border-primary' : 'border-2 border-primary'}`}>
             <h2 className="text-2xl font-semibold mb-2">
-              💎 Exam Season Pass {subject === 'computer-science' ? '(OCR CS)' : subject === 'physics' ? '(OCR Physics)' : productType === 'edexcel' ? '(Edexcel)' : productType === 'aqa' ? '(AQA)' : '(CIE)'}
-              {(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : productAccess[productType]?.hasAccess) && (
+              💎 Exam Season Pass {subject === 'computer-science' ? '(OCR CS)' : subject === 'physics' ? '(OCR Physics)' : subject === 'chemistry' ? '(AQA Chemistry)' : productType === 'edexcel' ? '(Edexcel)' : productType === 'aqa' ? '(AQA)' : '(CIE)'}
+              {(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : subject === 'chemistry' ? productAccess['aqa-chemistry']?.hasAccess : productAccess[productType]?.hasAccess) && (
                 <span className="block text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full w-fit mt-2">
                   ACTIVE
                 </span>
@@ -381,7 +414,9 @@ export const DashboardPage = () => {
                   ? `AI trained on all ${productType === 'edexcel' ? 'Edexcel Economics A' : productType === 'aqa' ? 'AQA' : 'CIE'} past papers (2017-2025, P1-P3)`
                   : subject === 'computer-science'
                   ? 'AI trained on all OCR Computer Science past papers'
-                  : 'AI trained on all OCR Physics past papers'
+                  : subject === 'physics'
+                  ? 'AI trained on all OCR Physics past papers'
+                  : 'AI trained on all AQA Chemistry past papers'
                 }
               </li>
               <li className="flex items-start">
@@ -394,7 +429,7 @@ export const DashboardPage = () => {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
-                Covers the entire {subject === 'economics' ? (productType === 'edexcel' ? 'Edexcel' : productType === 'aqa' ? 'AQA' : 'CIE') : 'OCR'} specification
+                Covers the entire {subject === 'economics' ? (productType === 'edexcel' ? 'Edexcel' : productType === 'aqa' ? 'AQA' : 'CIE') : subject === 'chemistry' ? 'AQA' : 'OCR'} specification
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
@@ -406,7 +441,9 @@ export const DashboardPage = () => {
                   ? 'Step-by-step diagram guidance (AD/AS → buffer stocks) + application bank'
                   : subject === 'computer-science'
                   ? 'Step-by-step coding guidance + algorithm explanations'
-                  : 'Step-by-step calculation guidance + formula explanations'
+                  : subject === 'physics'
+                  ? 'Step-by-step calculation guidance + formula explanations'
+                  : 'Step-by-step mechanism guidance + calculation explanations'
                 }
               </li>
               <li className="flex items-start">
@@ -415,7 +452,7 @@ export const DashboardPage = () => {
               </li>
             </ul>
             
-            {(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : productAccess[productType]?.hasAccess) ? (
+            {(subject === 'computer-science' ? productAccess['ocr-cs']?.hasAccess : subject === 'physics' ? productAccess['ocr-physics']?.hasAccess : subject === 'chemistry' ? productAccess['aqa-chemistry']?.hasAccess : productAccess[productType]?.hasAccess) ? (
               <Button 
                 variant="brand" 
                 size="lg" 
@@ -427,6 +464,8 @@ export const DashboardPage = () => {
                     ? '/ocr-cs-premium' 
                     : subject === 'physics'
                     ? '/ocr-physics-premium'
+                    : subject === 'chemistry'
+                    ? '/aqa-chemistry-premium'
                     : productType === 'edexcel' ? '/premium' : productType === 'aqa' ? '/aqa-premium' : '/cie-premium'
                 }>Launch Deluxe Version</Link>
               </Button>
@@ -462,6 +501,8 @@ export const DashboardPage = () => {
                       ? 'ocr-computer-science'
                       : subject === 'physics'
                       ? 'ocr-physics'
+                      : subject === 'chemistry'
+                      ? 'aqa-chemistry'
                       : productType === 'edexcel' ? 'edexcel-economics' 
                         : productType === 'aqa' ? 'aqa-economics' 
                         : 'cie-economics';
@@ -523,7 +564,7 @@ export const DashboardPage = () => {
               <div>
                 <p className="text-sm font-medium mb-2">Subscription Status</p>
                 <div className="space-y-3">
-                  {(['edexcel', 'aqa', 'cie', 'ocr-cs', 'ocr-physics'] as const).map((board) => {
+                  {(['edexcel', 'aqa', 'cie', 'ocr-cs', 'ocr-physics', 'aqa-chemistry'] as const).map((board) => {
                     const access = productAccess[board];
                     const sub = subscriptionDetails[board];
                     if (!access?.hasAccess) return null;
@@ -535,6 +576,7 @@ export const DashboardPage = () => {
                       'cie': 'CIE Economics',
                       'ocr-cs': 'OCR Computer Science',
                       'ocr-physics': 'OCR Physics',
+                      'aqa-chemistry': 'AQA Chemistry',
                     }[board];
                     
                     return (
@@ -567,7 +609,7 @@ export const DashboardPage = () => {
                     );
                   })}
                   
-                  {!productAccess['edexcel']?.hasAccess && !productAccess['aqa']?.hasAccess && !productAccess['cie']?.hasAccess && !productAccess['ocr-cs']?.hasAccess && !productAccess['ocr-physics']?.hasAccess && (
+                  {!productAccess['edexcel']?.hasAccess && !productAccess['aqa']?.hasAccess && !productAccess['cie']?.hasAccess && !productAccess['ocr-cs']?.hasAccess && !productAccess['ocr-physics']?.hasAccess && !productAccess['aqa-chemistry']?.hasAccess && (
                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                       Free
                     </span>

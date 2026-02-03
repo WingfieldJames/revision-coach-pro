@@ -24,7 +24,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scr
 import { ScreenshotTestimonials } from '@/components/ui/screenshot-testimonials';
 import { LatestFeaturesSection } from '@/components/LatestFeaturesSection';
 import { FlowFieldBackground } from '@/components/ui/flow-field-background';
-type Subject = 'economics' | 'computer-science' | 'physics';
+type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 export const ComparePage = () => {
   const {
@@ -37,7 +37,7 @@ export const ComparePage = () => {
   const shouldCheckout = searchParams.get('checkout') === 'true';
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
-    return saved === 'economics' || saved === 'computer-science' || saved === 'physics' ? saved as Subject : 'economics';
+    return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' ? saved as Subject : 'economics';
   });
   const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
     const savedSubject = localStorage.getItem('preferred-subject');
@@ -45,6 +45,9 @@ export const ComparePage = () => {
     // Only use saved exam board if it matches the subject
     if (savedSubject === 'computer-science' || savedSubject === 'physics') {
       return 'ocr';
+    }
+    if (savedSubject === 'chemistry') {
+      return 'aqa';
     }
     return saved === 'edexcel' || saved === 'aqa' || saved === 'cie' ? saved as ExamBoard : 'edexcel';
   });
@@ -58,7 +61,8 @@ export const ComparePage = () => {
     'aqa-economics': '17ade690-8c44-4961-83b5-0edf42a9faea',
     'cie-economics': '9a710cf9-0523-4c1f-82c6-0e02b19087e5',
     'ocr-computer-science': '5d05830b-de7b-4206-8f49-6d3695324eb6',
-    'ocr-physics': 'ecd5978d-3bf4-4b9c-993f-30b7f3a0f197'
+    'ocr-physics': 'ecd5978d-3bf4-4b9c-993f-30b7f3a0f197',
+    'aqa-chemistry': '3e5bf02e-1424-4bb3-88f9-2a9c58798444'
   };
 
   // Get current product slug based on subject and exam board
@@ -70,6 +74,7 @@ export const ComparePage = () => {
     }
     if (subject === 'computer-science') return 'ocr-computer-science';
     if (subject === 'physics') return 'ocr-physics';
+    if (subject === 'chemistry') return 'aqa-chemistry';
     return null;
   };
 
@@ -83,7 +88,8 @@ export const ComparePage = () => {
   const subjectLabels: Record<Subject, string> = {
     'economics': 'Economics',
     'computer-science': 'Computer Science',
-    'physics': 'Physics'
+    'physics': 'Physics',
+    'chemistry': 'Chemistry'
   };
 
   // Check product access when user or subject/examBoard changes
@@ -158,6 +164,7 @@ export const ComparePage = () => {
     const getFreePath = () => {
       if (subject === 'computer-science') return '/ocr-cs-free-version';
       if (subject === 'physics') return '/ocr-physics-free-version';
+      if (subject === 'chemistry') return '/aqa-chemistry-free-version';
       if (examBoard === 'aqa') return '/aqa-free-version';
       if (examBoard === 'cie') return '/cie-free-version';
       return '/free-version';
@@ -187,7 +194,7 @@ export const ComparePage = () => {
     if (hasProductAccess) {
       // User has access → redirect to premium page
       console.log('User has access, redirecting to premium page');
-      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
+      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
@@ -298,6 +305,12 @@ export const ComparePage = () => {
                 }}>
                     Physics
                   </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer hover:bg-muted" onClick={() => {
+                  setSubject('chemistry');
+                  setExamBoard('aqa');
+                }}>
+                    Chemistry
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -314,6 +327,16 @@ export const ComparePage = () => {
                   </ToggleGroupItem>
                 </ToggleGroup> : subject === 'computer-science' || subject === 'physics' ? <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
                   OCR
+                </div> : subject === 'chemistry' ? <div className="flex items-center gap-1">
+                  <div className="rounded-full px-4 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
+                    AQA
+                  </div>
+                  <div className="rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground">
+                    Edexcel
+                  </div>
+                  <div className="rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground">
+                    OCR
+                  </div>
                 </div> : null}
             </div>
 
@@ -324,7 +347,9 @@ export const ComparePage = () => {
                 <ToggleGroup type="single" value={subject} onValueChange={value => {
                 if (value) {
                   setSubject(value as Subject);
-                  setExamBoard(value === 'economics' ? 'edexcel' : 'ocr');
+                  if (value === 'economics') setExamBoard('edexcel');
+                  else if (value === 'chemistry') setExamBoard('aqa');
+                  else setExamBoard('ocr');
                 }
               }} className="flex items-center gap-1">
                   <ToggleGroupItem value="economics" className="rounded-full w-[110px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all">
@@ -335,6 +360,9 @@ export const ComparePage = () => {
                   </ToggleGroupItem>
                   <ToggleGroupItem value="physics" className="rounded-full w-[80px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all">
                     Physics
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="chemistry" className="rounded-full w-[100px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all">
+                    Chemistry
                   </ToggleGroupItem>
                 </ToggleGroup>
 
@@ -364,6 +392,16 @@ export const ComparePage = () => {
                       </div>
                       <div className="rounded-full flex-1 py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
                         Edexcel
+                      </div>
+                    </> : subject === 'chemistry' ? <>
+                      <ToggleGroupItem value="aqa" className="rounded-full flex-1 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-colors">
+                        AQA
+                      </ToggleGroupItem>
+                      <div className="rounded-full flex-1 py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                        Edexcel
+                      </div>
+                      <div className="rounded-full flex-1 py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                        OCR
                       </div>
                     </> : null}
                 </ToggleGroup>
@@ -532,9 +570,9 @@ export const ComparePage = () => {
       }]} />
       </div>
 
-      {/* Founder Section - Show for Economics, Computer Science, and Physics */}
+      {/* Founder Section - Show for Economics, Computer Science, Physics, and Chemistry */}
       <div className="relative z-10 bg-background">
-        {(subject === 'economics' || subject === 'computer-science' || subject === 'physics') && <FounderSection subject={subject} examBoard={examBoard} />}
+        {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry') && <FounderSection subject={subject} examBoard={examBoard} />}
       </div>
 
       {/* Latest Features Section */}
