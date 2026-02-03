@@ -113,7 +113,7 @@ export default function RadialOrbitalTimeline({
 
   const calculateNodePosition = (index: number, total: number) => {
     const angle = ((index / total) * 360 + rotationAngle) % 360;
-    const radius = 200;
+    const radius = 280;
     const radian = (angle * Math.PI) / 180;
 
     const x = radius * Math.cos(radian) + centerOffset.x;
@@ -155,21 +155,21 @@ export default function RadialOrbitalTimeline({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[600px] flex items-center justify-center overflow-visible bg-white"
+      className="relative w-full h-[700px] flex items-center justify-center overflow-visible bg-white -mt-8"
       onClick={handleContainerClick}
     >
       <div
         ref={orbitRef}
-        className="relative w-[500px] h-[500px] flex items-center justify-center"
+        className="relative w-[700px] h-[700px] flex items-center justify-center"
       >
         {/* Orbital rings */}
-        <div className="absolute w-[400px] h-[400px] rounded-full border-2 border-primary/20" />
-        <div className="absolute w-[300px] h-[300px] rounded-full border border-primary/15" />
-        <div className="absolute w-[200px] h-[200px] rounded-full border border-primary/10" />
+        <div className="absolute w-[560px] h-[560px] rounded-full border-2 border-primary/20" />
+        <div className="absolute w-[420px] h-[420px] rounded-full border border-primary/15" />
+        <div className="absolute w-[280px] h-[280px] rounded-full border border-primary/10" />
 
         {/* Center circle with white fill and brand glow */}
-        <div className="absolute w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.4)]">
-          <div className="w-16 h-16 rounded-full bg-white opacity-90" />
+        <div className="absolute w-28 h-28 rounded-full bg-white flex items-center justify-center shadow-[0_0_40px_rgba(139,92,246,0.5)]">
+          <div className="w-20 h-20 rounded-full bg-white opacity-90" />
         </div>
 
         {timelineData.map((item, index) => {
