@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.rag-chat]
 verify_jwt = false
+
+[functions.ingest-physics-papers]
+verify_jwt = false
