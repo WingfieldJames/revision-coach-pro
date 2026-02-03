@@ -228,8 +228,9 @@ export const HomePage = () => {
             <div className="flex flex-nowrap md:flex-wrap items-center justify-center gap-1 md:gap-2">
               <span>How</span>
               <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-5 md:h-8" />
-              <span>helps you revise</span>
-              <span className="bg-gradient-brand bg-clip-text text-transparent">smarter</span>
+              <span>helps you at</span>
+              <span className="bg-gradient-brand bg-clip-text text-transparent">every</span>
+              <span>stage of revision</span>
             </div>
           </h2>
         </ScrollReveal>
