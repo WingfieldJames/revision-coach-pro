@@ -238,7 +238,7 @@ export const HomePage = () => {
         {/* Desktop: Orbital Timeline */}
         <div className="hidden lg:block">
           <RadialOrbitalTimeline timelineData={revisionFeatures} />
-          <div className="text-center -mt-8">
+          <div className="text-center mt-4">
             <InteractiveHoverButton 
               text="Try A* AI now →" 
               variant="reverse" 
