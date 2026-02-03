@@ -240,10 +240,10 @@ export const HomePage = () => {
           <RadialOrbitalTimeline timelineData={revisionFeatures} />
           <div className="text-center mt-4">
             <InteractiveHoverButton 
-              text="Try A* AI now →" 
+              text="Get started free →" 
               variant="reverse" 
               onClick={() => handleNavigation()} 
-              className="pointer-events-auto text-base px-6 py-3 w-[200px]" 
+              className="pointer-events-auto text-base px-6 py-3 w-[220px]"
             />
           </div>
         </div>
