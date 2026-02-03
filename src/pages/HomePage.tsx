@@ -188,7 +188,7 @@ export const HomePage = () => {
         <div className="max-w-7xl mx-auto px-8">
           {/* Button beneath video */}
           <div className="text-center mt-8 mb-4">
-            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={() => handleNavigation()} className="pointer-events-auto text-base px-6 py-3 w-[200px]" />
+            <InteractiveHoverButton text="Get started free →" variant="reverse" onClick={() => handleNavigation()} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
           </div>
 
           {/* Disclaimer */}
