@@ -225,12 +225,16 @@ export const HomePage = () => {
       <section className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
         <ScrollReveal className="relative z-10">
           <h2 className="text-lg md:text-3xl font-bold text-center mb-8 md:mb-12">
-            <div className="flex flex-nowrap md:flex-wrap items-center justify-center gap-1 md:gap-2">
-              <span>How</span>
-              <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-5 md:h-8" />
-              <span>helps you at</span>
-              <span className="bg-gradient-brand bg-clip-text text-transparent">every</span>
-              <span>stage of revision</span>
+            <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-1 md:gap-2">
+              <div className="flex items-center gap-1 md:gap-2">
+                <span>How</span>
+                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-5 md:h-8" />
+                <span>helps you at</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <span className="bg-gradient-brand bg-clip-text text-transparent">every</span>
+                <span>stage of revision</span>
+              </div>
             </div>
           </h2>
         </ScrollReveal>
