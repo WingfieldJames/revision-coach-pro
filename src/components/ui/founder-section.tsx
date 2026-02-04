@@ -106,7 +106,7 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl" />
           
           {/* Quote icon */}
-          <div className="absolute top-8 right-8 opacity-10">
+          <div className="absolute top-8 right-8 opacity-10 hidden md:block">
             <Quote className="w-16 h-16 text-foreground" />
           </div>
 
@@ -177,8 +177,8 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
 
             {/* Content */}
             <div className="flex-1 text-center md:text-left">
-              {/* Quote */}
-              <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
+              {/* Quote - hidden on mobile */}
+              <blockquote className="hidden md:block text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
                 {isChemistry ? (
                   <>
                     "Hi, I'm Tudor. 4 A* grades at A-Level and 9 Grade 9s at GCSE, including perfect scores of 200/200 in Physics, 197/200 in Chemistry, and 236/240 in Mathematics.
