@@ -32,3 +32,12 @@ verify_jwt = false
 
 [functions.ingest-physics-papers]
 verify_jwt = false
+
+[functions.ingest-content]
+verify_jwt = false
+
+[functions.ingest-chemistry-spec]
+verify_jwt = false
+
+[functions.ingest-chemistry-papers]
+verify_jwt = false
