@@ -297,7 +297,7 @@ export const HomePage = () => {
         <HeroBackgroundPaths>
           <div className="max-w-4xl mx-auto relative z-10">
             <ScrollReveal>
-              <h2 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2">
+              <h2 className="text-xl sm:text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2 whitespace-nowrap">
                 Frequently asked questions
               </h2>
               <p className="text-center text-muted-foreground mb-8 text-lg">
