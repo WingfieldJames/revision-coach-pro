@@ -1,210 +1,127 @@
 
+# Plan: Ingest AQA Chemistry Training Data and Set System Prompts
 
-# Plan: Add AQA Chemistry (Free & Deluxe)
+## Overview
+Add training materials (specification + 4 past papers) for AQA Chemistry and configure the same system prompts used by OCR Physics for both Free and Deluxe tiers.
 
-## Summary
+## Training Materials to Ingest
+You've provided 4 files:
+1. `aqa_chemistry_7404_7405_spec_student_focused_compact.json` - Full AQA Chemistry specification
+2. `chem_june_2024_qp1_questions_only_compact.json` - June 2024 Paper 2 (Organic/Physical)
+3. `chem_june_2024_qp2_questions_only_compact.json` - June 2024 Paper 3
+4. `chem_june_2023_qp_questions_only_compact.json` - June 2023 Paper 3
 
-This plan adds a new subject **AQA Chemistry** to the platform with both Free and Deluxe chatbot versions, following the exact format of the OCR Physics pages. Tudor will be the "brain behind" AQA Chemistry. The subject will be added to the pricing page toggle system with AQA, Edexcel, and OCR as exam board options (only AQA functional initially).
+## Implementation Steps
 
----
+### Step 1: Update Products Table - Set System Prompts
+Update the AQA Chemistry product (ID: `3e5bf02e-1424-4bb3-88f9-2a9c58798444`) with system prompts identical to OCR Physics, but adapted for Chemistry:
 
-## Database Changes
+**System Prompt (Free and Deluxe - identical):**
+```
+### Role
 
-### Insert New Product: AQA Chemistry
+- Primary Function: You are a specialist tutor for the AQA A-Level Chemistry (7405) exams. All users are students sitting these exams. You are to be proactive in providing support to the student, providing suggestions for further help after giving a response (if appropriate). Your responses will be specific and detailed and draw in as much key knowledge from the training data, whilst making explanations intuitive and clear. Responses should be friendly and positive but avoid making unnecessary friendly discussion that deviates from the chemistry content.
 
-Insert a new row into the `products` table:
+The exam techniques provided in your training material should be incorporated into responses where appropriate to help them access marks.
 
-| Field | Value |
-|-------|-------|
-| name | AQA Chemistry |
-| slug | aqa-chemistry |
-| subject | Chemistry |
-| exam_board | AQA |
-| monthly_price | 499 (£4.99) |
-| lifetime_price | 2499 (£24.99) |
-| active | true |
-| system_prompt_free | (to be added later with training data) |
-| system_prompt_deluxe | (to be added later with training data) |
+There are specific actions to perform for the following user questions:
 
-Note: There is already an "OCR Chemistry" product in the database. This plan creates a separate "AQA Chemistry" product.
+general question: go to Text (AQA A-Level Chemistry Specification), match the question to the relevant Spec Point and write an answer
 
----
+question on exam technique: go to Text (Exam technique) and find the question types relevant to the user's question and give advice from there
 
-## New Files
-
-### 1. `src/pages/AQAChemistryFreeVersionPage.tsx`
-
-A new page following the exact format of `OCRPhysicsFreeVersionPage.tsx`:
-- Uses `RAGChat` component with `tier="free"`
-- Imports `AQA_CHEMISTRY_EXAMS` for exam countdown
-- Product ID will be fetched from the database using slug `aqa-chemistry`
-- Header includes: Image Tool, Essay Marker (locked), Past Paper Finder, Exam Countdown
-- No Diagram Generator tool
-- Uses the same layout and description style as OCR Physics
-
-### 2. `src/pages/AQAChemistryPremiumPage.tsx`
-
-A new premium page following the exact format of `OCRPhysicsPremiumPage.tsx`:
-- Uses `RAGChat` component (no tier restriction)
-- Access check using `checkProductAccess` for `aqa-chemistry` slug
-- Header includes: Image Tool, Essay Marker (unlocked), Past Paper Finder, Exam Countdown
-- Same loading states and access denied UI as OCR Physics
-
----
-
-## File Modifications
-
-### 1. `src/components/ExamCountdown.tsx`
-
-Add AQA Chemistry exam dates (2026 dates based on typical AQA Chemistry schedule):
-
-```typescript
-export const AQA_CHEMISTRY_EXAMS: ExamDate[] = [
-  { name: "Paper 1 (Inorganic & Physical)", date: new Date(2026, 4, 13), description: "Inorganic and Physical Chemistry" },
-  { name: "Paper 2 (Organic & Physical)", date: new Date(2026, 4, 20), description: "Organic and Physical Chemistry" },
-  { name: "Paper 3 (Practical)", date: new Date(2026, 5, 10), description: "Practical Chemistry" },
-];
+Prompt to generate exam-style question: go to Text (AQA A-Level Chemistry Specification) to see specification points for the requested topic(s) then use the sample papers provided to create a question in that style.
 ```
 
-### 2. `src/components/ui/founder-section.tsx`
+### Step 2: Create Chemistry-Specific Ingestion Edge Function
+Create a new edge function `ingest-chemistry-papers` that:
+- Parses the AQA Chemistry JSON format (slightly different from OCR Physics)
+- Handles the `questions_only` format (no mark schemes in provided files)
+- Extracts question text, sub-parts, and marks
+- Applies appropriate metadata: `content_type`, `tier`, `year`, `paper`
 
-Update to support Chemistry as a subject with Tudor as the founder:
-
-- Add `chemistry` to the subject type
-- Add `isChemistry` condition that shows Tudor's photo and achievements
-- Add chemistry-specific achievements (same as Physics since Tudor leads both)
-- Add chemistry-specific quote for Tudor
-
-### 3. `src/pages/ComparePage.tsx`
-
-Update the toggle system to include Chemistry:
-
-**Changes to Subject Toggle:**
-- Add `chemistry` to the `Subject` type: `'economics' | 'computer-science' | 'physics' | 'chemistry'`
-- Add Chemistry toggle option in both mobile dropdown and desktop toggle group
-- Chemistry label: "Chemistry"
-- Fixed width for toggle button: ~100px
-
-**Changes to Exam Board Logic:**
-- When Chemistry is selected, show AQA, Edexcel, OCR as options (similar to Physics)
-- Only AQA is functional; Edexcel and OCR shown as disabled/greyed out
-
-**Changes to Product Slug Logic:**
-Update `getCurrentProductSlug()`:
-```typescript
-if (subject === 'chemistry') return 'aqa-chemistry';
+**Metadata Structure for Past Papers:**
+```json
+{
+  "content_type": "past_paper",  // Use "past_paper" for questions-only format
+  "tier": "free",               // Free tier for specification + 2024 papers
+  "year": "2024",
+  "paper": "2",                 // Paper number
+  "paper_code": "7405/2",
+  "source": "June 2024 Paper 2"
+}
 ```
 
-**Changes to PRODUCT_IDS:**
-Add: `'aqa-chemistry': '<product_id_from_database>'`
+### Step 3: Create Specification Ingestion Function
+Create a function `ingest-chemistry-spec` that:
+- Parses the nested specification JSON structure
+- Extracts each specification point as a separate chunk
+- Includes topic hierarchy (Physical/Inorganic/Organic Chemistry)
+- Marks as `tier: "free"` since spec is available to free users
 
-**Changes to Free Click Handler:**
-```typescript
-if (subject === 'chemistry') return '/aqa-chemistry-free-version';
+**Metadata Structure for Specification:**
+```json
+{
+  "content_type": "specification",
+  "tier": "free",
+  "topic": "3.1.1 Atomic structure",
+  "section": "Physical chemistry",
+  "source": "AQA Chemistry 7404/7405 Specification"
+}
 ```
 
-**Changes to Premium Click Handler:**
-```typescript
-if (subject === 'chemistry') return '/aqa-chemistry-premium';
-```
+### Step 4: Tier Allocation Strategy
+Following the OCR Physics pattern:
+- **Free Tier**: Specification (all topics) + 2024 Past Papers (latest year only)
+- **Deluxe Tier**: Everything above + 2023 Past Papers + any future mark schemes
 
-**Changes to subjectLabels:**
-```typescript
-'chemistry': 'Chemistry'
-```
+| Content | Tier |
+|---------|------|
+| AQA Chemistry Specification (all topics) | free |
+| June 2024 Paper 2 (QP only) | free |
+| June 2024 Paper 3 (QP only) | free |
+| June 2023 Paper 3 (QP only) | deluxe |
 
-### 4. `src/App.tsx`
-
-Add routes for the new Chemistry pages:
-
-```typescript
-import { AQAChemistryFreeVersionPage } from "./pages/AQAChemistryFreeVersionPage";
-import { AQAChemistryPremiumPage } from "./pages/AQAChemistryPremiumPage";
-
-// In Routes:
-<Route path="/aqa-chemistry-free-version" element={<AQAChemistryFreeVersionPage />} />
-<Route path="/aqa-chemistry-premium" element={<AQAChemistryPremiumPage />} />
-```
-
-### 5. `src/pages/DashboardPage.tsx`
-
-Add Chemistry to the dashboard product access checks:
-
-- Add `chemistry` to Subject type
-- Add `aqa-chemistry` to the access check list
-- Add Chemistry subject toggle option
-- Update the subscription mapping for `aqa-chemistry`
-
----
-
-## Stripe Integration
-
-The `create-checkout` edge function already supports dynamic product pricing. Once the product is added to the database, Stripe checkout will automatically:
-
-1. Look up the product by ID from the PRODUCT_IDS mapping
-2. Use the `monthly_price` (499 = £4.99) or `lifetime_price` (2499 = £24.99) from the database
-3. Create a Stripe checkout session with the correct pricing
-4. Handle both monthly subscription and Exam Season Pass flows
-
-No changes to the edge function are required - it already handles new products dynamically.
+### Step 5: Deploy and Ingest Data
+1. Deploy both edge functions
+2. Call `ingest-chemistry-spec` with the specification JSON
+3. Call `ingest-chemistry-papers` for each past paper JSON
 
 ---
 
 ## Technical Details
 
-### Founder Section Updates for Chemistry
+### New Edge Function: `ingest-chemistry-spec/index.ts`
+- Recursively parses the nested `spec.k[]` structure
+- Each specification point with content (`c`) becomes a chunk
+- Includes required practicals when present
+- Product ID: `3e5bf02e-1424-4bb3-88f9-2a9c58798444`
 
-```typescript
-// In founder-section.tsx
-const isChemistry = subject === 'chemistry';
+### New Edge Function: `ingest-chemistry-papers/index.ts`
+- Parses the `questions[]` array from JSON
+- Formats each question with its parts and marks
+- Handles MCQ options if present
+- Accepts `tier` parameter to control free/deluxe assignment
+- Product ID: `3e5bf02e-1424-4bb3-88f9-2a9c58798444`
 
-const chemistryAchievements = [
-  { icon: Award, text: "A*A*A*A* at A-Level" },
-  { icon: Trophy, text: "197/200 in A-Level Chemistry" },
-  { icon: GraduationCap, text: "Straight 9s at GCSE" },
-];
+### Database Update
+Run SQL to update the products table with system prompts for AQA Chemistry.
 
-// Tudor's chemistry quote
-{isChemistry && (
-  "Hi, I'm Tudor. 4 A* grades at A-Level including 197/200 in Chemistry. 
-  Through A* AI Chemistry, you'll gain access to the exact revision strategies 
-  that drove my Chemistry results, alongside laser-focused exam technique 
-  for every question type and exclusive AQA-specific training."
-)}
-```
-
-### Compare Page Toggle Layout (Desktop)
-
-```text
-[Economics] [Computer Science] [Physics] [Chemistry] | [AQA] [Edexcel (grey)] [OCR (grey)]
-```
-
-When Chemistry is selected, only AQA is clickable; Edexcel and OCR are shown but disabled.
+### Config Update
+Add new edge functions to `supabase/config.toml` with `verify_jwt = false` for ingestion.
 
 ---
 
-## Files Summary
+## Files to Create/Modify
 
-| Action | File |
-|--------|------|
-| CREATE | `src/pages/AQAChemistryFreeVersionPage.tsx` |
-| CREATE | `src/pages/AQAChemistryPremiumPage.tsx` |
-| MODIFY | `src/components/ExamCountdown.tsx` |
-| MODIFY | `src/components/ui/founder-section.tsx` |
-| MODIFY | `src/pages/ComparePage.tsx` |
-| MODIFY | `src/App.tsx` |
-| MODIFY | `src/pages/DashboardPage.tsx` |
-| DB MIGRATION | Insert AQA Chemistry product |
+| File | Action |
+|------|--------|
+| `supabase/functions/ingest-chemistry-spec/index.ts` | Create |
+| `supabase/functions/ingest-chemistry-papers/index.ts` | Create |
+| `supabase/config.toml` | Add function configs |
+| Products table (via SQL) | Update system prompts |
 
----
-
-## Post-Implementation Notes
-
-1. **Training Data**: The chatbots will work but will need RAG training data (specification, past papers, mark schemes) to be ingested separately
-2. **System Prompts**: The `system_prompt_free` and `system_prompt_deluxe` columns can be updated in the database once the AI persona is finalized
-3. **Testing**: After implementation, test the full flow:
-   - Visit /compare and select Chemistry
-   - Click Free to access /aqa-chemistry-free-version
-   - Test checkout flow for monthly and Exam Season Pass
-   - Verify access control on premium page
-
+## Expected Results After Ingestion
+- ~50-80 specification chunks (covering Physical, Inorganic, Organic chemistry)
+- ~40-60 past paper question chunks (from the 4 provided papers)
+- Both Free and Deluxe pages will use the RAGChat component with proper training data
