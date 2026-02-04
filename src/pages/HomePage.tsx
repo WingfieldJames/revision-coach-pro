@@ -211,9 +211,9 @@ export const HomePage = () => {
           </ScrollReveal>
 
           <div className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
-            <TestimonialsColumn testimonials={firstColumn} duration={25} />
-            <TestimonialsColumn testimonials={secondColumn} duration={20} reverse />
-            <TestimonialsColumn testimonials={thirdColumn} duration={28} />
+            <TestimonialsColumn testimonials={firstColumn} duration={45} />
+            <TestimonialsColumn testimonials={secondColumn} duration={40} />
+            <TestimonialsColumn testimonials={thirdColumn} duration={50} />
           </div>
         </div>
       </section>
