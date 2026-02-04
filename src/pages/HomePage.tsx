@@ -293,7 +293,7 @@ export const HomePage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-8 bg-background relative overflow-hidden">
+      <section className="py-16 px-4 md:px-8 bg-background relative overflow-hidden">
         <HeroBackgroundPaths>
           <div className="max-w-4xl mx-auto relative z-10">
             <ScrollReveal>
