@@ -12,6 +12,7 @@ import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.pn
 import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.png';
 import amiraImage from '@/assets/amira-lse.jpg';
 import matanImage from '@/assets/matan-g.png';
+import alexandruImage from '@/assets/alexandru-leoca.png';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -538,41 +539,94 @@ export const ComparePage = () => {
         </ScrollReveal>
       </main>
 
-      <div className="relative z-10 bg-muted">
-        <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" testimonials={[{
-        author: {
-          name: "Lucy W",
-          handle: "Year 12",
-          avatar: lucyImage
-        },
-        text: "\"I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩\""
-      }, {
-        author: {
-          name: "James W",
-          handle: "LSE",
-          avatar: jamesImage
-        },
-        text: "\"A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick\""
-      }, {
-        author: {
-          name: "Matan G",
-          handle: "Year 13",
-          avatar: matanImage
-        },
-        text: "\"A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.\""
-      }, {
-        author: {
-          name: "Amira",
-          handle: "LSE Offer Holder",
-          avatar: amiraImage
-        },
-        text: "\"I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant.\""
-      }]} />
+      {/* Mobile: Founder Section first, then stacked testimonials */}
+      <div className="md:hidden">
+        {/* Founder Section - Mobile */}
+        <div className="relative z-10 bg-background">
+          {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry') && <FounderSection subject={subject} examBoard={examBoard} />}
+        </div>
+        
+        {/* Mobile Stacked Testimonials */}
+        <div className="relative z-10 bg-muted py-12 px-4">
+          <h3 className="text-xl font-bold text-center mb-6">Loved by sixth formers across the UK ⬇️</h3>
+          <div className="flex flex-col gap-4 max-w-md mx-auto">
+            {/* Matan G */}
+            <div className="bg-card rounded-3xl p-5 shadow-card border border-border/30">
+              <p className="text-foreground leading-relaxed text-base">A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.</p>
+              <div className="flex items-center gap-3 mt-4">
+                <img src={matanImage} alt="Matan G" className="w-10 h-10 rounded-full object-cover object-[center_20%]" />
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground text-sm truncate">Matan G</p>
+                  <p className="text-sm text-muted-foreground truncate">Year 13 Student</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Alexandru Leoca */}
+            <div className="bg-card rounded-3xl p-5 shadow-card border border-border/30">
+              <p className="text-foreground leading-relaxed text-base">Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked</p>
+              <div className="flex items-center gap-3 mt-4">
+                <img src={alexandruImage} alt="Alexandru Leoca" className="w-10 h-10 rounded-full object-cover object-[center_20%]" />
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground text-sm truncate">Alexandru Leoca</p>
+                  <p className="text-sm text-muted-foreground truncate">Year 12</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Sina Naderi */}
+            <div className="bg-card rounded-3xl p-5 shadow-card border border-border/30">
+              <p className="text-foreground leading-relaxed text-base">I used an early version of A* AI before its official launch. In those final weeks before the exam it was a lifesaver helping me match my knowledge to exact mark schemes helping me achieve A*s in Econ, Maths and Politics.</p>
+              <div className="flex items-center gap-3 mt-4">
+                <img src="/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png" alt="Sina Naderi" className="w-10 h-10 rounded-full object-cover object-[center_20%]" />
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground text-sm truncate">Sina Naderi</p>
+                  <p className="text-sm text-muted-foreground truncate">BA Economics, Cambridge</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Founder Section - Show for Economics, Computer Science, Physics, and Chemistry */}
-      <div className="relative z-10 bg-background">
-        {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry') && <FounderSection subject={subject} examBoard={examBoard} />}
+      {/* Desktop: Testimonials marquee first, then Founder Section */}
+      <div className="hidden md:block">
+        <div className="relative z-10 bg-muted">
+          <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" testimonials={[{
+          author: {
+            name: "Lucy W",
+            handle: "Year 12",
+            avatar: lucyImage
+          },
+          text: "\"I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩\""
+        }, {
+          author: {
+            name: "James W",
+            handle: "LSE",
+            avatar: jamesImage
+          },
+          text: "\"A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick\""
+        }, {
+          author: {
+            name: "Matan G",
+            handle: "Year 13",
+            avatar: matanImage
+          },
+          text: "\"A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.\""
+        }, {
+          author: {
+            name: "Amira",
+            handle: "LSE Offer Holder",
+            avatar: amiraImage
+          },
+          text: "\"I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant.\""
+        }]} />
+        </div>
+
+        {/* Founder Section - Desktop */}
+        <div className="relative z-10 bg-background">
+          {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry') && <FounderSection subject={subject} examBoard={examBoard} />}
+        </div>
       </div>
 
       {/* Latest Features Section */}
