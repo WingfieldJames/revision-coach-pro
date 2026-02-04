@@ -295,7 +295,7 @@ export const HomePage = () => {
       {/* FAQ Section */}
       <section className="py-16 px-4 md:px-8 bg-background relative overflow-hidden">
         <HeroBackgroundPaths>
-          <div className="max-w-4xl mx-auto relative z-10">
+          <div className="max-w-4xl mx-auto relative z-10 px-2 md:px-0">
             <ScrollReveal>
               <h2 className="text-xl sm:text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2 whitespace-nowrap">
                 Frequently asked questions
