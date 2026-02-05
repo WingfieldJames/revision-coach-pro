@@ -265,10 +265,11 @@ export const ComparePage = () => {
       alert(`Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
-  return <div className="min-h-screen bg-background font-sans relative">
+  return <div className="min-h-screen font-sans relative">
       <SEOHead title="Choose Your A* AI Plan | A-Level Economics, Computer Science & Physics" description="Compare A* AI plans for A-Level revision. Economics (Edexcel, AQA, CIE), Computer Science (OCR) & Physics (OCR). Free tier or Deluxe with full past paper training. £24.99 one-time." canonical="https://astarai.co.uk/compare" />
       <FlowFieldBackground color="#a855f7" trailOpacity={0.04} particleCount={400} />
-      <Header showNavLinks />
+      <div className="relative z-10">
+        <Header showNavLinks />
       
       <main className="py-8 px-8 max-w-4xl mx-auto text-center relative z-10">
         <ScrollReveal>
@@ -565,12 +566,12 @@ export const ComparePage = () => {
       {/* Mobile: Founder Section first, then stacked testimonials */}
       <div className="md:hidden">
         {/* Founder Section - Mobile */}
-        <div className="relative z-10 bg-background">
+        <div className="relative">
           {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry') && <FounderSection subject={subject} examBoard={examBoard} />}
         </div>
         
         {/* Mobile Stacked Testimonials */}
-        <div className="relative z-10 bg-muted py-12 px-4">
+        <div className="relative bg-muted py-12 px-4">
           <h3 className="text-xl font-bold text-center mb-6">Loved by sixth formers across the UK ⬇️</h3>
           <div className="flex flex-col gap-4 max-w-md mx-auto">
             {/* Matan G */}
@@ -614,7 +615,7 @@ export const ComparePage = () => {
 
       {/* Desktop: Testimonials marquee first, then Founder Section */}
       <div className="hidden md:block">
-        <div className="relative z-10 bg-muted">
+        <div className="relative bg-muted">
           <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" testimonials={[{
           author: {
             name: "Lucy W",
@@ -647,13 +648,13 @@ export const ComparePage = () => {
         </div>
 
         {/* Founder Section - Desktop */}
-        <div className="relative z-10 bg-background">
+        <div className="relative">
           {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry') && <FounderSection subject={subject} examBoard={examBoard} />}
         </div>
       </div>
 
       {/* Latest Features Section */}
-      <section className="py-8 md:py-16 px-4 md:px-8 relative z-10 bg-background">
+      <section className="py-8 md:py-16 px-4 md:px-8 relative">
         <ScrollReveal>
           <h2 className="text-xl md:text-3xl font-bold text-center mb-6 md:mb-12">
             <div className="flex flex-nowrap items-center justify-center gap-1 md:gap-2">
@@ -668,11 +669,11 @@ export const ComparePage = () => {
       </section>
 
       {/* Screenshot Testimonials */}
-      <div className="relative z-10 bg-muted">
+      <div className="relative bg-muted">
         <ScreenshotTestimonials />
       </div>
 
-      {!user && <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12 relative z-10">
+      {!user && <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12 relative">
           <div className="p-6 bg-secondary rounded-lg">
             <p className="text-muted-foreground mb-4 text-center">
               New to A* AI? Create an account to track your progress and access premium features.
@@ -689,7 +690,7 @@ export const ComparePage = () => {
         </ScrollReveal>}
 
       {/* Footer */}
-      <footer className="bg-muted py-16 px-8 text-center relative z-10">
+      <footer className="bg-muted py-16 px-8 text-center relative">
         <ScrollReveal className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
             <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-8" />
@@ -729,5 +730,6 @@ export const ComparePage = () => {
           </div>
         </ScrollReveal>
       </footer>
+      </div>
     </div>;
 };
