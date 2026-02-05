@@ -25,7 +25,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scr
 import { ScreenshotTestimonials } from '@/components/ui/screenshot-testimonials';
 import { LatestFeaturesSection } from '@/components/LatestFeaturesSection';
 import { FlowFieldBackground } from '@/components/ui/flow-field-background';
-type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry';
+type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'psychology';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 export const ComparePage = () => {
   const {
@@ -38,7 +38,7 @@ export const ComparePage = () => {
   const shouldCheckout = searchParams.get('checkout') === 'true';
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
-    return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' ? saved as Subject : 'economics';
+    return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' || saved === 'psychology' ? saved as Subject : 'economics';
   });
   const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
     const savedSubject = localStorage.getItem('preferred-subject');
@@ -47,7 +47,7 @@ export const ComparePage = () => {
     if (savedSubject === 'computer-science' || savedSubject === 'physics') {
       return 'ocr';
     }
-    if (savedSubject === 'chemistry') {
+    if (savedSubject === 'chemistry' || savedSubject === 'psychology') {
       return 'aqa';
     }
     return saved === 'edexcel' || saved === 'aqa' || saved === 'cie' ? saved as ExamBoard : 'edexcel';
@@ -63,7 +63,8 @@ export const ComparePage = () => {
     'cie-economics': '9a710cf9-0523-4c1f-82c6-0e02b19087e5',
     'ocr-computer-science': '5d05830b-de7b-4206-8f49-6d3695324eb6',
     'ocr-physics': 'ecd5978d-3bf4-4b9c-993f-30b7f3a0f197',
-    'aqa-chemistry': '3e5bf02e-1424-4bb3-88f9-2a9c58798444'
+    'aqa-chemistry': '3e5bf02e-1424-4bb3-88f9-2a9c58798444',
+    'aqa-psychology': 'c56bc6d6-5074-4e1f-8bf2-8e900ba928ec'
   };
 
   // Get current product slug based on subject and exam board
@@ -76,6 +77,7 @@ export const ComparePage = () => {
     if (subject === 'computer-science') return 'ocr-computer-science';
     if (subject === 'physics') return 'ocr-physics';
     if (subject === 'chemistry') return 'aqa-chemistry';
+    if (subject === 'psychology') return 'aqa-psychology';
     return null;
   };
 
@@ -90,7 +92,8 @@ export const ComparePage = () => {
     'economics': 'Economics',
     'computer-science': 'Computer Science',
     'physics': 'Physics',
-    'chemistry': 'Chemistry'
+    'chemistry': 'Chemistry',
+    'psychology': 'Psychology'
   };
 
   // Check product access when user or subject/examBoard changes
@@ -166,6 +169,7 @@ export const ComparePage = () => {
       if (subject === 'computer-science') return '/ocr-cs-free-version';
       if (subject === 'physics') return '/ocr-physics-free-version';
       if (subject === 'chemistry') return '/aqa-chemistry-free-version';
+      if (subject === 'psychology') return '/aqa-psychology-free-version';
       if (examBoard === 'aqa') return '/aqa-free-version';
       if (examBoard === 'cie') return '/cie-free-version';
       return '/free-version';
@@ -195,7 +199,7 @@ export const ComparePage = () => {
     if (hasProductAccess) {
       // User has access → redirect to premium page
       console.log('User has access, redirecting to premium page');
-      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
+      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
@@ -312,6 +316,12 @@ export const ComparePage = () => {
                 }}>
                     Chemistry
                   </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer hover:bg-muted" onClick={() => {
+                  setSubject('psychology');
+                  setExamBoard('aqa');
+                }}>
+                    Psychology
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -328,7 +338,7 @@ export const ComparePage = () => {
                   </ToggleGroupItem>
                 </ToggleGroup> : subject === 'computer-science' || subject === 'physics' ? <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
                   OCR
-                </div> : subject === 'chemistry' ? <div className="flex items-center gap-1">
+                </div> : subject === 'chemistry' || subject === 'psychology' ? <div className="flex items-center gap-1">
                   <div className="rounded-full px-4 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
                     AQA
                   </div>
@@ -349,7 +359,7 @@ export const ComparePage = () => {
                 if (value) {
                   setSubject(value as Subject);
                   if (value === 'economics') setExamBoard('edexcel');
-                  else if (value === 'chemistry') setExamBoard('aqa');
+                  else if (value === 'chemistry' || value === 'psychology') setExamBoard('aqa');
                   else setExamBoard('ocr');
                 }
               }} className="flex items-center gap-1">
@@ -364,6 +374,9 @@ export const ComparePage = () => {
                   </ToggleGroupItem>
                   <ToggleGroupItem value="chemistry" className="rounded-full w-[100px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all">
                     Chemistry
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="psychology" className="rounded-full w-[100px] py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all">
+                    Psychology
                   </ToggleGroupItem>
                 </ToggleGroup>
 
@@ -395,6 +408,16 @@ export const ComparePage = () => {
                         Edexcel
                       </div>
                     </> : subject === 'chemistry' ? <>
+                      <ToggleGroupItem value="aqa" className="rounded-full flex-1 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-colors">
+                        AQA
+                      </ToggleGroupItem>
+                      <div className="rounded-full flex-1 py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                        Edexcel
+                      </div>
+                      <div className="rounded-full flex-1 py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                        OCR
+                      </div>
+                    </> : subject === 'psychology' ? <>
                       <ToggleGroupItem value="aqa" className="rounded-full flex-1 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-colors">
                         AQA
                       </ToggleGroupItem>
