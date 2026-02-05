@@ -146,4 +146,10 @@ export const AQA_CHEMISTRY_EXAMS: ExamDate[] = [
   { name: "Paper 1 (Inorganic & Physical)", date: new Date(2026, 4, 13), description: "Inorganic and Physical Chemistry" },
   { name: "Paper 2 (Organic & Physical)", date: new Date(2026, 4, 20), description: "Organic and Physical Chemistry" },
   { name: "Paper 3 (Practical)", date: new Date(2026, 5, 10), description: "Practical Chemistry" },
-];
+ ];
+ 
+ export const AQA_PSYCHOLOGY_EXAMS: ExamDate[] = [
+   { name: "Paper 1 (Introductory Topics)", date: new Date(2026, 4, 14), description: "Introductory Topics in Psychology" },
+   { name: "Paper 2 (Psychology in Context)", date: new Date(2026, 4, 27), description: "Psychology in Context" },
+   { name: "Paper 3 (Issues and Options)", date: new Date(2026, 5, 8), description: "Issues and Options in Psychology" },
+ ];

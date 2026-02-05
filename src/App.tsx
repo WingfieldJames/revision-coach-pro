@@ -22,6 +22,8 @@ import { OCRPhysicsFreeVersionPage } from "./pages/OCRPhysicsFreeVersionPage";
 import { OCRPhysicsPremiumPage } from "./pages/OCRPhysicsPremiumPage";
 import { AQAChemistryFreeVersionPage } from "./pages/AQAChemistryFreeVersionPage";
 import { AQAChemistryPremiumPage } from "./pages/AQAChemistryPremiumPage";
+ import { AQAPsychologyFreeVersionPage } from "./pages/AQAPsychologyFreeVersionPage";
+ import { AQAPsychologyPremiumPage } from "./pages/AQAPsychologyPremiumPage";
 import { TestRAGChatPage } from "./pages/TestRAGChatPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
@@ -60,6 +62,8 @@ const App = () => (
             <Route path="/ocr-physics-premium" element={<OCRPhysicsPremiumPage />} />
             <Route path="/aqa-chemistry-free-version" element={<AQAChemistryFreeVersionPage />} />
             <Route path="/aqa-chemistry-premium" element={<AQAChemistryPremiumPage />} />
+             <Route path="/aqa-psychology-free-version" element={<AQAPsychologyFreeVersionPage />} />
+             <Route path="/aqa-psychology-premium" element={<AQAPsychologyPremiumPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/test-rag" element={<TestRAGChatPage />} />

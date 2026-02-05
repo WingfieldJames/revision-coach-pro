@@ -27,6 +27,10 @@ const CHATBOT_URLS: Record<string, { free: string; premium: string }> = {
   'ocr-physics': {
     free: 'https://www.chatbase.co/chatbot-iframe/VBv4qqbbRjfZ_eFquDXBl',
     premium: '' // To be added when Deluxe is ready
+  },
+  'aqa-psychology': {
+    free: '', // Uses RAGChat instead
+    premium: '' // Uses RAGChat instead
   }
 };
 
