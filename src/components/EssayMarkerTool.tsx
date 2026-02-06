@@ -51,7 +51,9 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   const navigate = useNavigate();
   const [selectedMark, setSelectedMark] = useState<number>(fixedMark ?? 15);
   const [essayText, setEssayText] = useState('');
-  const [inputMode, setInputMode] = useState<'text' | 'image'>('text');
+  // Default to image upload on touch devices (mobile/iPad), text on desktop
+  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const [inputMode, setInputMode] = useState<'text' | 'image'>(isTouchDevice ? 'image' : 'text');
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -258,11 +260,13 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           console.error('Error incrementing usage:', error);
         } else if (data) {
           const typedData = data as unknown as IncrementToolUsageResponse;
-          setMonthlyUsage(typedData.count);
           if (typedData.exceeded) {
+            setMonthlyUsage(typedData.count);
             toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
             return;
           }
+          // Don't update monthlyUsage here - it will refresh on next component mount
+          // This prevents the limit screen from flashing during the action
         }
       } catch (err) {
         console.error('Usage tracking error:', err);

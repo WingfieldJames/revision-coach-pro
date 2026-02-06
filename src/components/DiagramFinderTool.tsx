@@ -191,11 +191,13 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
           console.error('Error incrementing usage:', error);
         } else if (data) {
           const typedData = data as unknown as IncrementToolUsageResponse;
-          setMonthlyUsage(typedData.count);
           if (typedData.exceeded) {
+            setMonthlyUsage(typedData.count);
             toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
             return;
           }
+          // Don't update monthlyUsage here - it will refresh on next component mount
+          // This prevents the limit screen from flashing during the action
         }
       } catch (err) {
         console.error('Usage tracking error:', err);
