@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
+import { PastPaperFinderTool } from '@/components/PastPaperFinderTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
 import { Sparkles, BarChart2, PenLine, Timer, FileSearch } from 'lucide-react';
@@ -56,6 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [diagramToolOpen, setDiagramToolOpen] = useState(false);
   const [essayMarkerOpen, setEssayMarkerOpen] = useState(false);
   const [examCountdownOpen, setExamCountdownOpen] = useState(false);
+  const [pastPaperFinderOpen, setPastPaperFinderOpen] = useState(false);
 
   // Calculate days until first exam for the button
   const daysUntilFirstExam = examDates.length > 0 
@@ -77,6 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
       setDiagramToolOpen(false);
       setEssayMarkerOpen(false);
       setExamCountdownOpen(false);
+      setPastPaperFinderOpen(false);
     };
 
     window.addEventListener('blur', closeAllPopovers);
@@ -219,36 +222,23 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {showPastPaperFinder && (
-          <Popover>
+          <Popover open={pastPaperFinderOpen} onOpenChange={setPastPaperFinderOpen}>
             <PopoverTrigger asChild>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 opacity-70"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
               >
                 <FileSearch className="h-4 w-4" />
                 <span className="hidden sm:inline">Past Papers</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent 
-              className="w-[90vw] max-w-sm p-4 bg-background border border-border shadow-xl" 
+              className="w-[90vw] max-w-lg p-4 bg-background border border-border shadow-xl" 
               align="start"
               sideOffset={8}
             >
-              <div className="text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center mx-auto">
-                  <FileSearch className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-bold">Past Paper Finder</h3>
-                <p className="text-sm text-muted-foreground">
-                  Coming soon! Find and practice past paper questions by topic, year, or question type.
-                </p>
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <p className="text-xs text-muted-foreground">
-                    🚀 This feature is currently in development
-                  </p>
-                </div>
-              </div>
+              <PastPaperFinderTool tier={tier} productId={productId} />
             </PopoverContent>
           </Popover>
         )}

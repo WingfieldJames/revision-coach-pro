@@ -8,10 +8,10 @@ import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
 const EDEXCEL_ECONOMICS_FREE_PROMPTS = [
-  { text: "Explain the difference between demand-pull and cost-push inflation" },
-  { text: "What are the characteristics of perfect competition?" },
-  { text: "Help me understand the Phillips Curve" },
-  { text: "What causes market failure?" },
+  { text: "Find all PEQs related to externalities" },
+  { text: "Explain Spec Point 2.2 (AD)" },
+  { text: "How do I structure a 25 marker" },
+  { text: "Give me application for trade agreements" },
 ];
 
 export const FreeVersionPage = () => {
