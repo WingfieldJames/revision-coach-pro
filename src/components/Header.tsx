@@ -10,7 +10,18 @@ import { EssayMarkerTool } from '@/components/EssayMarkerTool';
 import { PastPaperFinderTool } from '@/components/PastPaperFinderTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
-import { Sparkles, BarChart2, PenLine, Timer, FileSearch } from 'lucide-react';
+import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown } from 'lucide-react';
+import { checkProductAccess } from '@/lib/productAccess';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Check } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import logo from '@/assets/logo.png';
 
 // Global flag to track when file dialog is open (set by ImageUploadTool)
@@ -29,9 +40,11 @@ interface HeaderProps {
   hideUserDetails?: boolean;
   diagramSubject?: 'economics' | 'cs';
   productId?: string;
+  productSlug?: string;
   onEssayMarkerSubmit?: (message: string) => void;
   essayMarkerLabel?: string;
   essayMarkerFixedMark?: number;
+  showUpgradeButton?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -47,9 +60,11 @@ export const Header: React.FC<HeaderProps> = ({
   hideUserDetails = false,
   diagramSubject = 'economics',
   productId,
+  productSlug,
   onEssayMarkerSubmit,
   essayMarkerLabel = "Essay Marker",
-  essayMarkerFixedMark
+  essayMarkerFixedMark,
+  showUpgradeButton = false
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -59,12 +74,31 @@ export const Header: React.FC<HeaderProps> = ({
   const [essayMarkerOpen, setEssayMarkerOpen] = useState(false);
   const [examCountdownOpen, setExamCountdownOpen] = useState(false);
   const [pastPaperFinderOpen, setPastPaperFinderOpen] = useState(false);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [isDeluxe, setIsDeluxe] = useState(false);
 
   const daysUntilFirstExam = examDates.length > 0 
     ? Math.ceil((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24))
     : 0;
 
   const tier = toolsLocked ? 'free' : 'deluxe';
+
+  // Check if user has deluxe access for the current product
+  useEffect(() => {
+    const checkDeluxeAccess = async () => {
+      if (!user || !productSlug) {
+        setIsDeluxe(false);
+        return;
+      }
+      try {
+        const { hasAccess, tier } = await checkProductAccess(user.id, productSlug);
+        setIsDeluxe(hasAccess && tier === 'deluxe');
+      } catch {
+        setIsDeluxe(false);
+      }
+    };
+    checkDeluxeAccess();
+  }, [user, productSlug]);
 
   useEffect(() => {
     const closeAllPopovers = () => {
@@ -122,6 +156,32 @@ export const Header: React.FC<HeaderProps> = ({
       navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);
+    }
+  };
+
+  const handleUpgradeClick = async (paymentType: 'monthly' | 'lifetime') => {
+    if (!user) {
+      window.location.href = '/login?redirect=stripe';
+      return;
+    }
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session?.access_token) {
+        window.location.href = '/login';
+        return;
+      }
+      const affiliateCode = getValidAffiliateCode();
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+        body: { paymentType, productId, affiliateCode }
+      });
+      if (error) {
+        alert(`Failed to create checkout: ${(error as any).message || String(error)}`);
+        return;
+      }
+      if (data?.url) window.location.href = data.url;
+    } catch (error) {
+      alert(`Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -214,16 +274,82 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      {user && !hideUserDetails && (
-        <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
-          <span className="text-xs sm:text-sm text-muted-foreground truncate max-w-[80px] sm:max-w-[120px] md:max-w-none hidden sm:block">
-            {user.email}
-          </span>
-          <Button variant="outline" size="sm" onClick={handleSignOut} className="text-xs sm:text-sm px-2 sm:px-3">
-            Sign Out
-          </Button>
-        </div>
-      )}
+      {/* Right side: Upgrade Now / Deluxe badge on chatbot pages */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {showUpgradeButton && (
+          isDeluxe ? (
+            <div
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-sm font-semibold"
+              style={{ background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' }}
+            >
+              <Crown className="h-4 w-4" />
+              <span>Deluxe</span>
+            </div>
+          ) : (
+            <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
+              <DialogTrigger asChild>
+                <button
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
+                  style={{ background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' }}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span className="hidden sm:inline">Upgrade Now</span>
+                  <span className="sm:hidden">Upgrade</span>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-center">Upgrade to Premium</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 mt-4">
+                  <div className="p-6 rounded-xl border-2 border-primary bg-muted relative">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1 rounded-full">
+                      BEST VALUE
+                    </div>
+                    <h3 className="text-xl font-bold mb-1">💎 Exam Season Pass</h3>
+                    <p className="text-3xl font-bold mb-1">£34.99</p>
+                    <p className="text-sm text-muted-foreground mb-4">One-time payment • Expires 30th June 2026</p>
+                    <ul className="space-y-2 mb-4 text-sm">
+                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All past papers & mark schemes</li>
+                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Full A* exam technique training</li>
+                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Essay Marker + Diagram Generator</li>
+                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Past Paper Finder</li>
+                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Priority support</li>
+                    </ul>
+                    <Button variant="brand" size="lg" className="w-full" onClick={() => { setUpgradeDialogOpen(false); handleUpgradeClick('lifetime'); }}>
+                      Get Season Pass
+                    </Button>
+                  </div>
+
+                  <div className="p-6 rounded-xl border border-border bg-muted">
+                    <h3 className="text-xl font-bold mb-1">💎 Monthly</h3>
+                    <p className="text-3xl font-bold mb-1">£6.99<span className="text-base font-normal">/mo</span></p>
+                    <p className="text-sm text-muted-foreground mb-4">Cancel anytime</p>
+                    <ul className="space-y-2 mb-4 text-sm">
+                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All premium features included</li>
+                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Flexible monthly billing</li>
+                    </ul>
+                    <Button variant="outline" size="lg" className="w-full" onClick={() => { setUpgradeDialogOpen(false); handleUpgradeClick('monthly'); }}>
+                      Get Monthly
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )
+        )}
+
+        {user && !hideUserDetails && (
+          <div className="hidden sm:flex items-center gap-2">
+            <span className="text-xs sm:text-sm text-muted-foreground truncate max-w-[80px] sm:max-w-[120px] md:max-w-none hidden sm:block">
+              {user.email}
+            </span>
+            <Button variant="outline" size="sm" onClick={handleSignOut} className="text-xs sm:text-sm px-2 sm:px-3">
+              Sign Out
+            </Button>
+          </div>
+        )}
+      </div>
     </header>
   );
 };

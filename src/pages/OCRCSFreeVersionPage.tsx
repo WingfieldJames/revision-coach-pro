@@ -36,6 +36,8 @@ export const OCRCSFreeVersionPage = () => {
           hideUserDetails 
           diagramSubject="cs"
           productId={OCR_CS_PRODUCT_ID}
+          productSlug="ocr-computer-science"
+          showUpgradeButton
         />
       </div>
       

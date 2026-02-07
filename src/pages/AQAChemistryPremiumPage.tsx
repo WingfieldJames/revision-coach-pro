@@ -167,6 +167,8 @@ export const AQAChemistryPremiumPage = () => {
           examSubjectName="AQA Chemistry"
           hideUserDetails 
           productId={productId}
+          productSlug="aqa-chemistry"
+          showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
           essayMarkerLabel="6-Marker Analysis"
           essayMarkerFixedMark={6}

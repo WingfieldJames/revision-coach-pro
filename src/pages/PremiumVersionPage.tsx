@@ -101,6 +101,9 @@ export const PremiumVersionPage = () => {
           examDates={EDEXCEL_ECONOMICS_EXAMS}
           examSubjectName="Edexcel Economics"
           hideUserDetails 
+          productId={EDEXCEL_PRODUCT_ID}
+          productSlug="edexcel-economics"
+          showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>

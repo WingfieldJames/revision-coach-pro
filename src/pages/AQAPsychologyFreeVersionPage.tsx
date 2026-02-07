@@ -25,18 +25,20 @@
        />
        <RandomChatbotBackground />
        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
-         <Header
-           showImageTool 
-           showEssayMarker
-           showPastPaperFinder
-           showExamCountdown
-           examDates={AQA_PSYCHOLOGY_EXAMS}
-           examSubjectName="AQA Psychology"
+        <Header
+          showImageTool 
+          showEssayMarker
+          showPastPaperFinder
+          showExamCountdown
+          examDates={AQA_PSYCHOLOGY_EXAMS}
+          examSubjectName="AQA Psychology"
           toolsLocked={false}
           hideUserDetails 
-           productId={AQA_PSYCHOLOGY_PRODUCT_ID}
-           essayMarkerLabel="16-Marker Analysis"
-           essayMarkerFixedMark={16}
+          productId={AQA_PSYCHOLOGY_PRODUCT_ID}
+          productSlug="aqa-psychology"
+          showUpgradeButton
+          essayMarkerLabel="16-Marker Analysis"
+          essayMarkerFixedMark={16}
          />
        </div>
        
