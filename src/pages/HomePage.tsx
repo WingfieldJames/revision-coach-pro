@@ -105,11 +105,9 @@ export const HomePage = () => {
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-[1.65rem] sm:text-[2.6rem] md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              <span className="text-white">The AI that actually </span>
-              <br className="hidden sm:inline" />
-              <span className="text-white">understands </span>
-              <span className="text-gradient-brand whitespace-nowrap">your exam board</span>
+            <h1 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-6 leading-[1.2]">
+              <div className="text-white whitespace-nowrap">The AI that actually</div>
+              <div><span className="text-white">understands </span><span className="text-gradient-brand">your exam board</span></div>
             </h1>
 
             {/* Subheadline */}
