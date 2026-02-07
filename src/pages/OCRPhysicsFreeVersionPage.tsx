@@ -32,7 +32,7 @@ export const OCRPhysicsFreeVersionPage = () => {
           showExamCountdown
           examDates={OCR_PHYSICS_EXAMS}
           examSubjectName="OCR Physics"
-          toolsLocked 
+          toolsLocked={false}
           hideUserDetails 
           productId={OCR_PHYSICS_PRODUCT_ID}
           essayMarkerLabel="6-Marker Analysis"
@@ -47,7 +47,7 @@ export const OCRPhysicsFreeVersionPage = () => {
           subjectDescription="Your personal A* Physics tutor. Ask me anything!"
           footerText="Powered by A* AI • Trained on OCR Physics specification"
           placeholder="Ask about mechanics, waves, electricity..."
-          tier="free"
+          tier="deluxe"
           suggestedPrompts={OCR_PHYSICS_PROMPTS}
         />
       </div>

@@ -326,7 +326,7 @@ export const HomePage = () => {
       <footer className="py-16 px-8 text-center border-t border-border/30">
         <ScrollReveal className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <img src={logo} alt="A* AI" className="h-8" />
+            <img src={logo} alt="A* AI" className="h-12 sm:h-14" />
             <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Instagram size={20} />
             </a>

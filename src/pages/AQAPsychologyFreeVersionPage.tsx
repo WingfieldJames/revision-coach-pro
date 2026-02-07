@@ -32,8 +32,8 @@
            showExamCountdown
            examDates={AQA_PSYCHOLOGY_EXAMS}
            examSubjectName="AQA Psychology"
-           toolsLocked 
-           hideUserDetails 
+          toolsLocked={false}
+          hideUserDetails 
            productId={AQA_PSYCHOLOGY_PRODUCT_ID}
            essayMarkerLabel="16-Marker Analysis"
            essayMarkerFixedMark={16}
@@ -47,7 +47,7 @@
            subjectDescription="Your personal A* Psychology tutor. Ask me anything!"
            footerText="Powered by A* AI • Trained on AQA Psychology specification"
            placeholder="Ask about social influence, memory, or attachment..."
-           tier="free"
+           tier="deluxe"
            suggestedPrompts={AQA_PSYCHOLOGY_PROMPTS}
          />
        </div>

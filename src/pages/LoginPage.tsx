@@ -135,7 +135,7 @@ export const LoginPage = () => {
         {/* Top navigation */}
         <div className="p-6">
           <Link to="/" className="inline-flex items-center gap-2">
-            <img src={logoImg} alt="A* AI" className="h-8" />
+            <img src={logoImg} alt="A* AI" className="h-12 sm:h-14" />
           </Link>
         </div>
 
