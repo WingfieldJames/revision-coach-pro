@@ -11,7 +11,7 @@ interface FlowFieldBackgroundProps {
 
 export function FlowFieldBackground({
   className,
-  color = "#a855f7", // Purple from brand
+  color = "#FF9A2E", // Orange from new brand
   trailOpacity = 0.08,
   particleCount = 600,
   speed = 1,
@@ -33,6 +33,9 @@ export function FlowFieldBackground({
     let animationFrameId: number;
     let mouse = { x: -1000, y: -1000 };
 
+    // Multiple colors for variety
+    const colors = ["#FF9A2E", "#FF4D8D", "#FFC83D"];
+
     class Particle {
       x: number;
       y: number;
@@ -40,6 +43,7 @@ export function FlowFieldBackground({
       vy: number;
       age: number;
       life: number;
+      color: string;
 
       constructor() {
         this.x = Math.random() * width;
@@ -48,6 +52,7 @@ export function FlowFieldBackground({
         this.vy = 0;
         this.age = 0;
         this.life = Math.random() * 200 + 100;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
       }
 
       update() {
@@ -90,10 +95,11 @@ export function FlowFieldBackground({
         this.vy = 0;
         this.age = 0;
         this.life = Math.random() * 200 + 100;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
       }
 
       draw(context: CanvasRenderingContext2D) {
-        context.fillStyle = color;
+        context.fillStyle = this.color;
         const alpha = 1 - Math.abs((this.age / this.life) - 0.5) * 2;
         context.globalAlpha = alpha;
         context.fillRect(this.x, this.y, 1.5, 1.5);
@@ -115,8 +121,8 @@ export function FlowFieldBackground({
     };
 
     const animate = () => {
-      // White background with purple lines
-      ctx.fillStyle = `rgba(255, 255, 255, ${trailOpacity})`;
+      // Dark background trail - uses #0D0316
+      ctx.fillStyle = `rgba(13, 3, 22, ${trailOpacity})`;
       ctx.fillRect(0, 0, width, height);
 
       particles.forEach((p) => {

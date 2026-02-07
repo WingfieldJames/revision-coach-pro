@@ -11,6 +11,7 @@ import { PastPaperFinderTool } from '@/components/PastPaperFinderTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
 import { Sparkles, BarChart2, PenLine, Timer, FileSearch } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 // Global flag to track when file dialog is open (set by ImageUploadTool)
 export const fileDialogOpen = { current: false };
@@ -59,34 +60,25 @@ export const Header: React.FC<HeaderProps> = ({
   const [examCountdownOpen, setExamCountdownOpen] = useState(false);
   const [pastPaperFinderOpen, setPastPaperFinderOpen] = useState(false);
 
-  // Calculate days until first exam for the button
   const daysUntilFirstExam = examDates.length > 0 
     ? Math.ceil((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24))
     : 0;
 
-  // Determine tier based on toolsLocked prop
   const tier = toolsLocked ? 'free' : 'deluxe';
 
-  // Close all popovers when clicking on iframe (detected via window blur)
-  // Skip if file dialog is open to prevent closing when picking a file
   useEffect(() => {
     const closeAllPopovers = () => {
-      // Don't close if file dialog is open
-      if (fileDialogOpen.current) {
-        return;
-      }
+      if (fileDialogOpen.current) return;
       setImageToolOpen(false);
       setDiagramToolOpen(false);
       setEssayMarkerOpen(false);
       setExamCountdownOpen(false);
       setPastPaperFinderOpen(false);
     };
-
     window.addEventListener('blur', closeAllPopovers);
     return () => window.removeEventListener('blur', closeAllPopovers);
   }, []);
 
-  // Determine selected tab based on current route
   const getSelectedTab = () => {
     if (location.pathname === '/dashboard') return 'profile';
     if (location.pathname === '/login') return 'profile';
@@ -96,12 +88,9 @@ export const Header: React.FC<HeaderProps> = ({
   
   const [selectedTab, setSelectedTab] = useState<string>(getSelectedTab());
 
-  // Update selected tab when location changes
   React.useEffect(() => {
     const newTab = getSelectedTab();
-    if (newTab !== selectedTab) {
-      setSelectedTab(newTab);
-    }
+    if (newTab !== selectedTab) setSelectedTab(newTab);
   }, [location.pathname]);
 
   const tabs: ITab[] = [
@@ -120,11 +109,10 @@ export const Header: React.FC<HeaderProps> = ({
     } else if (value === "profile") {
       if (user) {
         navigate('/dashboard');
-        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
       } else {
         navigate('/login');
-        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
       }
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     }
   };
 
@@ -138,29 +126,21 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 flex justify-between items-center px-3 sm:px-6 pt-4 sm:pt-6 pb-2 bg-background text-foreground">
+    <header className="sticky top-0 z-50 flex justify-between items-center px-3 sm:px-6 pt-4 sm:pt-6 pb-2 bg-background/95 backdrop-blur-sm text-foreground">
       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
         <Link to="/" className="flex items-center" onClick={() => window.scrollTo(0, 0)}>
-          <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI logo" className="h-8 sm:h-10" />
+          <img src={logo} alt="A* AI logo" className="h-8 sm:h-10" />
         </Link>
         
         {showImageTool && (
           <Popover open={imageToolOpen} onOpenChange={setImageToolOpen} modal={false}>
             <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
-              >
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
                 <Sparkles className="h-4 w-4" />
                 <span className="hidden sm:inline">My AI</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent 
-              className="w-[90vw] max-w-md p-4 bg-background border border-border shadow-xl" 
-              align="start"
-              sideOffset={8}
-            >
+            <PopoverContent className="w-[90vw] max-w-md p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <MyAIPreferences />
             </PopoverContent>
           </Popover>
@@ -169,20 +149,12 @@ export const Header: React.FC<HeaderProps> = ({
         {showDiagramTool && (
           <Popover open={diagramToolOpen} onOpenChange={setDiagramToolOpen}>
             <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
-              >
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
                 <BarChart2 className="h-4 w-4" />
                 <span className="hidden sm:inline">Diagram Generator</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent 
-              className="w-[90vw] max-w-md p-0 bg-background border border-border shadow-xl" 
-              align="start"
-              sideOffset={8}
-            >
+            <PopoverContent className="w-[90vw] max-w-md p-0 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <div className="p-4">
                 <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} />
               </div>
@@ -193,29 +165,14 @@ export const Header: React.FC<HeaderProps> = ({
         {showEssayMarker && (
           <Popover open={essayMarkerOpen} onOpenChange={setEssayMarkerOpen}>
             <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
-              >
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
                 <PenLine className="h-4 w-4" />
                 <span className="hidden sm:inline">{essayMarkerLabel}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent 
-              className="w-[90vw] max-w-md p-0 bg-background border border-border shadow-xl" 
-              align="start"
-              sideOffset={8}
-            >
+            <PopoverContent className="w-[90vw] max-w-md p-0 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <div className="p-4">
-                <EssayMarkerTool 
-                  tier={tier} 
-                  productId={productId} 
-                  onSubmitToChat={onEssayMarkerSubmit}
-                  onClose={() => setEssayMarkerOpen(false)}
-                  fixedMark={essayMarkerFixedMark}
-                  toolLabel={essayMarkerLabel}
-                />
+                <EssayMarkerTool tier={tier} productId={productId} onSubmitToChat={onEssayMarkerSubmit} onClose={() => setEssayMarkerOpen(false)} fixedMark={essayMarkerFixedMark} toolLabel={essayMarkerLabel} />
               </div>
             </PopoverContent>
           </Popover>
@@ -224,20 +181,12 @@ export const Header: React.FC<HeaderProps> = ({
         {showPastPaperFinder && (
           <Popover open={pastPaperFinderOpen} onOpenChange={setPastPaperFinderOpen}>
             <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
-              >
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
                 <FileSearch className="h-4 w-4" />
                 <span className="hidden sm:inline">Past Papers</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent 
-              className="w-[90vw] max-w-lg p-4 bg-background border border-border shadow-xl" 
-              align="start"
-              sideOffset={8}
-            >
+            <PopoverContent className="w-[90vw] max-w-lg p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <PastPaperFinderTool tier={tier} productId={productId} />
             </PopoverContent>
           </Popover>
@@ -246,21 +195,13 @@ export const Header: React.FC<HeaderProps> = ({
         {showExamCountdown && examDates.length > 0 && (
           <Popover open={examCountdownOpen} onOpenChange={setExamCountdownOpen}>
             <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3"
-              >
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
                 <Timer className="h-4 w-4" />
                 <span className="hidden sm:inline">{daysUntilFirstExam} days</span>
                 <span className="sm:hidden">{daysUntilFirstExam}d</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent 
-              className="w-[90vw] max-w-sm p-4 bg-background border border-border shadow-xl" 
-              align="start"
-              sideOffset={8}
-            >
+            <PopoverContent className="w-[90vw] max-w-sm p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <ExamCountdown exams={examDates} subjectName={examSubjectName} />
             </PopoverContent>
           </Popover>
@@ -269,12 +210,7 @@ export const Header: React.FC<HeaderProps> = ({
       
       {showNavLinks && (
         <div className={`flex-1 flex justify-center min-w-0 ${hideUserDetails ? 'justify-end pr-4' : 'px-2'}`}>
-          <Tabs 
-            selected={selectedTab} 
-            setSelected={handleTabChange} 
-            tabs={tabs} 
-            variant="primary"
-          />
+          <Tabs selected={selectedTab} setSelected={handleTabChange} tabs={tabs} variant="primary" />
         </div>
       )}
 

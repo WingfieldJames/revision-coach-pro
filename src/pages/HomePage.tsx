@@ -5,8 +5,7 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ChevronDown, Instagram, Music, Calendar, BookOpen, GraduationCap, Search, FileCheck } from 'lucide-react';
-import { ContainerScroll } from '@/components/ui/container-scroll-animation';
+import { ChevronDown, Instagram, Calendar, BookOpen, GraduationCap, Search, FileCheck, Star } from 'lucide-react';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { HeroBackgroundPaths } from '@/components/ui/hero-background-paths';
@@ -15,6 +14,7 @@ import { FoundersCarousel } from '@/components/FoundersCarousel';
 import { MobileFoundersSection } from '@/components/MobileFoundersSection';
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from '@/components/ui/testimonials-columns';
 import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
+import logo from '@/assets/logo.png';
 
 const revisionFeatures = [
   {
@@ -73,105 +73,87 @@ const revisionFeatures = [
     energy: 40,
   },
 ];
+
 export const HomePage = () => {
-  const {
-    user,
-    profile
-  } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Require login first, then go to subjects/pricing page
-  const handleNavigation = () => {
-    if (!user) {
-      navigate('/login?redirect=compare');
-    } else {
-      navigate('/compare');
+  const handlePickSubject = () => {
+    navigate('/compare');
+  };
+
+  const handleSeeHowItWorks = () => {
+    const section = document.querySelector('[data-section="how-it-works"]');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
       <Header showNavLinks />
       
-      {/* Hero Scroll Animation Section */}
-      <section className="overflow-hidden pb-0 mt-4 sm:-mt-8 md:-mt-8">
+      {/* Hero Section - Rebuilt */}
+      <section className="overflow-hidden pb-0 mt-4 sm:-mt-4">
         <HeroBackgroundPaths>
-          {isMobile ?
-        // Mobile version - simple image without scroll animation
-        <div className="pt-4 px-6">
-              <div className="text-left max-w-5xl mx-auto pt-4">
-                <div className="bg-secondary text-foreground text-xs px-3 py-1.5 rounded-full inline-block mb-4 text-center whitespace-nowrap">
-                  ⭐ Loved by 700+ users with a 4.9 star rating
-                </div>
-                <h1 className="text-6xl font-bold mb-3 flex flex-wrap items-center gap-2">
-                  Meet 
-                  <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-16" />
-                </h1>
-                <h2 className="text-2xl sm:text-4xl font-medium text-foreground mb-6 leading-tight whitespace-nowrap">
-                  ​The AI built for your exam board
-                </h2>
-              </div>
-              
-              <div className="mb-6">
-                <div className="relative w-full rounded-lg overflow-hidden">
-                  {/* Poster image shows instantly */}
-                  <img src="/video-poster.png" alt="" className="w-full h-auto" />
-                  {/* Video plays on top with identical sizing */}
-                  <iframe src="https://player.vimeo.com/video/1157200471?background=1&autoplay=1&loop=1&muted=1" className="absolute inset-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
-                </div>
-              </div>
+          <div className="px-6 sm:px-8 py-16 sm:py-24 md:py-32 text-center max-w-5xl mx-auto">
+            {/* Social Proof Pill */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-white/10 bg-white/5 backdrop-blur-sm" style={{ boxShadow: '0 0 20px rgba(255,154,46,0.1), 0 0 40px rgba(255,77,141,0.05)' }}>
+              <Star className="w-4 h-4 text-[#FFC83D] fill-[#FFC83D]" />
+              <span className="text-white text-sm font-medium">Loved by 700+ students with a 4.9 star rating</span>
+            </div>
 
-              <div className="text-center mb-8">
-                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => handleNavigation()} className="pointer-events-auto text-sm px-5 py-2.5 w-[200px]" />
-                <p className="text-xs text-muted-foreground mt-3">
-                  Get started free • No card needed
-                </p>
-              </div>
-            </div> :
-        // Desktop version - scroll animation with iPad
-        <>
-              <ContainerScroll titleComponent={<>
-                    <div className="text-left max-w-5xl mx-auto px-6 sm:px-8 pt-4 sm:pt-0">
-                      <div className="bg-secondary text-foreground text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full inline-block mb-4 md:mb-6 max-w-[95%] text-center whitespace-nowrap overflow-hidden text-ellipsis">
-                        ⭐ Loved by 700+ users with a 4.9 star rating
-                      </div>
-                      <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
-                        Meet 
-                        <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI - A Star AI Logo - AI-powered A-Level Economics revision coach" className="h-9 md:h-10 lg:h-12" />
-                      </h1>
-              <h2 className="text-base md:text-xl lg:text-2xl font-medium text-foreground mb-6 md:mb-8">
-                ​Trained by the UK’s top A* students. Built for your exam board
-              </h2>
-                    </div>
-                  </>}>
-                <img src="/lovable-uploads/hero-ipad-demo.jpg" alt="A* AI Demo - A Star AI interface showing A-Level Economics revision features on iPad" className="mx-auto rounded-2xl object-contain h-full object-center" />
-              </ContainerScroll>
-              
-              <div className="text-center mb-8 -mt-12 md:-mt-20 relative z-50 px-4">
-                <InteractiveHoverButton text="Pick your subject →" variant="default" onClick={() => handleNavigation()} className="pointer-events-auto text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 w-[200px] sm:w-[220px]" />
-                <p className="text-xs sm:text-sm text-muted-foreground mt-3">
-                  Get started free • No card needed
-                </p>
-              </div>
-            </>}
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              <span className="text-white">The AI that actually understands </span>
+              <span className="text-gradient-brand">your exam board</span>
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-base sm:text-lg md:text-xl text-[#94a3b8] max-w-3xl mx-auto mb-10 leading-relaxed">
+              We worked alongside the <span className="text-white font-medium">highest performing students</span> in the UK to train an AI model on <span className="text-white font-medium">everything you need</span> to ace your final exam — from the spec to past papers to the exact <span className="text-white font-medium">A* technique</span>.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={handlePickSubject}
+                className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
+                style={{ background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' }}
+              >
+                Pick Your Subject →
+              </button>
+              <button
+                onClick={handleSeeHowItWorks}
+                className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg border border-white/30 bg-transparent transition-all duration-300 hover:bg-[#FF9A2E] hover:border-[#FF9A2E]"
+              >
+                See How It Works
+              </button>
+            </div>
+
+            <p className="text-xs sm:text-sm text-muted-foreground mt-4">
+              Get started free • No card needed
+            </p>
+          </div>
         </HeroBackgroundPaths>
       </section>
 
-      {/* Trained by A* Students Section - Desktop only (moved up) */}
+      {/* Trained by A* Students Section - Desktop only */}
       <div className="hidden md:block">
         <FoundersCarousel />
       </div>
 
-      {/* Video Demo Section - Desktop only - NO animation background */}
+      {/* Video Demo Section - Desktop only */}
       <section className="hidden md:block py-16 bg-background">
         <div className="max-w-7xl mx-auto px-8">
           <ScrollReveal>
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <span>See</span>
-                <img src="/lovable-uploads/702cde0a-841c-4fee-ab63-d2f157d45a59.png" alt="A* AI Logo" className="h-6 md:h-8" />
+                <img src={logo} alt="A* AI Logo" className="h-6 md:h-8" />
                 <span>in</span>
-                <span className="bg-gradient-brand bg-clip-text text-transparent">action</span>
+                <span className="text-gradient-brand">action</span>
               </div>
             </h2>
           </ScrollReveal>
@@ -179,35 +161,28 @@ export const HomePage = () => {
         
         <ScrollReveal delay={0.2}>
           <div className="max-w-7xl mx-auto px-8">
-            <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-border/30">
               <iframe src="https://player.vimeo.com/video/1157200471?background=1&loop=1&muted=1" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
             </div>
           </div>
         </ScrollReveal>
 
         <div className="max-w-7xl mx-auto px-8">
-          {/* Button beneath video */}
           <div className="text-center mt-8 mb-4">
-            <InteractiveHoverButton text="Get started free →" variant="reverse" onClick={() => handleNavigation()} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
+            <InteractiveHoverButton text="Get started free →" variant="reverse" onClick={handlePickSubject} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
           </div>
-
-          {/* Disclaimer */}
           <p className="text-center text-sm text-muted-foreground">
             For the best experience, use a laptop or iPad
           </p>
         </div>
       </section>
 
-      {/* Testimonials Section - 3 columns moving UP */}
-      <section data-section="testimonials" className="hidden md:block py-16 px-8 bg-muted overflow-hidden">
+      {/* Testimonials Section */}
+      <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <ScrollReveal className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              What our users say
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              ​Join 700+ students and teachers achieving real results
-            </p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">What our users say</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">Join 700+ students and teachers achieving real results</p>
           </ScrollReveal>
 
           <div className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
@@ -218,41 +193,33 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Mobile Founders Section - Above "How A* AI helps" */}
       <MobileFoundersSection />
 
       {/* How A* AI helps you revise smarter Section */}
-      <section className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+      <section data-section="how-it-works" className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
         <ScrollReveal className="relative z-10">
           <h2 className="text-lg md:text-3xl font-bold text-center mb-8 md:mb-12">
             <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-1 md:gap-2">
               <div className="flex items-center gap-1 md:gap-2">
                 <span>How</span>
-                <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-5 md:h-8" />
+                <img src={logo} alt="A* AI" className="h-5 md:h-8" />
                 <span>helps you at</span>
               </div>
               <div className="flex items-center gap-1 md:gap-2">
-                <span className="bg-gradient-brand bg-clip-text text-transparent">every</span>
+                <span className="text-gradient-brand">every</span>
                 <span>stage of revision</span>
               </div>
             </div>
           </h2>
         </ScrollReveal>
 
-        {/* Desktop: Orbital Timeline */}
         <div className="hidden lg:block">
           <RadialOrbitalTimeline timelineData={revisionFeatures} />
           <div className="text-center mt-4">
-            <InteractiveHoverButton 
-              text="Get started free →" 
-              variant="reverse" 
-              onClick={() => handleNavigation()} 
-              className="pointer-events-auto text-base px-6 py-3 w-[220px]"
-            />
+            <InteractiveHoverButton text="Get started free →" variant="reverse" onClick={handlePickSubject} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
           </div>
         </div>
 
-        {/* Mobile/Tablet: Expandable Cards */}
         <div className="lg:hidden">
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
             {revisionFeatures.map((feature) => {
@@ -271,9 +238,7 @@ export const HomePage = () => {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="px-5 pb-5 md:px-6 md:pb-6 pt-0">
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {feature.content}
-                        </p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{feature.content}</p>
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
@@ -282,12 +247,7 @@ export const HomePage = () => {
             })}
           </StaggerContainer>
           <div className="text-center mt-8">
-            <InteractiveHoverButton 
-              text="Try A* AI now →" 
-              variant="reverse" 
-              onClick={() => handleNavigation()} 
-              className="pointer-events-auto text-base px-6 py-3 w-[200px]" 
-            />
+            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={handlePickSubject} className="pointer-events-auto text-base px-6 py-3 w-[200px]" />
           </div>
         </div>
       </section>
@@ -321,55 +281,52 @@ export const HomePage = () => {
 
                 <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
                   <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                    <span>How do the plans work?</span>
+                    <span>How does it work?</span>
                     <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
                   </AccordionTrigger>
                   <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                    <p className="mb-3">Free gives you a taste - limited training data and general AI help to try it out.</p>
-                    <p className="mb-3">Deluxe is the full experience. Trained on every past paper from 2017-2025, official mark schemes, and the complete specification. Plus exam technique trained directly by A* students - the structures, timings, and evaluation phrases that examiners reward.</p>
-                    <p className="mb-3">Deluxe also unlocks premium tools: upload essays and diagrams for instant AI feedback, or use the Diagram Generator to find the exact diagram for any question - all tailored to your subject and exam board.</p>
-                    <p>£24.99 once. Less than half a tutoring session. Access forever. That's it.</p>
+                    <p className="mb-3">Pick your subject and start chatting. The AI is trained on your exact specification, past papers, and mark schemes.</p>
+                    <p className="mb-3">Use the built-in tools — Diagram Generator, Essay Marker, Past Paper Finder — to practice and get instant feedback.</p>
+                    <p>It's like having an A* student available 24/7 to help you revise.</p>
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
                   <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                    <span>What's included in the Deluxe version?</span>
+                    <span>What subjects do you cover?</span>
                     <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
                   </AccordionTrigger>
                   <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                    <p className="mb-3">We sat down with A* students from LSE, Cambridge, and Imperial and got them to teach the AI everything - how they structured essays, which examples impressed examiners, the timing tricks that saved them marks.</p>
-                    <p className="mb-3">That's layered on top of every past paper (2017-2025), official mark schemes, and the full spec. Plus diagram guidance, application banks, model structures, and all future updates.</p>
-                    <p>Lifetime access. One payment. Done.</p>
+                    <p className="mb-3">We cover Economics (Edexcel, AQA, CIE), Computer Science (OCR), Physics (OCR), Chemistry (AQA) and Psychology (AQA).</p>
+                    <p>More subjects dropping soon. Tell us what you need next — we're listening.</p>
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
                   <AccordionTrigger hideIcon className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                    <span>Does it work for other exam boards or subjects?</span>
+                    <span>Is it really free?</span>
                     <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
                   </AccordionTrigger>
                   <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                    <p className="mb-3">We started with A-Level Economics. Now we cover Economics, Computer Science and Physics - with Chemistry, English and Psychology dropping soon and many other subjects in the pipeline                          </p>
-                    <p className="mb-3">We're growing fast.</p>
-                    <p>Tell us what you need next - we're listening.</p>
+                    <p className="mb-3">Yes! Create an account and start using all the features for free. No credit card required.</p>
+                    <p>For even more training data and priority support, you can upgrade to the Exam Season Pass or Monthly plan.</p>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
             </ScrollReveal>
             
             <ScrollReveal delay={0.3} className="text-center mt-8">
-              <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={() => handleNavigation()} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
+              <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={handlePickSubject} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
             </ScrollReveal>
           </div>
         </HeroBackgroundPaths>
       </section>
 
       {/* Footer */}
-      <footer className="bg-muted py-16 px-8 text-center">
+      <footer className="py-16 px-8 text-center border-t border-border/30">
         <ScrollReveal className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-8" />
+            <img src={logo} alt="A* AI" className="h-8" />
             <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Instagram size={20} />
             </a>
@@ -383,20 +340,19 @@ export const HomePage = () => {
           </p>
           
           <div className="flex flex-wrap justify-center gap-4 mb-6 text-muted-foreground">
-            <Link to="/compare" className="bg-gradient-brand bg-clip-text text-transparent hover:opacity-80 transition-opacity">Plans</Link>
+            <Link to="/compare" className="text-gradient-brand hover:opacity-80 transition-opacity">Plans</Link>
             <span>•</span>
-            <Link to="/#faq" className="bg-gradient-brand bg-clip-text text-transparent hover:opacity-80 transition-opacity">FAQs</Link>
+            <Link to="/#faq" className="text-gradient-brand hover:opacity-80 transition-opacity">FAQs</Link>
             <span>•</span>
-            <Link to="/login" className="bg-gradient-brand bg-clip-text text-transparent hover:opacity-80 transition-opacity" onClick={() => window.scrollTo(0, 0)}>Sign in</Link>
+            <Link to="/login" className="text-gradient-brand hover:opacity-80 transition-opacity" onClick={() => window.scrollTo(0, 0)}>Sign in</Link>
             <span>•</span>
-            <Link to="/contact" className="bg-gradient-brand bg-clip-text text-transparent hover:opacity-80 transition-opacity">Contact</Link>
+            <Link to="/contact" className="text-gradient-brand hover:opacity-80 transition-opacity">Contact</Link>
           </div>
           
           <p className="text-sm text-muted-foreground mb-4">
             Secure checkout via Stripe • Your chats stay private
           </p>
           
-          {/* Social Media Icons and Copyright */}
           <div className="flex justify-center items-center gap-4 mb-6">
             <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Instagram size={24} />

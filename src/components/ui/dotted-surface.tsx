@@ -24,7 +24,8 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
     const AMOUNTY = 60;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xffffff, 2000, 10000);
+    // Dark fog matching #0D0316
+    scene.fog = new THREE.Fog(0x0D0316, 2000, 10000);
 
     const camera = new THREE.PerspectiveCamera(
       60,
@@ -40,7 +41,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
     });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(scene.fog.color, 0);
+    renderer.setClearColor(0x0D0316, 0);
 
     containerRef.current.appendChild(renderer.domElement);
 
@@ -48,6 +49,13 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
     const colors: number[] = [];
 
     const geometry = new THREE.BufferGeometry();
+    
+    // Brand gradient colors for particles
+    const brandColors = [
+      [255 / 255, 154 / 255, 46 / 255],  // Orange #FF9A2E
+      [255 / 255, 77 / 255, 141 / 255],   // Pink #FF4D8D
+      [255 / 255, 200 / 255, 61 / 255],   // Yellow #FFC83D
+    ];
 
     for (let ix = 0; ix < AMOUNTX; ix++) {
       for (let iy = 0; iy < AMOUNTY; iy++) {
@@ -56,8 +64,8 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
         const z = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
 
         positions.push(x, y, z);
-        // Purple gradient color
-        colors.push(168 / 255, 85 / 255, 247 / 255);
+        const c = brandColors[(ix + iy) % brandColors.length];
+        colors.push(c[0], c[1], c[2]);
       }
     }
 
@@ -71,7 +79,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
       size: 8,
       vertexColors: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.6,
       sizeAttenuation: true,
     });
 
