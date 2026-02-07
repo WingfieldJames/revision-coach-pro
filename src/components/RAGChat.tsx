@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch, BarChart2 } from 'lucide-react';
+import aStarIcon from '@/assets/a-star-icon.png';
+import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -530,8 +532,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && <div className="text-center py-16">
-              <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-16 mx-auto mb-6" />
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] bg-clip-text text-transparent mb-2">
+              <img src={logo} alt="A* AI" className="h-16 mx-auto mb-6" />
+              <h2 className="text-2xl font-bold text-gradient-brand mb-2">
                 {subjectName}
               </h2>
               <p className="text-muted-foreground">
@@ -543,10 +545,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           const displayContent = getDisplayContent(message, index);
           const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
           const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
-          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? "bg-gradient-to-r from-[hsl(262,83%,90%)] to-[hsl(270,67%,88%)] text-foreground ml-auto max-w-[70%]" : "bg-muted max-w-[90%]")}>
+          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? "bg-white/10 text-foreground ml-auto max-w-[70%] border border-white/5" : "bg-muted max-w-[90%]")}>
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
-                    <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="w-8 h-8 object-contain" />
+                    <img src={aStarIcon} alt="A* AI" className="w-8 h-8 object-contain" />
                   </div>
                 )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
@@ -624,7 +626,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         })}
           
           {isLoading && messages[messages.length - 1]?.role === 'user' && <div className="flex gap-3 p-4 rounded-xl bg-muted mr-auto max-w-[85%]">
-              <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
+              <img src={aStarIcon} alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
               <div className="flex-1 flex flex-col gap-2">
                 {isSearching ? (
                   <>
@@ -799,7 +801,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               )}
 
               {/* Send button on right */}
-              <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-9 w-9 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] hover:opacity-90">
+              <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-9 w-9 rounded-full bg-gradient-brand hover:opacity-90 glow-brand">
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
             </div>

@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 function HeroFloatingPaths({ position, mobileOnly = false }: { position: number; mobileOnly?: boolean }) {
     const paths = Array.from({ length: 28 }, (_, i) => ({
         id: i,
-        // More horizontal, sweeping wave pattern that flows through the hero
         d: `M-${1000 - i * 15 * position} ${110 + i * 11 + Math.sin(i * 0.5) * 28}C-${
             600 - i * 12 * position
         } ${140 + i * 9 + Math.cos(i * 0.3) * 38} ${100 + i * 8 * position} ${
@@ -15,10 +14,12 @@ function HeroFloatingPaths({ position, mobileOnly = false }: { position: number;
         } ${1400 + i * 10 * position} ${180 + i * 7} ${2200 + i * 15 * position} ${
             140 + i * 13 + Math.sin(i * 0.6) * 22
         }`,
-        // Using exact purple gradient colors from the website
-        color: i % 2 === 0 
-            ? `rgba(168, 85, 247, ${0.12 + i * 0.02})` // Purple #a855f7
-            : `rgba(30, 58, 138, ${0.10 + i * 0.015})`,  // Blue #1e3a8a
+        // New warm gradient colors: orange, pink, yellow
+        color: i % 3 === 0 
+            ? `rgba(255, 154, 46, ${0.08 + i * 0.003})`  // Orange #FF9A2E
+            : i % 3 === 1
+            ? `rgba(255, 77, 141, ${0.08 + i * 0.003})`   // Pink #FF4D8D
+            : `rgba(255, 200, 61, ${0.08 + i * 0.003})`,  // Yellow #FFC83D
         width: 0.8 + i * 0.06,
     }));
 

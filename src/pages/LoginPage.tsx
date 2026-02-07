@@ -8,6 +8,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { CanvasRevealEffect } from '@/components/ui/canvas-reveal-effect';
+import logoImg from '@/assets/logo.png';
 import {
   Dialog,
   DialogContent,
@@ -110,7 +111,7 @@ export const LoginPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-white relative overflow-hidden">
+    <div className="min-h-screen w-full bg-background relative overflow-hidden">
       <SEOHead 
         title="Sign In to A* AI | A-Level Economics Revision"
         description="Sign in to your A* AI account to access your AI-powered A-Level Economics revision coach. Continue your journey to an A*."
@@ -118,12 +119,12 @@ export const LoginPage = () => {
       />
       
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-white">
+      <div className="absolute inset-0 bg-background">
         <CanvasRevealEffect
           animationSpeed={3}
-          containerClassName="bg-white"
-          colors={[[147, 51, 234], [168, 85, 247]]}
-          opacities={[0.1, 0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.5, 0.6, 0.8]}
+          containerClassName="bg-background"
+          colors={[[255, 154, 46], [255, 77, 141]]}
+          opacities={[0.05, 0.05, 0.08, 0.08, 0.1, 0.1, 0.12, 0.15, 0.15, 0.2]}
           dotSize={3}
           showGradient={false}
         />
@@ -134,11 +135,7 @@ export const LoginPage = () => {
         {/* Top navigation */}
         <div className="p-6">
           <Link to="/" className="inline-flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
-              alt="A* AI" 
-              className="h-8" 
-            />
+            <img src={logoImg} alt="A* AI" className="h-8" />
           </Link>
         </div>
 
@@ -161,7 +158,7 @@ export const LoginPage = () => {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 bg-black/5 backdrop-blur-sm border border-black/10 rounded-full py-3 px-4 text-foreground hover:bg-black/10 transition-all duration-200"
+                className="w-full flex items-center justify-center gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full py-3 px-4 text-foreground hover:bg-white/10 transition-all duration-200"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
                   <path
@@ -186,9 +183,9 @@ export const LoginPage = () => {
 
               {/* Divider */}
               <div className="flex items-center gap-4 my-6">
-                <div className="flex-1 h-px bg-black/10" />
+                <div className="flex-1 h-px bg-white/10" />
                 <span className="text-muted-foreground text-sm">or</span>
-                <div className="flex-1 h-px bg-black/10" />
+                <div className="flex-1 h-px bg-white/10" />
               </div>
 
               {/* Email Input */}
@@ -200,7 +197,7 @@ export const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full backdrop-blur-sm text-foreground bg-black/5 border border-black/10 rounded-full py-3 px-4 focus:outline-none focus:border-black/30 placeholder:text-muted-foreground"
+                  className="w-full backdrop-blur-sm text-foreground bg-white/5 border border-white/10 rounded-full py-3 px-4 focus:outline-none focus:border-white/30 placeholder:text-muted-foreground"
                 />
               </div>
 
@@ -214,7 +211,7 @@ export const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full backdrop-blur-sm text-foreground bg-black/5 border border-black/10 rounded-full py-3 px-4 focus:outline-none focus:border-black/30 placeholder:text-muted-foreground"
+                    className="w-full backdrop-blur-sm text-foreground bg-white/5 border border-white/10 rounded-full py-3 px-4 focus:outline-none focus:border-white/30 placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
@@ -263,11 +260,12 @@ export const LoginPage = () => {
               <button
                 type="submit"
                 disabled={loading || !email || !password}
-                className={`w-full rounded-full py-3 px-4 font-medium transition-all duration-200 ${
+                className={`w-full rounded-full py-3 px-4 font-medium transition-all duration-300 ${
                   email && password
-                    ? "bg-foreground text-background hover:bg-foreground/90 cursor-pointer"
-                    : "bg-black/10 text-muted-foreground border border-black/10 cursor-not-allowed"
+                    ? "text-white cursor-pointer glow-brand hover:glow-brand-intense hover:-translate-y-0.5"
+                    : "bg-white/5 text-muted-foreground border border-white/10 cursor-not-allowed"
                 }`}
+                style={email && password ? { background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' } : undefined}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
