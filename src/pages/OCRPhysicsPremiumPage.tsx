@@ -167,6 +167,8 @@ export const OCRPhysicsPremiumPage = () => {
           examSubjectName="OCR Physics"
           hideUserDetails 
           productId={productId}
+          productSlug="ocr-physics"
+          showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
           essayMarkerLabel="6-Marker Analysis"
           essayMarkerFixedMark={6}

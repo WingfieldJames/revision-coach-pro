@@ -35,6 +35,8 @@ export const CIEFreeVersionPage = () => {
           toolsLocked={false}
           hideUserDetails 
           productId={CIE_PRODUCT_ID}
+          productSlug="cie-economics"
+          showUpgradeButton
         />
       </div>
       

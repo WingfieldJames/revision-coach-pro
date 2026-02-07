@@ -35,6 +35,8 @@ export const AQAChemistryFreeVersionPage = () => {
           toolsLocked={false}
           hideUserDetails 
           productId={AQA_CHEMISTRY_PRODUCT_ID}
+          productSlug="aqa-chemistry"
+          showUpgradeButton
           essayMarkerLabel="6-Marker Analysis"
           essayMarkerFixedMark={6}
         />

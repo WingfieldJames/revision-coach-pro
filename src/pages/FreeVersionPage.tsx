@@ -35,6 +35,8 @@ export const FreeVersionPage = () => {
           toolsLocked={false}
           hideUserDetails 
           productId={EDEXCEL_PRODUCT_ID}
+          productSlug="edexcel-economics"
+          showUpgradeButton
         />
       </div>
       

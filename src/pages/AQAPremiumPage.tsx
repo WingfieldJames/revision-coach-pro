@@ -101,6 +101,9 @@ export const AQAPremiumPage = () => {
           examDates={AQA_ECONOMICS_EXAMS}
           examSubjectName="AQA Economics"
           hideUserDetails 
+          productId={AQA_PRODUCT_ID}
+          productSlug="aqa-economics"
+          showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>

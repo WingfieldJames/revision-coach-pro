@@ -41,6 +41,8 @@ export const OCRCSPremiumPage = () => {
           hideUserDetails 
           diagramSubject="cs"
           productId={OCR_CS_PRODUCT_ID}
+          productSlug="ocr-computer-science"
+          showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>

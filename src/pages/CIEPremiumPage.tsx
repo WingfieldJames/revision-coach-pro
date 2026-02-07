@@ -40,6 +40,8 @@ export const CIEPremiumPage = () => {
           examSubjectName="CIE Economics"
           hideUserDetails 
           productId={CIE_PRODUCT_ID}
+          productSlug="cie-economics"
+          showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>

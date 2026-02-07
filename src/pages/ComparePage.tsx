@@ -6,7 +6,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Check, Star, Instagram, Sparkles } from 'lucide-react';
+import { ChevronDown, Check, Star, Instagram } from 'lucide-react';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.png';
@@ -26,13 +26,6 @@ import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scr
 import { ScreenshotTestimonials } from '@/components/ui/screenshot-testimonials';
 import { LatestFeaturesSection } from '@/components/LatestFeaturesSection';
 import { FlowFieldBackground } from '@/components/ui/flow-field-background';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 
 type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'psychology';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
@@ -42,7 +35,6 @@ export const ComparePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
-  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
@@ -215,67 +207,6 @@ export const ComparePage = () => {
       <div className="relative z-10">
         <Header showNavLinks />
         
-        {/* Upgrade Now button - fixed position */}
-        {user && (
-          <div className="fixed top-4 right-4 z-[60]">
-            <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
-              <DialogTrigger asChild>
-                <button
-                  className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
-                  style={{ background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' }}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  <span className="hidden sm:inline">Upgrade Now</span>
-                  <span className="sm:hidden">Upgrade</span>
-                </button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-center">Upgrade to Premium</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 mt-4">
-                  {/* Exam Season Pass */}
-                  <div className="p-6 rounded-xl border-2 border-primary bg-muted relative">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1 rounded-full">
-                      BEST VALUE
-                    </div>
-                    <h3 className="text-xl font-bold mb-1">💎 Exam Season Pass</h3>
-                    <p className="text-3xl font-bold mb-1">
-                      <span className="line-through text-red-500 text-lg">{pricing.lifetimeStrike}</span> {pricing.lifetime}
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-4">One-time payment • Expires 30th June 2026</p>
-                    <ul className="space-y-2 mb-4 text-sm">
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All past papers & mark schemes</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Full A* exam technique training</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Essay Marker + Diagram Generator</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Past Paper Finder</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Priority support</li>
-                    </ul>
-                    <Button variant="brand" size="lg" className="w-full" onClick={() => { setUpgradeDialogOpen(false); handlePremiumClick('lifetime'); }}>
-                      Get Season Pass
-                    </Button>
-                  </div>
-
-                  {/* Monthly */}
-                  <div className="p-6 rounded-xl border border-border bg-muted">
-                    <h3 className="text-xl font-bold mb-1">💎 Monthly</h3>
-                    <p className="text-3xl font-bold mb-1">
-                      <span className="line-through text-red-500 text-lg">{pricing.monthlyStrike}</span> {pricing.monthly}<span className="text-base font-normal">/mo</span>
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-4">Cancel anytime</p>
-                    <ul className="space-y-2 mb-4 text-sm">
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All premium features included</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Flexible monthly billing</li>
-                    </ul>
-                    <Button variant="outline" size="lg" className="w-full" onClick={() => { setUpgradeDialogOpen(false); handlePremiumClick('monthly'); }}>
-                      Get Monthly
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        )}
 
         <main className="py-8 px-4 sm:px-8 max-w-5xl mx-auto text-center relative z-10">
           <ScrollReveal>

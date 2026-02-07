@@ -35,6 +35,8 @@ export const AQAFreeVersionPage = () => {
           toolsLocked={false}
           hideUserDetails 
           productId={AQA_PRODUCT_ID}
+          productSlug="aqa-economics"
+          showUpgradeButton
         />
       </div>
       
