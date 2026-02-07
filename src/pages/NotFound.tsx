@@ -2,10 +2,14 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Instagram } from 'lucide-react';
 import { SEOHead } from '@/components/SEOHead';
+import { useTheme } from '@/contexts/ThemeContext';
 import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
 
 const NotFound = () => {
   const location = useLocation();
+  const { theme } = useTheme();
+  const currentLogo = theme === 'dark' ? logo : logoDark;
 
   useEffect(() => {
     console.error(
@@ -35,7 +39,7 @@ const NotFound = () => {
       <footer className="py-16 px-8 text-center border-t border-border/30">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <img src={logo} alt="A* AI" className="h-12 sm:h-14" />
+            <img src={currentLogo} alt="A* AI" className="h-12 sm:h-14" />
             <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Instagram size={20} />
             </a>

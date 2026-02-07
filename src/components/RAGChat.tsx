@@ -4,7 +4,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch, BarChart2 } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
 import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/contexts/ThemeContext';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -99,6 +101,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const {
     user
   } = useAuth();
+  const { theme } = useTheme();
+  const currentLogo = theme === 'dark' ? logo : logoDark;
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -532,7 +536,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && <div className="text-center py-16">
-              <img src={logo} alt="A* AI" className="h-16 mx-auto mb-6" />
+              <img src={currentLogo} alt="A* AI" className="h-16 mx-auto mb-6" />
               <h2 className="text-2xl font-bold text-gradient-brand mb-2">
                 {subjectName}
               </h2>

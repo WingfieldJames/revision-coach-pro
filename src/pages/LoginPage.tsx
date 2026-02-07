@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
 import { CanvasRevealEffect } from '@/components/ui/canvas-reveal-effect';
-import logoImg from '@/assets/logo.png';
+import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
 import {
   Dialog,
   DialogContent,
@@ -27,9 +29,22 @@ export const LoginPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { signIn, signInWithGoogle, resetPassword } = useAuth();
+  const { theme } = useTheme();
+  const currentLogo = theme === 'dark' ? logo : logoDark;
+  const isDark = theme === 'dark';
   const { toast } = useToast();
 
   const redirect = searchParams.get('redirect');
+
+  // Theme-aware canvas colors
+  const canvasColors: [number, number, number][] = isDark
+    ? [[255, 154, 46], [255, 77, 141]]
+    : [[147, 51, 234], [124, 58, 237]];
+
+  // Theme-aware gradient for submit button
+  const submitGradient = isDark
+    ? 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)'
+    : 'linear-gradient(135deg, #9333EA 0%, #7C3AED 30%, #6D28D9 60%, #A855F7 100%)';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +138,7 @@ export const LoginPage = () => {
         <CanvasRevealEffect
           animationSpeed={3}
           containerClassName="bg-background"
-          colors={[[255, 154, 46], [255, 77, 141]]}
+          colors={canvasColors}
           opacities={[0.05, 0.05, 0.08, 0.08, 0.1, 0.1, 0.12, 0.15, 0.15, 0.2]}
           dotSize={3}
           showGradient={false}
@@ -135,7 +150,7 @@ export const LoginPage = () => {
         {/* Top navigation */}
         <div className="p-6">
           <Link to="/" className="inline-flex items-center gap-2">
-            <img src={logoImg} alt="A* AI" className="h-12 sm:h-14" />
+            <img src={currentLogo} alt="A* AI" className="h-12 sm:h-14" />
           </Link>
         </div>
 
@@ -158,34 +173,22 @@ export const LoginPage = () => {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full py-3 px-4 text-foreground hover:bg-white/10 transition-all duration-200"
+                className="w-full flex items-center justify-center gap-3 bg-foreground/5 backdrop-blur-sm border border-foreground/10 rounded-full py-3 px-4 text-foreground hover:bg-foreground/10 transition-all duration-200"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
                 Sign in with Google
               </button>
 
               {/* Divider */}
               <div className="flex items-center gap-4 my-6">
-                <div className="flex-1 h-px bg-white/10" />
+                <div className="flex-1 h-px bg-foreground/10" />
                 <span className="text-muted-foreground text-sm">or</span>
-                <div className="flex-1 h-px bg-white/10" />
+                <div className="flex-1 h-px bg-foreground/10" />
               </div>
 
               {/* Email Input */}
@@ -197,7 +200,7 @@ export const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full backdrop-blur-sm text-foreground bg-white/5 border border-white/10 rounded-full py-3 px-4 focus:outline-none focus:border-white/30 placeholder:text-muted-foreground"
+                  className="w-full backdrop-blur-sm text-foreground bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
                 />
               </div>
 
@@ -211,7 +214,7 @@ export const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full backdrop-blur-sm text-foreground bg-white/5 border border-white/10 rounded-full py-3 px-4 focus:outline-none focus:border-white/30 placeholder:text-muted-foreground"
+                    className="w-full backdrop-blur-sm text-foreground bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
@@ -263,9 +266,9 @@ export const LoginPage = () => {
                 className={`w-full rounded-full py-3 px-4 font-medium transition-all duration-300 ${
                   email && password
                     ? "text-white cursor-pointer glow-brand hover:glow-brand-intense hover:-translate-y-0.5"
-                    : "bg-white/5 text-muted-foreground border border-white/10 cursor-not-allowed"
+                    : "bg-foreground/5 text-muted-foreground border border-foreground/10 cursor-not-allowed"
                 }`}
-                style={email && password ? { background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' } : undefined}
+                style={email && password ? { background: submitGradient } : undefined}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
