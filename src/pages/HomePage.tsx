@@ -120,9 +120,9 @@ export const HomePage = () => {
             </div>
 
             {/* Meet A* AI - Mobile only */}
-            <div className="flex md:hidden items-center justify-center gap-2 mb-4">
-              <span className="text-foreground text-lg font-semibold">Meet</span>
-              <img src={currentLogo} alt="A* AI" className="h-6" />
+            <div className="flex md:hidden items-center justify-center gap-0 mb-4">
+              <span className="text-foreground text-2xl font-bold">Meet</span>
+              <img src={currentLogo} alt="A* AI" className="h-20 -mx-2" />
             </div>
 
             {/* Main Headline */}
