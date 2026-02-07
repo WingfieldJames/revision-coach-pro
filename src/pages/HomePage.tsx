@@ -15,81 +15,74 @@ import { MobileFoundersSection } from '@/components/MobileFoundersSection';
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from '@/components/ui/testimonials-columns';
 import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
 import logo from '@/assets/logo.png';
-
-const revisionFeatures = [
-  {
-    id: 1,
-    title: "Planning",
-    date: "Step 1",
-    content: "Never miss a deadline. AI-powered exam countdown tracks every paper and builds your personalized revision schedule based on your target grade.",
-    category: "Planning",
-    icon: Calendar,
-    relatedIds: [2],
-    status: "completed" as const,
-    energy: 100,
-  },
-  {
-    id: 2,
-    title: "Content Learning",
-    date: "Step 2",
-    content: "Tailored to you. Trained on your exact specification and adapted to your learning style - visual, detailed, or concise explanations on demand.",
-    category: "Learning",
-    icon: BookOpen,
-    relatedIds: [1, 3],
-    status: "completed" as const,
-    energy: 90,
-  },
-  {
-    id: 3,
-    title: "Exam Technique",
-    date: "Step 3",
-    content: "Learn from 4 A* students. Master the proven techniques that got real students into Oxbridge/Imperial/LSE & more - from essay structure to top-band evaluation.",
-    category: "Technique",
-    icon: GraduationCap,
-    relatedIds: [2, 4],
-    status: "in-progress" as const,
-    energy: 80,
-  },
-  {
-    id: 4,
-    title: "Past Paper Finder",
-    date: "Step 4",
-    content: "2,000+ questions searchable instantly. Find any question by topic or keyword, with official mark schemes included.",
-    category: "Practice",
-    icon: Search,
-    relatedIds: [3, 5],
-    status: "pending" as const,
-    energy: 60,
-  },
-  {
-    id: 5,
-    title: "Essay Marker",
-    date: "Step 5",
-    content: "90% teacher accuracy. Upload your essay, get instant breakdown of every AO, see exactly where you gained and lost marks.",
-    category: "Feedback",
-    icon: FileCheck,
-    relatedIds: [4],
-    status: "pending" as const,
-    energy: 40,
-  },
-];
-
+const revisionFeatures = [{
+  id: 1,
+  title: "Planning",
+  date: "Step 1",
+  content: "Never miss a deadline. AI-powered exam countdown tracks every paper and builds your personalized revision schedule based on your target grade.",
+  category: "Planning",
+  icon: Calendar,
+  relatedIds: [2],
+  status: "completed" as const,
+  energy: 100
+}, {
+  id: 2,
+  title: "Content Learning",
+  date: "Step 2",
+  content: "Tailored to you. Trained on your exact specification and adapted to your learning style - visual, detailed, or concise explanations on demand.",
+  category: "Learning",
+  icon: BookOpen,
+  relatedIds: [1, 3],
+  status: "completed" as const,
+  energy: 90
+}, {
+  id: 3,
+  title: "Exam Technique",
+  date: "Step 3",
+  content: "Learn from 4 A* students. Master the proven techniques that got real students into Oxbridge/Imperial/LSE & more - from essay structure to top-band evaluation.",
+  category: "Technique",
+  icon: GraduationCap,
+  relatedIds: [2, 4],
+  status: "in-progress" as const,
+  energy: 80
+}, {
+  id: 4,
+  title: "Past Paper Finder",
+  date: "Step 4",
+  content: "2,000+ questions searchable instantly. Find any question by topic or keyword, with official mark schemes included.",
+  category: "Practice",
+  icon: Search,
+  relatedIds: [3, 5],
+  status: "pending" as const,
+  energy: 60
+}, {
+  id: 5,
+  title: "Essay Marker",
+  date: "Step 5",
+  content: "90% teacher accuracy. Upload your essay, get instant breakdown of every AO, see exactly where you gained and lost marks.",
+  category: "Feedback",
+  icon: FileCheck,
+  relatedIds: [4],
+  status: "pending" as const,
+  energy: 40
+}];
 export const HomePage = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-
   const handlePickSubject = () => {
     navigate('/compare');
   };
-
   const handleSeeHowItWorks = () => {
     const section = document.querySelector('[data-section="how-it-works"]');
     if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
+      section.scrollIntoView({
+        behavior: 'smooth'
+      });
     }
   };
-
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
       <Header showNavLinks />
@@ -99,9 +92,11 @@ export const HomePage = () => {
         <HeroBackgroundPaths>
           <div className="px-6 sm:px-8 py-16 sm:py-24 md:py-32 text-center max-w-5xl mx-auto">
             {/* Social Proof Pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-white/10 bg-white/5 backdrop-blur-sm" style={{ boxShadow: '0 0 20px rgba(255,154,46,0.1), 0 0 40px rgba(255,77,141,0.05)' }}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-white/10 bg-white/5 backdrop-blur-sm" style={{
+            boxShadow: '0 0 20px rgba(255,154,46,0.1), 0 0 40px rgba(255,77,141,0.05)'
+          }}>
               <Star className="w-4 h-4 text-[#FFC83D] fill-[#FFC83D]" />
-              <span className="text-white text-sm font-medium">Loved by 700+ students with a 4.9 star rating</span>
+              <span className="text-white text-sm font-medium">Loved by 1.1k+ students with a 4.9 star rating</span>
             </div>
 
             {/* Main Headline */}
@@ -117,17 +112,12 @@ export const HomePage = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button
-                onClick={handlePickSubject}
-                className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
-                style={{ background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' }}
-              >
+              <button onClick={handlePickSubject} className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense" style={{
+              background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)'
+            }}>
                 Pick Your Subject →
               </button>
-              <button
-                onClick={handleSeeHowItWorks}
-                className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg border border-white/30 bg-transparent transition-all duration-300 hover:bg-[#FF9A2E] hover:border-[#FF9A2E]"
-              >
+              <button onClick={handleSeeHowItWorks} className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg border border-white/30 bg-transparent transition-all duration-300 hover:bg-[#FF9A2E] hover:border-[#FF9A2E]">
                 See How It Works
               </button>
             </div>
@@ -222,10 +212,9 @@ export const HomePage = () => {
 
         <div className="lg:hidden">
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-            {revisionFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <StaggerItem key={feature.id}>
+            {revisionFeatures.map(feature => {
+            const Icon = feature.icon;
+            return <StaggerItem key={feature.id}>
                   <Accordion type="single" collapsible>
                     <AccordionItem value={`feature-${feature.id}`} className="border-0 bg-muted rounded-xl overflow-hidden">
                       <AccordionTrigger hideIcon className="p-5 md:p-6 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180">
@@ -242,9 +231,8 @@ export const HomePage = () => {
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
-                </StaggerItem>
-              );
-            })}
+                </StaggerItem>;
+          })}
           </StaggerContainer>
           <div className="text-center mt-8">
             <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={handlePickSubject} className="pointer-events-auto text-base px-6 py-3 w-[200px]" />
