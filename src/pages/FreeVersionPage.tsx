@@ -32,7 +32,7 @@ export const FreeVersionPage = () => {
           showExamCountdown
           examDates={EDEXCEL_ECONOMICS_EXAMS}
           examSubjectName="Edexcel Economics"
-          toolsLocked 
+          toolsLocked={false}
           hideUserDetails 
           productId={EDEXCEL_PRODUCT_ID}
         />
@@ -46,7 +46,7 @@ export const FreeVersionPage = () => {
           footerText="A* AI can make mistakes. Verify important info."
           placeholder="Ask any Edexcel Economics question..."
           suggestedPrompts={EDEXCEL_ECONOMICS_FREE_PROMPTS}
-          tier="free"
+          tier="deluxe"
         />
       </div>
     </div>

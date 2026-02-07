@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Trash2, ExternalLink, Instagram, ChevronDown, AlertCircle } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -261,7 +262,7 @@ export const DashboardPage = () => {
             {/* Subject Dropdown */}
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white text-foreground hover:opacity-90 transition-all flex items-center gap-2">
+                <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white/10 text-foreground hover:opacity-90 transition-all flex items-center gap-2">
                   {subject === 'economics' ? 'Economics' : subject === 'computer-science' ? 'Computer Science' : subject === 'physics' ? 'Physics' : subject === 'chemistry' ? 'Chemistry' : 'Psychology'}
                   <ChevronDown className="h-3 w-3" />
                 </button>
@@ -662,7 +663,7 @@ export const DashboardPage = () => {
       <footer className="bg-muted py-16 px-8 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <img src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" alt="A* AI" className="h-8" />
+            <img src={logo} alt="A* AI" className="h-12 sm:h-14" />
             <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Instagram size={20} />
             </a>

@@ -6,6 +6,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { CanvasRevealEffect } from '@/components/ui/canvas-reveal-effect';
+import logoImg from '@/assets/logo.png';
 
 export const SignupPage = () => {
   const [email, setEmail] = useState('');
@@ -48,7 +49,7 @@ export const SignupPage = () => {
       } else if (redirect === 'free-version') {
         navigate('/free-version');
       } else {
-        navigate('/dashboard');
+        navigate('/compare');
       }
     } catch (error: any) {
       toast({
@@ -89,7 +90,7 @@ export const SignupPage = () => {
   const isFormValid = email && password && confirmPassword && password === confirmPassword;
 
   return (
-    <div className="min-h-screen w-full bg-white relative overflow-hidden">
+    <div className="min-h-screen w-full bg-background relative overflow-hidden">
       <SEOHead 
         title="Create Account | A* AI – A-Level Economics Revision"
         description="Join 1000+ students using A* AI to master A-Level Economics. Create your free account and start revising with AI trained on real past papers."
@@ -97,12 +98,12 @@ export const SignupPage = () => {
       />
       
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-white">
+      <div className="absolute inset-0 bg-background">
         <CanvasRevealEffect
           animationSpeed={3}
-          containerClassName="bg-white"
-          colors={[[147, 51, 234], [168, 85, 247]]}
-          opacities={[0.1, 0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.5, 0.6, 0.8]}
+          containerClassName="bg-background"
+          colors={[[255, 154, 46], [255, 77, 141]]}
+          opacities={[0.05, 0.05, 0.08, 0.08, 0.1, 0.1, 0.12, 0.15, 0.15, 0.2]}
           dotSize={3}
           showGradient={false}
         />
@@ -113,11 +114,7 @@ export const SignupPage = () => {
         {/* Top navigation */}
         <div className="p-6">
           <Link to="/" className="inline-flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png" 
-              alt="A* AI" 
-              className="h-8" 
-            />
+            <img src={logoImg} alt="A* AI" className="h-12 sm:h-14" />
           </Link>
         </div>
 
@@ -140,34 +137,22 @@ export const SignupPage = () => {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 bg-black/5 backdrop-blur-sm border border-black/10 rounded-full py-3 px-4 text-foreground hover:bg-black/10 transition-all duration-200"
+                className="w-full flex items-center justify-center gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full py-3 px-4 text-foreground hover:bg-white/10 transition-all duration-200"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
                 Sign up with Google
               </button>
 
               {/* Divider */}
               <div className="flex items-center gap-4 my-6">
-                <div className="flex-1 h-px bg-black/10" />
+                <div className="flex-1 h-px bg-white/10" />
                 <span className="text-muted-foreground text-sm">or</span>
-                <div className="flex-1 h-px bg-black/10" />
+                <div className="flex-1 h-px bg-white/10" />
               </div>
 
               {/* Email Input */}
@@ -179,7 +164,7 @@ export const SignupPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full backdrop-blur-sm text-foreground bg-black/5 border border-black/10 rounded-full py-3 px-4 focus:outline-none focus:border-black/30 placeholder:text-muted-foreground"
+                  className="w-full backdrop-blur-sm text-foreground bg-white/5 border border-white/10 rounded-full py-3 px-4 focus:outline-none focus:border-white/30 placeholder:text-muted-foreground"
                 />
               </div>
 
@@ -193,7 +178,7 @@ export const SignupPage = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full backdrop-blur-sm text-foreground bg-black/5 border border-black/10 rounded-full py-3 px-4 focus:outline-none focus:border-black/30 placeholder:text-muted-foreground"
+                  className="w-full backdrop-blur-sm text-foreground bg-white/5 border border-white/10 rounded-full py-3 px-4 focus:outline-none focus:border-white/30 placeholder:text-muted-foreground"
                 />
               </div>
 
@@ -207,7 +192,7 @@ export const SignupPage = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full backdrop-blur-sm text-foreground bg-black/5 border border-black/10 rounded-full py-3 px-4 focus:outline-none focus:border-black/30 placeholder:text-muted-foreground"
+                  className="w-full backdrop-blur-sm text-foreground bg-white/5 border border-white/10 rounded-full py-3 px-4 focus:outline-none focus:border-white/30 placeholder:text-muted-foreground"
                 />
               </div>
 
@@ -215,11 +200,12 @@ export const SignupPage = () => {
               <button
                 type="submit"
                 disabled={loading || !isFormValid}
-                className={`w-full rounded-full py-3 px-4 font-medium transition-all duration-200 ${
+                className={`w-full rounded-full py-3 px-4 font-medium transition-all duration-300 ${
                   isFormValid
-                    ? "bg-foreground text-background hover:bg-foreground/90 cursor-pointer"
-                    : "bg-black/10 text-muted-foreground border border-black/10 cursor-not-allowed"
+                    ? "text-white cursor-pointer glow-brand hover:glow-brand-intense hover:-translate-y-0.5"
+                    : "bg-white/5 text-muted-foreground border border-white/10 cursor-not-allowed"
                 }`}
+                style={isFormValid ? { background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' } : undefined}
               >
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>
