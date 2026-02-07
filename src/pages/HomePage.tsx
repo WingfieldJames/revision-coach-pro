@@ -107,15 +107,21 @@ export const HomePage = () => {
         <HeroBackgroundPaths>
           <div className="px-6 sm:px-8 py-16 sm:py-24 md:py-32 text-center max-w-5xl mx-auto">
             {/* Social Proof Pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm" style={{
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 md:mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm" style={{
             boxShadow: 'var(--shadow-glow)'
           }}>
               <Star className="w-4 h-4 text-[#FFC83D] fill-[#FFC83D]" />
               <span className="text-foreground text-sm font-medium">Loved by 1.1k+ students with a 4.9 star rating</span>
             </div>
 
+            {/* Meet A* AI - Mobile only */}
+            <div className="flex md:hidden items-center justify-center gap-2 mb-4">
+              <span className="text-foreground text-lg font-semibold">Meet</span>
+              <img src={currentLogo} alt="A* AI" className="h-6" />
+            </div>
+
             {/* Main Headline */}
-            <h1 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-6 leading-[1.2]">
+            <h1 className="text-[1.25rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-6 leading-[1.2]">
               <div className="text-foreground whitespace-nowrap">The AI that actually</div>
               <div className="whitespace-nowrap">
                 <span className="text-foreground">understands </span>
@@ -137,8 +143,8 @@ export const HomePage = () => {
               </div>
             </h1>
 
-            {/* Subheadline */}
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
+            {/* Subheadline - Hidden on mobile */}
+            <p className="hidden md:block text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
               We worked alongside the <span className="text-foreground font-medium">highest performing students</span> in the UK to train an AI model on <span className="text-foreground font-medium">everything you need</span> to ace your final exam — from the spec to past papers to the exact <span className="text-foreground font-medium">A* technique</span>.
             </p>
 
