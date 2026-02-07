@@ -105,7 +105,7 @@ export const HomePage = () => {
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-[1.75rem] sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
               <span className="text-white">The AI that actually understands </span>
               <span className="text-gradient-brand">your exam board</span>
             </h1>
