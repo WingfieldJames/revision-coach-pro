@@ -102,12 +102,17 @@ export const HomePage = () => {
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
       <Header showNavLinks />
       
+      {/* Mobile Social Proof - sits right under header */}
+      <div className="md:hidden text-center mt-2 mb-0 px-4">
+        <span className="text-foreground text-xs font-medium whitespace-nowrap">⭐ Loved by 1.1k+ students with a 4.9 star rating</span>
+      </div>
+
       {/* Hero Section - Rebuilt */}
-      <section className="overflow-hidden pb-0 mt-4 sm:-mt-4">
+      <section className="overflow-hidden pb-0 mt-2 md:mt-4 sm:-mt-4">
         <HeroBackgroundPaths>
-          <div className="px-6 sm:px-8 py-16 sm:py-24 md:py-32 text-center max-w-5xl mx-auto">
-            {/* Social Proof Pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 md:mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm" style={{
+          <div className="px-6 sm:px-8 py-10 sm:py-24 md:py-32 text-center max-w-5xl mx-auto">
+            {/* Social Proof Pill - Desktop only */}
+            <div className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm" style={{
             boxShadow: 'var(--shadow-glow)'
           }}>
               <Star className="w-4 h-4 text-[#FFC83D] fill-[#FFC83D]" />
