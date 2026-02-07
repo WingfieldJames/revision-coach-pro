@@ -104,7 +104,7 @@ export const HomePage = () => {
       
       {/* Mobile Social Proof - sits right under header */}
       <div className="md:hidden text-center mt-2 mb-0 px-4">
-        <span className="text-foreground text-xs font-medium whitespace-nowrap">⭐ Loved by 1.1k+ students with a 4.9 star rating</span>
+        <span className={`text-foreground text-xs font-medium whitespace-nowrap ${theme === 'light' ? 'inline-flex items-center px-4 py-1.5 rounded-full bg-foreground/[0.04] border border-foreground/10' : ''}`}>⭐ Loved by 1.1k+ students with a 4.9 star rating</span>
       </div>
 
       {/* Hero Section - Rebuilt */}
