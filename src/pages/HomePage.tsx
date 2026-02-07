@@ -116,7 +116,7 @@ export const HomePage = () => {
               <div className="whitespace-nowrap">
                 <span className="text-white">understands </span>
                 <span className="text-gradient-brand">A-Level </span>
-                <span className="relative inline-block overflow-hidden align-bottom text-left" style={{ width: '5.5em', height: '1.2em', verticalAlign: 'baseline' }}>
+                <span className="relative inline-block overflow-hidden text-left" style={{ width: '5.5em', height: '1em', verticalAlign: 'text-bottom' }}>
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={subjects[currentSubjectIndex]}
