@@ -84,7 +84,7 @@ export function FoundersCarousel() {
         <ScrollReveal className="text-center mb-12">
           <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-4 leading-[1.2]">
             <span className={isDark ? "text-foreground" : "text-foreground"}>Trained by real </span>
-            <span className={isDark ? "text-gradient-brand" : "text-foreground"}>A* students</span>
+            <span className="text-gradient-brand">A* students</span>
           </h2>
           <p className="text-muted-foreground text-sm md:text-base text-center mx-auto">
             ​We searched the country for the sharpest A-Level students – 4 A*s, Oxbridge offers, top exam scores – and worked alongside them to train our AI on their proven techniques
