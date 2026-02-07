@@ -113,22 +113,25 @@ export const HomePage = () => {
             {/* Main Headline */}
             <h1 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-6 leading-[1.2]">
               <div className="text-white whitespace-nowrap">The AI that actually</div>
-              <div className="flex items-baseline justify-center gap-[0.3em]">
+              <div>
                 <span className="text-white">understands </span>
-                <span className="text-gradient-brand">A-Level</span>
-                <span className="relative inline-flex overflow-hidden" style={{ minWidth: '4ch' }}>
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={subjects[currentSubjectIndex]}
-                      className="text-gradient-brand"
-                      initial={{ y: '100%', opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: '-100%', opacity: 0 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      {subjects[currentSubjectIndex]}
-                    </motion.span>
-                  </AnimatePresence>
+                <span className="inline-flex items-baseline text-gradient-brand">
+                  <span>A-Level&nbsp;</span>
+                  <span className="relative inline-flex overflow-hidden align-baseline" style={{ height: '1.2em' }}>
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={subjects[currentSubjectIndex]}
+                        className="inline-block"
+                        style={{ color: 'inherit' }}
+                        initial={{ y: '100%', opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: '-100%', opacity: 0 }}
+                        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                        {subjects[currentSubjectIndex]}
+                      </motion.span>
+                    </AnimatePresence>
+                  </span>
                 </span>
               </div>
             </h1>
