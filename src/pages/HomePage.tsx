@@ -83,10 +83,8 @@ export const HomePage = () => {
   const isMobile = useIsMobile();
 
   const handlePickSubject = () => {
-    const section = document.querySelector('[data-section="pick-subject"]');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
+    navigate('/compare');
+    window.scrollTo(0, 0);
   };
 
   const handleSeeHowItWorks = () => {
