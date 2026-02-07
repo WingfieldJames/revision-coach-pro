@@ -6,6 +6,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ChevronDown, Instagram, Calendar, BookOpen, GraduationCap, Search, FileCheck, Star } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { HeroBackgroundPaths } from '@/components/ui/hero-background-paths';
@@ -83,6 +84,16 @@ export const HomePage = () => {
       });
     }
   };
+
+  const subjects = ['Economics', 'CS', 'Chemistry', 'Psychology', 'Physics', 'Maths'];
+  const [currentSubjectIndex, setCurrentSubjectIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSubjectIndex((prev) => (prev + 1) % subjects.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
   return <div className="min-h-screen bg-background font-sans">
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
       <Header showNavLinks />
@@ -102,7 +113,24 @@ export const HomePage = () => {
             {/* Main Headline */}
             <h1 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-6 leading-[1.2]">
               <div className="text-white whitespace-nowrap">The AI that actually</div>
-              <div><span className="text-white">understands </span><span className="text-gradient-brand">your exam board</span></div>
+              <div className="flex items-baseline justify-center gap-[0.3em]">
+                <span className="text-white">understands </span>
+                <span className="text-gradient-brand">A-Level</span>
+                <span className="relative inline-flex overflow-hidden" style={{ minWidth: '4ch' }}>
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={subjects[currentSubjectIndex]}
+                      className="text-gradient-brand"
+                      initial={{ y: '100%', opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: '-100%', opacity: 0 }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {subjects[currentSubjectIndex]}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
+              </div>
             </h1>
 
             {/* Subheadline */}
