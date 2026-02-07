@@ -291,16 +291,40 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { message, product_id, user_preferences, history = [], tier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics' } = await req.json();
+    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics' } = await req.json();
 
     if (!message) {
       throw new Error("message is required");
     }
 
-    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (tier: ${tier}, diagrams: ${enable_diagrams})`);
+    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (diagrams: ${enable_diagrams})`);
     if (user_preferences) {
       console.log(`User preferences: Year ${user_preferences.year}, Predicted: ${user_preferences.predicted_grade}, Target: ${user_preferences.target_grade}`);
     }
+
+    // Server-side subscription verification - never trust client tier
+    let tier: string = 'free';
+    if (user_id && product_id) {
+      try {
+        const { data: sub } = await supabaseAdmin
+          .from('user_subscriptions')
+          .select('tier, subscription_end')
+          .eq('user_id', user_id)
+          .eq('product_id', product_id)
+          .eq('active', true)
+          .maybeSingle();
+        
+        if (sub?.tier === 'deluxe') {
+          if (!sub.subscription_end || new Date(sub.subscription_end) > new Date()) {
+            tier = 'deluxe';
+          }
+        }
+      } catch (err) {
+        console.error('Error verifying subscription:', err);
+      }
+    }
+    
+    console.log(`Verified tier for user ${user_id}: ${tier}`);
 
     // Check daily usage limit for FREE tier only
     if (tier === 'free' && user_id && product_id) {

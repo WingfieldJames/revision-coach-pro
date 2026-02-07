@@ -32,7 +32,6 @@ export const AQAChemistryFreeVersionPage = () => {
           showExamCountdown
           examDates={AQA_CHEMISTRY_EXAMS}
           examSubjectName="AQA Chemistry"
-          toolsLocked={false}
           hideUserDetails 
           productId={AQA_CHEMISTRY_PRODUCT_ID}
           productSlug="aqa-chemistry"
@@ -49,7 +48,6 @@ export const AQAChemistryFreeVersionPage = () => {
           subjectDescription="Your personal A* Chemistry tutor. Ask me anything!"
           footerText="Powered by A* AI • Trained on AQA Chemistry specification"
           placeholder="Ask about organic, inorganic, or physical chemistry..."
-          tier="deluxe"
           suggestedPrompts={AQA_CHEMISTRY_PROMPTS}
         />
       </div>

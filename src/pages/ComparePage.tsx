@@ -87,8 +87,7 @@ export const ComparePage = () => {
   };
 
   const getPricing = () => {
-    if (subject === 'economics') return { monthly: '£6.99', lifetime: '£34.99', monthlyStrike: '£12.99', lifetimeStrike: '£59.99' };
-    return { monthly: '£4.99', lifetime: '£24.99', monthlyStrike: '£9.99', lifetimeStrike: '£49.99' };
+    return { monthly: '£6.99', lifetime: '£24.99', monthlyStrike: '£12.99', lifetimeStrike: '£49.99' };
   };
 
   useEffect(() => {

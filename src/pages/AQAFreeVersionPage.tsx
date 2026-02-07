@@ -32,7 +32,6 @@ export const AQAFreeVersionPage = () => {
           showExamCountdown
           examDates={AQA_ECONOMICS_EXAMS}
           examSubjectName="AQA Economics"
-          toolsLocked={false}
           hideUserDetails 
           productId={AQA_PRODUCT_ID}
           productSlug="aqa-economics"
@@ -48,7 +47,6 @@ export const AQAFreeVersionPage = () => {
           footerText="A* AI can make mistakes. Verify important info."
           placeholder="Ask any AQA Economics question..."
           suggestedPrompts={AQA_ECONOMICS_FREE_PROMPTS}
-          tier="deluxe"
         />
       </div>
     </div>

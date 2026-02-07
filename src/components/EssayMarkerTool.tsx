@@ -90,7 +90,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     loadUsage();
   }, [tier, user, productId]);
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (paymentType: 'monthly' | 'lifetime' = 'lifetime') => {
     if (!user) {
       navigate('/login');
       return;
@@ -111,7 +111,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           Authorization: `Bearer ${sessionData.session.access_token}`
         },
         body: {
-          paymentType: 'lifetime',
+          paymentType,
           productId: productId,
           affiliateCode
         }
@@ -138,17 +138,17 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     return (
       <div className="space-y-4">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center mx-auto mb-3">
             <PenLine className="w-6 h-6 text-white" />
           </div>
           <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
           <p className="text-muted-foreground text-sm">
-            You've used your {FREE_MONTHLY_ESSAY_LIMIT} free essay marking this month. Upgrade to Deluxe for unlimited access.
+            You've used your {FREE_MONTHLY_ESSAY_LIMIT} free essay marking this month. Upgrade for unlimited access!
           </p>
         </div>
         
         <div className="bg-muted/50 rounded-xl p-4">
-          <p className="font-semibold text-sm mb-3">Deluxe Features:</p>
+          <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
           <ul className="space-y-2 text-sm">
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
@@ -160,29 +160,32 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
-              <span>Full 2017-2025 past paper training</span>
+              <span>Unlimited daily prompts</span>
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
-              <span>Unlimited daily prompts</span>
+              <span>Image upload & OCR analysis</span>
             </li>
           </ul>
         </div>
         
-        <Button 
-          className="w-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)]"
-          onClick={handleUpgrade}
-          disabled={isCheckingOut}
-        >
-          {isCheckingOut ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Loading...
-            </>
-          ) : (
-            'Upgrade to Deluxe'
-          )}
-        </Button>
+        <div className="space-y-2">
+          <Button 
+            className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
+            onClick={() => handleUpgrade('lifetime')}
+            disabled={isCheckingOut}
+          >
+            {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £24.99'}
+          </Button>
+          <Button 
+            variant="outline"
+            className="w-full"
+            onClick={() => handleUpgrade('monthly')}
+            disabled={isCheckingOut}
+          >
+            Monthly – £6.99/mo
+          </Button>
+        </div>
         
         <p className="text-xs text-center text-muted-foreground">
           Your free uses reset at the start of each month

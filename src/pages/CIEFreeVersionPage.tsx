@@ -32,7 +32,6 @@ export const CIEFreeVersionPage = () => {
           showExamCountdown
           examDates={AQA_ECONOMICS_EXAMS}
           examSubjectName="CIE Economics"
-          toolsLocked={false}
           hideUserDetails 
           productId={CIE_PRODUCT_ID}
           productSlug="cie-economics"
@@ -48,7 +47,6 @@ export const CIEFreeVersionPage = () => {
           footerText="A* AI can make mistakes. Verify important info."
           placeholder="Ask any CIE Economics question..."
           suggestedPrompts={CIE_ECONOMICS_FREE_PROMPTS}
-          tier="deluxe"
         />
       </div>
     </div>
