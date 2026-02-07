@@ -16,8 +16,10 @@ import { FoundersCarousel } from '@/components/FoundersCarousel';
 import { MobileFoundersSection } from '@/components/MobileFoundersSection';
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from '@/components/ui/testimonials-columns';
 import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
+import { SubjectPlanSelector } from '@/components/SubjectPlanSelector';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
+
 const revisionFeatures = [{
   id: 1,
   title: "Planning",
@@ -69,23 +71,28 @@ const revisionFeatures = [{
   status: "pending" as const,
   energy: 40
 }];
+
+/** Shared heading class matching FoundersCarousel / hero style */
+const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2]";
+
 export const HomePage = () => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const { theme } = useTheme();
   const currentLogo = theme === 'dark' ? logo : logoDark;
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+
   const handlePickSubject = () => {
-    navigate('/compare');
+    const section = document.querySelector('[data-section="pick-subject"]');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
   };
+
   const handleSeeHowItWorks = () => {
     const section = document.querySelector('[data-section="how-it-works"]');
     if (section) {
-      section.scrollIntoView({
-        behavior: 'smooth'
-      });
+      section.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -98,23 +105,23 @@ export const HomePage = () => {
     }, 2500);
     return () => clearInterval(interval);
   }, []);
-  return <div className="min-h-screen bg-background font-sans">
+
+  return (
+    <div className="min-h-screen bg-background font-sans">
       <SEOHead title="A* AI – Get an A* in A-Level Economics | AI Revision Coach" description="Join 1000+ students using A* AI to master A-Level Economics. Trained on real past papers (2017-2025), mark schemes & examiner reports. Free to try – get your A* today." canonical="https://astarai.co.uk/" />
       <Header showNavLinks />
-      
-      {/* Mobile Social Proof - sits right under header */}
+
+      {/* Mobile Social Proof */}
       <div className="md:hidden text-center mt-2 mb-0 px-4">
         <span className={`text-foreground text-xs font-medium whitespace-nowrap ${theme === 'light' ? 'inline-flex items-center px-4 py-1.5 rounded-full bg-foreground/[0.04] border border-foreground/10' : ''}`}>⭐ Loved by 1.1k+ students with a 4.9 star rating</span>
       </div>
 
-      {/* Hero Section - Rebuilt */}
+      {/* Hero Section */}
       <section className="overflow-hidden pb-0 mt-2 md:mt-4 sm:-mt-4">
         <HeroBackgroundPaths>
           <div className="px-6 sm:px-8 py-10 sm:py-24 md:py-32 text-center max-w-5xl mx-auto">
             {/* Social Proof Pill - Desktop only */}
-            <div className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm" style={{
-            boxShadow: 'var(--shadow-glow)'
-          }}>
+            <div className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm" style={{ boxShadow: 'var(--shadow-glow)' }}>
               <Star className="w-4 h-4 text-[#FFC83D] fill-[#FFC83D]" />
               <span className="text-foreground text-sm font-medium">Loved by 1.1k+ students with a 4.9 star rating</span>
             </div>
@@ -155,9 +162,7 @@ export const HomePage = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button onClick={handlePickSubject} className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense" style={{
-              background: 'var(--gradient-brand)'
-            }}>
+              <button onClick={handlePickSubject} className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense" style={{ background: 'var(--gradient-brand)' }}>
                 Pick Your Subject →
               </button>
               <button onClick={handleSeeHowItWorks} className="px-8 py-3.5 rounded-full text-foreground font-semibold text-base sm:text-lg border border-foreground/30 bg-transparent transition-all duration-300 hover:bg-primary hover:border-primary hover:text-primary-foreground">
@@ -172,92 +177,35 @@ export const HomePage = () => {
         </HeroBackgroundPaths>
       </section>
 
-      {/* Trained by A* Students Section - Desktop only */}
+      {/* Trained by A* Students - Desktop */}
       <div className="hidden md:block">
         <FoundersCarousel />
       </div>
 
-      {/* Video Demo Section - Desktop only */}
-      <section className="hidden md:block py-16 bg-background">
-        <div className="max-w-7xl mx-auto px-8">
-          <ScrollReveal>
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span>See</span>
-                <img src={currentLogo} alt="A* AI Logo" className="h-6 md:h-8" />
-                <span>in</span>
-                <span className="text-gradient-brand">action</span>
-              </div>
-            </h2>
-          </ScrollReveal>
-        </div>
-        
-        <ScrollReveal delay={0.2}>
-          <div className="max-w-7xl mx-auto px-8">
-            <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-border/30">
-              <iframe src="https://player.vimeo.com/video/1157200471?background=1&loop=1&muted=1" className="absolute top-0 left-0 w-full h-full" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerPolicy="strict-origin-when-cross-origin" title="A* AI Demo Video" />
-            </div>
-          </div>
-        </ScrollReveal>
-
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="text-center mt-8 mb-4">
-            <InteractiveHoverButton text="Get started free →" variant="reverse" onClick={handlePickSubject} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
-          </div>
-          <p className="text-center text-sm text-muted-foreground">
-            For the best experience, use a laptop or iPad
-          </p>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <ScrollReveal className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">What our users say</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Join 700+ students and teachers achieving real results</p>
-          </ScrollReveal>
-
-          <div className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
-            <TestimonialsColumn testimonials={firstColumn} duration={45} />
-            <TestimonialsColumn testimonials={secondColumn} duration={40} />
-            <TestimonialsColumn testimonials={thirdColumn} duration={50} />
-          </div>
-        </div>
-      </section>
-
       <MobileFoundersSection />
 
-      {/* How A* AI helps you revise smarter Section */}
+      {/* How A* AI helps you revise smarter */}
       <section data-section="how-it-works" className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <ScrollReveal className="relative z-10">
-          <h2 className="text-lg md:text-3xl font-bold text-center mb-8 md:mb-12">
-            <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-1 md:gap-2">
-              <div className="flex items-center gap-1 md:gap-2">
-                <span>How</span>
-                <img src={currentLogo} alt="A* AI" className="h-5 md:h-8" />
-                <span>helps you at</span>
-              </div>
-              <div className="flex items-center gap-1 md:gap-2">
-                <span className="text-gradient-brand">every</span>
-                <span>stage of revision</span>
-              </div>
-            </div>
+        <ScrollReveal className="relative z-10 text-center mb-8 md:mb-12">
+          <h2 className={sectionHeadingClass}>
+            <span className="text-foreground">How </span>
+            <span className="text-gradient-brand">A* AI</span>
+            <span className="text-foreground"> helps you at </span>
+            <span className="text-gradient-brand">every</span>
+            <span className="text-foreground"> stage of revision</span>
           </h2>
         </ScrollReveal>
 
         <div className="hidden lg:block">
           <RadialOrbitalTimeline timelineData={revisionFeatures} />
-          <div className="text-center mt-4">
-            <InteractiveHoverButton text="Get started free →" variant="reverse" onClick={handlePickSubject} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
-          </div>
         </div>
 
         <div className="lg:hidden">
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
             {revisionFeatures.map(feature => {
-            const Icon = feature.icon;
-            return <StaggerItem key={feature.id}>
+              const Icon = feature.icon;
+              return (
+                <StaggerItem key={feature.id}>
                   <Accordion type="single" collapsible>
                     <AccordionItem value={`feature-${feature.id}`} className="border-0 bg-muted rounded-xl overflow-hidden">
                       <AccordionTrigger hideIcon className="p-5 md:p-6 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180">
@@ -274,13 +222,42 @@ export const HomePage = () => {
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
-                </StaggerItem>;
-          })}
+                </StaggerItem>
+              );
+            })}
           </StaggerContainer>
-          <div className="text-center mt-8">
-            <InteractiveHoverButton text="Try A* AI now →" variant="reverse" onClick={handlePickSubject} className="pointer-events-auto text-base px-6 py-3 w-[200px]" />
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <ScrollReveal className="text-center mb-12">
+            <h2 className={sectionHeadingClass}>
+              <span className="text-foreground">What our </span>
+              <span className="text-gradient-brand">users</span>
+              <span className="text-foreground"> say</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto mt-4">Join 700+ students and teachers achieving real results</p>
+          </ScrollReveal>
+
+          <div className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
+            <TestimonialsColumn testimonials={firstColumn} duration={45} />
+            <TestimonialsColumn testimonials={secondColumn} duration={40} />
+            <TestimonialsColumn testimonials={thirdColumn} duration={50} />
           </div>
         </div>
+      </section>
+
+      {/* Subject + Plan Selection */}
+      <section data-section="pick-subject" className="py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
+        <ScrollReveal className="text-center mb-8 md:mb-12">
+          <h2 className={sectionHeadingClass}>
+            <span className="text-foreground">Choose your </span>
+            <span className="text-gradient-brand">subject</span>
+          </h2>
+        </ScrollReveal>
+        <SubjectPlanSelector />
       </section>
 
       {/* FAQ Section */}
@@ -288,14 +265,15 @@ export const HomePage = () => {
         <HeroBackgroundPaths>
           <div className="max-w-4xl mx-auto relative z-10 px-2 md:px-0">
             <ScrollReveal>
-              <h2 className="text-xl sm:text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2 whitespace-nowrap">
-                Frequently asked questions
+              <h2 className={`${sectionHeadingClass} text-center mb-6`}>
+                <span className="text-foreground">Frequently asked </span>
+                <span className="text-gradient-brand">questions</span>
               </h2>
               <p className="text-center text-muted-foreground mb-8 text-lg">
                 Everything you need to know about A* AI and revision.
               </p>
             </ScrollReveal>
-            
+
             <ScrollReveal delay={0.2}>
               <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
                 <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
@@ -345,10 +323,6 @@ export const HomePage = () => {
                 </AccordionItem>
               </Accordion>
             </ScrollReveal>
-            
-            <ScrollReveal delay={0.3} className="text-center mt-8">
-              <InteractiveHoverButton text="Pick your subject →" variant="reverse" onClick={handlePickSubject} className="pointer-events-auto text-base px-6 py-3 w-[220px]" />
-            </ScrollReveal>
           </div>
         </HeroBackgroundPaths>
       </section>
@@ -396,15 +370,18 @@ export const HomePage = () => {
             </p>
           </div>
           
-          {!user && <div className="flex gap-4 justify-center">
+          {!user && (
+            <div className="flex gap-4 justify-center">
               <Button variant="outline" asChild>
                 <Link to="/login">Login</Link>
               </Button>
               <Button variant="brand" asChild>
                 <Link to="/signup">Sign Up</Link>
               </Button>
-            </div>}
+            </div>
+          )}
         </ScrollReveal>
       </footer>
-    </div>;
+    </div>
+  );
 };

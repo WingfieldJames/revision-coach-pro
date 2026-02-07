@@ -3,9 +3,9 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { ChevronDown, Check, Star, Instagram } from 'lucide-react';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
@@ -28,6 +28,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scr
 import { ScreenshotTestimonials } from '@/components/ui/screenshot-testimonials';
 import { LatestFeaturesSection } from '@/components/LatestFeaturesSection';
 import { FlowFieldBackground } from '@/components/ui/flow-field-background';
+import { SubjectPlanSelector } from '@/components/SubjectPlanSelector';
 
 type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'psychology';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
