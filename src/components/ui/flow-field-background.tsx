@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface FlowFieldBackgroundProps {
   className?: string;
@@ -11,11 +12,13 @@ interface FlowFieldBackgroundProps {
 
 export function FlowFieldBackground({
   className,
-  color = "#FF9A2E", // Orange from new brand
+  color,
   trailOpacity = 0.08,
   particleCount = 600,
   speed = 1,
 }: FlowFieldBackgroundProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -33,8 +36,10 @@ export function FlowFieldBackground({
     let animationFrameId: number;
     let mouse = { x: -1000, y: -1000 };
 
-    // Multiple colors for variety
-    const colors = ["#FF9A2E", "#FF4D8D", "#FFC83D"];
+    // Theme-aware colors
+    const colors = isDark
+      ? ["#FF9A2E", "#FF4D8D", "#FFC83D"]
+      : ["#9333EA", "#7C3AED", "#A855F7"];
 
     class Particle {
       x: number;
@@ -121,8 +126,10 @@ export function FlowFieldBackground({
     };
 
     const animate = () => {
-      // Dark background trail - uses #0D0316
-      ctx.fillStyle = `rgba(13, 3, 22, ${trailOpacity})`;
+      // Theme-aware background trail
+      ctx.fillStyle = isDark
+        ? `rgba(13, 3, 22, ${trailOpacity})`
+        : `rgba(255, 255, 255, ${trailOpacity})`;
       ctx.fillRect(0, 0, width, height);
 
       particles.forEach((p) => {
@@ -163,7 +170,7 @@ export function FlowFieldBackground({
       container.removeEventListener("mouseleave", handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [color, trailOpacity, particleCount, speed]);
+  }, [color, trailOpacity, particleCount, speed, isDark]);
 
   return (
     <div
