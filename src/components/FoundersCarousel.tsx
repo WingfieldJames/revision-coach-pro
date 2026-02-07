@@ -74,11 +74,12 @@ export function FoundersCarousel() {
     setCurrentIndex(prev => prev === founders.length - 1 ? 0 : prev + 1);
   };
   const currentFounder = founders[currentIndex];
-  return <section className="py-16 px-8 bg-muted">
+  return <section className="py-16 px-8 bg-background">
       <div className="max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Trained by real A* students
+          <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-4 leading-[1.2]">
+            <span className="text-white">Trained by real </span>
+            <span className="text-gradient-brand">A* students</span>
           </h2>
           <p className="text-muted-foreground text-sm md:text-base text-center mx-auto">
             ​We searched the country for the sharpest A-Level students – 4 A*s, Oxbridge offers, top exam scores – and worked alongside them to train our AI on their proven techniques
