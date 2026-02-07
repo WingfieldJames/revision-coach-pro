@@ -679,7 +679,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 key={idx} 
                 onClick={() => handleSuggestedPrompt(prompt)} 
                 disabled={isLoading} 
-                className="px-4 py-2 rounded-full text-white text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap flex-shrink-0 disabled:opacity-50 bg-violet"
+                className="px-3 py-1.5 rounded-md border border-border bg-transparent text-foreground text-xs sm:text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors whitespace-nowrap flex-shrink-0 disabled:opacity-50"
               >
                 {prompt.text}
               </button>
