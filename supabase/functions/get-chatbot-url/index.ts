@@ -6,32 +6,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Chatbot URL mappings - stored securely in edge function, not in public database
-const CHATBOT_URLS: Record<string, { free: string; premium: string }> = {
+// Chatbot URL mappings - legacy Chatbase URLs (premium only, free URLs removed)
+// This function is largely legacy as RAGChat has replaced Chatbase
+const CHATBOT_URLS: Record<string, { premium: string }> = {
   'edexcel-economics': {
-    free: 'https://www.chatbase.co/chatbot-iframe/rdUsQQiBG6DHV2jFtXzn5',
     premium: 'https://www.chatbase.co/chatbot-iframe/1l2aTsS1zKI3FgVTquzOu'
   },
   'aqa-economics': {
-    free: 'https://www.chatbase.co/chatbot-iframe/rRsRPPSXyI-f4kL8JHcyz',
     premium: 'https://www.chatbase.co/chatbot-iframe/kkZTJB7EYleMIFmsFEEJ0'
   },
   'cie-economics': {
-    free: 'https://www.chatbase.co/chatbot-iframe/UuE_HD759RpXk9-xsbZa7',
     premium: 'https://www.chatbase.co/chatbot-iframe/qZY8ajOntZ2Tem3CqdOr0'
   },
   'ocr-computer-science': {
-    free: 'https://www.chatbase.co/chatbot-iframe/t9DaRQyfRFdgqWKI2fOnq',
     premium: 'https://www.chatbase.co/chatbot-iframe/g-4moPbIfo-Q36Db_c6TJ'
   },
-  'ocr-physics': {
-    free: 'https://www.chatbase.co/chatbot-iframe/VBv4qqbbRjfZ_eFquDXBl',
-    premium: '' // To be added when Deluxe is ready
-  },
-  'aqa-psychology': {
-    free: '', // Uses RAGChat instead
-    premium: '' // Uses RAGChat instead
-  }
 };
 
 serve(async (req) => {
@@ -54,21 +43,12 @@ serve(async (req) => {
     const productUrls = CHATBOT_URLS[productSlug];
     if (!productUrls) {
       return new Response(
-        JSON.stringify({ error: 'Unknown product' }),
+        JSON.stringify({ error: 'Unknown product or no Chatbase URL available' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // If requesting free tier, return free URL without auth check
-    if (tier === 'free') {
-      console.log(`Returning free URL for ${productSlug}`);
-      return new Response(
-        JSON.stringify({ url: productUrls.free, tier: 'free' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // For premium tier, require authentication
+    // All requests require authentication (no more free tier bypass)
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -85,14 +65,14 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
 
     if (authError || !user) {
-      console.log("Authentication failed for premium request:", authError?.message);
+      console.log("Authentication failed:", authError?.message);
       return new Response(
-        JSON.stringify({ error: 'Authentication required for premium access' }),
+        JSON.stringify({ error: 'Authentication required' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Checking premium access for user ${user.id}, product ${productSlug}`);
+    console.log(`Checking access for user ${user.id}, product ${productSlug}`);
 
     // Get product ID from slug
     const { data: product, error: productError } = await supabaseClient
@@ -163,13 +143,13 @@ serve(async (req) => {
     }
 
     if (hasAccess) {
-      console.log(`Premium access granted for user ${user.id}, product ${productSlug}`);
+      console.log(`Access granted for user ${user.id}, product ${productSlug}`);
       return new Response(
         JSON.stringify({ url: productUrls.premium, tier: 'premium' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } else {
-      console.log(`Premium access denied for user ${user.id}, product ${productSlug}`);
+      console.log(`Access denied for user ${user.id}, product ${productSlug}`);
       return new Response(
         JSON.stringify({ error: 'Premium subscription required', hasAccess: false }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
