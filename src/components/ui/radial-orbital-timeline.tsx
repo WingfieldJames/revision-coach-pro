@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Zap, Link } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import aStarLogo3D from "@/assets/a-star-logo-3d.png";
+import aStarIconDark from "@/assets/a-star-icon-dark.png";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -177,8 +178,8 @@ export default function RadialOrbitalTimeline({
             <img src={aStarLogo3D} alt="A* AI" className="w-32 h-32 object-contain drop-shadow-[0_0_25px_var(--glow-1)]" />
           </div>
         ) : (
-          <div className="absolute w-28 h-28 rounded-full bg-background flex items-center justify-center shadow-[var(--shadow-glow)]">
-            <div className="w-20 h-20 rounded-full bg-gradient-brand opacity-90" />
+          <div className="absolute w-36 h-36 rounded-full bg-background flex items-center justify-center shadow-[var(--shadow-glow)]">
+            <img src={aStarIconDark} alt="A* AI" className="w-28 h-28 object-contain" />
           </div>
         )}
 
