@@ -155,7 +155,7 @@ export default function RadialOrbitalTimeline({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[700px] flex items-center justify-center overflow-visible bg-white -mt-16"
+      className="relative w-full h-[700px] flex items-center justify-center overflow-visible bg-background -mt-16"
       onClick={handleContainerClick}
     >
       <div
@@ -167,9 +167,9 @@ export default function RadialOrbitalTimeline({
         <div className="absolute w-[420px] h-[420px] rounded-full border border-primary/15" />
         <div className="absolute w-[280px] h-[280px] rounded-full border border-primary/10" />
 
-        {/* Center circle with white fill and brand glow */}
-        <div className="absolute w-28 h-28 rounded-full bg-white flex items-center justify-center shadow-[0_0_40px_rgba(139,92,246,0.5)]">
-          <div className="w-20 h-20 rounded-full bg-white opacity-90" />
+        {/* Center circle with brand glow */}
+        <div className="absolute w-28 h-28 rounded-full bg-background flex items-center justify-center shadow-[var(--shadow-glow)]">
+          <div className="w-20 h-20 rounded-full bg-gradient-brand opacity-90" />
         </div>
 
         {timelineData.map((item, index) => {
