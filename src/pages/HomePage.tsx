@@ -16,7 +16,6 @@ import { FoundersCarousel } from '@/components/FoundersCarousel';
 import { MobileFoundersSection } from '@/components/MobileFoundersSection';
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from '@/components/ui/testimonials-columns';
 import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 const revisionFeatures = [{
@@ -396,7 +395,5 @@ export const HomePage = () => {
             </div>}
         </ScrollReveal>
       </footer>
-      
-      <ThemeToggle />
     </div>;
 };
