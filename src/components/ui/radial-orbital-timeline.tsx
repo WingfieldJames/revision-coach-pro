@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Zap, Link } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import aStarLogo3D from "@/assets/a-star-logo-3d.png";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +27,8 @@ interface RadialOrbitalTimelineProps {
 export default function RadialOrbitalTimeline({
   timelineData,
 }: RadialOrbitalTimelineProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>(
     {}
   );
@@ -167,10 +171,16 @@ export default function RadialOrbitalTimeline({
         <div className="absolute w-[420px] h-[420px] rounded-full border border-primary/15" />
         <div className="absolute w-[280px] h-[280px] rounded-full border border-primary/10" />
 
-        {/* Center circle with brand glow */}
-        <div className="absolute w-28 h-28 rounded-full bg-background flex items-center justify-center shadow-[var(--shadow-glow)]">
-          <div className="w-20 h-20 rounded-full bg-gradient-brand opacity-90" />
-        </div>
+        {/* Center circle */}
+        {isDark ? (
+          <div className="absolute w-36 h-36 rounded-full flex items-center justify-center shadow-[0_0_50px_var(--glow-1),0_0_100px_var(--glow-2)]">
+            <img src={aStarLogo3D} alt="A* AI" className="w-32 h-32 object-contain drop-shadow-[0_0_25px_var(--glow-1)]" />
+          </div>
+        ) : (
+          <div className="absolute w-28 h-28 rounded-full bg-background flex items-center justify-center shadow-[var(--shadow-glow)]">
+            <div className="w-20 h-20 rounded-full bg-gradient-brand opacity-90" />
+          </div>
+        )}
 
         {timelineData.map((item, index) => {
           const position = calculateNodePosition(index, timelineData.length);
