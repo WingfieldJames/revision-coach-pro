@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
     ? Math.ceil((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24))
     : 0;
 
-  const tier = toolsLocked ? 'free' : 'deluxe';
+  const tier = isDeluxe ? 'deluxe' : 'free';
 
   // Check if user has deluxe access for the current product
   useEffect(() => {
@@ -313,7 +313,7 @@ export const Header: React.FC<HeaderProps> = ({
                       BEST VALUE
                     </div>
                     <h3 className="text-xl font-bold mb-1">💎 Exam Season Pass</h3>
-                    <p className="text-3xl font-bold mb-1">£34.99</p>
+                    <p className="text-3xl font-bold mb-1">£24.99</p>
                     <p className="text-sm text-muted-foreground mb-4">One-time payment • Expires 30th June 2026</p>
                     <ul className="space-y-2 mb-4 text-sm">
                       <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All past papers & mark schemes</li>

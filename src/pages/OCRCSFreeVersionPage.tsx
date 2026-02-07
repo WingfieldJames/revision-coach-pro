@@ -32,7 +32,6 @@ export const OCRCSFreeVersionPage = () => {
           showExamCountdown
           examDates={OCR_CS_EXAMS}
           examSubjectName="OCR Computer Science"
-          toolsLocked={false}
           hideUserDetails 
           diagramSubject="cs"
           productId={OCR_CS_PRODUCT_ID}
@@ -48,7 +47,6 @@ export const OCRCSFreeVersionPage = () => {
           subjectDescription="Your personal A* Computer Science tutor. Ask me anything!"
           footerText="Powered by A* AI • Trained on OCR Computer Science specification"
           placeholder="Ask about algorithms, data structures, programming..."
-          tier="deluxe"
           suggestedPrompts={OCR_CS_PROMPTS}
         />
       </div>

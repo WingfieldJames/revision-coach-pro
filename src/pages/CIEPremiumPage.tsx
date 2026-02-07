@@ -53,7 +53,6 @@ export const CIEPremiumPage = () => {
           subjectDescription="Your personal A* CIE Economics tutor with full past paper access. Ask me anything!"
           footerText="Powered by A* AI • Trained on CIE Economics specification"
           placeholder="Ask any CIE Economics question..."
-          tier="deluxe"
           suggestedPrompts={CIE_ECONOMICS_PROMPTS}
           enableDiagrams
           chatRef={chatRef}

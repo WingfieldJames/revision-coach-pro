@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch, BarChart2 } from 'lucide-react';
+import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Sparkles, Crown } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
@@ -113,6 +113,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [imageUploadOpen, setImageUploadOpen] = useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
+  const [effectiveTier, setEffectiveTier] = useState<'free' | 'deluxe'>('free');
+  const [limitReached, setLimitReached] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -152,6 +154,36 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       }
     };
     fetchPreferences();
+  }, [user, productId]);
+
+  // Auto-detect subscription tier
+  useEffect(() => {
+    const detectTier = async () => {
+      if (!user) {
+        setEffectiveTier('free');
+        return;
+      }
+      try {
+        const { data: sub } = await supabase
+          .from('user_subscriptions')
+          .select('tier, subscription_end')
+          .eq('user_id', user.id)
+          .eq('product_id', productId)
+          .eq('active', true)
+          .maybeSingle();
+        
+        if (sub?.tier === 'deluxe') {
+          if (!sub.subscription_end || new Date(sub.subscription_end) > new Date()) {
+            setEffectiveTier('deluxe');
+            return;
+          }
+        }
+        setEffectiveTier('free');
+      } catch {
+        setEffectiveTier('free');
+      }
+    };
+    detectTier();
   }, [user, productId]);
 
   // Auto-scroll only for user messages (not during AI response)
@@ -252,7 +284,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             role: m.role,
             content: m.content
           })),
-          tier: tier,
+          tier: effectiveTier,
           user_id: user?.id,
           enable_diagrams: enableDiagrams,
           diagram_subject: diagramSubject
@@ -260,13 +292,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        if (errorData.error === 'limit_exceeded' && errorData.message) {
-          setMessages(prev => [...prev, {
-            role: 'assistant',
-            content: errorData.message,
-            displayedContent: errorData.message
-          }]);
+        if (errorData.error === 'limit_exceeded') {
+          setLimitReached(true);
           setIsLoading(false);
+          setIsSearching(false);
           return;
         }
         throw new Error(errorData.error || 'Failed to get response');
@@ -420,12 +449,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   // Handle upgrade to Stripe checkout
-  const handleUpgrade = async () => {
+  const handleUpgradeCheckout = async (paymentType: 'monthly' | 'lifetime' = 'lifetime') => {
     if (!user) {
       window.location.href = '/login';
       return;
     }
-
     setIsCheckingOut(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -433,24 +461,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         window.location.href = '/login';
         return;
       }
-
       const affiliateCode = localStorage.getItem('affiliate_code') || undefined;
-
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        headers: {
-          Authorization: `Bearer ${sessionData.session.access_token}`
-        },
-        body: {
-          paymentType: 'lifetime',
-          productId: productId,
-          affiliateCode
-        }
+        headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+        body: { paymentType, productId, affiliateCode }
       });
-
       if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
+      if (data?.url) window.location.href = data.url;
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error('Failed to start checkout. Please try again.');
@@ -629,6 +646,62 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               </div>;
         })}
           
+          {/* Limit Reached Upgrade Card */}
+          {limitReached && (
+            <div className="max-w-md mx-auto py-6">
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-lg text-center">
+                <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center mx-auto mb-3">
+                  <Crown className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Daily Limit Reached</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  You've used all 3 free prompts for today. Upgrade for unlimited access!
+                </p>
+                <div className="bg-muted/50 rounded-xl p-4 mb-4 text-left">
+                  <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">✓</span>
+                      <span>Unlimited daily prompts</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">✓</span>
+                      <span>Unlimited essay marking</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">✓</span>
+                      <span>Unlimited diagram searches</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">✓</span>
+                      <span>Image upload & OCR analysis</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <Button 
+                    className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
+                    onClick={() => handleUpgradeCheckout('lifetime')}
+                    disabled={isCheckingOut}
+                  >
+                    {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £24.99'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => handleUpgradeCheckout('monthly')}
+                    disabled={isCheckingOut}
+                  >
+                    Monthly – £6.99/mo
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Your free prompts reset at midnight
+                </p>
+              </div>
+            </div>
+          )}
+
           {isLoading && messages[messages.length - 1]?.role === 'user' && <div className="flex gap-3 p-4 rounded-xl bg-muted mr-auto max-w-[85%]">
               <img src={aStarIcon} alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
               <div className="flex-1 flex flex-col gap-2">
@@ -695,12 +768,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           {/* Two-line pill container */}
           <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
             {/* Line 1: Text input */}
-            <Textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder={placeholder} disabled={isLoading} className="w-full min-h-[48px] max-h-[200px] resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-base overflow-y-auto" rows={1} />
+            <Textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder={limitReached ? 'Upgrade to continue...' : placeholder} disabled={isLoading || limitReached} className="w-full min-h-[48px] max-h-[200px] resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-base overflow-y-auto" rows={1} />
             
             {/* Line 2: Buttons row */}
             <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
               {/* Plus button on left */}
-              {tier === 'free' ? (
+              {effectiveTier === 'free' ? (
                 <>
                   <Button 
                     variant="ghost" 
@@ -720,17 +793,17 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="text-center mb-4">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center mx-auto mb-3">
+                          <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center mx-auto mb-3">
                             <Image className="w-6 h-6 text-white" />
                           </div>
                           <h3 className="text-xl font-bold mb-2">Unlock Image Upload</h3>
                           <p className="text-muted-foreground text-sm">
-                            Upgrade to Deluxe to upload exam questions and get instant AI analysis.
+                            Upgrade to upload exam questions and get instant AI analysis.
                           </p>
                         </div>
                         
                         <div className="bg-muted/50 rounded-xl p-4 mb-4">
-                          <p className="font-semibold text-sm mb-3">Deluxe Features:</p>
+                          <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
                           <ul className="space-y-2 text-sm">
                             <li className="flex items-center gap-2">
                               <span className="text-primary">✓</span>
@@ -738,51 +811,40 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                             </li>
                             <li className="flex items-center gap-2">
                               <span className="text-primary">✓</span>
-                              <span>Full 2017-2025 past paper training</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <span className="text-primary">✓</span>
                               <span>Unlimited daily prompts</span>
                             </li>
                             <li className="flex items-center gap-2">
                               <span className="text-primary">✓</span>
-                              <span>A* essay structures & technique</span>
+                              <span>Unlimited essay marking</span>
                             </li>
                             <li className="flex items-center gap-2">
                               <span className="text-primary">✓</span>
-                              <span>AI-powered diagram generator</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <span className="text-primary">✓</span>
-                              <span>Mark scheme feedback on answers</span>
+                              <span>Unlimited diagram searches</span>
                             </li>
                           </ul>
                         </div>
                         
-                        <div className="flex gap-3">
+                        <div className="space-y-2">
+                          <Button 
+                            className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
+                            onClick={() => { setShowUpgradePrompt(false); handleUpgradeCheckout('lifetime'); }}
+                            disabled={isCheckingOut}
+                          >
+                            {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £24.99'}
+                          </Button>
                           <Button 
                             variant="outline" 
-                            className="flex-1"
-                            onClick={() => setShowUpgradePrompt(false)}
+                            className="w-full"
+                            onClick={() => { setShowUpgradePrompt(false); handleUpgradeCheckout('monthly'); }}
                             disabled={isCheckingOut}
                           >
-                            Maybe Later
-                          </Button>
-                          <Button 
-                            className="flex-1 bg-gradient-to-r from-primary to-[hsl(270,67%,60%)]"
-                            onClick={handleUpgrade}
-                            disabled={isCheckingOut}
-                          >
-                            {isCheckingOut ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Loading...
-                              </>
-                            ) : (
-                              'Upgrade Now'
-                            )}
+                            Monthly – £6.99/mo
                           </Button>
                         </div>
+                        
+                        <p className="text-xs text-center text-muted-foreground mt-3">
+                          Secure checkout via Stripe
+                        </p>
                       </div>
                     </div>
                   )}
@@ -805,7 +867,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               )}
 
               {/* Send button on right */}
-              <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-9 w-9 rounded-full bg-gradient-brand hover:opacity-90 glow-brand">
+              <Button onClick={handleSend} disabled={!input.trim() || isLoading || limitReached} size="icon" className="h-9 w-9 rounded-full bg-gradient-brand hover:opacity-90 glow-brand">
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
             </div>

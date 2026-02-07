@@ -54,7 +54,6 @@ export const OCRCSPremiumPage = () => {
           subjectDescription="Your personal A* Computer Science tutor with full diagram access. Ask me anything!"
           footerText="Powered by A* AI • Trained on OCR Computer Science specification (2017-2025)"
           placeholder="Ask about algorithms, data structures, programming..."
-          tier="deluxe"
           suggestedPrompts={OCR_CS_PROMPTS}
           enableDiagrams
           diagramSubject="cs"

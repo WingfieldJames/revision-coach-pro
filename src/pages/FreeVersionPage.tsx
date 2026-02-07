@@ -32,7 +32,6 @@ export const FreeVersionPage = () => {
           showExamCountdown
           examDates={EDEXCEL_ECONOMICS_EXAMS}
           examSubjectName="Edexcel Economics"
-          toolsLocked={false}
           hideUserDetails 
           productId={EDEXCEL_PRODUCT_ID}
           productSlug="edexcel-economics"
