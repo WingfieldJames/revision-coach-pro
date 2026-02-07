@@ -14,7 +14,9 @@ import amiraImage from '@/assets/amira-lse.jpg';
 import matanImage from '@/assets/matan-g.png';
 import alexandruImage from '@/assets/alexandru-leoca.png';
 import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { checkProductAccess } from '@/lib/productAccess';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
@@ -32,6 +34,8 @@ type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 
 export const ComparePage = () => {
   const { user, profile, loading } = useAuth();
+  const { theme } = useTheme();
+  const currentLogo = theme === 'dark' ? logo : logoDark;
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
@@ -212,7 +216,7 @@ export const ComparePage = () => {
           <ScrollReveal>
             <h1 className="text-2xl md:text-4xl font-bold mb-8 flex items-center justify-center gap-0 md:gap-0 flex-nowrap">
               Choose Your 
-              <img src={logo} alt="A* AI" className="h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3" />
+              <img src={currentLogo} alt="A* AI" className="h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3" />
               Subject
             </h1>
           </ScrollReveal>
@@ -224,7 +228,7 @@ export const ComparePage = () => {
               <div className="md:hidden border border-border p-1.5 rounded-full bg-transparent flex items-center gap-1">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-white/10 text-foreground hover:opacity-90 transition-all flex items-center gap-2">
+                    <button className="rounded-full px-6 py-2.5 text-sm font-semibold bg-foreground/10 text-foreground hover:opacity-90 transition-all flex items-center gap-2">
                       {subjectLabels[subject]}
                       <ChevronDown className="h-3 w-3" />
                     </button>
@@ -488,7 +492,7 @@ export const ComparePage = () => {
         <footer className="py-16 px-8 text-center border-t border-border/30 relative">
           <ScrollReveal className="max-w-4xl mx-auto">
             <div className="flex items-center justify-center gap-2 mb-6">
-              <img src={logo} alt="A* AI" className="h-12 sm:h-14" />
+              <img src={currentLogo} alt="A* AI" className="h-12 sm:h-14" />
               <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Instagram size={20} />
               </a>

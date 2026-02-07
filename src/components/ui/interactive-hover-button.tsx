@@ -20,7 +20,7 @@ const InteractiveHoverButton = React.forwardRef<
         "group relative w-32 cursor-pointer overflow-hidden rounded-full border p-2 text-center font-semibold transition-all duration-300",
         isReverse 
           ? "bg-gradient-brand text-white border-transparent glow-brand hover:glow-brand-intense hover:-translate-y-0.5" 
-          : "border-white/30 bg-transparent text-white hover:border-[#FF9A2E]",
+          : "border-foreground/30 bg-transparent text-foreground hover:border-primary",
         className,
       )}
       {...props}
@@ -32,7 +32,8 @@ const InteractiveHoverButton = React.forwardRef<
         isReverse ? "bg-white/10" : "bg-gradient-brand"
       )}></div>
       <span className={cn(
-        "relative z-20 inline-block transition-colors duration-200 ease-out text-white"
+        "relative z-20 inline-block transition-colors duration-200 ease-out",
+        isReverse ? "text-white" : "text-foreground group-hover:text-white"
       )}>
         {text}
       </span>

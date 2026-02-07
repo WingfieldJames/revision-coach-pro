@@ -2,14 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-/* A* AI Design System - Dark Mode Redesign */
+/* A* AI Design System - Light/Dark Mode */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* Dark theme as default */
-    --background: 271 77% 5%; /* #0D0316 */
-    --foreground: 0 0% 100%; /* white */
+    /* Light theme as default */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 10%;
+
+    --card: 240 5% 96%;
+    --card-foreground: 240 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+
+    /* Purple gradient accent for light mode */
+    --primary: 271 81% 56%;
+    --primary-variant: 271 91% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 10%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+
+    --accent: 240 5% 94%;
+    --accent-foreground: 240 10% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 271 81% 56%;
+
+    /* Brand gradient - purple for light */
+    --gradient-brand: linear-gradient(135deg, #9333EA 0%, #7C3AED 30%, #6D28D9 60%, #A855F7 100%);
+    --gradient-from: #9333EA;
+    --gradient-via1: #7C3AED;
+    --gradient-via2: #6D28D9;
+    --gradient-to: #A855F7;
+
+    --shadow-card: 0 2px 12px rgba(124, 58, 237, 0.06);
+    --shadow-elevated: 0 4px 20px rgba(124, 58, 237, 0.08);
+    --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.15), 0 0 40px rgba(139, 92, 246, 0.08);
+
+    --glow-1: rgba(124, 58, 237, 0.3);
+    --glow-2: rgba(139, 92, 246, 0.15);
+    --glow-1-intense: rgba(124, 58, 237, 0.4);
+    --glow-2-intense: rgba(139, 92, 246, 0.2);
+
+    --transition-smooth: all 0.2s ease;
+    --radius: 0.5rem;
+
+    /* Line animation colors - purple in light */
+    --line-color-1: #9333EA;
+    --line-color-2: #7C3AED;
+    --line-color-3: #A855F7;
+
+    /* Shugar tabs design tokens - light */
+    --ds-gray-200: hsla(0, 0%, 90%, 1);
+    --ds-gray-900: hsla(0, 0%, 40%, 1);
+    --ds-gray-1000: hsla(0, 0%, 10%, 1);
+    --ds-gray-alpha-200: hsla(0, 0%, 0%, 0.06);
+    --accents-2: #eaeaea;
+    --ds-background-100: hsla(0, 0%, 100%, 1);
+    --geist-success: #0070f3;
+    --geist-error: #ff4444;
+    --geist-warning: #f5a623;
+    --geist-violet: #7C3AED;
+    --geist-foreground: #000;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 271 81% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 5% 26%;
+    --sidebar-border: 240 6% 90%;
+    --sidebar-ring: 271 81% 56%;
+  }
+
+  .dark {
+    /* Dark theme - exact current design */
+    --background: 271 77% 5%;
+    --foreground: 0 0% 100%;
 
     --card: 271 50% 8%;
     --card-foreground: 0 0% 100%;
@@ -17,40 +96,46 @@
     --popover: 271 50% 8%;
     --popover-foreground: 0 0% 100%;
 
-    /* Brand gradient accent */
-    --primary: 31 100% 59%; /* #FF9A2E orange */
-    --primary-variant: 340 100% 65%; /* #FF4D8D pink */
+    --primary: 31 100% 59%;
+    --primary-variant: 340 100% 65%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 271 40% 12%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 271 30% 12%;
-    --muted-foreground: 213 20% 63%; /* #94a3b8 */
+    --muted-foreground: 213 20% 63%;
 
     --accent: 271 30% 15%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 271 25% 18%;
     --input: 271 25% 18%;
     --ring: 31 100% 59%;
 
-    /* A* AI Brand Gradient */
+    /* Brand gradient - orange/pink for dark */
     --gradient-brand: linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%);
+    --gradient-from: #FFC83D;
+    --gradient-via1: #FF9A2E;
+    --gradient-via2: #FF6A3D;
+    --gradient-to: #FF4D8D;
+
     --shadow-card: 0 2px 12px rgba(255, 154, 46, 0.06);
     --shadow-elevated: 0 4px 20px rgba(255, 77, 141, 0.08);
     --shadow-glow: 0 0 20px rgba(255, 154, 46, 0.15), 0 0 40px rgba(255, 77, 141, 0.08);
-    --transition-smooth: all 0.2s ease;
 
-    --radius: 0.5rem;
+    --glow-1: rgba(255, 154, 46, 0.3);
+    --glow-2: rgba(255, 77, 141, 0.15);
+    --glow-1-intense: rgba(255, 154, 46, 0.4);
+    --glow-2-intense: rgba(255, 77, 141, 0.2);
 
-    /* Line animation colors */
-    --line-orange: #FF9A2E;
-    --line-pink: #FF4D8D;
-    --line-yellow: #FFC83D;
+    /* Line animation colors - warm in dark */
+    --line-color-1: #FF9A2E;
+    --line-color-2: #FF4D8D;
+    --line-color-3: #FFC83D;
 
     /* Shugar tabs design tokens - dark */
     --ds-gray-200: hsla(0, 0%, 12%, 1);
@@ -59,11 +144,11 @@
     --ds-gray-alpha-200: hsla(0, 0%, 100%, 0.09);
     --accents-2: #333333;
     --ds-background-100: hsla(271, 77%, 5%, 1);
-    --geist-success: #0070f3;
     --geist-error: #ff4444;
+    --geist-foreground: #fff;
+    --geist-success: #0070f3;
     --geist-warning: #f5a623;
     --geist-violet: #FF9A2E;
-    --geist-foreground: #fff;
 
     --sidebar-background: 271 50% 6%;
     --sidebar-foreground: 0 0% 90%;
@@ -73,46 +158,6 @@
     --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 271 25% 18%;
     --sidebar-ring: 31 100% 59%;
-  }
-
-  .dark {
-    /* Same as root - dark is default */
-    --background: 271 77% 5%;
-    --foreground: 0 0% 100%;
-    --card: 271 50% 8%;
-    --card-foreground: 0 0% 100%;
-    --popover: 271 50% 8%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 31 100% 59%;
-    --primary-variant: 340 100% 65%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 271 40% 12%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 271 30% 12%;
-    --muted-foreground: 213 20% 63%;
-    --accent: 271 30% 15%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 271 25% 18%;
-    --input: 271 25% 18%;
-    --ring: 31 100% 59%;
-    --sidebar-background: 271 50% 6%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 31 100% 59%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 271 30% 12%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 271 25% 18%;
-    --sidebar-ring: 31 100% 59%;
-    --ds-gray-200: hsla(0, 0%, 12%, 1);
-    --ds-gray-900: hsla(0, 0%, 63%, 1);
-    --ds-gray-1000: hsla(0, 0%, 93%, 1);
-    --ds-gray-alpha-200: hsla(0, 0%, 100%, 0.09);
-    --accents-2: #333333;
-    --ds-background-100: hsla(271, 77%, 5%, 1);
-    --geist-error: #ff4444;
-    --geist-foreground: #fff;
   }
 }
 
@@ -141,18 +186,18 @@
     animation: float 3s ease-in-out infinite;
   }
 
-  /* Glow effect for buttons */
+  /* Glow effect for buttons - theme-aware */
   .glow-brand {
-    box-shadow: 0 0 20px rgba(255, 154, 46, 0.3), 0 0 40px rgba(255, 77, 141, 0.15);
+    box-shadow: 0 0 20px var(--glow-1), 0 0 40px var(--glow-2);
   }
 
   .glow-brand-intense {
-    box-shadow: 0 0 30px rgba(255, 154, 46, 0.4), 0 0 60px rgba(255, 77, 141, 0.2);
+    box-shadow: 0 0 30px var(--glow-1-intense), 0 0 60px var(--glow-2-intense);
   }
 
-  /* Gradient text utility */
+  /* Gradient text utility - theme-aware */
   .text-gradient-brand {
-    background: linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%);
+    background: linear-gradient(135deg, var(--gradient-from) 0%, var(--gradient-via1) 30%, var(--gradient-via2) 60%, var(--gradient-to) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
