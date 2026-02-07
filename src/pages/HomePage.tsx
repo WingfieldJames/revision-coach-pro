@@ -120,9 +120,9 @@ export const HomePage = () => {
             </div>
 
             {/* Meet A* AI - Mobile only */}
-            <div className="flex md:hidden items-center justify-center gap-0 mb-4">
-              <span className={`text-foreground font-bold ${theme === 'dark' ? 'text-3xl' : 'text-4xl'}`}>Meet</span>
-              <img src={currentLogo} alt="A* AI" className={`${theme === 'dark' ? 'h-24' : 'h-16'} -mx-2`} />
+            <div className="flex md:hidden items-center justify-center gap-0 mb-2 -mt-2">
+              <span className={`text-foreground font-bold ${theme === 'dark' ? 'text-4xl' : 'text-5xl'}`}>Meet</span>
+              <img src={currentLogo} alt="A* AI" className={`${theme === 'dark' ? 'h-28' : 'h-20'} -mx-2`} />
             </div>
 
             {/* Main Headline */}
