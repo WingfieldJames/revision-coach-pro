@@ -23,6 +23,8 @@ import { Check } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Global flag to track when file dialog is open (set by ImageUploadTool)
 export const fileDialogOpen = { current: false };
@@ -71,6 +73,8 @@ export const Header: React.FC<HeaderProps> = ({
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme } = useTheme();
+  const currentLogo = theme === 'dark' ? logo : logoDark;
   const [imageToolOpen, setImageToolOpen] = useState(false);
   const [diagramToolOpen, setDiagramToolOpen] = useState(false);
   const [essayMarkerOpen, setEssayMarkerOpen] = useState(false);
@@ -191,7 +195,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className={`sticky top-0 z-50 flex justify-between items-center px-3 sm:px-6 pt-4 sm:pt-6 pb-2 text-foreground ${transparentBg ? 'bg-transparent' : 'bg-background/95 backdrop-blur-sm'}`}>
       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
         <Link to="/" className="flex items-center" onClick={() => window.scrollTo(0, 0)}>
-          <img src={logo} alt="A* AI logo" className="h-16 sm:h-20" />
+          <img src={currentLogo} alt="A* AI logo" className="h-16 sm:h-20" />
         </Link>
         
         {showImageTool && (
@@ -282,7 +286,7 @@ export const Header: React.FC<HeaderProps> = ({
           isDeluxe ? (
             <div
               className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-sm font-semibold"
-              style={{ background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' }}
+              style={{ background: 'var(--gradient-brand)' }}
             >
               <Crown className="h-4 w-4" />
               <span>Deluxe</span>
@@ -292,7 +296,7 @@ export const Header: React.FC<HeaderProps> = ({
               <DialogTrigger asChild>
                 <button
                   className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
-                  style={{ background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' }}
+                  style={{ background: 'var(--gradient-brand)' }}
                 >
                   <Sparkles className="h-4 w-4" />
                   <span className="hidden sm:inline">Upgrade Now</span>

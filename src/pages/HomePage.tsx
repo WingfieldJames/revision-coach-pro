@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ChevronDown, Instagram, Calendar, BookOpen, GraduationCap, Search, FileCheck, Star } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -15,7 +16,9 @@ import { FoundersCarousel } from '@/components/FoundersCarousel';
 import { MobileFoundersSection } from '@/components/MobileFoundersSection';
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from '@/components/ui/testimonials-columns';
 import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
 const revisionFeatures = [{
   id: 1,
   title: "Planning",
@@ -71,6 +74,8 @@ export const HomePage = () => {
   const {
     user
   } = useAuth();
+  const { theme } = useTheme();
+  const currentLogo = theme === 'dark' ? logo : logoDark;
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const handlePickSubject = () => {
@@ -103,18 +108,18 @@ export const HomePage = () => {
         <HeroBackgroundPaths>
           <div className="px-6 sm:px-8 py-16 sm:py-24 md:py-32 text-center max-w-5xl mx-auto">
             {/* Social Proof Pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-white/10 bg-white/5 backdrop-blur-sm" style={{
-            boxShadow: '0 0 20px rgba(255,154,46,0.1), 0 0 40px rgba(255,77,141,0.05)'
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm" style={{
+            boxShadow: 'var(--shadow-glow)'
           }}>
               <Star className="w-4 h-4 text-[#FFC83D] fill-[#FFC83D]" />
-              <span className="text-white text-sm font-medium">Loved by 1.1k+ students with a 4.9 star rating</span>
+              <span className="text-foreground text-sm font-medium">Loved by 1.1k+ students with a 4.9 star rating</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-6 leading-[1.2]">
-              <div className="text-white whitespace-nowrap">The AI that actually</div>
+              <div className="text-foreground whitespace-nowrap">The AI that actually</div>
               <div className="whitespace-nowrap">
-                <span className="text-white">understands </span>
+                <span className="text-foreground">understands </span>
                 <span className="text-gradient-brand">A-Level </span>
                 <span className="relative inline-block overflow-hidden text-left" style={{ width: '5.5em', height: '1em', verticalAlign: 'text-bottom' }}>
                   <AnimatePresence mode="wait">
@@ -134,18 +139,18 @@ export const HomePage = () => {
             </h1>
 
             {/* Subheadline */}
-            <p className="text-base sm:text-lg md:text-xl text-[#94a3b8] max-w-3xl mx-auto mb-10 leading-relaxed">
-              We worked alongside the <span className="text-white font-medium">highest performing students</span> in the UK to train an AI model on <span className="text-white font-medium">everything you need</span> to ace your final exam — from the spec to past papers to the exact <span className="text-white font-medium">A* technique</span>.
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
+              We worked alongside the <span className="text-foreground font-medium">highest performing students</span> in the UK to train an AI model on <span className="text-foreground font-medium">everything you need</span> to ace your final exam — from the spec to past papers to the exact <span className="text-foreground font-medium">A* technique</span>.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button onClick={handlePickSubject} className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense" style={{
-              background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)'
+              background: 'var(--gradient-brand)'
             }}>
                 Pick Your Subject →
               </button>
-              <button onClick={handleSeeHowItWorks} className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg border border-white/30 bg-transparent transition-all duration-300 hover:bg-[#FF9A2E] hover:border-[#FF9A2E]">
+              <button onClick={handleSeeHowItWorks} className="px-8 py-3.5 rounded-full text-foreground font-semibold text-base sm:text-lg border border-foreground/30 bg-transparent transition-all duration-300 hover:bg-primary hover:border-primary hover:text-primary-foreground">
                 See How It Works
               </button>
             </div>
@@ -169,7 +174,7 @@ export const HomePage = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <span>See</span>
-                <img src={logo} alt="A* AI Logo" className="h-6 md:h-8" />
+                <img src={currentLogo} alt="A* AI Logo" className="h-6 md:h-8" />
                 <span>in</span>
                 <span className="text-gradient-brand">action</span>
               </div>
@@ -220,7 +225,7 @@ export const HomePage = () => {
             <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-1 md:gap-2">
               <div className="flex items-center gap-1 md:gap-2">
                 <span>How</span>
-                <img src={logo} alt="A* AI" className="h-5 md:h-8" />
+                <img src={currentLogo} alt="A* AI" className="h-5 md:h-8" />
                 <span>helps you at</span>
               </div>
               <div className="flex items-center gap-1 md:gap-2">
@@ -342,7 +347,7 @@ export const HomePage = () => {
       <footer className="py-16 px-8 text-center border-t border-border/30">
         <ScrollReveal className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <img src={logo} alt="A* AI" className="h-12 sm:h-14" />
+            <img src={currentLogo} alt="A* AI" className="h-12 sm:h-14" />
             <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Instagram size={20} />
             </a>
@@ -391,5 +396,7 @@ export const HomePage = () => {
             </div>}
         </ScrollReveal>
       </footer>
+      
+      <ThemeToggle />
     </div>;
 };
