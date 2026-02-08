@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.ingest-chemistry-papers]
 verify_jwt = false
+
+[functions.ingest-maths-spec]
+verify_jwt = false
