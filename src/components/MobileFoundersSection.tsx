@@ -54,12 +54,12 @@ export function MobileFoundersSection() {
   const isLight = theme === 'light';
 
   return (
-    <section className="py-12 px-4 bg-muted md:hidden">
+    <section className={`py-12 px-4 md:hidden ${isLight ? 'bg-muted' : 'bg-transparent'}`}>
       <div className="max-w-md mx-auto">
         {/* Header: no animation in light mode */}
         {isLight ? (
           <div className="text-center mb-8">
-            <h2 className="text-xl font-bold mb-2">
+            <h2 className="text-[1.25rem] font-bold leading-[1.2] mb-2">
               Trained by real A* students
             </h2>
             <p className="text-muted-foreground text-xs">
@@ -68,8 +68,9 @@ export function MobileFoundersSection() {
           </div>
         ) : (
           <ScrollReveal className="text-center mb-8">
-            <h2 className="text-xl font-bold mb-2">
-              Trained by real A* students
+            <h2 className="text-[1.25rem] font-bold leading-[1.2] mb-2">
+              <span className="text-foreground">Trained by real </span>
+              <span className="text-gradient-brand">A* students</span>
             </h2>
             <p className="text-muted-foreground text-xs">
               Built on proven techniques from top A-Level students
@@ -80,7 +81,7 @@ export function MobileFoundersSection() {
         <StaggerContainer className="space-y-4" staggerDelay={0.1}>
           {founders.map((founder) => (
             <StaggerItem key={founder.id}>
-              <div className={`rounded-2xl p-4 ${isLight ? 'bg-card border border-border/30 shadow-sm' : 'bg-card border border-border/50 shadow-card'}`}>
+              <div className={`rounded-2xl p-4 ${isLight ? 'bg-card border border-border/30 shadow-sm' : 'bg-card border border-primary/30 glow-brand'}`}>
                 <div className="flex items-center gap-4">
                   {/* Photo */}
                   <div className="flex-shrink-0">
