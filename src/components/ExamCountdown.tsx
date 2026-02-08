@@ -153,3 +153,9 @@ export const AQA_CHEMISTRY_EXAMS: ExamDate[] = [
    { name: "Paper 2 (Psychology in Context)", date: new Date(2026, 4, 27), description: "Psychology in Context" },
    { name: "Paper 3 (Issues and Options)", date: new Date(2026, 5, 8), description: "Issues and Options in Psychology" },
  ];
+
+export const EDEXCEL_MATHS_EXAMS: ExamDate[] = [
+  { name: "Paper 1 (Pure Mathematics 1)", date: new Date(2026, 5, 2), description: "Pure Mathematics 1" },
+  { name: "Paper 2 (Pure Mathematics 2)", date: new Date(2026, 5, 9), description: "Pure Mathematics 2" },
+  { name: "Paper 3 (Statistics & Mechanics)", date: new Date(2026, 5, 15), description: "Statistics and Mechanics" },
+];

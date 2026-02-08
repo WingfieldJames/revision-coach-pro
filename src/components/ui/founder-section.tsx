@@ -7,15 +7,16 @@ import etienneFounder from '@/assets/etienne-founder.png';
 import carlFounder from '@/assets/carl-founder.png';
 
 interface FounderSectionProps {
-  subject?: 'economics' | 'computer-science' | 'physics' | 'chemistry';
+  subject?: 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'mathematics';
   examBoard?: 'edexcel' | 'aqa' | 'cie' | 'ocr';
 }
 
 export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }: FounderSectionProps) {
-  const subjectLabel = subject === 'computer-science' ? 'Computer Science' : subject === 'physics' ? 'Physics' : subject === 'chemistry' ? 'Chemistry' : 'Economics';
+  const subjectLabel = subject === 'computer-science' ? 'Computer Science' : subject === 'physics' ? 'Physics' : subject === 'chemistry' ? 'Chemistry' : subject === 'mathematics' ? 'Mathematics' : 'Economics';
   const isCS = subject === 'computer-science';
   const isPhysics = subject === 'physics';
   const isChemistry = subject === 'chemistry';
+  const isMaths = subject === 'mathematics';
   const isAQA = subject === 'economics' && examBoard === 'aqa';
   const isCIE = subject === 'economics' && examBoard === 'cie';
   
@@ -67,10 +68,16 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
     { icon: GraduationCap, text: "Straight 9s at GCSE" },
   ];
 
-  const achievements = isChemistry ? chemistryAchievements : isPhysics ? physicsAchievements : isCS ? csAchievements : isAQA ? aqaAchievements : isCIE ? cieAchievements : economicsAchievements;
+  const mathsAchievements = [
+    { icon: Award, text: "A*A*A*A* at A-Level" },
+    { icon: Trophy, text: "236/240 in A-Level Mathematics" },
+    { icon: GraduationCap, text: "Straight 9s at GCSE" },
+  ];
 
-  const founderName = isChemistry ? "Tudor" : isPhysics ? "Tudor" : isCS ? "Naman" : isAQA ? "Etienne" : isCIE ? "Carl" : "James";
-  const founderStatus = isChemistry ? "Gap Year Student" : isPhysics ? "Gap Year Student" : isCS ? "Gap Year Student" : isAQA ? "BSc Economics Student" : isCIE ? "LSE Student" : "LSE Student";
+  const achievements = isMaths ? mathsAchievements : isChemistry ? chemistryAchievements : isPhysics ? physicsAchievements : isCS ? csAchievements : isAQA ? aqaAchievements : isCIE ? cieAchievements : economicsAchievements;
+
+  const founderName = isMaths ? "Tudor" : isChemistry ? "Tudor" : isPhysics ? "Tudor" : isCS ? "Naman" : isAQA ? "Etienne" : isCIE ? "Carl" : "James";
+  const founderStatus = isMaths ? "Gap Year Student" : isChemistry ? "Gap Year Student" : isPhysics ? "Gap Year Student" : isCS ? "Gap Year Student" : isAQA ? "BSc Economics Student" : isCIE ? "LSE Student" : "LSE Student";
 
   return (
     <section className="py-16 px-6 bg-gradient-to-br from-muted/50 via-background to-muted/30">
@@ -119,7 +126,13 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
                 transition={{ duration: 0.3 }}
               >
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg bg-muted">
-                  {isChemistry ? (
+                  {isMaths ? (
+                    <img 
+                      src={tudorFounder} 
+                      alt="Tudor - Mathematics Lead"
+                      className="w-full h-full object-cover object-[center_25%] scale-110"
+                    />
+                  ) : isChemistry ? (
                     <img 
                       src={tudorFounder} 
                       alt="Tudor - Chemistry Lead"
@@ -179,7 +192,13 @@ export function FounderSection({ subject = 'economics', examBoard = 'edexcel' }:
             <div className="flex-1 text-center md:text-left">
               {/* Quote - hidden on mobile */}
               <blockquote className="hidden md:block text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
-                {isChemistry ? (
+                {isMaths ? (
+                  <>
+                    "Hi, I'm Tudor. 4 A* grades at A-Level and 9 Grade 9s at GCSE, including perfect scores of 200/200 in Physics, 197/200 in Chemistry, and 236/240 in Mathematics.
+                    <br /><br />
+                    Through A* AI Maths, you'll gain access to the exact revision strategies and problem-solving techniques that got me near-perfect marks in Edexcel Mathematics, alongside step-by-step working for every question type and exclusive exam technique training."
+                  </>
+                ) : isChemistry ? (
                   <>
                     "Hi, I'm Tudor. 4 A* grades at A-Level and 9 Grade 9s at GCSE, including perfect scores of 200/200 in Physics, 197/200 in Chemistry, and 236/240 in Mathematics.
                     <br /><br />
