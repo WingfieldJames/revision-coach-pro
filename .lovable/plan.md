@@ -1,90 +1,153 @@
 
 
-## Backend Cleanup: Unified Deluxe Model for All Users
+# Adding Edexcel Mathematics Chatbot
 
-### What Changes
-
-Everyone (paying and non-paying) will use the same deluxe AI model, deluxe system prompt, and full training data. The only difference between paying and non-paying users will be **usage limits** (3 prompts/day for free, unlimited for paid) and feature restrictions (to be decided later).
-
-### Step-by-Step Plan
-
-#### 1. Database Cleanup (Products Table)
-
-- Set `system_prompt_free` to `NULL` for all products that currently have one (AQA Economics, AQA Psychology, AQA Chemistry, OCR Physics)
-- Set `chatbase_free_url` to `NULL` for all products (legacy Chatbase free URLs are no longer needed)
-- The `system_prompt_free` column itself can remain in the schema (harmless) to avoid a destructive migration
-
-#### 2. Database Cleanup (Document Chunks)
-
-- Update all `document_chunks` where `metadata->>'tier' = 'free'` to set tier to `NULL` (or remove the tier key)
-- This removes the content access distinction -- all training data is now accessible to everyone
-- 436 "free" chunks + 26 null chunks will become universally available alongside the 221 "deluxe" chunks
-
-#### 3. Edge Function: `rag-chat` (Main Changes)
-
-**System Prompt Selection** -- Always use `system_prompt_deluxe`:
-- Remove the tier parameter from `fetchSystemPrompt()`
-- Always query `system_prompt_deluxe` column, never `system_prompt_free`
-
-**Training Data Retrieval** -- Remove tier filtering:
-- Remove the `if (tier === 'free')` block in `fetchRelevantContext()` that restricts free users to only free-tier chunks
-- All users get the full training data context regardless of subscription status
-
-**Keep prompt limiting logic unchanged:**
-- The daily 3-prompt limit for non-subscribers stays exactly as-is
-- The `tier` parameter is still sent from frontend and used ONLY for the prompt limit check (`checkAndIncrementUsage`)
-
-#### 4. Edge Function: `get-chatbot-url` (Legacy Cleanup)
-
-- Remove all free Chatbase URLs from the `CHATBOT_URLS` mapping
-- This function is largely legacy (RAGChat has replaced Chatbase), but clean it up for consistency
-- Remove the `if (tier === 'free')` early return that skips auth checks
-
-#### 5. No Frontend Design Changes
-
-The frontend pages already pass `tier="deluxe"` to the RAGChat component. No UI changes needed -- this is purely a backend cleanup.
+## Overview
+Add a full Edexcel Mathematics A-Level chatbot product to the platform, following the exact same architecture pattern used for OCR Physics. Tudor is the brain behind Edexcel Maths (he scored 236/240 in A-Level Mathematics). The chatbot page removes the 6-marker analysis feature but keeps the Upgrade Now button and all other standard tools. Stripe checkout is set up at the same pricing as all other subjects.
 
 ---
 
-### Technical Details
+## Step 1: Create Database Product Row
 
-**Files modified:**
+Insert a new product into the `products` table for Edexcel Mathematics with:
+- **Name**: Edexcel Mathematics Deluxe
+- **Slug**: `edexcel-mathematics`
+- **Subject**: `mathematics`
+- **Exam board**: `edexcel`
+- **Monthly price**: 699 (same as all others)
+- **Lifetime price**: 2499 (same as all others)
+- **system_prompt_deluxe**: A Maths-specific tutoring persona for Tudor, covering Edexcel specification content, past papers, and exam technique
 
-| File | Change |
-|------|--------|
-| `supabase/functions/rag-chat/index.ts` | Always use `system_prompt_deluxe`; remove tier filtering on document_chunks retrieval |
-| `supabase/functions/get-chatbot-url/index.ts` | Remove free Chatbase URLs and free-tier early return |
+The system prompt will follow the established pattern but tailored for Maths: specification-linked responses, step-by-step working, mark scheme awareness, and exam technique for Edexcel Maths (9MA0).
 
-**Database operations (via data update, not schema migration):**
+---
 
-```sql
--- Clear free system prompts (no longer used)
-UPDATE products SET system_prompt_free = NULL;
+## Step 2: Create Chatbot Pages
 
--- Clear legacy Chatbase free URLs
-UPDATE products SET chatbase_free_url = NULL;
+### 2a. Free Version Page (`src/pages/EdexcelMathsFreeVersionPage.tsx`)
+Modelled exactly on `OCRPhysicsFreeVersionPage.tsx`:
+- Uses `RAGChat` component with Edexcel Maths product ID
+- Header with: My AI, Past Paper Finder, Exam Countdown, Upgrade Now button
+- **No** Essay Marker / 6-Marker Analysis
+- **No** Diagram Generator
+- Suggested prompts tailored to Edexcel Maths (e.g. "Explain integration by parts", "How do I approach a proof question?", "Find past exam questions on differentiation", "Create me a full revision plan")
 
--- Remove tier distinction from training data chunks
-UPDATE document_chunks
-SET metadata = metadata - 'tier'
-WHERE metadata->>'tier' IS NOT NULL;
-```
+### 2b. Premium Page (`src/pages/EdexcelMathsPremiumPage.tsx`)
+Modelled exactly on `OCRPhysicsPremiumPage.tsx`:
+- Full access check against `edexcel-mathematics` product slug
+- Same loading/auth/no-access states
+- Header with: My AI, Past Paper Finder, Exam Countdown, Upgrade Now / Deluxe badge
+- **No** Essay Marker / 6-Marker Analysis
+- **No** Diagram Generator
 
-**Key behavior after changes:**
+---
 
-```text
-Non-paying user sends message:
-  1. Check daily usage -> if under 3, allow
-  2. Fetch system_prompt_deluxe from products table
-  3. Retrieve ALL training data (no tier filter)
-  4. Generate response with full deluxe model
+## Step 3: Add Exam Dates
 
-Paying user sends message:
-  1. Skip usage check (unlimited)
-  2. Fetch system_prompt_deluxe from products table
-  3. Retrieve ALL training data (no tier filter)
-  4. Generate response with full deluxe model
-```
+In `src/components/ExamCountdown.tsx`, add `EDEXCEL_MATHS_EXAMS`:
+- Paper 1 (Pure Mathematics): June 2, 2026
+- Paper 2 (Pure Mathematics): June 9, 2026  
+- Paper 3 (Statistics and Mechanics): June 15, 2026
 
-The only remaining difference is the 3-prompt daily cap for non-subscribers, plus any future feature restrictions you decide on later.
+*(Dates based on typical Edexcel A-Level Maths 9MA0 timetable -- these can be adjusted when the exact 2026 timetable is confirmed)*
+
+---
+
+## Step 4: Register Routes in App.tsx
+
+Add imports and routes:
+- `/edexcel-maths-free-version` -> `EdexcelMathsFreeVersionPage`
+- `/edexcel-maths-premium` -> `EdexcelMathsPremiumPage`
+
+---
+
+## Step 5: Add "Mathematics" to Subject Toggles
+
+### Files affected:
+- `src/pages/ComparePage.tsx`
+- `src/components/SubjectPlanSelector.tsx` (HomePage widget)
+- `src/pages/DashboardPage.tsx`
+
+### Changes:
+1. Add `'mathematics'` to the `Subject` type union in each file
+2. Add to `subjectLabels`: `mathematics: 'Mathematics'`
+3. Add to `PRODUCT_IDS`: `'edexcel-mathematics': '<new-product-id>'`
+4. Update `getCurrentProductSlug()` to return `'edexcel-mathematics'` when subject is `mathematics`
+5. Add `'mathematics'` to the subject toggle arrays (both mobile dropdown and desktop toggle group)
+6. Maths board selector: Only **Edexcel** is active; **OCR** and **AQA** are greyed out (same pattern used for CS/Physics where only one board is active)
+7. Set fixed width for the "Mathematics" toggle button: `w-[120px]` (consistent with the fixed-width system)
+
+### Navigation mappings:
+- Free path: `/edexcel-maths-free-version`
+- Premium path: `/edexcel-maths-premium`
+
+---
+
+## Step 6: Update "The Plan" Feature List for Mathematics
+
+When `subject === 'mathematics'` is selected on the Compare page and SubjectPlanSelector, the plan description shows:
+
+1. AI trained on all past papers and mark schemes
+2. Full A* exam technique + essay structures
+3. Diagram Generator
+4. Past Paper Finder (2,000+ questions)
+5. Image upload and Edexcel analysis
+6. Covers entire Edexcel specification
+7. Personalised revision plans
+
+The "Image upload and OCR analysis" bullet dynamically shows "Edexcel analysis" when Maths is selected (matching the existing pattern for other subjects). The "Covers entire X specification" bullet shows "Edexcel".
+
+---
+
+## Step 7: Update Founder Section (Compare Page)
+
+### `src/components/ui/founder-section.tsx`
+Add `mathematics` to the `FounderSectionProps` subject union type and add Tudor's Maths-specific content:
+- **Photo**: Tudor (same asset already imported)
+- **Achievements**: A*A*A*A* at A-Level, 236/240 in A-Level Mathematics, Straight 9s at GCSE
+- **Quote**: Tudor's Maths-specific quote about building the model on techniques that got him near-perfect marks in Edexcel Maths
+
+Also ensure the FounderSection renders for `subject === 'mathematics'` on both mobile and desktop views of the Compare page.
+
+---
+
+## Step 8: Update Dashboard Page
+
+In `src/pages/DashboardPage.tsx`:
+- Add `'mathematics'` to the subject dropdown
+- When `mathematics` is selected, show Edexcel as the locked board (same as Physics showing OCR)
+- Add `'edexcel-mathematics'` to product access checks
+- Map slug `edexcel-mathematics` to UI key `edexcel-maths`
+- Add navigation links: free -> `/edexcel-maths-free-version`, premium -> `/edexcel-maths-premium`
+- Add subscription status display for "Edexcel Mathematics Deluxe"
+- Subject-specific descriptions: "AI trained on all Edexcel Mathematics past papers"
+
+---
+
+## Step 9: Update LatestFeaturesSection
+
+In `src/components/LatestFeaturesSection.tsx`:
+- Add `'mathematics'` to the subject prop type
+- Use the general economics-style features (Diagram Generator, Past Papers, Essay Marker) or create maths-specific variants
+
+---
+
+## Step 10: Update HomePage Subject Rotation
+
+The hero section in `HomePage.tsx` already includes 'Maths' in the rotating subject list (line 97), so no change needed there.
+
+---
+
+## Step 11: Update FAQ
+
+In the "What subjects do you cover?" FAQ on the HomePage, add "Mathematics (Edexcel)" to the list.
+
+---
+
+## Technical Notes
+
+- **Stripe checkout**: No Stripe product/price creation is needed upfront. The `create-checkout` function dynamically creates price data using `price_data` inline (not pre-created Stripe Price IDs). It pulls `monthly_price` (699) and `lifetime_price` (2499) from the products table. The stripe-webhook handles subscription creation automatically.
+- **RAG data**: The chatbot will work immediately via the system prompt, but will have limited RAG context until Edexcel Maths past papers and specifications are ingested into `document_chunks`. This is a separate data ingestion step that can happen later.
+- **Usage limits**: Free users get 3 prompts/day (enforced server-side in `rag-chat`). Same as all other subjects.
+- **No code changes needed** in `rag-chat` edge function -- it's fully database-driven and will automatically pick up the new product.
 
