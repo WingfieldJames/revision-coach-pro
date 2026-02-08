@@ -155,7 +155,7 @@ export const HomePage = () => {
 
             {/* Subheadline - Hidden on mobile */}
             <p className="hidden md:block text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
-              We worked alongside the <span className="text-foreground font-medium">highest performing students</span> in the UK to train an AI model on <span className="text-foreground font-medium">everything you need</span> to ace your final exam — from the spec to past papers to the exact <span className="text-foreground font-medium">A* technique</span>.
+              Built for your exam board, trained by the highest achieving A* students
             </p>
 
             {/* CTA Buttons */}
