@@ -30,7 +30,7 @@ import { LatestFeaturesSection } from '@/components/LatestFeaturesSection';
 import { FlowFieldBackground } from '@/components/ui/flow-field-background';
 import { SubjectPlanSelector } from '@/components/SubjectPlanSelector';
 
-type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'psychology';
+type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'psychology' | 'mathematics';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 
 export const ComparePage = () => {
@@ -43,13 +43,14 @@ export const ComparePage = () => {
 
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
-    return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' || saved === 'psychology' ? saved as Subject : 'economics';
+    return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' || saved === 'psychology' || saved === 'mathematics' ? saved as Subject : 'economics';
   });
   const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
     const savedSubject = localStorage.getItem('preferred-subject');
     const saved = localStorage.getItem('preferred-exam-board');
     if (savedSubject === 'computer-science' || savedSubject === 'physics') return 'ocr';
     if (savedSubject === 'chemistry' || savedSubject === 'psychology') return 'aqa';
+    if (savedSubject === 'mathematics') return 'edexcel';
     return saved === 'edexcel' || saved === 'aqa' || saved === 'cie' ? saved as ExamBoard : 'edexcel';
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
@@ -63,7 +64,8 @@ export const ComparePage = () => {
     'ocr-computer-science': '5d05830b-de7b-4206-8f49-6d3695324eb6',
     'ocr-physics': 'ecd5978d-3bf4-4b9c-993f-30b7f3a0f197',
     'aqa-chemistry': '3e5bf02e-1424-4bb3-88f9-2a9c58798444',
-    'aqa-psychology': 'c56bc6d6-5074-4e1f-8bf2-8e900ba928ec'
+    'aqa-psychology': 'c56bc6d6-5074-4e1f-8bf2-8e900ba928ec',
+    'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
   };
 
   const getCurrentProductSlug = () => {
@@ -76,6 +78,7 @@ export const ComparePage = () => {
     if (subject === 'physics') return 'ocr-physics';
     if (subject === 'chemistry') return 'aqa-chemistry';
     if (subject === 'psychology') return 'aqa-psychology';
+    if (subject === 'mathematics') return 'edexcel-mathematics';
     return null;
   };
 
@@ -84,7 +87,8 @@ export const ComparePage = () => {
     'computer-science': 'Computer Science',
     'physics': 'Physics',
     'chemistry': 'Chemistry',
-    'psychology': 'Psychology'
+    'psychology': 'Psychology',
+    'mathematics': 'Mathematics'
   };
 
   const getPricing = () => {
@@ -144,6 +148,7 @@ export const ComparePage = () => {
       if (subject === 'physics') return '/ocr-physics-free-version';
       if (subject === 'chemistry') return '/aqa-chemistry-free-version';
       if (subject === 'psychology') return '/aqa-psychology-free-version';
+      if (subject === 'mathematics') return '/edexcel-maths-free-version';
       if (examBoard === 'aqa') return '/aqa-free-version';
       if (examBoard === 'cie') return '/cie-free-version';
       return '/free-version';
@@ -163,7 +168,7 @@ export const ComparePage = () => {
     }
 
     if (hasProductAccess) {
-      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
+      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
@@ -234,10 +239,10 @@ export const ComparePage = () => {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-background border border-border z-50">
-                    {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology'] as Subject[]).map(s => (
+                    {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
                       <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                         setSubject(s);
-                        if (s === 'economics') setExamBoard('edexcel');
+                        if (s === 'economics' || s === 'mathematics') setExamBoard('edexcel');
                         else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
                         else setExamBoard('ocr');
                       }}>
@@ -255,6 +260,12 @@ export const ComparePage = () => {
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
+                ) : subject === 'mathematics' ? (
+                  <div className="flex items-center gap-1">
+                    <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">Edexcel</div>
+                    <div className="rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground cursor-default">OCR</div>
+                    <div className="rounded-full px-4 py-2.5 text-sm font-semibold text-muted-foreground cursor-default">AQA</div>
+                  </div>
                 ) : (
                   <div className="rounded-full px-6 py-2.5 text-sm font-semibold bg-gradient-brand text-white">
                     {subject === 'computer-science' || subject === 'physics' ? 'OCR' : 'AQA'}
@@ -268,13 +279,13 @@ export const ComparePage = () => {
                   <ToggleGroup type="single" value={subject} onValueChange={v => {
                     if (v) {
                       setSubject(v as Subject);
-                      if (v === 'economics') setExamBoard('edexcel');
+                      if (v === 'economics' || v === 'mathematics') setExamBoard('edexcel');
                       else if (v === 'chemistry' || v === 'psychology') setExamBoard('aqa');
                       else setExamBoard('ocr');
                     }
                   }} className="flex items-center gap-1">
-                    {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology'] as Subject[]).map(s => (
-                      <ToggleGroupItem key={s} value={s} className={`rounded-full ${s === 'computer-science' ? 'w-[150px]' : s === 'economics' ? 'w-[110px]' : 'w-[100px]'} py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all`}>
+                    {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
+                      <ToggleGroupItem key={s} value={s} className={`rounded-full ${s === 'computer-science' ? 'w-[150px]' : s === 'economics' ? 'w-[110px]' : s === 'mathematics' ? 'w-[120px]' : 'w-[100px]'} py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-all`}>
                         {subjectLabels[s]}
                       </ToggleGroupItem>
                     ))}
@@ -291,6 +302,18 @@ export const ComparePage = () => {
                             {b === 'cie' ? 'CIE' : b.charAt(0).toUpperCase() + b.slice(1)}
                           </ToggleGroupItem>
                         ))}
+                      </>
+                    ) : subject === 'mathematics' ? (
+                      <>
+                        <ToggleGroupItem value="edexcel" className="rounded-full flex-1 py-2.5 text-sm font-semibold data-[state=on]:bg-gradient-brand data-[state=on]:text-white data-[state=off]:text-foreground data-[state=off]:bg-transparent hover:bg-muted transition-colors">
+                          Edexcel
+                        </ToggleGroupItem>
+                        <div className="rounded-full flex-1 py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                          OCR
+                        </div>
+                        <div className="rounded-full flex-1 py-2.5 text-sm font-semibold text-muted-foreground bg-transparent text-center cursor-default">
+                          AQA
+                        </div>
                       </>
                     ) : (
                       <>
@@ -345,11 +368,11 @@ export const ComparePage = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-500 shrink-0" />
-                        <span>Image upload & OCR analysis</span>
+                        <span>Image upload & {subject === 'economics' ? (examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : 'CIE') : subject === 'mathematics' ? 'Edexcel' : subject === 'chemistry' || subject === 'psychology' ? 'AQA' : 'OCR'} analysis</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-500 shrink-0" />
-                        <span>Covers entire {subject === 'economics' ? (examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : 'CIE') : subject === 'chemistry' || subject === 'psychology' ? 'AQA' : 'OCR'} specification</span>
+                        <span>Covers entire {subject === 'economics' ? (examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : 'CIE') : subject === 'mathematics' ? 'Edexcel' : subject === 'chemistry' || subject === 'psychology' ? 'AQA' : 'OCR'} specification</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-500 shrink-0" />
@@ -386,7 +409,7 @@ export const ComparePage = () => {
         {/* Mobile: Founder Section first, then stacked testimonials */}
         <div className="md:hidden">
           <div className="relative">
-            {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry') && <FounderSection subject={subject} examBoard={examBoard} />}
+            {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry' || subject === 'mathematics') && <FounderSection subject={subject} examBoard={examBoard} />}
           </div>
           
           <div className="relative py-12 px-4">
@@ -447,7 +470,7 @@ export const ComparePage = () => {
           </div>
 
           <div className="relative">
-            {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry') && <FounderSection subject={subject} examBoard={examBoard} />}
+            {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry' || subject === 'mathematics') && <FounderSection subject={subject} examBoard={examBoard} />}
           </div>
         </div>
 
