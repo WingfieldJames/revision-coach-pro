@@ -227,7 +227,7 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials Section - Desktop */}
       <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <ScrollReveal className="text-center mb-12">
@@ -243,6 +243,34 @@ export const HomePage = () => {
             <TestimonialsColumn testimonials={firstColumn} duration={45} />
             <TestimonialsColumn testimonials={secondColumn} duration={40} />
             <TestimonialsColumn testimonials={thirdColumn} duration={50} />
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section - Mobile (loads instantly, no scroll animation) */}
+      <section className="md:hidden py-8 px-4">
+        <div className="max-w-md mx-auto">
+          <div className="text-center mb-6">
+            <h2 className="text-[1.25rem] font-bold leading-[1.2]">
+              <span className="text-foreground">What our </span>
+              <span className="text-gradient-brand">users</span>
+              <span className="text-foreground"> say</span>
+            </h2>
+            <p className="text-muted-foreground text-xs mt-2">Join 700+ students and teachers achieving real results</p>
+          </div>
+          <div className="space-y-3">
+            {[firstColumn[0], firstColumn[2], firstColumn[6]].map((t, i) => (
+              <div key={i} className="bg-card rounded-2xl p-4 shadow-card border border-border/30">
+                <p className="text-foreground text-sm leading-relaxed">{t.text}</p>
+                <div className="flex items-center gap-3 mt-3">
+                  <img src={t.image} alt={t.name} className="w-8 h-8 rounded-full object-cover object-[center_20%]" />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground text-xs truncate">{t.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
