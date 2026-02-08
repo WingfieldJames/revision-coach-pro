@@ -12,7 +12,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem('astar-theme');
-    return (stored as Theme) || 'light';
+    if (stored) return stored as Theme;
+    // Default to dark on mobile, light on desktop
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? 'dark' : 'light';
   });
 
   useEffect(() => {
