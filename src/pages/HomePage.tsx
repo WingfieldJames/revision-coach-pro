@@ -169,7 +169,8 @@ export const HomePage = () => {
             </div>
 
             <p className="text-xs sm:text-sm text-muted-foreground mt-4">
-              Get started free • No card needed
+              <span className="md:hidden">Built for your exam board • No card needed</span>
+              <span className="hidden md:inline">Get started free • No card needed</span>
             </p>
           </div>
         </HeroBackgroundPaths>
