@@ -1,5 +1,4 @@
 import { Award, GraduationCap, BookOpen, Trophy } from 'lucide-react';
-import { StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
 import { useTheme } from '@/contexts/ThemeContext';
 import jamesFounder from '@/assets/james-founder.png';
 import namanFounder from '@/assets/naman-founder.png';
@@ -73,47 +72,45 @@ export function MobileFoundersSection() {
           </p>
         </div>
 
-        <StaggerContainer className="space-y-4" staggerDelay={0.1}>
+        <div className="space-y-4">
           {founders.map((founder) => (
-            <StaggerItem key={founder.id}>
-              <div className={`rounded-2xl p-4 ${isLight ? 'bg-card border border-border/30 shadow-sm' : 'bg-card border border-primary/30 glow-brand'}`}>
-                <div className="flex items-center gap-4">
-                  {/* Photo */}
-                  <div className="flex-shrink-0">
-                    <div className={`w-16 h-16 rounded-xl overflow-hidden bg-muted ${isLight ? 'border-2 border-border/40' : 'border-2 border-primary/20'}`}>
-                      <img 
-                        src={founder.image} 
-                        alt={`${founder.name} - A* Student`}
-                        className="w-full h-full object-cover object-[center_25%] scale-110"
-                      />
-                    </div>
+            <div key={founder.id} className={`rounded-2xl p-4 ${isLight ? 'bg-card border border-border/30 shadow-sm' : 'bg-card border border-primary/30 glow-brand'}`}>
+              <div className="flex items-center gap-4">
+                {/* Photo */}
+                <div className="flex-shrink-0">
+                  <div className={`w-16 h-16 rounded-xl overflow-hidden bg-muted ${isLight ? 'border-2 border-border/40' : 'border-2 border-primary/20'}`}>
+                    <img 
+                      src={founder.image} 
+                      alt={`${founder.name} - A* Student`}
+                      className="w-full h-full object-cover object-[center_25%] scale-110"
+                    />
+                  </div>
+                </div>
+
+                {/* Name, status & badges */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-bold text-foreground">{founder.name}</h3>
+                    <span className={`text-xs font-medium ${isLight ? 'text-muted-foreground' : 'text-primary'}`}>{founder.status}</span>
                   </div>
 
-                  {/* Name, status & badges */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-bold text-foreground">{founder.name}</h3>
-                      <span className={`text-xs font-medium ${isLight ? 'text-muted-foreground' : 'text-primary'}`}>{founder.status}</span>
-                    </div>
-
-                    {/* Achievement badges */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {founder.achievements.map((achievement, i) => (
-                        <div
-                          key={i}
-                          className={`flex items-center gap-1 rounded-full px-2 py-0.5 ${isLight ? 'bg-muted border border-border/40' : 'bg-primary/10 border border-primary/20'}`}
-                        >
-                          <achievement.icon className={`w-3 h-3 ${isLight ? 'text-foreground' : 'text-primary'}`} />
-                          <span className="text-xs font-medium text-foreground">{achievement.text}</span>
-                        </div>
-                      ))}
-                    </div>
+                  {/* Achievement badges */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {founder.achievements.map((achievement, i) => (
+                      <div
+                        key={i}
+                        className={`flex items-center gap-1 rounded-full px-2 py-0.5 ${isLight ? 'bg-muted border border-border/40' : 'bg-primary/10 border border-primary/20'}`}
+                      >
+                        <achievement.icon className={`w-3 h-3 ${isLight ? 'text-foreground' : 'text-primary'}`} />
+                        <span className="text-xs font-medium text-foreground">{achievement.text}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-            </StaggerItem>
+            </div>
           ))}
-        </StaggerContainer>
+        </div>
       </div>
     </section>
   );
