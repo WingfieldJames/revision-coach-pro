@@ -257,7 +257,7 @@ export const ComparePage = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="rounded-full px-6 py-2.5 text-sm font-semibold border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted">
-                    {examBoard === 'cie' ? 'CIE' : examBoard.charAt(0).toUpperCase() + examBoard.slice(1)}
+                    {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : 'Edexcel'}
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                 </DropdownMenuTrigger>
@@ -271,7 +271,7 @@ export const ComparePage = () => {
                     : (['ocr'] as ExamBoard[])
                   ).map(b => (
                     <DropdownMenuItem key={b} className="cursor-pointer hover:bg-muted" onClick={() => setExamBoard(b)}>
-                      {b === 'cie' ? 'CIE' : b.charAt(0).toUpperCase() + b.slice(1)}
+                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : 'Edexcel'}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
