@@ -94,7 +94,7 @@ export const HomePage = () => {
     }
   };
 
-  const subjects = ['Economics', 'CS', 'Chemistry', 'Psychology', 'Physics', 'Maths'];
+  const subjects = ['Economics', 'Computing', 'Chemistry', 'Psychology', 'Physics', 'Mathematics'];
   const [currentSubjectIndex, setCurrentSubjectIndex] = React.useState(0);
 
   React.useEffect(() => {
@@ -136,7 +136,7 @@ export const HomePage = () => {
               <div className="whitespace-nowrap">
                 <span className="text-foreground">understands </span>
                 <span className="text-gradient-brand">A-Level </span>
-                <span className="relative inline-block overflow-hidden text-left" style={{ width: '5.5em', height: '1em', verticalAlign: 'text-bottom' }}>
+                <span className="relative inline-block overflow-hidden text-left" style={{ width: '7.5em', height: '1.2em', verticalAlign: 'baseline' }}>
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={subjects[currentSubjectIndex]}
