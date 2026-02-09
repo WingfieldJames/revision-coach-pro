@@ -1,26 +1,30 @@
 
-## Centre Navigation Tabs on Page
 
-### Problem
-The "Home / Subjects / Launch" tabs are currently centred within the remaining flex space between the logo and right-side elements, rather than being centred relative to the full page width.
+## Fix Subject Roulette on Homepage
 
-### Solution
-Change the nav tabs container from `flex-1` positioning to `absolute` centring within the header. This makes the tabs visually centred on the page regardless of the logo or right-side content width.
+Three changes to `src/pages/HomePage.tsx`:
 
-### Change (single file)
+### 1. Rename subjects
+- Change `'CS'` to `'Computing'` and `'Maths'` to `'Mathematics'` in the subjects array (line 97).
 
-**`src/components/Header.tsx`** (line 280):
+### 2. Fix vertical alignment
+- The animated text container uses `height: '1em'` and `verticalAlign: 'text-bottom'`, which causes the cycling text to sit slightly too high.
+- Change `verticalAlign` to `'baseline'` and adjust the height to `'1.2em'` so the text aligns with "A-Level".
 
-Replace the current flex-based centring:
+### 3. Fix clipping on longer words
+- The container has a fixed `width: '5.5em'` which clips longer words like "Psychology", "Computing", and "Mathematics".
+- Increase the width to `'7.5em'` to accommodate the longest word ("Mathematics").
+
+### Technical details
+
+**File: `src/pages/HomePage.tsx`**
+
+**Line 97** -- Update subjects array:
 ```tsx
-<div className={`flex-1 flex justify-center min-w-0 ${hideUserDetails ? 'justify-end pr-4' : 'px-2'}`}>
+const subjects = ['Economics', 'Computing', 'Chemistry', 'Psychology', 'Physics', 'Mathematics'];
 ```
 
-With absolute centring:
+**Line 139** -- Update the container dimensions and alignment:
 ```tsx
-<div className="absolute left-1/2 -translate-x-1/2">
+<span className="relative inline-block overflow-hidden text-left" style={{ width: '7.5em', height: '1.2em', verticalAlign: 'baseline' }}>
 ```
-
-This positions the tabs at the exact horizontal centre of the header (and therefore the page), independent of the logo and right-side content.
-
-The header already has `relative` implied by `sticky`, so no additional positioning context is needed.
