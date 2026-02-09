@@ -388,8 +388,7 @@ export const ComparePage = () => {
                 <div className="mt-6">
                   <button
                     onClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
-                    className="w-full sm:w-auto px-10 py-3.5 rounded-full text-white font-semibold text-base transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
-                    style={{ background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' }}
+                    className="w-full sm:w-auto px-10 py-3.5 rounded-full text-white font-semibold text-base transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense bg-gradient-brand"
                   >
                     {hasProductAccess ? "Go to your chat →" : "Get Started →"}
                   </button>
