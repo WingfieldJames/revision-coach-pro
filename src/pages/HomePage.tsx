@@ -167,7 +167,7 @@ export const HomePage = () => {
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={subjects[currentSubjectIndex]}
-                      className="absolute left-0 bottom-0.5 text-gradient-brand"
+                      className="absolute left-0 bottom-0 text-gradient-brand"
                       initial={{ y: "100%", opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: "-100%", opacity: 0 }}
