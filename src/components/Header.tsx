@@ -277,7 +277,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
       
       {showNavLinks && (
-        <div className={`flex-1 flex justify-center min-w-0 ${hideUserDetails ? 'justify-end pr-4' : 'px-2'}`}>
+        <div className="absolute left-1/2 -translate-x-1/2">
           <Tabs selected={selectedTab} setSelected={handleTabChange} tabs={tabs} variant="primary" />
         </div>
       )}
