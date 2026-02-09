@@ -136,11 +136,11 @@ export const HomePage = () => {
               <div className="whitespace-nowrap">
                 <span className="text-foreground">understands </span>
                 <span className="text-gradient-brand">A-Level </span>
-                <span className="relative inline-block overflow-hidden text-left" style={{ width: '7.5em', height: '1.2em', verticalAlign: 'baseline' }}>
+                <span className="relative inline-block overflow-hidden text-left" style={{ width: '7.5em', height: '1.15em', verticalAlign: 'baseline' }}>
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={subjects[currentSubjectIndex]}
-                      className="absolute left-0 bottom-0 text-gradient-brand"
+                      className="absolute left-0 top-0 text-gradient-brand"
                       initial={{ y: '100%', opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: '-100%', opacity: 0 }}
