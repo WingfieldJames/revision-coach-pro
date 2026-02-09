@@ -162,12 +162,12 @@ export const HomePage = () => {
                 <span className="text-gradient-brand">A-Level </span>
                 <span
                   className="relative inline-block overflow-hidden text-left"
-                  style={{ width: "7.5em", height: "1.15em", verticalAlign: "baseline" }}
+                  style={{ width: "7.5em", height: "1.15em", verticalAlign: "initial" }}
                 >
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={subjects[currentSubjectIndex]}
-                      className="absolute left-0 top-3 text-gradient-brand"
+                      className="absolute left-0 top-0 text-gradient-brand"
                       initial={{ y: "100%", opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: "-100%", opacity: 0 }}
