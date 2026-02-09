@@ -96,8 +96,9 @@ export const AQAPremiumPage = () => {
           showImageTool 
           showDiagramTool 
           showEssayMarker 
-          showPastPaperFinder
-          showExamCountdown
+           showPastPaperFinder
+           pastPaperBoard="aqa"
+           showExamCountdown
           examDates={AQA_ECONOMICS_EXAMS}
           examSubjectName="AQA Economics"
           hideUserDetails 

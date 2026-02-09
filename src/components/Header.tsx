@@ -41,6 +41,7 @@ interface HeaderProps {
   toolsLocked?: boolean;
   hideUserDetails?: boolean;
   diagramSubject?: 'economics' | 'cs';
+  pastPaperBoard?: 'edexcel' | 'aqa';
   productId?: string;
   productSlug?: string;
   onEssayMarkerSubmit?: (message: string) => void;
@@ -62,6 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
   toolsLocked = false,
   hideUserDetails = false,
   diagramSubject = 'economics',
+  pastPaperBoard = 'edexcel',
   productId,
   productSlug,
   onEssayMarkerSubmit,
@@ -253,7 +255,7 @@ export const Header: React.FC<HeaderProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-lg p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
-              <PastPaperFinderTool tier={tier} productId={productId} />
+              <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />
             </PopoverContent>
           </Popover>
         )}
