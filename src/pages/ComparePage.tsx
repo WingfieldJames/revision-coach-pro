@@ -55,6 +55,7 @@ export const ComparePage = () => {
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [hasProductAccess, setHasProductAccess] = useState(false);
+  const [subscriptionPaymentType, setSubscriptionPaymentType] = useState<string | null>(null);
   const [checkingAccess, setCheckingAccess] = useState(false);
 
   const PRODUCT_IDS: Record<string, string> = {
@@ -104,8 +105,9 @@ export const ComparePage = () => {
       }
       setCheckingAccess(true);
       try {
-        const { hasAccess } = await checkProductAccess(user.id, productSlug);
-        setHasProductAccess(hasAccess);
+        const access = await checkProductAccess(user.id, productSlug);
+        setHasProductAccess(access.hasAccess);
+        setSubscriptionPaymentType(access.subscription?.payment_type ?? null);
       } catch (error) {
         console.error('Error checking product access:', error);
         setHasProductAccess(false);
@@ -341,9 +343,9 @@ export const ComparePage = () => {
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
                   {/* Left: Features */}
                   <div className="flex-1">
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-1">The Plan</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-1">{hasProductAccess ? "You're Deluxe!" : "The Plan"}</h2>
                     <p className="text-muted-foreground mb-6 text-sm">
-                      Everything you need to ace your {subjectLabels[subject]} exam
+                      {hasProductAccess ? "You have access to:" : `Everything you need to ace your ${subjectLabels[subject]} exam`}
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                       <div className="flex items-center gap-2">
@@ -385,14 +387,16 @@ export const ComparePage = () => {
                 {/* CTA Button */}
                 <div className="mt-6">
                   <button
-                    onClick={handleFreeClick}
+                    onClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
                     className="w-full sm:w-auto px-10 py-3.5 rounded-full text-white font-semibold text-base transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
                     style={{ background: 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)' }}
                   >
-                    Get Started →
+                    {hasProductAccess ? "Go to your chat →" : "Get Started →"}
                   </button>
                   <p className="text-xs text-muted-foreground mt-3">
-                    Free to start • No credit card required
+                    {hasProductAccess
+                      ? (subscriptionPaymentType === 'lifetime' ? 'Exam season pass active' : 'Monthly pass active')
+                      : 'Free to start • No credit card required'}
                   </p>
                 </div>
               </div>
