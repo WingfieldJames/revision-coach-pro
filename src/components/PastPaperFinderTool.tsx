@@ -2,38 +2,89 @@ import React, { useState, useMemo } from 'react';
 import { Search, FileSearch, ChevronRight, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EDEXCEL_SPEC_POINTS, EDEXCEL_PAST_QUESTIONS, EdexcelSpecPoint, PastPaperQuestion } from '@/data/edexcelPastPapers';
+import { AQA_SPEC_POINTS, AQA_PAST_QUESTIONS, AQASpecPoint, AQAPastPaperQuestion } from '@/data/aqaPastPapers';
+
+// Unified types for the component
+interface SpecPoint {
+  code: string;
+  name: string;
+  keywords: string[];
+}
+
+interface Question {
+  paper: string;
+  year: number;
+  section: string;
+  number: string;
+  question: string;
+  marks: number;
+  specCodes: string[];
+  extract?: string;
+}
 
 interface PastPaperFinderToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
+  board?: 'edexcel' | 'aqa';
+}
+
+// Adapt Edexcel spec points to unified type
+function getSpecPoints(board: 'edexcel' | 'aqa'): SpecPoint[] {
+  if (board === 'aqa') {
+    return AQA_SPEC_POINTS.map(sp => ({
+      code: sp.code,
+      name: sp.name,
+      keywords: sp.keywords,
+    }));
+  }
+  return EDEXCEL_SPEC_POINTS.map(sp => ({
+    code: sp.code,
+    name: sp.name,
+    keywords: sp.keywords,
+  }));
+}
+
+function getQuestions(board: 'edexcel' | 'aqa'): Question[] {
+  if (board === 'aqa') {
+    return AQA_PAST_QUESTIONS;
+  }
+  return EDEXCEL_PAST_QUESTIONS;
+}
+
+function getBoardLabel(board: 'edexcel' | 'aqa'): string {
+  return board === 'aqa' ? 'AQA' : 'Edexcel';
 }
 
 export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
   tier = 'free',
+  board = 'edexcel',
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSpec, setSelectedSpec] = useState<EdexcelSpecPoint | null>(null);
+  const [selectedSpec, setSelectedSpec] = useState<SpecPoint | null>(null);
   const [showResults, setShowResults] = useState(false);
+
+  const specPoints = useMemo(() => getSpecPoints(board), [board]);
+  const questions = useMemo(() => getQuestions(board), [board]);
 
   // Filter spec points based on search query
   const filteredSpecs = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
-    return EDEXCEL_SPEC_POINTS.filter(spec => {
+    return specPoints.filter(spec => {
       const nameMatch = spec.name.toLowerCase().includes(query);
       const codeMatch = spec.code.toLowerCase().includes(query);
       const keywordMatch = spec.keywords.some(kw => kw.includes(query));
       return nameMatch || codeMatch || keywordMatch;
-    }).slice(0, 8); // Limit to 8 suggestions
-  }, [searchQuery]);
+    }).slice(0, 8);
+  }, [searchQuery, specPoints]);
 
   // Find questions matching selected spec point
   const matchedQuestions = useMemo(() => {
     if (!selectedSpec) return [];
-    return EDEXCEL_PAST_QUESTIONS.filter(q =>
+    return questions.filter(q =>
       q.specCodes.some(code => code === selectedSpec.code)
     ).sort((a, b) => b.year - a.year || a.number.localeCompare(b.number));
-  }, [selectedSpec]);
+  }, [selectedSpec, questions]);
 
   const handleSearch = () => {
     if (selectedSpec) {
@@ -47,10 +98,18 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
     setShowResults(false);
   };
 
-  const handleSpecClick = (spec: EdexcelSpecPoint) => {
+  const handleSpecClick = (spec: SpecPoint) => {
     setSelectedSpec(spec);
     setSearchQuery(spec.name);
   };
+
+  const boardLabel = getBoardLabel(board);
+  const placeholderText = board === 'aqa'
+    ? "Enter a topic... e.g. externalities, AD, monopoly"
+    : "Enter a topic... e.g. externalities, AD, tariffs";
+  const hintText = board === 'aqa'
+    ? '"externalities", "fiscal policy", "monopoly", "trade unions"'
+    : '"externalities", "fiscal policy", "oligopoly", "exchange rates"';
 
   // Results view
   if (showResults && selectedSpec) {
@@ -61,7 +120,7 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
             <FileSearch className="w-5 h-5 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground text-sm">Past Paper Finder</h3>
+            <h3 className="font-semibold text-foreground text-sm">{boardLabel} Past Paper Finder</h3>
             <p className="text-xs text-muted-foreground truncate">
               {selectedSpec.code}: {selectedSpec.name}
             </p>
@@ -120,7 +179,7 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
           <FileSearch className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Past Paper Finder</h3>
+          <h3 className="font-semibold text-foreground">{boardLabel} Past Paper Finder</h3>
           <p className="text-xs text-muted-foreground">
             Search by topic to find past exam questions
           </p>
@@ -146,7 +205,7 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
             setSelectedSpec(null);
             setShowResults(false);
           }}
-          placeholder="Enter a topic... e.g. externalities, AD, tariffs"
+          placeholder={placeholderText}
           className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
@@ -203,7 +262,7 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
       {/* Empty state hint */}
       {!searchQuery && (
         <p className="text-xs text-center text-muted-foreground">
-          Try: "externalities", "fiscal policy", "oligopoly", "exchange rates"
+          Try: {hintText}
         </p>
       )}
     </div>
