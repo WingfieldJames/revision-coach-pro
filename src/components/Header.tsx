@@ -215,7 +215,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">My AI</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-md p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <MyAIPreferences />
             </PopoverContent>
           </Popover>
