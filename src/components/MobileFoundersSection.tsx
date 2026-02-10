@@ -58,7 +58,7 @@ export function MobileFoundersSection() {
         {/* Header: no animation in either mode - loads instantly */}
         <div className="text-center mb-6">
           <h2 className="text-[1.25rem] font-bold leading-[1.2] mb-2">
-            <span className="text-foreground dark:text-foreground text-[#CFCFD1]">Trained by real </span>
+            <span className={isLight ? "text-[#CFCFD1]" : "text-foreground"}>Trained by real </span>
             <span className="text-gradient-brand">A* students</span>
           </h2>
           <p className="text-muted-foreground text-xs">
