@@ -3,7 +3,6 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { ChevronDown, Check, Star, Instagram } from 'lucide-react';
@@ -228,35 +227,81 @@ export const ComparePage = () => {
             </h1>
           </ScrollReveal>
 
-          {/* Subject & Board Dropdowns */}
+          {/* Subject & Board Selection */}
           <ScrollReveal delay={0.1}>
-            {/* Subject Toggle Row */}
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
-              {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
-                <button
-                  key={s}
-                  onClick={() => {
-                    setSubject(s);
-                    if (s === 'economics' || s === 'mathematics') setExamBoard('edexcel');
-                    else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
-                    else setExamBoard('ocr');
-                  }}
-                  className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${
-                    subject === s
-                      ? 'bg-gradient-brand text-white glow-brand'
-                      : 'border border-border bg-background text-foreground hover:bg-muted'
-                  }`}
-                >
-                  {subjectLabels[s]}
-                </button>
-              ))}
-            </div>
+            {/* Desktop: Connected toggle group + board dropdown on same line */}
+            <div className="hidden md:flex items-center justify-center gap-4 mb-12">
+              <div className="inline-flex rounded-full border border-border bg-background overflow-hidden">
+                {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map((s, i) => (
+                  <button
+                    key={s}
+                    onClick={() => {
+                      setSubject(s);
+                      if (s === 'economics' || s === 'mathematics') setExamBoard('edexcel');
+                      else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
+                      else setExamBoard('ocr');
+                    }}
+                    className={`px-5 py-2 text-sm font-semibold transition-all ${
+                      subject === s
+                        ? 'bg-gradient-brand text-white'
+                        : 'text-foreground hover:bg-muted'
+                    } ${i > 0 ? 'border-l border-border' : ''}`}
+                  >
+                    {subjectLabels[s]}
+                  </button>
+                ))}
+              </div>
 
-            {/* Exam Board Dropdown */}
-            <div className="flex justify-center mb-12">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="rounded-full px-6 py-2.5 text-sm font-semibold border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted">
+                  <button className="rounded-full px-6 py-2 text-sm font-semibold border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted">
+                    {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : 'Edexcel'}
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+                  {(subject === 'economics'
+                    ? (['edexcel', 'aqa', 'cie'] as ExamBoard[])
+                    : subject === 'mathematics'
+                    ? (['edexcel'] as ExamBoard[])
+                    : subject === 'chemistry' || subject === 'psychology'
+                    ? (['aqa'] as ExamBoard[])
+                    : (['ocr'] as ExamBoard[])
+                  ).map(b => (
+                    <DropdownMenuItem key={b} className="cursor-pointer hover:bg-muted" onClick={() => setExamBoard(b)}>
+                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : 'Edexcel'}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Mobile: Two dropdown buttons */}
+            <div className="md:hidden sticky top-[72px] z-40 bg-background/95 backdrop-blur-sm py-3 -mx-4 px-4 flex items-center justify-center gap-3 mb-8">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="rounded-full px-5 py-2.5 text-sm font-semibold bg-gradient-brand text-white flex items-center gap-2 glow-brand">
+                    {subjectLabels[subject]}
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+                  {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
+                    <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
+                      setSubject(s);
+                      if (s === 'economics' || s === 'mathematics') setExamBoard('edexcel');
+                      else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
+                      else setExamBoard('ocr');
+                    }}>
+                      {subjectLabels[s]}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="rounded-full px-5 py-2.5 text-sm font-semibold border border-border bg-background text-foreground flex items-center gap-2 hover:bg-muted">
                     {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : 'Edexcel'}
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>

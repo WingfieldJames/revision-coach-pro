@@ -58,10 +58,9 @@ export const SignupPage = () => {
 
       if (redirect === 'stripe') {
         navigate('/compare?checkout=true');
-      } else if (redirect === 'premium') {
-        navigate('/premium-version');
-      } else if (redirect === 'free-version') {
-        navigate('/free-version');
+      } else if (redirect) {
+        // Redirect to the original path the user was trying to access
+        navigate(`/${redirect}`);
       } else {
         navigate('/compare');
       }
