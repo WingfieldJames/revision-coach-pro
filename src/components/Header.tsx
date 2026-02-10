@@ -245,7 +245,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">{essayMarkerLabel}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-md p-0 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-md p-0 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <div className="p-4">
                 <EssayMarkerTool tier={tier} productId={productId} onSubmitToChat={onEssayMarkerSubmit} onClose={() => setEssayMarkerOpen(false)} fixedMark={essayMarkerFixedMark} toolLabel={essayMarkerLabel} />
               </div>
