@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Sparkles, Crown } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
+import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 import { cn } from '@/lib/utils';
