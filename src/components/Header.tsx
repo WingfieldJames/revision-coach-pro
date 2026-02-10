@@ -261,7 +261,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">Past Papers</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-lg p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-lg p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />
             </PopoverContent>
           </Popover>
