@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Sparkles, Crown } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
+import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 import { cn } from '@/lib/utils';
@@ -566,10 +567,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           const displayContent = getDisplayContent(message, index);
           const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
           const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
-          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? "bg-white/10 text-foreground ml-auto max-w-[70%] border border-white/5" : "bg-muted max-w-[90%]")}>
+          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? cn("text-foreground ml-auto max-w-[70%]", theme === 'dark' ? "bg-white/10 border border-white/5" : "bg-purple-100/60 border border-purple-200/40") : "bg-muted max-w-[90%]")}>
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
-                    <img src={aStarIcon} alt="A* AI" className="w-8 h-8 object-contain" />
+                    <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
                   </div>
                 )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
@@ -703,7 +704,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           )}
 
           {isLoading && messages[messages.length - 1]?.role === 'user' && <div className="flex gap-3 p-4 rounded-xl bg-muted mr-auto max-w-[85%]">
-              <img src={aStarIcon} alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
+              <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
               <div className="flex-1 flex flex-col gap-2">
                 {isSearching ? (
                   <>
