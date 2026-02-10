@@ -3,6 +3,7 @@ import { Search, FileSearch, ChevronRight, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EDEXCEL_SPEC_POINTS, EDEXCEL_PAST_QUESTIONS, EdexcelSpecPoint, PastPaperQuestion } from '@/data/edexcelPastPapers';
 import { AQA_SPEC_POINTS, AQA_PAST_QUESTIONS, AQASpecPoint, AQAPastPaperQuestion } from '@/data/aqaPastPapers';
+import { OCR_CS_SPEC_POINTS, OCR_CS_PAST_QUESTIONS, OCRCSSpecPoint, OCRCSPastPaperQuestion } from '@/data/ocrCsPastPapers';
 
 // Unified types for the component
 interface SpecPoint {
@@ -25,11 +26,18 @@ interface Question {
 interface PastPaperFinderToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
-  board?: 'edexcel' | 'aqa';
+  board?: 'edexcel' | 'aqa' | 'ocr-cs';
 }
 
-// Adapt Edexcel spec points to unified type
-function getSpecPoints(board: 'edexcel' | 'aqa'): SpecPoint[] {
+// Adapt spec points to unified type
+function getSpecPoints(board: 'edexcel' | 'aqa' | 'ocr-cs'): SpecPoint[] {
+  if (board === 'ocr-cs') {
+    return OCR_CS_SPEC_POINTS.map(sp => ({
+      code: sp.code,
+      name: sp.name,
+      keywords: sp.keywords,
+    }));
+  }
   if (board === 'aqa') {
     return AQA_SPEC_POINTS.map(sp => ({
       code: sp.code,
@@ -44,14 +52,14 @@ function getSpecPoints(board: 'edexcel' | 'aqa'): SpecPoint[] {
   }));
 }
 
-function getQuestions(board: 'edexcel' | 'aqa'): Question[] {
-  if (board === 'aqa') {
-    return AQA_PAST_QUESTIONS;
-  }
+function getQuestions(board: 'edexcel' | 'aqa' | 'ocr-cs'): Question[] {
+  if (board === 'ocr-cs') return OCR_CS_PAST_QUESTIONS;
+  if (board === 'aqa') return AQA_PAST_QUESTIONS;
   return EDEXCEL_PAST_QUESTIONS;
 }
 
-function getBoardLabel(board: 'edexcel' | 'aqa'): string {
+function getBoardLabel(board: 'edexcel' | 'aqa' | 'ocr-cs'): string {
+  if (board === 'ocr-cs') return 'OCR CS';
   return board === 'aqa' ? 'AQA' : 'Edexcel';
 }
 
@@ -104,10 +112,14 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
   };
 
   const boardLabel = getBoardLabel(board);
-  const placeholderText = board === 'aqa'
+  const placeholderText = board === 'ocr-cs'
+    ? "Enter a topic... e.g. binary search, TCP/IP, SQL"
+    : board === 'aqa'
     ? "Enter a topic... e.g. externalities, AD, monopoly"
     : "Enter a topic... e.g. externalities, AD, tariffs";
-  const hintText = board === 'aqa'
+  const hintText = board === 'ocr-cs'
+    ? '"sorting algorithms", "databases", "encryption", "OOP"'
+    : board === 'aqa'
     ? '"externalities", "fiscal policy", "monopoly", "trade unions"'
     : '"externalities", "fiscal policy", "oligopoly", "exchange rates"';
 
