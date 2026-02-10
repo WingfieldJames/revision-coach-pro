@@ -10,6 +10,7 @@ interface TestimonialsSectionProps {
     href?: string
   }>
   className?: string
+  titleClassName?: string
 }
 
 export function TestimonialsSection({ 
