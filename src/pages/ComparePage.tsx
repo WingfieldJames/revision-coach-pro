@@ -445,7 +445,7 @@ export const ComparePage = () => {
         {/* Desktop: Testimonials marquee then Founder Section */}
         <div className="hidden md:block">
           <div className="relative">
-            <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" testimonials={[{
+            <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" titleClassName={theme === 'dark' ? '' : 'text-[#CFCFD1]'} testimonials={[{
               author: { name: "Lucy W", handle: "Year 12", avatar: lucyImage },
               text: "\"I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩\""
             }, {
