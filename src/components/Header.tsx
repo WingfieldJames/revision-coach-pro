@@ -290,7 +290,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="sm:hidden">{daysUntilFirstExam}d</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-sm p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-sm p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <ExamCountdown exams={examDates} subjectName={examSubjectName} />
             </PopoverContent>
           </Popover>
