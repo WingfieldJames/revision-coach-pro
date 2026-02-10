@@ -231,8 +231,8 @@ export const ComparePage = () => {
           <ScrollReveal delay={0.1}>
             {/* Desktop: Connected toggle group + board dropdown on same line */}
             <div className="hidden md:flex items-center justify-center gap-4 mb-12">
-              <div className="inline-flex rounded-full border border-border bg-background overflow-hidden">
-                {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map((s, i) => (
+              <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
+                {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map((s) => (
                   <button
                     key={s}
                     onClick={() => {
@@ -241,11 +241,11 @@ export const ComparePage = () => {
                       else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
                       else setExamBoard('ocr');
                     }}
-                    className={`px-5 py-2 text-sm font-semibold transition-all ${
+                    className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                       subject === s
                         ? 'bg-gradient-brand text-white'
                         : 'text-foreground hover:bg-muted'
-                    } ${i > 0 ? 'border-l border-border' : ''}`}
+                    }`}
                   >
                     {subjectLabels[s]}
                   </button>
