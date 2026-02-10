@@ -704,7 +704,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           )}
 
           {isLoading && messages[messages.length - 1]?.role === 'user' && <div className="flex gap-3 p-4 rounded-xl bg-muted mr-auto max-w-[85%]">
-              <img src={aStarIcon} alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
+              <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
               <div className="flex-1 flex flex-col gap-2">
                 {isSearching ? (
                   <>
