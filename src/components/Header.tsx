@@ -215,7 +215,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">My AI</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-md p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <MyAIPreferences />
             </PopoverContent>
           </Popover>
@@ -229,7 +229,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">Diagram Generator</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-md p-0 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-md p-0 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <div className="p-4">
                 <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} />
               </div>
@@ -245,7 +245,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">{essayMarkerLabel}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-md p-0 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-md p-0 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <div className="p-4">
                 <EssayMarkerTool tier={tier} productId={productId} onSubmitToChat={onEssayMarkerSubmit} onClose={() => setEssayMarkerOpen(false)} fixedMark={essayMarkerFixedMark} toolLabel={essayMarkerLabel} />
               </div>
@@ -261,7 +261,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">Past Papers</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-lg p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-lg p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />
             </PopoverContent>
           </Popover>
@@ -275,7 +275,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">Revision Guide</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-lg p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-lg p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <RevisionGuideTool board={revisionGuideBoard} tier={tier} productId={productId} />
             </PopoverContent>
           </Popover>
@@ -290,7 +290,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="sm:hidden">{daysUntilFirstExam}d</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-sm p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-sm p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <ExamCountdown exams={examDates} subjectName={examSubjectName} />
             </PopoverContent>
           </Popover>
