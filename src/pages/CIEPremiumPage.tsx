@@ -5,7 +5,7 @@ import { RandomChatbotBackground } from '@/components/ui/random-chatbot-backgrou
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
-const CIE_PRODUCT_ID = "c3e5f8a1-9d4b-4c2e-8f1a-6b7c8d9e0f1a";
+const CIE_PRODUCT_ID = "9a710cf9-0523-4c1f-82c6-0e02b19087e5";
 
 const CIE_ECONOMICS_PROMPTS = [
   { text: "Explain the difference between demand-pull and cost-push inflation" },

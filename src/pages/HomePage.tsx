@@ -289,7 +289,6 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials Section - Mobile (loads instantly, no scroll animation) */}
       <section className="md:hidden py-8 px-4">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-6">
@@ -302,13 +301,13 @@ export const HomePage = () => {
           </div>
           <div className="space-y-3">
             {[firstColumn[0], firstColumn[2], firstColumn[6]].map((t, i) => (
-              <div key={i} className="bg-card rounded-2xl p-4 shadow-card border border-border/30">
-                <p className="text-foreground text-sm leading-relaxed">{t.text}</p>
-                <div className="flex items-center gap-3 mt-3">
-                  <img src={t.image} alt={t.name} className="w-8 h-8 rounded-full object-cover object-[center_20%]" />
+              <div key={i} className="bg-card rounded-3xl p-5 shadow-card border border-border/30">
+                <p className="text-foreground leading-relaxed text-base">{t.text}</p>
+                <div className="flex items-center gap-3 mt-4">
+                  <img src={t.image} alt={t.name} className="w-10 h-10 rounded-full object-cover object-[center_20%]" />
                   <div className="min-w-0">
-                    <p className="font-semibold text-foreground text-xs truncate">{t.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{t.role}</p>
+                    <p className="font-semibold text-foreground text-sm truncate">{t.name}</p>
+                    <p className="text-sm text-muted-foreground truncate">{t.role}</p>
                   </div>
                 </div>
               </div>

@@ -59,10 +59,9 @@ export const LoginPage = () => {
 
       if (redirect === 'stripe') {
         navigate('/compare?checkout=true');
-      } else if (redirect === 'compare' || redirect === 'free-version' || redirect === 'aqa-free-version' || redirect === 'cie-free-version' || redirect === 'ocr-cs-free-version' || redirect === 'ocr-physics-free-version') {
-        navigate('/compare');
-      } else if (redirect === 'premium' || redirect === 'aqa-premium' || redirect === 'cie-premium' || redirect === 'ocr-cs-premium' || redirect === 'ocr-physics-premium') {
-        navigate('/compare');
+      } else if (redirect) {
+        // Redirect to the original path the user was trying to access
+        navigate(`/${redirect}`);
       } else {
         navigate('/compare');
       }

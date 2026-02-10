@@ -53,19 +53,13 @@ export function MobileFoundersSection() {
   const isLight = theme === 'light';
 
   return (
-    <section className={`pt-4 pb-12 px-4 md:hidden ${isLight ? 'bg-muted' : 'bg-transparent'}`}>
+    <section className={`pt-4 pb-12 px-4 md:hidden ${isLight ? 'bg-transparent' : 'bg-transparent'}`}>
       <div className="max-w-md mx-auto">
         {/* Header: no animation in either mode - loads instantly */}
         <div className="text-center mb-6">
           <h2 className="text-[1.25rem] font-bold leading-[1.2] mb-2">
-            {isLight ? (
-              <>Trained by real A* students</>
-            ) : (
-              <>
-                <span className="text-foreground">Trained by real </span>
-                <span className="text-gradient-brand">A* students</span>
-              </>
-            )}
+            <span className="text-foreground">Trained by real </span>
+            <span className="text-gradient-brand">A* students</span>
           </h2>
           <p className="text-muted-foreground text-xs">
             Built on proven techniques from top A-Level students
