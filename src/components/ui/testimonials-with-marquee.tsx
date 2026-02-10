@@ -17,13 +17,14 @@ export function TestimonialsSection({
   title,
   description,
   testimonials,
-  className 
+  className,
+  titleClassName
 }: TestimonialsSectionProps) {
   return (
     <section id="testimonials" className={cn("py-16 md:py-20 bg-muted w-full", className)}>
       <div className="mx-auto flex flex-col items-center gap-8 text-center sm:gap-12">
         <div className="flex flex-col items-center gap-4 px-8">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+          <h2 className={cn("text-xl sm:text-2xl md:text-3xl font-bold text-foreground", titleClassName)}>
             {title}
           </h2>
           {description && (

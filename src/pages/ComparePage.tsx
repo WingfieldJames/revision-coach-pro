@@ -404,7 +404,7 @@ export const ComparePage = () => {
           </div>
           
           <div className="relative py-12 px-4">
-            <h3 className="text-xl font-bold text-center mb-6">Loved by sixth formers across the UK ⬇️</h3>
+            <h3 className={`text-xl font-bold text-center mb-6 ${theme === 'dark' ? 'text-foreground' : 'text-[#CFCFD1]'}`}>Loved by sixth formers across the UK ⬇️</h3>
             <div className="flex flex-col gap-4 max-w-md mx-auto">
               <div className="bg-card rounded-3xl p-5 shadow-card border border-border/30">
                 <p className="text-foreground leading-relaxed text-base">A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.</p>
