@@ -215,7 +215,7 @@ export const ComparePage = () => {
       <SEOHead title="Choose Your A* AI Plan | A-Level Economics, Computer Science & Physics" description="Compare A* AI plans for A-Level revision. Economics (Edexcel, AQA, CIE), Computer Science (OCR) & Physics (OCR). Free to start." canonical="https://astarai.co.uk/compare" />
       {theme === 'dark' && <FlowFieldBackground color="#a855f7" trailOpacity={0.04} particleCount={400} />}
       <div className="relative z-10">
-        <Header showNavLinks transparentBg />
+        <Header showNavLinks />
         
 
         <main className="py-8 px-4 sm:px-8 max-w-5xl mx-auto text-center relative z-10">
