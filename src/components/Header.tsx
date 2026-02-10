@@ -229,7 +229,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">Diagram Generator</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-md p-0 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-md p-0 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <div className="p-4">
                 <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} />
               </div>
