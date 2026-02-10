@@ -8,9 +8,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { EssayMarkerTool } from '@/components/EssayMarkerTool';
 import { PastPaperFinderTool } from '@/components/PastPaperFinderTool';
+import { RevisionGuideTool } from '@/components/RevisionGuideTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
-import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown } from 'lucide-react';
+import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen } from 'lucide-react';
 import { checkProductAccess } from '@/lib/productAccess';
 import {
   Dialog,
@@ -35,13 +36,15 @@ interface HeaderProps {
   showDiagramTool?: boolean;
   showEssayMarker?: boolean;
   showPastPaperFinder?: boolean;
+  showRevisionGuide?: boolean;
   showExamCountdown?: boolean;
   examDates?: ExamDate[];
   examSubjectName?: string;
   toolsLocked?: boolean;
   hideUserDetails?: boolean;
   diagramSubject?: 'economics' | 'cs';
-  pastPaperBoard?: 'edexcel' | 'aqa';
+  pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs';
+  revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs';
   productId?: string;
   productSlug?: string;
   onEssayMarkerSubmit?: (message: string) => void;
@@ -57,6 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
   showDiagramTool = false,
   showEssayMarker = false,
   showPastPaperFinder = false,
+  showRevisionGuide = false,
   showExamCountdown = false,
   examDates = [],
   examSubjectName = "Exams",
@@ -64,6 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
   hideUserDetails = false,
   diagramSubject = 'economics',
   pastPaperBoard = 'edexcel',
+  revisionGuideBoard = 'edexcel',
   productId,
   productSlug,
   onEssayMarkerSubmit,
@@ -82,6 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [essayMarkerOpen, setEssayMarkerOpen] = useState(false);
   const [examCountdownOpen, setExamCountdownOpen] = useState(false);
   const [pastPaperFinderOpen, setPastPaperFinderOpen] = useState(false);
+  const [revisionGuideOpen, setRevisionGuideOpen] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [isDeluxe, setIsDeluxe] = useState(false);
 
@@ -116,6 +122,7 @@ export const Header: React.FC<HeaderProps> = ({
       setEssayMarkerOpen(false);
       setExamCountdownOpen(false);
       setPastPaperFinderOpen(false);
+      setRevisionGuideOpen(false);
     };
     window.addEventListener('blur', closeAllPopovers);
     return () => window.removeEventListener('blur', closeAllPopovers);
@@ -256,6 +263,20 @@ export const Header: React.FC<HeaderProps> = ({
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-lg p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {showRevisionGuide && (
+          <Popover open={revisionGuideOpen} onOpenChange={setRevisionGuideOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                <BookOpen className="h-4 w-4" />
+                <span className="hidden sm:inline">Revision Guide</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[90vw] max-w-lg p-4 bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+              <RevisionGuideTool board={revisionGuideBoard} tier={tier} productId={productId} />
             </PopoverContent>
           </Popover>
         )}

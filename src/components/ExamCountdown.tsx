@@ -159,3 +159,10 @@ export const EDEXCEL_MATHS_EXAMS: ExamDate[] = [
   { name: "Paper 2 (Pure Mathematics 2)", date: new Date(2026, 5, 9), description: "Pure Mathematics 2" },
   { name: "Paper 3 (Statistics & Mechanics)", date: new Date(2026, 5, 15), description: "Statistics and Mechanics" },
 ];
+
+export const CIE_ECONOMICS_EXAMS: ExamDate[] = [
+  { name: "Paper 1 (Multiple Choice)", date: new Date(2026, 4, 12), description: "AS Multiple Choice" },
+  { name: "Paper 2 (Data Response & Essays)", date: new Date(2026, 4, 22), description: "AS Data Response and Essays" },
+  { name: "Paper 3 (Multiple Choice)", date: new Date(2026, 5, 3), description: "A Level Multiple Choice" },
+  { name: "Paper 4 (Data Response & Essays)", date: new Date(2026, 5, 12), description: "A Level Data Response and Essays" },
+];

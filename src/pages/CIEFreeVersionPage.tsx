@@ -3,7 +3,7 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
-import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 const CIE_PRODUCT_ID = "9a710cf9-0523-4c1f-82c6-0e02b19087e5";
 
@@ -11,7 +11,7 @@ const CIE_ECONOMICS_FREE_PROMPTS = [
   { text: "Explain the difference between demand-pull and cost-push inflation" },
   { text: "What are the characteristics of perfect competition?" },
   { text: "Help me understand the Phillips Curve" },
-  { text: "What causes market failure?" },
+  { text: "Create me a full revision plan", usesPersonalization: true },
 ];
 
 export const CIEFreeVersionPage = () => {
@@ -30,7 +30,7 @@ export const CIEFreeVersionPage = () => {
           showEssayMarker 
           showPastPaperFinder
           showExamCountdown
-          examDates={AQA_ECONOMICS_EXAMS}
+          examDates={CIE_ECONOMICS_EXAMS}
           examSubjectName="CIE Economics"
           hideUserDetails 
           productId={CIE_PRODUCT_ID}

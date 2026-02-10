@@ -35,11 +35,14 @@ export const OCRCSPremiumPage = () => {
           showDiagramTool 
           showEssayMarker
           showPastPaperFinder
+          showRevisionGuide
           showExamCountdown
           examDates={OCR_CS_EXAMS}
           examSubjectName="OCR Computer Science"
           hideUserDetails 
           diagramSubject="cs"
+          pastPaperBoard="ocr-cs"
+          revisionGuideBoard="ocr-cs"
           productId={OCR_CS_PRODUCT_ID}
           productSlug="ocr-computer-science"
           showUpgradeButton
