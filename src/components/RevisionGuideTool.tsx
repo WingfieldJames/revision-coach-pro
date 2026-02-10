@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 
 // Unified spec point type
@@ -220,7 +221,7 @@ Format using clear markdown headings and bullet points. Be thorough and detailed
         </div>
 
         <div ref={guideRef} className="max-h-[400px] overflow-y-auto prose prose-sm dark:prose-invert text-foreground pr-1">
-          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+          <ReactMarkdown remarkPlugins={[remarkMath, remarkGfm]} rehypePlugins={[rehypeKatex]}>
             {guideContent}
           </ReactMarkdown>
         </div>

@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useTheme } from '@/contexts/ThemeContext';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -574,7 +575,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   </div>
                 )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
-                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} components={{
+                  <ReactMarkdown remarkPlugins={[remarkMath, remarkGfm]} rehypePlugins={[rehypeKatex]} components={{
                 p: ({
                   children
                 }) => <p className="mb-2 last:mb-0">{children}</p>,
@@ -623,7 +624,25 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   children
                 }) => <blockquote className="border-l-4 border-primary pl-4 italic my-2">
                           {children}
-                        </blockquote>
+                        </blockquote>,
+                table: ({
+                  children
+                }) => <div className="overflow-x-auto my-3"><table className="min-w-full border-collapse border border-border text-sm">{children}</table></div>,
+                thead: ({
+                  children
+                }) => <thead className="bg-muted">{children}</thead>,
+                tbody: ({
+                  children
+                }) => <tbody>{children}</tbody>,
+                tr: ({
+                  children
+                }) => <tr className="border-b border-border">{children}</tr>,
+                th: ({
+                  children
+                }) => <th className="px-3 py-2 text-left font-semibold border border-border">{children}</th>,
+                td: ({
+                  children
+                }) => <td className="px-3 py-2 border border-border">{children}</td>,
               }}>
                     {displayContent}
                   </ReactMarkdown>
