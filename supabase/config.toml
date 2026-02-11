@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.ingest-maths-spec]
 verify_jwt = false
+
+[functions.generate-revision-guide]
+verify_jwt = false

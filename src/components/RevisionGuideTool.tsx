@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Search, BookOpen, ChevronRight, X, FileDown, Loader2 } from 'lucide-react';
+import { Search, BookOpen, ChevronRight, X, FileDown, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
@@ -20,6 +19,7 @@ interface ContentOption {
   id: string;
   label: string;
   enabled: boolean;
+  locked?: boolean; // greyed out, can't select
 }
 
 interface RevisionGuideToolProps {
@@ -28,11 +28,38 @@ interface RevisionGuideToolProps {
   tier?: 'free' | 'deluxe';
 }
 
-// Lazy imports for spec points
-function getSpecPoints(board: 'edexcel' | 'aqa' | 'ocr-cs'): SpecPoint[] {
-  // We'll import dynamically based on board
-  return [];
+// Match past paper questions to a spec code
+function getMatchedPastPapers(
+  board: string,
+  specCode: string,
+  questions: Array<{ paper: string; year: number; number: string; question: string; marks: number; specCodes: string[] }>
+): string {
+  const matched = questions.filter(q => q.specCodes.includes(specCode));
+  if (matched.length === 0) return '';
+
+  return matched
+    .map(q => `- **${q.year} ${q.paper} Q${q.number}** (${q.marks} marks): ${q.question}`)
+    .join('\n');
 }
+
+// Match diagrams to a spec point by keywords
+function getMatchedDiagrams(
+  specName: string,
+  specKeywords: string[],
+  diagramList: Array<{ id: string; title: string; keywords: string[]; imagePath: string }>
+): Array<{ title: string; imagePath: string }> {
+  const searchTerms = [...specKeywords, ...specName.toLowerCase().split(/[\s,()]+/)].filter(w => w.length > 2);
+
+  return diagramList.filter(d => {
+    return d.keywords.some(dk => {
+      const dkLower = dk.toLowerCase();
+      return searchTerms.some(st => dkLower.includes(st) || st.includes(dkLower));
+    });
+  });
+}
+
+const SUPABASE_URL = "https://xoipyycgycmpflfnrlty.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvaXB5eWNneWNtcGZsZm5ybHR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzkzMjUsImV4cCI6MjA2OTM1NTMyNX0.pU8Ej1aAvGoAQ6CuVZwvcCvWBxSGo61X16cfQxW7_bI";
 
 export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
   board,
@@ -44,33 +71,43 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
   const [selectedSpec, setSelectedSpec] = useState<SpecPoint | null>(null);
   const [specPoints, setSpecPoints] = useState<SpecPoint[]>([]);
   const [specLoaded, setSpecLoaded] = useState(false);
+  const [pastQuestions, setPastQuestions] = useState<any[]>([]);
+  const [diagramList, setDiagramList] = useState<any[]>([]);
   const [contentOptions, setContentOptions] = useState<ContentOption[]>([
     { id: 'exam_technique', label: 'Exam Technique', enabled: true },
     { id: 'past_papers', label: 'Past Paper Questions', enabled: true },
     { id: 'diagrams', label: 'Diagrams', enabled: true },
     { id: 'application', label: 'Application', enabled: true },
-    { id: 'mark_scheme', label: 'Mark Scheme', enabled: true },
+    { id: 'mark_scheme', label: 'Mark Scheme', enabled: false, locked: true },
   ]);
   const [generating, setGenerating] = useState(false);
   const [guideContent, setGuideContent] = useState<string | null>(null);
+  const [matchedDiagrams, setMatchedDiagrams] = useState<Array<{ title: string; imagePath: string }>>([]);
   const guideRef = useRef<HTMLDivElement>(null);
 
-  // Load spec points on mount
+  // Load spec points, past papers, and diagrams on mount
   React.useEffect(() => {
-    const loadSpecs = async () => {
+    const loadData = async () => {
       if (board === 'ocr-cs') {
-        const { OCR_CS_SPEC_POINTS } = await import('@/data/ocrCsPastPapers');
+        const { OCR_CS_SPEC_POINTS, OCR_CS_PAST_QUESTIONS } = await import('@/data/ocrCsPastPapers');
         setSpecPoints(OCR_CS_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords })));
+        setPastQuestions(OCR_CS_PAST_QUESTIONS);
+        const { csDiagrams } = await import('@/data/csDiagrams');
+        setDiagramList(csDiagrams);
       } else if (board === 'aqa') {
         const { AQA_SPEC_POINTS } = await import('@/data/aqaPastPapers');
         setSpecPoints(AQA_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords })));
+        const { diagrams } = await import('@/data/diagrams');
+        setDiagramList(diagrams);
       } else {
         const { EDEXCEL_SPEC_POINTS } = await import('@/data/edexcelPastPapers');
         setSpecPoints(EDEXCEL_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords })));
+        const { diagrams } = await import('@/data/diagrams');
+        setDiagramList(diagrams);
       }
       setSpecLoaded(true);
     };
-    loadSpecs();
+    loadData();
   }, [board]);
 
   const filteredSpecs = useMemo(() => {
@@ -86,11 +123,11 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
 
   const toggleOption = (id: string) => {
     setContentOptions(prev => prev.map(opt =>
-      opt.id === id ? { ...opt, enabled: !opt.enabled } : opt
+      opt.id === id && !opt.locked ? { ...opt, enabled: !opt.enabled } : opt
     ));
   };
 
-  const enabledOptions = contentOptions.filter(o => o.enabled);
+  const enabledOptions = contentOptions.filter(o => o.enabled && !o.locked);
 
   const handleGenerate = async () => {
     if (!selectedSpec || !productId) return;
@@ -99,50 +136,62 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
     setGuideContent(null);
 
     try {
-      const optionLabels = enabledOptions.map(o => o.label).join(', ');
-      const prompt = `Generate a comprehensive revision guide for spec point ${selectedSpec.code}: ${selectedSpec.name}.
+      // Client-side: match past papers to this spec code
+      const pastPaperContext = contentOptions.find(o => o.id === 'past_papers')?.enabled
+        ? getMatchedPastPapers(board, selectedSpec.code, pastQuestions)
+        : '';
 
-This guide should be structured as a complete study resource covering this specific topic. Include the following sections:
+      // Client-side: match diagrams to this spec point
+      const matched = contentOptions.find(o => o.id === 'diagrams')?.enabled
+        ? getMatchedDiagrams(selectedSpec.name, selectedSpec.keywords, diagramList)
+        : [];
+      setMatchedDiagrams(matched);
 
-1. **Key Knowledge** (MANDATORY) - Cover every detail of this spec point systematically. Use clear definitions, explanations, and examples.
+      const diagramContext = matched.length > 0
+        ? matched.map(d => `- ${d.title} (available as diagram image)`).join('\n')
+        : '';
 
-${enabledOptions.some(o => o.id === 'exam_technique') ? '2. **Exam Technique** - How to answer questions on this topic. Include command word tips, common pitfalls, and mark scheme expectations.' : ''}
-
-${enabledOptions.some(o => o.id === 'past_papers') ? '3. **Past Paper Questions** - List any relevant past paper questions from your training data that relate to this topic. Include the year and marks available.' : ''}
-
-${enabledOptions.some(o => o.id === 'diagrams') ? '4. **Diagrams** - Describe any relevant diagrams for this topic. Explain what should be drawn and labelled.' : ''}
-
-${enabledOptions.some(o => o.id === 'application') ? '5. **Real-World Application** - Provide real-world examples and case studies that demonstrate this concept in practice.' : ''}
-
-${enabledOptions.some(o => o.id === 'mark_scheme') ? '6. **Mark Scheme Pointers** - Key phrases and points that examiners look for. Include typical mark allocation breakdowns.' : ''}
-
-Format using clear markdown headings and bullet points. Be thorough and detailed.`;
-
+      // Get auth token
+      const { supabase } = await import('@/integrations/supabase/client');
       const { data: sessionData } = await supabase.auth.getSession();
+
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
       };
       if (sessionData.session?.access_token) {
         headers['Authorization'] = `Bearer ${sessionData.session.access_token}`;
       }
 
-      const { data, error } = await supabase.functions.invoke('rag-chat', {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-revision-guide`, {
+        method: 'POST',
         headers,
-        body: {
-          message: prompt,
+        body: JSON.stringify({
           product_id: productId,
+          spec_code: selectedSpec.code,
+          spec_name: selectedSpec.name,
+          board,
+          options: enabledOptions.map(o => o.id),
+          past_paper_context: pastPaperContext,
+          diagram_context: diagramContext,
           user_id: user?.id,
-          tier: tier,
-          history: [],
-        },
+        }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 429) {
+          toast.error(errorData.message || 'Rate limit reached. Try again later.');
+          return;
+        }
+        throw new Error(errorData.error || `Request failed with status ${response.status}`);
+      }
 
-      setGuideContent(data?.reply || data?.response || 'Unable to generate guide. Please try again.');
+      const data = await response.json();
+      setGuideContent(data.content || 'Unable to generate guide. Please try again.');
     } catch (err) {
       console.error('Error generating guide:', err);
-      toast.error('Failed to generate revision guide');
+      toast.error('Failed to generate revision guide. Please try again.');
     } finally {
       setGenerating(false);
     }
@@ -150,12 +199,27 @@ Format using clear markdown headings and bullet points. Be thorough and detailed
 
   const handleDownload = () => {
     if (!guideContent || !guideRef.current) return;
-    
+
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       toast.error('Please allow pop-ups to download the guide');
       return;
     }
+
+    // Build diagram images HTML
+    const diagramImagesHtml = matchedDiagrams.length > 0
+      ? `<div class="diagrams-section">
+          <h2>📊 Relevant Diagrams</h2>
+          ${matchedDiagrams.map(d => `
+            <div class="diagram-card">
+              <h3>${d.title}</h3>
+              <img src="${window.location.origin}${d.imagePath}" alt="${d.title}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0;" />
+            </div>
+          `).join('')}
+        </div>`
+      : '';
+
+    const boardLabel = board === 'ocr-cs' ? 'OCR A Level Computer Science' : board === 'aqa' ? 'AQA A Level Economics' : 'Edexcel A Level Economics';
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -163,30 +227,64 @@ Format using clear markdown headings and bullet points. Be thorough and detailed
       <head>
         <title>Revision Guide - ${selectedSpec?.code}: ${selectedSpec?.name}</title>
         <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a; line-height: 1.6; }
-          h1 { color: #7c3aed; border-bottom: 3px solid #7c3aed; padding-bottom: 8px; font-size: 24px; }
-          h2 { color: #6d28d9; margin-top: 28px; font-size: 20px; }
-          h3 { color: #5b21b6; font-size: 16px; }
+          * { box-sizing: border-box; }
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            max-width: 800px; margin: 0 auto; padding: 40px 20px; 
+            color: #1a1a1a; line-height: 1.7; background: #fff;
+          }
+          .header-bar {
+            background: linear-gradient(135deg, #9333EA, #7C3AED, #6D28D9, #A855F7);
+            height: 6px; border-radius: 3px; margin-bottom: 24px;
+          }
+          .header { text-align: center; margin-bottom: 32px; }
+          .header img { height: 40px; margin-bottom: 12px; }
+          .header h1 { 
+            color: #6D28D9; font-size: 22px; margin: 0 0 4px 0;
+          }
+          .header .board-label { 
+            color: #7C3AED; font-size: 14px; font-weight: 500; margin: 0 0 4px 0; 
+          }
+          .header .subtitle { color: #6b7280; font-size: 12px; margin: 0; }
+          h2 { 
+            color: #6D28D9; margin-top: 32px; font-size: 18px; 
+            border-bottom: 2px solid #E9D5FF; padding-bottom: 6px;
+          }
+          h3 { color: #7C3AED; font-size: 15px; margin-top: 20px; }
+          h4 { color: #5b21b6; font-size: 14px; }
           ul, ol { padding-left: 24px; }
           li { margin-bottom: 4px; }
-          code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+          code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
           pre { background: #f3f4f6; padding: 16px; border-radius: 8px; overflow-x: auto; }
-          blockquote { border-left: 4px solid #7c3aed; margin-left: 0; padding-left: 16px; color: #4b5563; }
+          blockquote { border-left: 4px solid #7C3AED; margin-left: 0; padding-left: 16px; color: #4b5563; }
           strong { color: #1e1b4b; }
-          .header { text-align: center; margin-bottom: 32px; }
-          .header p { color: #6b7280; font-size: 14px; }
-          .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 12px; }
-          @media print { body { padding: 20px; } }
+          table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+          th, td { border: 1px solid #e5e7eb; padding: 8px 12px; text-align: left; font-size: 13px; }
+          th { background: #f3e8ff; color: #5b21b6; font-weight: 600; }
+          .diagram-card { margin: 16px 0; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; }
+          .diagram-card h3 { margin-top: 0; font-size: 14px; }
+          .footer { 
+            text-align: center; margin-top: 48px; padding-top: 20px; 
+            border-top: 2px solid #E9D5FF; color: #9ca3af; font-size: 11px; 
+          }
+          @media print { 
+            body { padding: 20px; } 
+            .diagram-card { page-break-inside: avoid; }
+          }
         </style>
       </head>
       <body>
+        <div class="header-bar"></div>
         <div class="header">
-          <h1>📚 Revision Guide</h1>
-          <p>${selectedSpec?.code}: ${selectedSpec?.name}</p>
-          <p>Generated by A* AI</p>
+          <img src="${window.location.origin}/lovable-uploads/deluxe-assistant-new.png" alt="A* AI" onerror="this.style.display='none'" />
+          <p class="board-label">${boardLabel}</p>
+          <h1>${selectedSpec?.code}: ${selectedSpec?.name}</h1>
+          <p class="subtitle">Revision Guide • Generated by A* AI</p>
         </div>
         ${guideRef.current.innerHTML}
+        ${diagramImagesHtml}
         <div class="footer">
+          <div class="header-bar" style="margin-bottom: 12px;"></div>
           <p>Generated by A* AI • astarai.co.uk</p>
         </div>
       </body>
@@ -200,6 +298,7 @@ Format using clear markdown headings and bullet points. Be thorough and detailed
     setGuideContent(null);
     setSelectedSpec(null);
     setSearchQuery('');
+    setMatchedDiagrams([]);
   };
 
   const boardLabel = board === 'ocr-cs' ? 'OCR CS' : board === 'aqa' ? 'AQA' : 'Edexcel';
@@ -225,6 +324,19 @@ Format using clear markdown headings and bullet points. Be thorough and detailed
             {guideContent}
           </ReactMarkdown>
         </div>
+
+        {/* Show matched diagrams inline */}
+        {matchedDiagrams.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">📊 Relevant Diagrams</p>
+            {matchedDiagrams.map((d, i) => (
+              <div key={i} className="rounded-lg border border-border overflow-hidden">
+                <img src={d.imagePath} alt={d.title} className="w-full h-auto" />
+                <p className="text-xs text-center py-1 text-muted-foreground">{d.title}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleDownload} className="flex-1">
@@ -315,14 +427,19 @@ Format using clear markdown headings and bullet points. Be thorough and detailed
                 <button
                   key={opt.id}
                   onClick={() => toggleOption(opt.id)}
+                  disabled={opt.locked}
                   className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
-                    opt.enabled
-                      ? 'bg-primary/15 text-primary border border-primary/30'
-                      : 'bg-muted text-muted-foreground border border-border line-through'
+                    opt.locked
+                      ? 'bg-muted/50 text-muted-foreground/50 border border-border/50 cursor-not-allowed'
+                      : opt.enabled
+                        ? 'bg-primary/15 text-primary border border-primary/30'
+                        : 'bg-muted text-muted-foreground border border-border line-through'
                   }`}
                 >
+                  {opt.locked && <Lock className="w-3 h-3" />}
                   {opt.label}
-                  {opt.enabled && (
+                  {opt.locked && <span className="text-[10px] opacity-60">(Coming soon)</span>}
+                  {opt.enabled && !opt.locked && (
                     <X className="w-3 h-3 hover:text-destructive" />
                   )}
                 </button>
