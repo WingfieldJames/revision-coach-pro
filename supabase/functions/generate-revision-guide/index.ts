@@ -162,46 +162,43 @@ The student has selected spec point **${spec_code}: ${spec_name}**.
 
 Generate a detailed, exam-focused revision guide. Structure it EXACTLY as follows:
 
-## 📘 ${spec_code}: ${spec_name}
+Start with the spec point content. Break it down into logical sub-topics with clear bold sub-headings. For example, if the spec point covers "traversal methods", create separate sub-headings for "Pre-order Traversal", "In-order Traversal", "Post-order Traversal" etc.
 
-### Key Knowledge
+For each sub-topic:
+- Explain every concept, definition, and mechanism thoroughly
+- Use precise technical language that matches ${boardLabel} mark scheme expectations
+- Include examples where helpful
+- Use indented bullet points for detail
 
-Cover EVERY detail of this spec point systematically. This is the most important section. Be thorough - explain every concept, definition, and mechanism that falls under this spec point. Use clear explanations with examples. Structure with sub-headings where appropriate. This should be detailed enough that a student could learn the entire topic from this section alone.
-
-For ${boardLabel}, tailor your explanations to exactly what the exam board expects students to know. Use precise technical language that matches mark scheme expectations.`;
-
-    if (diagram_context) {
-      prompt += `\n\n### 📊 Relevant Diagrams\n\nThe following diagrams are available and relevant to this topic. Reference them in your explanation and describe what each diagram shows and how to draw/label it in an exam:\n${diagram_context}`;
-    }
+${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them INLINE within your explanation where they are relevant - do NOT put them in a separate section. Reference them naturally as you explain concepts. If a diagram helps illustrate a point, mention it right there. Only use diagrams that genuinely help explain the content - if none are relevant, don't force them in.\n\nAvailable diagrams:\n${diagram_context}\n\nWhen referencing a diagram, write: [DIAGRAM: exact diagram title here]\n` : ""}`;
 
     if (options.includes("application")) {
-      prompt += `\n\n### 🌍 Real-World Application\n\nProvide real-world examples and case studies that demonstrate this concept in practice. Include current/recent examples where possible.`;
+      prompt += `\n\nAfter the spec point explanation, include a section titled "Real-World Application" (as a ## heading). Provide real-world examples and case studies that demonstrate these concepts in practice.`;
     }
 
     if (options.includes("exam_technique")) {
-      prompt += `\n\n### 🎯 Exam Technique\n\nProvide specific exam technique advice for questions on this topic. Include:
-- **Command words**: Explain what each relevant command word means and how to structure answers (e.g., 'Describe' = what happens step by step, 'Explain' = what + why, 'Evaluate/Discuss' = both sides + conclusion)
-- **Timing guidance**: How long to spend on different mark questions  
-- **Key phrases**: Exact technical phrases that examiners look for in mark schemes
-- **Common mistakes**: What students typically get wrong on this topic
-- **Mark allocation**: How marks are typically distributed for this type of question
-- **Answer structure**: How to structure responses for maximum marks`;
+      prompt += `\n\nInclude a section titled "Exam Technique" (as a ## heading). Provide specific exam technique advice:
+- Command words: what each relevant command word means and how to structure answers (e.g., 'Describe' = what happens step by step, 'Explain' = what + why, 'Evaluate/Discuss' = both sides + conclusion)
+- Timing guidance: how long to spend on different mark questions
+- Key phrases examiners look for in mark schemes
+- Common mistakes students make on this topic
+- How to structure responses for maximum marks`;
     }
 
     if (options.includes("past_papers") && past_paper_context) {
-      prompt += `\n\n### 📝 Past Paper Questions\n\nHere are real past paper questions that have been asked on this topic. For each question, explain what the examiner is looking for:\n\n${past_paper_context}\n\nFor each question listed above, briefly note:
-- What the question is testing
-- Key points needed for full marks
-- Any traps or common mistakes`;
+      prompt += `\n\nInclude a section titled "Real Past Paper Questions" (as a ## heading). List the following real past paper questions:\n\n${past_paper_context}\n\nFor each question, note what the examiner is looking for and key points needed for full marks.`;
     }
 
-    prompt += `\n\nIMPORTANT FORMATTING RULES:
-- Use clear markdown formatting with ## for main sections and ### for sub-sections
-- Use bullet points and numbered lists for clarity
-- Bold key terms and definitions
-- Keep language precise and exam-focused
-- Do NOT include a title - it will be added automatically
-- Start directly with the "Key Knowledge" section`;
+    prompt += `\n\nCRITICAL FORMATTING RULES:
+- Do NOT include any overall title - it will be added automatically by the system
+- Do NOT use emoji anywhere in headings or text
+- Use ## for main section headings (like "Exam Technique", "Real Past Paper Questions")
+- Use ### for sub-topic headings within the spec explanation
+- Use bold for key terms and definitions
+- Use indented bullet points for detailed explanations
+- Leave clear spacing between different sections
+- Start directly with the first sub-topic of the spec point explanation
+- Keep language precise, technical, and exam-focused`;
 
     // Build system prompt
     let systemPrompt = systemPromptBase || `You are an expert ${boardLabel} tutor creating revision materials.`;
