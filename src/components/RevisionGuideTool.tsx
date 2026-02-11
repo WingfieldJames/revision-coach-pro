@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Search, BookOpen, ChevronRight, X, FileDown, Loader2, Lock, Eye } from 'lucide-react';
+import { Search, BookOpen, ChevronRight, X, FileDown, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -115,7 +115,6 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
   const [generating, setGenerating] = useState(false);
   const [guideContent, setGuideContent] = useState<string | null>(null);
   const [matchedDiagrams, setMatchedDiagrams] = useState<Array<{ title: string; imagePath: string }>>([]);
-  const [viewMode, setViewMode] = useState<'buttons' | 'view'>('buttons');
   const guideRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -165,7 +164,6 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
     if (!selectedSpec || !productId) return;
     setGenerating(true);
     setGuideContent(null);
-    setViewMode('buttons');
 
     try {
       const pastPaperContext = contentOptions.find(o => o.id === 'past_papers')?.enabled
@@ -229,27 +227,84 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
   const handleDownload = () => {
     if (!guideContent || !selectedSpec) return;
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
+    const boardLabel = BOARD_LABELS[board] || board;
+
+    // Convert markdown to HTML manually
+    const markdownToHtml = (md: string): string => {
+      let html = md;
+      // Process diagram placeholders
+      html = html.replace(/\[DIAGRAM:\s*(.+?)\]/g, (match, title) => {
+        const diagram = matchedDiagrams.find(d =>
+          d.title.toLowerCase().includes(title.toLowerCase().trim()) ||
+          title.toLowerCase().trim().includes(d.title.toLowerCase())
+        );
+        if (diagram) {
+          return `<div class="diagram-inline"><img src="${window.location.origin}${diagram.imagePath}" alt="${diagram.title}" /><p class="diagram-caption">${diagram.title}</p></div>`;
+        }
+        return '';
+      });
+      // Headers
+      html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+      // Bold and italic
+      html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      // Code blocks
+      html = html.replace(/```[\s\S]*?```/g, (match) => {
+        const code = match.replace(/```\w*\n?/, '').replace(/```$/, '');
+        return `<pre><code>${code}</code></pre>`;
+      });
+      // Inline code
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // Unordered lists - process line by line
+      const lines = html.split('\n');
+      let result: string[] = [];
+      let inList = false;
+      let listIndent = 0;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const listMatch = line.match(/^(\s*)[-*] (.+)$/);
+        if (listMatch) {
+          const indent = listMatch[1].length;
+          if (!inList) {
+            result.push('<ul>');
+            inList = true;
+            listIndent = indent;
+          } else if (indent > listIndent) {
+            result.push('<ul>');
+            listIndent = indent;
+          }
+          result.push(`<li>${listMatch[2]}</li>`);
+        } else {
+          if (inList) {
+            result.push('</ul>');
+            inList = false;
+            listIndent = 0;
+          }
+          // Paragraphs - wrap non-empty, non-tag lines
+          if (line.trim() && !line.trim().startsWith('<')) {
+            result.push(`<p>${line}</p>`);
+          } else {
+            result.push(line);
+          }
+        }
+      }
+      if (inList) result.push('</ul>');
+      return result.join('\n');
+    };
+
+    const htmlContent = markdownToHtml(guideContent);
+
+    const pdfWindow = window.open('', '_blank');
+    if (!pdfWindow) {
       toast.error('Please allow pop-ups to download the guide');
       return;
     }
 
-    const boardLabel = BOARD_LABELS[board] || board;
-
-    // Process diagram placeholders for print
-    let printContent = guideContent.replace(/\[DIAGRAM:\s*(.+?)\]/g, (match, title) => {
-      const diagram = matchedDiagrams.find(d =>
-        d.title.toLowerCase().includes(title.toLowerCase().trim()) ||
-        title.toLowerCase().trim().includes(d.title.toLowerCase())
-      );
-      if (diagram) {
-        return `<div class="diagram-inline"><img src="${window.location.origin}${diagram.imagePath}" alt="${diagram.title}" /><p class="diagram-caption">${diagram.title}</p></div>`;
-      }
-      return '';
-    });
-
-    printWindow.document.write(`
+    pdfWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
@@ -273,6 +328,7 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
             border-bottom: 3px solid #7C3AED;
           }
           .generated-by { font-size: 11px; color: #9ca3af; margin-bottom: 20px; }
+          h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-top: 24px; margin-bottom: 8px; }
           h2 {
             font-size: 17px; font-weight: 700; color: #5b21b6;
             margin-top: 28px; margin-bottom: 12px;
@@ -280,10 +336,11 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
           }
           h3 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-top: 20px; margin-bottom: 8px; }
           h4 { font-size: 13px; font-weight: 600; color: #374151; margin-top: 14px; margin-bottom: 6px; }
-          p { margin-bottom: 8px; font-size: 13px; }
-          ul, ol { padding-left: 24px; margin-bottom: 10px; }
-          li { margin-bottom: 4px; font-size: 13px; }
+          p { margin-bottom: 10px; font-size: 13px; line-height: 1.7; }
+          ul, ol { padding-left: 24px; margin-bottom: 12px; }
+          li { margin-bottom: 5px; font-size: 13px; line-height: 1.6; }
           strong { color: #1e1b4b; }
+          em { font-style: italic; }
           code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
           pre { background: #f3f4f6; padding: 14px; border-radius: 8px; overflow-x: auto; margin: 10px 0; }
           blockquote { border-left: 4px solid #7C3AED; margin: 10px 0; padding-left: 14px; color: #4b5563; }
@@ -308,23 +365,17 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
         <div class="main-title">${boardLabel}</div>
         <div class="spec-title">${selectedSpec.code}: ${selectedSpec.name}</div>
         <div class="generated-by">Revision Guide &middot; Generated by A* AI</div>
-        <div id="content">${printContent}</div>
+        ${htmlContent}
         <div class="footer">
           <p>Generated by A* AI &middot; astarai.co.uk</p>
         </div>
       </body>
       </html>
     `);
-    printWindow.document.close();
+    pdfWindow.document.close();
 
-    // Convert markdown to HTML for print using a simple approach
-    import('react-dom/server').then(({ renderToString }) => {
-      const React = require('react');
-      // For the print window, we already have the content - trigger print
-      setTimeout(() => printWindow.print(), 600);
-    }).catch(() => {
-      setTimeout(() => printWindow.print(), 600);
-    });
+    // Auto-trigger Save as PDF via print dialog
+    setTimeout(() => pdfWindow.print(), 800);
   };
 
   const handleReset = () => {
@@ -332,139 +383,12 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
     setSelectedSpec(null);
     setSearchQuery('');
     setMatchedDiagrams([]);
-    setViewMode('buttons');
   };
 
   const boardLabel = BOARD_LABELS[board] || board;
   const shortBoardLabel = board === 'ocr-cs' ? 'OCR CS' : board === 'aqa' ? 'AQA' : 'Edexcel';
 
-  // Full-screen A4 view
-  if (guideContent && viewMode === 'view') {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/60 overflow-y-auto flex justify-center py-8 px-4" onClick={() => setViewMode('buttons')}>
-        <div className="w-full max-w-[210mm] relative" onClick={e => e.stopPropagation()}>
-          {/* Close / back button */}
-          <div className="flex justify-end mb-3 gap-2 sticky top-0 z-10">
-            <Button variant="outline" size="sm" onClick={handleDownload} className="bg-white text-foreground shadow-md">
-              <FileDown className="w-4 h-4 mr-1.5" />
-              Download PDF
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setViewMode('buttons')} className="bg-white text-foreground shadow-md">
-              <X className="w-4 h-4 mr-1.5" />
-              Close
-            </Button>
-          </div>
-
-          {/* A4 pages */}
-          <div
-            ref={guideRef}
-            className="bg-white text-gray-900 shadow-2xl rounded-sm"
-            style={{
-              width: '210mm',
-              minHeight: '297mm',
-              padding: '20mm 25mm',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-              lineHeight: 1.7,
-              fontSize: '13px',
-            }}
-          >
-            {/* Logo top-left */}
-            <img
-              src="/lovable-uploads/deluxe-assistant-new.png"
-              alt="A* AI"
-              style={{ height: '36px', marginBottom: '8px' }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
-
-            {/* Main title */}
-            <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>
-              {boardLabel}
-            </h1>
-
-            {/* Spec point */}
-            <h2 style={{
-              fontSize: '17px',
-              fontWeight: 700,
-              color: '#1a1a1a',
-              marginBottom: '16px',
-              paddingBottom: '12px',
-              borderBottom: '3px solid #7C3AED',
-            }}>
-              {selectedSpec?.code}: {selectedSpec?.name}
-            </h2>
-
-            <p style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '20px' }}>
-              Revision Guide &middot; Generated by A* AI
-            </p>
-
-            {/* Guide content */}
-            <div className="prose prose-sm max-w-none
-              [&_h2]:text-[17px] [&_h2]:font-bold [&_h2]:text-purple-800 [&_h2]:mt-7 [&_h2]:mb-3 [&_h2]:pb-1.5 [&_h2]:border-b-2 [&_h2]:border-purple-200
-              [&_h3]:text-[14px] [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:mt-5 [&_h3]:mb-2
-              [&_h4]:text-[13px] [&_h4]:font-semibold [&_h4]:text-gray-700 [&_h4]:mt-3.5 [&_h4]:mb-1.5
-              [&_p]:text-[13px] [&_p]:text-gray-800 [&_p]:mb-2
-              [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:text-[13px] [&_li]:text-gray-800 [&_li]:mb-1
-              [&_strong]:text-gray-950
-              [&_blockquote]:border-l-4 [&_blockquote]:border-purple-500 [&_blockquote]:pl-3.5 [&_blockquote]:text-gray-600
-              [&_table]:w-full [&_table]:border-collapse [&_th]:bg-purple-50 [&_th]:text-purple-800 [&_th]:font-semibold [&_th]:border [&_th]:border-gray-200 [&_th]:px-2.5 [&_th]:py-2 [&_th]:text-xs [&_td]:border [&_td]:border-gray-200 [&_td]:px-2.5 [&_td]:py-2 [&_td]:text-xs
-              [&_code]:bg-gray-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs
-              [&_pre]:bg-gray-100 [&_pre]:p-3.5 [&_pre]:rounded-lg [&_pre]:overflow-x-auto
-            ">
-              <GuideMarkdown content={guideContent} diagrams={matchedDiagrams} />
-            </div>
-
-            {/* Footer */}
-            <div style={{
-              textAlign: 'center',
-              marginTop: '40px',
-              paddingTop: '16px',
-              borderTop: '2px solid #E9D5FF',
-              fontSize: '11px',
-              color: '#9ca3af',
-            }}>
-              Generated by A* AI &middot; astarai.co.uk
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Button selection view (after generation)
-  if (guideContent && viewMode === 'buttons') {
-    return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-gradient-brand">
-            <BookOpen className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground text-sm">Revision Guide Ready</h3>
-            <p className="text-xs text-muted-foreground truncate">
-              {selectedSpec?.code}: {selectedSpec?.name}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Button onClick={() => setViewMode('view')} className="w-full bg-gradient-brand hover:opacity-90 text-primary-foreground" size="sm">
-            <Eye className="w-4 h-4 mr-2" />
-            View Here
-          </Button>
-          <Button variant="outline" onClick={handleDownload} className="w-full" size="sm">
-            <FileDown className="w-4 h-4 mr-2" />
-            Download PDF
-          </Button>
-        </div>
-
-        <Button variant="ghost" size="sm" onClick={handleReset} className="w-full text-muted-foreground text-xs">
-          Generate New Guide
-        </Button>
-      </div>
-    );
-  }
-
-  // Search & options view
+  // Main view - always shows search, spec, options + download button when guide is ready
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
@@ -488,6 +412,7 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
           onChange={(e) => {
             setSearchQuery(e.target.value);
             setSelectedSpec(null);
+            setGuideContent(null);
           }}
           placeholder="Search a topic or spec point..."
           className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -501,7 +426,7 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
           {filteredSpecs.map((spec) => (
             <button
               key={spec.code}
-              onClick={() => { setSelectedSpec(spec); setSearchQuery(spec.name); }}
+              onClick={() => { setSelectedSpec(spec); setSearchQuery(spec.name); setGuideContent(null); }}
               className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-primary/10 transition-colors flex items-center gap-2 group"
             >
               <BookOpen className="w-3.5 h-3.5 text-primary flex-shrink-0" />
@@ -525,7 +450,7 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
               <span className="text-xs text-foreground ml-1.5">{selectedSpec.name}</span>
             </div>
             <button
-              onClick={() => { setSelectedSpec(null); setSearchQuery(''); }}
+              onClick={() => { setSelectedSpec(null); setSearchQuery(''); setGuideContent(null); }}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
               ✕
@@ -562,27 +487,43 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
         </>
       )}
 
-      {/* Generate button */}
-      <Button
-        onClick={handleGenerate}
-        disabled={!selectedSpec || generating}
-        className="w-full bg-gradient-brand hover:opacity-90 text-primary-foreground"
-        size="sm"
-      >
-        {generating ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Generating Guide...
-          </>
-        ) : (
-          <>
-            <BookOpen className="w-4 h-4 mr-2" />
-            Generate Revision Guide
-          </>
-        )}
-      </Button>
+      {/* Generate or Download button */}
+      {guideContent ? (
+        <div className="space-y-2">
+          <Button
+            onClick={handleDownload}
+            className="w-full bg-gradient-brand hover:opacity-90 text-primary-foreground"
+            size="sm"
+          >
+            <FileDown className="w-4 h-4 mr-2" />
+            Download PDF
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleReset} className="w-full text-muted-foreground text-xs">
+            Generate New Guide
+          </Button>
+        </div>
+      ) : (
+        <Button
+          onClick={handleGenerate}
+          disabled={!selectedSpec || generating}
+          className="w-full bg-gradient-brand hover:opacity-90 text-primary-foreground"
+          size="sm"
+        >
+          {generating ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Generating Guide...
+            </>
+          ) : (
+            <>
+              <BookOpen className="w-4 h-4 mr-2" />
+              Generate Revision Guide
+            </>
+          )}
+        </Button>
+      )}
 
-      {!searchQuery && (
+      {!searchQuery && !guideContent && (
         <p className="text-xs text-center text-muted-foreground">
           Search for a topic to generate your personalised revision guide
         </p>
