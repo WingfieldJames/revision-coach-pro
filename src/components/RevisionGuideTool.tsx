@@ -131,8 +131,9 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
         const { diagrams } = await import('@/data/diagrams');
         setDiagramList(diagrams);
       } else {
-        const { EDEXCEL_SPEC_POINTS } = await import('@/data/edexcelPastPapers');
+        const { EDEXCEL_SPEC_POINTS, EDEXCEL_PAST_QUESTIONS } = await import('@/data/edexcelPastPapers');
         setSpecPoints(EDEXCEL_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords })));
+        setPastQuestions(EDEXCEL_PAST_QUESTIONS);
         const { diagrams } = await import('@/data/diagrams');
         setDiagramList(diagrams);
       }
@@ -224,7 +225,7 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!guideContent || !selectedSpec) return;
 
     const boardLabel = BOARD_LABELS[board] || board;
@@ -232,7 +233,6 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
     // Convert markdown to HTML manually
     const markdownToHtml = (md: string): string => {
       let html = md;
-      // Process diagram placeholders
       html = html.replace(/\[DIAGRAM:\s*(.+?)\]/g, (match, title) => {
         const diagram = matchedDiagrams.find(d =>
           d.title.toLowerCase().includes(title.toLowerCase().trim()) ||
@@ -243,23 +243,18 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
         }
         return '';
       });
-      // Headers
       html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
       html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
       html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
       html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-      // Bold and italic
       html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
       html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-      // Code blocks
       html = html.replace(/```[\s\S]*?```/g, (match) => {
         const code = match.replace(/```\w*\n?/, '').replace(/```$/, '');
         return `<pre><code>${code}</code></pre>`;
       });
-      // Inline code
       html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-      // Unordered lists - process line by line
       const lines = html.split('\n');
       let result: string[] = [];
       let inList = false;
@@ -284,7 +279,6 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
             inList = false;
             listIndent = 0;
           }
-          // Paragraphs - wrap non-empty, non-tag lines
           if (line.trim() && !line.trim().startsWith('<')) {
             result.push(`<p>${line}</p>`);
           } else {
@@ -298,84 +292,88 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
 
     const htmlContent = markdownToHtml(guideContent);
 
-    const pdfWindow = window.open('', '_blank');
-    if (!pdfWindow) {
-      toast.error('Please allow pop-ups to download the guide');
-      return;
+    // Convert the logo to a base64 data URL for embedding in the PDF
+    let logoDataUrl = '';
+    try {
+      const logoResponse = await fetch('/logos/a-star-logo-pdf.png');
+      const logoBlob = await logoResponse.blob();
+      logoDataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(logoBlob);
+      });
+    } catch (e) {
+      console.error('Failed to load logo:', e);
     }
 
-    pdfWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Revision Guide - ${selectedSpec.code}: ${selectedSpec.name}</title>
+    // Create a hidden container for PDF rendering
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '210mm';
+    container.innerHTML = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; line-height: 1.7; padding: 10px;">
         <style>
-          @page { size: A4; margin: 20mm 25mm; }
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            color: #1a1a1a; line-height: 1.7; background: #fff;
-            max-width: 210mm; margin: 0 auto; padding: 20mm 25mm;
-          }
-          .logo { height: 36px; margin-bottom: 8px; }
-          .main-title {
-            font-size: 22px; font-weight: 700; color: #1a1a1a;
-            margin-bottom: 4px;
-          }
-          .spec-title {
-            font-size: 17px; font-weight: 700; color: #1a1a1a;
-            margin-bottom: 16px; padding-bottom: 12px;
-            border-bottom: 3px solid #7C3AED;
-          }
-          .generated-by { font-size: 11px; color: #9ca3af; margin-bottom: 20px; }
-          h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-top: 24px; margin-bottom: 8px; }
-          h2 {
-            font-size: 17px; font-weight: 700; color: #5b21b6;
-            margin-top: 28px; margin-bottom: 12px;
-            padding-bottom: 6px; border-bottom: 2px solid #E9D5FF;
-          }
-          h3 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-top: 20px; margin-bottom: 8px; }
-          h4 { font-size: 13px; font-weight: 600; color: #374151; margin-top: 14px; margin-bottom: 6px; }
-          p { margin-bottom: 10px; font-size: 13px; line-height: 1.7; }
-          ul, ol { padding-left: 24px; margin-bottom: 12px; }
-          li { margin-bottom: 5px; font-size: 13px; line-height: 1.6; }
-          strong { color: #1e1b4b; }
-          em { font-style: italic; }
-          code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
-          pre { background: #f3f4f6; padding: 14px; border-radius: 8px; overflow-x: auto; margin: 10px 0; }
-          blockquote { border-left: 4px solid #7C3AED; margin: 10px 0; padding-left: 14px; color: #4b5563; }
-          table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-          th, td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; font-size: 12px; }
-          th { background: #f3e8ff; color: #5b21b6; font-weight: 600; }
-          .diagram-inline { margin: 14px 0; text-align: center; }
-          .diagram-inline img { max-width: 80%; height: auto; border-radius: 8px; border: 1px solid #e5e7eb; }
-          .diagram-caption { font-size: 11px; color: #6b7280; margin-top: 4px; font-style: italic; }
-          .footer {
-            text-align: center; margin-top: 40px; padding-top: 16px;
-            border-top: 2px solid #E9D5FF; font-size: 11px; color: #9ca3af;
-          }
-          @media print {
-            body { padding: 0; }
-            .diagram-inline { page-break-inside: avoid; }
-          }
+          .pdf-content .logo { height: 48px; margin-bottom: 8px; }
+          .pdf-content .main-title { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+          .pdf-content .spec-title { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 3px solid #7C3AED; }
+          .pdf-content .generated-by { font-size: 11px; color: #9ca3af; margin-bottom: 20px; }
+          .pdf-content h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-top: 24px; margin-bottom: 8px; }
+          .pdf-content h2 { font-size: 17px; font-weight: 700; color: #5b21b6; margin-top: 28px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #E9D5FF; }
+          .pdf-content h3 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-top: 20px; margin-bottom: 8px; }
+          .pdf-content h4 { font-size: 13px; font-weight: 600; color: #374151; margin-top: 14px; margin-bottom: 6px; }
+          .pdf-content p { margin-bottom: 10px; font-size: 13px; line-height: 1.7; }
+          .pdf-content ul, .pdf-content ol { padding-left: 24px; margin-bottom: 12px; }
+          .pdf-content li { margin-bottom: 5px; font-size: 13px; line-height: 1.6; }
+          .pdf-content strong { color: #1e1b4b; }
+          .pdf-content code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+          .pdf-content pre { background: #f3f4f6; padding: 14px; border-radius: 8px; overflow-x: auto; margin: 10px 0; }
+          .pdf-content .diagram-inline { margin: 14px 0; text-align: center; }
+          .pdf-content .diagram-inline img { max-width: 80%; height: auto; border-radius: 8px; border: 1px solid #e5e7eb; }
+          .pdf-content .diagram-caption { font-size: 11px; color: #6b7280; margin-top: 4px; font-style: italic; }
+          .pdf-content .footer { text-align: center; margin-top: 40px; padding-top: 16px; border-top: 2px solid #E9D5FF; font-size: 11px; color: #9ca3af; }
+          .pdf-content table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+          .pdf-content th, .pdf-content td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; font-size: 12px; }
+          .pdf-content th { background: #f3e8ff; color: #5b21b6; font-weight: 600; }
         </style>
-      </head>
-      <body>
-        <img src="${window.location.origin}/lovable-uploads/deluxe-assistant-new.png" alt="A* AI" class="logo" onerror="this.style.display='none'" />
-        <div class="main-title">${boardLabel}</div>
-        <div class="spec-title">${selectedSpec.code}: ${selectedSpec.name}</div>
-        <div class="generated-by">Revision Guide &middot; Generated by A* AI</div>
-        ${htmlContent}
-        <div class="footer">
-          <p>Generated by A* AI &middot; astarai.co.uk</p>
+        <div class="pdf-content">
+          ${logoDataUrl ? `<img src="${logoDataUrl}" alt="A* AI" class="logo" />` : ''}
+          <div class="main-title">${boardLabel}</div>
+          <div class="spec-title">${selectedSpec.code}: ${selectedSpec.name}</div>
+          <div class="generated-by">Revision Guide &middot; Generated by A* AI</div>
+          ${htmlContent}
+          <div class="footer">
+            <p>Generated by A* AI &middot; astarai.co.uk</p>
+          </div>
         </div>
-      </body>
-      </html>
-    `);
-    pdfWindow.document.close();
+      </div>
+    `;
+    document.body.appendChild(container);
 
-    // Auto-trigger Save as PDF via print dialog
-    setTimeout(() => pdfWindow.print(), 800);
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const filename = `Revision-Guide-${selectedSpec.code}-${selectedSpec.name.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+      
+      await html2pdf()
+        .set({
+          margin: [15, 20, 15, 20],
+          filename,
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+        })
+        .from(container.querySelector('.pdf-content'))
+        .save();
+
+      toast.success('PDF downloaded successfully!');
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      toast.error('Failed to generate PDF. Please try again.');
+    } finally {
+      document.body.removeChild(container);
+    }
   };
 
   const handleReset = () => {
