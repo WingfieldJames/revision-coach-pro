@@ -180,30 +180,12 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
       return;
     }
 
-    // For free tier, check and increment usage
+    // For free tier, check usage limit before proceeding
     if (tier === 'free' && user) {
-      try {
-        const { data, error } = await supabase.rpc('increment_tool_usage', {
-          p_user_id: user.id,
-          p_product_id: productId || null,
-          p_tool_type: 'diagram_generator',
-          p_limit: FREE_MONTHLY_DIAGRAM_LIMIT
-        });
-
-        if (error) {
-          console.error('Error incrementing usage:', error);
-        } else if (data) {
-          const typedData = data as unknown as IncrementToolUsageResponse;
-          if (typedData.exceeded) {
-            setMonthlyUsage(typedData.count);
-            toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
-            return;
-          }
-          // Don't update monthlyUsage here - it will refresh on next component mount
-          // This prevents the limit screen from flashing during the action
-        }
-      } catch (err) {
-        console.error('Usage tracking error:', err);
+      if (monthlyUsage >= FREE_MONTHLY_DIAGRAM_LIMIT) {
+        setMonthlyUsage(monthlyUsage);
+        toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
+        return;
       }
     }
 
@@ -221,17 +203,38 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
         return;
       }
 
+      let actionSucceeded = false;
+
       if (data?.diagramId) {
         // Search in the appropriate diagram set
         const diagramSet = subject === 'cs' ? csDiagrams : diagrams;
         const found = diagramSet.find(d => d.id === data.diagramId);
         if (found) {
           setMatchedDiagram(found);
+          actionSucceeded = true;
         } else {
           setNoMatch(true);
         }
       } else {
         setNoMatch(true);
+      }
+
+      // Only increment usage AFTER successful action
+      if (actionSucceeded && tier === 'free' && user) {
+        try {
+          const { data: usageData, error: usageError } = await supabase.rpc('increment_tool_usage', {
+            p_user_id: user.id,
+            p_product_id: productId || null,
+            p_tool_type: 'diagram_generator',
+            p_limit: FREE_MONTHLY_DIAGRAM_LIMIT
+          });
+          if (!usageError && usageData) {
+            const typedData = usageData as unknown as IncrementToolUsageResponse;
+            setMonthlyUsage(typedData.count);
+          }
+        } catch (err) {
+          console.error('Usage tracking error:', err);
+        }
       }
     } catch (error) {
       console.error('Error finding diagram:', error);
