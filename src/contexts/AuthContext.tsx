@@ -161,10 +161,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const redirect = urlParams.get('redirect');
     
-    // Default to compare page, or handle specific redirects
+    // Build redirect URL based on the redirect param
     let redirectTo = `${window.location.origin}/compare`;
     if (redirect === 'stripe') {
       redirectTo = `${window.location.origin}/compare?checkout=true`;
+    } else if (redirect) {
+      // Redirect to the specific page (e.g., chatbot page) after Google auth
+      redirectTo = `${window.location.origin}/${redirect}`;
     }
 
     const { error } = await supabase.auth.signInWithOAuth({
