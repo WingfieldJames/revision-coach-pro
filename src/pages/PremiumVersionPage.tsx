@@ -97,6 +97,8 @@ export const PremiumVersionPage = () => {
           showDiagramTool 
           showEssayMarker 
           showPastPaperFinder
+          showRevisionGuide
+          revisionGuideBoard="edexcel"
           showExamCountdown
           examDates={EDEXCEL_ECONOMICS_EXAMS}
           examSubjectName="Edexcel Economics"
