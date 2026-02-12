@@ -257,27 +257,31 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
       html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
       const lines = html.split('\n');
       let result: string[] = [];
-      let inList = false;
-      let listIndent = 0;
+      let listStack: number[] = []; // track indent levels for proper nesting
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const listMatch = line.match(/^(\s*)[-*] (.+)$/);
         if (listMatch) {
           const indent = listMatch[1].length;
-          if (!inList) {
+          if (listStack.length === 0) {
             result.push('<ul>');
-            inList = true;
-            listIndent = indent;
-          } else if (indent > listIndent) {
+            listStack.push(indent);
+          } else if (indent > listStack[listStack.length - 1]) {
             result.push('<ul>');
-            listIndent = indent;
+            listStack.push(indent);
+          } else {
+            // Close nested lists until we're at the right level
+            while (listStack.length > 1 && indent <= listStack[listStack.length - 1] && indent < listStack[listStack.length - 1]) {
+              result.push('</ul>');
+              listStack.pop();
+            }
           }
           result.push(`<li>${listMatch[2]}</li>`);
         } else {
-          if (inList) {
+          // Close all open lists
+          while (listStack.length > 0) {
             result.push('</ul>');
-            inList = false;
-            listIndent = 0;
+            listStack.pop();
           }
           if (line.trim() && !line.trim().startsWith('<')) {
             result.push(`<p>${line}</p>`);
@@ -286,7 +290,10 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
           }
         }
       }
-      if (inList) result.push('</ul>');
+      while (listStack.length > 0) {
+        result.push('</ul>');
+        listStack.pop();
+      }
       return result.join('\n');
     };
 

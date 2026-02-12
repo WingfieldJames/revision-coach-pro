@@ -217,6 +217,7 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
+        max_tokens: 8000,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt },
