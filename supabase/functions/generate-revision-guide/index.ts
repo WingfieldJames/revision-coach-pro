@@ -62,16 +62,16 @@ serve(async (req) => {
 
     console.log(`User ${user_id} tier: ${tier}`);
 
-    // Tool usage limit for free users (2 per month)
+    // Tool usage limit for free users (2 per month) - check BEFORE action
     if (tier === "free" && user_id) {
-      const { data: usageData, error: usageError } = await supabaseAdmin.rpc("increment_tool_usage", {
+      const { data: usageData, error: usageError } = await supabaseAdmin.rpc("get_tool_usage", {
         p_user_id: user_id,
         p_product_id: product_id,
         p_tool_type: "revision_guide",
-        p_limit: 2,
       });
 
-      if (!usageError && usageData?.exceeded) {
+      const currentCount = (!usageError && usageData) ? (usageData as { count: number }).count : 0;
+      if (currentCount >= 2) {
         return new Response(
           JSON.stringify({
             error: "limit_exceeded",
@@ -260,6 +260,16 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
     }
 
     console.log(`Generated guide: ${content.length} chars`);
+
+    // Increment usage AFTER successful generation
+    if (tier === "free" && user_id) {
+      await supabaseAdmin.rpc("increment_tool_usage", {
+        p_user_id: user_id,
+        p_product_id: product_id,
+        p_tool_type: "revision_guide",
+        p_limit: 2,
+      });
+    }
 
     return new Response(
       JSON.stringify({ content }),
