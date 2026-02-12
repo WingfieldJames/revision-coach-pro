@@ -87,11 +87,18 @@ const revisionFeatures = [
 const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2]";
 
 export const HomePage = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { theme } = useTheme();
   const currentLogo = theme === "dark" ? logo : logoDark;
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+
+  // If user is already logged in, redirect to subject selection
+  React.useEffect(() => {
+    if (!loading && user) {
+      navigate('/compare', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handlePickSubject = () => {
     navigate("/compare");
