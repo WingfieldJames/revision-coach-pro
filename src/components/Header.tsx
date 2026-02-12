@@ -352,7 +352,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
       
       {showNavLinks && (
-        <div className="absolute left-1/2 -translate-x-1/2 md:left-1/2 ml-4 md:ml-0">
+        <div className="absolute left-1/2 -translate-x-1/2 md:left-1/2 ml-8 md:ml-0">
           <Tabs selected={selectedTab} setSelected={handleTabChange} tabs={tabs} variant="primary" />
         </div>
       )}
