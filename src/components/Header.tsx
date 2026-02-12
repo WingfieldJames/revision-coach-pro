@@ -11,7 +11,7 @@ import { PastPaperFinderTool } from '@/components/PastPaperFinderTool';
 import { RevisionGuideTool } from '@/components/RevisionGuideTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
-import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen } from 'lucide-react';
+import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen, ChevronDown } from 'lucide-react';
 import { checkProductAccess } from '@/lib/productAccess';
 import {
   Dialog,
@@ -29,6 +29,54 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 // Global flag to track when file dialog is open (set by ImageUploadTool)
 export const fileDialogOpen = { current: false };
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const MathsModeSwitcher: React.FC<{ currentMode: 'pure' | 'applied' }> = ({ currentMode }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const isPremium = location.pathname.includes('-premium');
+  
+  const handleSwitch = (mode: 'pure' | 'applied') => {
+    if (mode === currentMode) return;
+    if (mode === 'pure') {
+      navigate(isPremium ? '/edexcel-maths-premium' : '/edexcel-maths-free-version');
+    } else {
+      navigate(isPremium ? '/edexcel-maths-applied-premium' : '/edexcel-maths-applied-free-version');
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 font-medium">
+          <span>{currentMode === 'pure' ? 'Pure' : 'Applied'}</span>
+          <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="bg-popover border border-border shadow-xl z-[100]">
+        <DropdownMenuItem 
+          onClick={() => handleSwitch('pure')}
+          className={currentMode === 'pure' ? 'bg-accent font-semibold' : ''}
+        >
+          Pure Mathematics
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => handleSwitch('applied')}
+          className={currentMode === 'applied' ? 'bg-accent font-semibold' : ''}
+        >
+          Applied (Stats & Mechanics)
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 interface HeaderProps {
   showNavLinks?: boolean;
@@ -52,6 +100,7 @@ interface HeaderProps {
   essayMarkerFixedMark?: number;
   showUpgradeButton?: boolean;
   transparentBg?: boolean;
+  mathsMode?: 'pure' | 'applied';
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -75,7 +124,8 @@ export const Header: React.FC<HeaderProps> = ({
   essayMarkerLabel = "Essay Marker",
   essayMarkerFixedMark,
   showUpgradeButton = false,
-  transparentBg = false
+  transparentBg = false,
+  mathsMode
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -206,6 +256,10 @@ export const Header: React.FC<HeaderProps> = ({
         <Link to="/" className="flex items-center" onClick={() => window.scrollTo(0, 0)}>
           <img src={currentLogo} alt="A* AI logo" className="h-16 sm:h-20" />
         </Link>
+        
+        {mathsMode && (
+          <MathsModeSwitcher currentMode={mathsMode} />
+        )}
         
         {showImageTool && (
           <Popover open={imageToolOpen} onOpenChange={setImageToolOpen} modal={false}>
