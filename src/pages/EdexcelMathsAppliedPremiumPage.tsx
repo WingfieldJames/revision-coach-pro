@@ -10,16 +10,16 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
 
-const EDEXCEL_MATHS_SLUG = 'edexcel-mathematics';
+const EDEXCEL_MATHS_APPLIED_SLUG = 'edexcel-mathematics-applied';
 
-const EDEXCEL_MATHS_PROMPTS = [
-  { text: "Explain integration by parts" },
-  { text: "How do I approach a proof question?" },
-  { text: "Find past exam questions on differentiation" },
+const EDEXCEL_MATHS_APPLIED_PROMPTS = [
+  { text: "Explain Newton's second law problems" },
+  { text: "How do I approach a hypothesis test?" },
+  { text: "Help me with projectile motion questions" },
   { text: "Create me a full revision plan", usesPersonalization: true },
 ];
 
-export const EdexcelMathsPremiumPage = () => {
+export const EdexcelMathsAppliedPremiumPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [productId, setProductId] = useState<string | null>(null);
@@ -33,12 +33,11 @@ export const EdexcelMathsPremiumPage = () => {
         setCheckingAccess(false);
         return;
       }
-
       try {
         const { data: product, error: productError } = await supabase
           .from('products')
           .select('id')
-          .eq('slug', EDEXCEL_MATHS_SLUG)
+          .eq('slug', EDEXCEL_MATHS_APPLIED_SLUG)
           .single();
 
         if (productError || !product) {
@@ -46,7 +45,6 @@ export const EdexcelMathsPremiumPage = () => {
           setCheckingAccess(false);
           return;
         }
-
         setProductId(product.id);
 
         const { data: subscription, error: subError } = await supabase
@@ -57,10 +55,7 @@ export const EdexcelMathsPremiumPage = () => {
           .eq('active', true)
           .maybeSingle();
 
-        if (subError) {
-          console.error('Subscription check error:', subError);
-        }
-
+        if (subError) console.error('Subscription check error:', subError);
         setHasAccess(!!subscription);
       } catch (error) {
         console.error('Access check error:', error);
@@ -68,10 +63,7 @@ export const EdexcelMathsPremiumPage = () => {
         setCheckingAccess(false);
       }
     };
-
-    if (!loading) {
-      checkAccess();
-    }
+    if (!loading) checkAccess();
   }, [user, loading]);
 
   const handleEssayMarkerSubmit = (message: string) => {
@@ -93,16 +85,16 @@ export const EdexcelMathsPremiumPage = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <SEOHead 
-          title="Deluxe A* AI – Edexcel Mathematics | Premium Access Required"
-          description="Sign in to access your Edexcel Mathematics Deluxe subscription."
-          canonical="https://astarai.co.uk/edexcel-maths-premium"
+          title="Deluxe A* AI – Edexcel Maths Applied | Premium Access Required"
+          description="Sign in to access your Edexcel Mathematics Applied Deluxe subscription."
+          canonical="https://astarai.co.uk/edexcel-maths-applied-premium"
         />
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center max-w-md px-6">
             <h1 className="text-2xl font-bold mb-4">Sign In Required</h1>
             <p className="text-muted-foreground mb-6">
-              Please sign in to access Edexcel Mathematics Deluxe.
+              Please sign in to access Edexcel Mathematics Applied Deluxe.
             </p>
             <Button variant="brand" onClick={() => navigate('/login')}>
               Sign In
@@ -117,22 +109,22 @@ export const EdexcelMathsPremiumPage = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <SEOHead 
-          title="Deluxe A* AI – Edexcel Mathematics | Premium Access Required"
-          description="Upgrade to access Edexcel Mathematics Deluxe with AI trained on past papers."
-          canonical="https://astarai.co.uk/edexcel-maths-premium"
+          title="Deluxe A* AI – Edexcel Maths Applied | Premium Access Required"
+          description="Upgrade to access Edexcel Mathematics Applied Deluxe."
+          canonical="https://astarai.co.uk/edexcel-maths-applied-premium"
         />
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center max-w-md px-6">
             <h1 className="text-2xl font-bold mb-4">Premium Access Required</h1>
             <p className="text-muted-foreground mb-6">
-              Upgrade to Edexcel Mathematics Deluxe for unlimited AI tutoring with full past paper training.
+              Upgrade to Edexcel Mathematics Applied Deluxe for unlimited AI tutoring.
             </p>
             <div className="flex flex-col gap-3">
               <Button variant="brand" onClick={() => navigate('/compare')}>
                 View Plans
               </Button>
-              <Button variant="outline" onClick={() => navigate('/edexcel-maths-free-version')}>
+              <Button variant="outline" onClick={() => navigate('/edexcel-maths-applied-free-version')}>
                 Try Free Version
               </Button>
             </div>
@@ -145,9 +137,9 @@ export const EdexcelMathsPremiumPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
-        title="Deluxe A* AI – Edexcel Mathematics | AI Tutor"
-        description="Your personal Edexcel Mathematics A* tutor. AI trained on past papers, mark schemes, and specifications."
-        canonical="https://astarai.co.uk/edexcel-maths-premium"
+        title="Deluxe A* AI – Edexcel Maths Applied | AI Tutor"
+        description="Your personal Edexcel Mathematics Applied A* tutor. AI trained on Stats & Mechanics."
+        canonical="https://astarai.co.uk/edexcel-maths-applied-premium"
       />
       <RandomChatbotBackground />
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
@@ -159,9 +151,9 @@ export const EdexcelMathsPremiumPage = () => {
           examSubjectName="Edexcel Maths"
           hideUserDetails 
           productId={productId}
-          productSlug="edexcel-mathematics"
+          productSlug="edexcel-mathematics-applied"
           showUpgradeButton
-          mathsMode="pure"
+          mathsMode="applied"
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
@@ -169,11 +161,11 @@ export const EdexcelMathsPremiumPage = () => {
       <div className="flex-1 relative z-10">
         <RAGChat 
           productId={productId}
-          subjectName="Edexcel Mathematics Deluxe"
-          subjectDescription="Your personal A* Maths tutor. Ask me anything!"
-          footerText="Powered by A* AI • Trained on Edexcel Mathematics past papers & mark schemes"
-          placeholder="Ask me anything about Edexcel A-Level Maths..."
-          suggestedPrompts={EDEXCEL_MATHS_PROMPTS}
+          subjectName="Edexcel Mathematics Applied Deluxe"
+          subjectDescription="Your personal A* Stats & Mechanics tutor. Ask me anything!"
+          footerText="Powered by A* AI • Edexcel Mathematics Applied (Stats & Mechanics)"
+          placeholder="Ask me anything about Stats & Mechanics..."
+          suggestedPrompts={EDEXCEL_MATHS_APPLIED_PROMPTS}
           chatRef={chatRef}
         />
       </div>

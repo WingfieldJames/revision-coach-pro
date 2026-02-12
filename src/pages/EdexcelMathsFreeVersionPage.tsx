@@ -34,6 +34,7 @@ export const EdexcelMathsFreeVersionPage = () => {
           productId={EDEXCEL_MATHS_PRODUCT_ID}
           productSlug="edexcel-mathematics"
           showUpgradeButton
+          mathsMode="pure"
         />
       </div>
       

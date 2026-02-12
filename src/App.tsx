@@ -28,6 +28,8 @@ import { AQAChemistryPremiumPage } from "./pages/AQAChemistryPremiumPage";
  import { AQAPsychologyPremiumPage } from "./pages/AQAPsychologyPremiumPage";
 import { EdexcelMathsFreeVersionPage } from "./pages/EdexcelMathsFreeVersionPage";
 import { EdexcelMathsPremiumPage } from "./pages/EdexcelMathsPremiumPage";
+import { EdexcelMathsAppliedFreeVersionPage } from "./pages/EdexcelMathsAppliedFreeVersionPage";
+import { EdexcelMathsAppliedPremiumPage } from "./pages/EdexcelMathsAppliedPremiumPage";
 import { TestRAGChatPage } from "./pages/TestRAGChatPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
@@ -72,6 +74,8 @@ const App = () => (
              <Route path="/aqa-psychology-premium" element={<AQAPsychologyPremiumPage />} />
             <Route path="/edexcel-maths-free-version" element={<EdexcelMathsFreeVersionPage />} />
             <Route path="/edexcel-maths-premium" element={<EdexcelMathsPremiumPage />} />
+            <Route path="/edexcel-maths-applied-free-version" element={<EdexcelMathsAppliedFreeVersionPage />} />
+            <Route path="/edexcel-maths-applied-premium" element={<EdexcelMathsAppliedPremiumPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/test-rag" element={<TestRAGChatPage />} />
