@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
@@ -39,6 +40,7 @@ export const ComparePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
+  const isMobile = useIsMobile();
 
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
@@ -213,16 +215,16 @@ export const ComparePage = () => {
   return (
     <div className="min-h-screen font-sans relative">
       <SEOHead title="Choose Your A* AI Plan | A-Level Economics, Computer Science & Physics" description="Compare A* AI plans for A-Level revision. Economics (Edexcel, AQA, CIE), Computer Science (OCR) & Physics (OCR). Free to start." canonical="https://astarai.co.uk/compare" />
-      {theme === 'dark' && <FlowFieldBackground color="#a855f7" trailOpacity={0.04} particleCount={400} />}
+      {theme === 'dark' && !isMobile && <FlowFieldBackground color="#a855f7" trailOpacity={0.04} particleCount={400} />}
       <div className="relative z-10">
         <Header showNavLinks />
         
 
         <main className="py-8 px-4 sm:px-8 max-w-5xl mx-auto text-center relative z-10">
           <ScrollReveal>
-            <h1 className="text-2xl md:text-4xl font-bold mb-8 flex items-center justify-center gap-0 md:gap-0 flex-nowrap">
+            <h1 className="text-2xl md:text-4xl font-bold mb-8 flex items-baseline justify-center gap-0 md:gap-0 flex-nowrap">
               Choose Your 
-              <img src={currentLogo} alt="A* AI" className="h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3" />
+              <img src={currentLogo} alt="A* AI" className="h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3 self-center" />
               Subject
             </h1>
           </ScrollReveal>
