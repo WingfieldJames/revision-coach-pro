@@ -114,7 +114,7 @@ export function FoundersCarousel() {
             x: -20
           }} transition={{
             duration: 0.3
-          }} className={`backdrop-blur-xl rounded-3xl border border-border/50 p-8 md:p-12 overflow-hidden shadow-elevated ${isDark ? 'bg-gradient-to-br from-card/80 to-card/40' : 'bg-[#CFCFD1]'}`}>
+          }} className={`backdrop-blur-xl rounded-3xl border border-border/50 p-8 md:p-12 overflow-hidden shadow-elevated ${isDark ? 'bg-gradient-to-br from-card/80 to-card/40' : 'bg-[#F3F3F4]'}`}>
               <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
                 {/* Photo */}
                 <div className="flex-shrink-0">
