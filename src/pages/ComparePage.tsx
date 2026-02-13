@@ -444,8 +444,12 @@ export const ComparePage = () => {
           </div>
         </div>
 
-        {/* Desktop: Testimonials marquee then Founder Section */}
+        {/* Desktop: Founder Section then Testimonials marquee */}
         <div className="hidden md:block">
+          <div className="relative">
+            {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry' || subject === 'mathematics') && <FounderSection subject={subject} examBoard={examBoard} />}
+          </div>
+
           <div className="relative">
             <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" testimonials={[{
               author: { name: "Lucy W", handle: "Year 12", avatar: lucyImage },
@@ -460,10 +464,6 @@ export const ComparePage = () => {
               author: { name: "Amira", handle: "LSE Offer Holder", avatar: amiraImage },
               text: "\"I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant.\""
             }]} />
-          </div>
-
-          <div className="relative">
-            {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry' || subject === 'mathematics') && <FounderSection subject={subject} examBoard={examBoard} />}
           </div>
         </div>
 
