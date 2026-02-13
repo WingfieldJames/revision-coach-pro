@@ -222,10 +222,10 @@ export const ComparePage = () => {
 
         <main className="py-8 px-4 sm:px-8 max-w-5xl mx-auto text-center relative z-10">
           <ScrollReveal>
-            <h1 className="text-2xl md:text-4xl font-bold mb-8 flex items-baseline justify-center gap-0 md:gap-0 flex-nowrap">
-              Choose Your 
-              <img src={currentLogo} alt="A* AI" className="h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3 self-center" />
-              Subject
+            <h1 className="text-2xl md:text-4xl font-bold mb-8 flex items-center justify-center gap-0 md:gap-0 flex-nowrap">
+              <span className="self-center">Choose Your</span>
+              <img src={currentLogo} alt="A* AI" className="h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3" />
+              <span className="self-center">Subject</span>
             </h1>
           </ScrollReveal>
 
