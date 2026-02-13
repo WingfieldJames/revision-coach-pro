@@ -98,6 +98,7 @@ interface HeaderProps {
   onEssayMarkerSubmit?: (message: string) => void;
   essayMarkerLabel?: string;
   essayMarkerFixedMark?: number;
+  essayMarkerCustomMarks?: number[];
   showUpgradeButton?: boolean;
   transparentBg?: boolean;
   mathsMode?: 'pure' | 'applied';
@@ -123,6 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
   onEssayMarkerSubmit,
   essayMarkerLabel = "Essay Marker",
   essayMarkerFixedMark,
+  essayMarkerCustomMarks,
   showUpgradeButton = false,
   transparentBg = false,
   mathsMode
@@ -301,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-md p-0 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <div className="p-4">
-                <EssayMarkerTool tier={tier} productId={productId} onSubmitToChat={onEssayMarkerSubmit} onClose={() => setEssayMarkerOpen(false)} fixedMark={essayMarkerFixedMark} toolLabel={essayMarkerLabel} />
+                <EssayMarkerTool tier={tier} productId={productId} onSubmitToChat={onEssayMarkerSubmit} onClose={() => setEssayMarkerOpen(false)} fixedMark={essayMarkerFixedMark} toolLabel={essayMarkerLabel} customMarks={essayMarkerCustomMarks} />
               </div>
             </PopoverContent>
           </Popover>
