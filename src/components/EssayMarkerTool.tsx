@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
+const DEFAULT_MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
 const FREE_MONTHLY_ESSAY_LIMIT = 1;
 
 interface ToolUsageResponse {
@@ -37,6 +37,7 @@ interface EssayMarkerToolProps {
   onClose?: () => void;
   fixedMark?: number;
   toolLabel?: string;
+  customMarks?: number[];
 }
 
 export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
@@ -45,11 +46,12 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   onSubmitToChat,
   onClose,
   fixedMark,
-  toolLabel = "Essay Marker"
+  toolLabel = "Essay Marker",
+  customMarks
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [selectedMark, setSelectedMark] = useState<number>(fixedMark ?? 15);
+  const [selectedMark, setSelectedMark] = useState<number>(fixedMark ?? customMarks?.[0] ?? 15);
   const [essayText, setEssayText] = useState('');
   // Default to image upload on touch devices (mobile/iPad), text on desktop
   const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
@@ -342,7 +344,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Number of Marks</label>
             <div className="flex flex-wrap gap-2">
-              {MARK_OPTIONS.map((mark) => (
+              {(customMarks || DEFAULT_MARK_OPTIONS).map((mark) => (
                 <button
                   key={mark}
                   onClick={() => setSelectedMark(mark)}

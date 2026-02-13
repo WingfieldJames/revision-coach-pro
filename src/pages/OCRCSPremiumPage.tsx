@@ -46,7 +46,8 @@ export const OCRCSPremiumPage = () => {
           productId={OCR_CS_PRODUCT_ID}
           productSlug="ocr-computer-science"
           showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
+           onEssayMarkerSubmit={handleEssayMarkerSubmit}
+           essayMarkerCustomMarks={[9, 12]}
         />
       </div>
       
