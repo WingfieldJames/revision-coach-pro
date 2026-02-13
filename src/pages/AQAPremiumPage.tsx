@@ -106,6 +106,7 @@ export const AQAPremiumPage = () => {
           productSlug="aqa-economics"
           showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
+          essayMarkerCustomMarks={[9, 10, 15, 25]}
         />
       </div>
       

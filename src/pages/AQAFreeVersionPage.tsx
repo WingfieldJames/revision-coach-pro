@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 const AQA_PRODUCT_ID = "17ade690-8c44-4961-83b5-0edf42a9faea";
@@ -15,6 +15,12 @@ const AQA_ECONOMICS_FREE_PROMPTS = [
 ];
 
 export const AQAFreeVersionPage = () => {
+  const chatRef = useRef<RAGChatRef>(null);
+
+  const handleEssayMarkerSubmit = (message: string) => {
+    chatRef.current?.submitMessage(message);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -37,6 +43,8 @@ export const AQAFreeVersionPage = () => {
           productId={AQA_PRODUCT_ID}
           productSlug="aqa-economics"
           showUpgradeButton
+          essayMarkerCustomMarks={[9, 10, 15, 25]}
+          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -48,6 +56,7 @@ export const AQAFreeVersionPage = () => {
           footerText="A* AI can make mistakes. Verify important info."
           placeholder="Ask any AQA Economics question..."
           suggestedPrompts={AQA_ECONOMICS_FREE_PROMPTS}
+          chatRef={chatRef}
         />
       </div>
     </div>
