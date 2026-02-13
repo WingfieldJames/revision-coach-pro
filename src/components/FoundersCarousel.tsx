@@ -79,7 +79,7 @@ export function FoundersCarousel() {
   };
   const currentFounder = founders[currentIndex];
 
-  return <section className="py-16 px-8 bg-background">
+  return <section className={`py-16 px-8 ${isDark ? 'bg-background' : 'bg-[#F3F3F4]'}`}>
       <div className="max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-12">
           <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-4 leading-[1.2]">
@@ -114,7 +114,7 @@ export function FoundersCarousel() {
             x: -20
           }} transition={{
             duration: 0.3
-          }} className={`backdrop-blur-xl rounded-3xl border border-border/50 p-8 md:p-12 overflow-hidden shadow-elevated ${isDark ? 'bg-gradient-to-br from-card/80 to-card/40' : 'bg-[#F3F3F4]'}`}>
+          }} className={`backdrop-blur-xl rounded-3xl border border-border/50 p-8 md:p-12 overflow-hidden shadow-elevated ${isDark ? 'bg-gradient-to-br from-card/80 to-card/40' : 'bg-white'}`}>
               <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
                 {/* Photo */}
                 <div className="flex-shrink-0">
