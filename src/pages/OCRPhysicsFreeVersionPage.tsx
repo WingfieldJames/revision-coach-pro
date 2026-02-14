@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
 
 // Correct OCR Physics product ID from database
@@ -16,6 +16,12 @@ const OCR_PHYSICS_PROMPTS = [
 ];
 
 export const OCRPhysicsFreeVersionPage = () => {
+  const chatRef = useRef<RAGChatRef>(null);
+
+  const handleEssayMarkerSubmit = (message: string) => {
+    chatRef.current?.submitMessage(message);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -38,6 +44,7 @@ export const OCRPhysicsFreeVersionPage = () => {
           showUpgradeButton
           essayMarkerLabel="6-Marker Analysis"
           essayMarkerFixedMark={6}
+          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -49,6 +56,7 @@ export const OCRPhysicsFreeVersionPage = () => {
           footerText="Powered by A* AI • Trained on OCR Physics specification"
           placeholder="Ask about mechanics, waves, electricity..."
           suggestedPrompts={OCR_PHYSICS_PROMPTS}
+          chatRef={chatRef}
         />
       </div>
     </div>

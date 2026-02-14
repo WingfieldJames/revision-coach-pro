@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { AQA_CHEMISTRY_EXAMS } from '@/components/ExamCountdown';
 
 // AQA Chemistry product ID from database
@@ -16,6 +16,12 @@ const AQA_CHEMISTRY_PROMPTS = [
 ];
 
 export const AQAChemistryFreeVersionPage = () => {
+  const chatRef = useRef<RAGChatRef>(null);
+
+  const handleEssayMarkerSubmit = (message: string) => {
+    chatRef.current?.submitMessage(message);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -38,6 +44,7 @@ export const AQAChemistryFreeVersionPage = () => {
           showUpgradeButton
           essayMarkerLabel="6-Marker Analysis"
           essayMarkerFixedMark={6}
+          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -49,6 +56,7 @@ export const AQAChemistryFreeVersionPage = () => {
           footerText="Powered by A* AI • Trained on AQA Chemistry specification"
           placeholder="Ask about organic, inorganic, or physical chemistry..."
           suggestedPrompts={AQA_CHEMISTRY_PROMPTS}
+          chatRef={chatRef}
         />
       </div>
     </div>
