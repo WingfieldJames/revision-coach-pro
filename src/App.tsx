@@ -32,6 +32,7 @@ import { EdexcelMathsAppliedFreeVersionPage } from "./pages/EdexcelMathsAppliedF
 import { EdexcelMathsAppliedPremiumPage } from "./pages/EdexcelMathsAppliedPremiumPage";
 import { TestRAGChatPage } from "./pages/TestRAGChatPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { ProgressPage } from "./pages/ProgressPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 
@@ -77,6 +78,7 @@ const App = () => (
             <Route path="/edexcel-maths-applied-free-version" element={<EdexcelMathsAppliedFreeVersionPage />} />
             <Route path="/edexcel-maths-applied-premium" element={<EdexcelMathsAppliedPremiumPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/test-rag" element={<TestRAGChatPage />} />
             <Route path="*" element={<NotFound />} />

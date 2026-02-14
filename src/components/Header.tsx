@@ -181,6 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const getSelectedTab = () => {
+    if (location.pathname === '/progress') return 'profile';
     if (location.pathname === '/dashboard') return 'profile';
     if (location.pathname === '/login') return 'profile';
     if (location.pathname === '/compare') return 'pricing';
@@ -197,7 +198,7 @@ export const Header: React.FC<HeaderProps> = ({
   const tabs: ITab[] = [
     { title: "Home", value: "home" },
     { title: "Subjects", value: "pricing" },
-    { title: "Launch", value: "profile" }
+    { title: "Progress", value: "profile" }
   ];
 
   const handleTabChange = (value: string) => {
@@ -209,7 +210,7 @@ export const Header: React.FC<HeaderProps> = ({
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } else if (value === "profile") {
       if (user) {
-        navigate('/dashboard');
+        navigate('/progress');
       } else {
         navigate('/login');
       }
