@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
+import { marked } from 'marked';
 import { Search, BookOpen, ChevronRight, X, FileDown, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -230,10 +231,10 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
 
     const boardLabel = BOARD_LABELS[board] || board;
 
-    // Convert markdown to HTML manually
+    // Convert markdown to HTML using marked library
     const markdownToHtml = (md: string): string => {
-      let html = md;
-      html = html.replace(/\[DIAGRAM:\s*(.+?)\]/g, (match, title) => {
+      // Replace diagram placeholders before markdown conversion
+      let processed = md.replace(/\[DIAGRAM:\s*(.+?)\]/g, (match, title) => {
         const diagram = matchedDiagrams.find(d =>
           d.title.toLowerCase().includes(title.toLowerCase().trim()) ||
           title.toLowerCase().trim().includes(d.title.toLowerCase())
@@ -243,59 +244,8 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
         }
         return '';
       });
-      html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
-      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-      html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-      html = html.replace(/```[\s\S]*?```/g, (match) => {
-        const code = match.replace(/```\w*\n?/, '').replace(/```$/, '');
-        return `<pre><code>${code}</code></pre>`;
-      });
-      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-      const lines = html.split('\n');
-      let result: string[] = [];
-      let listStack: number[] = []; // track indent levels for proper nesting
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const listMatch = line.match(/^(\s*)[-*] (.+)$/);
-        if (listMatch) {
-          const indent = listMatch[1].length;
-          if (listStack.length === 0) {
-            result.push('<ul>');
-            listStack.push(indent);
-          } else if (indent > listStack[listStack.length - 1]) {
-            result.push('<ul>');
-            listStack.push(indent);
-          } else {
-            // Close nested lists until we're at the right level
-            while (listStack.length > 1 && indent <= listStack[listStack.length - 1] && indent < listStack[listStack.length - 1]) {
-              result.push('</ul>');
-              listStack.pop();
-            }
-          }
-          result.push(`<li>${listMatch[2]}</li>`);
-        } else {
-          // Close all open lists
-          while (listStack.length > 0) {
-            result.push('</ul>');
-            listStack.pop();
-          }
-          const blockTags = /^<(h[1-6]|p|pre|ul|ol|li|div|table|tr|th|td|blockquote|hr)/i;
-          if (line.trim() && !blockTags.test(line.trim())) {
-            result.push(`<p>${line}</p>`);
-          } else {
-            result.push(line);
-          }
-        }
-      }
-      while (listStack.length > 0) {
-        result.push('</ul>');
-        listStack.pop();
-      }
-      return result.join('\n');
+
+      return marked(processed, { async: false }) as string;
     };
 
     const htmlContent = markdownToHtml(guideContent);
@@ -320,8 +270,9 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
     container.style.left = '-9999px';
     container.style.top = '0';
     container.style.width = '210mm';
+    container.style.background = '#ffffff';
     container.innerHTML = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; line-height: 1.7; padding: 10px;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; line-height: 1.7; padding: 10px; background: #ffffff;">
         <style>
           .pdf-content .logo { height: 48px; margin-bottom: 8px; }
           .pdf-content .main-title { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
