@@ -283,7 +283,8 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
             result.push('</ul>');
             listStack.pop();
           }
-          if (line.trim() && !line.trim().startsWith('<')) {
+          const blockTags = /^<(h[1-6]|p|pre|ul|ol|li|div|table|tr|th|td|blockquote|hr)/i;
+          if (line.trim() && !blockTags.test(line.trim())) {
             result.push(`<p>${line}</p>`);
           } else {
             result.push(line);
