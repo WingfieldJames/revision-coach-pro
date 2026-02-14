@@ -1,34 +1,38 @@
 
 
-## Sync SubjectPlanSelector with ComparePage
+## Fix: Revision Guide Body Text Not Rendering in PDF
 
-Bring all the ComparePage improvements into the `SubjectPlanSelector` component used on the homepage.
+### Problem
+The `markdownToHtml` function in `RevisionGuideTool.tsx` has a bug in its line-by-line HTML conversion. After converting markdown bold (`**text**`) to `<strong>text</strong>`, the function checks if a line starts with `<` to decide whether to wrap it in a `<p>` tag. Lines starting with inline HTML like `<strong>`, `<em>`, or `<code>` incorrectly skip the `<p>` wrapper, causing them to render as floating inline fragments that html2pdf.js ignores.
 
-### Changes (single file: `src/components/SubjectPlanSelector.tsx`)
+This is why headings (block-level `<h1>`-`<h4>`) render fine, but body text (often starting with bold key terms) vanishes entirely.
 
-#### 1. Replace toggle-based selectors with dropdown buttons
-Remove the desktop toggle group and mobile toggle/dropdown hybrid. Replace with two simple dropdown buttons matching ComparePage:
-- Subject dropdown: purple gradient pill (`bg-gradient-brand text-white glow-brand`)
-- Exam board dropdown: bordered pill (`border border-border bg-background`)
-- Board options are dynamically filtered by subject (Economics gets Edexcel/AQA/CIE, others are locked)
-- Labels use explicit "AQA", "OCR", "CIE" capitalization
+### Fix (single file change)
 
-#### 2. Add Deluxe subscription detection
-- Add `subscriptionPaymentType` state
-- Update the `checkProductAccess` call to also capture `subscription?.payment_type`
-- When user has access:
-  - Title changes from "The Plan" to "You're Deluxe!"
-  - Subtitle changes to "You have access to:"
-  - CTA button changes to "Go to your chat ->" and routes to the premium chatbot
-  - Footer shows "Monthly pass active" or "Exam season pass active"
+**File: `src/components/RevisionGuideTool.tsx`** (line ~286)
 
-#### 3. Add premium click handler
-- Import and replicate the `handlePremiumClick` logic from ComparePage (routes to premium path if access exists, otherwise creates checkout)
-- Update CTA to call `handlePremiumClick` when user has access, `handleFreeClick` otherwise
+Change the condition from "doesn't start with `<`" to "doesn't start with a **block-level** HTML tag". This ensures inline HTML like `<strong>`, `<em>`, `<code>` still gets wrapped in `<p>`, while actual block elements (`<h1>`-`<h4>`, `<pre>`, `<ul>`, `<div>`, `<table>`) are left as-is.
 
-#### 4. Remove unused imports
-- Remove `ToggleGroup` and `ToggleGroupItem` imports since we're switching to dropdowns only
+```typescript
+// BEFORE (broken)
+if (line.trim() && !line.trim().startsWith('<')) {
+    result.push(`<p>${line}</p>`);
+} else {
+    result.push(line);
+}
 
-### Technical details
+// AFTER (fixed)
+const blockTags = /^<(h[1-6]|p|pre|ul|ol|li|div|table|tr|th|td|blockquote|hr)/i;
+if (line.trim() && !blockTags.test(line.trim())) {
+    result.push(`<p>${line}</p>`);
+} else {
+    result.push(line);
+}
+```
 
-The entire selector section (lines 159-337) will be restructured to match ComparePage lines 231-352, using the same two-dropdown layout, same plan card with conditional deluxe content, and same CTA logic.
+### What stays the same
+- Everything else in the component (search, spec selection, options, PDF styling, download logic, diagram matching)
+- The edge function (`generate-revision-guide`) is unchanged
+- Dark mode / light mode styling is unchanged
+- All other pages and components are untouched
+
