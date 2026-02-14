@@ -71,11 +71,11 @@ serve(async (req) => {
       });
 
       const currentCount = (!usageError && usageData) ? (usageData as { count: number }).count : 0;
-      if (currentCount >= 2) {
+      if (currentCount >= 1) {
         return new Response(
           JSON.stringify({
             error: "limit_exceeded",
-            message: "You've used your 2 free revision guides this month. Upgrade to Deluxe for unlimited guides!",
+            message: "You've used your free revision guide this month. Upgrade to Deluxe for unlimited guides!",
           }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
@@ -267,7 +267,7 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
         p_user_id: user_id,
         p_product_id: product_id,
         p_tool_type: "revision_guide",
-        p_limit: 2,
+        p_limit: 1,
       });
     }
 
