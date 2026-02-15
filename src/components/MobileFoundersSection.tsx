@@ -53,7 +53,7 @@ export function MobileFoundersSection() {
   const isLight = theme === 'light';
 
   return (
-    <section className={`pt-4 pb-12 px-4 md:hidden ${isLight ? 'bg-transparent' : 'bg-transparent'}`}>
+    <section className={`pt-4 pb-12 px-4 md:hidden bg-transparent`}>
       <div className="max-w-md mx-auto">
         {/* Header: no animation in either mode - loads instantly */}
         <div className="text-center mb-6">
@@ -68,8 +68,9 @@ export function MobileFoundersSection() {
 
         <div className="space-y-4">
           {founders.map((founder) => (
-            <div key={founder.id} className={`rounded-2xl p-4 ${isLight ? 'bg-card border border-border/30 shadow-sm' : 'bg-card border border-primary/30 glow-brand'}`}>
-              <div className="flex items-center gap-4">
+            <div key={founder.id} className={`relative rounded-2xl p-4 overflow-hidden ${isLight ? 'bg-white border border-border/30 shadow-sm' : 'bg-card border border-primary/30 glow-brand'}`}>
+              {isLight && <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-2xl pointer-events-none" />}
+              <div className="relative z-10 flex items-center gap-4">
                 {/* Photo */}
                 <div className="flex-shrink-0">
                   <div className={`w-16 h-16 rounded-xl overflow-hidden bg-muted ${isLight ? 'border-2 border-border/40' : 'border-2 border-primary/20'}`}>
