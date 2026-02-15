@@ -72,10 +72,10 @@ export function FoundersCarousel() {
   const isDark = theme === 'dark';
 
   const goToPrevious = () => {
-    setCurrentIndex(prev => prev === 0 ? founders.length - 1 : prev - 1);
+    setCurrentIndex((prev) => prev === 0 ? founders.length - 1 : prev - 1);
   };
   const goToNext = () => {
-    setCurrentIndex(prev => prev === founders.length - 1 ? 0 : prev + 1);
+    setCurrentIndex((prev) => prev === founders.length - 1 ? 0 : prev + 1);
   };
   const currentFounder = founders[currentIndex];
 
@@ -114,7 +114,7 @@ export function FoundersCarousel() {
             x: -20
           }} transition={{
             duration: 0.3
-           }} className={`relative backdrop-blur-xl rounded-3xl border border-border/50 p-8 md:p-12 overflow-hidden shadow-elevated ${isDark ? 'bg-gradient-to-br from-card/80 to-card/40' : 'bg-white'}`}>
+          }} className={`relative backdrop-blur-xl rounded-3xl border border-border/50 p-8 md:p-12 overflow-hidden shadow-elevated ${isDark ? 'bg-gradient-to-br from-card/80 to-card/40' : 'bg-white'}`}>
               {/* Light mode purple gradient overlay */}
               {!isDark && <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl pointer-events-none" />}
               <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
@@ -122,7 +122,7 @@ export function FoundersCarousel() {
                 <div className="flex-shrink-0">
                   <div className="relative">
                     <div className={`w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden shadow-lg bg-muted ${isDark ? 'border-4 border-primary/20' : 'border-4 border-border'}`}>
-                      <img src={currentFounder.image} alt={`${currentFounder.name} - Founder`} className="w-full h-full object-cover object-[center_25%] scale-110" />
+                      <img src={currentFounder.image} alt={`${currentFounder.name} - Founder`} className="w-full h-full object-cover object-[center_25%] scale-110 opacity-0" />
                     </div>
                   </div>
                   
@@ -153,7 +153,7 @@ export function FoundersCarousel() {
 
           {/* Dots indicator */}
           <div className="flex justify-center gap-2 mt-6">
-            {founders.map((_, index) => <button key={index} onClick={() => setCurrentIndex(index)} className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentIndex ? (isDark ? 'bg-primary' : 'bg-foreground') : 'bg-border'}`} aria-label={`Go to founder ${index + 1}`} />)}
+            {founders.map((_, index) => <button key={index} onClick={() => setCurrentIndex(index)} className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentIndex ? isDark ? 'bg-primary' : 'bg-foreground' : 'bg-border'}`} aria-label={`Go to founder ${index + 1}`} />)}
           </div>
         </div>
       </div>
