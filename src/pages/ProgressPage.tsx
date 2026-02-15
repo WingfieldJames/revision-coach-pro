@@ -4,6 +4,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { Flame, Plus, X } from "lucide-react";
+import { RevisionTimetable } from "@/components/RevisionTimetable";
 import { Button } from "@/components/ui/button";
 import {
   LineChart,
@@ -279,6 +280,9 @@ export const ProgressPage = () => {
             {Object.keys(goals).length > 0 ? "Edit Study Goals" : "Set Study Goals"}
           </Button>
         </motion.div>
+
+        {/* Revision Timetable */}
+        <RevisionTimetable />
 
         {/* Goal editor modal */}
         {showGoalEditor && (
