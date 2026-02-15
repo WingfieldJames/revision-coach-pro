@@ -275,7 +275,7 @@ export const HomePage = () => {
       </section>
 
       {/* Testimonials Section - Desktop */}
-      <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden">
+      <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden bg-background">
         <div className="max-w-7xl mx-auto">
           <ScrollReveal className="text-center mb-12">
             <h2 className={sectionHeadingClass}>
@@ -308,7 +308,8 @@ export const HomePage = () => {
           </div>
           <div className="space-y-3">
             {[firstColumn[0], firstColumn[2], firstColumn[6]].map((t, i) => (
-              <div key={i} className="bg-card rounded-3xl p-5 shadow-card border border-border/30">
+              <div key={i} className="relative bg-card rounded-3xl p-5 shadow-card border border-border/30 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 dark:hidden rounded-3xl pointer-events-none" />
                 <p className="text-foreground leading-relaxed text-base">{t.text}</p>
                 <div className="flex items-center gap-3 mt-4">
                   <img src={t.image} alt={t.name} className="w-10 h-10 rounded-full object-cover object-[center_20%]" />
