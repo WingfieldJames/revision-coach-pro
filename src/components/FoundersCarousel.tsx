@@ -122,7 +122,7 @@ export function FoundersCarousel() {
                 <div className="flex-shrink-0">
                   <div className="relative">
                     <div className={`w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden shadow-lg bg-muted ${isDark ? 'border-4 border-primary/20' : 'border-4 border-border'}`}>
-                      <img src={currentFounder.image} alt={`${currentFounder.name} - Founder`} className="w-full h-full object-cover object-[center_25%] scale-110 opacity-0" />
+                      <img src={currentFounder.image} alt={`${currentFounder.name} - Founder`} className="w-full h-full object-cover object-[center_25%] scale-110" />
                     </div>
                   </div>
                   
