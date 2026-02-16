@@ -260,7 +260,7 @@ export const RevisionTimetable: React.FC = () => {
       )}
 
       {/* Weekly grid */}
-      <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 mb-4 overflow-x-auto">
+      <div className="bg-muted border border-border rounded-2xl p-3 sm:p-4 mb-4 overflow-x-auto">
         <div className="min-w-[520px]">
           {/* Day headers */}
           <div className="grid grid-cols-[48px_repeat(7,1fr)] gap-1 mb-1">
