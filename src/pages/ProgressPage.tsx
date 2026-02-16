@@ -161,8 +161,7 @@ export const ProgressPage = () => {
           className="flex items-center justify-center gap-3 mb-10"
         >
           <div
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-border shadow-sm"
-            style={{ backgroundColor: "#f9fafb" }}
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-border shadow-sm bg-[#f9fafb] dark:bg-card"
           >
             <Flame className="h-6 w-6 text-orange-500" />
             <span className="text-3xl font-bold text-foreground">{streak}</span>
