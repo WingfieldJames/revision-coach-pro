@@ -141,7 +141,8 @@ export const ProgressPage = () => {
       />
       <Header showNavLinks />
 
-      <div className="max-w-2xl mx-auto px-4 pt-8 pb-20">
+      {/* Revision Timetable – full width */}
+      <div className="max-w-6xl mx-auto px-4 pt-8">
         {/* Title */}
         <motion.h1
           initial={{ opacity: 0, y: 12 }}
@@ -167,6 +168,11 @@ export const ProgressPage = () => {
             <span className="text-muted-foreground text-sm">day streak</span>
           </div>
         </motion.div>
+
+        <RevisionTimetable />
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 pt-8 pb-20">
 
         {/* Chart */}
         <motion.div
@@ -280,9 +286,6 @@ export const ProgressPage = () => {
             {Object.keys(goals).length > 0 ? "Edit Study Goals" : "Set Study Goals"}
           </Button>
         </motion.div>
-
-        {/* Revision Timetable */}
-        <RevisionTimetable />
 
         {/* Goal editor modal */}
         {showGoalEditor && (
