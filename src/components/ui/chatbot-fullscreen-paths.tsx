@@ -1,12 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useTheme } from "@/contexts/ThemeContext";
 
 function FloatingPaths({ position }: { position: number }) {
-    const { theme } = useTheme();
-    const isDark = theme === 'dark';
-
+    // EXACT SAME path definitions as background-paths.tsx (demo video)
     const paths = Array.from({ length: 36 }, (_, i) => ({
         id: i,
         d: `M-${800 - i * 8 * position} -${100 + i * 8}C-${
@@ -16,11 +13,9 @@ function FloatingPaths({ position }: { position: number }) {
         } ${350 - i * 5}C${1000 - i * 6 * position} ${450 - i * 6} ${
             1400 - i * 8 * position
         } ${600 - i * 8} ${1800 - i * 8 * position} ${700 - i * 8}`,
-        color: i % 3 === 0 
-            ? `rgba(${isDark ? '255, 154, 46' : '147, 51, 234'}, ${0.10 + i * 0.003})`
-            : i % 3 === 1
-            ? `rgba(${isDark ? '255, 77, 141' : '124, 58, 237'}, ${0.10 + i * 0.003})`
-            : `rgba(${isDark ? '255, 200, 61' : '168, 85, 247'}, ${0.10 + i * 0.003})`,
+        color: i % 2 === 0 
+            ? `rgba(168, 85, 247, ${0.15 + i * 0.025})`
+            : `rgba(30, 58, 138, ${0.12 + i * 0.02})`,
         width: 1 + i * 0.08,
     }));
 

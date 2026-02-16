@@ -141,28 +141,3 @@ export const OCR_PHYSICS_EXAMS: ExamDate[] = [
   { name: "Paper 2 (Exploring Physics)", date: new Date(2026, 5, 1), description: "Exploring Physics" },
   { name: "Paper 3 (Unified Physics)", date: new Date(2026, 5, 8), description: "Unified Physics" },
 ];
-
-export const AQA_CHEMISTRY_EXAMS: ExamDate[] = [
-  { name: "Paper 1 (Inorganic & Physical)", date: new Date(2026, 4, 13), description: "Inorganic and Physical Chemistry" },
-  { name: "Paper 2 (Organic & Physical)", date: new Date(2026, 4, 20), description: "Organic and Physical Chemistry" },
-  { name: "Paper 3 (Practical)", date: new Date(2026, 5, 10), description: "Practical Chemistry" },
- ];
- 
- export const AQA_PSYCHOLOGY_EXAMS: ExamDate[] = [
-   { name: "Paper 1 (Introductory Topics)", date: new Date(2026, 4, 14), description: "Introductory Topics in Psychology" },
-   { name: "Paper 2 (Psychology in Context)", date: new Date(2026, 4, 27), description: "Psychology in Context" },
-   { name: "Paper 3 (Issues and Options)", date: new Date(2026, 5, 8), description: "Issues and Options in Psychology" },
- ];
-
-export const EDEXCEL_MATHS_EXAMS: ExamDate[] = [
-  { name: "Paper 1 (Pure Mathematics 1)", date: new Date(2026, 5, 2), description: "Pure Mathematics 1" },
-  { name: "Paper 2 (Pure Mathematics 2)", date: new Date(2026, 5, 9), description: "Pure Mathematics 2" },
-  { name: "Paper 3 (Statistics & Mechanics)", date: new Date(2026, 5, 15), description: "Statistics and Mechanics" },
-];
-
-export const CIE_ECONOMICS_EXAMS: ExamDate[] = [
-  { name: "Paper 1 (Multiple Choice)", date: new Date(2026, 4, 12), description: "AS Multiple Choice" },
-  { name: "Paper 2 (Data Response & Essays)", date: new Date(2026, 4, 22), description: "AS Data Response and Essays" },
-  { name: "Paper 3 (Multiple Choice)", date: new Date(2026, 5, 3), description: "A Level Multiple Choice" },
-  { name: "Paper 4 (Data Response & Essays)", date: new Date(2026, 5, 12), description: "A Level Data Response and Essays" },
-];

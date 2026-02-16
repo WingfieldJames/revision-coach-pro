@@ -4,7 +4,7 @@ import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button
 import { motion, AnimatePresence } from "framer-motion";
 
 interface LatestFeaturesSectionProps {
-  subject?: 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'psychology' | 'mathematics';
+  subject?: 'economics' | 'computer-science' | 'physics';
 }
 
 const economicsFeatures = [
@@ -50,9 +50,7 @@ const csFeatures = [
 ];
 
 export function LatestFeaturesSection({ subject = 'economics' }: LatestFeaturesSectionProps) {
-  const features = subject === 'computer-science' ? csFeatures : 
-    subject === 'psychology' ? economicsFeatures : // Psychology uses essay-based features like Economics
-    economicsFeatures;
+  const features = subject === 'computer-science' ? csFeatures : economicsFeatures;
   const [selectedFeature, setSelectedFeature] = useState(features[0].id);
   
   const currentFeature = features.find(f => f.id === selectedFeature) || features[0];

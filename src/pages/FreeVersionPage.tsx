@@ -1,26 +1,20 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { RAGChat } from '@/components/RAGChat';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
 const EDEXCEL_ECONOMICS_FREE_PROMPTS = [
-  { text: "Find all PEQs related to externalities" },
-  { text: "Explain Spec Point 2.2 (AD)" },
-  { text: "How do I structure a 25 marker" },
-  { text: "Give me application for trade agreements" },
+  { text: "Explain the difference between demand-pull and cost-push inflation" },
+  { text: "What are the characteristics of perfect competition?" },
+  { text: "Help me understand the Phillips Curve" },
+  { text: "What causes market failure?" },
 ];
 
 export const FreeVersionPage = () => {
-  const chatRef = useRef<RAGChatRef>(null);
-
-  const handleEssayMarkerSubmit = (message: string) => {
-    chatRef.current?.submitMessage(message);
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -35,16 +29,12 @@ export const FreeVersionPage = () => {
           showDiagramTool 
           showEssayMarker 
           showPastPaperFinder
-          showRevisionGuide
-          revisionGuideBoard="edexcel"
           showExamCountdown
           examDates={EDEXCEL_ECONOMICS_EXAMS}
           examSubjectName="Edexcel Economics"
+          toolsLocked 
           hideUserDetails 
           productId={EDEXCEL_PRODUCT_ID}
-          productSlug="edexcel-economics"
-          showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -56,8 +46,7 @@ export const FreeVersionPage = () => {
           footerText="A* AI can make mistakes. Verify important info."
           placeholder="Ask any Edexcel Economics question..."
           suggestedPrompts={EDEXCEL_ECONOMICS_FREE_PROMPTS}
-          tier="deluxe"
-          chatRef={chatRef}
+          tier="free"
         />
       </div>
     </div>

@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { RAGChat } from '@/components/RAGChat';
 import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
 
 // Correct OCR Physics product ID from database
@@ -16,12 +16,6 @@ const OCR_PHYSICS_PROMPTS = [
 ];
 
 export const OCRPhysicsFreeVersionPage = () => {
-  const chatRef = useRef<RAGChatRef>(null);
-
-  const handleEssayMarkerSubmit = (message: string) => {
-    chatRef.current?.submitMessage(message);
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -33,18 +27,15 @@ export const OCRPhysicsFreeVersionPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showEssayMarker
+          showDiagramTool 
+          showEssayMarker 
           showPastPaperFinder
           showExamCountdown
           examDates={OCR_PHYSICS_EXAMS}
           examSubjectName="OCR Physics"
+          toolsLocked 
           hideUserDetails 
           productId={OCR_PHYSICS_PRODUCT_ID}
-          productSlug="ocr-physics"
-          showUpgradeButton
-          essayMarkerLabel="6-Marker Analysis"
-          essayMarkerFixedMark={6}
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -55,8 +46,8 @@ export const OCRPhysicsFreeVersionPage = () => {
           subjectDescription="Your personal A* Physics tutor. Ask me anything!"
           footerText="Powered by A* AI • Trained on OCR Physics specification"
           placeholder="Ask about mechanics, waves, electricity..."
+          tier="free"
           suggestedPrompts={OCR_PHYSICS_PROMPTS}
-          chatRef={chatRef}
         />
       </div>
     </div>

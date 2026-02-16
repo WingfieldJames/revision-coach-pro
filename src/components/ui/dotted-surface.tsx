@@ -2,15 +2,11 @@
 import { cn } from '@/lib/utils';
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { useTheme } from '@/contexts/ThemeContext';
 
 type DottedSurfaceProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'ref'>;
 
 export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   const sceneRef = useRef<{
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
@@ -28,8 +24,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
     const AMOUNTY = 60;
 
     const scene = new THREE.Scene();
-    const fogColor = isDark ? 0x0D0316 : 0xFFFFFF;
-    scene.fog = new THREE.Fog(fogColor, 2000, 10000);
+    scene.fog = new THREE.Fog(0xffffff, 2000, 10000);
 
     const camera = new THREE.PerspectiveCamera(
       60,
@@ -45,7 +40,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
     });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(fogColor, 0);
+    renderer.setClearColor(scene.fog.color, 0);
 
     containerRef.current.appendChild(renderer.domElement);
 
@@ -53,19 +48,6 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
     const colors: number[] = [];
 
     const geometry = new THREE.BufferGeometry();
-    
-    // Theme-aware brand gradient colors for particles
-    const brandColors = isDark
-      ? [
-          [255 / 255, 154 / 255, 46 / 255],   // Orange #FF9A2E
-          [255 / 255, 77 / 255, 141 / 255],    // Pink #FF4D8D
-          [255 / 255, 200 / 255, 61 / 255],    // Yellow #FFC83D
-        ]
-      : [
-          [147 / 255, 51 / 255, 234 / 255],    // Purple #9333EA
-          [124 / 255, 58 / 255, 237 / 255],    // Purple #7C3AED
-          [168 / 255, 85 / 255, 247 / 255],    // Purple #A855F7
-        ];
 
     for (let ix = 0; ix < AMOUNTX; ix++) {
       for (let iy = 0; iy < AMOUNTY; iy++) {
@@ -74,8 +56,8 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
         const z = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
 
         positions.push(x, y, z);
-        const c = brandColors[(ix + iy) % brandColors.length];
-        colors.push(c[0], c[1], c[2]);
+        // Purple gradient color
+        colors.push(168 / 255, 85 / 255, 247 / 255);
       }
     }
 
@@ -89,7 +71,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
       size: 8,
       vertexColors: true,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.8,
       sizeAttenuation: true,
     });
 
@@ -165,7 +147,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
         }
       }
     };
-  }, [isDark]);
+  }, []);
 
   return (
     <div

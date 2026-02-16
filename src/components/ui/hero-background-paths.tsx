@@ -1,14 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useTheme } from "@/contexts/ThemeContext";
 
 function HeroFloatingPaths({ position, mobileOnly = false }: { position: number; mobileOnly?: boolean }) {
-    const { theme } = useTheme();
-    const isDark = theme === 'dark';
-
     const paths = Array.from({ length: 28 }, (_, i) => ({
         id: i,
+        // More horizontal, sweeping wave pattern that flows through the hero
         d: `M-${1000 - i * 15 * position} ${110 + i * 11 + Math.sin(i * 0.5) * 28}C-${
             600 - i * 12 * position
         } ${140 + i * 9 + Math.cos(i * 0.3) * 38} ${100 + i * 8 * position} ${
@@ -18,11 +15,10 @@ function HeroFloatingPaths({ position, mobileOnly = false }: { position: number;
         } ${1400 + i * 10 * position} ${180 + i * 7} ${2200 + i * 15 * position} ${
             140 + i * 13 + Math.sin(i * 0.6) * 22
         }`,
-        color: i % 3 === 0
-            ? `rgba(${isDark ? '255, 154, 46' : '147, 51, 234'}, ${0.08 + i * 0.003})`
-            : i % 3 === 1
-            ? `rgba(${isDark ? '255, 77, 141' : '124, 58, 237'}, ${0.08 + i * 0.003})`
-            : `rgba(${isDark ? '255, 200, 61' : '168, 85, 247'}, ${0.08 + i * 0.003})`,
+        // Using exact purple gradient colors from the website
+        color: i % 2 === 0 
+            ? `rgba(168, 85, 247, ${0.12 + i * 0.02})` // Purple #a855f7
+            : `rgba(30, 58, 138, ${0.10 + i * 0.015})`,  // Blue #1e3a8a
         width: 0.8 + i * 0.06,
     }));
 
