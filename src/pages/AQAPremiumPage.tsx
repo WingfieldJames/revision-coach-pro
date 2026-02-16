@@ -96,12 +96,17 @@ export const AQAPremiumPage = () => {
           showImageTool 
           showDiagramTool 
           showEssayMarker 
-          showPastPaperFinder
-          showExamCountdown
+           showPastPaperFinder
+           pastPaperBoard="aqa"
+           showExamCountdown
           examDates={AQA_ECONOMICS_EXAMS}
           examSubjectName="AQA Economics"
           hideUserDetails 
+          productId={AQA_PRODUCT_ID}
+          productSlug="aqa-economics"
+          showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
+          essayMarkerCustomMarks={[9, 10, 15, 25]}
         />
       </div>
       

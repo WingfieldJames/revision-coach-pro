@@ -1,11 +1,14 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
-import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import { useAuth } from '@/contexts/AuthContext';
+import { checkProductAccess } from '@/lib/productAccess';
 
-const CIE_PRODUCT_ID = "c3e5f8a1-9d4b-4c2e-8f1a-6b7c8d9e0f1a";
+const CIE_PRODUCT_ID = "9a710cf9-0523-4c1f-82c6-0e02b19087e5";
 
 const CIE_ECONOMICS_PROMPTS = [
   { text: "Explain the difference between demand-pull and cost-push inflation" },
@@ -16,6 +19,23 @@ const CIE_ECONOMICS_PROMPTS = [
 
 export const CIEPremiumPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (loading) return;
+      if (!user) {
+        navigate('/login?redirect=cie-premium');
+        return;
+      }
+      const access = await checkProductAccess(user.id, 'cie-economics');
+      if (!access.hasAccess) {
+        navigate('/compare');
+      }
+    };
+    checkAccess();
+  }, [user, loading, navigate]);
 
   const handleEssayMarkerSubmit = (message: string) => {
     chatRef.current?.submitMessage(message);
@@ -36,10 +56,12 @@ export const CIEPremiumPage = () => {
           showEssayMarker
           showPastPaperFinder
           showExamCountdown
-          examDates={AQA_ECONOMICS_EXAMS}
+          examDates={CIE_ECONOMICS_EXAMS}
           examSubjectName="CIE Economics"
           hideUserDetails 
           productId={CIE_PRODUCT_ID}
+          productSlug="cie-economics"
+          showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
@@ -51,7 +73,6 @@ export const CIEPremiumPage = () => {
           subjectDescription="Your personal A* CIE Economics tutor with full past paper access. Ask me anything!"
           footerText="Powered by A* AI • Trained on CIE Economics specification"
           placeholder="Ask any CIE Economics question..."
-          tier="deluxe"
           suggestedPrompts={CIE_ECONOMICS_PROMPTS}
           enableDiagrams
           chatRef={chatRef}

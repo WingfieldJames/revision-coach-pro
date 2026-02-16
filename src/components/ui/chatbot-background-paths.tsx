@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 function ChatbotFloatingPaths({ position }: { position: number }) {
     const paths = Array.from({ length: 36 }, (_, i) => ({
         id: i,
-        // Extended paths that go well beyond screen edges
         d: `M-${800 - i * 8 * position} -${100 + i * 8}C-${
             600 - i * 8 * position
         } ${100 + i * 6} ${200 - i * 6 * position} ${250 - i * 4} ${
@@ -13,11 +12,12 @@ function ChatbotFloatingPaths({ position }: { position: number }) {
         } ${350 - i * 5}C${1000 - i * 6 * position} ${450 - i * 6} ${
             1400 - i * 8 * position
         } ${600 - i * 8} ${1800 - i * 8 * position} ${700 - i * 8}`,
-        // Using exact purple gradient colors from the website
-        // Gradient from --primary (#1e3a8a) to --primary-variant (#a855f7)
-        color: i % 2 === 0 
-            ? `rgba(168, 85, 247, ${0.15 + i * 0.025})` // Purple #a855f7
-            : `rgba(30, 58, 138, ${0.12 + i * 0.02})`,  // Blue #1e3a8a
+        // Warm gradient colors: orange, pink, yellow
+        color: i % 3 === 0 
+            ? `rgba(255, 154, 46, ${0.08 + i * 0.003})`  // Orange
+            : i % 3 === 1
+            ? `rgba(255, 77, 141, ${0.08 + i * 0.003})`   // Pink
+            : `rgba(255, 200, 61, ${0.08 + i * 0.003})`,  // Yellow
         width: 1 + i * 0.08,
     }));
 

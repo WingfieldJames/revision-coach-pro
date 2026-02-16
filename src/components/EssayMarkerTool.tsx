@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
+const DEFAULT_MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
 const FREE_MONTHLY_ESSAY_LIMIT = 1;
 
 interface ToolUsageResponse {
@@ -35,19 +35,27 @@ interface EssayMarkerToolProps {
   productId?: string;
   onSubmitToChat?: (message: string) => void;
   onClose?: () => void;
+  fixedMark?: number;
+  toolLabel?: string;
+  customMarks?: number[];
 }
 
 export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   tier = 'deluxe',
   productId,
   onSubmitToChat,
-  onClose
+  onClose,
+  fixedMark,
+  toolLabel = "Essay Marker",
+  customMarks
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [selectedMark, setSelectedMark] = useState<number>(15);
+  const [selectedMark, setSelectedMark] = useState<number>(fixedMark ?? customMarks?.[0] ?? 15);
   const [essayText, setEssayText] = useState('');
-  const [inputMode, setInputMode] = useState<'text' | 'image'>('text');
+  // Default to image upload on touch devices (mobile/iPad), text on desktop
+  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const [inputMode, setInputMode] = useState<'text' | 'image'>(isTouchDevice ? 'image' : 'text');
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,7 +92,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     loadUsage();
   }, [tier, user, productId]);
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (paymentType: 'monthly' | 'lifetime' = 'lifetime') => {
     if (!user) {
       navigate('/login');
       return;
@@ -105,7 +113,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           Authorization: `Bearer ${sessionData.session.access_token}`
         },
         body: {
-          paymentType: 'lifetime',
+          paymentType,
           productId: productId,
           affiliateCode
         }
@@ -132,17 +140,17 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     return (
       <div className="space-y-4">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)] flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center mx-auto mb-3">
             <PenLine className="w-6 h-6 text-white" />
           </div>
           <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
           <p className="text-muted-foreground text-sm">
-            You've used your {FREE_MONTHLY_ESSAY_LIMIT} free essay marking this month. Upgrade to Deluxe for unlimited access.
+            You've used your {FREE_MONTHLY_ESSAY_LIMIT} free essay marking this month. Upgrade for unlimited access!
           </p>
         </div>
         
         <div className="bg-muted/50 rounded-xl p-4">
-          <p className="font-semibold text-sm mb-3">Deluxe Features:</p>
+          <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
           <ul className="space-y-2 text-sm">
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
@@ -154,29 +162,32 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
-              <span>Full 2017-2025 past paper training</span>
+              <span>Unlimited daily prompts</span>
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary">✓</span>
-              <span>Unlimited daily prompts</span>
+              <span>Image upload & OCR analysis</span>
             </li>
           </ul>
         </div>
         
-        <Button 
-          className="w-full bg-gradient-to-r from-primary to-[hsl(270,67%,60%)]"
-          onClick={handleUpgrade}
-          disabled={isCheckingOut}
-        >
-          {isCheckingOut ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Loading...
-            </>
-          ) : (
-            'Upgrade to Deluxe'
-          )}
-        </Button>
+        <div className="space-y-2">
+          <Button 
+            className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
+            onClick={() => handleUpgrade('lifetime')}
+            disabled={isCheckingOut}
+          >
+            {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £24.99'}
+          </Button>
+          <Button 
+            variant="outline"
+            className="w-full"
+            onClick={() => handleUpgrade('monthly')}
+            disabled={isCheckingOut}
+          >
+            Monthly – £6.99/mo
+          </Button>
+        </div>
         
         <p className="text-xs text-center text-muted-foreground">
           Your free uses reset at the start of each month
@@ -240,36 +251,41 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
       return;
     }
 
-    // For free tier, check and increment usage
+    // For free tier, check usage limit before proceeding
     if (tier === 'free' && user) {
-      try {
-        const { data, error } = await supabase.rpc('increment_tool_usage', {
-          p_user_id: user.id,
-          p_product_id: productId || null,
-          p_tool_type: 'essay_marker',
-          p_limit: FREE_MONTHLY_ESSAY_LIMIT
-        });
-
-        if (error) {
-          console.error('Error incrementing usage:', error);
-        } else if (data) {
-          const typedData = data as unknown as IncrementToolUsageResponse;
-          setMonthlyUsage(typedData.count);
-          if (typedData.exceeded) {
-            toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
-            return;
-          }
-        }
-      } catch (err) {
-        console.error('Usage tracking error:', err);
+      if (monthlyUsage >= FREE_MONTHLY_ESSAY_LIMIT) {
+        setMonthlyUsage(monthlyUsage);
+        toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
+        return;
       }
     }
 
-    const prompt = `${markPrompts[selectedMark]}\n\n${essayText}`;
+    // Use fixedMark if provided, otherwise use selectedMark
+    const markToUse = fixedMark ?? selectedMark;
+    const prompt = `Mark my ${markToUse} marker. Use exact marking criteria.\n\n${essayText}`;
     
     if (onSubmitToChat) {
       setIsSubmitting(true);
       onSubmitToChat(prompt);
+
+      // Increment usage AFTER successful submission
+      if (tier === 'free' && user) {
+        try {
+          const { data, error } = await supabase.rpc('increment_tool_usage', {
+            p_user_id: user.id,
+            p_product_id: productId || null,
+            p_tool_type: 'essay_marker',
+            p_limit: FREE_MONTHLY_ESSAY_LIMIT
+          });
+          if (!error && data) {
+            const typedData = data as unknown as IncrementToolUsageResponse;
+            setMonthlyUsage(typedData.count);
+          }
+        } catch (err) {
+          console.error('Usage tracking error:', err);
+        }
+      }
+
       // Close the popover after submitting
       if (onClose) {
         onClose();
@@ -306,9 +322,9 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           <PenLine className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Essay Marker</h3>
+          <h3 className="font-semibold text-foreground">{toolLabel}</h3>
           <p className="text-xs text-muted-foreground">
-            Upload a photo or paste your essay
+            Upload a photo or paste your {fixedMark ? `${fixedMark}-marker` : 'essay'}
           </p>
         </div>
       </div>
@@ -323,25 +339,27 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
       )}
 
       <div className="space-y-4">
-        {/* Mark Selector */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Number of Marks</label>
-          <div className="flex flex-wrap gap-2">
-            {MARK_OPTIONS.map((mark) => (
-              <button
-                key={mark}
-                onClick={() => setSelectedMark(mark)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  selectedMark === mark
-                    ? 'bg-gradient-brand text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                {mark}
-              </button>
-            ))}
+        {/* Mark Selector - only show if no fixedMark */}
+        {!fixedMark && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Number of Marks</label>
+            <div className="flex flex-wrap gap-2">
+              {(customMarks || DEFAULT_MARK_OPTIONS).map((mark) => (
+                <button
+                  key={mark}
+                  onClick={() => setSelectedMark(mark)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    selectedMark === mark
+                      ? 'bg-gradient-brand text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {mark}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Input Mode Toggle */}
         <div className="space-y-2">

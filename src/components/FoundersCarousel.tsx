@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Award, GraduationCap, BookOpen, Trophy } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
+import { useTheme } from '@/contexts/ThemeContext';
 import jamesFounder from '@/assets/james-founder.png';
 import namanFounder from '@/assets/naman-founder.png';
 import tudorFounder from '@/assets/tudor-founder.jpg';
@@ -67,18 +68,23 @@ const founders: Founder[] = [{
 }];
 export function FoundersCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const goToPrevious = () => {
-    setCurrentIndex(prev => prev === 0 ? founders.length - 1 : prev - 1);
+    setCurrentIndex((prev) => prev === 0 ? founders.length - 1 : prev - 1);
   };
   const goToNext = () => {
-    setCurrentIndex(prev => prev === founders.length - 1 ? 0 : prev + 1);
+    setCurrentIndex((prev) => prev === founders.length - 1 ? 0 : prev + 1);
   };
   const currentFounder = founders[currentIndex];
-  return <section className="py-16 px-8 bg-muted">
+
+  return <section className={`py-16 px-8 ${isDark ? 'bg-background' : 'bg-background'}`}>
       <div className="max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
-            Trained by real A* students
+          <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-4 leading-[1.2]">
+            <span className={isDark ? "text-foreground" : "text-foreground"}>Trained by real </span>
+            <span className="text-gradient-brand">A* students</span>
           </h2>
           <p className="text-muted-foreground text-sm md:text-base text-center mx-auto">
             ​We searched the country for the sharpest A-Level students – 4 A*s, Oxbridge offers, top exam scores – and worked alongside them to train our AI on their proven techniques
@@ -108,12 +114,14 @@ export function FoundersCarousel() {
             x: -20
           }} transition={{
             duration: 0.3
-          }} className="bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl rounded-3xl border border-border/50 p-8 md:p-12 overflow-hidden shadow-elevated">
-              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+          }} className={`relative backdrop-blur-xl rounded-3xl border border-border/50 p-8 md:p-12 overflow-hidden shadow-elevated ${isDark ? 'bg-gradient-to-br from-card/80 to-card/40' : 'bg-white'}`}>
+              {/* Light mode purple gradient overlay */}
+              {!isDark && <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl pointer-events-none" />}
+              <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
                 {/* Photo */}
                 <div className="flex-shrink-0">
                   <div className="relative">
-                    <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg bg-muted">
+                    <div className={`w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden shadow-lg bg-muted ${isDark ? 'border-4 border-primary/20' : 'border-4 border-border'}`}>
                       <img src={currentFounder.image} alt={`${currentFounder.name} - Founder`} className="w-full h-full object-cover object-[center_25%] scale-110" />
                     </div>
                   </div>
@@ -121,20 +129,20 @@ export function FoundersCarousel() {
                   {/* Name and status */}
                   <div className="text-center mt-4">
                     <h3 className="text-xl font-bold text-foreground">{currentFounder.name}</h3>
-                    <p className="text-sm text-primary font-medium">{currentFounder.status}</p>
+                    <p className={`text-sm font-medium ${isDark ? 'text-primary' : 'text-muted-foreground'}`}>{currentFounder.status}</p>
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 text-center md:text-left">
-                  <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
+                  <blockquote className={`text-lg md:text-xl leading-relaxed mb-8 ${isDark ? 'text-muted-foreground' : 'text-foreground/70'}`}>
                     "{currentFounder.quote}"
                   </blockquote>
 
                   {/* Achievement badges */}
                   <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                    {currentFounder.achievements.map((achievement, i) => <div key={i} className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
-                        <achievement.icon className="w-4 h-4 text-primary" />
+                    {currentFounder.achievements.map((achievement, i) => <div key={i} className={`flex items-center gap-2 rounded-full px-4 py-2 ${isDark ? 'bg-primary/10 border border-primary/20' : 'bg-muted border border-border'}`}>
+                        <achievement.icon className={`w-4 h-4 ${isDark ? 'text-primary' : 'text-foreground'}`} />
                         <span className="text-sm font-medium text-foreground">{achievement.text}</span>
                       </div>)}
                   </div>
@@ -145,7 +153,7 @@ export function FoundersCarousel() {
 
           {/* Dots indicator */}
           <div className="flex justify-center gap-2 mt-6">
-            {founders.map((_, index) => <button key={index} onClick={() => setCurrentIndex(index)} className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentIndex ? 'bg-primary' : 'bg-border'}`} aria-label={`Go to founder ${index + 1}`} />)}
+            {founders.map((_, index) => <button key={index} onClick={() => setCurrentIndex(index)} className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentIndex ? isDark ? 'bg-primary' : 'bg-foreground' : 'bg-border'}`} aria-label={`Go to founder ${index + 1}`} />)}
           </div>
         </div>
       </div>

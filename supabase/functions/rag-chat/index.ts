@@ -106,17 +106,15 @@ Apply the additional context naturally depending on the user's question - do not
 }
 
 // Fetch system prompt from database for a given product
+// Always uses system_prompt_deluxe - unified model for all users
 async function fetchSystemPrompt(
   supabase: ReturnType<typeof createClient>,
-  productId: string,
-  tier: 'free' | 'deluxe'
+  productId: string
 ): Promise<string> {
   try {
-    const promptColumn = tier === 'deluxe' ? 'system_prompt_deluxe' : 'system_prompt_free';
-    
     const { data, error } = await supabase
       .from('products')
-      .select(`${promptColumn}, slug`)
+      .select('system_prompt_deluxe, slug')
       .eq('id', productId)
       .single();
     
@@ -125,14 +123,14 @@ async function fetchSystemPrompt(
       return FALLBACK_PROMPTS["default"];
     }
     
-    const prompt = data?.[promptColumn];
+    const prompt = data?.system_prompt_deluxe;
     if (prompt) {
-      console.log(`Using DB ${tier} prompt for product: ${data.slug}`);
+      console.log(`Using DB deluxe prompt for product: ${data.slug}`);
       return prompt;
     }
     
     // Fallback to default if no prompt in DB
-    console.log(`No ${tier} prompt in DB for ${data?.slug}, using fallback`);
+    console.log(`No deluxe prompt in DB for ${data?.slug}, using fallback`);
     return FALLBACK_PROMPTS["default"];
   } catch (err) {
     console.error('Error in fetchSystemPrompt:', err);
@@ -185,12 +183,11 @@ function detectContentTypePriorities(userMessage: string): string[] {
 }
 
 // Query relevant document chunks from the training data
-// Now with tier filtering and smart content routing
+// Unified: all users get full training data (no tier filtering)
 async function fetchRelevantContext(
   supabase: ReturnType<typeof createClient>,
   productId: string,
   userMessage: string,
-  tier: 'free' | 'deluxe',
   contentTypes?: string[]
 ): Promise<FetchContextResult> {
   try {
@@ -200,28 +197,14 @@ async function fetchRelevantContext(
       : detectContentTypePriorities(userMessage);
     
     console.log(`Content type priorities: ${effectiveContentTypes.join(', ')}`);
-    console.log(`Fetching context for tier: ${tier}`);
     
-    // Build query for document chunks - ALWAYS filter by product_id first
-    let query = supabase
+    // Build query for document chunks - filter by product_id only
+    // All users get full training data (tier distinction removed)
+    const { data: chunks, error } = await supabase
       .from('document_chunks')
       .select('content, metadata')
-      .eq('product_id', productId);
-    
-    // CRITICAL: Apply tier filtering for free users
-    // Free users only get: tier='free' OR tier IS NULL (backwards compat)
-    // Deluxe users get everything (no tier filter)
-    if (tier === 'free') {
-      // Use ->> operator for JSONB text extraction (PostgREST syntax)
-      // metadata->>tier extracts the tier value as text
-      query = query.or('metadata->>tier.eq.free,metadata->>tier.is.null');
-      console.log('Applied free tier filter: metadata->>tier = free OR null');
-    } else {
-      console.log('Deluxe tier: no tier filter applied (gets all content)');
-    }
-    
-    // Limit results to avoid overwhelming context
-    const { data: chunks, error } = await query.limit(15);
+      .eq('product_id', productId)
+      .limit(15);
     
     if (error) {
       console.error('Error fetching document chunks:', error);
@@ -229,11 +212,11 @@ async function fetchRelevantContext(
     }
     
     if (!chunks || chunks.length === 0) {
-      console.log(`No training data found for product ${productId} (tier: ${tier})`);
+      console.log(`No training data found for product ${productId}`);
       return { context: '', sourcesSearched: [] };
     }
     
-    console.log(`Found ${chunks.length} relevant chunks for context (tier: ${tier})`);
+    console.log(`Found ${chunks.length} relevant chunks for context`);
     
     // Track unique sources searched
     const sourcesMap = new Map<string, { type: string; topic: string }>();
@@ -242,7 +225,7 @@ async function fetchRelevantContext(
     const contextParts = chunks.map((chunk: { content: string; metadata: Record<string, unknown> }) => {
       const contentType = chunk.metadata?.content_type || 'general';
       const topic = chunk.metadata?.topic || '';
-      const chunkTier = chunk.metadata?.tier || 'free';
+      const contentTier = chunk.metadata?.tier || 'all';
       const header = topic 
         ? `[${String(contentType).toUpperCase()} - ${topic}]` 
         : `[${String(contentType).toUpperCase()}]`;
@@ -308,16 +291,40 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { message, product_id, user_preferences, history = [], tier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics' } = await req.json();
+    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics' } = await req.json();
 
     if (!message) {
       throw new Error("message is required");
     }
 
-    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (tier: ${tier}, diagrams: ${enable_diagrams})`);
+    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (diagrams: ${enable_diagrams})`);
     if (user_preferences) {
       console.log(`User preferences: Year ${user_preferences.year}, Predicted: ${user_preferences.predicted_grade}, Target: ${user_preferences.target_grade}`);
     }
+
+    // Server-side subscription verification - never trust client tier
+    let tier: string = 'free';
+    if (user_id && product_id) {
+      try {
+        const { data: sub } = await supabaseAdmin
+          .from('user_subscriptions')
+          .select('tier, subscription_end')
+          .eq('user_id', user_id)
+          .eq('product_id', product_id)
+          .eq('active', true)
+          .maybeSingle();
+        
+        if (sub?.tier === 'deluxe') {
+          if (!sub.subscription_end || new Date(sub.subscription_end) > new Date()) {
+            tier = 'deluxe';
+          }
+        }
+      } catch (err) {
+        console.error('Error verifying subscription:', err);
+      }
+    }
+    
+    console.log(`Verified tier for user ${user_id}: ${tier}`);
 
     // Check daily usage limit for FREE tier only
     if (tier === 'free' && user_id && product_id) {
@@ -357,18 +364,17 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       }
     }
 
-    // Fetch the appropriate system prompt from database
-    const basePrompt = await fetchSystemPrompt(supabaseAdmin, product_id, tier as 'free' | 'deluxe');
+    // Fetch the deluxe system prompt from database (unified for all users)
+    const basePrompt = await fetchSystemPrompt(supabaseAdmin, product_id);
     
     // Add user personalization context (pass message for technique detection)
     const personalizedPrompt = buildPersonalizedPrompt(basePrompt, user_preferences, message);
     
-    // Fetch relevant training data from document_chunks WITH TIER FILTERING
+    // Fetch relevant training data from document_chunks (no tier filtering)
     const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(
       supabaseAdmin, 
       product_id, 
-      message, 
-      tier as 'free' | 'deluxe'
+      message
     );
     
     // Find relevant diagram for deluxe users

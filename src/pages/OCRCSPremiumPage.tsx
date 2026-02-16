@@ -35,13 +35,19 @@ export const OCRCSPremiumPage = () => {
           showDiagramTool 
           showEssayMarker
           showPastPaperFinder
+          showRevisionGuide
           showExamCountdown
           examDates={OCR_CS_EXAMS}
           examSubjectName="OCR Computer Science"
           hideUserDetails 
           diagramSubject="cs"
+          pastPaperBoard="ocr-cs"
+          revisionGuideBoard="ocr-cs"
           productId={OCR_CS_PRODUCT_ID}
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
+          productSlug="ocr-computer-science"
+          showUpgradeButton
+           onEssayMarkerSubmit={handleEssayMarkerSubmit}
+           essayMarkerCustomMarks={[9, 12]}
         />
       </div>
       
@@ -52,7 +58,6 @@ export const OCRCSPremiumPage = () => {
           subjectDescription="Your personal A* Computer Science tutor with full diagram access. Ask me anything!"
           footerText="Powered by A* AI • Trained on OCR Computer Science specification (2017-2025)"
           placeholder="Ask about algorithms, data structures, programming..."
-          tier="deluxe"
           suggestedPrompts={OCR_CS_PROMPTS}
           enableDiagrams
           diagramSubject="cs"

@@ -12,10 +12,10 @@ import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
 const EDEXCEL_ECONOMICS_PROMPTS = [
-  { text: "Explain Spec Point (4.1.5 Market Structures)" },
-  { text: "Find all past exam questions on Economic Growth" },
-  { text: "Layout the structure of the exam" },
-  { text: "Create me a full revision plan", usesPersonalization: true },
+  { text: "Find all PEQs related to externalities" },
+  { text: "Explain Spec Point 2.2 (AD)" },
+  { text: "How do I structure a 25 marker" },
+  { text: "Give me application for trade agreements" },
 ];
 
 export const PremiumVersionPage = () => {
@@ -97,10 +97,15 @@ export const PremiumVersionPage = () => {
           showDiagramTool 
           showEssayMarker 
           showPastPaperFinder
+          showRevisionGuide
+          revisionGuideBoard="edexcel"
           showExamCountdown
           examDates={EDEXCEL_ECONOMICS_EXAMS}
           examSubjectName="Edexcel Economics"
           hideUserDetails 
+          productId={EDEXCEL_PRODUCT_ID}
+          productSlug="edexcel-economics"
+          showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>

@@ -29,3 +29,21 @@ verify_jwt = false
 
 [functions.rag-chat]
 verify_jwt = false
+
+[functions.ingest-physics-papers]
+verify_jwt = false
+
+[functions.ingest-content]
+verify_jwt = false
+
+[functions.ingest-chemistry-spec]
+verify_jwt = false
+
+[functions.ingest-chemistry-papers]
+verify_jwt = false
+
+[functions.ingest-maths-spec]
+verify_jwt = false
+
+[functions.generate-revision-guide]
+verify_jwt = false
