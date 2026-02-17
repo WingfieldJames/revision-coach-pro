@@ -1,14 +1,13 @@
 'use client';
 import React, { useMemo } from 'react';
-import { ChatbotFullscreenPaths } from './chatbot-fullscreen-paths';
 import { DottedSurface } from './dotted-surface';
 import { FlowFieldBackground } from './flow-field-background';
 
-type BackgroundType = 'paths' | 'dotted' | 'flowfield';
+type BackgroundType = 'dotted' | 'flowfield';
 
 export function RandomChatbotBackground() {
   const backgroundType = useMemo<BackgroundType>(() => {
-    const options: BackgroundType[] = ['paths', 'dotted', 'flowfield'];
+    const options: BackgroundType[] = ['dotted', 'flowfield'];
     const randomIndex = Math.floor(Math.random() * options.length);
     return options[randomIndex];
   }, []);
@@ -17,9 +16,7 @@ export function RandomChatbotBackground() {
     case 'dotted':
       return <DottedSurface />;
     case 'flowfield':
-      return <FlowFieldBackground color="#FF9A2E" trailOpacity={0.08} />;
-    case 'paths':
     default:
-      return <ChatbotFullscreenPaths />;
+      return <FlowFieldBackground color="#FF9A2E" trailOpacity={0.08} />;
   }
 }
