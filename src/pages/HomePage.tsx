@@ -93,12 +93,7 @@ export const HomePage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // If user is already logged in, redirect to subject selection
-  React.useEffect(() => {
-    if (!loading && user) {
-      navigate('/compare', { replace: true });
-    }
-  }, [user, loading, navigate]);
+  // No redirect for signed-in users — homepage is accessible to everyone
 
   const handlePickSubject = () => {
     navigate("/compare");
