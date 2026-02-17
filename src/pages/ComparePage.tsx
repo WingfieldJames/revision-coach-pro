@@ -220,7 +220,7 @@ export const ComparePage = () => {
         <Header showNavLinks />
         
 
-        <main className="py-8 px-4 sm:px-8 max-w-5xl mx-auto text-center relative z-10">
+        <main className="pt-2 pb-8 px-4 sm:px-8 max-w-5xl mx-auto text-center relative z-10">
           <ScrollReveal>
             <h1 className="text-2xl md:text-4xl font-bold mb-8 flex items-center justify-center gap-0 md:gap-0 flex-nowrap">
               <span className="self-center">Choose Your</span>
