@@ -78,8 +78,11 @@ Remember to:
 - Give exam tips and mark scheme points where relevant`,
 };
 
+// AQA Psychology product ID - used for spec version routing
+const PSYCHOLOGY_PRODUCT_ID = 'c56bc6d6-5074-4e1f-8bf2-8e900ba928ec';
+
 // Build personalized system prompt with user context - PREPENDED to start
-function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | null, userMessage: string): string {
+function buildPersonalizedPrompt(basePrompt: string, prefs: UserPreferences | null, userMessage: string, productId?: string): string {
   if (!prefs) return basePrompt;
   
   // Build student context block to PREPEND to the start of the system prompt
@@ -97,9 +100,18 @@ Year-specific context:
 - If Year 12: They are only studying Theme 1 and 2 and have predicted grade exams. Include more foundational explanations.
 
 Apply the additional context naturally depending on the user's question - do not bring this up constantly.
----
-
 `;
+
+  // Add Psychology-specific spec version context
+  if (productId === PSYCHOLOGY_PRODUCT_ID) {
+    if (prefs.year === 'Year 13') {
+      studentContext += `\nSpecification context: You are sitting the 2016 specification (exams June 2026). Use the spec for 2026. This spec includes: Zimbardo, types of LTM, Wundt/introspection, biological rhythms, and 'Psychopathology' as the topic name.\n`;
+    } else if (prefs.year === 'Year 12') {
+      studentContext += `\nSpecification context: You are sitting the 2027 specification (exams June 2027 onwards). Use the spec 2027 onwards. Key differences: no Zimbardo, no types of LTM, no Wundt/introspection, no biological rhythms. 'Psychopathology' is renamed to 'Clinical Psychology and Mental Health'. Gender includes gender identities (non-binary, gender fluid). Forensic uses 'typology approach' and 'data-driven approach'.\n`;
+    }
+  }
+
+  studentContext += `---\n\n`;
 
   // PREPEND student context to the START of the system prompt (not append to end)
   return studentContext + basePrompt;
@@ -188,7 +200,8 @@ async function fetchRelevantContext(
   supabase: ReturnType<typeof createClient>,
   productId: string,
   userMessage: string,
-  contentTypes?: string[]
+  contentTypes?: string[],
+  userPreferences?: UserPreferences | null
 ): Promise<FetchContextResult> {
   try {
     // Detect content type priorities if not explicitly provided
@@ -204,7 +217,7 @@ async function fetchRelevantContext(
       .from('document_chunks')
       .select('content, metadata')
       .eq('product_id', productId)
-      .limit(15);
+      .limit(30);
     
     if (error) {
       console.error('Error fetching document chunks:', error);
@@ -216,13 +229,30 @@ async function fetchRelevantContext(
       return { context: '', sourcesSearched: [] };
     }
     
-    console.log(`Found ${chunks.length} relevant chunks for context`);
+    // For Psychology product, filter specification chunks by spec_version based on user year
+    let filteredChunks = chunks;
+    if (productId === PSYCHOLOGY_PRODUCT_ID && userPreferences) {
+      const specVersion = userPreferences.year === 'Year 12' ? '2027' : '2026';
+      console.log(`Psychology spec filtering: Year ${userPreferences.year} -> spec_version ${specVersion}`);
+      
+      filteredChunks = chunks.filter((chunk: { content: string; metadata: Record<string, unknown> }) => {
+        const metadata = chunk.metadata || {};
+        // Non-specification chunks are shared across both specs
+        if (metadata.content_type !== 'specification') return true;
+        // Specification chunks: only include matching spec_version
+        return metadata.spec_version === specVersion;
+      });
+      
+      console.log(`Filtered from ${chunks.length} to ${filteredChunks.length} chunks after spec_version filtering`);
+    }
+    
+    console.log(`Found ${filteredChunks.length} relevant chunks for context`);
     
     // Track unique sources searched
     const sourcesMap = new Map<string, { type: string; topic: string }>();
     
     // Format chunks as context
-    const contextParts = chunks.map((chunk: { content: string; metadata: Record<string, unknown> }) => {
+    const contextParts = filteredChunks.map((chunk: { content: string; metadata: Record<string, unknown> }) => {
       const contentType = chunk.metadata?.content_type || 'general';
       const topic = chunk.metadata?.topic || '';
       const contentTier = chunk.metadata?.tier || 'all';
@@ -368,13 +398,15 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
     const basePrompt = await fetchSystemPrompt(supabaseAdmin, product_id);
     
     // Add user personalization context (pass message for technique detection)
-    const personalizedPrompt = buildPersonalizedPrompt(basePrompt, user_preferences, message);
+    const personalizedPrompt = buildPersonalizedPrompt(basePrompt, user_preferences, message, product_id);
     
-    // Fetch relevant training data from document_chunks (no tier filtering)
+    // Fetch relevant training data from document_chunks (with spec_version filtering for Psychology)
     const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(
       supabaseAdmin, 
       product_id, 
-      message
+      message,
+      undefined,
+      user_preferences
     );
     
     // Find relevant diagram for deluxe users
