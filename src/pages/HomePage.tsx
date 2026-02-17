@@ -209,65 +209,35 @@ export const HomePage = () => {
         </HeroBackgroundPaths>
       </section>
 
+      {/* See A* AI in action - Demo Video */}
+      <section className="py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
+        <ScrollReveal className="text-center mb-8 md:mb-12">
+          <h2 className={sectionHeadingClass}>
+            <span className="text-foreground">See </span>
+            <span className="text-gradient-brand">A* AI</span>
+            <span className="text-foreground"> in action</span>
+          </h2>
+        </ScrollReveal>
+        <ScrollReveal delay={0.2}>
+          <div className="rounded-2xl overflow-hidden border border-border/50 shadow-elevated" style={{ position: 'relative', paddingTop: '62.28%' }}>
+            <iframe
+              src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&autoplay=1&muted=1&background=1"
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+              title="A* AI Demo"
+            />
+          </div>
+        </ScrollReveal>
+      </section>
+
       {/* Trained by A* Students - Desktop */}
       <div className="hidden md:block">
         <FoundersCarousel />
       </div>
 
       <MobileFoundersSection />
-
-      {/* How A* AI helps you revise smarter */}
-      <section data-section="how-it-works" className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <ScrollReveal className="relative z-10 text-center mb-8 md:mb-12">
-          <h2 className={sectionHeadingClass}>
-            <span className="text-foreground">How </span>
-            <span className="text-gradient-brand">A* AI</span>
-            <span className="text-foreground"> helps you at </span>
-            <span className="text-gradient-brand">every</span>
-            <span className="text-foreground"> stage of revision</span>
-          </h2>
-        </ScrollReveal>
-
-        <div className="hidden lg:block">
-          <RadialOrbitalTimeline timelineData={revisionFeatures} />
-        </div>
-
-        <div className="lg:hidden">
-          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-            {revisionFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <StaggerItem key={feature.id}>
-                  <Accordion type="single" collapsible>
-                    <AccordionItem
-                      value={`feature-${feature.id}`}
-                      className="border-0 bg-muted rounded-xl overflow-hidden"
-                    >
-                      <AccordionTrigger
-                        hideIcon
-                        className="p-5 md:p-6 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180"
-                      >
-                        <div className="flex items-center gap-3 w-full">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <Icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <strong className="text-base md:text-lg font-semibold text-left flex-1">
-                            {feature.title}
-                          </strong>
-                          <ChevronDown className="chevron h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-5 pb-5 md:px-6 md:pb-6 pt-0">
-                        <p className="text-sm text-muted-foreground leading-relaxed">{feature.content}</p>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </StaggerItem>
-              );
-            })}
-          </StaggerContainer>
-        </div>
-      </section>
 
       {/* Testimonials Section - Desktop */}
       <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden bg-background">
@@ -328,6 +298,59 @@ export const HomePage = () => {
           </h2>
         </ScrollReveal>
         <SubjectPlanSelector />
+      </section>
+
+      {/* How A* AI helps you revise smarter */}
+      <section data-section="how-it-works" className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
+        <ScrollReveal className="relative z-10 text-center mb-8 md:mb-12">
+          <h2 className={sectionHeadingClass}>
+            <span className="text-foreground">How </span>
+            <span className="text-gradient-brand">A* AI</span>
+            <span className="text-foreground"> helps you at </span>
+            <span className="text-gradient-brand">every</span>
+            <span className="text-foreground"> stage of revision</span>
+          </h2>
+        </ScrollReveal>
+
+        <div className="hidden lg:block">
+          <RadialOrbitalTimeline timelineData={revisionFeatures} />
+        </div>
+
+        <div className="lg:hidden">
+          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+            {revisionFeatures.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <StaggerItem key={feature.id}>
+                  <Accordion type="single" collapsible>
+                    <AccordionItem
+                      value={`feature-${feature.id}`}
+                      className="border-0 bg-muted rounded-xl overflow-hidden"
+                    >
+                      <AccordionTrigger
+                        hideIcon
+                        className="p-5 md:p-6 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180"
+                      >
+                        <div className="flex items-center gap-3 w-full">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <Icon className="w-5 h-5 text-primary" />
+                          </div>
+                          <strong className="text-base md:text-lg font-semibold text-left flex-1">
+                            {feature.title}
+                          </strong>
+                          <ChevronDown className="chevron h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-5 pb-5 md:px-6 md:pb-6 pt-0">
+                        <p className="text-sm text-muted-foreground leading-relaxed">{feature.content}</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </StaggerItem>
+              );
+            })}
+          </StaggerContainer>
+        </div>
       </section>
 
       {/* FAQ Section */}
