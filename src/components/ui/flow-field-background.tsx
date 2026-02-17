@@ -39,7 +39,7 @@ export function FlowFieldBackground({
     // Theme-aware colors
     const colors = isDark
       ? ["#FF9A2E", "#FF4D8D", "#FFC83D"]
-      : ["#9333EA", "#7C3AED", "#A855F7"];
+      : ["#1e3a8a", "#7c3aed", "#a855f7"];
 
     class Particle {
       x: number;
