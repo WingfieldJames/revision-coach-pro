@@ -210,7 +210,7 @@ export const HomePage = () => {
       </section>
 
       {/* See A* AI in action - Demo Video */}
-      <section className="py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
+      <section className="hidden md:block py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-8 md:mb-12">
           <h2 className={sectionHeadingClass}>
             <span className="text-foreground">See </span>
