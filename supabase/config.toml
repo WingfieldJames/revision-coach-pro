@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.generate-revision-guide]
 verify_jwt = false
+
+[functions.update-system-prompt]
+verify_jwt = false
