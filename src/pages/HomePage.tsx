@@ -101,9 +101,9 @@ export const HomePage = () => {
   };
 
   const handleSeeHowItWorks = () => {
-    const section = document.querySelector('[data-section="how-it-works"]');
+    const section = document.querySelector('[data-section="founders"]');
     if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -209,6 +209,11 @@ export const HomePage = () => {
         </HeroBackgroundPaths>
       </section>
 
+      {/* Trained by A* Students - Desktop */}
+      <div className="hidden md:block" data-section="founders">
+        <FoundersCarousel />
+      </div>
+
       {/* See A* AI in action - Demo Video */}
       <section className="hidden md:block py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-8 md:mb-12">
@@ -231,11 +236,6 @@ export const HomePage = () => {
           </div>
         </ScrollReveal>
       </section>
-
-      {/* Trained by A* Students - Desktop */}
-      <div className="hidden md:block">
-        <FoundersCarousel />
-      </div>
 
       <MobileFoundersSection />
 
