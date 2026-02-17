@@ -217,10 +217,10 @@ export const HomePage = () => {
       {/* See A* AI in action - Demo Video */}
       <section className="hidden md:block py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-8 md:mb-12">
-          <h2 className={sectionHeadingClass}>
-            <span className="text-foreground">See </span>
-            <span className="text-gradient-brand">A* AI</span>
-            <span className="text-foreground"> in action</span>
+          <h2 className={`${sectionHeadingClass} flex items-center justify-center gap-0 flex-nowrap`}>
+            <span className="text-foreground">See</span>
+            <img src={currentLogo} alt="A* AI" className={`h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3 ${theme === 'dark' ? '-translate-y-1 md:-translate-y-1.5' : ''}`} />
+            <span className="text-foreground">in action</span>
           </h2>
         </ScrollReveal>
         <ScrollReveal delay={0.2}>
