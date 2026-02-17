@@ -219,7 +219,7 @@ export const HomePage = () => {
         <ScrollReveal className="text-center mb-8 md:mb-12">
           <h2 className={`${sectionHeadingClass} flex items-center justify-center gap-0 flex-nowrap`}>
             <span className="text-foreground">See</span>
-            <img src={currentLogo} alt="A* AI" className="h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3 translate-y-[0.4cm]" />
+            <img src={currentLogo} alt="A* AI" className="h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3 translate-y-[0.1cm]" />
             <span className="text-foreground">in action</span>
           </h2>
         </ScrollReveal>
