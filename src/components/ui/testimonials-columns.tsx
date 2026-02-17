@@ -42,10 +42,8 @@ export const TestimonialsColumn = ({
             {testimonials.map(({ text, image, name, role }, i) => (
               <div
                 key={`${index}-${i}`}
-                className="relative bg-card rounded-3xl p-5 shadow-card border border-border/30 overflow-hidden"
+                className="relative bg-muted rounded-3xl p-5 shadow-card border border-border/30 overflow-hidden"
               >
-                {/* Light mode purple gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 dark:hidden rounded-3xl pointer-events-none" />
                 <p className="text-foreground leading-relaxed text-base">{text}</p>
                 <div className="flex items-center gap-3 mt-4">
                   <img
