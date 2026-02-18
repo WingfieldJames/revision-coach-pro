@@ -203,6 +203,22 @@
     background-clip: text;
   }
 
+  /* Light mode only gradient for chatbot subject heading */
+  .light-gradient-subject {
+    background: linear-gradient(135deg, #1e3a8a 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .light-gradient-subject {
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    background-clip: unset;
+    color: hsl(var(--foreground));
+  }
+
   /* Tiny scrollbar for horizontal scroll areas */
   .scrollbar-thin {
     scrollbar-width: thin;

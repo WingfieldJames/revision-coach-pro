@@ -556,7 +556,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && <div className="text-center py-16">
               <img src={currentLogo} alt="A* AI" className="h-16 mx-auto mb-6" />
-              <h2 className="text-2xl font-bold text-gradient-brand mb-2">
+              <h2 className="text-2xl font-bold mb-2 dark:text-foreground light-gradient-subject">
                 {subjectName}
               </h2>
               <p className="text-muted-foreground">
