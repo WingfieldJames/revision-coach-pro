@@ -303,11 +303,11 @@ export const HomePage = () => {
       {/* How A* AI helps you revise smarter */}
       <section data-section="how-it-works" className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
         <ScrollReveal className="relative z-10 text-center mb-8 md:mb-12">
-          <h2 className={sectionHeadingClass}>
+          <h2 className={`${sectionHeadingClass} text-[1.2rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] whitespace-nowrap md:whitespace-normal`}>
             <span className="text-foreground">Everything you need to get an </span>
             <span className="text-gradient-brand">A*</span>
           </h2>
-          <p className="text-muted-foreground mt-3 text-base md:text-lg">Tailored to your exam board. Built to get you the grade.</p>
+          <p className="text-muted-foreground mt-3 text-sm sm:text-base md:text-lg whitespace-nowrap md:whitespace-normal">Tailored to your exam board. Built to get you the grade.</p>
         </ScrollReveal>
 
         {/* Desktop/tablet: always-open cards */}
