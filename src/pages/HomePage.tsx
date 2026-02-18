@@ -473,8 +473,20 @@ export const HomePage = () => {
         </HeroBackgroundPaths>
       </section>
 
+      {/* Subject + Plan Selection (bottom CTA copy) */}
+      <section data-section="pick-subject-bottom" className="py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
+        <ScrollReveal className="text-center mb-8 md:mb-12">
+          <h2 className={sectionHeadingClass}>
+            <span className="text-foreground">Choose your </span>
+            <span className="text-gradient-brand">subject</span>
+          </h2>
+        </ScrollReveal>
+        <SubjectPlanSelector />
+      </section>
+
       {/* Footer */}
       <footer className="py-16 px-8 text-center border-t border-border/30">
+
         <ScrollReveal className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
             <img src={currentLogo} alt="A* AI" className="h-12 sm:h-14" />
