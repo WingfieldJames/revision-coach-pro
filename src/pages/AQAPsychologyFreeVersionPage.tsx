@@ -35,6 +35,9 @@ export const AQAPsychologyFreeVersionPage = () => {
           showImageTool 
           showEssayMarker
           showPastPaperFinder
+          pastPaperBoard="aqa-psychology"
+          showRevisionGuide
+          revisionGuideBoard="aqa-psychology"
           showExamCountdown
           examDates={AQA_PSYCHOLOGY_EXAMS}
           examSubjectName="AQA Psychology"

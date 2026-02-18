@@ -91,8 +91,8 @@ interface HeaderProps {
   toolsLocked?: boolean;
   hideUserDetails?: boolean;
   diagramSubject?: 'economics' | 'cs';
-  pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs';
-  revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs';
+  pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology';
+  revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology';
   productId?: string;
   productSlug?: string;
   onEssayMarkerSubmit?: (message: string) => void;

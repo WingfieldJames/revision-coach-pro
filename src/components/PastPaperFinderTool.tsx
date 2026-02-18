@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { EDEXCEL_SPEC_POINTS, EDEXCEL_PAST_QUESTIONS, EdexcelSpecPoint, PastPaperQuestion } from '@/data/edexcelPastPapers';
 import { AQA_SPEC_POINTS, AQA_PAST_QUESTIONS, AQASpecPoint, AQAPastPaperQuestion } from '@/data/aqaPastPapers';
 import { OCR_CS_SPEC_POINTS, OCR_CS_PAST_QUESTIONS, OCRCSSpecPoint, OCRCSPastPaperQuestion } from '@/data/ocrCsPastPapers';
+import { AQA_PSYCHOLOGY_SPEC_POINTS, AQA_PSYCHOLOGY_PAST_QUESTIONS } from '@/data/aqaPsychologyPastPapers';
 
 // Unified types for the component
 interface SpecPoint {
@@ -26,47 +27,40 @@ interface Question {
 interface PastPaperFinderToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
-  board?: 'edexcel' | 'aqa' | 'ocr-cs';
+  board?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology';
 }
 
 // Adapt spec points to unified type
-function getSpecPoints(board: 'edexcel' | 'aqa' | 'ocr-cs'): SpecPoint[] {
+function getSpecPoints(board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology'): SpecPoint[] {
   if (board === 'ocr-cs') {
-    return OCR_CS_SPEC_POINTS.map(sp => ({
-      code: sp.code,
-      name: sp.name,
-      keywords: sp.keywords,
-    }));
+    return OCR_CS_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
   }
   if (board === 'aqa') {
-    return AQA_SPEC_POINTS.map(sp => ({
-      code: sp.code,
-      name: sp.name,
-      keywords: sp.keywords,
-    }));
+    return AQA_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
   }
-  return EDEXCEL_SPEC_POINTS.map(sp => ({
-    code: sp.code,
-    name: sp.name,
-    keywords: sp.keywords,
-  }));
+  if (board === 'aqa-psychology') {
+    return AQA_PSYCHOLOGY_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
+  }
+  return EDEXCEL_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
 }
 
-function getQuestions(board: 'edexcel' | 'aqa' | 'ocr-cs'): Question[] {
+function getQuestions(board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology'): Question[] {
   if (board === 'ocr-cs') return OCR_CS_PAST_QUESTIONS;
   if (board === 'aqa') return AQA_PAST_QUESTIONS;
+  if (board === 'aqa-psychology') return AQA_PSYCHOLOGY_PAST_QUESTIONS;
   return EDEXCEL_PAST_QUESTIONS;
 }
 
-function getBoardLabel(board: 'edexcel' | 'aqa' | 'ocr-cs'): string {
+function getBoardLabel(board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology'): string {
   if (board === 'ocr-cs') return 'OCR CS';
+  if (board === 'aqa-psychology') return 'AQA Psychology';
   return board === 'aqa' ? 'AQA' : 'Edexcel';
 }
 
 export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
   tier = 'free',
   board = 'edexcel',
-}) => {
+}: { tier?: 'free' | 'deluxe'; productId?: string; board?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpec, setSelectedSpec] = useState<SpecPoint | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -116,11 +110,15 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
     ? "Enter a topic... e.g. binary search, TCP/IP, SQL"
     : board === 'aqa'
     ? "Enter a topic... e.g. externalities, AD, monopoly"
+    : board === 'aqa-psychology'
+    ? "Enter a topic... e.g. conformity, attachment, memory"
     : "Enter a topic... e.g. externalities, AD, tariffs";
   const hintText = board === 'ocr-cs'
     ? '"sorting algorithms", "databases", "encryption", "OOP"'
     : board === 'aqa'
     ? '"externalities", "fiscal policy", "monopoly", "trade unions"'
+    : board === 'aqa-psychology'
+    ? '"conformity", "Milgram", "working memory", "attachment"'
     : '"externalities", "fiscal policy", "oligopoly", "exchange rates"';
 
   // Results view

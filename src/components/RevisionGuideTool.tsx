@@ -25,7 +25,7 @@ interface ContentOption {
 }
 
 interface RevisionGuideToolProps {
-  board: 'edexcel' | 'aqa' | 'ocr-cs';
+  board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology';
   productId?: string;
   tier?: 'free' | 'deluxe';
 }
@@ -63,6 +63,7 @@ const BOARD_LABELS: Record<string, string> = {
   'ocr-cs': 'OCR A Level Computer Science (H446)',
   'aqa': 'AQA A Level Economics',
   'edexcel': 'Edexcel A Level Economics',
+  'aqa-psychology': 'AQA A Level Psychology (7182)',
 };
 
 // Render markdown content with inline diagram support
@@ -106,10 +107,11 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
   const [specLoaded, setSpecLoaded] = useState(false);
   const [pastQuestions, setPastQuestions] = useState<any[]>([]);
   const [diagramList, setDiagramList] = useState<any[]>([]);
+  const noDiagrams = board === 'aqa-psychology';
   const [contentOptions, setContentOptions] = useState<ContentOption[]>([
     { id: 'exam_technique', label: 'Exam Technique', enabled: true },
     { id: 'past_papers', label: 'Past Paper Questions', enabled: true },
-    { id: 'diagrams', label: 'Diagrams', enabled: true },
+    ...(!noDiagrams ? [{ id: 'diagrams', label: 'Diagrams', enabled: true }] : []),
     { id: 'application', label: 'Application', enabled: true },
     { id: 'mark_scheme', label: 'Mark Scheme', enabled: false, locked: true },
   ]);
@@ -131,6 +133,12 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
         setSpecPoints(AQA_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords })));
         const { diagrams } = await import('@/data/diagrams');
         setDiagramList(diagrams);
+      } else if (board === 'aqa-psychology') {
+        const { AQA_PSYCHOLOGY_SPEC_POINTS, AQA_PSYCHOLOGY_PAST_QUESTIONS } = await import('@/data/aqaPsychologyPastPapers');
+        setSpecPoints(AQA_PSYCHOLOGY_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords })));
+        setPastQuestions(AQA_PSYCHOLOGY_PAST_QUESTIONS);
+        // No diagrams for Psychology — leave diagramList empty
+        setDiagramList([]);
       } else {
         const { EDEXCEL_SPEC_POINTS, EDEXCEL_PAST_QUESTIONS } = await import('@/data/edexcelPastPapers');
         setSpecPoints(EDEXCEL_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords })));
@@ -343,7 +351,7 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
   };
 
   const boardLabel = BOARD_LABELS[board] || board;
-  const shortBoardLabel = board === 'ocr-cs' ? 'OCR CS' : board === 'aqa' ? 'AQA' : 'Edexcel';
+  const shortBoardLabel = board === 'ocr-cs' ? 'OCR CS' : board === 'aqa' ? 'AQA' : board === 'aqa-psychology' ? 'AQA Psychology' : 'Edexcel';
 
   // Main view - always shows search, spec, options + download button when guide is ready
   return (
