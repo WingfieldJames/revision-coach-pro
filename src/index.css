@@ -38,21 +38,21 @@
     --input: 240 6% 90%;
     --ring: 271 81% 56%;
 
-    /* Brand gradient - purple for light */
-    --gradient-brand: linear-gradient(135deg, #9333EA 0%, #7C3AED 30%, #6D28D9 60%, #A855F7 100%);
-    --gradient-from: #9333EA;
-    --gradient-via1: #7C3AED;
-    --gradient-via2: #6D28D9;
-    --gradient-to: #A855F7;
+    /* Brand gradient - navy to purple for light */
+    --gradient-brand: linear-gradient(135deg, #1e3a8a 0%, #a855f7 100%);
+    --gradient-from: #1e3a8a;
+    --gradient-via1: #4f46e5;
+    --gradient-via2: #7c3aed;
+    --gradient-to: #a855f7;
 
-    --shadow-card: 0 2px 12px rgba(124, 58, 237, 0.06);
-    --shadow-elevated: 0 4px 20px rgba(124, 58, 237, 0.08);
-    --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.15), 0 0 40px rgba(139, 92, 246, 0.08);
+    --shadow-card: 0 2px 12px rgba(30, 58, 138, 0.06);
+    --shadow-elevated: 0 4px 20px rgba(168, 85, 247, 0.08);
+    --shadow-glow: 0 0 20px rgba(30, 58, 138, 0.15), 0 0 40px rgba(168, 85, 247, 0.08);
 
-    --glow-1: rgba(124, 58, 237, 0.3);
-    --glow-2: rgba(139, 92, 246, 0.15);
-    --glow-1-intense: rgba(124, 58, 237, 0.4);
-    --glow-2-intense: rgba(139, 92, 246, 0.2);
+    --glow-1: rgba(30, 58, 138, 0.3);
+    --glow-2: rgba(168, 85, 247, 0.15);
+    --glow-1-intense: rgba(30, 58, 138, 0.4);
+    --glow-2-intense: rgba(168, 85, 247, 0.2);
 
     --transition-smooth: all 0.2s ease;
     --radius: 0.5rem;
