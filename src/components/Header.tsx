@@ -267,7 +267,12 @@ export const Header: React.FC<HeaderProps> = ({
         {showImageTool && (
           <Popover open={imageToolOpen} onOpenChange={setImageToolOpen} modal={false}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
+                style={imageToolOpen ? { background: '#1e3a8a', color: '#fff', borderColor: '#1e3a8a' } : undefined}
+              >
                 <Sparkles className="h-4 w-4" />
                 <span className="hidden sm:inline">My AI</span>
               </Button>
@@ -281,7 +286,12 @@ export const Header: React.FC<HeaderProps> = ({
         {showDiagramTool && (
           <Popover open={diagramToolOpen} onOpenChange={setDiagramToolOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
+                style={diagramToolOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
+              >
                 <BarChart2 className="h-4 w-4" />
                 <span className="hidden sm:inline">Diagram Generator</span>
               </Button>
@@ -297,7 +307,12 @@ export const Header: React.FC<HeaderProps> = ({
         {showEssayMarker && (
           <Popover open={essayMarkerOpen} onOpenChange={setEssayMarkerOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
+                style={essayMarkerOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
+              >
                 <PenLine className="h-4 w-4" />
                 <span className="hidden sm:inline">{essayMarkerLabel}</span>
               </Button>
@@ -313,7 +328,12 @@ export const Header: React.FC<HeaderProps> = ({
         {showPastPaperFinder && (
           <Popover open={pastPaperFinderOpen} onOpenChange={setPastPaperFinderOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
+                style={pastPaperFinderOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
+              >
                 <FileSearch className="h-4 w-4" />
                 <span className="hidden sm:inline">Past Papers</span>
               </Button>
@@ -327,7 +347,12 @@ export const Header: React.FC<HeaderProps> = ({
         {showRevisionGuide && (
           <Popover open={revisionGuideOpen} onOpenChange={setRevisionGuideOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
+                style={revisionGuideOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
+              >
                 <BookOpen className="h-4 w-4" />
                 <span className="hidden sm:inline">Revision Guide</span>
               </Button>
@@ -341,7 +366,12 @@ export const Header: React.FC<HeaderProps> = ({
         {showExamCountdown && examDates.length > 0 && (
           <Popover open={examCountdownOpen} onOpenChange={setExamCountdownOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
+                style={examCountdownOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
+              >
                 <Timer className="h-4 w-4" />
                 <span className="hidden sm:inline">{daysUntilFirstExam} days</span>
                 <span className="sm:hidden">{daysUntilFirstExam}d</span>
