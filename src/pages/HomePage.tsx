@@ -310,12 +310,31 @@ export const HomePage = () => {
           <p className="text-muted-foreground mt-3 text-base md:text-lg">Tailored to your exam board. Built to get you the grade.</p>
         </ScrollReveal>
 
-        <div className="hidden lg:block">
-          <RadialOrbitalTimeline timelineData={revisionFeatures} />
-        </div>
+        {/* Desktop/tablet: always-open cards */}
+        <StaggerContainer className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {revisionFeatures.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <StaggerItem key={feature.id}>
+                <div className="bg-muted rounded-xl overflow-hidden p-5 md:p-6 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <strong className="text-base md:text-lg font-semibold text-left">
+                      {feature.title}
+                    </strong>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.content}</p>
+                </div>
+              </StaggerItem>
+            );
+          })}
+        </StaggerContainer>
 
-        <div className="lg:hidden">
-          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+        {/* Mobile: collapsible accordion */}
+        <div className="md:hidden">
+          <StaggerContainer className="grid grid-cols-1 gap-4">
             {revisionFeatures.map((feature) => {
               const Icon = feature.icon;
               return (
@@ -327,19 +346,19 @@ export const HomePage = () => {
                     >
                       <AccordionTrigger
                         hideIcon
-                        className="p-5 md:p-6 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180"
+                        className="p-5 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180"
                       >
                         <div className="flex items-center gap-3 w-full">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                             <Icon className="w-5 h-5 text-primary" />
                           </div>
-                          <strong className="text-base md:text-lg font-semibold text-left flex-1">
+                          <strong className="text-base font-semibold text-left flex-1">
                             {feature.title}
                           </strong>
                           <ChevronDown className="chevron h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="px-5 pb-5 md:px-6 md:pb-6 pt-0">
+                      <AccordionContent className="px-5 pb-5 pt-0">
                         <p className="text-sm text-muted-foreground leading-relaxed">{feature.content}</p>
                       </AccordionContent>
                     </AccordionItem>
