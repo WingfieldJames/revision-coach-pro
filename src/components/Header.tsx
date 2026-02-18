@@ -271,7 +271,6 @@ export const Header: React.FC<HeaderProps> = ({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
-                style={imageToolOpen ? { background: '#1e3a8a', color: '#fff', borderColor: '#1e3a8a' } : undefined}
               >
                 <Sparkles className="h-4 w-4" />
                 <span className="hidden sm:inline">My AI</span>
@@ -290,7 +289,6 @@ export const Header: React.FC<HeaderProps> = ({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
-                style={diagramToolOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
               >
                 <BarChart2 className="h-4 w-4" />
                 <span className="hidden sm:inline">Diagram Generator</span>
@@ -311,7 +309,6 @@ export const Header: React.FC<HeaderProps> = ({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
-                style={essayMarkerOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
               >
                 <PenLine className="h-4 w-4" />
                 <span className="hidden sm:inline">{essayMarkerLabel}</span>
@@ -332,7 +329,6 @@ export const Header: React.FC<HeaderProps> = ({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
-                style={pastPaperFinderOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
               >
                 <FileSearch className="h-4 w-4" />
                 <span className="hidden sm:inline">Past Papers</span>
@@ -351,7 +347,6 @@ export const Header: React.FC<HeaderProps> = ({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
-                style={revisionGuideOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
               >
                 <BookOpen className="h-4 w-4" />
                 <span className="hidden sm:inline">Revision Guide</span>
@@ -370,7 +365,6 @@ export const Header: React.FC<HeaderProps> = ({
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
-                style={examCountdownOpen ? { background: 'linear-gradient(135deg, #1e3a8a, #a855f7)', color: '#fff', borderColor: 'transparent' } : undefined}
               >
                 <Timer className="h-4 w-4" />
                 <span className="hidden sm:inline">{daysUntilFirstExam} days</span>
