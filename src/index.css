@@ -242,41 +242,17 @@
   }
 
   /* ── Light-mode overrides for My AI & Exam Countdown panels ── */
-  /* Deep blue #1e3a8a replaces purple primary inside these panels */
+  /* Override --primary and --ring to deep blue inside these panels (light only) */
+  :root .my-ai-panel {
+    --primary: 222 75% 31%;
+    --ring: 222 75% 31%;
+    --primary-variant: 222 75% 45%;
+  }
+
   :root .my-ai-panel .panel-badge,
   :root .exam-countdown-panel .panel-badge {
     background-color: rgba(30, 58, 138, 0.1);
     color: #1e3a8a;
-  }
-
-  :root .my-ai-panel [data-radix-slider-thumb],
-  :root .exam-countdown-panel [data-radix-slider-thumb] {
-    background-color: #1e3a8a !important;
-    border-color: #1e3a8a !important;
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #1e3a8a !important;
-  }
-
-  :root .my-ai-panel [data-radix-slider-range],
-  :root .exam-countdown-panel [data-radix-slider-range] {
-    background-color: #1e3a8a !important;
-  }
-
-  /* Year select trigger – focus ring & border */
-  :root .my-ai-panel [data-radix-select-trigger]:focus-visible,
-  :root .my-ai-panel [data-radix-select-trigger][data-state="open"] {
-    border-color: #1e3a8a !important;
-    outline: none !important;
-    box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.25) !important;
-  }
-
-  /* Selected item highlight in the dropdown */
-  :root .my-ai-panel [data-radix-select-item][data-highlighted] {
-    background-color: rgba(30, 58, 138, 0.08) !important;
-    color: #1e3a8a !important;
-  }
-
-  :root .my-ai-panel [data-radix-select-item][data-state="checked"] {
-    color: #1e3a8a !important;
   }
 
   /* Exam countdown timeline colours – light mode only */
