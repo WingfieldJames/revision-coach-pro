@@ -213,12 +213,12 @@ export const RevisionTimetable: React.FC = () => {
                 <select
                   value={s.predicted}
                   onChange={(e) => updateSubject(s.id, { predicted: e.target.value as Grade })}
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  style={{ backgroundColor: "white", color: "inherit" }}
+                  className="w-full h-9 rounded-md border border-input px-2 text-sm text-foreground"
+                  style={{ backgroundColor: "#ffffff" }}
                   disabled={!!generated}
                 >
                   {GRADES.map((g) => (
-                    <option key={g} value={g} style={{ backgroundColor: "white" }}>{g}</option>
+                    <option key={g} value={g}>{g}</option>
                   ))}
                 </select>
               </div>
@@ -227,19 +227,20 @@ export const RevisionTimetable: React.FC = () => {
                 <select
                   value={s.target}
                   onChange={(e) => updateSubject(s.id, { target: e.target.value as Grade })}
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  style={{ backgroundColor: "white", color: "inherit" }}
+                  className="w-full h-9 rounded-md border border-input px-2 text-sm text-foreground"
+                  style={{ backgroundColor: "#ffffff" }}
                   disabled={!!generated}
                 >
                   {GRADES.map((g) => (
-                    <option key={g} value={g} style={{ backgroundColor: "white" }}>{g}</option>
+                    <option key={g} value={g}>{g}</option>
                   ))}
                 </select>
               </div>
             </div>
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Importance: {s.importance}</label>
-              <div className="[&_[data-radix-slider-range]]:bg-[#a855f7] [&_[data-radix-slider-thumb]]:border-[#a855f7] [&_[data-radix-slider-thumb]]:ring-[#a855f7]">
+              {/* Override --primary locally so the slider's bg-primary / border-primary resolve to #a855f7 */}
+              <div style={{ '--primary': '271 91% 65%', '--ring': '271 91% 65%' } as React.CSSProperties}>
                 <Slider
                   min={1}
                   max={5}
