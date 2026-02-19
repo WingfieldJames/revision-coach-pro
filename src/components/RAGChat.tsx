@@ -257,8 +257,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       animateNextWord();
     }
   }, [isAnimating, animateNextWord]);
-  const handleSendWithMessage = async (messageText: string) => {
-    if (!messageText.trim() || isLoading) return;
+  const handleSendWithMessage = async (messageText: string, imageDataUrl?: string) => {
+    if (!messageText.trim() && !imageDataUrl || isLoading) return;
 
     // Reset animation state
     bufferRef.current = '';
@@ -278,7 +278,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
         },
         body: JSON.stringify({
-          message: messageText,
+          message: messageText || '(Please analyse the attached file)',
           product_id: productId,
           user_preferences: userPreferences,
           history: messages.slice(-10).map(m => ({
@@ -288,7 +288,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           tier: effectiveTier,
           user_id: user?.id,
           enable_diagrams: enableDiagrams,
-          diagram_subject: diagramSubject
+          diagram_subject: diagramSubject,
+          image_data: imageDataUrl || null,
         })
       });
       if (!response.ok) {
@@ -387,19 +388,17 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const handleSend = async () => {
     if ((!input.trim() && !pendingImage) || isLoading) return;
     const messageText = input.trim();
-    const imageUrl = pendingImage?.dataUrl;
+    const imageDataUrl = pendingImage?.dataUrl;
     const userMessage: Message = {
       role: 'user',
       content: messageText,
-      imageUrl,
+      imageUrl: imageDataUrl,
     };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setPendingImage(null);
 
-    // Use the shared send logic (send image description + text to AI)
-    const textToSend = messageText || (imageUrl ? '(Image attached)' : '');
-    handleSendWithMessage(textToSend);
+    handleSendWithMessage(messageText, imageDataUrl);
   };
 
   // Expose submitMessage function via ref for external components (like Essay Marker)
@@ -494,34 +493,25 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       setIsDraggingOver(false);
     }
   };
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { toast.error('Please drop an image file'); return; }
-    if (file.size > 10 * 1024 * 1024) { toast.error('Image must be less than 10MB'); return; }
+  const processAttachment = (file: File) => {
+    if (file.size > 20 * 1024 * 1024) { toast.error('File must be less than 20MB'); return; }
     const reader = new FileReader();
     reader.onloadend = () => setPendingImage({ dataUrl: reader.result as string, file });
     reader.readAsDataURL(file);
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    processAttachment(file);
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Image must be less than 10MB');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPendingImage({ dataUrl: reader.result as string, file });
-    };
-    reader.readAsDataURL(file);
+    processAttachment(file);
     // Reset so same file can be re-selected
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -781,7 +771,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xlsx,.xls,.pptx,.ppt"
                 onChange={handleFileSelect}
                 className="hidden"
               />

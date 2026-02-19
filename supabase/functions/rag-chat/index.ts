@@ -321,7 +321,7 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics' } = await req.json();
+    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null } = await req.json();
 
     if (!message) {
       throw new Error("message is required");
@@ -434,6 +434,17 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
     if (relevantDiagram) {
       console.log(`Diagram included: ${relevantDiagram.id}`);
     }
+    // Build the user message content — support vision (image) when image_data provided
+    let userMessageContent: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
+    if (image_data) {
+      userMessageContent = [
+        { type: "text", text: message || "Please analyse the attached file." },
+        { type: "image_url", image_url: { url: image_data } },
+      ];
+    } else {
+      userMessageContent = message;
+    }
+
     // Call Lovable AI for response (streaming)
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -442,11 +453,11 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: finalSystemPrompt },
           ...history,
-          { role: "user", content: message },
+          { role: "user", content: userMessageContent },
         ],
         stream: true,
       }),
