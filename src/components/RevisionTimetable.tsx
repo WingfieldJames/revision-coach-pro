@@ -213,8 +213,7 @@ export const RevisionTimetable: React.FC = () => {
                 <select
                   value={s.predicted}
                   onChange={(e) => updateSubject(s.id, { predicted: e.target.value as Grade })}
-                  className="w-full h-9 rounded-md border border-input px-2 text-sm text-foreground"
-                  style={{ backgroundColor: "#ffffff" }}
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
                   disabled={!!generated}
                 >
                   {GRADES.map((g) => (
@@ -227,8 +226,7 @@ export const RevisionTimetable: React.FC = () => {
                 <select
                   value={s.target}
                   onChange={(e) => updateSubject(s.id, { target: e.target.value as Grade })}
-                  className="w-full h-9 rounded-md border border-input px-2 text-sm text-foreground"
-                  style={{ backgroundColor: "#ffffff" }}
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
                   disabled={!!generated}
                 >
                   {GRADES.map((g) => (
@@ -239,17 +237,14 @@ export const RevisionTimetable: React.FC = () => {
             </div>
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Importance: {s.importance}</label>
-              {/* Override --primary locally so the slider's bg-primary / border-primary resolve to #a855f7 */}
-              <div style={{ '--primary': '271 91% 65%', '--ring': '271 91% 65%' } as React.CSSProperties}>
-                <Slider
-                  min={1}
-                  max={5}
-                  step={1}
-                  value={[s.importance]}
-                  onValueChange={([v]) => updateSubject(s.id, { importance: v })}
-                  disabled={!!generated}
-                />
-              </div>
+              <Slider
+                min={1}
+                max={5}
+                step={1}
+                value={[s.importance]}
+                onValueChange={([v]) => updateSubject(s.id, { importance: v })}
+                disabled={!!generated}
+              />
             </div>
           </div>
         ))}
