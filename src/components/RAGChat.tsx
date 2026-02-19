@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Plus, Image, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Sparkles, Crown } from 'lucide-react';
+import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Sparkles, Crown } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
@@ -13,7 +13,6 @@ import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +22,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   displayedContent?: string;
+  imageUrl?: string; // base64 data URL for user-uploaded images
 }
 interface UserPreferences {
   year: string;
@@ -112,8 +112,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [searchedSources, setSearchedSources] = useState<SearchedSource[]>([]);
   const [currentDiagram, setCurrentDiagram] = useState<DiagramData | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [imageUploadOpen, setImageUploadOpen] = useState(false);
-  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
+  const [pendingImage, setPendingImage] = useState<{ dataUrl: string; file: File } | null>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
   const [effectiveTier, setEffectiveTier] = useState<'free' | 'deluxe'>('free');
   const [limitReached, setLimitReached] = useState(false);
@@ -386,17 +385,21 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     }
   };
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !pendingImage) || isLoading) return;
     const messageText = input.trim();
+    const imageUrl = pendingImage?.dataUrl;
     const userMessage: Message = {
       role: 'user',
-      content: messageText
+      content: messageText,
+      imageUrl,
     };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setPendingImage(null);
 
-    // Use the shared send logic
-    handleSendWithMessage(messageText);
+    // Use the shared send logic (send image description + text to AI)
+    const textToSend = messageText || (imageUrl ? '(Image attached)' : '');
+    handleSendWithMessage(textToSend);
   };
 
   // Expose submitMessage function via ref for external components (like Essay Marker)
@@ -477,7 +480,18 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       setIsCheckingOut(false);
     }
   };
-  const handleImageUpload = async (file: File) => {
+  // Handle + button: open file picker directly
+  const handlePlusClick = () => {
+    if (effectiveTier === 'free') {
+      setShowUpgradePrompt(true);
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
@@ -486,56 +500,16 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       toast.error('Image must be less than 10MB');
       return;
     }
-    setIsAnalyzingImage(true);
-    setImageUploadOpen(false);
-    try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
-        const {
-          data,
-          error
-        } = await supabase.functions.invoke('analyze-image', {
-          body: {
-            image: base64,
-            imageType: 'exam_question'
-          }
-        });
-        if (error) throw error;
-        // Fix: the edge function returns 'extractedText', not 'text'
-        if (data?.extractedText) {
-          setInput(prev => prev ? `${prev}\n\n${data.extractedText}` : data.extractedText);
-          toast.success('Text extracted from image');
-        } else {
-          toast.error('Could not extract text from image');
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error('Image analysis error:', error);
-      toast.error('Failed to analyze image');
-    } finally {
-      setIsAnalyzingImage(false);
-    }
-  };
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleImageUpload(file);
-    }
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPendingImage({ dataUrl: reader.result as string, file });
+    };
+    reader.readAsDataURL(file);
+    // Reset so same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Handle plus button click - show upgrade prompt for free tier
-  const handlePlusClick = () => {
-    if (tier === 'free') {
-      setShowUpgradePrompt(true);
-      setImageUploadOpen(false);
-    }
-  };
+  const removePendingImage = () => setPendingImage(null);
 
   // Get the content to display for a message (animated or final)
   const getDisplayContent = (message: Message, index: number) => {
@@ -568,13 +542,21 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           const displayContent = getDisplayContent(message, index);
           const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
           const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
-          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? cn("text-foreground ml-auto max-w-[70%]", theme === 'dark' ? "bg-white/10 border border-white/5" : "bg-purple-100/60 border border-purple-200/40") : "bg-muted max-w-[90%]")}>
+          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? cn("text-foreground ml-auto max-w-[70%]", theme === 'dark' ? "bg-white/10 border border-white/5" : "bg-accent/60 border border-border") : "bg-muted max-w-[90%]")}>
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
                     <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
                   </div>
                 )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
+                  {/* Show attached image if present */}
+                  {message.imageUrl && (
+                    <img
+                      src={message.imageUrl}
+                      alt="Attached image"
+                      className="max-w-[240px] max-h-[200px] object-contain rounded-lg border border-border mb-2 block"
+                    />
+                  )}
                   <ReactMarkdown remarkPlugins={[remarkMath, remarkGfm]} rehypePlugins={[rehypeKatex]} components={{
                 p: ({
                   children
@@ -786,118 +768,122 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         )}
         
         <div className="max-w-5xl mx-auto px-4">
-          {/* Two-line pill container */}
+          {/* Pill container */}
           <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
-            {/* Line 1: Text input */}
-            <Textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder={limitReached ? 'Upgrade to continue...' : placeholder} disabled={isLoading || limitReached} className="w-full min-h-[48px] max-h-[200px] resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-base overflow-y-auto" rows={1} />
-            
-            {/* Line 2: Buttons row */}
-            <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
-              {/* Plus button on left */}
-              {effectiveTier === 'free' ? (
-                <>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9 rounded-full hover:bg-primary/10" 
-                    disabled={isLoading}
-                    onClick={handlePlusClick}
+
+            {/* Pending image preview strip */}
+            {pendingImage && (
+              <div className="px-3 pt-3 pb-1 flex items-start gap-2">
+                <div className="relative group w-20 h-20 flex-shrink-0">
+                  <img
+                    src={pendingImage.dataUrl}
+                    alt="Attachment preview"
+                    className="w-20 h-20 object-cover rounded-lg border border-border"
+                  />
+                  {/* Remove on hover */}
+                  <button
+                    onClick={removePendingImage}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    aria-label="Remove image"
                   >
-                    <Plus className="w-5 h-5 text-muted-foreground" />
-                  </Button>
-                  
-                  {/* Upgrade prompt dialog for free users */}
-                  {showUpgradePrompt && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]" onClick={() => setShowUpgradePrompt(false)}>
-                      <div 
-                        className="bg-background border border-border rounded-2xl p-6 max-w-md mx-4 shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="text-center mb-4">
-                          <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center mx-auto mb-3">
-                            <Image className="w-6 h-6 text-white" />
-                          </div>
-                          <h3 className="text-xl font-bold mb-2">Unlock Image Upload</h3>
-                          <p className="text-muted-foreground text-sm">
-                            Upgrade to upload exam questions and get instant AI analysis.
-                          </p>
-                        </div>
-                        
-                        <div className="bg-muted/50 rounded-xl p-4 mb-4">
-                          <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
-                          <ul className="space-y-2 text-sm">
-                            <li className="flex items-center gap-2">
-                              <span className="text-primary">✓</span>
-                              <span>Image-to-text OCR for exam questions</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <span className="text-primary">✓</span>
-                              <span>Unlimited daily prompts</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <span className="text-primary">✓</span>
-                              <span>Unlimited essay marking</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <span className="text-primary">✓</span>
-                              <span>Unlimited diagram searches</span>
-                            </li>
-                          </ul>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Button 
-                            className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
-                            onClick={() => { setShowUpgradePrompt(false); handleUpgradeCheckout('lifetime'); }}
-                            disabled={isCheckingOut}
-                          >
-                            {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £24.99'}
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => { setShowUpgradePrompt(false); handleUpgradeCheckout('monthly'); }}
-                            disabled={isCheckingOut}
-                          >
-                            Monthly – £6.99/mo
-                          </Button>
-                        </div>
-                        
-                        <p className="text-xs text-center text-muted-foreground mt-3">
-                          Secure checkout via Stripe
-                        </p>
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Text input */}
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={limitReached ? 'Upgrade to continue...' : placeholder}
+              disabled={isLoading || limitReached}
+              className="w-full min-h-[48px] max-h-[200px] resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-base overflow-y-auto"
+              rows={1}
+            />
+            
+            {/* Buttons row */}
+            <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
+              {/* Hidden file input – always rendered */}
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+
+              {/* Plus button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full hover:bg-primary/10"
+                disabled={isLoading}
+                onClick={handlePlusClick}
+              >
+                <Plus className="w-5 h-5 text-muted-foreground" />
+              </Button>
+
+              {/* Upgrade prompt dialog for free users */}
+              {showUpgradePrompt && (
+                <div
+                  className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]"
+                  onClick={() => setShowUpgradePrompt(false)}
+                >
+                  <div
+                    className="bg-background border border-border rounded-2xl p-6 max-w-md mx-4 shadow-2xl"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="text-center mb-4">
+                      <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center mx-auto mb-3">
+                        <Sparkles className="w-6 h-6 text-white" />
                       </div>
+                      <h3 className="text-xl font-bold mb-2">Unlock Image Upload</h3>
+                      <p className="text-muted-foreground text-sm">
+                        Upgrade to attach images directly to your messages.
+                      </p>
                     </div>
-                  )}
-                </>
-              ) : (
-                <Popover open={imageUploadOpen} onOpenChange={setImageUploadOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-primary/10" disabled={isLoading || isAnalyzingImage}>
-                      {isAnalyzingImage ? <Loader2 className="w-5 h-5 animate-spin text-primary" /> : <Plus className="w-5 h-5 text-muted-foreground" />}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-48 p-2 bg-background border border-border shadow-xl" align="start" side="top" sideOffset={8}>
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                    <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => fileInputRef.current?.click()}>
-                      <Image className="w-4 h-4" />
-                      Upload Image
-                    </Button>
-                  </PopoverContent>
-                </Popover>
+                    <div className="bg-muted/50 rounded-xl p-4 mb-4">
+                      <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Image attachments in chat</span></li>
+                        <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Unlimited daily prompts</span></li>
+                        <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Unlimited essay marking</span></li>
+                        <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Unlimited diagram searches</span></li>
+                      </ul>
+                    </div>
+                    <div className="space-y-2">
+                      <Button
+                        className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
+                        onClick={() => { setShowUpgradePrompt(false); handleUpgradeCheckout('lifetime'); }}
+                        disabled={isCheckingOut}
+                      >
+                        {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £24.99'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => { setShowUpgradePrompt(false); handleUpgradeCheckout('monthly'); }}
+                        disabled={isCheckingOut}
+                      >
+                        Monthly – £6.99/mo
+                      </Button>
+                    </div>
+                    <p className="text-xs text-center text-muted-foreground mt-3">Secure checkout via Stripe</p>
+                  </div>
+                </div>
               )}
 
-              {/* Send button on right */}
-              <Button onClick={handleSend} disabled={!input.trim() || isLoading || limitReached} size="icon" className="h-9 w-9 rounded-full bg-gradient-brand hover:opacity-90 glow-brand">
+              {/* Send button */}
+              <Button
+                onClick={handleSend}
+                disabled={(!input.trim() && !pendingImage) || isLoading || limitReached}
+                size="icon"
+                className="h-9 w-9 rounded-full bg-gradient-brand hover:opacity-90 glow-brand"
+              >
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
             </div>
           </div>
           
           {/* Footer text */}
-          <p className="text-center text-xs text-muted-foreground mt-2">
-            {footerText}
-          </p>
+          <p className="text-center text-xs text-muted-foreground mt-2">{footerText}</p>
         </div>
       </div>
     </div>;
