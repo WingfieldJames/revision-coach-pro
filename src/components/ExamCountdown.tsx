@@ -47,7 +47,7 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 exam-countdown-panel">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-gradient-brand">
@@ -64,29 +64,28 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
       {/* Timeline */}
       <div className="relative py-4 pl-4">
         {/* Vertical line */}
-        <div className="absolute left-[11px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary to-primary/30" />
+        <div className="absolute left-[11px] top-0 bottom-0 w-0.5 panel-timeline-line" />
         
         {/* Today marker */}
         <div className="relative flex items-center mb-6">
-          <div className="absolute left-0 w-6 h-6 rounded-full bg-primary border-4 border-background shadow-lg z-10 flex items-center justify-center">
+          <div className="absolute left-0 w-6 h-6 rounded-full panel-dot-filled border-4 border-background shadow-lg z-10 flex items-center justify-center">
             <div className="w-2 h-2 rounded-full bg-background" />
           </div>
           <div className="ml-10">
-            <p className="text-sm font-semibold text-primary">Today</p>
+            <p className="text-sm font-semibold panel-accent-text">Today</p>
             <p className="text-xs text-muted-foreground">{formatDate(today)}</p>
           </div>
         </div>
 
         {/* Exam markers */}
         {sortedExams.map((exam, index) => {
-          const position = getPosition(exam.date);
           const daysUntil = getDaysUntil(exam.date);
           
           // Calculate proportional spacing
           const prevDate = index === 0 ? today : sortedExams[index - 1].date;
           const daysBetween = Math.ceil((exam.date.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
-          const minHeight = 48; // minimum height in pixels
-          const heightPerDay = 2; // pixels per day
+          const minHeight = 48;
+          const heightPerDay = 2;
           const marginTop = Math.max(minHeight, daysBetween * heightPerDay);
 
           return (
@@ -95,13 +94,13 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
               className="relative flex items-center"
               style={{ marginTop: `${marginTop}px` }}
             >
-              <div className="absolute left-0 w-6 h-6 rounded-full bg-background border-2 border-primary shadow-md z-10 flex items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-primary" />
+              <div className="absolute left-0 w-6 h-6 rounded-full bg-background panel-dot-outline shadow-md z-10 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full panel-dot-inner" />
               </div>
               <div className="ml-10">
                 <p className="text-sm font-semibold text-foreground">{exam.name}</p>
                 <p className="text-xs text-muted-foreground">{formatDate(exam.date)}</p>
-                <p className="text-xs text-primary font-medium">{daysUntil} days</p>
+                <p className="text-xs panel-accent-text font-medium">{daysUntil} days</p>
               </div>
             </div>
           );

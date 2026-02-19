@@ -240,4 +240,70 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.4);
   }
+
+  /* ── Light-mode overrides for My AI & Exam Countdown panels ── */
+  /* Deep blue #1e3a8a replaces purple primary inside these panels */
+  :root .my-ai-panel .panel-badge,
+  :root .exam-countdown-panel .panel-badge {
+    background-color: rgba(30, 58, 138, 0.1);
+    color: #1e3a8a;
+  }
+
+  :root .my-ai-panel [data-radix-slider-thumb],
+  :root .exam-countdown-panel [data-radix-slider-thumb] {
+    background-color: #1e3a8a !important;
+    border-color: #1e3a8a !important;
+  }
+
+  :root .my-ai-panel [data-radix-slider-range],
+  :root .exam-countdown-panel [data-radix-slider-range] {
+    background-color: #1e3a8a !important;
+  }
+
+  /* Exam countdown timeline colours – light mode only */
+  :root .exam-countdown-panel .panel-timeline-line {
+    background: linear-gradient(to bottom, #1e3a8a, #1e3a8a, rgba(30,58,138,0.3));
+  }
+
+  :root .exam-countdown-panel .panel-dot-filled {
+    background-color: #1e3a8a;
+  }
+
+  :root .exam-countdown-panel .panel-dot-outline {
+    border: 2px solid #1e3a8a;
+  }
+
+  :root .exam-countdown-panel .panel-dot-inner {
+    background-color: #1e3a8a;
+  }
+
+  :root .exam-countdown-panel .panel-accent-text {
+    color: #1e3a8a;
+  }
+
+  /* Dark mode – revert to theme primary (orange) */
+  .dark .my-ai-panel .panel-badge {
+    background-color: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+  }
+
+  .dark .exam-countdown-panel .panel-timeline-line {
+    background: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--primary)), hsl(var(--primary) / 0.3));
+  }
+
+  .dark .exam-countdown-panel .panel-dot-filled {
+    background-color: hsl(var(--primary));
+  }
+
+  .dark .exam-countdown-panel .panel-dot-outline {
+    border-color: hsl(var(--primary));
+  }
+
+  .dark .exam-countdown-panel .panel-dot-inner {
+    background-color: hsl(var(--primary));
+  }
+
+  .dark .exam-countdown-panel .panel-accent-text {
+    color: hsl(var(--primary));
+  }
 }

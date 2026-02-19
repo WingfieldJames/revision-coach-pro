@@ -169,7 +169,7 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId }) =
   }
 
   return (
-    <div className="space-y-6 py-2">
+    <div className="space-y-6 py-2 my-ai-panel">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-lg">Personalize Your AI</h3>
         {saving && (
@@ -204,7 +204,7 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId }) =
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label>Predicted Grade</Label>
-          <span className="text-sm font-medium bg-primary/10 px-2 py-0.5 rounded text-primary">
+          <span className="text-sm font-medium panel-badge px-2 py-0.5 rounded">
             {preferences.predicted_grade}
           </span>
         </div>
@@ -229,7 +229,7 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId }) =
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label>Target Grade</Label>
-          <span className="text-sm font-medium bg-primary/10 px-2 py-0.5 rounded text-primary">
+          <span className="text-sm font-medium panel-badge px-2 py-0.5 rounded">
             {preferences.target_grade}
           </span>
         </div>
