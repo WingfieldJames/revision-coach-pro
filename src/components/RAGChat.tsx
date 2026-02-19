@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Sparkles, Crown } from 'lucide-react';
+import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
@@ -449,8 +449,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     }
   };
 
-  // State for upgrade prompt dialog
-  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   // Handle upgrade to Stripe checkout
@@ -480,13 +479,31 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       setIsCheckingOut(false);
     }
   };
-  // Handle + button: open file picker directly
+  // Handle + button: open file picker directly (all tiers)
   const handlePlusClick = () => {
-    if (effectiveTier === 'free') {
-      setShowUpgradePrompt(true);
-      return;
-    }
     fileInputRef.current?.click();
+  };
+
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(true);
+  };
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDraggingOver(false);
+    }
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Please drop an image file'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error('Image must be less than 10MB'); return; }
+    const reader = new FileReader();
+    reader.onloadend = () => setPendingImage({ dataUrl: reader.result as string, file });
+    reader.readAsDataURL(file);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -524,32 +541,56 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     // For completed messages, show full content
     return message.content;
   };
-  return <div className="flex flex-col h-full relative">
+  return (
+    <div
+      className="flex flex-col h-full relative"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drag-over overlay */}
+      {isDraggingOver && (
+        <div className="absolute inset-0 z-[200] flex items-center justify-center bg-background/80 backdrop-blur-sm border-4 border-dashed border-primary rounded-2xl pointer-events-none">
+          <div className="text-center">
+            <Plus className="w-10 h-10 text-primary mx-auto mb-2" />
+            <p className="text-base font-semibold text-primary">Drop image here</p>
+          </div>
+        </div>
+      )}
+
       {/* Messages area - scrollable */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
         <div className="max-w-3xl mx-auto space-y-4">
-          {messages.length === 0 && <div className="text-center py-16">
+          {messages.length === 0 && (
+            <div className="text-center py-16">
               <img src={currentLogo} alt="A* AI" className="h-16 mx-auto mb-6" />
               <h2 className="text-2xl font-bold mb-2 dark:text-foreground light-gradient-subject">
                 {subjectName}
               </h2>
-              <p className="text-muted-foreground">
-                {subjectDescription}
-              </p>
-            </div>}
-          
+              <p className="text-muted-foreground">{subjectDescription}</p>
+            </div>
+          )}
+
           {messages.map((message, index) => {
-          const displayContent = getDisplayContent(message, index);
-          const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
-          const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
-          return <div key={index} className={cn("flex gap-3 p-4 rounded-xl", message.role === 'user' ? cn("text-foreground ml-auto max-w-[70%]", theme === 'dark' ? "bg-white/10 border border-white/5" : "bg-accent/60 border border-border") : "bg-muted max-w-[90%]")}>
+            const displayContent = getDisplayContent(message, index);
+            const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
+            const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "flex gap-3 p-4 rounded-xl",
+                  message.role === 'user'
+                    ? cn("text-foreground ml-auto max-w-[70%]", theme === 'dark' ? "bg-white/10 border border-white/5" : "bg-accent/60 border border-border")
+                    : "bg-muted max-w-[90%]"
+                )}
+              >
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
                     <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
                   </div>
                 )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
-                  {/* Show attached image if present */}
                   {message.imageUrl && (
                     <img
                       src={message.imageUrl}
@@ -557,97 +598,51 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                       className="max-w-[240px] max-h-[200px] object-contain rounded-lg border border-border mb-2 block"
                     />
                   )}
-                  <ReactMarkdown remarkPlugins={[remarkMath, remarkGfm]} rehypePlugins={[rehypeKatex]} components={{
-                p: ({
-                  children
-                }) => <p className="mb-2 last:mb-0">{children}</p>,
-                ul: ({
-                  children
-                }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
-                ol: ({
-                  children
-                }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
-                li: ({
-                  children
-                }) => <li className="mb-1">{children}</li>,
-                code: ({
-                  className,
-                  children,
-                  ...props
-                }) => {
-                  const isInline = !className;
-                  if (isInline) {
-                    return <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
-                              {children}
-                            </code>;
-                  }
-                  return <pre className="bg-muted p-3 rounded-lg overflow-x-auto my-2">
-                            <code className={cn("text-sm font-mono", className)} {...props}>
-                              {children}
-                            </code>
-                          </pre>;
-                },
-                strong: ({
-                  children
-                }) => <strong className="font-semibold">{children}</strong>,
-                em: ({
-                  children
-                }) => <em className="italic">{children}</em>,
-                h1: ({
-                  children
-                }) => <h1 className="text-xl font-bold mb-2 mt-4">{children}</h1>,
-                h2: ({
-                  children
-                }) => <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>,
-                h3: ({
-                  children
-                }) => <h3 className="text-base font-bold mb-2 mt-2">{children}</h3>,
-                blockquote: ({
-                  children
-                }) => <blockquote className="border-l-4 border-primary pl-4 italic my-2">
-                          {children}
-                        </blockquote>,
-                table: ({
-                  children
-                }) => <div className="overflow-x-auto my-3"><table className="min-w-full border-collapse border border-border text-sm">{children}</table></div>,
-                thead: ({
-                  children
-                }) => <thead className="bg-muted">{children}</thead>,
-                tbody: ({
-                  children
-                }) => <tbody>{children}</tbody>,
-                tr: ({
-                  children
-                }) => <tr className="border-b border-border">{children}</tr>,
-                th: ({
-                  children
-                }) => <th className="px-3 py-2 text-left font-semibold border border-border">{children}</th>,
-                td: ({
-                  children
-                }) => <td className="px-3 py-2 border border-border">{children}</td>,
-              }}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath, remarkGfm]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                      code: ({ className, children, ...props }) => {
+                        const isInline = !className;
+                        if (isInline) return <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>{children}</code>;
+                        return <pre className="bg-muted p-3 rounded-lg overflow-x-auto my-2"><code className={cn("text-sm font-mono", className)} {...props}>{children}</code></pre>;
+                      },
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                      h1: ({ children }) => <h1 className="text-xl font-bold mb-2 mt-4">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-base font-bold mb-2 mt-2">{children}</h3>,
+                      blockquote: ({ children }) => <blockquote className="border-l-4 border-primary pl-4 italic my-2">{children}</blockquote>,
+                      table: ({ children }) => <div className="overflow-x-auto my-3"><table className="min-w-full border-collapse border border-border text-sm">{children}</table></div>,
+                      thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
+                      tbody: ({ children }) => <tbody>{children}</tbody>,
+                      tr: ({ children }) => <tr className="border-b border-border">{children}</tr>,
+                      th: ({ children }) => <th className="px-3 py-2 text-left font-semibold border border-border">{children}</th>,
+                      td: ({ children }) => <td className="px-3 py-2 border border-border">{children}</td>,
+                    }}
+                  >
                     {displayContent}
                   </ReactMarkdown>
                   {showCursor && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
-                  
-                  {/* Show diagram for last assistant message if available */}
+
                   {isLastAssistant && currentDiagram && !isLoading && !isAnimating && (
                     <div className="mt-4 p-3 rounded-lg border border-border bg-background">
                       <div className="flex items-center gap-2 mb-2">
                         <BarChart2 className="w-4 h-4 text-primary" />
                         <span className="text-sm font-medium">{currentDiagram.title}</span>
                       </div>
-                      <img 
-                        src={currentDiagram.imagePath} 
-                        alt={currentDiagram.title} 
-                        className="w-full max-w-md rounded-lg border border-border"
-                      />
+                      <img src={currentDiagram.imagePath} alt={currentDiagram.title} className="w-full max-w-md rounded-lg border border-border" />
                     </div>
                   )}
                 </div>
-              </div>;
-        })}
-          
+              </div>
+            );
+          })}
+
           {/* Limit Reached Upgrade Card */}
           {limitReached && (
             <div className="max-w-md mx-auto py-6">
@@ -656,55 +651,31 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   <Crown className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">Daily Limit Reached</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  You've used all 3 free prompts for today. Upgrade for unlimited access!
-                </p>
+                <p className="text-muted-foreground text-sm mb-4">You've used all 3 free prompts for today. Upgrade for unlimited access!</p>
                 <div className="bg-muted/50 rounded-xl p-4 mb-4 text-left">
                   <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <span className="text-primary">✓</span>
-                      <span>Unlimited daily prompts</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-primary">✓</span>
-                      <span>Unlimited essay marking</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-primary">✓</span>
-                      <span>Unlimited diagram searches</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-primary">✓</span>
-                      <span>Image upload & OCR analysis</span>
-                    </li>
+                    <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Unlimited daily prompts</span></li>
+                    <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Unlimited essay marking</span></li>
+                    <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Unlimited diagram searches</span></li>
+                    <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Image upload &amp; analysis</span></li>
                   </ul>
                 </div>
                 <div className="space-y-2">
-                  <Button 
-                    className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
-                    onClick={() => handleUpgradeCheckout('lifetime')}
-                    disabled={isCheckingOut}
-                  >
+                  <Button className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold" onClick={() => handleUpgradeCheckout('lifetime')} disabled={isCheckingOut}>
                     {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £24.99'}
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => handleUpgradeCheckout('monthly')}
-                    disabled={isCheckingOut}
-                  >
+                  <Button variant="outline" className="w-full" onClick={() => handleUpgradeCheckout('monthly')} disabled={isCheckingOut}>
                     Monthly – £6.99/mo
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Your free prompts reset at midnight
-                </p>
+                <p className="text-xs text-muted-foreground mt-3">Your free prompts reset at midnight</p>
               </div>
             </div>
           )}
 
-          {isLoading && messages[messages.length - 1]?.role === 'user' && <div className="flex gap-3 p-4 rounded-xl bg-muted mr-auto max-w-[85%]">
+          {isLoading && messages[messages.length - 1]?.role === 'user' && (
+            <div className="flex gap-3 p-4 rounded-xl bg-muted mr-auto max-w-[85%]">
               <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
               <div className="flex-1 flex flex-col gap-2">
                 {isSearching ? (
@@ -742,22 +713,23 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   </div>
                 )}
               </div>
-            </div>}
-          
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Fixed bottom composer - two line layout */}
+      {/* Fixed bottom composer */}
       <div className="fixed bottom-0 left-0 right-0 bg-background pt-4 pb-4 z-50">
-        {/* Suggested prompts - full width, outside max-w container */}
-        {messages.length === 0 && suggestedPrompts.length > 0 && (
+        {/* Suggested prompts — hidden when an image is pending */}
+        {messages.length === 0 && suggestedPrompts.length > 0 && !pendingImage && (
           <div className="flex justify-center gap-2 mb-3 w-full overflow-x-auto scrollbar-thin pb-1 px-4">
             {suggestedPrompts.map((prompt, idx) => (
-              <button 
-                key={idx} 
-                onClick={() => handleSuggestedPrompt(prompt)} 
-                disabled={isLoading} 
+              <button
+                key={idx}
+                onClick={() => handleSuggestedPrompt(prompt)}
+                disabled={isLoading}
                 className={`px-4 py-2 rounded-full border border-border text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 disabled:opacity-50 ${theme === 'dark' ? 'bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground' : 'text-white hover:opacity-90'}`}
                 style={theme === 'dark' ? undefined : { background: 'var(--gradient-brand)' }}
               >
@@ -766,7 +738,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             ))}
           </div>
         )}
-        
+
         <div className="max-w-5xl mx-auto px-4">
           {/* Pill container */}
           <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
@@ -780,7 +752,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     alt="Attachment preview"
                     className="w-20 h-20 object-cover rounded-lg border border-border"
                   />
-                  {/* Remove on hover */}
                   <button
                     onClick={removePendingImage}
                     className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
@@ -803,13 +774,19 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               className="w-full min-h-[48px] max-h-[200px] resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 text-base overflow-y-auto"
               rows={1}
             />
-            
+
             {/* Buttons row */}
             <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
-              {/* Hidden file input – always rendered */}
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+              {/* Hidden file input — no capture attr so iOS shows native sheet (Photos / Camera / Files) */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
 
-              {/* Plus button */}
+              {/* Plus button — all tiers get image upload */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -819,56 +796,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               >
                 <Plus className="w-5 h-5 text-muted-foreground" />
               </Button>
-
-              {/* Upgrade prompt dialog for free users */}
-              {showUpgradePrompt && (
-                <div
-                  className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]"
-                  onClick={() => setShowUpgradePrompt(false)}
-                >
-                  <div
-                    className="bg-background border border-border rounded-2xl p-6 max-w-md mx-4 shadow-2xl"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="text-center mb-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center mx-auto mb-3">
-                        <Sparkles className="w-6 h-6 text-white" />
-                      </div>
-                      <h3 className="text-xl font-bold mb-2">Unlock Image Upload</h3>
-                      <p className="text-muted-foreground text-sm">
-                        Upgrade to attach images directly to your messages.
-                      </p>
-                    </div>
-                    <div className="bg-muted/50 rounded-xl p-4 mb-4">
-                      <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Image attachments in chat</span></li>
-                        <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Unlimited daily prompts</span></li>
-                        <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Unlimited essay marking</span></li>
-                        <li className="flex items-center gap-2"><span className="text-primary">✓</span><span>Unlimited diagram searches</span></li>
-                      </ul>
-                    </div>
-                    <div className="space-y-2">
-                      <Button
-                        className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
-                        onClick={() => { setShowUpgradePrompt(false); handleUpgradeCheckout('lifetime'); }}
-                        disabled={isCheckingOut}
-                      >
-                        {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £24.99'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => { setShowUpgradePrompt(false); handleUpgradeCheckout('monthly'); }}
-                        disabled={isCheckingOut}
-                      >
-                        Monthly – £6.99/mo
-                      </Button>
-                    </div>
-                    <p className="text-xs text-center text-muted-foreground mt-3">Secure checkout via Stripe</p>
-                  </div>
-                </div>
-              )}
 
               {/* Send button */}
               <Button
@@ -881,10 +808,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               </Button>
             </div>
           </div>
-          
+
           {/* Footer text */}
           <p className="text-center text-xs text-muted-foreground mt-2">{footerText}</p>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
