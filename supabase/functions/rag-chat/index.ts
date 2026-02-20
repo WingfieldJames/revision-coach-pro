@@ -161,16 +161,29 @@ function detectContentTypePriorities(userMessage: string): string[] {
   const lowerMessage = userMessage.toLowerCase();
   const priorities: string[] = [];
   
+  // Detect if this is explicitly a past paper / exam question search
+  const isPastPaperSearch = lowerMessage.includes('peq') || lowerMessage.includes('past paper') ||
+    lowerMessage.includes('past exam') || lowerMessage.includes('exam question') ||
+    (lowerMessage.includes('question') && lowerMessage.includes('related')) ||
+    (lowerMessage.includes('find') && lowerMessage.includes('question')) ||
+    lowerMessage.includes('practice question');
+  
+  if (isPastPaperSearch) {
+    // Papers are THE priority — all three equally, plus spec for context
+    priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3, CONTENT_TYPES.SPECIFICATION);
+    return priorities; // Return early — don't dilute with exam technique etc.
+  }
+  
   // Exam technique keywords
-  if (lowerMessage.includes('exam') || lowerMessage.includes('technique') || 
-      lowerMessage.includes('how to answer') || lowerMessage.includes('marks') ||
+  if (lowerMessage.includes('technique') || 
+      lowerMessage.includes('how to answer') ||
       lowerMessage.includes('structure') || lowerMessage.includes('essay')) {
     priorities.push(CONTENT_TYPES.EXAM_TECHNIQUE, CONTENT_TYPES.ESSAY_WRITING, CONTENT_TYPES.MARK_SCHEME);
   }
   
-  // Past paper / practice question keywords
+  // Past paper / practice question keywords (less explicit)
   if (lowerMessage.includes('practice') || lowerMessage.includes('question') ||
-      lowerMessage.includes('past paper') || lowerMessage.includes('example')) {
+      lowerMessage.includes('example')) {
     priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3);
   }
   
@@ -275,19 +288,19 @@ async function fetchRelevantContext(
     console.log(`Query keywords: ${messageWords.join(', ')}`);
     
     // Build balanced selection: prioritized types get more slots
-    const MAX_CHUNKS = 40;
+    const MAX_CHUNKS = 50;
     const selectedChunks: Array<{ content: string; metadata: Record<string, unknown> }> = [];
     
     // Allocate slots: prioritized types first, then remaining types equally
     const prioritizedTypes = effectiveContentTypes.filter(t => chunksByType.has(t));
     const remainingTypes = Array.from(chunksByType.keys()).filter(t => !prioritizedTypes.includes(t));
     
-    // Give prioritized types ~60% of slots, remaining types ~40%
+    // Give prioritized types ~75% of slots, remaining types ~25%
     const prioritySlots = prioritizedTypes.length > 0 
-      ? Math.floor(MAX_CHUNKS * 0.6 / prioritizedTypes.length) 
+      ? Math.floor(MAX_CHUNKS * 0.75 / prioritizedTypes.length) 
       : 0;
     const remainingSlots = remainingTypes.length > 0 
-      ? Math.floor(MAX_CHUNKS * 0.4 / remainingTypes.length) 
+      ? Math.floor(MAX_CHUNKS * 0.25 / remainingTypes.length) 
       : Math.floor(MAX_CHUNKS / Math.max(prioritizedTypes.length, 1));
     
     // Add prioritized chunks (already sorted by relevance)
