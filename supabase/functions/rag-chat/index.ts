@@ -161,29 +161,16 @@ function detectContentTypePriorities(userMessage: string): string[] {
   const lowerMessage = userMessage.toLowerCase();
   const priorities: string[] = [];
   
-  // Detect if this is explicitly a past paper / exam question search
-  const isPastPaperSearch = lowerMessage.includes('peq') || lowerMessage.includes('past paper') ||
-    lowerMessage.includes('past exam') || lowerMessage.includes('exam question') ||
-    (lowerMessage.includes('question') && lowerMessage.includes('related')) ||
-    (lowerMessage.includes('find') && lowerMessage.includes('question')) ||
-    lowerMessage.includes('practice question');
-  
-  if (isPastPaperSearch) {
-    // Papers are THE priority — all three equally, plus spec for context
-    priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3, CONTENT_TYPES.SPECIFICATION);
-    return priorities; // Return early — don't dilute with exam technique etc.
-  }
-  
   // Exam technique keywords
-  if (lowerMessage.includes('technique') || 
-      lowerMessage.includes('how to answer') ||
+  if (lowerMessage.includes('exam') || lowerMessage.includes('technique') || 
+      lowerMessage.includes('how to answer') || lowerMessage.includes('marks') ||
       lowerMessage.includes('structure') || lowerMessage.includes('essay')) {
     priorities.push(CONTENT_TYPES.EXAM_TECHNIQUE, CONTENT_TYPES.ESSAY_WRITING, CONTENT_TYPES.MARK_SCHEME);
   }
   
-  // Past paper / practice question keywords (less explicit)
+  // Past paper / practice question keywords
   if (lowerMessage.includes('practice') || lowerMessage.includes('question') ||
-      lowerMessage.includes('example')) {
+      lowerMessage.includes('past paper') || lowerMessage.includes('example')) {
     priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3);
   }
   
@@ -255,79 +242,55 @@ async function fetchRelevantContext(
       console.log(`Filtered from ${allChunks.length} to ${filteredChunks.length} chunks after spec_version filtering`);
     }
     
-    // Extract keywords from user message for relevance scoring
-    const messageWords = userMessage.toLowerCase()
-      .replace(/[^a-z0-9\s]/g, ' ')
-      .split(/\s+/)
-      .filter(w => w.length > 2 && !['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'has', 'her', 'was', 'one', 'our', 'out', 'this', 'that', 'with', 'have', 'from', 'they', 'been', 'said', 'each', 'what', 'find', 'related', 'about', 'please', 'tell', 'show', 'give', 'any', 'peq', 'peqs', 'past', 'exam', 'questions', 'paper'].includes(w));
-    
-    // Score a chunk by how many query keywords appear in its content
-    function scoreChunk(chunk: { content: string; metadata: Record<string, unknown> }): number {
-      const lowerContent = chunk.content.toLowerCase();
-      let score = 0;
-      for (const word of messageWords) {
-        if (lowerContent.includes(word)) score++;
-      }
-      return score;
-    }
-    
-    // Group chunks by content_type and sort each group by relevance
-    const chunksByType = new Map<string, Array<{ content: string; metadata: Record<string, unknown>; relevance: number }>>();
+    // Group chunks by content_type
+    const chunksByType = new Map<string, Array<{ content: string; metadata: Record<string, unknown> }>>();
     for (const chunk of filteredChunks) {
       const ct = (chunk.metadata as Record<string, unknown>)?.content_type as string || 'general';
       if (!chunksByType.has(ct)) chunksByType.set(ct, []);
-      chunksByType.get(ct)!.push({ ...chunk, relevance: scoreChunk(chunk) });
-    }
-    
-    // Sort each group by relevance (highest first)
-    for (const [, chunks] of chunksByType) {
-      chunks.sort((a, b) => b.relevance - a.relevance);
+      chunksByType.get(ct)!.push(chunk);
     }
     
     console.log(`Content types available: ${Array.from(chunksByType.entries()).map(([k, v]) => `${k}(${v.length})`).join(', ')}`);
-    console.log(`Query keywords: ${messageWords.join(', ')}`);
     
     // Build balanced selection: prioritized types get more slots
-    const MAX_CHUNKS = 50;
+    const MAX_CHUNKS = 40;
     const selectedChunks: Array<{ content: string; metadata: Record<string, unknown> }> = [];
     
     // Allocate slots: prioritized types first, then remaining types equally
     const prioritizedTypes = effectiveContentTypes.filter(t => chunksByType.has(t));
     const remainingTypes = Array.from(chunksByType.keys()).filter(t => !prioritizedTypes.includes(t));
     
-    // Give prioritized types ~75% of slots, remaining types ~25%
+    // Give prioritized types ~60% of slots, remaining types ~40%
     const prioritySlots = prioritizedTypes.length > 0 
-      ? Math.floor(MAX_CHUNKS * 0.75 / prioritizedTypes.length) 
+      ? Math.floor(MAX_CHUNKS * 0.6 / prioritizedTypes.length) 
       : 0;
     const remainingSlots = remainingTypes.length > 0 
-      ? Math.floor(MAX_CHUNKS * 0.25 / remainingTypes.length) 
+      ? Math.floor(MAX_CHUNKS * 0.4 / remainingTypes.length) 
       : Math.floor(MAX_CHUNKS / Math.max(prioritizedTypes.length, 1));
     
-    // Add prioritized chunks (already sorted by relevance)
+    // Add prioritized chunks
     for (const ct of prioritizedTypes) {
       const chunks = chunksByType.get(ct)!;
       const limit = Math.min(chunks.length, prioritySlots || Math.floor(MAX_CHUNKS / chunksByType.size));
       selectedChunks.push(...chunks.slice(0, limit));
     }
     
-    // Add remaining type chunks (already sorted by relevance)
+    // Add remaining type chunks
     for (const ct of remainingTypes) {
       const chunks = chunksByType.get(ct)!;
       const limit = Math.min(chunks.length, remainingSlots);
       selectedChunks.push(...chunks.slice(0, limit));
     }
     
-    // If still under MAX_CHUNKS, fill with highest-relevance remaining chunks
+    // If still under MAX_CHUNKS, fill with any remaining chunks
     if (selectedChunks.length < MAX_CHUNKS) {
       const selectedSet = new Set(selectedChunks);
-      // Gather all unselected chunks, sort by relevance
-      const remaining = filteredChunks
-        .map(c => ({ ...c, relevance: scoreChunk(c) }))
-        .filter(c => !selectedSet.has(c))
-        .sort((a, b) => b.relevance - a.relevance);
-      for (const chunk of remaining) {
+      for (const chunk of filteredChunks) {
         if (selectedChunks.length >= MAX_CHUNKS) break;
-        selectedChunks.push(chunk);
+        if (!selectedSet.has(chunk)) {
+          selectedChunks.push(chunk);
+          selectedSet.add(chunk);
+        }
       }
     }
     
