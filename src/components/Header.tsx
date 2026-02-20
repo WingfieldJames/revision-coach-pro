@@ -10,8 +10,9 @@ import { EssayMarkerTool } from '@/components/EssayMarkerTool';
 import { PastPaperFinderTool } from '@/components/PastPaperFinderTool';
 import { RevisionGuideTool } from '@/components/RevisionGuideTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
+import { GradeBoundariesTool } from '@/components/GradeBoundariesTool';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
-import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen, ChevronDown } from 'lucide-react';
+import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen, ChevronDown, TrendingUp } from 'lucide-react';
 import { checkProductAccess } from '@/lib/productAccess';
 import {
   Dialog,
@@ -85,6 +86,7 @@ interface HeaderProps {
   showEssayMarker?: boolean;
   showPastPaperFinder?: boolean;
   showRevisionGuide?: boolean;
+  showGradeBoundaries?: boolean;
   showExamCountdown?: boolean;
   examDates?: ExamDate[];
   examSubjectName?: string;
@@ -111,6 +113,7 @@ export const Header: React.FC<HeaderProps> = ({
   showEssayMarker = false,
   showPastPaperFinder = false,
   showRevisionGuide = false,
+  showGradeBoundaries = false,
   showExamCountdown = false,
   examDates = [],
   examSubjectName = "Exams",
@@ -136,6 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
   const currentLogo = theme === 'dark' ? logo : logoDark;
   const [imageToolOpen, setImageToolOpen] = useState(false);
   const [diagramToolOpen, setDiagramToolOpen] = useState(false);
+  const [gradeBoundariesOpen, setGradeBoundariesOpen] = useState(false);
   const [essayMarkerOpen, setEssayMarkerOpen] = useState(false);
   const [examCountdownOpen, setExamCountdownOpen] = useState(false);
   const [pastPaperFinderOpen, setPastPaperFinderOpen] = useState(false);
@@ -174,6 +178,7 @@ export const Header: React.FC<HeaderProps> = ({
       setEssayMarkerOpen(false);
       setExamCountdownOpen(false);
       setPastPaperFinderOpen(false);
+      setGradeBoundariesOpen(false);
       setRevisionGuideOpen(false);
     };
     window.addEventListener('blur', closeAllPopovers);
@@ -278,6 +283,24 @@ export const Header: React.FC<HeaderProps> = ({
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <MyAIPreferences />
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {showGradeBoundaries && (
+          <Popover open={gradeBoundariesOpen} onOpenChange={setGradeBoundariesOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
+              >
+                <TrendingUp className="h-4 w-4" />
+                <span className="hidden sm:inline">Grade Boundaries</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+              <GradeBoundariesTool />
             </PopoverContent>
           </Popover>
         )}
