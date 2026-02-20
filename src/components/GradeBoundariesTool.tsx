@@ -97,7 +97,7 @@ export const GradeBoundariesTool: React.FC = () => {
                 dot={{ r: 4, fill: COLORS[grade], strokeDasharray: '' }}
                 activeDot={{ r: 6 }}
                 legendType="none"
-                name={`${grade} `}
+                name={` `}
               />
             ))}
           </LineChart>
