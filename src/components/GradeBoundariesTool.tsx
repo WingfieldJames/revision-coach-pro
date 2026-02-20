@@ -10,12 +10,24 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const gradeBoundaryData = [
+// Actual data (solid lines)
+const actualData = [
   { year: "2023", "A*": 81.5, A: 73.1, B: 63.0 },
   { year: "2024", "A*": 83.0, A: 74.9, B: 64.5 },
   { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
+];
+
+// Predicted data (dotted lines) – starts from last actual point for continuity
+const predictedData = [
+  { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
   { year: "2026 (Predicted)", "A*": 87.8, A: 80.8, B: 70.2 },
 ];
+
+const COLORS = {
+  "A*": "#1e3a8a",  // navy
+  A: "#6d28d9",     // purple
+  B: "#a855f7",     // light purple
+};
 
 export const GradeBoundariesTool: React.FC = () => {
   return (
@@ -29,13 +41,14 @@ export const GradeBoundariesTool: React.FC = () => {
 
       <div className="w-full h-[260px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={gradeBoundaryData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+          <LineChart margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" />
             <XAxis
               dataKey="year"
               tick={{ fontSize: 11 }}
               className="fill-muted-foreground"
               tickLine={false}
+              allowDuplicatedCategory={false}
             />
             <YAxis
               domain={[55, 95]}
@@ -58,36 +71,41 @@ export const GradeBoundariesTool: React.FC = () => {
               wrapperStyle={{ fontSize: '12px' }}
               iconType="circle"
             />
-            <Line
-              type="monotone"
-              dataKey="A*"
-              stroke="hsl(var(--chart-1, 262 83% 58%))"
-              strokeWidth={2.5}
-              dot={{ r: 4, fill: 'hsl(var(--chart-1, 262 83% 58%))' }}
-              activeDot={{ r: 6 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="A"
-              stroke="hsl(var(--chart-2, 173 58% 39%))"
-              strokeWidth={2.5}
-              dot={{ r: 4, fill: 'hsl(var(--chart-2, 173 58% 39%))' }}
-              activeDot={{ r: 6 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="B"
-              stroke="hsl(var(--chart-3, 197 37% 24%))"
-              strokeWidth={2.5}
-              dot={{ r: 4, fill: 'hsl(var(--chart-3, 197 37% 24%))' }}
-              activeDot={{ r: 6 }}
-            />
+            {/* Solid lines for actual data */}
+            {(["A*", "A", "B"] as const).map((grade) => (
+              <Line
+                key={grade}
+                data={actualData}
+                type="monotone"
+                dataKey={grade}
+                stroke={COLORS[grade]}
+                strokeWidth={2.5}
+                dot={{ r: 4, fill: COLORS[grade] }}
+                activeDot={{ r: 6 }}
+              />
+            ))}
+            {/* Dotted lines for predicted data */}
+            {(["A*", "A", "B"] as const).map((grade) => (
+              <Line
+                key={`${grade}-predicted`}
+                data={predictedData}
+                type="monotone"
+                dataKey={grade}
+                stroke={COLORS[grade]}
+                strokeWidth={2.5}
+                strokeDasharray="6 4"
+                dot={{ r: 4, fill: COLORS[grade], strokeDasharray: '' }}
+                activeDot={{ r: 6 }}
+                legendType="none"
+                name={`${grade} `}
+              />
+            ))}
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       <p className="text-[10px] text-muted-foreground text-center italic">
-        2026 values are predicted using linear trend analysis from 2023–2025 data
+        2026 values are predicted (dotted line) using linear trend analysis from 2023–2025 data
       </p>
     </div>
   );
