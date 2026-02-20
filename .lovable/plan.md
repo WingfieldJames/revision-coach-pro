@@ -1,106 +1,65 @@
 
-# Upload Training Data to AQA Psychology
 
-Upload 4 files to the AQA Psychology product (ID: `c56bc6d6-5074-4e1f-8bf2-8e900ba928ec`), including two separate specifications that are served conditionally based on the student's year group.
+# Upload AQA Psychology June 2024 Papers 1, 2 and 3 (with Mark Schemes)
 
----
-
-## Spec Routing Logic
-
-The user's year (set in "My AI" preferences) determines which specification applies:
-
-| Year (Feb 2026) | Exam Date | Spec Used |
-|---|---|---|
-| Year 13 | June 2026 | **2016 spec** (old, "spec for 2026") |
-| Year 12 | June 2027 | **2027 spec** (new, "spec 2027 onwards") |
-
-Both specs will be ingested as separate chunks, tagged with a `spec_version` metadata field (`"2026"` or `"2027"`). The `rag-chat` edge function will then be updated to filter specification chunks based on the user's year group before injecting context.
+Ingest all three uploaded past papers into the RAG training database and populate the Past Paper Finder so students can search for questions by topic.
 
 ---
 
-## Files to Upload
+## What is being uploaded
 
-| File | Content Type | Chunks (approx) | Details |
+| File | Paper Code | Items | Content |
 |---|---|---|---|
-| system_prompt.txt | System prompt | 1 (DB update) | Short 2-line persona -- will be combined with exam_technique.txt |
-| exam_technique.txt | exam_technique | 1 chunk | 47-line detailed A* exam methodology, AO weighting, essay structure |
-| spec_2016_onwards.json | specification | ~12 chunks (pages 13-24) | Old spec for current Year 13s (exams June 2026), tagged `spec_version: "2026"` |
-| spec_2027_onwards.json | specification | ~12 chunks (pages 13-24) | New spec for current Year 12s (exams June 2027+), tagged `spec_version: "2027"` |
+| Paper 1 (June 2024) | 7182/1 | ~15 questions | Social Influence, Memory, Attachment, Psychopathology + mark schemes |
+| Paper 2 (June 2024) | 7182/2 | ~25 questions | Approaches, Biopsychology, Research Methods + mark schemes |
+| Paper 3 (June 2024) | 7182/3 | ~40 questions | Issues and Debates, Relationships, Gender, Cognition and Development, Schizophrenia, Eating Behaviour, Stress, Aggression, Forensic Psychology, Addiction + mark schemes |
 
 ---
 
-## Implementation Steps
+## Step 1: Ingest into RAG database
 
-### Step 1: Update the system prompt
+Call the `ingest-content` edge function three times (once per paper) to insert combined QP+MS chunks into `document_chunks` for product `c56bc6d6-5074-4e1f-8bf2-8e900ba928ec`.
 
-Combine `system_prompt.txt` (the short persona line) with the full `exam_technique.txt` content into a single `system_prompt_deluxe` for the product. The system prompt file says to use the exam technique notes, so they belong together as the base persona.
+Each question becomes one chunk containing the question text and mark scheme together (the proven QP+MS combined format used for OCR Physics). Metadata tags:
 
-### Step 2: Ingest exam technique as a document chunk
+```text
+content_type: "paper_1" / "paper_2" / "paper_3"
+year: "2024"
+paper: "June 2024 Paper 1" etc.
+question_number: "001" etc.
+source: "AQA 7182/1 June 2024"
+```
 
-Also ingest the exam_technique.txt content as a `content_type: "exam_technique"` chunk so it's available in RAG context retrieval when students ask about essay structure or marks.
+Estimated chunks: ~80 total across all three papers.
 
-### Step 3: Ingest the 2016 specification (for Year 13 / June 2026 exams)
+## Step 2: Populate the Past Paper Finder
 
-Extract the subject content pages (pages 13-24) from `spec_2016_onwards.json` and chunk by topic section:
-- 3.1.1 Social influence, 3.1.2 Memory, 3.1.3 Attachment
-- 3.2.1 Approaches, 3.2.1.1 Biopsychology, 3.2.2 Psychopathology, 3.2.3 Research methods
-- 4.1-4.3 A-level content (full topic breakdown)
+Update `src/data/aqaPsychologyPastPapers.ts` to fill the currently empty `AQA_PSYCHOLOGY_PAST_QUESTIONS` array with entries for every question across all three papers.
 
-Each chunk tagged with `spec_version: "2026"`.
+Each entry maps a question to its relevant specification codes. For example:
+- Q001 (Paper 1): "Outline one ethical issue in social influence research" maps to `["3.1.1.1"]` (Social Influence)
+- Q103 (Paper 1): "Discuss Romanian orphan studies" maps to `["3.1.3.10"]`
+- Q106 (Paper 1): "Discuss the cognitive approach to explaining depression" maps to `["3.1.4.6"]`
 
-### Step 4: Ingest the 2027 specification (for Year 12 / June 2027+ exams)
+This enables students to search by topic and find matching past paper questions.
 
-Same structure but from `spec_2027_onwards.json`. Key differences include:
-- "Psychopathology" renamed to "Clinical Psychology and Mental Health"
-- Removal of Zimbardo conformity, types of LTM, Wundt/introspection
-- Addition of new content in Gender (gender identities, non-binary)
-- Changes in Forensic (typology approach replaces top-down/bottom-up)
-- Removal of biological rhythms from Biopsychology
+## Step 3: No other changes needed
 
-Each chunk tagged with `spec_version: "2027"`.
-
-### Step 5: Update `rag-chat` edge function
-
-Modify the `fetchRelevantContext` function to:
-1. Read the user's year from `user_preferences.year`
-2. When fetching `specification` chunks for the Psychology product, filter by `spec_version` metadata:
-   - Year 13 -> filter `spec_version = "2026"`
-   - Year 12 -> filter `spec_version = "2027"`
-3. Non-specification chunks (past papers, exam technique, etc.) are shared across both specs
-
-### Step 6: Update `buildPersonalizedPrompt` in rag-chat
-
-Add Psychology-specific year context to the student context block:
-- Year 13: "You are sitting the 2016 specification (exams June 2026). Use the spec for 2026."
-- Year 12: "You are sitting the 2027 specification (exams June 2027 onwards). Use the spec 2027 onwards."
-
-This aligns with the exam_technique.txt instruction: "first look at the correct specification from text snippets (spec for 2026) or (spec 2027 onwards)".
+- No edge function changes required (rag-chat already handles Psychology with conditional spec filtering)
+- No frontend changes required (Past Paper Finder and Revision Guide already configured for Psychology)
+- The Revision Guide will automatically benefit from the new training data via RAG context
 
 ---
 
-## After State
+## Files Modified
 
-| Content Type | Chunks | Notes |
-|---|---|---|
-| System Prompt | Updated | Combined persona + exam technique (approx 12,000 chars) |
-| exam_technique | 1 | Full AO weighting and essay methodology |
-| specification (2026) | ~12 | Old spec, served to Year 13 students |
-| specification (2027) | ~12 | New spec, served to Year 12 students |
-| **Total** | **~25 chunks** | |
+| File | Change |
+|---|---|
+| `src/data/aqaPsychologyPastPapers.ts` | Populate `AQA_PSYCHOLOGY_PAST_QUESTIONS` with ~80 entries mapping questions to spec codes |
 
----
+## Database Changes
 
-## Technical Details
+| Table | Change |
+|---|---|
+| `document_chunks` | INSERT ~80 new chunks via `ingest-content` edge function |
 
-### Files Modified
-- `supabase/functions/rag-chat/index.ts` -- Add spec_version filtering logic based on user year and product subject
-- `supabase/config.toml` -- No changes needed (rag-chat already registered)
-
-### Database Changes
-- `products` table: UPDATE `system_prompt_deluxe` for product `c56bc6d6-5074-4e1f-8bf2-8e900ba928ec`
-- `document_chunks` table: INSERT ~25 new chunks via `ingest-content` edge function
-
-### No Frontend Changes Required
-- The "My AI" preferences component already supports Year 12 / Year 13 selection
-- User preferences are already passed to the rag-chat function
-- The spec routing is entirely server-side in the edge function
