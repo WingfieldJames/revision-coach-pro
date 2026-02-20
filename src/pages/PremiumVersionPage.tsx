@@ -95,6 +95,7 @@ export const PremiumVersionPage = () => {
         <Header
           showImageTool 
           showDiagramTool 
+          showGradeBoundaries
           showEssayMarker 
           showPastPaperFinder
           showRevisionGuide

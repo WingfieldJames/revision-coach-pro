@@ -33,6 +33,7 @@ export const FreeVersionPage = () => {
         <Header
           showImageTool 
           showDiagramTool 
+          showGradeBoundaries
           showEssayMarker 
           showPastPaperFinder
           showRevisionGuide
