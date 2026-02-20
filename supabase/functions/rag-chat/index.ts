@@ -195,7 +195,7 @@ function detectContentTypePriorities(userMessage: string): string[] {
 }
 
 // Query relevant document chunks from the training data
-// Unified: all users get full training data (no tier filtering)
+// Fetches a balanced mix across content types so no single type dominates
 async function fetchRelevantContext(
   supabase: ReturnType<typeof createClient>,
   productId: string,
@@ -204,63 +204,109 @@ async function fetchRelevantContext(
   userPreferences?: UserPreferences | null
 ): Promise<FetchContextResult> {
   try {
-    // Detect content type priorities if not explicitly provided
+    // Detect content type priorities based on user message
     const effectiveContentTypes = contentTypes && contentTypes.length > 0 
       ? contentTypes 
       : detectContentTypePriorities(userMessage);
     
     console.log(`Content type priorities: ${effectiveContentTypes.join(', ')}`);
     
-    // Build query for document chunks - filter by product_id only
-    // All users get full training data (tier distinction removed)
-    const { data: chunks, error } = await supabase
+    // Fetch ALL chunks for this product (they're small enough to filter in memory)
+    const { data: allChunks, error } = await supabase
       .from('document_chunks')
       .select('content, metadata')
-      .eq('product_id', productId)
-      .limit(30);
+      .eq('product_id', productId);
     
     if (error) {
       console.error('Error fetching document chunks:', error);
       return { context: '', sourcesSearched: [] };
     }
     
-    if (!chunks || chunks.length === 0) {
+    if (!allChunks || allChunks.length === 0) {
       console.log(`No training data found for product ${productId}`);
       return { context: '', sourcesSearched: [] };
     }
     
     // For Psychology product, filter specification chunks by spec_version based on user year
-    let filteredChunks = chunks;
+    let filteredChunks = allChunks;
     if (productId === PSYCHOLOGY_PRODUCT_ID && userPreferences) {
       const specVersion = userPreferences.year === 'Year 12' ? '2027' : '2026';
       console.log(`Psychology spec filtering: Year ${userPreferences.year} -> spec_version ${specVersion}`);
       
-      filteredChunks = chunks.filter((chunk: { content: string; metadata: Record<string, unknown> }) => {
+      filteredChunks = allChunks.filter((chunk: { content: string; metadata: Record<string, unknown> }) => {
         const metadata = chunk.metadata || {};
-        // Non-specification chunks are shared across both specs
         if (metadata.content_type !== 'specification') return true;
-        // Specification chunks: only include matching spec_version
         return metadata.spec_version === specVersion;
       });
       
-      console.log(`Filtered from ${chunks.length} to ${filteredChunks.length} chunks after spec_version filtering`);
+      console.log(`Filtered from ${allChunks.length} to ${filteredChunks.length} chunks after spec_version filtering`);
     }
     
-    console.log(`Found ${filteredChunks.length} relevant chunks for context`);
+    // Group chunks by content_type
+    const chunksByType = new Map<string, Array<{ content: string; metadata: Record<string, unknown> }>>();
+    for (const chunk of filteredChunks) {
+      const ct = (chunk.metadata as Record<string, unknown>)?.content_type as string || 'general';
+      if (!chunksByType.has(ct)) chunksByType.set(ct, []);
+      chunksByType.get(ct)!.push(chunk);
+    }
+    
+    console.log(`Content types available: ${Array.from(chunksByType.entries()).map(([k, v]) => `${k}(${v.length})`).join(', ')}`);
+    
+    // Build balanced selection: prioritized types get more slots
+    const MAX_CHUNKS = 40;
+    const selectedChunks: Array<{ content: string; metadata: Record<string, unknown> }> = [];
+    
+    // Allocate slots: prioritized types first, then remaining types equally
+    const prioritizedTypes = effectiveContentTypes.filter(t => chunksByType.has(t));
+    const remainingTypes = Array.from(chunksByType.keys()).filter(t => !prioritizedTypes.includes(t));
+    
+    // Give prioritized types ~60% of slots, remaining types ~40%
+    const prioritySlots = prioritizedTypes.length > 0 
+      ? Math.floor(MAX_CHUNKS * 0.6 / prioritizedTypes.length) 
+      : 0;
+    const remainingSlots = remainingTypes.length > 0 
+      ? Math.floor(MAX_CHUNKS * 0.4 / remainingTypes.length) 
+      : Math.floor(MAX_CHUNKS / Math.max(prioritizedTypes.length, 1));
+    
+    // Add prioritized chunks
+    for (const ct of prioritizedTypes) {
+      const chunks = chunksByType.get(ct)!;
+      const limit = Math.min(chunks.length, prioritySlots || Math.floor(MAX_CHUNKS / chunksByType.size));
+      selectedChunks.push(...chunks.slice(0, limit));
+    }
+    
+    // Add remaining type chunks
+    for (const ct of remainingTypes) {
+      const chunks = chunksByType.get(ct)!;
+      const limit = Math.min(chunks.length, remainingSlots);
+      selectedChunks.push(...chunks.slice(0, limit));
+    }
+    
+    // If still under MAX_CHUNKS, fill with any remaining chunks
+    if (selectedChunks.length < MAX_CHUNKS) {
+      const selectedSet = new Set(selectedChunks);
+      for (const chunk of filteredChunks) {
+        if (selectedChunks.length >= MAX_CHUNKS) break;
+        if (!selectedSet.has(chunk)) {
+          selectedChunks.push(chunk);
+          selectedSet.add(chunk);
+        }
+      }
+    }
+    
+    console.log(`Selected ${selectedChunks.length} balanced chunks from ${filteredChunks.length} total`);
     
     // Track unique sources searched
     const sourcesMap = new Map<string, { type: string; topic: string }>();
     
     // Format chunks as context
-    const contextParts = filteredChunks.map((chunk: { content: string; metadata: Record<string, unknown> }) => {
+    const contextParts = selectedChunks.map((chunk) => {
       const contentType = chunk.metadata?.content_type || 'general';
       const topic = chunk.metadata?.topic || '';
-      const contentTier = chunk.metadata?.tier || 'all';
       const header = topic 
         ? `[${String(contentType).toUpperCase()} - ${topic}]` 
         : `[${String(contentType).toUpperCase()}]`;
       
-      // Track this source
       const sourceKey = `${contentType}-${topic}`;
       if (!sourcesMap.has(sourceKey)) {
         sourcesMap.set(sourceKey, { type: String(contentType), topic: String(topic) });
