@@ -70,6 +70,11 @@ export const GradeBoundariesTool: React.FC = () => {
             <Legend
               wrapperStyle={{ fontSize: '12px' }}
               iconType="circle"
+              payload={[
+                { value: 'A*', type: 'circle', color: COLORS['A*'] },
+                { value: 'A', type: 'circle', color: COLORS['A'] },
+                { value: 'B', type: 'circle', color: COLORS['B'] },
+              ]}
             />
             {/* Solid lines for actual data */}
             {(["A*", "A", "B"] as const).map((grade) => (
