@@ -10,32 +10,69 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-// Actual data (solid lines)
-const actualData = [
-  { year: "2023", "A*": 81.5, A: 73.1, B: 63.0 },
-  { year: "2024", "A*": 83.0, A: 74.9, B: 64.5 },
-  { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
-];
+type GradeBoundarySubject = 'economics' | 'maths';
 
-// Predicted data (dotted lines) – starts from last actual point for continuity
-const predictedData = [
-  { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
-  { year: "2026 (Predicted)", "A*": 87.8, A: 80.8, B: 70.2 },
-];
+interface SubjectConfig {
+  label: string;
+  code: string;
+  maxUms: number;
+  actualData: Record<string, string | number>[];
+  predictedData: Record<string, string | number>[];
+  yDomain: [number, number];
+}
 
-const COLORS = {
-  "A*": "#1e3a8a",  // navy
-  A: "#6d28d9",     // purple
-  B: "#a855f7",     // light purple
+const SUBJECT_CONFIGS: Record<GradeBoundarySubject, SubjectConfig> = {
+  economics: {
+    label: 'Edexcel A Level Economics',
+    code: '9EC0',
+    maxUms: 335,
+    actualData: [
+      { year: "2023", "A*": 81.5, A: 73.1, B: 63.0 },
+      { year: "2024", "A*": 83.0, A: 74.9, B: 64.5 },
+      { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
+    ],
+    predictedData: [
+      { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
+      { year: "2026 (Predicted)", "A*": 87.8, A: 80.8, B: 70.2 },
+    ],
+    yDomain: [55, 95],
+  },
+  maths: {
+    label: 'Edexcel A Level Mathematics',
+    code: '9MA0',
+    maxUms: 300,
+    actualData: [
+      { year: "2023", "A*": 81.3, A: 65.3, B: 52.7 },
+      { year: "2024", "A*": 83.7, A: 68.3, B: 55.7 },
+      { year: "2025", "A*": 86.0, A: 71.3, B: 59.3 },
+    ],
+    predictedData: [
+      { year: "2025", "A*": 86.0, A: 71.3, B: 59.3 },
+      { year: "2026 (Predicted)", "A*": 88.4, A: 74.3, B: 62.6 },
+    ],
+    yDomain: [45, 95],
+  },
 };
 
-export const GradeBoundariesTool: React.FC = () => {
+const COLORS = {
+  "A*": "#1e3a8a",
+  A: "#6d28d9",
+  B: "#a855f7",
+};
+
+interface GradeBoundariesToolProps {
+  subject?: GradeBoundarySubject;
+}
+
+export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subject = 'economics' }) => {
+  const config = SUBJECT_CONFIGS[subject];
+
   return (
     <div className="space-y-3">
       <div>
         <h3 className="text-base font-semibold text-foreground">Grade Boundaries</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Edexcel A Level Economics (9EC0) • Percentage of max UMS (335)
+          {config.label} ({config.code}) • Percentage of max UMS ({config.maxUms})
         </p>
       </div>
 
@@ -51,7 +88,7 @@ export const GradeBoundariesTool: React.FC = () => {
               allowDuplicatedCategory={false}
             />
             <YAxis
-              domain={[55, 95]}
+              domain={config.yDomain}
               tick={{ fontSize: 11 }}
               className="fill-muted-foreground"
               tickLine={false}
@@ -76,11 +113,10 @@ export const GradeBoundariesTool: React.FC = () => {
                 { value: 'B', type: 'circle', color: COLORS['B'] },
               ]}
             />
-            {/* Solid lines for actual data */}
             {(["A*", "A", "B"] as const).map((grade) => (
               <Line
                 key={grade}
-                data={actualData}
+                data={config.actualData}
                 type="monotone"
                 dataKey={grade}
                 stroke={COLORS[grade]}
@@ -89,11 +125,10 @@ export const GradeBoundariesTool: React.FC = () => {
                 activeDot={{ r: 6 }}
               />
             ))}
-            {/* Dotted lines for predicted data */}
             {(["A*", "A", "B"] as const).map((grade) => (
               <Line
                 key={`${grade}-predicted`}
-                data={predictedData}
+                data={config.predictedData}
                 type="monotone"
                 dataKey={grade}
                 stroke={COLORS[grade]}

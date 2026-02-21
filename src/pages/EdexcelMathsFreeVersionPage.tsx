@@ -27,6 +27,8 @@ export const EdexcelMathsFreeVersionPage = () => {
         <Header
           showImageTool 
           showPastPaperFinder
+          showGradeBoundaries
+          gradeBoundariesSubject="maths"
           showExamCountdown
           examDates={EDEXCEL_MATHS_EXAMS}
           examSubjectName="Edexcel Maths"
