@@ -6,6 +6,7 @@ import { AQA_SPEC_POINTS, AQA_PAST_QUESTIONS, AQASpecPoint, AQAPastPaperQuestion
 import { OCR_CS_SPEC_POINTS, OCR_CS_PAST_QUESTIONS, OCRCSSpecPoint, OCRCSPastPaperQuestion } from '@/data/ocrCsPastPapers';
 import { AQA_PSYCHOLOGY_SPEC_POINTS, AQA_PSYCHOLOGY_PAST_QUESTIONS } from '@/data/aqaPsychologyPastPapers';
 import { EDEXCEL_MATHS_SPEC_POINTS, EDEXCEL_MATHS_PAST_QUESTIONS } from '@/data/edexcelMathsPastPapers';
+import { EDEXCEL_MATHS_APPLIED_SPEC_POINTS, EDEXCEL_MATHS_APPLIED_PAST_QUESTIONS } from '@/data/edexcelMathsAppliedPastPapers';
 
 // Unified types for the component
 interface SpecPoint {
@@ -25,7 +26,7 @@ interface Question {
   extract?: string;
 }
 
-type BoardType = 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' | 'edexcel-maths';
+type BoardType = 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
 
 interface PastPaperFinderToolProps {
   tier?: 'free' | 'deluxe';
@@ -47,6 +48,9 @@ function getSpecPoints(board: BoardType): SpecPoint[] {
   if (board === 'edexcel-maths') {
     return EDEXCEL_MATHS_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
   }
+  if (board === 'edexcel-maths-applied') {
+    return EDEXCEL_MATHS_APPLIED_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
+  }
   return EDEXCEL_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
 }
 
@@ -55,13 +59,15 @@ function getQuestions(board: BoardType): Question[] {
   if (board === 'aqa') return AQA_PAST_QUESTIONS;
   if (board === 'aqa-psychology') return AQA_PSYCHOLOGY_PAST_QUESTIONS;
   if (board === 'edexcel-maths') return EDEXCEL_MATHS_PAST_QUESTIONS;
+  if (board === 'edexcel-maths-applied') return EDEXCEL_MATHS_APPLIED_PAST_QUESTIONS;
   return EDEXCEL_PAST_QUESTIONS;
 }
 
 function getBoardLabel(board: BoardType): string {
   if (board === 'ocr-cs') return 'OCR CS';
   if (board === 'aqa-psychology') return 'AQA Psychology';
-  if (board === 'edexcel-maths') return 'Edexcel Maths';
+  if (board === 'edexcel-maths') return 'Edexcel Maths (Pure)';
+  if (board === 'edexcel-maths-applied') return 'Edexcel Maths (Applied)';
   return board === 'aqa' ? 'AQA' : 'Edexcel';
 }
 

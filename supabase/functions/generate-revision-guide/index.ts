@@ -154,7 +154,8 @@ serve(async (req) => {
       board === "ocr-cs" ? "OCR A Level Computer Science (H446)" :
       board === "aqa" ? "AQA A Level Economics" :
       board === "edexcel" ? "Edexcel A Level Economics" :
-      board === "edexcel-maths" ? "Edexcel A Level Mathematics (9MA0)" :
+      board === "edexcel-maths" ? "Edexcel A Level Mathematics (9MA0) – Pure" :
+      board === "edexcel-maths-applied" ? "Edexcel A Level Mathematics (9MA0) – Applied (Statistics & Mechanics)" :
       board;
 
     let prompt = `You are generating a comprehensive A* revision guide for a student studying ${boardLabel}.
