@@ -10,19 +10,19 @@ interface LatestFeaturesSectionProps {
 const economicsFeatures = [
   {
     id: "diagram-generator",
-    title: "📊 Diagram Generator",
+    title: "Diagram Generator",
     description: "Paste any question and instantly get the exact diagram you need - AD/AS, supply and demand, market failure, and more. AI-powered, so it understands context, not just keywords.",
     image: "/features/diagram-generator.png"
   },
   {
     id: "past-paper",
-    title: "📄 Past Paper Mastery",
+    title: "Past Paper Mastery",
     description: "Search and retrieve real past paper questions by topic, paper, or command word. Trained on every exam from 2017-2025, so your practice is always exam-focused.",
     image: "/features/past-papers.png"
   },
   {
     id: "essay-marker",
-    title: "✍️ A* Technique and Essay Marker",
+    title: "A* Technique and Essay Marker",
     description: "Upload your essays and get instant feedback against real mark schemes. Learn the exact structures, evaluation phrases, and timing tricks that A* students use.",
     image: "/features/essay-marker.png"
   }
@@ -31,19 +31,19 @@ const economicsFeatures = [
 const csFeatures = [
   {
     id: "diagram-generator",
-    title: "📊 Diagram Generator",
+    title: "Diagram Generator",
     description: "Paste any question and instantly get the exact diagram you need - data structures, full adders, network topologies, and more. AI-powered, so it understands context, not just keywords.",
     image: "/features/diagram-generator-cs.png"
   },
   {
     id: "past-paper",
-    title: "📄 Past Paper Mastery",
+    title: "Past Paper Mastery",
     description: "Search and retrieve real past paper questions by topic, paper, or command word. Trained on every exam from 2017-2025, so your practice is always exam-focused.",
     image: "/features/past-papers.png"
   },
   {
     id: "essay-marker",
-    title: "✍️ A* Technique and Long Answer Marker",
+    title: "A* Technique and Long Answer Marker",
     description: "Upload your answers and get instant feedback against real mark schemes. Learn the exact structures, terminology, and timing tricks that A* students use.",
     image: "/features/essay-marker.png"
   }
