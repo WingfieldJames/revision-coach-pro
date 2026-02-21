@@ -25,7 +25,7 @@ interface ContentOption {
 }
 
 interface RevisionGuideToolProps {
-  board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology';
+  board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' | 'edexcel-maths';
   productId?: string;
   tier?: 'free' | 'deluxe';
 }
@@ -64,6 +64,7 @@ const BOARD_LABELS: Record<string, string> = {
   'aqa': 'AQA A Level Economics',
   'edexcel': 'Edexcel A Level Economics',
   'aqa-psychology': 'AQA A Level Psychology (7182)',
+  'edexcel-maths': 'Edexcel A Level Mathematics (9MA0)',
 };
 
 // Render markdown content with inline diagram support
@@ -107,7 +108,7 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
   const [specLoaded, setSpecLoaded] = useState(false);
   const [pastQuestions, setPastQuestions] = useState<any[]>([]);
   const [diagramList, setDiagramList] = useState<any[]>([]);
-  const noDiagrams = board === 'aqa-psychology';
+  const noDiagrams = board === 'aqa-psychology' || board === 'edexcel-maths';
   const [contentOptions, setContentOptions] = useState<ContentOption[]>([
     { id: 'exam_technique', label: 'Exam Technique', enabled: true },
     { id: 'past_papers', label: 'Past Paper Questions', enabled: true },
@@ -138,6 +139,11 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
         setSpecPoints(AQA_PSYCHOLOGY_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords })));
         setPastQuestions(AQA_PSYCHOLOGY_PAST_QUESTIONS);
         // No diagrams for Psychology — leave diagramList empty
+        setDiagramList([]);
+      } else if (board === 'edexcel-maths') {
+        const { EDEXCEL_MATHS_SPEC_POINTS, EDEXCEL_MATHS_PAST_QUESTIONS } = await import('@/data/edexcelMathsPastPapers');
+        setSpecPoints(EDEXCEL_MATHS_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords })));
+        setPastQuestions(EDEXCEL_MATHS_PAST_QUESTIONS);
         setDiagramList([]);
       } else {
         const { EDEXCEL_SPEC_POINTS, EDEXCEL_PAST_QUESTIONS } = await import('@/data/edexcelPastPapers');

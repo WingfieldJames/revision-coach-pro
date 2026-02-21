@@ -5,6 +5,7 @@ import { EDEXCEL_SPEC_POINTS, EDEXCEL_PAST_QUESTIONS, EdexcelSpecPoint, PastPape
 import { AQA_SPEC_POINTS, AQA_PAST_QUESTIONS, AQASpecPoint, AQAPastPaperQuestion } from '@/data/aqaPastPapers';
 import { OCR_CS_SPEC_POINTS, OCR_CS_PAST_QUESTIONS, OCRCSSpecPoint, OCRCSPastPaperQuestion } from '@/data/ocrCsPastPapers';
 import { AQA_PSYCHOLOGY_SPEC_POINTS, AQA_PSYCHOLOGY_PAST_QUESTIONS } from '@/data/aqaPsychologyPastPapers';
+import { EDEXCEL_MATHS_SPEC_POINTS, EDEXCEL_MATHS_PAST_QUESTIONS } from '@/data/edexcelMathsPastPapers';
 
 // Unified types for the component
 interface SpecPoint {
@@ -24,14 +25,16 @@ interface Question {
   extract?: string;
 }
 
+type BoardType = 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' | 'edexcel-maths';
+
 interface PastPaperFinderToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
-  board?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology';
+  board?: BoardType;
 }
 
 // Adapt spec points to unified type
-function getSpecPoints(board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology'): SpecPoint[] {
+function getSpecPoints(board: BoardType): SpecPoint[] {
   if (board === 'ocr-cs') {
     return OCR_CS_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
   }
@@ -41,26 +44,31 @@ function getSpecPoints(board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology'): 
   if (board === 'aqa-psychology') {
     return AQA_PSYCHOLOGY_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
   }
+  if (board === 'edexcel-maths') {
+    return EDEXCEL_MATHS_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
+  }
   return EDEXCEL_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
 }
 
-function getQuestions(board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology'): Question[] {
+function getQuestions(board: BoardType): Question[] {
   if (board === 'ocr-cs') return OCR_CS_PAST_QUESTIONS;
   if (board === 'aqa') return AQA_PAST_QUESTIONS;
   if (board === 'aqa-psychology') return AQA_PSYCHOLOGY_PAST_QUESTIONS;
+  if (board === 'edexcel-maths') return EDEXCEL_MATHS_PAST_QUESTIONS;
   return EDEXCEL_PAST_QUESTIONS;
 }
 
-function getBoardLabel(board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology'): string {
+function getBoardLabel(board: BoardType): string {
   if (board === 'ocr-cs') return 'OCR CS';
   if (board === 'aqa-psychology') return 'AQA Psychology';
+  if (board === 'edexcel-maths') return 'Edexcel Maths';
   return board === 'aqa' ? 'AQA' : 'Edexcel';
 }
 
 export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
   tier = 'free',
   board = 'edexcel',
-}: { tier?: 'free' | 'deluxe'; productId?: string; board?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' }) => {
+}: { tier?: 'free' | 'deluxe'; productId?: string; board?: BoardType }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpec, setSelectedSpec] = useState<SpecPoint | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -112,6 +120,8 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
     ? "Enter a topic... e.g. externalities, AD, monopoly"
     : board === 'aqa-psychology'
     ? "Enter a topic... e.g. conformity, attachment, memory"
+    : board === 'edexcel-maths'
+    ? "Enter a topic... e.g. differentiation, binomial, vectors"
     : "Enter a topic... e.g. externalities, AD, tariffs";
   const hintText = board === 'ocr-cs'
     ? '"sorting algorithms", "databases", "encryption", "OOP"'
@@ -119,6 +129,8 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
     ? '"externalities", "fiscal policy", "monopoly", "trade unions"'
     : board === 'aqa-psychology'
     ? '"conformity", "Milgram", "working memory", "attachment"'
+    : board === 'edexcel-maths'
+    ? '"integration", "chain rule", "proof", "trigonometry"'
     : '"externalities", "fiscal policy", "oligopoly", "exchange rates"';
 
   // Results view
