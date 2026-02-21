@@ -154,6 +154,9 @@ export const EdexcelMathsPremiumPage = () => {
         <Header
           showImageTool
           showPastPaperFinder
+          pastPaperBoard="edexcel-maths"
+          showRevisionGuide
+          revisionGuideBoard="edexcel-maths"
           showGradeBoundaries
           gradeBoundariesSubject="maths"
           showExamCountdown
