@@ -95,6 +95,7 @@ interface HeaderProps {
   diagramSubject?: 'economics' | 'cs';
   pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology';
   revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology';
+  gradeBoundariesSubject?: 'economics' | 'maths';
   productId?: string;
   productSlug?: string;
   onEssayMarkerSubmit?: (message: string) => void;
@@ -122,6 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
   diagramSubject = 'economics',
   pastPaperBoard = 'edexcel',
   revisionGuideBoard = 'edexcel',
+  gradeBoundariesSubject = 'economics',
   productId,
   productSlug,
   onEssayMarkerSubmit,
@@ -300,7 +302,7 @@ export const Header: React.FC<HeaderProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
-              <GradeBoundariesTool />
+              <GradeBoundariesTool subject={gradeBoundariesSubject} />
             </PopoverContent>
           </Popover>
         )}
