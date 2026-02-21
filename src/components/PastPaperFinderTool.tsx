@@ -128,6 +128,8 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
     ? "Enter a topic... e.g. conformity, attachment, memory"
     : board === 'edexcel-maths'
     ? "Enter a topic... e.g. differentiation, binomial, vectors"
+    : board === 'edexcel-maths-applied'
+    ? "Enter a topic... e.g. projectiles, hypothesis test, friction"
     : "Enter a topic... e.g. externalities, AD, tariffs";
   const hintText = board === 'ocr-cs'
     ? '"sorting algorithms", "databases", "encryption", "OOP"'
@@ -137,6 +139,8 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
     ? '"conformity", "Milgram", "working memory", "attachment"'
     : board === 'edexcel-maths'
     ? '"integration", "chain rule", "proof", "trigonometry"'
+    : board === 'edexcel-maths-applied'
+    ? '"SUVAT", "normal distribution", "projectiles", "moments"'
     : '"externalities", "fiscal policy", "oligopoly", "exchange rates"';
 
   // Results view
