@@ -250,7 +250,7 @@ export const HomePage = () => {
               <span className="text-foreground"> say</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mt-4">
-              Join 700+ students and teachers achieving real results
+              Join 2000+ students and teachers achieving real results
             </p>
           </ScrollReveal>
 
@@ -270,7 +270,7 @@ export const HomePage = () => {
               <span className="text-gradient-brand">users</span>
               <span className="text-foreground"> say</span>
             </h2>
-            <p className="text-muted-foreground text-xs mt-2">Join 700+ students and teachers achieving real results</p>
+            <p className="text-muted-foreground text-xs mt-2">Join 2000+ students and teachers achieving real results</p>
           </div>
           <div className="space-y-3">
             {[firstColumn[0], firstColumn[2], firstColumn[6]].map((t, i) => (
