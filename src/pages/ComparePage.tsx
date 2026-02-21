@@ -481,10 +481,7 @@ export const ComparePage = () => {
           <LatestFeaturesSection subject={subject} />
         </section>
 
-        {/* Screenshot Testimonials */}
-        <div className="relative">
-          <ScreenshotTestimonials />
-        </div>
+
 
         {!user && (
           <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12 relative">
