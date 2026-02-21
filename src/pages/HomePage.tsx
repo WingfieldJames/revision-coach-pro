@@ -103,7 +103,8 @@ export const HomePage = () => {
   const handleSeeHowItWorks = () => {
     const section = document.querySelector('[data-section="demo-video"]');
     if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
+      const y = section.getBoundingClientRect().top + window.scrollY - 20;
+      window.scrollTo({ top: y, behavior: "smooth" });
     }
   };
 
