@@ -132,7 +132,7 @@ export const HomePage = () => {
         <span
           className={`text-foreground text-xs font-medium whitespace-nowrap ${theme === "light" ? "inline-flex items-center px-4 py-1.5 rounded-full bg-foreground/[0.04] border border-foreground/10" : ""}`}
         >
-          ⭐ Loved by 1.1k+ students with a 4.9 star rating
+          ⭐ Loved by 2k+ students with a 4.9 star rating
         </span>
       </div>
 
@@ -147,7 +147,7 @@ export const HomePage = () => {
             >
               <Star className="w-4 h-4 text-[#FFC83D] fill-[#FFC83D]" />
               <span className="text-foreground text-sm font-medium">
-                Loved by 1.1k+ students with a 4.9 star rating
+                Loved by 2k+ students with a 4.9 star rating
               </span>
             </div>
 
