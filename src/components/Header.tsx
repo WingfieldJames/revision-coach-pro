@@ -475,10 +475,7 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {user && !hideUserDetails && (
-          <div className="hidden sm:flex items-center gap-2">
-            <span className="text-xs sm:text-sm text-muted-foreground truncate max-w-[80px] sm:max-w-[120px] md:max-w-none hidden sm:block">
-              {user.email}
-            </span>
+          <div className="hidden sm:flex items-center">
             <Button variant="outline" size="sm" onClick={handleSignOut} className="text-xs sm:text-sm px-2 sm:px-3">
               Sign Out
             </Button>
