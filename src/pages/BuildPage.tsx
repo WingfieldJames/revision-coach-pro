@@ -27,7 +27,7 @@ const SUBJECT_OPTIONS = [
   { value: "OCR-Maths", label: "OCR Maths", subject: "Maths", board: "OCR" },
 ];
 
-const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020"];
+const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
 
 type SectionStatus = "empty" | "in_progress" | "complete";
 
