@@ -40,6 +40,7 @@ interface TrainerUpload {
   chunks_created: number;
   doc_type?: string | null;
   paper_number?: number | null;
+  created_at?: string;
 }
 
 interface CustomSection {
@@ -231,8 +232,8 @@ export function BuildPage() {
 
       if (recErr) throw recErr;
 
-      // Trigger processing
-      const { error: processErr } = await supabase.functions.invoke("process-training-file", {
+      // Trigger processing asynchronously (don't block UI)
+      supabase.functions.invoke("process-training-file", {
         body: {
           upload_id: uploadRecord.id,
           project_id: projectId,
@@ -240,16 +241,31 @@ export function BuildPage() {
           file_url: filePath,
           year: year || null,
         },
+      }).then(async ({ error: processErr }) => {
+        if (processErr) {
+          console.error("Processing error:", processErr);
+          await supabase
+            .from("trainer_uploads")
+            .update({ processing_status: "error" })
+            .eq("id", uploadRecord.id);
+        }
+
+        const { data: refreshedUploads } = await supabase
+          .from("trainer_uploads")
+          .select("*")
+          .eq("project_id", projectId);
+        setUploads((refreshedUploads as TrainerUpload[]) || []);
+      }).catch(async (processErr) => {
+        console.error("Processing invoke failed:", processErr);
+        await supabase
+          .from("trainer_uploads")
+          .update({ processing_status: "error" })
+          .eq("id", uploadRecord.id);
       });
 
-      if (processErr) {
-        console.error("Processing error:", processErr);
-        toast({ title: "Processing started", description: "File uploaded. Processing may take a moment.", variant: "default" });
-      } else {
-        toast({ title: "File processed", description: `${file.name} has been processed successfully.` });
-      }
+      toast({ title: "Upload complete", description: `${file.name} uploaded. Processing in background.` });
 
-      // Reload uploads
+      // Reload uploads immediately so new pending item appears
       const { data: updatedUploads } = await supabase
         .from("trainer_uploads")
         .select("*")
@@ -369,9 +385,15 @@ export function BuildPage() {
     setCustomSections(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Get upload status for a section
+  // Get latest upload status for a section
   const getUploadForSection = (sectionType: string, year?: string) => {
-    return uploads.find(u => u.section_type === sectionType && (year ? u.year === year : true));
+    const candidates = uploads.filter(u => u.section_type === sectionType && (year ? u.year === year : true));
+    if (candidates.length === 0) return undefined;
+    return candidates.sort((a, b) => {
+      const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return bTime - aTime;
+    })[0];
   };
 
   // Access denied / loading states
@@ -717,7 +739,7 @@ function FileUploadZone({
       done: "text-green-500",
       error: "text-destructive",
     };
-    const canReplace = existingUpload.processing_status === "error" || existingUpload.processing_status === "done";
+    const canReplace = true;
     return (
       <div className={`flex items-center gap-2 ${compact ? '' : 'border border-border rounded-lg p-3'}`}>
         {existingUpload.processing_status === "processing" ? (
@@ -747,8 +769,8 @@ function FileUploadZone({
                 if (file) onUpload(file);
               }}
             />
-            <Button size="sm" variant="outline" className="text-xs" onClick={() => inputRef.current?.click()}>
-              <Upload className="h-3 w-3 mr-1" /> Replace
+            <Button size="sm" variant="outline" className="text-xs" onClick={() => inputRef.current?.click()} disabled={uploading}>
+              <Upload className="h-3 w-3 mr-1" /> {existingUpload.processing_status === "processing" ? "Replace now" : "Replace"}
             </Button>
           </>
         )}
