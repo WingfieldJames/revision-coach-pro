@@ -1,0 +1,1 @@
+UPDATE trainer_uploads SET processing_status = 'error' WHERE id IN ('2920774e-53b7-4ee5-9458-90ad92bc96b1', '0cc2a3f3-9cc7-46a5-a71c-38264f119a35') AND processing_status = 'processing'
