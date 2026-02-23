@@ -6,6 +6,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function generateEmbedding(lovableApiKey: string, content: string): Promise<number[] | null> {
+  try {
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${lovableApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ model: "text-embedding-3-small", input: content }),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.data?.[0]?.embedding || null;
+  } catch {
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -14,9 +32,10 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { project_id } = await req.json();
+    const { project_id, staged_specifications } = await req.json();
     if (!project_id) throw new Error("project_id is required");
 
     // Get the project
@@ -59,25 +78,56 @@ serve(async (req) => {
       }).eq("id", productId);
     }
 
+    // Save staged specification data if provided
+    let specChunksCreated = 0;
+    if (staged_specifications && Array.isArray(staged_specifications) && staged_specifications.length > 0) {
+      console.log(`Saving ${staged_specifications.length} staged specification points...`);
+
+      // Delete any existing spec chunks for this product first
+      await supabase
+        .from("document_chunks")
+        .delete()
+        .eq("product_id", productId)
+        .contains("metadata", { content_type: "specification" });
+
+      for (const specPoint of staged_specifications) {
+        const embedding = await generateEmbedding(lovableApiKey, specPoint);
+        const { error: insertErr } = await supabase.from("document_chunks").insert({
+          product_id: productId,
+          content: specPoint,
+          embedding,
+          metadata: {
+            content_type: "specification",
+            type: "specification",
+          },
+        });
+        if (!insertErr) specChunksCreated++;
+        else console.error("Spec chunk insert error:", insertErr);
+      }
+
+      console.log(`Saved ${specChunksCreated} specification chunks`);
+    }
+
     // Update project status
     await supabase.from("trainer_projects").update({
       status: "deployed",
       product_id: productId,
     }).eq("id", project_id);
 
-    // Count chunks
+    // Count total chunks
     const { count } = await supabase
       .from("document_chunks")
       .select("id", { count: "exact", head: true })
       .eq("product_id", productId);
 
-    console.log(`Deployed project ${project_id} as product ${productId} with ${count} chunks`);
+    console.log(`Deployed project ${project_id} as product ${productId} with ${count} chunks (${specChunksCreated} spec)`);
 
     return new Response(JSON.stringify({
       success: true,
       product_id: productId,
       chunks_count: count,
-      message: `${project.exam_board} ${project.subject} deployed successfully. Add Stripe price IDs and routes manually.`,
+      spec_chunks_created: specChunksCreated,
+      message: `${project.exam_board} ${project.subject} deployed successfully with ${count} chunks.`,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

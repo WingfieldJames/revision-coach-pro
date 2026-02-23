@@ -2,27 +2,30 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { Upload, CheckCircle2, Loader2, AlertCircle, FileText, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SpecificationUploaderProps {
   onStatusChange?: (status: "idle" | "processing" | "success" | "error") => void;
+  onSpecDataChange?: (specs: string[] | null) => void;
   initialComplete?: boolean;
 }
 
 type UploadState = "idle" | "reading" | "processing" | "success" | "error";
 
-export function SpecificationUploader({ onStatusChange, initialComplete }: SpecificationUploaderProps) {
+export function SpecificationUploader({ onStatusChange, onSpecDataChange, initialComplete }: SpecificationUploaderProps) {
   const [state, setState] = useState<UploadState>(initialComplete ? "success" : "idle");
-  const [fileName, setFileName] = useState<string | null>(initialComplete ? "Specification" : null);
+  const [fileName, setFileName] = useState<string | null>(initialComplete ? "Specification (loaded)" : null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [stagedSpecs, setStagedSpecs] = useState<string[] | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Sync initialComplete prop
   useEffect(() => {
     if (initialComplete && state === "idle") {
       setState("success");
-      setFileName("Specification");
+      setFileName("Specification (loaded)");
     }
   }, [initialComplete]);
 
@@ -35,6 +38,11 @@ export function SpecificationUploader({ onStatusChange, initialComplete }: Speci
     else onStatusChange("idle");
   }, [state, onStatusChange]);
 
+  // Report staged data changes to parent
+  useEffect(() => {
+    onSpecDataChange?.(stagedSpecs);
+  }, [stagedSpecs, onSpecDataChange]);
+
   const processFile = useCallback(async (file: File) => {
     if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
       setErrorMessage("Only PDF files are accepted.");
@@ -45,6 +53,7 @@ export function SpecificationUploader({ onStatusChange, initialComplete }: Speci
 
     setFileName(file.name);
     setErrorMessage(null);
+    setStagedSpecs(null);
     setState("reading");
 
     try {
@@ -68,10 +77,13 @@ export function SpecificationUploader({ onStatusChange, initialComplete }: Speci
         throw new Error("Invalid response from parser");
       }
 
+      // Stage the data — do NOT save to database
+      setStagedSpecs(data.specifications);
+      setShowPreview(true);
       setState("success");
       toast({
         title: "Specification parsed",
-        description: `Extracted ${data.specifications.length} specification points.`,
+        description: `Extracted ${data.specifications.length} spec points. Review below before deploying.`,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to process PDF";
@@ -81,63 +93,25 @@ export function SpecificationUploader({ onStatusChange, initialComplete }: Speci
     }
   }, []);
 
-  const isProcessing = state === "reading" || state === "processing";
+  const removeSpecPoint = (index: number) => {
+    setStagedSpecs(prev => prev ? prev.filter((_, i) => i !== index) : null);
+  };
 
-  // Success / done state — compact green confirmation
-  if (state === "success") {
-    return (
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Specification</CardTitle>
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <input
-            ref={inputRef}
-            type="file"
-            className="hidden"
-            accept=".pdf"
-            onChange={e => {
-              const file = e.target.files?.[0];
-              if (file) processFile(file);
-              e.target.value = "";
-            }}
-          />
-          <div className="flex items-center gap-3 rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3">
-            <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-green-600 dark:text-green-400">Specification uploaded</p>
-              {fileName && fileName !== "Specification" && (
-                <p className="text-xs text-muted-foreground truncate">{fileName}</p>
-              )}
-            </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-xs text-muted-foreground shrink-0"
-              onClick={() => inputRef.current?.click()}
-            >
-              Replace
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const isProcessing = state === "reading" || state === "processing";
+  const hasStagedData = stagedSpecs && stagedSpecs.length > 0;
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">Specification</CardTitle>
+          {state === "success" && <CheckCircle2 className="h-5 w-5 text-green-500" />}
           {state === "error" && <AlertCircle className="h-5 w-5 text-destructive" />}
           {isProcessing && <Loader2 className="h-5 w-5 animate-spin text-orange-500" />}
           {state === "idle" && <div className="h-5 w-5 rounded-full border border-muted-foreground" />}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
         <input
           ref={inputRef}
           type="file"
@@ -149,40 +123,110 @@ export function SpecificationUploader({ onStatusChange, initialComplete }: Speci
             e.target.value = "";
           }}
         />
-        <div
-          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-            isProcessing
-              ? "border-orange-500/50 bg-orange-500/5 cursor-wait"
-              : state === "error"
-              ? "border-destructive/50 bg-destructive/5"
-              : "border-border hover:border-primary/50"
-          }`}
-          onClick={() => !isProcessing && inputRef.current?.click()}
-        >
-          {isProcessing ? (
-            <div className="space-y-2">
-              <Loader2 className="mx-auto h-6 w-6 animate-spin text-orange-500" />
-              <p className="text-sm text-orange-500 font-medium">
-                {state === "reading" ? "Reading PDF..." : "Extracting specification points..."}
+
+        {/* Success state with staged data */}
+        {state === "success" && (hasStagedData || initialComplete) ? (
+          <div className="flex items-center gap-3 rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3">
+            <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                {initialComplete && !hasStagedData
+                  ? "Specification loaded"
+                  : `${stagedSpecs!.length} spec points staged`}
               </p>
-              {fileName && <p className="text-xs text-muted-foreground">{fileName}</p>}
+              {fileName && <p className="text-xs text-muted-foreground truncate">{fileName}</p>}
+              {hasStagedData && (
+                <p className="text-xs text-orange-500 mt-0.5">Will be saved to database on deploy</p>
+              )}
             </div>
-          ) : state === "error" ? (
-            <div className="space-y-2">
-              <AlertCircle className="mx-auto h-6 w-6 text-destructive" />
-              <p className="text-sm text-destructive font-medium">
-                {errorMessage || "Processing failed"}
-              </p>
-              <p className="text-xs text-muted-foreground">Click to try again</p>
+            <div className="flex items-center gap-1 shrink-0">
+              {hasStagedData && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-xs"
+                  onClick={() => setShowPreview(!showPreview)}
+                >
+                  {showPreview ? "Hide" : "Preview"}
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-xs text-muted-foreground"
+                onClick={() => inputRef.current?.click()}
+              >
+                Replace
+              </Button>
             </div>
-          ) : (
-            <>
-              <Upload className="mx-auto h-6 w-6 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mt-2">Click to upload specification PDF</p>
-              <p className="text-xs text-muted-foreground mt-1">PDF only — one file</p>
-            </>
-          )}
-        </div>
+          </div>
+        ) : !isProcessing && state !== "error" ? (
+          /* Upload zone */
+          <div
+            className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors border-border hover:border-primary/50"
+            onClick={() => inputRef.current?.click()}
+          >
+            <Upload className="mx-auto h-6 w-6 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mt-2">Click to upload specification PDF</p>
+            <p className="text-xs text-muted-foreground mt-1">PDF only — one file</p>
+          </div>
+        ) : null}
+
+        {/* Processing state */}
+        {isProcessing && (
+          <div className="border-2 border-dashed rounded-lg p-6 text-center border-orange-500/50 bg-orange-500/5 cursor-wait">
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-orange-500" />
+            <p className="text-sm text-orange-500 font-medium mt-2">
+              {state === "reading" ? "Reading PDF..." : "Extracting specification points..."}
+            </p>
+            {fileName && <p className="text-xs text-muted-foreground mt-1">{fileName}</p>}
+          </div>
+        )}
+
+        {/* Error state */}
+        {state === "error" && (
+          <div
+            className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer border-destructive/50 bg-destructive/5"
+            onClick={() => inputRef.current?.click()}
+          >
+            <AlertCircle className="mx-auto h-6 w-6 text-destructive" />
+            <p className="text-sm text-destructive font-medium mt-2">
+              {errorMessage || "Processing failed"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">Click to try again</p>
+          </div>
+        )}
+
+        {/* Staging preview */}
+        {showPreview && hasStagedData && (
+          <div className="border border-border rounded-lg">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-muted/50 rounded-t-lg">
+              <span className="text-xs font-medium flex items-center gap-1.5">
+                <FileText className="h-3.5 w-3.5" />
+                Staged Specification Points
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {stagedSpecs!.length} points
+              </span>
+            </div>
+            <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
+              {stagedSpecs!.map((spec, i) => (
+                <div key={i} className="flex items-start gap-1.5 group">
+                  <p className="flex-1 text-xs text-muted-foreground px-2 py-1.5 rounded bg-muted/30">
+                    {spec}
+                  </p>
+                  <button
+                    onClick={() => removeSpecPoint(i)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive shrink-0 mt-0.5"
+                    title="Remove this spec point"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
