@@ -717,6 +717,7 @@ function FileUploadZone({
       done: "text-green-500",
       error: "text-destructive",
     };
+    const canReplace = existingUpload.processing_status === "error" || existingUpload.processing_status === "done";
     return (
       <div className={`flex items-center gap-2 ${compact ? '' : 'border border-border rounded-lg p-3'}`}>
         {existingUpload.processing_status === "processing" ? (
@@ -728,12 +729,29 @@ function FileUploadZone({
         ) : (
           <Clock className="h-4 w-4 text-muted-foreground" />
         )}
-        <span className={`text-sm ${statusColors[existingUpload.processing_status]}`}>
+        <span className={`text-sm flex-1 ${statusColors[existingUpload.processing_status]}`}>
           {existingUpload.file_name}
           {existingUpload.processing_status === "done" && ` (${existingUpload.chunks_created} chunks)`}
           {existingUpload.processing_status === "processing" && " — Processing..."}
           {existingUpload.processing_status === "error" && " — Error"}
         </span>
+        {canReplace && (
+          <>
+            <input
+              ref={inputRef}
+              type="file"
+              className="hidden"
+              accept=".pdf,.doc,.docx,.txt,.json"
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (file) onUpload(file);
+              }}
+            />
+            <Button size="sm" variant="outline" className="text-xs" onClick={() => inputRef.current?.click()}>
+              <Upload className="h-3 w-3 mr-1" /> Replace
+            </Button>
+          </>
+        )}
       </div>
     );
   }
