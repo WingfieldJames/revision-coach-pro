@@ -93,6 +93,10 @@ export function BuildPage() {
     specification: "empty",
   });
 
+  // Spec status from SpecificationUploader + initial DB check
+  const [specComplete, setSpecComplete] = useState(false);
+  const [specStatusFromUploader, setSpecStatusFromUploader] = useState<"idle" | "processing" | "success" | "error">("idle");
+
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -148,6 +152,17 @@ export function BuildPage() {
         setExamTechnique(existing.exam_technique || "");
         setCustomSections((existing.custom_sections as unknown as CustomSection[]) || []);
         setProjectStatus(existing.status);
+
+        // Check if spec data already exists in document_chunks for this product
+        if (existing.product_id) {
+          const { count } = await supabase
+            .from("document_chunks")
+            .select("id", { count: "exact", head: true })
+            .eq("product_id", existing.product_id);
+          setSpecComplete((count || 0) > 0);
+        } else {
+          setSpecComplete(false);
+        }
       } else {
         // Create new project
         const { data: newProj, error } = await supabase
@@ -166,6 +181,7 @@ export function BuildPage() {
           setExamTechnique("");
           setCustomSections([]);
           setProjectStatus("draft");
+          setSpecComplete(false);
         }
         if (error) console.error("Failed to create project:", error);
       }
@@ -548,7 +564,10 @@ export function BuildPage() {
           </Card>
 
           {/* Specification */}
-          <SpecificationUploader />
+          <SpecificationUploader
+            initialComplete={specComplete}
+            onStatusChange={setSpecStatusFromUploader}
+          />
 
           {/* Past Papers */}
           <Card>
@@ -654,8 +673,8 @@ export function BuildPage() {
                 <ProgressRow label="System Prompt" status={systemPrompt.length > 50 ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"} />
                 <ProgressRow label="Exam Technique" status={examTechnique.length > 50 ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"} />
                 <ProgressRow label="Specification" status={
-                  getUploadForSection("specification")?.processing_status === "done" ? "complete" :
-                  getUploadForSection("specification") ? "in_progress" : "empty"
+                  specStatusFromUploader === "success" || specComplete ? "complete" :
+                  specStatusFromUploader === "processing" ? "in_progress" : "empty"
                 } />
                 {PAPER_YEARS.map(year => (
                   <ProgressRow
