@@ -38,6 +38,8 @@ interface TrainerUpload {
   file_name: string;
   processing_status: string;
   chunks_created: number;
+  doc_type?: string | null;
+  paper_number?: number | null;
 }
 
 interface CustomSection {
@@ -201,20 +203,19 @@ export function BuildPage() {
 
   useEffect(() => { autoSave(); }, [systemPrompt, examTechnique, customSections, autoSave]);
 
-  // File upload handler
+  // File upload handler (supports multiple files)
   const handleFileUpload = async (file: File, sectionType: string, year?: string) => {
     if (!projectId) return;
-    setUploading(sectionType + (year || ""));
+    setUploading(sectionType + (year || "") + file.name);
 
     try {
-      const filePath = `${projectId}/${sectionType}${year ? `_${year}` : ''}_${file.name}`;
+      const filePath = `${projectId}/${sectionType}${year ? `_${year}` : ''}_${Date.now()}_${file.name}`;
       const { error: uploadErr } = await supabase.storage
         .from("trainer-uploads")
         .upload(filePath, file, { upsert: true });
 
       if (uploadErr) throw uploadErr;
 
-      // Create upload record
       const { data: uploadRecord, error: recErr } = await supabase
         .from("trainer_uploads")
         .insert({
@@ -260,6 +261,34 @@ export function BuildPage() {
     } finally {
       setUploading(null);
     }
+  };
+
+  const handleMultiFileUpload = async (files: FileList, year: string) => {
+    for (const file of Array.from(files)) {
+      await handleFileUpload(file, "past_paper", year);
+    }
+  };
+
+  // Get all uploads for a given year
+  const getUploadsForYear = (year: string) => {
+    return uploads.filter(u => u.section_type === "past_paper" && u.year === year);
+  };
+
+  // Year status for progress sidebar
+  const getYearStatus = (year: string): SectionStatus => {
+    const yearUploads = getUploadsForYear(year);
+    if (yearUploads.length === 0) return "empty";
+    const hasMerged = yearUploads.some(u => u.processing_status === "done" && u.doc_type);
+    // Check if any QP+MS pair both done for same paper_number
+    const doneUploads = yearUploads.filter(u => u.processing_status === "done" && u.doc_type && u.paper_number);
+    const paperNumbers = [...new Set(doneUploads.map(u => u.paper_number))];
+    const hasCompletePair = paperNumbers.some(pn => {
+      const hasQP = doneUploads.some(u => u.paper_number === pn && u.doc_type === "qp");
+      const hasMS = doneUploads.some(u => u.paper_number === pn && u.doc_type === "ms");
+      return hasQP && hasMS;
+    });
+    if (hasCompletePair) return "complete";
+    return "in_progress";
   };
 
   // Chat with mock chatbot
@@ -519,28 +548,29 @@ export function BuildPage() {
           {/* Past Papers */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Past Papers (QP + MS Combined)</CardTitle>
+              <CardTitle className="text-base">Past Papers</CardTitle>
+              <p className="text-xs text-muted-foreground">Upload QPs and Mark Schemes — they'll be auto-paired by paper number</p>
             </CardHeader>
             <CardContent className="space-y-3">
               {PAPER_YEARS.map(year => {
-                const upload = getUploadForSection("past_paper", year);
+                const yearUploads = getUploadsForYear(year);
                 return (
-                  <div key={year} className="flex items-center gap-3 border border-border rounded-lg p-3">
-                    <div className="w-16 text-sm font-medium">{year}</div>
-                    <div className="flex-1">
-                      <FileUploadZone
-                        sectionType="past_paper"
+                  <div key={year} className="border border-border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{year}</span>
+                      <MultiFileUploadButton
                         year={year}
-                        existingUpload={upload}
-                        onUpload={(file) => handleFileUpload(file, "past_paper", year)}
-                        uploading={uploading === `past_paper${year}`}
-                        compact
+                        onUpload={(files) => handleMultiFileUpload(files, year)}
+                        uploading={!!uploading?.startsWith("past_paper" + year)}
                       />
                     </div>
-                    <Checkbox
-                      checked={upload?.processing_status === "done"}
-                      disabled
-                    />
+                    {yearUploads.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {yearUploads.map(u => (
+                          <UploadChip key={u.id} upload={u} />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -626,10 +656,7 @@ export function BuildPage() {
                   <ProgressRow
                     key={year}
                     label={`Paper ${year}`}
-                    status={
-                      getUploadForSection("past_paper", year)?.processing_status === "done" ? "complete" :
-                      getUploadForSection("past_paper", year) ? "in_progress" : "empty"
-                    }
+                    status={getYearStatus(year)}
                   />
                 ))}
                 {customSections.map((s, i) => (
@@ -735,5 +762,74 @@ function FileUploadZone({
         </>
       )}
     </div>
+  );
+}
+
+function MultiFileUploadButton({
+  year,
+  onUpload,
+  uploading,
+}: {
+  year: string;
+  onUpload: (files: FileList) => void;
+  uploading: boolean;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        accept=".pdf,.doc,.docx"
+        multiple
+        onChange={e => {
+          if (e.target.files && e.target.files.length > 0) {
+            onUpload(e.target.files);
+            e.target.value = "";
+          }
+        }}
+      />
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="text-xs"
+      >
+        {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+        Add files
+      </Button>
+    </>
+  );
+}
+
+function UploadChip({ upload }: { upload: TrainerUpload }) {
+  const statusIcon = {
+    pending: <Clock className="h-3 w-3 text-muted-foreground" />,
+    processing: <Loader2 className="h-3 w-3 animate-spin text-orange-500" />,
+    done: <CheckCircle2 className="h-3 w-3 text-green-500" />,
+    error: <Circle className="h-3 w-3 text-destructive" />,
+  }[upload.processing_status] || <Clock className="h-3 w-3 text-muted-foreground" />;
+
+  const label = upload.doc_type && upload.paper_number
+    ? `P${upload.paper_number} ${upload.doc_type.toUpperCase()}`
+    : upload.file_name.length > 25
+    ? upload.file_name.slice(0, 22) + "..."
+    : upload.file_name;
+
+  const statusSuffix = upload.processing_status === "done"
+    ? ` (${upload.chunks_created})`
+    : upload.processing_status === "processing"
+    ? " ..."
+    : upload.processing_status === "error"
+    ? " ✗"
+    : "";
+
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border border-border bg-muted/50">
+      {statusIcon}
+      <span>{label}{statusSuffix}</span>
+    </span>
   );
 }
