@@ -333,9 +333,11 @@ export type Database = {
         Row: {
           chunks_created: number | null
           created_at: string
+          doc_type: string | null
           file_name: string
           file_url: string
           id: string
+          paper_number: number | null
           processing_status: string
           project_id: string
           section_type: string
@@ -344,9 +346,11 @@ export type Database = {
         Insert: {
           chunks_created?: number | null
           created_at?: string
+          doc_type?: string | null
           file_name: string
           file_url: string
           id?: string
+          paper_number?: number | null
           processing_status?: string
           project_id: string
           section_type: string
@@ -355,9 +359,11 @@ export type Database = {
         Update: {
           chunks_created?: number | null
           created_at?: string
+          doc_type?: string | null
           file_name?: string
           file_url?: string
           id?: string
+          paper_number?: number | null
           processing_status?: string
           project_id?: string
           section_type?: string
