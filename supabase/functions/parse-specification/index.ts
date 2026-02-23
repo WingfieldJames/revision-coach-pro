@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SPEC_EXTRACTION_PROMPT = `You are a specification extraction expert. Extract ALL specification points from this PDF document.
+const SPEC_EXTRACTION_PROMPT = `You are a specification extraction expert. Extract ONLY the actual specification/syllabus learning objectives and content points from this PDF.
 
 Return ONLY a JSON object (no markdown, no code fences) in this exact format:
 {
@@ -17,11 +17,18 @@ Return ONLY a JSON object (no markdown, no code fences) in this exact format:
 }
 
 Rules:
-- Each specification point should be a single string describing one learning objective or content point
+- Extract ONLY testable learning objectives, content points, and syllabus requirements that students need to know
 - Include topic numbers/codes if present (e.g. "3.1.1 Atomic structure: ...")
-- Be exhaustive - capture every single specification point in the document
+- SKIP and IGNORE all of the following — do NOT include them:
+  * Table of contents, page numbers, headers, footers
+  * Introductions, forewords, "about this qualification" sections
+  * Assessment overview, exam structure, command words, mark scheme guidance
+  * Administration info, entry codes, grading info, contact details
+  * Copyright notices, acknowledgements, appendices with formulae/data sheets
+  * Any meta-information about the specification itself
+- Be exhaustive for actual spec content — capture every single testable point
 - Preserve the original wording as closely as possible
-- Do NOT include section headers as separate points - integrate them into the point text for context`;
+- Integrate parent topic context into each point (e.g. "Mechanics > Forces: Newton's three laws of motion")`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
