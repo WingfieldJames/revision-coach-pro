@@ -35,7 +35,7 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { project_id, staged_specifications } = await req.json();
+    const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique } = await req.json();
     if (!project_id) throw new Error("project_id is required");
 
     // Get the project
@@ -106,6 +106,42 @@ serve(async (req) => {
       }
 
       console.log(`Saved ${specChunksCreated} specification chunks`);
+    }
+
+    // Save system prompt as training data chunk
+    if (staged_system_prompt && typeof staged_system_prompt === "string" && staged_system_prompt.trim().length > 0) {
+      console.log("Saving system prompt as training data...");
+      await supabase
+        .from("document_chunks")
+        .delete()
+        .eq("product_id", productId)
+        .contains("metadata", { content_type: "system_prompt" });
+
+      const embedding = await generateEmbedding(lovableApiKey, staged_system_prompt);
+      await supabase.from("document_chunks").insert({
+        product_id: productId,
+        content: staged_system_prompt,
+        embedding,
+        metadata: { content_type: "system_prompt", type: "system_prompt" },
+      });
+    }
+
+    // Save exam technique as training data chunk
+    if (staged_exam_technique && typeof staged_exam_technique === "string" && staged_exam_technique.trim().length > 0) {
+      console.log("Saving exam technique as training data...");
+      await supabase
+        .from("document_chunks")
+        .delete()
+        .eq("product_id", productId)
+        .contains("metadata", { content_type: "exam_technique" });
+
+      const embedding = await generateEmbedding(lovableApiKey, staged_exam_technique);
+      await supabase.from("document_chunks").insert({
+        product_id: productId,
+        content: staged_exam_technique,
+        embedding,
+        metadata: { content_type: "exam_technique", type: "exam_technique" },
+      });
     }
 
     // Update project status
