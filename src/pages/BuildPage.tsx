@@ -96,6 +96,7 @@ export function BuildPage() {
   // Spec status from SpecificationUploader + initial DB check
   const [specComplete, setSpecComplete] = useState(false);
   const [specStatusFromUploader, setSpecStatusFromUploader] = useState<"idle" | "processing" | "success" | "error">("idle");
+  const [stagedSpecData, setStagedSpecData] = useState<string[] | null>(null);
 
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
@@ -376,10 +377,15 @@ export function BuildPage() {
     setDeploying(true);
     try {
       const { data, error } = await supabase.functions.invoke("deploy-subject", {
-        body: { project_id: projectId },
+        body: {
+          project_id: projectId,
+          staged_specifications: stagedSpecData || undefined,
+        },
       });
       if (error) throw error;
       setProjectStatus("deployed");
+      setStagedSpecData(null);
+      setSpecComplete(true);
       toast({ title: "Deployed!", description: data.message || "Subject deployed successfully." });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Deployment failed";
@@ -567,6 +573,7 @@ export function BuildPage() {
           <SpecificationUploader
             initialComplete={specComplete}
             onStatusChange={setSpecStatusFromUploader}
+            onSpecDataChange={setStagedSpecData}
           />
 
           {/* Past Papers */}
@@ -693,17 +700,68 @@ export function BuildPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Training Data</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 <div className="text-sm text-muted-foreground space-y-1">
                   <p>Uploads: {uploads.length}</p>
                   <p>Processed: {uploads.filter(u => u.processing_status === "done").length}</p>
                   <p>Chunks: {uploads.reduce((sum, u) => sum + (u.chunks_created || 0), 0)}</p>
                 </div>
+                <TrainingProgressBar
+                  systemPrompt={systemPrompt}
+                  examTechnique={examTechnique}
+                  specStatus={specStatusFromUploader === "success" || specComplete ? "complete" : specStatusFromUploader === "processing" ? "in_progress" : "empty"}
+                  paperYears={PAPER_YEARS}
+                  getYearStatus={getYearStatus}
+                />
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function TrainingProgressBar({
+  systemPrompt,
+  examTechnique,
+  specStatus,
+  paperYears,
+  getYearStatus,
+}: {
+  systemPrompt: string;
+  examTechnique: string;
+  specStatus: SectionStatus;
+  paperYears: string[];
+  getYearStatus: (year: string) => SectionStatus;
+}) {
+  const sections: { label: string; status: SectionStatus }[] = [
+    { label: "System Prompt", status: systemPrompt.length > 50 ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty" },
+    { label: "Exam Technique", status: examTechnique.length > 50 ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty" },
+    { label: "Specification", status: specStatus },
+    ...paperYears.map(y => ({ label: y, status: getYearStatus(y) })),
+  ];
+
+  const total = sections.length;
+  const complete = sections.filter(s => s.status === "complete").length;
+  const inProgress = sections.filter(s => s.status === "in_progress").length;
+  const pct = Math.round((complete / total) * 100);
+
+  return (
+    <div className="space-y-1.5 pt-2 border-t border-border">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium">{pct}% trained</span>
+        <span className="text-xs text-muted-foreground">{complete}/{total} sections</span>
+      </div>
+      <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+        <div
+          className="h-full rounded-full bg-green-500 transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      {inProgress > 0 && (
+        <p className="text-xs text-orange-500">{inProgress} section{inProgress > 1 ? "s" : ""} in progress</p>
+      )}
     </div>
   );
 }
