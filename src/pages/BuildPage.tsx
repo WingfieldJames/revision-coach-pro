@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket } from "lucide-react";
+import { SpecificationUploader } from "@/components/SpecificationUploader";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -547,25 +548,7 @@ export function BuildPage() {
           </Card>
 
           {/* Specification */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Specification</CardTitle>
-                <StatusIndicator
-                  status={sectionStatuses.specification}
-                  onClick={() => setSectionStatuses(prev => ({ ...prev, specification: cycleStatus(prev.specification) }))}
-                />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <FileUploadZone
-                sectionType="specification"
-                existingUpload={getUploadForSection("specification")}
-                onUpload={(file) => handleFileUpload(file, "specification")}
-                uploading={uploading === "specification"}
-              />
-            </CardContent>
-          </Card>
+          <SpecificationUploader />
 
           {/* Past Papers */}
           <Card>

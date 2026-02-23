@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.deploy-subject]
 verify_jwt = false
+
+[functions.parse-specification]
+verify_jwt = false
