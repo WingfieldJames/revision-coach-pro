@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Award, GraduationCap, BookOpen, Trophy } fro
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { useTheme } from '@/contexts/ThemeContext';
 import jamesFounder from '@/assets/james-founder.png';
-import namanFounder from '@/assets/naman-founder.png';
 import tudorFounder from '@/assets/tudor-founder.jpg';
 interface Founder {
   id: string;
@@ -18,22 +17,6 @@ interface Founder {
   }>;
 }
 const founders: Founder[] = [{
-  id: 'naman',
-  name: 'Naman',
-  status: 'Gap Year Student',
-  image: namanFounder,
-  quote: "Hi, I'm Naman. 4 A*s (Maths, Further Maths, Computer Science and Physics), TMUA score of 8.9, and straight 9s at GCSE. I built this model on everything that got me top marks in OCR CS - the pseudocode patterns, the algorithm tricks, the exam shortcuts that actually work.",
-  achievements: [{
-    icon: Award,
-    text: "A*A*A*A* at A-Level"
-  }, {
-    icon: GraduationCap,
-    text: "Straight 9s at GCSE"
-  }, {
-    icon: BookOpen,
-    text: "8.9 TMUA score"
-  }]
-}, {
   id: 'tudor',
   name: 'Tudor',
   status: 'Gap Year Student',

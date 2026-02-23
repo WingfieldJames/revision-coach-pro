@@ -1,7 +1,6 @@
 import { Award, GraduationCap, BookOpen, Trophy } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import jamesFounder from '@/assets/james-founder.png';
-import namanFounder from '@/assets/naman-founder.png';
 import tudorFounder from '@/assets/tudor-founder.jpg';
 
 interface Founder {
@@ -13,17 +12,6 @@ interface Founder {
 }
 
 const founders: Founder[] = [
-  {
-    id: 'naman',
-    name: 'Naman',
-    status: 'Gap Year Student',
-    image: namanFounder,
-    achievements: [
-      { icon: Award, text: "A*A*A*A*" },
-      { icon: GraduationCap, text: "Straight 9s" },
-      { icon: BookOpen, text: "8.9 TMUA" },
-    ]
-  },
   {
     id: 'tudor',
     name: 'Tudor',
