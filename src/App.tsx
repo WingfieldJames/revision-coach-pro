@@ -35,6 +35,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ProgressPage } from "./pages/ProgressPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
+import { BuildPage } from "./pages/BuildPage";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => (
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/test-rag" element={<TestRAGChatPage />} />
+            <Route path="/build" element={<BuildPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

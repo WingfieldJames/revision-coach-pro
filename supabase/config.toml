@@ -50,3 +50,9 @@ verify_jwt = false
 
 [functions.update-system-prompt]
 verify_jwt = false
+
+[functions.process-training-file]
+verify_jwt = false
+
+[functions.deploy-subject]
+verify_jwt = false
