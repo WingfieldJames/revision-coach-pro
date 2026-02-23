@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
 import { ChevronDown, Check, Star, Instagram } from 'lucide-react';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
@@ -254,14 +255,11 @@ export const ComparePage = () => {
                 ))}
               </div>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted">
-                    {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : 'Edexcel'}
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+              <Select value={examBoard} onValueChange={(val) => setExamBoard(val as ExamBoard)}>
+                <SelectTrigger className="rounded-full px-6 py-2 h-auto w-auto text-sm font-medium border border-border bg-background text-foreground transition-all hover:bg-muted [&>svg]:ml-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
                   {(subject === 'economics'
                     ? (['edexcel', 'aqa', 'cie'] as ExamBoard[])
                     : subject === 'mathematics'
@@ -270,12 +268,12 @@ export const ComparePage = () => {
                     ? (['aqa'] as ExamBoard[])
                     : (['ocr'] as ExamBoard[])
                   ).map(b => (
-                    <DropdownMenuItem key={b} className="cursor-pointer hover:bg-muted" onClick={() => setExamBoard(b)}>
+                    <SelectItem key={b} value={b}>
                       {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : 'Edexcel'}
-                    </DropdownMenuItem>
+                    </SelectItem>
                   ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Mobile: Two dropdown buttons */}
@@ -301,14 +299,11 @@ export const ComparePage = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="rounded-full px-5 py-2.5 text-sm font-semibold border border-border bg-background text-foreground flex items-center gap-2 hover:bg-muted">
-                    {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : 'Edexcel'}
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+              <Select value={examBoard} onValueChange={(val) => setExamBoard(val as ExamBoard)}>
+                <SelectTrigger className="rounded-full px-5 py-2.5 h-auto w-auto text-sm font-semibold border border-border bg-background text-foreground hover:bg-muted [&>svg]:ml-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
                   {(subject === 'economics'
                     ? (['edexcel', 'aqa', 'cie'] as ExamBoard[])
                     : subject === 'mathematics'
@@ -317,12 +312,12 @@ export const ComparePage = () => {
                     ? (['aqa'] as ExamBoard[])
                     : (['ocr'] as ExamBoard[])
                   ).map(b => (
-                    <DropdownMenuItem key={b} className="cursor-pointer hover:bg-muted" onClick={() => setExamBoard(b)}>
+                    <SelectItem key={b} value={b}>
                       {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : 'Edexcel'}
-                    </DropdownMenuItem>
+                    </SelectItem>
                   ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </SelectContent>
+              </Select>
             </div>
           </ScrollReveal>
 
