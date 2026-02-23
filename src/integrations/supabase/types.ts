@@ -279,6 +279,100 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_projects: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_sections: Json | null
+          exam_board: string
+          exam_technique: string | null
+          id: string
+          product_id: string | null
+          status: string
+          subject: string
+          system_prompt: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_sections?: Json | null
+          exam_board: string
+          exam_technique?: string | null
+          id?: string
+          product_id?: string | null
+          status?: string
+          subject: string
+          system_prompt?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_sections?: Json | null
+          exam_board?: string
+          exam_technique?: string | null
+          id?: string
+          product_id?: string | null
+          status?: string
+          subject?: string
+          system_prompt?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_projects_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_uploads: {
+        Row: {
+          chunks_created: number | null
+          created_at: string
+          file_name: string
+          file_url: string
+          id: string
+          processing_status: string
+          project_id: string
+          section_type: string
+          year: string | null
+        }
+        Insert: {
+          chunks_created?: number | null
+          created_at?: string
+          file_name: string
+          file_url: string
+          id?: string
+          processing_status?: string
+          project_id: string
+          section_type: string
+          year?: string | null
+        }
+        Update: {
+          chunks_created?: number | null
+          created_at?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          processing_status?: string
+          project_id?: string
+          section_type?: string
+          year?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_uploads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_preferences: {
         Row: {
           additional_info: string | null
@@ -322,6 +416,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
       }
       user_subscriptions: {
         Row: {
@@ -450,6 +565,13 @@ export type Database = {
         Args: { p_product_id: string; p_tool_type: string; p_user_id: string }
         Returns: Json
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       increment_prompt_usage: {
         Args: { p_limit?: number; p_product_id: string; p_user_id: string }
         Returns: Json
@@ -478,7 +600,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "trainer" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -605,6 +727,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "trainer", "user"],
+    },
   },
 } as const
