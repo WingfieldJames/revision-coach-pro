@@ -24,6 +24,7 @@ import {
 // Available subject/board combos (add more later)
 const SUBJECT_OPTIONS = [
   { value: "AQA-Biology", label: "AQA Biology", subject: "Biology", board: "AQA" },
+  { value: "OCR-Maths", label: "OCR Maths", subject: "Maths", board: "OCR" },
 ];
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020"];
