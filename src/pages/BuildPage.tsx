@@ -98,6 +98,10 @@ export function BuildPage() {
   const [specStatusFromUploader, setSpecStatusFromUploader] = useState<"idle" | "processing" | "success" | "error">("idle");
   const [stagedSpecData, setStagedSpecData] = useState<string[] | null>(null);
 
+  // Submit states for text sections
+  const [systemPromptSubmitted, setSystemPromptSubmitted] = useState(false);
+  const [examTechniqueSubmitted, setExamTechniqueSubmitted] = useState(false);
+
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -380,6 +384,8 @@ export function BuildPage() {
         body: {
           project_id: projectId,
           staged_specifications: stagedSpecData || undefined,
+          staged_system_prompt: systemPromptSubmitted ? systemPrompt : undefined,
+          staged_exam_technique: examTechniqueSubmitted ? examTechnique : undefined,
         },
       });
       if (error) throw error;
@@ -531,20 +537,60 @@ export function BuildPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">System Prompt</CardTitle>
-                <StatusIndicator
-                  status={sectionStatuses.system_prompt}
-                  onClick={() => setSectionStatuses(prev => ({ ...prev, system_prompt: cycleStatus(prev.system_prompt) }))}
-                />
+                {systemPromptSubmitted
+                  ? <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  : systemPrompt.length > 0
+                  ? <Clock className="h-5 w-5 text-orange-500" />
+                  : <Circle className="h-5 w-5 text-muted-foreground" />
+                }
               </div>
             </CardHeader>
             <CardContent>
-              <Textarea
-                value={systemPrompt}
-                onChange={e => setSystemPrompt(e.target.value)}
-                placeholder="Enter the AI tutor's system prompt... Define its personality, teaching style, and subject expertise."
-                className="min-h-[200px] text-sm"
-              />
-              <p className="text-xs text-muted-foreground mt-2">Auto-saves every 2 seconds</p>
+              {systemPromptSubmitted ? (
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                      <p className="text-sm font-medium text-green-600 dark:text-green-400">System prompt submitted</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-3">{systemPrompt}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() => setSystemPromptSubmitted(false)}
+                  >
+                    Edit
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Textarea
+                    value={systemPrompt}
+                    onChange={e => setSystemPrompt(e.target.value)}
+                    placeholder="Enter the AI tutor's system prompt... Define its personality, teaching style, and subject expertise."
+                    className="min-h-[200px] text-sm"
+                  />
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">Auto-saves every 2 seconds</p>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (systemPrompt.trim().length < 10) {
+                          toast({ title: "Too short", description: "Please enter a more detailed system prompt.", variant: "destructive" });
+                          return;
+                        }
+                        setSystemPromptSubmitted(true);
+                        toast({ title: "System prompt submitted", description: "Will be saved to database on deploy." });
+                      }}
+                      disabled={systemPrompt.trim().length === 0}
+                    >
+                      Submit
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -553,19 +599,59 @@ export function BuildPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Exam Technique</CardTitle>
-                <StatusIndicator
-                  status={sectionStatuses.exam_technique}
-                  onClick={() => setSectionStatuses(prev => ({ ...prev, exam_technique: cycleStatus(prev.exam_technique) }))}
-                />
+                {examTechniqueSubmitted
+                  ? <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  : examTechnique.length > 0
+                  ? <Clock className="h-5 w-5 text-orange-500" />
+                  : <Circle className="h-5 w-5 text-muted-foreground" />
+                }
               </div>
             </CardHeader>
             <CardContent>
-              <Textarea
-                value={examTechnique}
-                onChange={e => setExamTechnique(e.target.value)}
-                placeholder="Enter exam technique guidance... How to structure answers, common pitfalls, mark scheme tips."
-                className="min-h-[150px] text-sm"
-              />
+              {examTechniqueSubmitted ? (
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                      <p className="text-sm font-medium text-green-600 dark:text-green-400">Exam technique submitted</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-3">{examTechnique}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() => setExamTechniqueSubmitted(false)}
+                  >
+                    Edit
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Textarea
+                    value={examTechnique}
+                    onChange={e => setExamTechnique(e.target.value)}
+                    placeholder="Enter exam technique guidance... How to structure answers, common pitfalls, mark scheme tips."
+                    className="min-h-[150px] text-sm"
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (examTechnique.trim().length < 10) {
+                          toast({ title: "Too short", description: "Please enter more detailed exam technique guidance.", variant: "destructive" });
+                          return;
+                        }
+                        setExamTechniqueSubmitted(true);
+                        toast({ title: "Exam technique submitted", description: "Will be saved to database on deploy." });
+                      }}
+                      disabled={examTechnique.trim().length === 0}
+                    >
+                      Submit
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -677,8 +763,8 @@ export function BuildPage() {
                 <CardTitle className="text-base">Progress</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <ProgressRow label="System Prompt" status={systemPrompt.length > 50 ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"} />
-                <ProgressRow label="Exam Technique" status={examTechnique.length > 50 ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"} />
+                <ProgressRow label="System Prompt" status={systemPromptSubmitted ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"} />
+                <ProgressRow label="Exam Technique" status={examTechniqueSubmitted ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"} />
                 <ProgressRow label="Specification" status={
                   specStatusFromUploader === "success" || specComplete ? "complete" :
                   specStatusFromUploader === "processing" ? "in_progress" : "empty"
@@ -707,8 +793,8 @@ export function BuildPage() {
                   <p>Chunks: {uploads.reduce((sum, u) => sum + (u.chunks_created || 0), 0)}</p>
                 </div>
                 <TrainingProgressBar
-                  systemPrompt={systemPrompt}
-                  examTechnique={examTechnique}
+                  systemPromptStatus={systemPromptSubmitted ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"}
+                  examTechniqueStatus={examTechniqueSubmitted ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"}
                   specStatus={specStatusFromUploader === "success" || specComplete ? "complete" : specStatusFromUploader === "processing" ? "in_progress" : "empty"}
                   paperYears={PAPER_YEARS}
                   getYearStatus={getYearStatus}
@@ -723,21 +809,21 @@ export function BuildPage() {
 }
 
 function TrainingProgressBar({
-  systemPrompt,
-  examTechnique,
+  systemPromptStatus,
+  examTechniqueStatus,
   specStatus,
   paperYears,
   getYearStatus,
 }: {
-  systemPrompt: string;
-  examTechnique: string;
+  systemPromptStatus: SectionStatus;
+  examTechniqueStatus: SectionStatus;
   specStatus: SectionStatus;
   paperYears: string[];
   getYearStatus: (year: string) => SectionStatus;
 }) {
   const sections: { label: string; status: SectionStatus }[] = [
-    { label: "System Prompt", status: systemPrompt.length > 50 ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty" },
-    { label: "Exam Technique", status: examTechnique.length > 50 ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty" },
+    { label: "System Prompt", status: systemPromptStatus },
+    { label: "Exam Technique", status: examTechniqueStatus },
     { label: "Specification", status: specStatus },
     ...paperYears.map(y => ({ label: y, status: getYearStatus(y) })),
   ];
