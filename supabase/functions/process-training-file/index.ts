@@ -284,13 +284,18 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let uploadIdForError: string | null = null;
+  let supabaseForError: ReturnType<typeof createClient> | null = null;
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
+    supabaseForError = supabase;
 
     const { upload_id, project_id, section_type, file_url, year } = await req.json();
+    uploadIdForError = upload_id;
 
     if (!upload_id || !project_id || !section_type || !file_url) {
       throw new Error("upload_id, project_id, section_type, and file_url are required");
@@ -541,7 +546,20 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Process training file error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+
+    if (supabaseForError && uploadIdForError) {
+      try {
+        await supabaseForError
+          .from("trainer_uploads")
+          .update({ processing_status: "error" })
+          .eq("id", uploadIdForError);
+      } catch (statusErr) {
+        console.error("Failed to mark upload as error:", statusErr);
+      }
+    }
+
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
