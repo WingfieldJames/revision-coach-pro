@@ -128,6 +128,8 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
   const boardLabel = getBoardLabel(board);
   const placeholderText = board === 'ocr-cs'
     ? "Enter a topic... e.g. binary search, TCP/IP, SQL"
+    : board === 'ocr-physics'
+    ? "Enter a topic... e.g. momentum, SHM, capacitors"
     : board === 'aqa'
     ? "Enter a topic... e.g. externalities, AD, monopoly"
     : board === 'aqa-psychology'
@@ -139,6 +141,8 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
     : "Enter a topic... e.g. externalities, AD, tariffs";
   const hintText = board === 'ocr-cs'
     ? '"sorting algorithms", "databases", "encryption", "OOP"'
+    : board === 'ocr-physics'
+    ? '"gravitational fields", "capacitors", "waves", "Newton\'s laws"'
     : board === 'aqa'
     ? '"externalities", "fiscal policy", "monopoly", "trade unions"'
     : board === 'aqa-psychology'
