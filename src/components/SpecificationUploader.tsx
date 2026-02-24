@@ -49,6 +49,16 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
     }
   }, [initialComplete]);
 
+  // Hydrate from async-loaded staged specs (prevents losing state after refresh)
+  useEffect(() => {
+    if (initialStagedSpecs && initialStagedSpecs.length > 0) {
+      setStagedSpecs(initialStagedSpecs);
+      setHasBeenSubmitted(true);
+      setState("submitted");
+      if (!fileName) setFileName("Specification (saved)");
+    }
+  }, [initialStagedSpecs, fileName]);
+
   // Report status changes to parent
   useEffect(() => {
     if (!onStatusChange) return;
