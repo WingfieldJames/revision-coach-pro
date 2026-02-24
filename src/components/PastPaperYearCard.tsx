@@ -9,6 +9,7 @@ import {
   X,
   FileText,
 } from "lucide-react";
+import { PastPaperChunkViewer } from "@/components/PastPaperChunkViewer";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +43,7 @@ interface PastPaperYearCardProps {
   uploading: boolean;
   /** If the year had files previously deployed */
   initialSubmitted?: boolean;
+  productId?: string | null;
 }
 
 export function PastPaperYearCard({
@@ -51,6 +53,7 @@ export function PastPaperYearCard({
   onDeleteUpload,
   uploading,
   initialSubmitted,
+  productId,
 }: PastPaperYearCardProps) {
   const [state, setState] = useState<YearState>(
     initialSubmitted || uploads.length > 0 ? "submitted" : "idle"
@@ -233,20 +236,29 @@ export function PastPaperYearCard({
           {uploads.map(u => (
             <div
               key={u.id}
-              className="flex items-center gap-2 px-2 py-1.5 rounded bg-muted/30 group"
+              className="px-2 py-1.5 rounded bg-muted/30 group"
             >
-              <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-              <span className="text-xs flex-1 truncate">{getFileLabel(u)}</span>
-              {getStatusBadge(u)}
-              {state !== "submitted" && (
-                <button
-                  onClick={() => handleDeleteFile(u.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-muted-foreground hover:text-destructive shrink-0"
-                  title="Remove this file"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="text-xs flex-1 truncate">{getFileLabel(u)}</span>
+                {getStatusBadge(u)}
+                {u.processing_status === "done" && (
+                  <PastPaperChunkViewer
+                    uploadId={u.id}
+                    uploadLabel={getFileLabel(u)}
+                    productId={productId || null}
+                  />
+                )}
+                {state !== "submitted" && (
+                  <button
+                    onClick={() => handleDeleteFile(u.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-muted-foreground hover:text-destructive shrink-0"
+                    title="Remove this file"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
