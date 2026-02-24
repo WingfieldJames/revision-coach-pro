@@ -363,25 +363,38 @@ serve(async (req) => {
 
     let productId = project.product_id;
 
-    // Create draft product if needed
+    // Create or find draft product if needed
     if (!productId) {
       const slug = `${project.exam_board}-${project.subject}`.toLowerCase().replace(/\s+/g, '-');
-      const { data: newProduct, error: prodError } = await supabase
+      
+      // First check if a product with this slug already exists
+      const { data: existingProduct } = await supabase
         .from("products")
-        .insert({
-          name: `${project.exam_board} ${project.subject}`,
-          slug,
-          subject: project.subject.toLowerCase(),
-          exam_board: project.exam_board,
-          monthly_price: 0,
-          lifetime_price: 0,
-          active: false,
-        })
         .select("id")
-        .single();
+        .eq("slug", slug)
+        .maybeSingle();
 
-      if (prodError) throw new Error(`Failed to create draft product: ${prodError.message}`);
-      productId = newProduct.id;
+      if (existingProduct) {
+        productId = existingProduct.id;
+        console.log(`Found existing product ${productId} for slug ${slug}`);
+      } else {
+        const { data: newProduct, error: prodError } = await supabase
+          .from("products")
+          .insert({
+            name: `${project.exam_board} ${project.subject}`,
+            slug,
+            subject: project.subject.toLowerCase(),
+            exam_board: project.exam_board,
+            monthly_price: 0,
+            lifetime_price: 0,
+            active: false,
+          })
+          .select("id")
+          .single();
+
+        if (prodError) throw new Error(`Failed to create draft product: ${prodError.message}`);
+        productId = newProduct.id;
+      }
       await supabase.from("trainer_projects").update({ product_id: productId }).eq("id", project_id);
     }
 
