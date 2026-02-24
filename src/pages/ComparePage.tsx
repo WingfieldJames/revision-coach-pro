@@ -25,14 +25,42 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { TestimonialsSection } from '@/components/ui/testimonials-with-marquee';
 import { FounderSection } from '@/components/ui/founder-section';
+import { DynamicFounderSection } from '@/components/DynamicFounderSection';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
 import { ScreenshotTestimonials } from '@/components/ui/screenshot-testimonials';
 import { LatestFeaturesSection } from '@/components/LatestFeaturesSection';
 import { FlowFieldBackground } from '@/components/ui/flow-field-background';
 import { SubjectPlanSelector } from '@/components/SubjectPlanSelector';
 
-type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'psychology' | 'mathematics';
-type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
+type Subject = string;
+type ExamBoard = string;
+
+interface DynamicProduct {
+  id: string;
+  slug: string;
+  subject: string;
+  exam_board: string;
+  name: string;
+}
+
+// Hardcoded (legacy) subjects and boards
+const LEGACY_SUBJECTS = ['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'];
+const LEGACY_BOARDS_MAP: Record<string, string[]> = {
+  'economics': ['edexcel', 'aqa', 'cie'],
+  'computer-science': ['ocr'],
+  'physics': ['ocr'],
+  'chemistry': ['aqa'],
+  'psychology': ['aqa'],
+  'mathematics': ['edexcel'],
+};
+const LEGACY_DEFAULT_BOARD: Record<string, string> = {
+  'economics': 'edexcel',
+  'computer-science': 'ocr',
+  'physics': 'ocr',
+  'chemistry': 'aqa',
+  'psychology': 'aqa',
+  'mathematics': 'edexcel',
+};
 
 export const ComparePage = () => {
   const { user, profile, loading } = useAuth();
@@ -43,22 +71,41 @@ export const ComparePage = () => {
   const shouldCheckout = searchParams.get('checkout') === 'true';
   const isMobile = useIsMobile();
 
+  // Dynamic products from database
+  const [dynamicProducts, setDynamicProducts] = useState<DynamicProduct[]>([]);
+
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
-    return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' || saved === 'psychology' || saved === 'mathematics' ? saved as Subject : 'economics';
+    if (saved && LEGACY_SUBJECTS.includes(saved)) return saved;
+    return 'economics';
   });
   const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
     const savedSubject = localStorage.getItem('preferred-subject');
     const saved = localStorage.getItem('preferred-exam-board');
-    if (savedSubject === 'computer-science' || savedSubject === 'physics') return 'ocr';
-    if (savedSubject === 'chemistry' || savedSubject === 'psychology') return 'aqa';
-    if (savedSubject === 'mathematics') return 'edexcel';
-    return saved === 'edexcel' || saved === 'aqa' || saved === 'cie' ? saved as ExamBoard : 'edexcel';
+    if (savedSubject && LEGACY_DEFAULT_BOARD[savedSubject]) return LEGACY_DEFAULT_BOARD[savedSubject];
+    return saved || 'edexcel';
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [hasProductAccess, setHasProductAccess] = useState(false);
   const [subscriptionPaymentType, setSubscriptionPaymentType] = useState<string | null>(null);
   const [checkingAccess, setCheckingAccess] = useState(false);
+
+  // Load dynamic products
+  useEffect(() => {
+    const loadDynamic = async () => {
+      const { data } = await supabase
+        .from('products')
+        .select('id, slug, subject, exam_board, name')
+        .eq('active', true);
+      if (data) {
+        // Filter out legacy products (already hardcoded)
+        const legacySlugs = new Set(Object.keys(PRODUCT_IDS));
+        const dynamic = data.filter((p: any) => !legacySlugs.has(p.slug));
+        setDynamicProducts(dynamic as DynamicProduct[]);
+      }
+    };
+    loadDynamic();
+  }, []);
 
   const PRODUCT_IDS: Record<string, string> = {
     'edexcel-economics': '6dc19d53-8a88-4741-9528-f25af97afb21',
@@ -71,7 +118,70 @@ export const ComparePage = () => {
     'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
   };
 
+  // Build combined subjects list (legacy + dynamic)
+  const allSubjects = React.useMemo(() => {
+    const subjects = [...LEGACY_SUBJECTS];
+    for (const dp of dynamicProducts) {
+      const subjectKey = dp.subject.toLowerCase().replace(/\s+/g, '-');
+      if (!subjects.includes(subjectKey)) subjects.push(subjectKey);
+    }
+    return subjects;
+  }, [dynamicProducts]);
+
+  // Build subject labels
+  const subjectLabels = React.useMemo(() => {
+    const labels: Record<string, string> = {
+      'economics': 'Economics',
+      'computer-science': 'Computer Science',
+      'physics': 'Physics',
+      'chemistry': 'Chemistry',
+      'psychology': 'Psychology',
+      'mathematics': 'Mathematics',
+    };
+    for (const dp of dynamicProducts) {
+      const key = dp.subject.toLowerCase().replace(/\s+/g, '-');
+      if (!labels[key]) labels[key] = dp.subject;
+    }
+    return labels;
+  }, [dynamicProducts]);
+
+  // Build boards for current subject
+  const boardsForSubject = React.useMemo(() => {
+    if (LEGACY_BOARDS_MAP[subject]) {
+      const boards = [...LEGACY_BOARDS_MAP[subject]];
+      // Also add any dynamic boards for this subject
+      for (const dp of dynamicProducts) {
+        const subjectKey = dp.subject.toLowerCase().replace(/\s+/g, '-');
+        const boardKey = dp.exam_board.toLowerCase();
+        if (subjectKey === subject && !boards.includes(boardKey)) boards.push(boardKey);
+      }
+      return boards;
+    }
+    // Fully dynamic subject
+    const boards: string[] = [];
+    for (const dp of dynamicProducts) {
+      const subjectKey = dp.subject.toLowerCase().replace(/\s+/g, '-');
+      const boardKey = dp.exam_board.toLowerCase();
+      if (subjectKey === subject && !boards.includes(boardKey)) boards.push(boardKey);
+    }
+    return boards.length > 0 ? boards : ['other'];
+  }, [subject, dynamicProducts]);
+
+  // Check if current selection is a dynamic product
+  const getDynamicProduct = React.useCallback(() => {
+    return dynamicProducts.find(dp => {
+      const subjectKey = dp.subject.toLowerCase().replace(/\s+/g, '-');
+      const boardKey = dp.exam_board.toLowerCase();
+      return subjectKey === subject && boardKey === examBoard;
+    });
+  }, [dynamicProducts, subject, examBoard]);
+
   const getCurrentProductSlug = () => {
+    // Check dynamic products first
+    const dp = getDynamicProduct();
+    if (dp) return dp.slug;
+
+    // Legacy mappings
     if (subject === 'economics') {
       if (examBoard === 'aqa') return 'aqa-economics';
       if (examBoard === 'cie') return 'cie-economics';
@@ -83,15 +193,6 @@ export const ComparePage = () => {
     if (subject === 'psychology') return 'aqa-psychology';
     if (subject === 'mathematics') return 'edexcel-mathematics';
     return null;
-  };
-
-  const subjectLabels: Record<Subject, string> = {
-    'economics': 'Economics',
-    'computer-science': 'Computer Science',
-    'physics': 'Physics',
-    'chemistry': 'Chemistry',
-    'psychology': 'Psychology',
-    'mathematics': 'Mathematics'
   };
 
   const getPricing = () => {
@@ -148,6 +249,11 @@ export const ComparePage = () => {
 
   const handleFreeClick = async () => {
     const getFreePath = () => {
+      // Check if this is a dynamic product
+      const dp = getDynamicProduct();
+      if (dp) return `/s/${dp.slug}/free`;
+
+      // Legacy routes
       if (subject === 'computer-science') return '/ocr-cs-free-version';
       if (subject === 'physics') return '/ocr-physics-free-version';
       if (subject === 'chemistry') return '/aqa-chemistry-free-version';
@@ -172,6 +278,10 @@ export const ComparePage = () => {
     }
 
     if (hasProductAccess) {
+      // Check dynamic product first
+      const dp = getDynamicProduct();
+      if (dp) { window.location.href = `/s/${dp.slug}/premium`; return; }
+
       const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
@@ -185,7 +295,9 @@ export const ComparePage = () => {
         window.location.href = '/login';
         return;
       }
-      const productId = productSlug ? PRODUCT_IDS[productSlug] : null;
+      // Look up product ID: check legacy first, then dynamic
+      const dp = getDynamicProduct();
+      const productId = productSlug ? (PRODUCT_IDS[productSlug] || dp?.id || null) : null;
       const affiliateCode = getValidAffiliateCode();
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
@@ -235,14 +347,18 @@ export const ComparePage = () => {
             {/* Desktop: Connected toggle group + board dropdown on same line */}
             <div className="hidden md:flex items-center justify-center gap-4 mb-12">
               <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
-                {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map((s) => (
+                {allSubjects.map((s) => (
                   <button
                     key={s}
                     onClick={() => {
                       setSubject(s);
-                      if (s === 'economics' || s === 'mathematics') setExamBoard('edexcel');
-                      else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
-                      else setExamBoard('ocr');
+                      const defaultBoard = LEGACY_DEFAULT_BOARD[s];
+                      if (defaultBoard) setExamBoard(defaultBoard);
+                      else {
+                        // Dynamic: pick first available board
+                        const dp = dynamicProducts.find(p => p.subject.toLowerCase().replace(/\s+/g, '-') === s);
+                        if (dp) setExamBoard(dp.exam_board.toLowerCase());
+                      }
                     }}
                     className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                       subject === s
@@ -250,27 +366,20 @@ export const ComparePage = () => {
                         : 'text-foreground hover:bg-muted'
                     }`}
                   >
-                    {subjectLabels[s]}
+                    {subjectLabels[s] || s}
                   </button>
                 ))}
               </div>
 
-              <Select value={examBoard} onValueChange={(val) => setExamBoard(val as ExamBoard)}>
+              <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
                 <SelectTrigger className="rounded-full px-6 py-2 h-auto w-auto text-sm font-medium border border-border bg-background text-foreground transition-all hover:bg-muted [&>svg]:ml-1">
                   <span className="text-muted-foreground mr-1">Exam Board:</span>
                   <SelectValue placeholder="Select Exam Board" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-                  {(subject === 'economics'
-                    ? (['edexcel', 'aqa', 'cie'] as ExamBoard[])
-                    : subject === 'mathematics'
-                    ? (['edexcel'] as ExamBoard[])
-                    : subject === 'chemistry' || subject === 'psychology'
-                    ? (['aqa'] as ExamBoard[])
-                    : (['ocr'] as ExamBoard[])
-                  ).map(b => (
+                  {boardsForSubject.map(b => (
                     <SelectItem key={b} value={b}>
-                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : 'Edexcel'}
+                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -282,40 +391,36 @@ export const ComparePage = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="rounded-full px-5 py-2.5 text-sm font-semibold bg-gradient-brand text-white flex items-center gap-2 glow-brand">
-                    {subjectLabels[subject]}
+                    {subjectLabels[subject] || subject}
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-                  {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
+                  {allSubjects.map(s => (
                     <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                       setSubject(s);
-                      if (s === 'economics' || s === 'mathematics') setExamBoard('edexcel');
-                      else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
-                      else setExamBoard('ocr');
+                      const defaultBoard = LEGACY_DEFAULT_BOARD[s];
+                      if (defaultBoard) setExamBoard(defaultBoard);
+                      else {
+                        const dp = dynamicProducts.find(p => p.subject.toLowerCase().replace(/\s+/g, '-') === s);
+                        if (dp) setExamBoard(dp.exam_board.toLowerCase());
+                      }
                     }}>
-                      {subjectLabels[s]}
+                      {subjectLabels[s] || s}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Select value={examBoard} onValueChange={(val) => setExamBoard(val as ExamBoard)}>
+              <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
                 <SelectTrigger className="rounded-full px-5 py-2.5 h-auto w-auto text-sm font-semibold border border-border bg-background text-foreground hover:bg-muted [&>svg]:ml-1">
                   <span className="text-muted-foreground mr-1">Exam Board:</span>
                   <SelectValue placeholder="Select Exam Board" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-                  {(subject === 'economics'
-                    ? (['edexcel', 'aqa', 'cie'] as ExamBoard[])
-                    : subject === 'mathematics'
-                    ? (['edexcel'] as ExamBoard[])
-                    : subject === 'chemistry' || subject === 'psychology'
-                    ? (['aqa'] as ExamBoard[])
-                    : (['ocr'] as ExamBoard[])
-                  ).map(b => (
+                  {boardsForSubject.map(b => (
                     <SelectItem key={b} value={b}>
-                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : 'Edexcel'}
+                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -357,11 +462,11 @@ export const ComparePage = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-500 shrink-0" />
-                        <span>Image upload & {subject === 'economics' ? (examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : 'CIE') : subject === 'mathematics' ? 'Edexcel' : subject === 'chemistry' || subject === 'psychology' ? 'AQA' : 'OCR'} analysis</span>
+                        <span>Image upload & {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()} analysis</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-500 shrink-0" />
-                        <span>Covers entire {subject === 'economics' ? (examBoard === 'edexcel' ? 'Edexcel' : examBoard === 'aqa' ? 'AQA' : 'CIE') : subject === 'mathematics' ? 'Edexcel' : subject === 'chemistry' || subject === 'psychology' ? 'AQA' : 'OCR'} specification</span>
+                        <span>Covers entire {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()} specification</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-500 shrink-0" />
@@ -399,7 +504,10 @@ export const ComparePage = () => {
         {/* Mobile: Founder Section first, then stacked testimonials */}
         <div className="md:hidden">
           <div className="relative">
-            {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry' || subject === 'mathematics') && <FounderSection subject={subject} examBoard={examBoard} />}
+            {LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology'
+              ? <FounderSection subject={subject as any} examBoard={examBoard as any} />
+              : getDynamicProduct() && <DynamicFounderSection productId={getDynamicProduct()!.id} subjectLabel={subjectLabels[subject] || subject} />
+            }
           </div>
           
           <div className="relative py-12 px-4">
@@ -444,7 +552,10 @@ export const ComparePage = () => {
         {/* Desktop: Founder Section then Testimonials marquee */}
         <div className="hidden md:block">
           <div className="relative">
-            {(subject === 'economics' || subject === 'computer-science' || subject === 'physics' || subject === 'chemistry' || subject === 'mathematics') && <FounderSection subject={subject} examBoard={examBoard} />}
+            {LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology'
+              ? <FounderSection subject={subject as any} examBoard={examBoard as any} />
+              : getDynamicProduct() && <DynamicFounderSection productId={getDynamicProduct()!.id} subjectLabel={subjectLabels[subject] || subject} />
+            }
           </div>
 
           <div className="relative">
@@ -475,7 +586,7 @@ export const ComparePage = () => {
               </div>
             </h2>
           </ScrollReveal>
-          <LatestFeaturesSection subject={subject} />
+          {LEGACY_SUBJECTS.includes(subject) && <LatestFeaturesSection subject={subject as any} />}
         </section>
 
 
