@@ -36,7 +36,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const body = await req.json();
-    const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique, delete_specifications_only } = body;
+    const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique, staged_custom_sections, delete_specifications_only } = body;
     if (!project_id) throw new Error("project_id is required");
 
     // Get the project
@@ -163,7 +163,42 @@ serve(async (req) => {
       });
     }
 
-    // Update project status
+    // Save custom sections as training data chunks
+    let customChunksCreated = 0;
+    if (staged_custom_sections && Array.isArray(staged_custom_sections) && staged_custom_sections.length > 0) {
+      console.log(`Saving ${staged_custom_sections.length} custom sections...`);
+
+      // Delete existing custom section chunks for this product
+      await supabase
+        .from("document_chunks")
+        .delete()
+        .eq("product_id", productId)
+        .contains("metadata", { content_type: "custom_section" });
+
+      for (const section of staged_custom_sections) {
+        const sectionName = section.name || "Custom Section";
+        const sectionContent = section.content || "";
+        if (sectionContent.trim().length < 10) continue;
+
+        const chunkContent = `[${sectionName}]\n${sectionContent}`;
+        const embedding = await generateEmbedding(lovableApiKey, chunkContent);
+        const { error: insertErr } = await supabase.from("document_chunks").insert({
+          product_id: productId,
+          content: chunkContent,
+          embedding,
+          metadata: {
+            content_type: "custom_section",
+            type: "custom_section",
+            section_name: sectionName,
+          },
+        });
+        if (!insertErr) customChunksCreated++;
+        else console.error("Custom section chunk insert error:", insertErr);
+      }
+
+      console.log(`Saved ${customChunksCreated} custom section chunks`);
+    }
+
     await supabase.from("trainer_projects").update({
       status: "deployed",
       product_id: productId,
@@ -175,7 +210,7 @@ serve(async (req) => {
       .select("id", { count: "exact", head: true })
       .eq("product_id", productId);
 
-    console.log(`Deployed project ${project_id} as product ${productId} with ${count} chunks (${specChunksCreated} spec)`);
+    console.log(`Deployed project ${project_id} as product ${productId} with ${count} chunks (${specChunksCreated} spec, ${customChunksCreated} custom)`);
 
     return new Response(JSON.stringify({
       success: true,
