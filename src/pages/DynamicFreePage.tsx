@@ -82,11 +82,7 @@ export const DynamicFreePage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool={hasFeature('my_ai')}
-          showDiagramTool={hasFeature('diagram_generator')}
           showEssayMarker={hasFeature('essay_marker')}
-          showPastPaperFinder={hasFeature('past_papers')}
-          showRevisionGuide={hasFeature('revision_guide')}
-          showExamCountdown={hasFeature('exam_countdown')}
           examSubjectName={subjectName}
           hideUserDetails
           productId={product.id}
