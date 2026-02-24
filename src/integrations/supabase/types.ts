@@ -286,11 +286,14 @@ export type Database = {
           custom_sections: Json | null
           exam_board: string
           exam_technique: string | null
+          exam_technique_submitted: boolean
           id: string
           product_id: string | null
+          staged_specifications: Json | null
           status: string
           subject: string
           system_prompt: string | null
+          system_prompt_submitted: boolean
           updated_at: string
         }
         Insert: {
@@ -299,11 +302,14 @@ export type Database = {
           custom_sections?: Json | null
           exam_board: string
           exam_technique?: string | null
+          exam_technique_submitted?: boolean
           id?: string
           product_id?: string | null
+          staged_specifications?: Json | null
           status?: string
           subject: string
           system_prompt?: string | null
+          system_prompt_submitted?: boolean
           updated_at?: string
         }
         Update: {
@@ -312,11 +318,14 @@ export type Database = {
           custom_sections?: Json | null
           exam_board?: string
           exam_technique?: string | null
+          exam_technique_submitted?: boolean
           id?: string
           product_id?: string | null
+          staged_specifications?: Json | null
           status?: string
           subject?: string
           system_prompt?: string | null
+          system_prompt_submitted?: boolean
           updated_at?: string
         }
         Relationships: [

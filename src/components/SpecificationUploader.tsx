@@ -20,19 +20,20 @@ interface SpecificationUploaderProps {
   onSpecDataChange?: (specs: string[] | null) => void;
   onReplaceDeployed?: () => Promise<void>;
   initialComplete?: boolean;
+  initialStagedSpecs?: string[] | null;
 }
 
 type UploadState = "idle" | "reading" | "processing" | "staged" | "submitted" | "error";
 
-export function SpecificationUploader({ onStatusChange, onSpecDataChange, onReplaceDeployed, initialComplete }: SpecificationUploaderProps) {
-  const [state, setState] = useState<UploadState>(initialComplete ? "submitted" : "idle");
-  const [fileName, setFileName] = useState<string | null>(initialComplete ? "Specification (loaded)" : null);
+export function SpecificationUploader({ onStatusChange, onSpecDataChange, onReplaceDeployed, initialComplete, initialStagedSpecs }: SpecificationUploaderProps) {
+  const [state, setState] = useState<UploadState>(initialComplete || (initialStagedSpecs && initialStagedSpecs.length > 0) ? "submitted" : "idle");
+  const [fileName, setFileName] = useState<string | null>(initialComplete ? "Specification (loaded)" : initialStagedSpecs ? "Specification (saved)" : null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [stagedSpecs, setStagedSpecs] = useState<string[] | null>(null);
+  const [stagedSpecs, setStagedSpecs] = useState<string[] | null>(initialStagedSpecs || null);
   const [showPreview, setShowPreview] = useState(false);
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   // Track whether a spec has ever been submitted/deployed (persists through edits)
-  const [hasBeenSubmitted, setHasBeenSubmitted] = useState(initialComplete || false);
+  const [hasBeenSubmitted, setHasBeenSubmitted] = useState(initialComplete || (initialStagedSpecs && initialStagedSpecs.length > 0) || false);
   // Store the previously submitted specs so cancel can restore them
   const [previousSpecs, setPreviousSpecs] = useState<string[] | null>(null);
   const [previousFileName, setPreviousFileName] = useState<string | null>(null);
