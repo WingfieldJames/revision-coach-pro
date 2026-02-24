@@ -44,6 +44,8 @@ interface PastPaperYearCardProps {
   /** If the year had files previously deployed */
   initialSubmitted?: boolean;
   productId?: string | null;
+  onSubmitYear?: (year: string) => void;
+  onEditYear?: (year: string) => void;
 }
 
 export function PastPaperYearCard({
@@ -54,6 +56,8 @@ export function PastPaperYearCard({
   uploading,
   initialSubmitted,
   productId,
+  onSubmitYear,
+  onEditYear,
 }: PastPaperYearCardProps) {
   const [state, setState] = useState<YearState>(
     initialSubmitted || uploads.length > 0 ? "submitted" : "idle"
@@ -85,11 +89,13 @@ export function PastPaperYearCard({
       return;
     }
     setState("submitted");
+    onSubmitYear?.(year);
     toast({ title: `${year} papers submitted`, description: `${uploads.length} file(s) ready for deployment.` });
   };
 
   const handleEdit = () => {
     setState("editing");
+    onEditYear?.(year);
   };
 
   const handleDeleteFile = async (uploadId: string) => {

@@ -306,7 +306,24 @@ export function BuildPage() {
         .from("trainer_uploads")
         .select("*")
         .eq("project_id", projectId);
-      setUploads((data as TrainerUpload[]) || []);
+      const loaded = (data as TrainerUpload[]) || [];
+      setUploads(loaded);
+      // Initialize submitted years: years where all uploads are done
+      const yearGroups = new Map<string, TrainerUpload[]>();
+      for (const u of loaded) {
+        if (u.section_type === "past_paper" && u.year) {
+          const arr = yearGroups.get(u.year) || [];
+          arr.push(u);
+          yearGroups.set(u.year, arr);
+        }
+      }
+      const initialSubmitted = new Set<string>();
+      for (const [y, ups] of yearGroups) {
+        if (ups.length > 0 && ups.every(u => u.processing_status === "done")) {
+          initialSubmitted.add(y);
+        }
+      }
+      setSubmittedYears(initialSubmitted);
     };
     loadUploads();
   }, [projectId]);
@@ -484,20 +501,11 @@ export function BuildPage() {
     return uploads.filter(u => u.section_type === "past_paper" && u.year === year);
   };
 
-  // Year status for progress sidebar
+  // Year status for progress sidebar — only "complete" if user pressed Submit
   const getYearStatus = (year: string): SectionStatus => {
     const yearUploads = getUploadsForYear(year);
     if (yearUploads.length === 0) return "empty";
-    const hasMerged = yearUploads.some(u => u.processing_status === "done" && u.doc_type);
-    // Check if any QP+MS pair both done for same paper_number
-    const doneUploads = yearUploads.filter(u => u.processing_status === "done" && u.doc_type && u.paper_number);
-    const paperNumbers = [...new Set(doneUploads.map(u => u.paper_number))];
-    const hasCompletePair = paperNumbers.some(pn => {
-      const hasQP = doneUploads.some(u => u.paper_number === pn && u.doc_type === "qp");
-      const hasMS = doneUploads.some(u => u.paper_number === pn && u.doc_type === "ms");
-      return hasQP && hasMS;
-    });
-    if (hasCompletePair) return "complete";
+    if (submittedYears.has(year)) return "complete";
     return "in_progress";
   };
 
@@ -1142,6 +1150,8 @@ export function BuildPage() {
                     uploading={!!uploading?.startsWith("past_paper" + year)}
                     initialSubmitted={yearUploads.length > 0 && yearUploads.every(u => u.processing_status === "done")}
                     productId={projects.find(p => p.id === selectedProjectId)?.product_id || null}
+                    onSubmitYear={(y) => setSubmittedYears(prev => new Set(prev).add(y))}
+                    onEditYear={(y) => setSubmittedYears(prev => { const n = new Set(prev); n.delete(y); return n; })}
                   />
                 );
               })}
