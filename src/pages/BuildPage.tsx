@@ -386,10 +386,11 @@ export function BuildPage() {
     return "in_progress";
   };
 
-  // Chat with mock chatbot
+  // Chat with mock chatbot (uses streaming like the main RAGChat)
   const sendChatMessage = async () => {
     if (!chatInput.trim() || chatLoading) return;
     const userMsg: ChatMessage = { role: "user", content: chatInput };
+    const currentInput = chatInput;
     setChatMessages(prev => [...prev, userMsg]);
     setChatInput("");
     setChatLoading(true);
@@ -406,23 +407,93 @@ export function BuildPage() {
         productId = data?.product_id || null;
       }
 
-      const { data, error } = await supabase.functions.invoke("rag-chat", {
-        body: {
-          message: chatInput,
+      if (!productId) {
+        setChatMessages(prev => [...prev, { role: "assistant", content: "No deployed product found. Please deploy first to test the chatbot with training data." }]);
+        setChatLoading(false);
+        return;
+      }
+
+      const CHAT_URL = `https://xoipyycgycmpflfnrlty.supabase.co/functions/v1/rag-chat`;
+
+      const response = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          message: currentInput,
           product_id: productId,
           history: chatMessages.map(m => ({ role: m.role, content: m.content })),
           tier: "deluxe",
           user_id: user?.id,
-          system_prompt_override: systemPrompt || undefined,
-        },
+        }),
       });
 
-      if (error) throw error;
-      const reply = data?.reply || data?.response || "No response received.";
-      setChatMessages(prev => [...prev, { role: "assistant", content: reply }]);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to get response");
+      }
+
+      if (!response.body) throw new Error("No response body");
+
+      // Parse SSE stream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let fullContent = "";
+
+      setChatMessages(prev => [...prev, { role: "assistant", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, newlineIndex);
+          buffer = buffer.slice(newlineIndex + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            // Skip metadata events
+            if (parsed.sources_searched) continue;
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              fullContent += content;
+              const captured = fullContent;
+              setChatMessages(prev => {
+                const lastIdx = prev.length - 1;
+                if (lastIdx >= 0 && prev[lastIdx]?.role === "assistant") {
+                  return prev.map((m, i) => i === lastIdx ? { ...m, content: captured } : m);
+                }
+                return prev;
+              });
+            }
+          } catch {
+            buffer = line + "\n" + buffer;
+            break;
+          }
+        }
+      }
+
+      if (!fullContent) {
+        setChatMessages(prev => {
+          const lastIdx = prev.length - 1;
+          if (lastIdx >= 0 && prev[lastIdx]?.role === "assistant" && !prev[lastIdx].content) {
+            return prev.map((m, i) => i === lastIdx ? { ...m, content: "No response received." } : m);
+          }
+          return prev;
+        });
+      }
     } catch (err) {
       console.error("Chat error:", err);
-      setChatMessages(prev => [...prev, { role: "assistant", content: "Error: Failed to get response. Make sure training data has been uploaded." }]);
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Error: Failed to get response. Make sure training data has been deployed." }]);
     } finally {
       setChatLoading(false);
     }
