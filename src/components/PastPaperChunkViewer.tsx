@@ -28,14 +28,36 @@ export function PastPaperChunkViewer({ uploadId, uploadLabel, productId }: PastP
   const fetchChunks = async () => {
     setLoading(true);
     try {
-      // Query chunks that have this upload_id in metadata
-      const { data, error } = await supabase
+      // Query chunks that have this upload_id in metadata (individual chunks)
+      const { data: directChunks, error: err1 } = await supabase
         .from("document_chunks")
         .select("id, content, metadata")
         .contains("metadata", { upload_id: uploadId });
 
-      if (error) throw error;
-      setChunks((data as ChunkData[]) || []);
+      if (err1) throw err1;
+
+      // Also query merged chunks where this upload is a source (QP or MS)
+      const { data: mergedQP, error: err2 } = await supabase
+        .from("document_chunks")
+        .select("id, content, metadata")
+        .contains("metadata", { source_qp_upload: uploadId });
+
+      if (err2) throw err2;
+
+      const { data: mergedMS, error: err3 } = await supabase
+        .from("document_chunks")
+        .select("id, content, metadata")
+        .contains("metadata", { source_ms_upload: uploadId });
+
+      if (err3) throw err3;
+
+      // Deduplicate by id
+      const allChunks = [...(directChunks || []), ...(mergedQP || []), ...(mergedMS || [])];
+      const uniqueMap = new Map<string, ChunkData>();
+      for (const c of allChunks) {
+        uniqueMap.set(c.id, c as ChunkData);
+      }
+      setChunks(Array.from(uniqueMap.values()));
     } catch (err) {
       console.error("Failed to fetch chunks:", err);
       toast({ title: "Failed to load chunks", variant: "destructive" });
