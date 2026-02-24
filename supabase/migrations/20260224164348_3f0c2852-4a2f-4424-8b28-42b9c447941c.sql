@@ -1,0 +1,1 @@
+ALTER TABLE trainer_projects ADD COLUMN selected_features jsonb DEFAULT '[]'::jsonb;
