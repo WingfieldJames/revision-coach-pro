@@ -158,14 +158,16 @@ export function BuildPage() {
 
       if (existing) {
         setProjectId(existing.id);
-        setSystemPrompt(existing.system_prompt || "");
-        setExamTechnique(existing.exam_technique || "");
         setCustomSections((existing.custom_sections as unknown as CustomSection[]) || []);
         setProjectStatus(existing.status);
 
-        // Restore submitted flags
-        setSystemPromptSubmitted(!!(existing as any).system_prompt_submitted);
-        setExamTechniqueSubmitted(!!(existing as any).exam_technique_submitted);
+        // Restore submitted flags and only load text if submitted
+        const spSubmitted = !!(existing as any).system_prompt_submitted;
+        const etSubmitted = !!(existing as any).exam_technique_submitted;
+        setSystemPromptSubmitted(spSubmitted);
+        setExamTechniqueSubmitted(etSubmitted);
+        setSystemPrompt(spSubmitted ? (existing.system_prompt || "") : "");
+        setExamTechnique(etSubmitted ? (existing.exam_technique || "") : "");
 
         // Restore staged specifications
         const savedSpecs = (existing as any).staged_specifications;
