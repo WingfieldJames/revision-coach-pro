@@ -289,6 +289,7 @@ export type Database = {
           exam_technique_submitted: boolean
           id: string
           product_id: string | null
+          selected_features: Json | null
           staged_specifications: Json | null
           status: string
           subject: string
@@ -308,6 +309,7 @@ export type Database = {
           exam_technique_submitted?: boolean
           id?: string
           product_id?: string | null
+          selected_features?: Json | null
           staged_specifications?: Json | null
           status?: string
           subject: string
@@ -327,6 +329,7 @@ export type Database = {
           exam_technique_submitted?: boolean
           id?: string
           product_id?: string | null
+          selected_features?: Json | null
           staged_specifications?: Json | null
           status?: string
           subject?: string

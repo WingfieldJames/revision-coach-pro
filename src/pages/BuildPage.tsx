@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus } from "lucide-react";
+import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3 } from "lucide-react";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
@@ -59,9 +59,19 @@ interface TrainerProject {
   trainer_image_url: string | null;
   trainer_description: string | null;
   trainer_bio_submitted: boolean;
+  selected_features: string[] | null;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
+
+const WEBSITE_FEATURES = [
+  { id: "my_ai", label: "My AI", description: "AI-powered chatbot trained on your subject content", icon: Bot },
+  { id: "diagram_generator", label: "Diagram Generator", description: "AI diagram finder for visual question support", icon: BarChart3 },
+  { id: "essay_marker", label: "Essay Marker", description: "AI-powered essay marking with detailed feedback", icon: PenTool },
+  { id: "past_papers", label: "Past Papers", description: "Searchable past paper archive with mark schemes", icon: FileText },
+  { id: "exam_countdown", label: "Exam Countdown", description: "Live countdown timer to upcoming exams", icon: Timer },
+  { id: "revision_guide", label: "Revision Guide", description: "AI-generated revision notes by topic", icon: BookMarked },
+] as const;
 
 type SectionStatus = "empty" | "in_progress" | "complete";
 
@@ -148,6 +158,9 @@ export function BuildPage() {
   const [trainerBioSubmitted, setTrainerBioSubmitted] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const trainerImageInputRef = useRef<HTMLInputElement>(null);
+
+  // Website Deployment features
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
 
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
@@ -237,6 +250,7 @@ export function BuildPage() {
     setExamTechnique(etSubmitted ? (existing.exam_technique || "") : "");
     setTrainerImageUrl(existing.trainer_image_url || null);
     setTrainerDescription(bioSubmitted ? (existing.trainer_description || "") : "");
+    setSelectedFeatures(Array.isArray(existing.selected_features) ? existing.selected_features : []);
 
     const savedSpecs = existing.staged_specifications;
     if (savedSpecs && Array.isArray(savedSpecs) && savedSpecs.length > 0) {
@@ -1279,6 +1293,67 @@ export function BuildPage() {
               </AlertDialogContent>
             </AlertDialog>
           )}
+
+          {/* Website Deployment — Feature Selection */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base">Website Deployment</CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">Select which features you'd like enabled on your subject's student-facing page. Click a feature to toggle it on or off.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {WEBSITE_FEATURES.map(feature => {
+                  const isSelected = selectedFeatures.includes(feature.id);
+                  return (
+                    <button
+                      key={feature.id}
+                      type="button"
+                      onClick={() => {
+                        const next = isSelected
+                          ? selectedFeatures.filter(f => f !== feature.id)
+                          : [...selectedFeatures, feature.id];
+                        setSelectedFeatures(next);
+                        // Persist immediately
+                        if (projectId) {
+                          supabase
+                            .from("trainer_projects")
+                            .update({ selected_features: next as unknown as import("@/integrations/supabase/types").Json })
+                            .eq("id", projectId)
+                            .then(({ error }) => { if (error) console.error("Failed to save features:", error); });
+                        }
+                      }}
+                      className={`flex items-start gap-3 rounded-lg border-2 p-3 text-left transition-all ${
+                        isSelected
+                          ? "border-green-500 bg-green-500/10"
+                          : "border-border hover:border-muted-foreground/30"
+                      }`}
+                    >
+                      <div className={`mt-0.5 shrink-0 rounded-full p-1.5 ${
+                        isSelected ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"
+                      }`}>
+                        <feature.icon className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className={`text-sm font-medium ${isSelected ? "text-green-600 dark:text-green-400" : ""}`}>
+                          {feature.label}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{feature.description}</p>
+                      </div>
+                      {isSelected && (
+                        <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0 ml-auto mt-0.5" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedFeatures.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-3">{selectedFeatures.length} feature{selectedFeatures.length !== 1 ? "s" : ""} selected</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Right: Info Panel */}
