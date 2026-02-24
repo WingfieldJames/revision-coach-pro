@@ -59,3 +59,6 @@ verify_jwt = false
 
 [functions.parse-specification]
 verify_jwt = false
+
+[functions.delete-training-upload]
+verify_jwt = false

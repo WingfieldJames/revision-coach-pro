@@ -9,6 +9,16 @@ import {
   X,
   FileText,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TrainerUpload {
   id: string;
@@ -28,7 +38,7 @@ interface PastPaperYearCardProps {
   year: string;
   uploads: TrainerUpload[];
   onUploadFiles: (files: FileList, year: string) => Promise<void>;
-  onDeleteUpload: (uploadId: string) => Promise<void>;
+  onDeleteUpload: (uploadId: string, deleteChunks?: boolean) => Promise<void>;
   uploading: boolean;
   /** If the year had files previously deployed */
   initialSubmitted?: boolean;
@@ -46,10 +56,15 @@ export function PastPaperYearCard({
     initialSubmitted || uploads.length > 0 ? "submitted" : "idle"
   );
   const inputRef = useRef<HTMLInputElement>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const hasFiles = uploads.length > 0;
   const allDone = hasFiles && uploads.every(u => u.processing_status === "done");
   const anyProcessing = uploads.some(u => u.processing_status === "processing" || u.processing_status === "pending");
+
+  // A file is "deployed" if the year was initially submitted (came from DB)
+  const isDeployed = !!initialSubmitted;
 
   // Header icon
   const headerIcon =
@@ -75,10 +90,32 @@ export function PastPaperYearCard({
   };
 
   const handleDeleteFile = async (uploadId: string) => {
-    await onDeleteUpload(uploadId);
-    // If no files left after delete and we're editing, go back to idle
-    if (uploads.length <= 1) {
-      setState("idle");
+    if (isDeployed && state === "submitted") {
+      // Deployed file — need confirmation
+      setConfirmDeleteId(uploadId);
+    } else if (state === "editing" && isDeployed) {
+      // Editing a deployed year — also confirm since chunks exist
+      setConfirmDeleteId(uploadId);
+    } else {
+      // Not deployed — just remove immediately
+      await onDeleteUpload(uploadId, false);
+      if (uploads.length <= 1) {
+        setState("idle");
+      }
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDeleteId) return;
+    setDeleting(true);
+    try {
+      await onDeleteUpload(confirmDeleteId, true);
+      if (uploads.length <= 1) {
+        setState("idle");
+      }
+    } finally {
+      setDeleting(false);
+      setConfirmDeleteId(null);
     }
   };
 
@@ -96,6 +133,8 @@ export function PastPaperYearCard({
     if (u.processing_status === "error") return <span className="text-[10px] text-destructive">Error</span>;
     return null;
   };
+
+  const fileToDelete = confirmDeleteId ? uploads.find(u => u.id === confirmDeleteId) : null;
 
   return (
     <div className={`border rounded-lg p-3 space-y-2 ${
@@ -117,6 +156,30 @@ export function PastPaperYearCard({
           }
         }}
       />
+
+      {/* Delete confirmation dialog for deployed files */}
+      <AlertDialog open={!!confirmDeleteId} onOpenChange={(open) => !open && setConfirmDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove deployed file?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This file has been deployed and its training data is in the knowledge base. Removing it will also delete the associated chunks from the database. This cannot be undone.
+              {fileToDelete && (
+                <span className="block mt-2 font-medium text-foreground">
+                  {getFileLabel(fileToDelete)}
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={deleting}>
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              Yes, remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Header row */}
       <div className="flex items-center justify-between">

@@ -347,16 +347,15 @@ export function BuildPage() {
     }
   };
 
-  // Delete an upload record (and its storage file)
-  const handleDeleteUpload = async (uploadId: string) => {
+  // Delete an upload record (and its storage file) via edge function
+  const handleDeleteUpload = async (uploadId: string, deleteChunks = false) => {
     const upload = uploads.find(u => u.id === uploadId);
     if (!upload) return;
     try {
-      // Delete from storage
-      await supabase.storage.from("trainer-uploads").remove([upload.file_url]);
-      // Delete the DB record via edge function (RLS doesn't allow direct delete)
-      // For now just mark as removed locally since trainer_uploads doesn't allow DELETE via RLS
-      // We'll filter it out - the record stays but won't affect deployment
+      const { error } = await supabase.functions.invoke("delete-training-upload", {
+        body: { upload_id: uploadId, delete_chunks: deleteChunks },
+      });
+      if (error) throw error;
       setUploads(prev => prev.filter(u => u.id !== uploadId));
       toast({ title: "File removed", description: upload.file_name });
     } catch (err) {
