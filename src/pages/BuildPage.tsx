@@ -177,6 +177,7 @@ export function BuildPage() {
 
   // Deploying
   const [deploying, setDeploying] = useState(false);
+  const [deployingToWebsite, setDeployingToWebsite] = useState(false);
   const [erasing, setErasing] = useState(false);
   // Track if changes were made after deployment (enables re-deploy)
   const [hasChangesSinceDeploy, setHasChangesSinceDeploy] = useState(false);
@@ -688,6 +689,45 @@ export function BuildPage() {
       toast({ title: "Erase failed", description: message, variant: "destructive" });
     } finally {
       setErasing(false);
+    }
+  };
+
+  // Deploy to Website — activates the product so it appears on /compare and gets dynamic routes
+  const handleDeployToWebsite = async () => {
+    if (!projectId) return;
+    setDeployingToWebsite(true);
+    try {
+      // First ensure the subject has been deployed (has a product_id)
+      const { data: proj } = await supabase
+        .from("trainer_projects")
+        .select("product_id, exam_board, subject, selected_features")
+        .eq("id", projectId)
+        .single();
+
+      if (!proj?.product_id) {
+        toast({ title: "Deploy first", description: "Please deploy the training data before deploying to the website.", variant: "destructive" });
+        setDeployingToWebsite(false);
+        return;
+      }
+
+      // Activate the product — this makes it visible on /compare and dynamic routes
+      const { error: updateErr } = await supabase.functions.invoke("deploy-subject", {
+        body: {
+          project_id: projectId,
+          activate_website: true,
+        },
+      });
+      if (updateErr) throw updateErr;
+
+      toast({ 
+        title: "Deployed to website! 🎉", 
+        description: `${proj.exam_board} ${proj.subject} is now live at /s/${proj.exam_board.toLowerCase()}-${proj.subject.toLowerCase().replace(/\s+/g, '-')}/free` 
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Website deployment failed";
+      toast({ title: "Deploy to website failed", description: message, variant: "destructive" });
+    } finally {
+      setDeployingToWebsite(false);
     }
   };
 
@@ -1354,6 +1394,39 @@ export function BuildPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Deploy to Website Button */}
+          {projectStatus === "deployed" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="lg" className="w-full bg-gradient-brand hover:opacity-90" disabled={deployingToWebsite}>
+                  {deployingToWebsite ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Globe className="h-5 w-5 mr-2" />}
+                  Deploy to Website
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Deploy {currentLabel} to the website?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will make <strong>{currentLabel}</strong> live on the website. It will:
+                    <ul className="list-disc ml-4 mt-2 space-y-1">
+                      <li>Create a free and premium chatbot page for students</li>
+                      <li>Add this subject to the /compare page selection</li>
+                      <li>Set up Stripe payment integration</li>
+                      <li>Use your "Meet the Brain" photo &amp; bio on the subject page</li>
+                      <li>Enable the features you selected above</li>
+                    </ul>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>No, not yet</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeployToWebsite}>
+                    Yes, go live!
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
 
         {/* Right: Info Panel */}

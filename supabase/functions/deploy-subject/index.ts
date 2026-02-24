@@ -36,7 +36,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const body = await req.json();
-    const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique, staged_custom_sections, delete_specifications_only } = body;
+    const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique, staged_custom_sections, delete_specifications_only, activate_website } = body;
     if (!project_id) throw new Error("project_id is required");
 
     // Get the project
@@ -61,6 +61,35 @@ serve(async (req) => {
         else console.log("Deleted specification chunks for product:", productId);
       }
       return new Response(JSON.stringify({ success: true, deleted: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Handle website activation (set product active, set up pricing)
+    if (activate_website) {
+      const productId = project.product_id;
+      if (!productId) throw new Error("Project must be deployed before activating on website");
+
+      // Set product as active with standard pricing
+      await supabase.from("products").update({
+        active: true,
+        monthly_price: 699,
+        lifetime_price: 2499,
+      }).eq("id", productId);
+
+      // Update project status
+      await supabase.from("trainer_projects").update({
+        status: "deployed",
+      }).eq("id", project_id);
+
+      console.log(`Activated product ${productId} on website`);
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        product_id: productId, 
+        activated: true,
+        message: `${project.exam_board} ${project.subject} is now live on the website.` 
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
