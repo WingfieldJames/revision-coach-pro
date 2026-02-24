@@ -73,7 +73,8 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
   // Report staged data changes to parent — only send when submitted
   useEffect(() => {
     onSpecDataChange?.(state === "submitted" ? stagedSpecs : null);
-  }, [stagedSpecs, state, onSpecDataChange]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stagedSpecs, state]);
 
   const processFile = useCallback(async (file: File) => {
     if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
