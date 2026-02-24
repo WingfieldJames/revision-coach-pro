@@ -105,6 +105,8 @@ interface HeaderProps {
   showUpgradeButton?: boolean;
   transparentBg?: boolean;
   mathsMode?: 'pure' | 'applied';
+  customPastPaperContent?: React.ReactNode;
+  customRevisionGuideContent?: React.ReactNode;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -132,7 +134,9 @@ export const Header: React.FC<HeaderProps> = ({
   essayMarkerCustomMarks,
   showUpgradeButton = false,
   transparentBg = false,
-  mathsMode
+  mathsMode,
+  customPastPaperContent,
+  customRevisionGuideContent,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -360,7 +364,7 @@ export const Header: React.FC<HeaderProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-lg p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
-              <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />
+              {customPastPaperContent || <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />}
             </PopoverContent>
           </Popover>
         )}
@@ -378,7 +382,7 @@ export const Header: React.FC<HeaderProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-lg p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
-              <RevisionGuideTool board={revisionGuideBoard} tier={tier} productId={productId} />
+              {customRevisionGuideContent || <RevisionGuideTool board={revisionGuideBoard} tier={tier} productId={productId} />}
             </PopoverContent>
           </Popover>
         )}

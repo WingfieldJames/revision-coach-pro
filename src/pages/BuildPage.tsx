@@ -60,6 +60,7 @@ interface TrainerProject {
   trainer_description: string | null;
   trainer_bio_submitted: boolean;
   selected_features: string[] | null;
+  exam_dates: any[] | null;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
@@ -161,6 +162,7 @@ export function BuildPage() {
 
   // Website Deployment features
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+  const [examDates, setExamDates] = useState<Array<{ name: string; date: string }>>([]);
 
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
@@ -252,6 +254,7 @@ export function BuildPage() {
     setTrainerImageUrl(existing.trainer_image_url || null);
     setTrainerDescription(bioSubmitted ? (existing.trainer_description || "") : "");
     setSelectedFeatures(Array.isArray(existing.selected_features) ? existing.selected_features : []);
+    setExamDates(Array.isArray(existing.exam_dates) ? existing.exam_dates : []);
 
     const savedSpecs = existing.staged_specifications;
     if (savedSpecs && Array.isArray(savedSpecs) && savedSpecs.length > 0) {
@@ -1394,6 +1397,85 @@ export function BuildPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Exam Dates for Countdown */}
+          {selectedFeatures.includes("exam_countdown") && (
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Timer className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-base">Exam Dates</CardTitle>
+                </div>
+                <p className="text-xs text-muted-foreground">Add your exam dates so students can see a countdown timer.</p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {examDates.map((ed, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      placeholder="Paper name (e.g. Paper 1)"
+                      value={ed.name}
+                      onChange={(e) => {
+                        const next = [...examDates];
+                        next[idx] = { ...next[idx], name: e.target.value };
+                        setExamDates(next);
+                      }}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="date"
+                      value={ed.date}
+                      onChange={(e) => {
+                        const next = [...examDates];
+                        next[idx] = { ...next[idx], date: e.target.value };
+                        setExamDates(next);
+                      }}
+                      className="w-40"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const next = examDates.filter((_, i) => i !== idx);
+                        setExamDates(next);
+                        if (projectId) {
+                          supabase.from("trainer_projects").update({ exam_dates: next as unknown as import("@/integrations/supabase/types").Json }).eq("id", projectId);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setExamDates([...examDates, { name: "", date: "" }]);
+                  }}
+                  className="w-full"
+                >
+                  <Plus className="h-3 w-3 mr-1" /> Add Exam Date
+                </Button>
+                {examDates.length > 0 && examDates.some(d => d.name && d.date) && (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (projectId) {
+                        supabase.from("trainer_projects").update({ exam_dates: examDates as unknown as import("@/integrations/supabase/types").Json }).eq("id", projectId)
+                          .then(({ error }) => {
+                            if (error) console.error("Failed to save exam dates:", error);
+                            else toast({ title: "Exam dates saved" });
+                          });
+                      }
+                    }}
+                    className="w-full bg-gradient-brand hover:opacity-90"
+                  >
+                    Save Exam Dates
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Deploy to Website Button */}
           {projectStatus === "deployed" && (

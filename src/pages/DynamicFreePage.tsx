@@ -4,6 +4,9 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
+import { ExamDate } from '@/components/ExamCountdown';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 
@@ -20,6 +23,7 @@ interface TrainerConfig {
   trainer_image_url: string | null;
   trainer_description: string | null;
   selected_features: string[] | null;
+  exam_dates: any[] | null;
 }
 
 export const DynamicFreePage = () => {
@@ -42,10 +46,9 @@ export const DynamicFreePage = () => {
       if (!prod) { navigate('/compare'); return; }
       setProduct(prod);
 
-      // Load trainer config
       const { data: tp } = await supabase
         .from('trainer_projects')
-        .select('trainer_image_url, trainer_description, selected_features')
+        .select('trainer_image_url, trainer_description, selected_features, exam_dates')
         .eq('product_id', prod.id)
         .maybeSingle();
       setTrainer(tp as TrainerConfig | null);
@@ -71,6 +74,15 @@ export const DynamicFreePage = () => {
 
   const subjectName = `${product.exam_board} ${product.subject}`;
 
+  // Parse exam dates from trainer config
+  const examDates: ExamDate[] = (trainer?.exam_dates || [])
+    .filter((d: any) => d.name && d.date)
+    .map((d: any) => ({
+      name: d.name,
+      date: new Date(d.date),
+      description: d.description || '',
+    }));
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
@@ -83,12 +95,22 @@ export const DynamicFreePage = () => {
         <Header
           showImageTool={hasFeature('my_ai')}
           showEssayMarker={hasFeature('essay_marker')}
+          showPastPaperFinder={hasFeature('past_papers')}
+          showRevisionGuide={hasFeature('revision_guide')}
+          showExamCountdown={hasFeature('exam_countdown')}
+          examDates={examDates}
           examSubjectName={subjectName}
           hideUserDetails
           productId={product.id}
           productSlug={product.slug}
           showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
+          customPastPaperContent={
+            <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="free" />
+          }
+          customRevisionGuideContent={
+            <DynamicRevisionGuide productId={product.id} subjectName={subjectName} tier="free" />
+          }
         />
       </div>
 
