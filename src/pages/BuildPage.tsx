@@ -120,6 +120,9 @@ export function BuildPage() {
   // Deploying
   const [deploying, setDeploying] = useState(false);
 
+  // Track whether project data has been loaded (prevent auto-save from overwriting on mount)
+  const [projectLoaded, setProjectLoaded] = useState(false);
+
   // Auto-save debounce
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -187,6 +190,7 @@ export function BuildPage() {
             setSpecComplete(false);
           }
         }
+        setProjectLoaded(true);
       } else {
         // Create new project
         const { data: newProj, error } = await supabase
@@ -205,7 +209,7 @@ export function BuildPage() {
           setExamTechnique("");
           setCustomSections([]);
           setProjectStatus("draft");
-          setSpecComplete(false);
+          setProjectLoaded(true);
         }
         if (error) console.error("Failed to create project:", error);
       }
@@ -228,7 +232,7 @@ export function BuildPage() {
 
   // Auto-save text fields
   const autoSave = useCallback(() => {
-    if (!projectId) return;
+    if (!projectId || !projectLoaded) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
       const { error } = await supabase
@@ -241,7 +245,7 @@ export function BuildPage() {
         .eq("id", projectId);
       if (error) console.error("Auto-save failed:", error);
     }, 2000);
-  }, [projectId, systemPrompt, examTechnique, customSections]);
+  }, [projectId, projectLoaded, systemPrompt, examTechnique, customSections]);
 
   useEffect(() => { autoSave(); }, [systemPrompt, examTechnique, customSections, autoSave]);
 
