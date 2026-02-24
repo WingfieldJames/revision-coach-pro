@@ -25,7 +25,7 @@ interface ContentOption {
 }
 
 interface RevisionGuideToolProps {
-  board: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
+  board: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
   productId?: string;
   tier?: 'free' | 'deluxe';
 }

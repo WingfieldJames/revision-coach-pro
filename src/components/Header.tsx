@@ -93,8 +93,8 @@ interface HeaderProps {
   toolsLocked?: boolean;
   hideUserDetails?: boolean;
   diagramSubject?: 'economics' | 'cs';
-  pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
-  revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
+  pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
+  revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
   gradeBoundariesSubject?: 'economics' | 'maths';
   productId?: string;
   productSlug?: string;

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { EDEXCEL_SPEC_POINTS, EDEXCEL_PAST_QUESTIONS, EdexcelSpecPoint, PastPaperQuestion } from '@/data/edexcelPastPapers';
 import { AQA_SPEC_POINTS, AQA_PAST_QUESTIONS, AQASpecPoint, AQAPastPaperQuestion } from '@/data/aqaPastPapers';
 import { OCR_CS_SPEC_POINTS, OCR_CS_PAST_QUESTIONS, OCRCSSpecPoint, OCRCSPastPaperQuestion } from '@/data/ocrCsPastPapers';
+import { OCR_PHYSICS_SPEC_POINTS, OCR_PHYSICS_PAST_QUESTIONS } from '@/data/ocrPhysicsPastPapers';
 import { AQA_PSYCHOLOGY_SPEC_POINTS, AQA_PSYCHOLOGY_PAST_QUESTIONS } from '@/data/aqaPsychologyPastPapers';
 import { EDEXCEL_MATHS_SPEC_POINTS, EDEXCEL_MATHS_PAST_QUESTIONS } from '@/data/edexcelMathsPastPapers';
 import { EDEXCEL_MATHS_APPLIED_SPEC_POINTS, EDEXCEL_MATHS_APPLIED_PAST_QUESTIONS } from '@/data/edexcelMathsAppliedPastPapers';
@@ -26,7 +27,7 @@ interface Question {
   extract?: string;
 }
 
-type BoardType = 'edexcel' | 'aqa' | 'ocr-cs' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
+type BoardType = 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
 
 interface PastPaperFinderToolProps {
   tier?: 'free' | 'deluxe';
@@ -38,6 +39,9 @@ interface PastPaperFinderToolProps {
 function getSpecPoints(board: BoardType): SpecPoint[] {
   if (board === 'ocr-cs') {
     return OCR_CS_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
+  }
+  if (board === 'ocr-physics') {
+    return OCR_PHYSICS_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
   }
   if (board === 'aqa') {
     return AQA_SPEC_POINTS.map(sp => ({ code: sp.code, name: sp.name, keywords: sp.keywords }));
@@ -56,6 +60,7 @@ function getSpecPoints(board: BoardType): SpecPoint[] {
 
 function getQuestions(board: BoardType): Question[] {
   if (board === 'ocr-cs') return OCR_CS_PAST_QUESTIONS;
+  if (board === 'ocr-physics') return OCR_PHYSICS_PAST_QUESTIONS;
   if (board === 'aqa') return AQA_PAST_QUESTIONS;
   if (board === 'aqa-psychology') return AQA_PSYCHOLOGY_PAST_QUESTIONS;
   if (board === 'edexcel-maths') return EDEXCEL_MATHS_PAST_QUESTIONS;
@@ -65,6 +70,7 @@ function getQuestions(board: BoardType): Question[] {
 
 function getBoardLabel(board: BoardType): string {
   if (board === 'ocr-cs') return 'OCR CS';
+  if (board === 'ocr-physics') return 'OCR Physics';
   if (board === 'aqa-psychology') return 'AQA Psychology';
   if (board === 'edexcel-maths') return 'Edexcel Maths (Pure)';
   if (board === 'edexcel-maths-applied') return 'Edexcel Maths (Applied)';
