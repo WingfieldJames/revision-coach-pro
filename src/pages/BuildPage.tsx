@@ -164,6 +164,7 @@ export function BuildPage() {
 
   // Deploying
   const [deploying, setDeploying] = useState(false);
+  const [erasing, setErasing] = useState(false);
   // Track if changes were made after deployment (enables re-deploy)
   const [hasChangesSinceDeploy, setHasChangesSinceDeploy] = useState(false);
 
@@ -653,6 +654,26 @@ export function BuildPage() {
       toast({ title: "Deploy failed", description: message, variant: "destructive" });
     } finally {
       setDeploying(false);
+    }
+  };
+
+  // Erase all training data from database
+  const handleEraseTraining = async () => {
+    if (!projectId) return;
+    setErasing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("erase-training-data", {
+        body: { project_id: projectId },
+      });
+      if (error) throw error;
+      setProjectStatus("draft");
+      setHasChangesSinceDeploy(false);
+      toast({ title: "Training data erased", description: `${data.deleted} chunk(s) removed from the database.` });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Erase failed";
+      toast({ title: "Erase failed", description: message, variant: "destructive" });
+    } finally {
+      setErasing(false);
     }
   };
 
@@ -1227,6 +1248,37 @@ export function BuildPage() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+
+          {/* Erase All Training Button */}
+          {projectStatus === "deployed" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="lg" variant="outline" className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" disabled={erasing}>
+                  {erasing ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Trash2 className="h-5 w-5 mr-2" />}
+                  Erase All Training Data
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Erase all training data?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete <strong>all trained chunks</strong> from the database for {currentLabel}. The AI will have no knowledge until you re-deploy.
+                    <br /><br />
+                    Your uploaded files and portal content will <strong>not</strong> be affected — only the deployed training data will be removed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>No, keep it</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleEraseTraining}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Yes, erase everything
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
 
         {/* Right: Info Panel */}
