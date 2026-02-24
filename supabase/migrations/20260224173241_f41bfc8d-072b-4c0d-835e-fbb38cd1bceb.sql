@@ -1,0 +1,2 @@
+UPDATE public.products SET subject = 'Mathematics', name = 'OCR Mathematics' WHERE id = '7469e99a-c34e-4500-9aee-11a107a4af09';
+UPDATE public.trainer_projects SET subject = 'Mathematics' WHERE product_id = '7469e99a-c34e-4500-9aee-11a107a4af09';
