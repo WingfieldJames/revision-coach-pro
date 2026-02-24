@@ -119,6 +119,8 @@ export function BuildPage() {
 
   // Deploying
   const [deploying, setDeploying] = useState(false);
+  // Track if changes were made after deployment (enables re-deploy)
+  const [hasChangesSinceDeploy, setHasChangesSinceDeploy] = useState(false);
 
   // Track whether project data has been loaded (prevent auto-save from overwriting on mount)
   const [projectLoaded, setProjectLoaded] = useState(false);
@@ -263,8 +265,9 @@ export function BuildPage() {
     setStagedSpecData(specs);
     if (projectLoaded) {
       persistSubmissionState({ staged_specifications: specs });
+      if (projectStatus === "deployed" && specs) setHasChangesSinceDeploy(true);
     }
-  }, [projectLoaded, persistSubmissionState]);
+  }, [projectLoaded, persistSubmissionState, projectStatus]);
 
   // File upload handler (supports multiple files)
   const handleFileUpload = async (file: File, sectionType: string, year?: string) => {
@@ -325,6 +328,7 @@ export function BuildPage() {
           .eq("id", uploadRecord.id);
       });
 
+      if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
       toast({ title: "Upload complete", description: `${file.name} uploaded. Processing in background.` });
 
       // Reload uploads immediately so new pending item appears
@@ -357,6 +361,7 @@ export function BuildPage() {
       });
       if (error) throw error;
       setUploads(prev => prev.filter(u => u.id !== uploadId));
+      if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
       toast({ title: "File removed", description: upload.file_name });
     } catch (err) {
       console.error("Delete failed:", err);
@@ -520,6 +525,7 @@ export function BuildPage() {
       });
       if (error) throw error;
       setProjectStatus("deployed");
+      setHasChangesSinceDeploy(false);
       setStagedSpecData(null);
       setSpecComplete(true);
       toast({ title: "Deployed!", description: data.message || "Subject deployed successfully." });
@@ -712,6 +718,7 @@ export function BuildPage() {
                           return;
                         }
                         setSystemPromptSubmitted(true);
+                        if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
                         persistSubmissionState({ system_prompt_submitted: true });
                         toast({ title: "System prompt submitted", description: "Will be saved to database on deploy." });
                       }}
@@ -774,6 +781,7 @@ export function BuildPage() {
                           return;
                         }
                         setExamTechniqueSubmitted(true);
+                        if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
                         persistSubmissionState({ exam_technique_submitted: true });
                         toast({ title: "Exam technique submitted", description: "Will be saved to database on deploy." });
                       }}
@@ -873,21 +881,31 @@ export function BuildPage() {
           {/* Deploy Button */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button size="lg" className="w-full" disabled={projectStatus === "deployed" || deploying}>
+              <Button size="lg" className="w-full" disabled={(projectStatus === "deployed" && !hasChangesSinceDeploy) || deploying}>
                 {deploying ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Rocket className="h-5 w-5 mr-2" />}
-                {projectStatus === "deployed" ? "Already Deployed" : "Deploy Subject"}
+                {projectStatus === "deployed" && !hasChangesSinceDeploy
+                  ? "Already Deployed"
+                  : projectStatus === "deployed" && hasChangesSinceDeploy
+                  ? "Re-Deploy Changes"
+                  : "Deploy Subject"}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Deploy {currentOption?.label}?</AlertDialogTitle>
+                <AlertDialogTitle>
+                  {projectStatus === "deployed" ? `Re-Deploy ${currentOption?.label}?` : `Deploy ${currentOption?.label}?`}
+                </AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will make the subject live and create a new product entry. You'll need to manually add Stripe links and routes afterwards.
+                  {projectStatus === "deployed"
+                    ? "This will update the live product with your latest changes. Existing training data will be replaced — no duplicates will be created."
+                    : "This will make the subject live and create a new product entry. You'll need to manually add Stripe links and routes afterwards."}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeploy}>Deploy</AlertDialogAction>
+                <AlertDialogAction onClick={handleDeploy}>
+                  {projectStatus === "deployed" ? "Re-Deploy" : "Deploy"}
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

@@ -65,7 +65,7 @@ serve(async (req) => {
       });
     }
 
-    if (project.status === "deployed") throw new Error("Project is already deployed");
+    // Allow re-deployment for updates after initial deploy
 
     let productId = project.product_id;
 
