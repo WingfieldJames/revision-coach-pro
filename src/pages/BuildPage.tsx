@@ -1000,6 +1000,7 @@ export function BuildPage() {
                     onDeleteUpload={handleDeleteUpload}
                     uploading={!!uploading?.startsWith("past_paper" + year)}
                     initialSubmitted={yearUploads.length > 0 && yearUploads.every(u => u.processing_status === "done")}
+                    productId={projects.find(p => p.id === selectedProjectId)?.product_id || null}
                   />
                 );
               })}
