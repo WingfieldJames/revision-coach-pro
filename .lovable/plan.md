@@ -1,27 +1,60 @@
 
 
-## Fix: Infinite Render Loop Causing "Aw Snap" Crashes
+# Build Portal: Trainer-Friendly Subject Management
 
-### Root Cause
+## Problem
+The current Build Portal has a small dropdown with hardcoded subject options ("AQA Biology", "OCR Maths"). This is rigid -- trainers can't easily add new subjects, and the dropdown format doesn't scale well as more subjects are added.
 
-An infinite re-render loop between `BuildPage.tsx` and `SpecificationUploader.tsx`:
+## Solution
+Redesign the Build Portal header to be more intuitive and scalable:
 
-1. `BuildPage` renders and passes an **inline arrow function** as `onSpecDataChange`
-2. `SpecificationUploader` has a `useEffect` with `onSpecDataChange` in its dependency array
-3. Since the function is recreated every render, the effect fires every render
-4. The effect calls back into `setStagedSpecData()`, which triggers a `BuildPage` re-render
-5. This loops infinitely until the browser runs out of memory and crashes
+1. **Replace the static dropdown with a sidebar-style subject list** that shows all existing trainer projects fetched from the database, plus a prominent "New Subject" button to create new ones.
 
-### Fix (2 changes)
+2. **"New Subject" flow**: When a trainer clicks "New Subject", a dialog appears with two fields -- a Subject name input and an Exam Board input (e.g., "Biology" + "AQA"). This creates a new `trainer_projects` row in the database, and the trainer is taken straight into it.
 
-**File 1: `src/pages/BuildPage.tsx`**
-- Wrap the `onSpecDataChange` callback in `useCallback` so it has a stable reference across renders
-- Dependencies: `[projectLoaded, persistSubmissionState]`
+3. **Dynamic project list**: Instead of the hardcoded `SUBJECT_OPTIONS` array, the portal loads all `trainer_projects` from the database for the current user. Each project shows its name, board, and deployment status (Draft / Deployed badge).
 
-**File 2: `src/components/SpecificationUploader.tsx`**
-- Remove `onSpecDataChange` from the `useEffect` dependency array (line 76) to prevent re-firing when the parent re-renders
-- This is safe because the effect should only fire when `stagedSpecs` or `state` actually changes, not when the callback reference changes
+4. **Better header layout**: The header shows the currently selected subject prominently with a clear status badge, and the subject switcher becomes a proper navigation element.
 
-### Why this only recently started
-The `projectLoaded` guard and other recent changes to the auto-save logic likely changed the timing such that the loop now consistently triggers before React can bail out of the re-render cycle.
+---
 
+## Technical Details
+
+### File: `src/pages/BuildPage.tsx`
+
+**Remove the hardcoded array:**
+```typescript
+// DELETE this
+const SUBJECT_OPTIONS = [
+  { value: "AQA-Biology", label: "AQA Biology", subject: "Biology", board: "AQA" },
+  { value: "OCR-Maths", label: "OCR Maths", subject: "Maths", board: "OCR" },
+];
+```
+
+**Add dynamic project loading:**
+- New state: `projects` (array of all `trainer_projects` rows for the user)
+- New state: `showNewSubjectDialog` (boolean)
+- New state: `newSubjectName` / `newExamBoard` (strings for the creation dialog)
+- Load all projects on mount with `supabase.from("trainer_projects").select("*").order("created_at")`
+- Replace `selectedSubject` (string matching a hardcoded value) with `selectedProjectId` (UUID) pointing to a real DB row
+
+**Replace the header Select with a proper subject picker:**
+- A dropdown that lists all projects from the DB, each showing "{Board} {Subject}" and a small status dot (green for deployed, grey for draft)
+- A "Create New Subject" item at the bottom of the dropdown, which opens a Dialog
+- The Dialog has two inputs: Subject (text input, e.g. "Biology") and Exam Board (select with common boards: AQA, OCR, Edexcel, CIE, or custom text)
+
+**Creation flow:**
+- On submit, insert a new row into `trainer_projects` with the given subject + exam_board + created_by
+- Automatically select the new project
+- All existing logic (loading uploads, auto-save, deploy) continues to work since it's already keyed on `projectId`
+
+**Remove the project-creation logic from the existing `loadProject` effect:**
+- Currently, when no project is found for a subject, it auto-creates one. This will be replaced by explicit creation via the dialog.
+- The load effect will simply select the project by ID and populate state.
+
+### Summary of changes
+- **1 file modified**: `src/pages/BuildPage.tsx`
+  - Remove `SUBJECT_OPTIONS` constant
+  - Add project list loading from Supabase
+  - Replace header `Select` with a dynamic dropdown + "New Subject" dialog
+  - Refactor project loading to work by project ID instead of subject string matching
