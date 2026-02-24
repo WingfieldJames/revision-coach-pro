@@ -4,6 +4,9 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
+import { ExamDate } from '@/components/ExamCountdown';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -22,6 +25,7 @@ interface TrainerConfig {
   trainer_image_url: string | null;
   trainer_description: string | null;
   selected_features: string[] | null;
+  exam_dates: any[] | null;
 }
 
 export const DynamicPremiumPage = () => {
@@ -46,7 +50,6 @@ export const DynamicPremiumPage = () => {
         .maybeSingle();
       if (!prod) { navigate('/compare'); return; }
 
-      // Check auth + subscription
       if (!user) { navigate(`/login?redirect=${prod.slug}-premium`); return; }
       const access = await checkProductAccess(user.id, prod.slug);
       if (!access.hasAccess) { navigate('/compare'); return; }
@@ -55,7 +58,7 @@ export const DynamicPremiumPage = () => {
 
       const { data: tp } = await supabase
         .from('trainer_projects')
-        .select('trainer_image_url, trainer_description, selected_features')
+        .select('trainer_image_url, trainer_description, selected_features, exam_dates')
         .eq('product_id', prod.id)
         .maybeSingle();
       setTrainer(tp as TrainerConfig | null);
@@ -81,6 +84,14 @@ export const DynamicPremiumPage = () => {
 
   const subjectName = `${product.exam_board} ${product.subject}`;
 
+  const examDates: ExamDate[] = (trainer?.exam_dates || [])
+    .filter((d: any) => d.name && d.date)
+    .map((d: any) => ({
+      name: d.name,
+      date: new Date(d.date),
+      description: d.description || '',
+    }));
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
@@ -93,12 +104,22 @@ export const DynamicPremiumPage = () => {
         <Header
           showImageTool={hasFeature('my_ai')}
           showEssayMarker={hasFeature('essay_marker')}
+          showPastPaperFinder={hasFeature('past_papers')}
+          showRevisionGuide={hasFeature('revision_guide')}
+          showExamCountdown={hasFeature('exam_countdown')}
+          examDates={examDates}
           examSubjectName={subjectName}
           hideUserDetails
           productId={product.id}
           productSlug={product.slug}
           showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
+          customPastPaperContent={
+            <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="deluxe" />
+          }
+          customRevisionGuideContent={
+            <DynamicRevisionGuide productId={product.id} subjectName={subjectName} tier="deluxe" />
+          }
         />
       </div>
 

@@ -285,6 +285,7 @@ export type Database = {
           created_by: string | null
           custom_sections: Json | null
           exam_board: string
+          exam_dates: Json | null
           exam_technique: string | null
           exam_technique_submitted: boolean
           id: string
@@ -305,6 +306,7 @@ export type Database = {
           created_by?: string | null
           custom_sections?: Json | null
           exam_board: string
+          exam_dates?: Json | null
           exam_technique?: string | null
           exam_technique_submitted?: boolean
           id?: string
@@ -325,6 +327,7 @@ export type Database = {
           created_by?: string | null
           custom_sections?: Json | null
           exam_board?: string
+          exam_dates?: Json | null
           exam_technique?: string | null
           exam_technique_submitted?: boolean
           id?: string
