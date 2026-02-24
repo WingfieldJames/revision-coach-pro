@@ -35,7 +35,8 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique } = await req.json();
+    const body = await req.json();
+    const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique, delete_specifications_only } = body;
     if (!project_id) throw new Error("project_id is required");
 
     // Get the project
@@ -46,6 +47,24 @@ serve(async (req) => {
       .single();
 
     if (projError || !project) throw new Error("Project not found");
+
+    // Handle specification-only deletion (for replace flow)
+    if (delete_specifications_only) {
+      const productId = project.product_id;
+      if (productId) {
+        const { error: delErr } = await supabase
+          .from("document_chunks")
+          .delete()
+          .eq("product_id", productId)
+          .contains("metadata", { content_type: "specification" });
+        if (delErr) console.error("Error deleting spec chunks:", delErr);
+        else console.log("Deleted specification chunks for product:", productId);
+      }
+      return new Response(JSON.stringify({ success: true, deleted: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (project.status === "deployed") throw new Error("Project is already deployed");
 
     let productId = project.product_id;

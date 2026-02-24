@@ -18,12 +18,13 @@ import {
 interface SpecificationUploaderProps {
   onStatusChange?: (status: "idle" | "processing" | "success" | "error") => void;
   onSpecDataChange?: (specs: string[] | null) => void;
+  onReplaceDeployed?: () => Promise<void>;
   initialComplete?: boolean;
 }
 
 type UploadState = "idle" | "reading" | "processing" | "staged" | "submitted" | "error";
 
-export function SpecificationUploader({ onStatusChange, onSpecDataChange, initialComplete }: SpecificationUploaderProps) {
+export function SpecificationUploader({ onStatusChange, onSpecDataChange, onReplaceDeployed, initialComplete }: SpecificationUploaderProps) {
   const [state, setState] = useState<UploadState>(initialComplete ? "submitted" : "idle");
   const [fileName, setFileName] = useState<string | null>(initialComplete ? "Specification (loaded)" : null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -166,9 +167,25 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
     }
   };
 
-  const handleReplaceConfirmed = () => {
+  const handleReplaceConfirmed = async () => {
     setShowReplaceConfirm(false);
-    inputRef.current?.click();
+    // If spec was deployed to DB, delete it
+    if (initialComplete && onReplaceDeployed) {
+      try {
+        await onReplaceDeployed();
+      } catch (e) {
+        console.error("Failed to delete deployed spec data:", e);
+      }
+    }
+    // Reset to idle so tick/progress is removed until new upload completes
+    setHasBeenSubmitted(false);
+    setStagedSpecs(null);
+    setFileName(null);
+    setPreviousSpecs(null);
+    setPreviousFileName(null);
+    setState("idle");
+    // Trigger file picker
+    setTimeout(() => inputRef.current?.click(), 100);
   };
 
   const removeSpecPoint = (index: number) => {
