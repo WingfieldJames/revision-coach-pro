@@ -51,7 +51,7 @@ const LEGACY_BOARDS_MAP: Record<string, string[]> = {
   'physics': ['ocr'],
   'chemistry': ['aqa'],
   'psychology': ['aqa'],
-  'mathematics': ['edexcel', 'ocr'],
+  'mathematics': ['edexcel'],
 };
 const LEGACY_DEFAULT_BOARD: Record<string, string> = {
   'economics': 'edexcel',
