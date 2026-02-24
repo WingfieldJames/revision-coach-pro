@@ -432,6 +432,7 @@ export function BuildPage() {
           history: chatMessages.map(m => ({ role: m.role, content: m.content })),
           tier: "deluxe",
           user_id: user?.id,
+          trainer_test: true,
         }),
       });
 

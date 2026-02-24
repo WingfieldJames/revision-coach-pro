@@ -367,20 +367,40 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null } = await req.json();
+    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false } = await req.json();
 
     if (!message) {
       throw new Error("message is required");
     }
 
-    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (diagrams: ${enable_diagrams})`);
+    console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (diagrams: ${enable_diagrams}, trainer_test: ${trainer_test})`);
     if (user_preferences) {
       console.log(`User preferences: Year ${user_preferences.year}, Predicted: ${user_preferences.predicted_grade}, Target: ${user_preferences.target_grade}`);
     }
 
+    // If trainer_test flag is set, verify the user is actually a trainer/admin
+    let isTrainerTest = false;
+    if (trainer_test && user_id) {
+      try {
+        const { data: roleData } = await supabaseAdmin
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user_id)
+          .in('role', ['trainer', 'admin']);
+        
+        if (roleData && roleData.length > 0) {
+          isTrainerTest = true;
+          console.log(`Trainer test mode enabled for user ${user_id}`);
+        }
+      } catch (err) {
+        console.error('Error checking trainer role:', err);
+      }
+    }
+
     // Server-side subscription verification - never trust client tier
-    let tier: string = 'free';
-    if (user_id && product_id) {
+    // Trainers testing their own product bypass subscription check
+    let tier: string = isTrainerTest ? 'deluxe' : 'free';
+    if (!isTrainerTest && user_id && product_id) {
       try {
         const { data: sub } = await supabaseAdmin
           .from('user_subscriptions')
@@ -402,8 +422,8 @@ serve(async (req) => {
     
     console.log(`Verified tier for user ${user_id}: ${tier}`);
 
-    // Check daily usage limit for FREE tier only
-    if (tier === 'free' && user_id && product_id) {
+    // Check daily usage limit for FREE tier only (skip for trainer tests)
+    if (tier === 'free' && !isTrainerTest && user_id && product_id) {
       const usageResult = await checkAndIncrementUsage(supabaseAdmin, user_id, product_id);
       
       console.log(`Usage check for ${user_id}: ${usageResult.count}/${usageResult.limit} (allowed: ${usageResult.allowed})`);
