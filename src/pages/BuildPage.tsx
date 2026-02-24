@@ -8,9 +8,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket } from "lucide-react";
+import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen } from "lucide-react";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,11 +40,23 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Available subject/board combos (add more later)
-const SUBJECT_OPTIONS = [
-  { value: "AQA-Biology", label: "AQA Biology", subject: "Biology", board: "AQA" },
-  { value: "OCR-Maths", label: "OCR Maths", subject: "Maths", board: "OCR" },
-];
+const EXAM_BOARDS = ["AQA", "OCR", "Edexcel", "CIE", "WJEC", "SQA"];
+
+interface TrainerProject {
+  id: string;
+  subject: string;
+  exam_board: string;
+  status: string;
+  created_at: string;
+  created_by: string | null;
+  system_prompt: string | null;
+  exam_technique: string | null;
+  custom_sections: any;
+  product_id: string | null;
+  system_prompt_submitted: boolean;
+  exam_technique_submitted: boolean;
+  staged_specifications: any;
+}
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
 
@@ -79,9 +108,15 @@ function cycleStatus(s: SectionStatus): SectionStatus {
 export function BuildPage() {
   const { user, loading: authLoading } = useAuth();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
-  const [selectedSubject, setSelectedSubject] = useState(SUBJECT_OPTIONS[0].value);
+  const [projects, setProjects] = useState<TrainerProject[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectStatus, setProjectStatus] = useState("draft");
+
+  // New Subject dialog
+  const [showNewSubjectDialog, setShowNewSubjectDialog] = useState(false);
+  const [newSubjectName, setNewSubjectName] = useState("");
+  const [newExamBoard, setNewExamBoard] = useState("");
 
   // Content fields
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -145,79 +180,87 @@ export function BuildPage() {
     checkRole();
   }, [user, authLoading]);
 
-  // Load or create project when subject changes
+  // Load all projects for this trainer
   useEffect(() => {
     if (!hasAccess || !user) return;
-    const opt = SUBJECT_OPTIONS.find(o => o.value === selectedSubject);
-    if (!opt) return;
-
-    const loadProject = async () => {
-      // Try to find existing project
-      const { data: existing } = await supabase
+    const loadProjects = async () => {
+      const { data, error } = await supabase
         .from("trainer_projects")
         .select("*")
-        .eq("subject", opt.subject)
-        .eq("exam_board", opt.board)
-        .limit(1)
-        .maybeSingle();
-
-      if (existing) {
-        setProjectId(existing.id);
-        setCustomSections((existing.custom_sections as unknown as CustomSection[]) || []);
-        setProjectStatus(existing.status);
-
-        // Restore submitted flags and only load text if submitted
-        const spSubmitted = !!(existing as any).system_prompt_submitted;
-        const etSubmitted = !!(existing as any).exam_technique_submitted;
-        setSystemPromptSubmitted(spSubmitted);
-        setExamTechniqueSubmitted(etSubmitted);
-        setSystemPrompt(spSubmitted ? (existing.system_prompt || "") : "");
-        setExamTechnique(etSubmitted ? (existing.exam_technique || "") : "");
-
-        // Restore staged specifications
-        const savedSpecs = (existing as any).staged_specifications;
-        if (savedSpecs && Array.isArray(savedSpecs) && savedSpecs.length > 0) {
-          setStagedSpecData(savedSpecs);
-          setSpecComplete(true);
-        } else {
-          setStagedSpecData(null);
-          // Check if spec data already exists in document_chunks for this product
-          if (existing.product_id) {
-            const { count } = await supabase
-              .from("document_chunks")
-              .select("id", { count: "exact", head: true })
-              .eq("product_id", existing.product_id);
-            setSpecComplete((count || 0) > 0);
-          } else {
-            setSpecComplete(false);
-          }
-        }
-        setProjectLoaded(true);
-      } else {
-        // Create new project
-        const { data: newProj, error } = await supabase
-          .from("trainer_projects")
-          .insert({
-            subject: opt.subject,
-            exam_board: opt.board,
-            created_by: user.id,
-          })
-          .select("id")
-          .single();
-
-        if (newProj) {
-          setProjectId(newProj.id);
-          setSystemPrompt("");
-          setExamTechnique("");
-          setCustomSections([]);
-          setProjectStatus("draft");
-          setProjectLoaded(true);
-        }
-        if (error) console.error("Failed to create project:", error);
+        .order("created_at", { ascending: true });
+      if (error) { console.error("Failed to load projects:", error); return; }
+      const typed = (data || []) as unknown as TrainerProject[];
+      setProjects(typed);
+      // Auto-select first project if none selected
+      if (!selectedProjectId && typed.length > 0) {
+        setSelectedProjectId(typed[0].id);
       }
     };
-    loadProject();
-  }, [hasAccess, user, selectedSubject]);
+    loadProjects();
+  }, [hasAccess, user]);
+
+  // Load project data when selectedProjectId changes
+  useEffect(() => {
+    if (!selectedProjectId || !hasAccess || !user) return;
+    const existing = projects.find(p => p.id === selectedProjectId);
+    if (!existing) return;
+
+    setProjectId(existing.id);
+    setCustomSections((existing.custom_sections as unknown as CustomSection[]) || []);
+    setProjectStatus(existing.status);
+
+    const spSubmitted = !!existing.system_prompt_submitted;
+    const etSubmitted = !!existing.exam_technique_submitted;
+    setSystemPromptSubmitted(spSubmitted);
+    setExamTechniqueSubmitted(etSubmitted);
+    setSystemPrompt(spSubmitted ? (existing.system_prompt || "") : "");
+    setExamTechnique(etSubmitted ? (existing.exam_technique || "") : "");
+
+    const savedSpecs = existing.staged_specifications;
+    if (savedSpecs && Array.isArray(savedSpecs) && savedSpecs.length > 0) {
+      setStagedSpecData(savedSpecs);
+      setSpecComplete(true);
+    } else {
+      setStagedSpecData(null);
+      if (existing.product_id) {
+        supabase
+          .from("document_chunks")
+          .select("id", { count: "exact", head: true })
+          .eq("product_id", existing.product_id)
+          .then(({ count }) => setSpecComplete((count || 0) > 0));
+      } else {
+        setSpecComplete(false);
+      }
+    }
+    setProjectLoaded(true);
+    setHasChangesSinceDeploy(false);
+    setChatMessages([]);
+  }, [selectedProjectId, projects]);
+
+  // Create new project
+  const handleCreateProject = async () => {
+    if (!user || !newSubjectName.trim() || !newExamBoard.trim()) return;
+    const { data, error } = await supabase
+      .from("trainer_projects")
+      .insert({
+        subject: newSubjectName.trim(),
+        exam_board: newExamBoard.trim(),
+        created_by: user.id,
+      })
+      .select("*")
+      .single();
+    if (error) {
+      toast({ title: "Failed to create subject", description: error.message, variant: "destructive" });
+      return;
+    }
+    const newProject = data as unknown as TrainerProject;
+    setProjects(prev => [...prev, newProject]);
+    setSelectedProjectId(newProject.id);
+    setShowNewSubjectDialog(false);
+    setNewSubjectName("");
+    setNewExamBoard("");
+    toast({ title: "Subject created", description: `${newProject.exam_board} ${newProject.subject}` });
+  };
 
   // Load uploads when project changes
   useEffect(() => {
@@ -586,7 +629,8 @@ export function BuildPage() {
     );
   }
 
-  const currentOption = SUBJECT_OPTIONS.find(o => o.value === selectedSubject);
+  const currentProject = projects.find(p => p.id === selectedProjectId);
+  const currentLabel = currentProject ? `${currentProject.exam_board} ${currentProject.subject}` : "Select Subject";
 
   return (
     <div className="min-h-screen bg-background">
@@ -595,30 +639,109 @@ export function BuildPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold">Build Portal</h1>
-            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SUBJECT_OPTIONS.map(opt => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2 min-w-[200px] justify-between">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    <span>{currentLabel}</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[260px]">
+                {projects.map(proj => (
+                  <DropdownMenuItem
+                    key={proj.id}
+                    onClick={() => setSelectedProjectId(proj.id)}
+                    className="flex items-center justify-between gap-2 cursor-pointer"
+                  >
+                    <span className="font-medium">{proj.exam_board} {proj.subject}</span>
+                    <span className={`h-2 w-2 rounded-full shrink-0 ${
+                      proj.status === "deployed" ? "bg-green-500" : "bg-muted-foreground/40"
+                    }`} />
+                  </DropdownMenuItem>
                 ))}
-              </SelectContent>
-            </Select>
+                {projects.length > 0 && <DropdownMenuSeparator />}
+                <DropdownMenuItem
+                  onClick={() => setShowNewSubjectDialog(true)}
+                  className="cursor-pointer"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span>Create New Subject</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex items-center gap-3">
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-              projectStatus === "deployed" ? "bg-green-500/20 text-green-600" :
-              projectStatus === "review" ? "bg-orange-500/20 text-orange-600" :
-              "bg-muted text-muted-foreground"
-            }`}>
+            <Badge variant={projectStatus === "deployed" ? "default" : "secondary"} className={
+              projectStatus === "deployed" ? "bg-green-500/20 text-green-600 border-green-500/30 hover:bg-green-500/20" : ""
+            }>
               {projectStatus.charAt(0).toUpperCase() + projectStatus.slice(1)}
-            </span>
+            </Badge>
           </div>
         </div>
       </div>
 
+      {/* New Subject Dialog */}
+      <Dialog open={showNewSubjectDialog} onOpenChange={setShowNewSubjectDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Create New Subject</DialogTitle>
+            <DialogDescription>Add a new subject to train your AI tutor on.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Subject Name</Label>
+              <Input
+                placeholder="e.g. Biology, Mathematics, History..."
+                value={newSubjectName}
+                onChange={e => setNewSubjectName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Exam Board</Label>
+              <Select value={newExamBoard} onValueChange={setNewExamBoard}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select exam board..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {EXAM_BOARDS.map(board => (
+                    <SelectItem key={board} value={board}>{board}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewSubjectDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateProject} disabled={!newSubjectName.trim() || !newExamBoard}>
+              Create Subject
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Empty state — no projects yet */}
+      {projects.length === 0 && (
+        <div className="max-w-md mx-auto mt-24 text-center space-y-4">
+          <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
+          <h2 className="text-lg font-semibold">No subjects yet</h2>
+          <p className="text-sm text-muted-foreground">Create your first subject to start training your AI tutor.</p>
+          <Button onClick={() => setShowNewSubjectDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" /> Create Subject
+          </Button>
+        </div>
+      )}
+
+      {!selectedProjectId && projects.length > 0 && (
+        <div className="max-w-md mx-auto mt-24 text-center space-y-4">
+          <p className="text-sm text-muted-foreground">Select a subject from the dropdown above to get started.</p>
+        </div>
+      )}
+
       {/* Main Content */}
+      {selectedProjectId && (
       <div className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left: Content Sections */}
         <div className="lg:col-span-3 space-y-6">
@@ -914,7 +1037,7 @@ export function BuildPage() {
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {projectStatus === "deployed" ? `Re-Deploy ${currentOption?.label}?` : `Deploy ${currentOption?.label}?`}
+                  {projectStatus === "deployed" ? `Re-Deploy ${currentLabel}?` : `Deploy ${currentLabel}?`}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
                   {projectStatus === "deployed"
@@ -981,6 +1104,7 @@ export function BuildPage() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
