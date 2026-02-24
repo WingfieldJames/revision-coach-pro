@@ -506,9 +506,11 @@ export const ComparePage = () => {
         {/* Mobile: Founder Section first, then stacked testimonials */}
         <div className="md:hidden">
           <div className="relative">
-            {LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology'
+            {getDynamicProduct()
+              ? <DynamicFounderSection productId={getDynamicProduct()!.id} subjectLabel={subjectLabels[subject] || subject} />
+              : LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology'
               ? <FounderSection subject={subject as any} examBoard={examBoard as any} />
-              : getDynamicProduct() && <DynamicFounderSection productId={getDynamicProduct()!.id} subjectLabel={subjectLabels[subject] || subject} />
+              : null
             }
           </div>
           
@@ -554,9 +556,11 @@ export const ComparePage = () => {
         {/* Desktop: Founder Section then Testimonials marquee */}
         <div className="hidden md:block">
           <div className="relative">
-            {LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology'
+            {getDynamicProduct()
+              ? <DynamicFounderSection productId={getDynamicProduct()!.id} subjectLabel={subjectLabels[subject] || subject} />
+              : LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology'
               ? <FounderSection subject={subject as any} examBoard={examBoard as any} />
-              : getDynamicProduct() && <DynamicFounderSection productId={getDynamicProduct()!.id} subjectLabel={subjectLabels[subject] || subject} />
+              : null
             }
           </div>
 
