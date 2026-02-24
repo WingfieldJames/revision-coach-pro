@@ -4,6 +4,16 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Upload, CheckCircle2, Loader2, AlertCircle, FileText, Trash2, X, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SpecificationUploaderProps {
   onStatusChange?: (status: "idle" | "processing" | "success" | "error") => void;
@@ -19,13 +29,21 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [stagedSpecs, setStagedSpecs] = useState<string[] | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
+  // Track whether a spec has ever been submitted/deployed (persists through edits)
+  const [hasBeenSubmitted, setHasBeenSubmitted] = useState(initialComplete || false);
+  // Store the previously submitted specs so cancel can restore them
+  const [previousSpecs, setPreviousSpecs] = useState<string[] | null>(null);
+  const [previousFileName, setPreviousFileName] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pendingFileRef = useRef<File | null>(null);
 
   // Sync initialComplete prop
   useEffect(() => {
     if (initialComplete && state === "idle") {
       setState("submitted");
       setFileName("Specification (loaded)");
+      setHasBeenSubmitted(true);
     }
   }, [initialComplete]);
 
@@ -35,8 +53,10 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
     if (state === "reading" || state === "processing") onStatusChange("processing");
     else if (state === "submitted") onStatusChange("success");
     else if (state === "error") onStatusChange("error");
+    // staged but previously submitted — still report success (spec exists)
+    else if (state === "staged" && hasBeenSubmitted) onStatusChange("success");
     else onStatusChange("idle");
-  }, [state, onStatusChange]);
+  }, [state, onStatusChange, hasBeenSubmitted]);
 
   // Report staged data changes to parent — only send when submitted
   useEffect(() => {
@@ -49,6 +69,12 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
       setState("error");
       toast({ title: "Invalid file", description: "Please upload a PDF file.", variant: "destructive" });
       return;
+    }
+
+    // Save current state before replacing
+    if (hasBeenSubmitted && stagedSpecs) {
+      setPreviousSpecs(stagedSpecs);
+      setPreviousFileName(fileName);
     }
 
     setFileName(file.name);
@@ -87,23 +113,62 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to process PDF";
       setErrorMessage(message);
-      setState("error");
+      // If we had a previous submission, restore to submitted state on error
+      if (hasBeenSubmitted && previousSpecs) {
+        setStagedSpecs(previousSpecs);
+        setFileName(previousFileName);
+        setState("submitted");
+        setPreviousSpecs(null);
+        setPreviousFileName(null);
+      } else {
+        setState("error");
+      }
       toast({ title: "Processing failed", description: message, variant: "destructive" });
     }
-  }, []);
+  }, [hasBeenSubmitted, stagedSpecs, fileName, previousSpecs, previousFileName]);
 
+  // Cancel: if previously submitted, go back to submitted. If fresh, go to idle.
   const handleCancel = () => {
-    setStagedSpecs(null);
-    setFileName(null);
-    setShowPreview(false);
-    setState("idle");
+    if (hasBeenSubmitted) {
+      // Restore previous submission
+      if (previousSpecs) {
+        setStagedSpecs(previousSpecs);
+        setFileName(previousFileName);
+        setPreviousSpecs(null);
+        setPreviousFileName(null);
+      }
+      setState("submitted");
+      setShowPreview(false);
+    } else {
+      setStagedSpecs(null);
+      setFileName(null);
+      setShowPreview(false);
+      setState("idle");
+    }
   };
 
   const handleSubmit = () => {
     if (!stagedSpecs || stagedSpecs.length === 0) return;
     setState("submitted");
+    setHasBeenSubmitted(true);
     setShowPreview(false);
+    setPreviousSpecs(null);
+    setPreviousFileName(null);
     toast({ title: "Specification submitted", description: "Will be saved to database on deploy." });
+  };
+
+  // Replace flow: if already submitted, ask for confirmation first
+  const handleReplaceClick = () => {
+    if (hasBeenSubmitted) {
+      setShowReplaceConfirm(true);
+    } else {
+      inputRef.current?.click();
+    }
+  };
+
+  const handleReplaceConfirmed = () => {
+    setShowReplaceConfirm(false);
+    inputRef.current?.click();
   };
 
   const removeSpecPoint = (index: number) => {
@@ -115,6 +180,8 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
 
   // Header icon
   const headerIcon = state === "submitted"
+    ? <CheckCircle2 className="h-5 w-5 text-green-500" />
+    : (state === "staged" && hasBeenSubmitted)
     ? <CheckCircle2 className="h-5 w-5 text-green-500" />
     : state === "staged"
     ? <Clock className="h-5 w-5 text-orange-500" />
@@ -145,6 +212,22 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
           }}
         />
 
+        {/* Replace confirmation dialog */}
+        <AlertDialog open={showReplaceConfirm} onOpenChange={setShowReplaceConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Replace specification?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will replace the current specification data. The existing spec points in the database will be removed when you deploy. Are you sure?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>No, keep current</AlertDialogCancel>
+              <AlertDialogAction onClick={handleReplaceConfirmed}>Yes, replace</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {/* Submitted (green done) state */}
         {state === "submitted" && (
           <div className="space-y-3">
@@ -158,7 +241,9 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
                 </p>
               </div>
               {fileName && <p className="text-xs text-muted-foreground truncate ml-6">{fileName}</p>}
-              <p className="text-xs text-orange-500 mt-1 ml-6">Will be saved to database on deploy</p>
+              {hasStagedData && (
+                <p className="text-xs text-orange-500 mt-1 ml-6">Will be saved to database on deploy</p>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -166,6 +251,9 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
                 variant="outline"
                 className="text-xs"
                 onClick={() => {
+                  // Save current state for potential cancel
+                  setPreviousSpecs(stagedSpecs);
+                  setPreviousFileName(fileName);
                   setState("staged");
                   setShowPreview(true);
                 }}
@@ -176,7 +264,7 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
                 size="sm"
                 variant="ghost"
                 className="text-xs text-muted-foreground"
-                onClick={() => inputRef.current?.click()}
+                onClick={handleReplaceClick}
               >
                 Replace
               </Button>
@@ -187,11 +275,19 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
         {/* Staged state — parsed but not yet submitted */}
         {state === "staged" && (
           <div className="space-y-3">
-            <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 px-4 py-3">
+            <div className={`rounded-lg border px-4 py-3 ${
+              hasBeenSubmitted
+                ? "border-green-500/30 bg-green-500/5"
+                : "border-orange-500/30 bg-orange-500/5"
+            }`}>
               <div className="flex items-center gap-2 mb-1">
-                <FileText className="h-4 w-4 text-orange-500 shrink-0" />
-                <p className="text-sm font-medium text-orange-600 dark:text-orange-400">
-                  {stagedSpecs?.length || 0} spec points extracted — review before submitting
+                <FileText className={`h-4 w-4 shrink-0 ${hasBeenSubmitted ? "text-green-500" : "text-orange-500"}`} />
+                <p className={`text-sm font-medium ${
+                  hasBeenSubmitted
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-orange-600 dark:text-orange-400"
+                }`}>
+                  {stagedSpecs?.length || 0} spec points — review before submitting
                 </p>
               </div>
               {fileName && <p className="text-xs text-muted-foreground truncate ml-6">{fileName}</p>}
@@ -213,7 +309,7 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, initia
                 size="sm"
                 variant="ghost"
                 className="text-xs text-muted-foreground"
-                onClick={() => inputRef.current?.click()}
+                onClick={handleReplaceClick}
               >
                 Replace
               </Button>
