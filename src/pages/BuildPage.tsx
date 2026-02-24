@@ -660,6 +660,19 @@ export function BuildPage() {
             initialComplete={specComplete}
             onStatusChange={setSpecStatusFromUploader}
             onSpecDataChange={setStagedSpecData}
+            onReplaceDeployed={async () => {
+              if (!projectId) return;
+              // Delete deployed spec chunks via edge function (needs service role)
+              const { error } = await supabase.functions.invoke("deploy-subject", {
+                body: {
+                  project_id: projectId,
+                  delete_specifications_only: true,
+                },
+              });
+              if (error) throw error;
+              setSpecComplete(false);
+              setStagedSpecData(null);
+            }}
           />
 
           {/* Past Papers */}
