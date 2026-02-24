@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket } from "lucide-react";
+import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import {
   AlertDialog,
@@ -37,6 +38,7 @@ interface TrainerUpload {
   section_type: string;
   year: string | null;
   file_name: string;
+  file_url: string;
   processing_status: string;
   chunks_created: number;
   doc_type?: string | null;
@@ -105,6 +107,9 @@ export function BuildPage() {
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
+
+  // Per-year submission tracking
+  const [submittedYears, setSubmittedYears] = useState<Set<string>>(new Set());
 
   // Chat
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -304,6 +309,24 @@ export function BuildPage() {
   const handleMultiFileUpload = async (files: FileList, year: string) => {
     for (const file of Array.from(files)) {
       await handleFileUpload(file, "past_paper", year);
+    }
+  };
+
+  // Delete an upload record (and its storage file)
+  const handleDeleteUpload = async (uploadId: string) => {
+    const upload = uploads.find(u => u.id === uploadId);
+    if (!upload) return;
+    try {
+      // Delete from storage
+      await supabase.storage.from("trainer-uploads").remove([upload.file_url]);
+      // Delete the DB record via edge function (RLS doesn't allow direct delete)
+      // For now just mark as removed locally since trainer_uploads doesn't allow DELETE via RLS
+      // We'll filter it out - the record stays but won't affect deployment
+      setUploads(prev => prev.filter(u => u.id !== uploadId));
+      toast({ title: "File removed", description: upload.file_name });
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast({ title: "Delete failed", variant: "destructive" });
     }
   };
 
@@ -679,29 +702,21 @@ export function BuildPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Past Papers</CardTitle>
-              <p className="text-xs text-muted-foreground">Upload QPs and Mark Schemes — they'll be auto-paired by paper number</p>
+              <p className="text-xs text-muted-foreground">Upload QPs and Mark Schemes — they'll be auto-paired by paper number. Submit each year when ready.</p>
             </CardHeader>
             <CardContent className="space-y-3">
               {PAPER_YEARS.map(year => {
                 const yearUploads = getUploadsForYear(year);
                 return (
-                  <div key={year} className="border border-border rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{year}</span>
-                      <MultiFileUploadButton
-                        year={year}
-                        onUpload={(files) => handleMultiFileUpload(files, year)}
-                        uploading={!!uploading?.startsWith("past_paper" + year)}
-                      />
-                    </div>
-                    {yearUploads.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {yearUploads.map(u => (
-                          <UploadChip key={u.id} upload={u} />
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <PastPaperYearCard
+                    key={year}
+                    year={year}
+                    uploads={yearUploads}
+                    onUploadFiles={handleMultiFileUpload}
+                    onDeleteUpload={handleDeleteUpload}
+                    uploading={!!uploading?.startsWith("past_paper" + year)}
+                    initialSubmitted={yearUploads.length > 0 && yearUploads.every(u => u.processing_status === "done")}
+                  />
                 );
               })}
             </CardContent>
