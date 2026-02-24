@@ -431,12 +431,14 @@ export function BuildPage() {
     if (!projectId) return;
     setDeploying(true);
     try {
+      const submittedCustomSections = customSections.filter(s => s.content.length > 20);
       const { data, error } = await supabase.functions.invoke("deploy-subject", {
         body: {
           project_id: projectId,
           staged_specifications: stagedSpecData || undefined,
           staged_system_prompt: systemPromptSubmitted ? systemPrompt : undefined,
           staged_exam_technique: examTechniqueSubmitted ? examTechnique : undefined,
+          staged_custom_sections: submittedCustomSections.length > 0 ? submittedCustomSections : undefined,
         },
       });
       if (error) throw error;
