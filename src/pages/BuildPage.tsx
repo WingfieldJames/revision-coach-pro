@@ -163,15 +163,27 @@ export function BuildPage() {
         setCustomSections((existing.custom_sections as unknown as CustomSection[]) || []);
         setProjectStatus(existing.status);
 
-        // Check if spec data already exists in document_chunks for this product
-        if (existing.product_id) {
-          const { count } = await supabase
-            .from("document_chunks")
-            .select("id", { count: "exact", head: true })
-            .eq("product_id", existing.product_id);
-          setSpecComplete((count || 0) > 0);
+        // Restore submitted flags
+        setSystemPromptSubmitted(!!(existing as any).system_prompt_submitted);
+        setExamTechniqueSubmitted(!!(existing as any).exam_technique_submitted);
+
+        // Restore staged specifications
+        const savedSpecs = (existing as any).staged_specifications;
+        if (savedSpecs && Array.isArray(savedSpecs) && savedSpecs.length > 0) {
+          setStagedSpecData(savedSpecs);
+          setSpecComplete(true);
         } else {
-          setSpecComplete(false);
+          setStagedSpecData(null);
+          // Check if spec data already exists in document_chunks for this product
+          if (existing.product_id) {
+            const { count } = await supabase
+              .from("document_chunks")
+              .select("id", { count: "exact", head: true })
+              .eq("product_id", existing.product_id);
+            setSpecComplete((count || 0) > 0);
+          } else {
+            setSpecComplete(false);
+          }
         }
       } else {
         // Create new project
@@ -230,6 +242,16 @@ export function BuildPage() {
   }, [projectId, systemPrompt, examTechnique, customSections]);
 
   useEffect(() => { autoSave(); }, [systemPrompt, examTechnique, customSections, autoSave]);
+
+  // Persist submission states to DB
+  const persistSubmissionState = useCallback(async (updates: Record<string, unknown>) => {
+    if (!projectId) return;
+    const { error } = await supabase
+      .from("trainer_projects")
+      .update(updates as any)
+      .eq("id", projectId);
+    if (error) console.error("Failed to persist submission state:", error);
+  }, [projectId]);
 
   // File upload handler (supports multiple files)
   const handleFileUpload = async (file: File, sectionType: string, year?: string) => {
@@ -605,6 +627,7 @@ export function BuildPage() {
                           return;
                         }
                         setSystemPromptSubmitted(true);
+                        persistSubmissionState({ system_prompt_submitted: true });
                         toast({ title: "System prompt submitted", description: "Will be saved to database on deploy." });
                       }}
                       disabled={systemPrompt.trim().length === 0}
@@ -666,6 +689,7 @@ export function BuildPage() {
                           return;
                         }
                         setExamTechniqueSubmitted(true);
+                        persistSubmissionState({ exam_technique_submitted: true });
                         toast({ title: "Exam technique submitted", description: "Will be saved to database on deploy." });
                       }}
                       disabled={examTechnique.trim().length === 0}
@@ -681,8 +705,12 @@ export function BuildPage() {
           {/* Specification */}
           <SpecificationUploader
             initialComplete={specComplete}
+            initialStagedSpecs={stagedSpecData}
             onStatusChange={setSpecStatusFromUploader}
-            onSpecDataChange={setStagedSpecData}
+            onSpecDataChange={(specs) => {
+              setStagedSpecData(specs);
+              persistSubmissionState({ staged_specifications: specs });
+            }}
             onReplaceDeployed={async () => {
               if (!projectId) return;
               // Delete deployed spec chunks via edge function (needs service role)
