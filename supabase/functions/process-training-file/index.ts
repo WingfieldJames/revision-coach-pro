@@ -24,37 +24,64 @@ Return ONLY a JSON object (no markdown):
 }
 
 function buildQPExtractionPrompt(year: string): string {
-  return `You are an exam paper extraction expert. Extract each question with its sub-parts from this Question Paper.
+  return `You are an exam paper extraction expert. Extract each question from this Question Paper.
+
+FOCUS ON:
+- The question number and sub-part labels (a), (b)(i), (b)(ii) etc.
+- The actual question text students must answer
+- Any context, data, stimulus material, or source text given WITH the question
+- Mark allocations per part
+- Whether it's a multiple choice, short answer, or extended response question
+
+SKIP/IGNORE:
+- Cover page instructions, rubric, "Answer ALL questions", "Write in black ink" etc.
+- Blank pages, formula sheets, periodic tables, data booklets references
+- Page numbers, headers, footers, copyright notices
+- Administrative text about exam conditions
 
 Output as a JSON array of objects, one per question:
 [
   {
     "question_number": "1",
-    "question_text": "Full question text including all sub-parts (a), (b), (c) etc.",
+    "question_text": "Full question text including all sub-parts with their labels and mark allocations. Include any context/stimulus material given.",
     "total_marks": 6,
     "topic": "Topic this question covers"
   }
 ]
 
 Year: ${year}
-Be thorough - capture every question. Preserve sub-part labels and mark allocations.`;
+Be thorough - capture every question with its full context.`;
 }
 
 function buildMSExtractionPrompt(year: string): string {
-  return `You are a mark scheme extraction expert. Extract the mark scheme answers for each question from this document.
+  return `You are a mark scheme extraction expert. Extract the mark scheme for each question from this document.
+
+FOCUS ON:
+- The correct answers and acceptable alternative answers
+- Mark allocation codes (M1, A1, B1, AO1, AO2, AO3 etc.) and what earns each mark
+- Examiner comments, guidance notes, and "Accept/Reject" clarifications
+- Required working or method steps
+- Level descriptors for extended response questions (what gets Level 1, 2, 3 etc.)
+- Key indicative content students should include
+
+SKIP/IGNORE:
+- Cover page, administrative headers, "Mark Scheme" title pages
+- General marking instructions that appear at the start (e.g. "Use ticks to indicate marks")
+- Copyright notices, page numbers, blank pages
+- Generic rubric about how to use the mark scheme
 
 Output as a JSON array of objects, one per question:
 [
   {
     "question_number": "1",
-    "mark_scheme": "Full mark scheme for this question including M1, A1, B1 codes and acceptable answers for all sub-parts",
+    "mark_scheme": "The actual marking points, acceptable answers, mark codes, and any examiner guidance for all sub-parts",
     "total_marks": 6,
     "topic": "Topic this question covers"
   }
 ]
 
 Year: ${year}
-Be thorough - capture every question's marking points. Preserve mark allocation codes (M1, A1, B1 etc).`;
+Be thorough - capture every question's marking points and examiner guidance.`;
 }
 
 function buildSpecificationPrompt(): string {
