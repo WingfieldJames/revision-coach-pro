@@ -39,6 +39,9 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
   // Store the previously submitted specs so cancel can restore them
   const [previousSpecs, setPreviousSpecs] = useState<string[] | null>(null);
   const [previousFileName, setPreviousFileName] = useState<string | null>(null);
+  const [showJsonEditor, setShowJsonEditor] = useState(false);
+  const [jsonEditorValue, setJsonEditorValue] = useState("");
+  const [jsonError, setJsonError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const pendingFileRef = useRef<File | null>(null);
 
@@ -144,8 +147,9 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
 
   // Cancel: if previously submitted, go back to submitted. If fresh, go to idle.
   const handleCancel = () => {
+    setShowJsonEditor(false);
+    setJsonError(null);
     if (hasBeenSubmitted) {
-      // Restore previous submission
       if (previousSpecs) {
         setStagedSpecs(previousSpecs);
         setFileName(previousFileName);
@@ -345,6 +349,21 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
               <Button
                 size="sm"
                 variant="ghost"
+                className="text-xs"
+                onClick={() => {
+                  if (!showJsonEditor) {
+                    setJsonEditorValue(JSON.stringify(stagedSpecs || [], null, 2));
+                    setJsonError(null);
+                  }
+                  setShowJsonEditor(!showJsonEditor);
+                  if (!showPreview) setShowPreview(true);
+                }}
+              >
+                {showJsonEditor ? "List view" : "Edit JSON"}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
                 className="text-xs text-muted-foreground"
                 onClick={handleReplaceClick}
               >
@@ -411,24 +430,61 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
                 {stagedSpecs!.length} points
               </span>
             </div>
-            <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
-              {stagedSpecs!.map((spec, i) => (
-                <div key={i} className="flex items-start gap-1.5 group">
-                  <p className="flex-1 text-xs text-muted-foreground px-2 py-1.5 rounded bg-muted/30">
-                    {spec}
-                  </p>
-                  {state === "staged" && (
-                    <button
-                      onClick={() => removeSpecPoint(i)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive shrink-0 mt-0.5"
-                      title="Remove this spec point"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+            {showJsonEditor && state === "staged" ? (
+              <div className="p-2 space-y-2">
+                <textarea
+                  className="w-full min-h-[300px] max-h-[500px] text-xs font-mono p-3 rounded border border-border bg-background text-foreground resize-y focus:outline-none focus:ring-1 focus:ring-ring"
+                  value={jsonEditorValue}
+                  onChange={e => {
+                    setJsonEditorValue(e.target.value);
+                    setJsonError(null);
+                  }}
+                />
+                {jsonError && (
+                  <p className="text-xs text-destructive">{jsonError}</p>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs"
+                  onClick={() => {
+                    try {
+                      const parsed = JSON.parse(jsonEditorValue);
+                      if (!Array.isArray(parsed) || !parsed.every(s => typeof s === "string")) {
+                        setJsonError("JSON must be an array of strings");
+                        return;
+                      }
+                      setStagedSpecs(parsed);
+                      setJsonError(null);
+                      toast({ title: "JSON applied", description: `${parsed.length} spec points updated.` });
+                    } catch {
+                      setJsonError("Invalid JSON — please fix syntax errors");
+                    }
+                  }}
+                >
+                  Apply changes
+                </Button>
+              </div>
+            ) : (
+              <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
+                {stagedSpecs!.map((spec, i) => (
+                  <div key={i} className="flex items-start gap-1.5 group">
+                    <p className="flex-1 text-xs text-muted-foreground px-2 py-1.5 rounded bg-muted/30">
+                      {spec}
+                    </p>
+                    {state === "staged" && (
+                      <button
+                        onClick={() => removeSpecPoint(i)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive shrink-0 mt-0.5"
+                        title="Remove this spec point"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </CardContent>
