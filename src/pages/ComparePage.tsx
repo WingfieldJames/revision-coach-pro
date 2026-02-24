@@ -51,7 +51,7 @@ const LEGACY_BOARDS_MAP: Record<string, string[]> = {
   'physics': ['ocr'],
   'chemistry': ['aqa'],
   'psychology': ['aqa'],
-  'mathematics': ['edexcel'],
+  'mathematics': ['edexcel', 'ocr'],
 };
 const LEGACY_DEFAULT_BOARD: Record<string, string> = {
   'economics': 'edexcel',
@@ -115,7 +115,8 @@ export const ComparePage = () => {
     'ocr-physics': 'ecd5978d-3bf4-4b9c-993f-30b7f3a0f197',
     'aqa-chemistry': '3e5bf02e-1424-4bb3-88f9-2a9c58798444',
     'aqa-psychology': 'c56bc6d6-5074-4e1f-8bf2-8e900ba928ec',
-    'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+    'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    'ocr-maths': '7469e99a-c34e-4500-9aee-11a107a4af09',
   };
 
   // Build combined subjects list (legacy + dynamic)
@@ -191,6 +192,7 @@ export const ComparePage = () => {
     if (subject === 'physics') return 'ocr-physics';
     if (subject === 'chemistry') return 'aqa-chemistry';
     if (subject === 'psychology') return 'aqa-psychology';
+    if (subject === 'mathematics' && examBoard === 'ocr') return 'ocr-maths';
     if (subject === 'mathematics') return 'edexcel-mathematics';
     return null;
   };
@@ -258,6 +260,7 @@ export const ComparePage = () => {
       if (subject === 'physics') return '/ocr-physics-free-version';
       if (subject === 'chemistry') return '/aqa-chemistry-free-version';
       if (subject === 'psychology') return '/aqa-psychology-free-version';
+      if (subject === 'mathematics' && examBoard === 'ocr') return '/s/ocr-maths/free';
       if (subject === 'mathematics') return '/edexcel-maths-free-version';
       if (examBoard === 'aqa') return '/aqa-free-version';
       if (examBoard === 'cie') return '/cie-free-version';
@@ -282,7 +285,7 @@ export const ComparePage = () => {
       const dp = getDynamicProduct();
       if (dp) { window.location.href = `/s/${dp.slug}/premium`; return; }
 
-      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
+      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : (subject === 'mathematics' && examBoard === 'ocr') ? '/s/ocr-maths/premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
