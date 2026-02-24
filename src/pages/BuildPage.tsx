@@ -715,7 +715,9 @@ export function BuildPage() {
             onStatusChange={setSpecStatusFromUploader}
             onSpecDataChange={(specs) => {
               setStagedSpecData(specs);
-              persistSubmissionState({ staged_specifications: specs });
+              if (projectLoaded) {
+                persistSubmissionState({ staged_specifications: specs });
+              }
             }}
             onReplaceDeployed={async () => {
               if (!projectId) return;
