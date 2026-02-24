@@ -189,7 +189,14 @@ export function BuildPage() {
         .select("*")
         .order("created_at", { ascending: true });
       if (error) { console.error("Failed to load projects:", error); return; }
-      const typed = (data || []) as unknown as TrainerProject[];
+      const all = (data || []) as unknown as TrainerProject[];
+      // Deduplicate by board+subject (keep earliest created)
+      const seen = new Map<string, TrainerProject>();
+      for (const p of all) {
+        const key = `${p.exam_board.toLowerCase()}::${p.subject.toLowerCase()}`;
+        if (!seen.has(key)) seen.set(key, p);
+      }
+      const typed = Array.from(seen.values());
       setProjects(typed);
       // Auto-select first project if none selected
       if (!selectedProjectId && typed.length > 0) {
@@ -240,6 +247,21 @@ export function BuildPage() {
   // Create new project
   const handleCreateProject = async () => {
     if (!user || !newSubjectName.trim() || !newExamBoard.trim()) return;
+
+    // Prevent duplicates: check if board+subject already exists
+    const duplicate = projects.find(
+      p => p.exam_board.toLowerCase() === newExamBoard.trim().toLowerCase() &&
+           p.subject.toLowerCase() === newSubjectName.trim().toLowerCase()
+    );
+    if (duplicate) {
+      toast({ title: "Subject already exists", description: `${duplicate.exam_board} ${duplicate.subject} is already in your list.`, variant: "destructive" });
+      setSelectedProjectId(duplicate.id);
+      setShowNewSubjectDialog(false);
+      setNewSubjectName("");
+      setNewExamBoard("");
+      return;
+    }
+
     const { data, error } = await supabase
       .from("trainer_projects")
       .insert({
