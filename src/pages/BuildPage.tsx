@@ -259,6 +259,13 @@ export function BuildPage() {
     if (error) console.error("Failed to persist submission state:", error);
   }, [projectId]);
 
+  const handleSpecDataChange = useCallback((specs: string[] | null) => {
+    setStagedSpecData(specs);
+    if (projectLoaded) {
+      persistSubmissionState({ staged_specifications: specs });
+    }
+  }, [projectLoaded, persistSubmissionState]);
+
   // File upload handler (supports multiple files)
   const handleFileUpload = async (file: File, sectionType: string, year?: string) => {
     if (!projectId) return;
@@ -715,12 +722,7 @@ export function BuildPage() {
             initialComplete={specComplete}
             initialStagedSpecs={stagedSpecData}
             onStatusChange={setSpecStatusFromUploader}
-            onSpecDataChange={(specs) => {
-              setStagedSpecData(specs);
-              if (projectLoaded) {
-                persistSubmissionState({ staged_specifications: specs });
-              }
-            }}
+            onSpecDataChange={handleSpecDataChange}
             onReplaceDeployed={async () => {
               if (!projectId) return;
               // Delete deployed spec chunks via edge function (needs service role)
