@@ -294,6 +294,9 @@ export type Database = {
           subject: string
           system_prompt: string | null
           system_prompt_submitted: boolean
+          trainer_bio_submitted: boolean
+          trainer_description: string | null
+          trainer_image_url: string | null
           updated_at: string
         }
         Insert: {
@@ -310,6 +313,9 @@ export type Database = {
           subject: string
           system_prompt?: string | null
           system_prompt_submitted?: boolean
+          trainer_bio_submitted?: boolean
+          trainer_description?: string | null
+          trainer_image_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -326,6 +332,9 @@ export type Database = {
           subject?: string
           system_prompt?: string | null
           system_prompt_submitted?: boolean
+          trainer_bio_submitted?: boolean
+          trainer_description?: string | null
+          trainer_image_url?: string | null
           updated_at?: string
         }
         Relationships: [

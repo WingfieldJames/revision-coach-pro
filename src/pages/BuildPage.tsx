@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen } from "lucide-react";
+import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus } from "lucide-react";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +56,9 @@ interface TrainerProject {
   system_prompt_submitted: boolean;
   exam_technique_submitted: boolean;
   staged_specifications: any;
+  trainer_image_url: string | null;
+  trainer_description: string | null;
+  trainer_bio_submitted: boolean;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
@@ -139,6 +142,13 @@ export function BuildPage() {
   const [systemPromptSubmitted, setSystemPromptSubmitted] = useState(false);
   const [examTechniqueSubmitted, setExamTechniqueSubmitted] = useState(false);
 
+  // Meet the Brain
+  const [trainerImageUrl, setTrainerImageUrl] = useState<string | null>(null);
+  const [trainerDescription, setTrainerDescription] = useState("");
+  const [trainerBioSubmitted, setTrainerBioSubmitted] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const trainerImageInputRef = useRef<HTMLInputElement>(null);
+
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -218,10 +228,14 @@ export function BuildPage() {
 
     const spSubmitted = !!existing.system_prompt_submitted;
     const etSubmitted = !!existing.exam_technique_submitted;
+    const bioSubmitted = !!existing.trainer_bio_submitted;
     setSystemPromptSubmitted(spSubmitted);
     setExamTechniqueSubmitted(etSubmitted);
+    setTrainerBioSubmitted(bioSubmitted);
     setSystemPrompt(spSubmitted ? (existing.system_prompt || "") : "");
     setExamTechnique(etSubmitted ? (existing.exam_technique || "") : "");
+    setTrainerImageUrl(existing.trainer_image_url || null);
+    setTrainerDescription(bioSubmitted ? (existing.trainer_description || "") : "");
 
     const savedSpecs = existing.staged_specifications;
     if (savedSpecs && Array.isArray(savedSpecs) && savedSpecs.length > 0) {
@@ -308,13 +322,44 @@ export function BuildPage() {
           system_prompt: systemPrompt,
           exam_technique: examTechnique,
           custom_sections: customSections as unknown as import("@/integrations/supabase/types").Json,
+          trainer_description: trainerDescription,
         })
         .eq("id", projectId);
       if (error) console.error("Auto-save failed:", error);
     }, 2000);
-  }, [projectId, projectLoaded, systemPrompt, examTechnique, customSections]);
+  }, [projectId, projectLoaded, systemPrompt, examTechnique, customSections, trainerDescription]);
 
-  useEffect(() => { autoSave(); }, [systemPrompt, examTechnique, customSections, autoSave]);
+  useEffect(() => { autoSave(); }, [systemPrompt, examTechnique, customSections, trainerDescription, autoSave]);
+
+  // Upload trainer image
+  const handleTrainerImageUpload = async (file: File) => {
+    if (!projectId) return;
+    setUploadingImage(true);
+    try {
+      const filePath = `${projectId}/trainer_image_${Date.now()}_${file.name}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("trainer-uploads")
+        .upload(filePath, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      const { data: urlData } = supabase.storage
+        .from("trainer-uploads")
+        .getPublicUrl(filePath);
+
+      // Since bucket is private, store the path and we'll use a signed URL or just show the path
+      setTrainerImageUrl(filePath);
+      await supabase
+        .from("trainer_projects")
+        .update({ trainer_image_url: filePath })
+        .eq("id", projectId);
+      toast({ title: "Image uploaded" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Upload failed";
+      toast({ title: "Image upload failed", description: message, variant: "destructive" });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   // Persist submission states to DB
   const persistSubmissionState = useCallback(async (updates: Record<string, unknown>) => {
@@ -814,6 +859,102 @@ export function BuildPage() {
             </CardContent>
           </Card>
 
+          {/* Meet the Brain */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <User className="h-4 w-4" /> Meet the Brain
+                </CardTitle>
+                {trainerBioSubmitted
+                  ? <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  : (trainerDescription.length > 0 || trainerImageUrl)
+                  ? <Clock className="h-5 w-5 text-orange-500" />
+                  : <Circle className="h-5 w-5 text-muted-foreground" />
+                }
+              </div>
+            </CardHeader>
+            <CardContent>
+              {trainerBioSubmitted ? (
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                      <p className="text-sm font-medium text-green-600 dark:text-green-400">Bio submitted</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      {trainerImageUrl && (
+                        <div className="h-16 w-16 rounded-full bg-muted overflow-hidden shrink-0">
+                          <TrainerImage filePath={trainerImageUrl} />
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground line-clamp-3">{trainerDescription}</p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" className="text-xs" onClick={() => setTrainerBioSubmitted(false)}>
+                    Edit
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <input
+                      ref={trainerImageInputRef}
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleTrainerImageUpload(file);
+                      }}
+                    />
+                    <div
+                      className="h-20 w-20 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors overflow-hidden shrink-0"
+                      onClick={() => trainerImageInputRef.current?.click()}
+                    >
+                      {uploadingImage ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      ) : trainerImageUrl ? (
+                        <TrainerImage filePath={trainerImageUrl} />
+                      ) : (
+                        <ImagePlus className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground">Your photo</p>
+                      <p className="text-xs">Click to upload a profile image</p>
+                    </div>
+                  </div>
+                  <Textarea
+                    value={trainerDescription}
+                    onChange={e => setTrainerDescription(e.target.value)}
+                    placeholder="Tell students about yourself... Your qualifications, teaching experience, what makes you passionate about this subject."
+                    className="min-h-[120px] text-sm"
+                  />
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">Auto-saves every 2 seconds</p>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (trainerDescription.trim().length < 10) {
+                          toast({ title: "Too short", description: "Please enter a more detailed bio.", variant: "destructive" });
+                          return;
+                        }
+                        setTrainerBioSubmitted(true);
+                        if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
+                        persistSubmissionState({ trainer_bio_submitted: true });
+                        toast({ title: "Bio submitted" });
+                      }}
+                      disabled={trainerDescription.trim().length === 0}
+                    >
+                      Submit
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* System Prompt */}
           <Card>
             <CardHeader className="pb-3">
@@ -1086,6 +1227,7 @@ export function BuildPage() {
                 <CardTitle className="text-base">Progress</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                <ProgressRow label="Meet the Brain" status={trainerBioSubmitted ? "complete" : (trainerDescription.length > 0 || trainerImageUrl) ? "in_progress" : "empty"} />
                 <ProgressRow label="System Prompt" status={systemPromptSubmitted ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"} />
                 <ProgressRow label="Exam Technique" status={examTechniqueSubmitted ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"} />
                 <ProgressRow label="Specification" status={
@@ -1116,6 +1258,7 @@ export function BuildPage() {
                   <p>Chunks: {uploads.reduce((sum, u) => sum + (u.chunks_created || 0), 0)}</p>
                 </div>
                 <TrainingProgressBar
+                  trainerBioStatus={trainerBioSubmitted ? "complete" : (trainerDescription.length > 0 || trainerImageUrl) ? "in_progress" : "empty"}
                   systemPromptStatus={systemPromptSubmitted ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"}
                   examTechniqueStatus={examTechniqueSubmitted ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"}
                   specStatus={specStatusFromUploader === "success" || specComplete ? "complete" : specStatusFromUploader === "processing" ? "in_progress" : "empty"}
@@ -1133,12 +1276,14 @@ export function BuildPage() {
 }
 
 function TrainingProgressBar({
+  trainerBioStatus,
   systemPromptStatus,
   examTechniqueStatus,
   specStatus,
   paperYears,
   getYearStatus,
 }: {
+  trainerBioStatus: SectionStatus;
   systemPromptStatus: SectionStatus;
   examTechniqueStatus: SectionStatus;
   specStatus: SectionStatus;
@@ -1146,6 +1291,7 @@ function TrainingProgressBar({
   getYearStatus: (year: string) => SectionStatus;
 }) {
   const sections: { label: string; status: SectionStatus }[] = [
+    { label: "Meet the Brain", status: trainerBioStatus },
     { label: "System Prompt", status: systemPromptStatus },
     { label: "Exam Technique", status: examTechniqueStatus },
     { label: "Specification", status: specStatus },
@@ -1342,4 +1488,21 @@ function UploadChip({ upload }: { upload: TrainerUpload }) {
       <span>{label}{statusSuffix}</span>
     </span>
   );
+}
+
+function TrainerImage({ filePath }: { filePath: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const getUrl = async () => {
+      const { data } = await supabase.storage
+        .from("trainer-uploads")
+        .createSignedUrl(filePath, 3600);
+      if (data?.signedUrl) setUrl(data.signedUrl);
+    };
+    getUrl();
+  }, [filePath]);
+
+  if (!url) return <div className="w-full h-full bg-muted" />;
+  return <img src={url} alt="Trainer" className="w-full h-full object-cover" />;
 }
