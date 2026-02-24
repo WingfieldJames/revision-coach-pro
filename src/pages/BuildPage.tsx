@@ -734,6 +734,38 @@ export function BuildPage() {
     }
   };
 
+  // Remove from Website — deactivates the product so it no longer appears on the site
+  const [removingFromWebsite, setRemovingFromWebsite] = useState(false);
+  const handleRemoveFromWebsite = async () => {
+    if (!projectId) return;
+    setRemovingFromWebsite(true);
+    try {
+      const { data: proj } = await supabase
+        .from("trainer_projects")
+        .select("product_id, exam_board, subject")
+        .eq("id", projectId)
+        .single();
+
+      if (!proj?.product_id) {
+        toast({ title: "Nothing to remove", description: "This subject hasn't been deployed to the website yet." });
+        setRemovingFromWebsite(false);
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke("deploy-subject", {
+        body: { project_id: projectId, deactivate_website: true },
+      });
+      if (error) throw error;
+
+      toast({ title: "Removed from website", description: `${proj.exam_board} ${proj.subject} is no longer visible to students.` });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to remove from website";
+      toast({ title: "Remove failed", description: message, variant: "destructive" });
+    } finally {
+      setRemovingFromWebsite(false);
+    }
+  };
+
   // Add custom section
   const addCustomSection = () => {
     setCustomSections(prev => [...prev, { name: "", content: "" }]);
@@ -1504,6 +1536,32 @@ export function BuildPage() {
                   <AlertDialogCancel>No, not yet</AlertDialogCancel>
                   <AlertDialogAction onClick={handleDeployToWebsite}>
                     Yes, go live!
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
+          {/* Remove from Website Button */}
+          {projectStatus === "deployed" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="lg" variant="destructive" className="w-full" disabled={removingFromWebsite}>
+                  {removingFromWebsite ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Globe className="h-5 w-5 mr-2" />}
+                  Remove from Website
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Remove {currentLabel} from the website?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will take <strong>{currentLabel}</strong> offline. Students will no longer be able to access the free or premium chatbot pages. Your training data will remain intact and you can re-deploy at any time.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleRemoveFromWebsite} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Yes, remove it
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

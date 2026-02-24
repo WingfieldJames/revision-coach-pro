@@ -36,7 +36,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const body = await req.json();
-    const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique, staged_custom_sections, delete_specifications_only, activate_website } = body;
+    const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique, staged_custom_sections, delete_specifications_only, activate_website, deactivate_website } = body;
     if (!project_id) throw new Error("project_id is required");
 
     // Get the project
@@ -89,6 +89,25 @@ serve(async (req) => {
         product_id: productId, 
         activated: true,
         message: `${project.exam_board} ${project.subject} is now live on the website.` 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Handle website deactivation (remove from website)
+    if (deactivate_website) {
+      const productId = project.product_id;
+      if (!productId) throw new Error("Project has no product to deactivate");
+
+      await supabase.from("products").update({ active: false }).eq("id", productId);
+
+      console.log(`Deactivated product ${productId} from website`);
+
+      return new Response(JSON.stringify({
+        success: true,
+        product_id: productId,
+        deactivated: true,
+        message: `${project.exam_board} ${project.subject} has been removed from the website.`,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
