@@ -170,45 +170,31 @@ export function SubjectPlanSelector() {
       <ScrollReveal delay={0.1}>
         {/* Desktop: Connected toggle group + board dropdown on same line */}
         <div className="hidden md:flex items-center justify-center gap-4 mb-12">
-          <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
-            {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map((s) => (
-              <button
-                key={s}
-                onClick={() => {
-                  setSubject(s);
-                  if (s === 'economics' || s === 'mathematics') setExamBoard('edexcel');
-                  else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
-                  else setExamBoard('ocr');
-                }}
-                className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
-                  subject === s
-                    ? 'bg-gradient-brand text-white'
-                    : 'text-foreground hover:bg-muted'
-                }`}
-              >
-                {subjectLabels[s]}
-              </button>
-            ))}
-          </div>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted">
-                {getBoardLabel()}
+              <button className="rounded-full px-6 py-2.5 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted">
+                Exam Board: {getBoardLabel()} — {subjectLabels[subject]}
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-              {(subject === 'economics'
-                ? (['edexcel', 'aqa', 'cie'] as ExamBoard[])
-                : subject === 'mathematics'
-                ? (['edexcel'] as ExamBoard[])
-                : subject === 'chemistry' || subject === 'psychology'
-                ? (['aqa'] as ExamBoard[])
-                : (['ocr'] as ExamBoard[])
-              ).map(b => (
-                <DropdownMenuItem key={b} className="cursor-pointer hover:bg-muted" onClick={() => setExamBoard(b)}>
-                  {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : 'Edexcel'}
+            <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated min-w-[260px]">
+              {([
+                { s: 'economics' as Subject, b: 'edexcel' as ExamBoard, label: 'Economics (Edexcel)' },
+                { s: 'economics' as Subject, b: 'aqa' as ExamBoard, label: 'Economics (AQA)' },
+                { s: 'economics' as Subject, b: 'cie' as ExamBoard, label: 'Economics (CIE)' },
+                { s: 'computer-science' as Subject, b: 'ocr' as ExamBoard, label: 'Computer Science (OCR)' },
+                { s: 'physics' as Subject, b: 'ocr' as ExamBoard, label: 'Physics (OCR)' },
+                { s: 'chemistry' as Subject, b: 'aqa' as ExamBoard, label: 'Chemistry (AQA)' },
+                { s: 'psychology' as Subject, b: 'aqa' as ExamBoard, label: 'Psychology (AQA)' },
+                { s: 'mathematics' as Subject, b: 'edexcel' as ExamBoard, label: 'Mathematics (Edexcel)' },
+                { s: 'mathematics' as Subject, b: 'ocr' as ExamBoard, label: 'Mathematics (OCR)' },
+              ]).map(({ s, b, label }) => (
+                <DropdownMenuItem
+                  key={`${s}-${b}`}
+                  className={`cursor-pointer hover:bg-muted ${subject === s && examBoard === b ? 'font-semibold bg-muted' : ''}`}
+                  onClick={() => { setSubject(s); setExamBoard(b); }}
+                >
+                  {label}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
