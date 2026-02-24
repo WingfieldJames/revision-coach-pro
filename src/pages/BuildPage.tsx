@@ -690,6 +690,15 @@ export function BuildPage() {
                       <p className="text-sm font-medium text-green-600 dark:text-green-400">System prompt submitted</p>
                     </div>
                     <p className="text-xs text-muted-foreground line-clamp-3">{systemPrompt}</p>
+                    <p className="text-xs mt-1">
+                      {projectStatus === "deployed" && !hasChangesSinceDeploy ? (
+                        <span className="text-green-500">Live — deployed to database</span>
+                      ) : projectStatus === "deployed" && hasChangesSinceDeploy ? (
+                        <span className="text-orange-500">Changes pending — re-deploy to update</span>
+                      ) : (
+                        <span className="text-orange-500">Will be saved to database on deploy</span>
+                      )}
+                    </p>
                   </div>
                   <Button
                     size="sm"
@@ -720,7 +729,7 @@ export function BuildPage() {
                         setSystemPromptSubmitted(true);
                         if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
                         persistSubmissionState({ system_prompt_submitted: true });
-                        toast({ title: "System prompt submitted", description: "Will be saved to database on deploy." });
+                        toast({ title: "System prompt submitted", description: projectStatus === "deployed" ? "Re-deploy to apply changes." : "Will be saved to database on deploy." });
                       }}
                       disabled={systemPrompt.trim().length === 0}
                     >
@@ -754,6 +763,15 @@ export function BuildPage() {
                       <p className="text-sm font-medium text-green-600 dark:text-green-400">Exam technique submitted</p>
                     </div>
                     <p className="text-xs text-muted-foreground line-clamp-3">{examTechnique}</p>
+                    <p className="text-xs mt-1">
+                      {projectStatus === "deployed" && !hasChangesSinceDeploy ? (
+                        <span className="text-green-500">Live — deployed to database</span>
+                      ) : projectStatus === "deployed" && hasChangesSinceDeploy ? (
+                        <span className="text-orange-500">Changes pending — re-deploy to update</span>
+                      ) : (
+                        <span className="text-orange-500">Will be saved to database on deploy</span>
+                      )}
+                    </p>
                   </div>
                   <Button
                     size="sm"
@@ -783,7 +801,7 @@ export function BuildPage() {
                         setExamTechniqueSubmitted(true);
                         if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
                         persistSubmissionState({ exam_technique_submitted: true });
-                        toast({ title: "Exam technique submitted", description: "Will be saved to database on deploy." });
+                        toast({ title: "Exam technique submitted", description: projectStatus === "deployed" ? "Re-deploy to apply changes." : "Will be saved to database on deploy." });
                       }}
                       disabled={examTechnique.trim().length === 0}
                     >
@@ -799,6 +817,8 @@ export function BuildPage() {
           <SpecificationUploader
             initialComplete={specComplete}
             initialStagedSpecs={stagedSpecData}
+            isDeployed={projectStatus === "deployed"}
+            hasChangesSinceDeploy={hasChangesSinceDeploy}
             onStatusChange={setSpecStatusFromUploader}
             onSpecDataChange={handleSpecDataChange}
             onReplaceDeployed={async () => {

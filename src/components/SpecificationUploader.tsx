@@ -21,11 +21,13 @@ interface SpecificationUploaderProps {
   onReplaceDeployed?: () => Promise<void>;
   initialComplete?: boolean;
   initialStagedSpecs?: string[] | null;
+  isDeployed?: boolean;
+  hasChangesSinceDeploy?: boolean;
 }
 
 type UploadState = "idle" | "reading" | "processing" | "staged" | "submitted" | "error";
 
-export function SpecificationUploader({ onStatusChange, onSpecDataChange, onReplaceDeployed, initialComplete, initialStagedSpecs }: SpecificationUploaderProps) {
+export function SpecificationUploader({ onStatusChange, onSpecDataChange, onReplaceDeployed, initialComplete, initialStagedSpecs, isDeployed, hasChangesSinceDeploy }: SpecificationUploaderProps) {
   const [state, setState] = useState<UploadState>(initialComplete || (initialStagedSpecs && initialStagedSpecs.length > 0) ? "submitted" : "idle");
   const [fileName, setFileName] = useState<string | null>(initialComplete ? "Specification (loaded)" : initialStagedSpecs ? "Specification (saved)" : null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -270,9 +272,15 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
                 </p>
               </div>
               {fileName && <p className="text-xs text-muted-foreground truncate ml-6">{fileName}</p>}
-              {hasStagedData && (
-                <p className="text-xs text-orange-500 mt-1 ml-6">Will be saved to database on deploy</p>
-              )}
+              <p className="text-xs mt-1 ml-6">
+                {isDeployed && !hasChangesSinceDeploy ? (
+                  <span className="text-green-500">Live — deployed to database</span>
+                ) : isDeployed && hasChangesSinceDeploy ? (
+                  <span className="text-orange-500">Changes pending — re-deploy to update</span>
+                ) : (
+                  <span className="text-orange-500">Will be saved to database on deploy</span>
+                )}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <Button
