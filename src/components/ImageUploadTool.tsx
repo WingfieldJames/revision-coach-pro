@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Image, Copy, Check, X, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { fileDialogOpen } from '@/components/Header';
+import { fileDialogOpen } from '@/lib/fileDialogState';
 type ImageType = 'exam-question' | 'diagram' | 'notes' | 'general';
 
 interface ImageTypeOption {
