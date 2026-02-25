@@ -373,19 +373,22 @@ export const ComparePage = () => {
                 ))}
               </div>
 
-              <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
-                <SelectTrigger className="rounded-full px-6 py-2 h-auto w-auto text-sm font-medium border border-border bg-background text-foreground transition-all hover:bg-muted [&>svg]:ml-1">
-                  <span className="text-muted-foreground mr-1">Exam Board:</span>
-                  <SelectValue placeholder="Select Exam Board" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted">
+                    Exam Board
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
                   {boardsForSubject.map(b => (
-                    <SelectItem key={b} value={b}>
+                    <DropdownMenuItem key={b} className="cursor-pointer hover:bg-muted flex items-center gap-2" onClick={() => setExamBoard(b)}>
+                      {examBoard === b ? <Check className="h-3.5 w-3.5" /> : <span className="w-3.5" />}
                       {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
-                    </SelectItem>
+                    </DropdownMenuItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Mobile: Two dropdown buttons */}
