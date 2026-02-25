@@ -61,6 +61,7 @@ interface TrainerProject {
   trainer_bio_submitted: boolean;
   selected_features: string[] | null;
   exam_dates: any[] | null;
+  essay_marker_marks: number[] | null;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
@@ -163,6 +164,7 @@ export function BuildPage() {
   // Website Deployment features
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [examDates, setExamDates] = useState<Array<{ name: string; date: string }>>([]);
+  const [essayMarkerMarks, setEssayMarkerMarks] = useState<string>("");
 
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
@@ -255,6 +257,11 @@ export function BuildPage() {
     setTrainerDescription(bioSubmitted ? (existing.trainer_description || "") : "");
     setSelectedFeatures(Array.isArray(existing.selected_features) ? existing.selected_features : []);
     setExamDates(Array.isArray(existing.exam_dates) ? existing.exam_dates : []);
+    setEssayMarkerMarks(
+      Array.isArray(existing.essay_marker_marks) && existing.essay_marker_marks.length > 0
+        ? existing.essay_marker_marks.join(', ')
+        : ''
+    );
 
     const savedSpecs = existing.staged_specifications;
     if (savedSpecs && Array.isArray(savedSpecs) && savedSpecs.length > 0) {
@@ -1426,6 +1433,49 @@ export function BuildPage() {
               </div>
               {selectedFeatures.length > 0 && (
                 <p className="text-xs text-muted-foreground mt-3">{selectedFeatures.length} feature{selectedFeatures.length !== 1 ? "s" : ""} selected</p>
+              )}
+
+              {/* Essay Marker mark options */}
+              {selectedFeatures.includes("essay_marker") && (
+                <div className="mt-4 p-3 rounded-lg border border-border space-y-2">
+                  <div className="flex items-center gap-2">
+                    <PenTool className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-medium">Essay Marker — Mark Options</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Enter the mark values students can choose from (comma-separated). e.g. 3, 4, 6, 15</p>
+                  <Input
+                    value={essayMarkerMarks}
+                    onChange={(e) => setEssayMarkerMarks(e.target.value)}
+                    placeholder="e.g. 3, 4, 6, 15"
+                    className="text-sm"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const parsed = essayMarkerMarks
+                        .split(',')
+                        .map(s => parseInt(s.trim(), 10))
+                        .filter(n => !isNaN(n) && n > 0);
+                      if (parsed.length === 0) {
+                        toast({ title: "Invalid marks", description: "Enter at least one valid number.", variant: "destructive" });
+                        return;
+                      }
+                      if (projectId) {
+                        supabase
+                          .from("trainer_projects")
+                          .update({ essay_marker_marks: parsed as unknown as import("@/integrations/supabase/types").Json })
+                          .eq("id", projectId)
+                          .then(({ error }) => {
+                            if (error) console.error("Failed to save marks:", error);
+                            else toast({ title: "Mark options saved", description: `Marks: ${parsed.join(', ')}` });
+                          });
+                      }
+                    }}
+                  >
+                    Save Mark Options
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>
