@@ -55,6 +55,29 @@ serve(async (req) => {
             tier = "deluxe";
           }
         }
+
+        // Fallback: check legacy users table for Edexcel backwards compatibility
+        if (tier === "free") {
+          const { data: prod } = await supabaseAdmin
+            .from("products")
+            .select("slug")
+            .eq("id", product_id)
+            .maybeSingle();
+
+          if (prod?.slug === "edexcel-economics") {
+            const { data: legacyUser } = await supabaseAdmin
+              .from("users")
+              .select("is_premium, subscription_end")
+              .eq("id", user_id)
+              .maybeSingle();
+
+            if (legacyUser?.is_premium) {
+              if (!legacyUser.subscription_end || new Date(legacyUser.subscription_end) > new Date()) {
+                tier = "deluxe";
+              }
+            }
+          }
+        }
       } catch (err) {
         console.error("Error verifying subscription:", err);
       }
