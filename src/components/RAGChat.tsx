@@ -45,7 +45,7 @@ interface DiagramData {
 }
 
 export interface RAGChatRef {
-  submitMessage: (message: string) => void;
+  submitMessage: (message: string, imageDataUrl?: string) => void;
 }
 
 interface RAGChatProps {
@@ -405,14 +405,15 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   useEffect(() => {
     if (chatRef) {
       (chatRef as React.MutableRefObject<RAGChatRef>).current = {
-        submitMessage: (messageText: string) => {
-          if (!messageText.trim() || isLoading) return;
+        submitMessage: (messageText: string, imageDataUrl?: string) => {
+          if ((!messageText.trim() && !imageDataUrl) || isLoading) return;
           const userMessage: Message = {
             role: 'user',
-            content: messageText
+            content: messageText,
+            ...(imageDataUrl ? { imageUrl: imageDataUrl } : {})
           };
           setMessages(prev => [...prev, userMessage]);
-          handleSendWithMessage(messageText);
+          handleSendWithMessage(messageText, imageDataUrl);
         }
       };
     }
