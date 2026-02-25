@@ -75,9 +75,11 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
     else onStatusChange("idle");
   }, [state, onStatusChange, hasBeenSubmitted]);
 
-  // Report staged data changes to parent — only send when submitted
+  // Report staged data changes to parent — persist in both staged and submitted states to prevent data loss
   useEffect(() => {
-    onSpecDataChange?.(state === "submitted" ? stagedSpecs : null);
+    if (state === "submitted" || state === "staged") {
+      onSpecDataChange?.(stagedSpecs);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stagedSpecs, state]);
 
