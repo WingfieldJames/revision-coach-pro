@@ -39,7 +39,7 @@ export const LoginPage = () => {
   // Theme-aware canvas colors
   const canvasColors: [number, number, number][] = isDark
     ? [[255, 154, 46], [255, 77, 141]]
-    : [[147, 51, 234], [124, 58, 237]];
+    : [[168, 85, 247], [147, 51, 234]];
 
   // Theme-aware gradient for submit button
   const submitGradient = isDark
@@ -125,7 +125,7 @@ export const LoginPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-white dark:bg-background relative overflow-hidden">
+    <div className="min-h-screen w-full bg-[#f9fafb] dark:bg-background relative overflow-hidden">
       <SEOHead 
         title="Sign In to A* AI | A-Level Economics Revision"
         description="Sign in to your A* AI account to access your AI-powered A-Level Economics revision coach. Continue your journey to an A*."
@@ -133,17 +133,17 @@ export const LoginPage = () => {
       />
       
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-white dark:bg-background">
+      <div className="absolute inset-0 bg-[#f9fafb] dark:bg-background">
         <CanvasRevealEffect
           animationSpeed={10}
-          containerClassName="bg-white dark:bg-background"
+          containerClassName="bg-[#f9fafb] dark:bg-background"
           colors={canvasColors}
           opacities={[0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1]}
           dotSize={3}
           showGradient={false}
           direction="edges"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-background dark:via-background/80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f9fafb] via-[#f9fafb]/80 to-transparent dark:from-background dark:via-background/80" />
       </div>
 
       {/* Content Layer */}
