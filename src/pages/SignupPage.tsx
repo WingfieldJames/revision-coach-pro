@@ -118,7 +118,7 @@ export const SignupPage = () => {
           colors={canvasColors}
           opacities={[0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1]}
           dotSize={3}
-          showGradient={true}
+          showGradient={false}
           direction="edges"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-background dark:via-background/80" />
