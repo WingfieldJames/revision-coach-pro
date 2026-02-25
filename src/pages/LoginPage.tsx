@@ -141,6 +141,7 @@ export const LoginPage = () => {
           opacities={[0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1]}
           dotSize={3}
           showGradient={true}
+          direction="edges"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
       </div>

@@ -30,6 +30,7 @@ export const CanvasRevealEffect = ({
   dotSize,
   showGradient = true,
   reverse = false,
+  direction = "center",
 }: {
   animationSpeed?: number;
   opacities?: number[];
@@ -38,7 +39,29 @@ export const CanvasRevealEffect = ({
   dotSize?: number;
   showGradient?: boolean;
   reverse?: boolean;
+  direction?: "center" | "edges";
 }) => {
+  const shaderCode = direction === "edges"
+    ? `
+      float animation_speed_factor = ${animationSpeed.toFixed(1)};
+      float res_x = u_resolution.x / u_total_size;
+      float edge_dist = min(st2.x, res_x - st2.x) / (res_x * 0.5);
+      float intro_offset = edge_dist * 0.4 + (random(st2) * 0.12);
+      intro_offset *= animation_speed_factor;
+      float raw_time = u_time * animation_speed_factor - intro_offset;
+      float opacity_param = min(max(raw_time, 0.0), 1.0);
+    `
+    : `
+      float animation_speed_factor = ${animationSpeed.toFixed(1)};
+      float intro_offset = distance(u_resolution / 2.0 / u_total_size, st2) * 0.01 + (random(st2) * 0.15);
+      intro_offset *= animation_speed_factor;
+      ${reverse
+        ? `float time_param = 1.0 - (u_time * animation_speed_factor - intro_offset);`
+        : `float time_param = u_time * animation_speed_factor - intro_offset;`
+      }
+      float opacity_param = min(max(time_param, 0.0), 1.0);
+    `;
+
   return (
     <div className={`h-full relative w-full ${containerClassName}`}>
       <div className="h-full w-full">
@@ -46,16 +69,7 @@ export const CanvasRevealEffect = ({
           colors={colors ?? [[0, 255, 255]]}
           dotSize={dotSize ?? 3}
           opacities={opacities ?? [0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1]}
-          shader={`
-            float animation_speed_factor = ${animationSpeed.toFixed(1)};
-            float intro_offset = distance(u_resolution / 2.0 / u_total_size, st2) * 0.01 + (random(st2) * 0.15);
-            intro_offset *= animation_speed_factor;
-            ${reverse 
-              ? `float time_param = 1.0 - (u_time * animation_speed_factor - intro_offset);`
-              : `float time_param = u_time * animation_speed_factor - intro_offset;`
-            }
-            float opacity_param = min(max(time_param, 0.0), 1.0);
-          `}
+          shader={shaderCode}
           center={["x", "y"]}
         />
       </div>
