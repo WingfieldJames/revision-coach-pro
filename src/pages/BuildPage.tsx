@@ -343,13 +343,19 @@ export function BuildPage() {
           yearGroups.set(u.year, arr);
         }
       }
-      const initialSubmitted = new Set<string>();
-      for (const [y, ups] of yearGroups) {
-        if (ups.length > 0 && ups.every(u => u.processing_status === "done")) {
-          initialSubmitted.add(y);
+      // Restore explicitly submitted years from localStorage (not auto-detected from processing status)
+      const storageKey = `submittedYears_${projectId}`;
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const parsed = JSON.parse(saved) as string[];
+          setSubmittedYears(new Set(parsed));
+        } else {
+          setSubmittedYears(new Set());
         }
+      } catch {
+        setSubmittedYears(new Set());
       }
-      setSubmittedYears(initialSubmitted);
     };
     loadUploads();
   }, [projectId]);
@@ -1265,10 +1271,25 @@ export function BuildPage() {
                     onUploadFiles={handleMultiFileUpload}
                     onDeleteUpload={handleDeleteUpload}
                     uploading={!!uploading?.startsWith("past_paper" + year)}
-                    initialSubmitted={yearUploads.length > 0 && yearUploads.every(u => u.processing_status === "done")}
+                    initialSubmitted={submittedYears.has(year)}
                     productId={projects.find(p => p.id === selectedProjectId)?.product_id || null}
-                    onSubmitYear={(y) => setSubmittedYears(prev => new Set(prev).add(y))}
-                    onEditYear={(y) => setSubmittedYears(prev => { const n = new Set(prev); n.delete(y); return n; })}
+                    onSubmitYear={(y) => {
+                      setSubmittedYears(prev => {
+                        const next = new Set(prev).add(y);
+                        try { localStorage.setItem(`submittedYears_${projectId}`, JSON.stringify(Array.from(next))); } catch {}
+                        return next;
+                      });
+                      if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
+                    }}
+                    onEditYear={(y) => {
+                      setSubmittedYears(prev => {
+                        const next = new Set(prev);
+                        next.delete(y);
+                        try { localStorage.setItem(`submittedYears_${projectId}`, JSON.stringify(Array.from(next))); } catch {}
+                        return next;
+                      });
+                      if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
+                    }}
                   />
                 );
               })}
