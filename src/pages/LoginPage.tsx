@@ -125,7 +125,7 @@ export const LoginPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-background relative overflow-hidden">
+    <div className="min-h-screen w-full bg-white dark:bg-background relative overflow-hidden">
       <SEOHead 
         title="Sign In to A* AI | A-Level Economics Revision"
         description="Sign in to your A* AI account to access your AI-powered A-Level Economics revision coach. Continue your journey to an A*."
@@ -133,17 +133,17 @@ export const LoginPage = () => {
       />
       
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-background">
+      <div className="absolute inset-0 bg-white dark:bg-background">
         <CanvasRevealEffect
           animationSpeed={10}
-          containerClassName="bg-background"
+          containerClassName="bg-white dark:bg-background"
           colors={canvasColors}
           opacities={[0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1]}
           dotSize={3}
           showGradient={true}
           direction="edges"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-background dark:via-background/80" />
       </div>
 
       {/* Content Layer */}
