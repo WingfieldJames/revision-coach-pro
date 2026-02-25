@@ -194,7 +194,7 @@ export function SubjectPlanSelector() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted whitespace-nowrap">
-                Exam Board
+                {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : 'Exam Board'}
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>
             </DropdownMenuTrigger>
