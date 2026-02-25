@@ -123,6 +123,8 @@ export const ComparePage = () => {
     const subjects = [...LEGACY_SUBJECTS];
     for (const dp of dynamicProducts) {
       const subjectKey = dp.subject.toLowerCase().replace(/\s+/g, '-');
+      // Skip "mathematics-applied" — it's a mode inside the Mathematics bot, not a separate subject
+      if (subjectKey === 'mathematics-applied') continue;
       if (!subjects.includes(subjectKey)) subjects.push(subjectKey);
     }
     return subjects;
