@@ -5,8 +5,8 @@ import { PenLine, Loader2, Image, FileText, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { fileDialogOpen } from '@/lib/fileDialogState';
 import { useNavigate } from 'react-router-dom';
-
 const DEFAULT_MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
 const FREE_MONTHLY_ESSAY_LIMIT = 1;
 
@@ -93,6 +93,17 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     loadUsage();
   }, [tier, user, productId]);
 
+  useEffect(() => {
+    const handleFocus = () => {
+      setTimeout(() => {
+        fileDialogOpen.current = false;
+        filePickerOpen.current = false;
+      }, 120);
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
   const handleUpgrade = async (paymentType: 'monthly' | 'lifetime' = 'lifetime') => {
     if (!user) {
       navigate('/login');
@@ -199,6 +210,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     filePickerOpen.current = false;
+    fileDialogOpen.current = false;
     const files = e.target.files;
     if (files) {
       Array.from(files).forEach(file => {
@@ -223,15 +235,10 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
 
   const openFilePicker = () => {
     filePickerOpen.current = true;
-    // Add marker class so the popover knows not to close
-    document.body.classList.add('essay-marker-file-open');
+    fileDialogOpen.current = true;
     fileInputRef.current?.click();
-    // Remove marker after a delay (file dialog closed)
-    setTimeout(() => {
-      document.body.classList.remove('essay-marker-file-open');
-      filePickerOpen.current = false;
-    }, 1000);
   };
+
 
   const handleMarkEssay = async () => {
     if (!essayText.trim() && attachedFiles.length === 0) {

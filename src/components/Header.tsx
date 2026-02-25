@@ -28,9 +28,7 @@ import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 import { useTheme } from '@/contexts/ThemeContext';
 
-// Global flag to track when file dialog is open (set by ImageUploadTool)
-export const fileDialogOpen = { current: false };
-
+import { fileDialogOpen } from '@/lib/fileDialogState';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -332,7 +330,7 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {showEssayMarker && (
-          <Popover open={essayMarkerOpen} onOpenChange={setEssayMarkerOpen} modal={false}>
+          <Popover open={essayMarkerOpen} onOpenChange={(open) => { if (fileDialogOpen.current && !open) return; setEssayMarkerOpen(open); }} modal={false}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
