@@ -1,0 +1,1 @@
+ALTER TABLE public.trainer_projects ADD COLUMN essay_marker_marks jsonb DEFAULT '[]'::jsonb;

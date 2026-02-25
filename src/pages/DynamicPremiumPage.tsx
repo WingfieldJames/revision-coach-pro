@@ -26,6 +26,7 @@ interface TrainerConfig {
   trainer_description: string | null;
   selected_features: string[] | null;
   exam_dates: any[] | null;
+  essay_marker_marks: number[] | null;
 }
 
 export const DynamicPremiumPage = () => {
@@ -58,7 +59,7 @@ export const DynamicPremiumPage = () => {
 
       const { data: tp } = await supabase
         .from('trainer_projects')
-        .select('trainer_image_url, trainer_description, selected_features, exam_dates')
+        .select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks')
         .eq('product_id', prod.id)
         .maybeSingle();
       setTrainer(tp as TrainerConfig | null);
@@ -114,6 +115,11 @@ export const DynamicPremiumPage = () => {
           productSlug={product.slug}
           showUpgradeButton
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
+          essayMarkerCustomMarks={
+            trainer?.essay_marker_marks && trainer.essay_marker_marks.length > 0
+              ? trainer.essay_marker_marks
+              : undefined
+          }
           customPastPaperContent={
             <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="deluxe" />
           }

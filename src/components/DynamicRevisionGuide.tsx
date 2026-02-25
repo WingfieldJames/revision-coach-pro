@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, Loader2, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -10,6 +11,12 @@ import rehypeKatex from 'rehype-katex';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+interface SpecPoint {
+  id: string;
+  content: string;
+  topic?: string;
+}
 
 interface DynamicRevisionGuideProps {
   productId: string;
@@ -26,17 +33,49 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
   const [topicInput, setTopicInput] = useState('');
   const [generating, setGenerating] = useState(false);
   const [guideContent, setGuideContent] = useState<string | null>(null);
+  const [specPoints, setSpecPoints] = useState<SpecPoint[]>([]);
+  const [loadingSpecs, setLoadingSpecs] = useState(true);
   const guideRef = useRef<HTMLDivElement>(null);
 
-  const handleGenerate = async () => {
-    if (!topicInput.trim()) return;
+  // Load spec points on mount
+  useEffect(() => {
+    const loadSpecs = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('document_chunks')
+          .select('id, content, metadata')
+          .eq('product_id', productId)
+          .limit(200);
+
+        if (error || !data) { setLoadingSpecs(false); return; }
+
+        const specs = data
+          .filter((c: any) => String(c.metadata?.content_type || '') === 'specification')
+          .map((c: any) => ({
+            id: c.id,
+            content: c.content,
+            topic: c.metadata?.topic || c.content.slice(0, 80),
+          }));
+
+        setSpecPoints(specs);
+      } catch (err) {
+        console.error('Failed to load spec points:', err);
+      } finally {
+        setLoadingSpecs(false);
+      }
+    };
+    loadSpecs();
+  }, [productId]);
+
+  const handleGenerate = async (topic?: string) => {
+    const query = topic || topicInput.trim();
+    if (!query) return;
+    setTopicInput(query);
     setGenerating(true);
     setGuideContent(null);
 
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
       const { data: sessionData } = await supabase.auth.getSession();
-
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_ANON_KEY,
@@ -50,8 +89,8 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
         headers,
         body: JSON.stringify({
           product_id: productId,
-          spec_code: topicInput.trim(),
-          spec_name: topicInput.trim(),
+          spec_code: query,
+          spec_name: query,
           board: 'dynamic',
           options: ['exam_technique', 'application'],
           past_paper_context: '',
@@ -155,7 +194,7 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
     );
   }
 
-  // Input view
+  // Input view with spec point selector
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
@@ -165,11 +204,12 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
         <div>
           <h3 className="font-semibold text-foreground">Revision Guide</h3>
           <p className="text-xs text-muted-foreground">
-            Generate a topic-specific revision guide
+            Select a spec point or enter a topic
           </p>
         </div>
       </div>
 
+      {/* Free text input */}
       <div className="relative">
         <input
           type="text"
@@ -182,7 +222,7 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
       </div>
 
       <Button
-        onClick={handleGenerate}
+        onClick={() => handleGenerate()}
         disabled={!topicInput.trim() || generating}
         className="w-full bg-gradient-brand hover:opacity-90 text-primary-foreground"
         size="sm"
@@ -200,10 +240,29 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
         )}
       </Button>
 
-      {!topicInput && (
-        <p className="text-xs text-center text-muted-foreground">
-          Enter any topic and we'll generate a comprehensive revision guide
-        </p>
+      {/* Spec points browser */}
+      {!generating && specPoints.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">Or select a spec point:</p>
+          <div className="max-h-[200px] overflow-y-auto space-y-1 pr-1">
+            {specPoints.map((sp) => (
+              <button
+                key={sp.id}
+                onClick={() => handleGenerate(sp.topic || sp.content.slice(0, 80))}
+                className="w-full text-left px-3 py-2 text-xs rounded-md border border-border hover:bg-muted/50 transition-colors line-clamp-2"
+              >
+                {sp.topic || sp.content.slice(0, 100)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {loadingSpecs && (
+        <div className="flex items-center justify-center py-2">
+          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+          <span className="text-xs text-muted-foreground ml-2">Loading spec points...</span>
+        </div>
       )}
     </div>
   );

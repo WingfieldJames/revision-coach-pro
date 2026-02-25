@@ -95,56 +95,86 @@ serve(async (req) => {
       console.error("Error fetching system prompt:", err);
     }
 
-    // Fetch relevant document chunks for context
+    // Fetch relevant document chunks for context — targeted queries by content_type
     let trainingContext = "";
     try {
-      const { data: chunks } = await supabaseAdmin
-        .from("document_chunks")
-        .select("content, metadata")
-        .eq("product_id", product_id)
-        .limit(20);
+      const specCodeLower = spec_code.toLowerCase();
+      const specNameLower = spec_name.toLowerCase();
+      const specKeywords = specNameLower.split(/[\s,()]+/).filter((w: string) => w.length > 2);
 
-      if (chunks && chunks.length > 0) {
-        // Filter chunks relevant to this spec point or exam technique
-        const specCodeLower = spec_code.toLowerCase();
-        const specNameLower = spec_name.toLowerCase();
-        const specKeywords = specNameLower.split(/[\s,()]+/).filter((w: string) => w.length > 2);
+      // Run parallel queries for different content types
+      const [specResult, techniqueResult, paperResult] = await Promise.all([
+        // Specification chunks
+        supabaseAdmin
+          .from("document_chunks")
+          .select("content, metadata")
+          .eq("product_id", product_id)
+          .limit(30),
+        // Exam technique chunks  
+        supabaseAdmin
+          .from("document_chunks")
+          .select("content, metadata")
+          .eq("product_id", product_id)
+          .limit(20),
+        // Past paper chunks
+        supabaseAdmin
+          .from("document_chunks")
+          .select("content, metadata")
+          .eq("product_id", product_id)
+          .limit(50),
+      ]);
 
-        const relevantChunks = chunks.filter((chunk: { content: string; metadata: Record<string, unknown> }) => {
-          const content = chunk.content.toLowerCase();
-          const contentType = String(chunk.metadata?.content_type || "");
+      const allChunks = [
+        ...(specResult.data || []),
+        ...(techniqueResult.data || []),
+        ...(paperResult.data || []),
+      ];
 
-          // Always include exam technique chunks if user selected that option
-          if (options.includes("exam_technique") && contentType === "exam_technique") return true;
+      // Deduplicate by content
+      const seen = new Set<string>();
+      const uniqueChunks = allChunks.filter((c: any) => {
+        const key = c.content.slice(0, 100);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
 
-          // Include specification chunks
-          if (contentType === "specification") {
-            if (content.includes(specCodeLower)) return true;
-            const matchCount = specKeywords.filter((kw: string) => content.includes(kw)).length;
-            if (matchCount >= 2) return true;
-          }
+      // Filter and score relevance
+      const relevantChunks = uniqueChunks.filter((chunk: { content: string; metadata: Record<string, unknown> }) => {
+        const content = chunk.content.toLowerCase();
+        const contentType = String(chunk.metadata?.content_type || "");
 
-          // Include paper chunks that mention this topic
-          if (contentType.startsWith("paper_")) {
-            const matchCount = specKeywords.filter((kw: string) => content.includes(kw)).length;
-            if (matchCount >= 2) return true;
-          }
+        // Always include exam technique chunks
+        if (options.includes("exam_technique") && contentType === "exam_technique") return true;
 
-          return false;
-        });
-
-        if (relevantChunks.length > 0) {
-          trainingContext = relevantChunks
-            .map((c: { content: string; metadata: Record<string, unknown> }) => {
-              const type = String(c.metadata?.content_type || "general").toUpperCase();
-              const topic = c.metadata?.topic || "";
-              return `[${type}${topic ? ` - ${topic}` : ""}]\n${c.content}`;
-            })
-            .join("\n\n---\n\n");
+        // Include specification chunks matching topic
+        if (contentType === "specification") {
+          if (content.includes(specCodeLower)) return true;
+          const matchCount = specKeywords.filter((kw: string) => content.includes(kw)).length;
+          if (matchCount >= 2) return true;
         }
 
-        console.log(`Found ${relevantChunks.length}/${chunks.length} relevant chunks`);
+        // Include paper/combined chunks matching topic
+        if (contentType.startsWith("paper_") || contentType === "combined" || contentType.includes("question") || contentType.includes("mark_scheme")) {
+          const matchCount = specKeywords.filter((kw: string) => content.includes(kw)).length;
+          if (matchCount >= 2) return true;
+        }
+
+        return false;
+      });
+
+      if (relevantChunks.length > 0) {
+        trainingContext = relevantChunks
+          .slice(0, 30) // Cap at 30 to avoid token overflow
+          .map((c: { content: string; metadata: Record<string, unknown> }) => {
+            const type = String(c.metadata?.content_type || "general").toUpperCase();
+            const topic = c.metadata?.topic || "";
+            return `[${type}${topic ? ` - ${topic}` : ""}]\n${c.content}`;
+          })
+          .join("\n\n---\n\n");
       }
+
+      console.log(`Found ${relevantChunks.length}/${uniqueChunks.length} relevant chunks`);
     } catch (err) {
       console.error("Error fetching training data:", err);
     }
