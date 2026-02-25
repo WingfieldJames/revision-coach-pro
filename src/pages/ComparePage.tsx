@@ -367,7 +367,7 @@ export const ComparePage = () => {
                     className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                       subject === s
                         ? 'bg-gradient-brand text-white'
-                        : 'text-foreground hover:bg-muted'
+                        : 'text-foreground'
                     }`}
                   >
                     {subjectLabels[s] || s}
@@ -377,14 +377,14 @@ export const ComparePage = () => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted whitespace-nowrap">
+                  <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 whitespace-nowrap">
                     {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : 'Exam Board'}
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
                   {boardsForSubject.map(b => (
-                    <DropdownMenuItem key={b} className="cursor-pointer hover:bg-muted flex items-center gap-2" onClick={() => setExamBoard(b)}>
+                    <DropdownMenuItem key={b} className="cursor-pointer flex items-center gap-2" onClick={() => setExamBoard(b)}>
                       {examBoard === b ? <Check className="h-3.5 w-3.5" /> : <span className="w-3.5" />}
                       {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
                     </DropdownMenuItem>
