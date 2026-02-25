@@ -174,7 +174,7 @@ export const LoginPage = () => {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 bg-foreground/5 backdrop-blur-sm border border-foreground/10 rounded-full py-3 px-4 text-foreground hover:bg-foreground/10 transition-all duration-200"
+                className="w-full flex items-center justify-center gap-3 bg-[#f9fafb] dark:bg-foreground/5 backdrop-blur-sm border border-foreground/10 rounded-full py-3 px-4 text-foreground hover:bg-[#f0f0f0] dark:hover:bg-foreground/10 transition-all duration-200"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -201,7 +201,7 @@ export const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full backdrop-blur-sm text-foreground bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
+                  className="w-full backdrop-blur-sm text-foreground bg-[#f9fafb] dark:bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
                 />
               </div>
 
@@ -215,7 +215,7 @@ export const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full backdrop-blur-sm text-foreground bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
+                    className="w-full backdrop-blur-sm text-foreground bg-[#f9fafb] dark:bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
@@ -224,7 +224,7 @@ export const LoginPage = () => {
               <div className="flex justify-end">
                 <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
                   <DialogTrigger asChild>
-                    <button type="button" className="text-sm text-primary hover:text-primary/80 transition-colors">
+                    <button type="button" className="text-sm text-[#a855f7] hover:text-[#a855f7]/80 dark:text-primary dark:hover:text-primary/80 transition-colors">
                       Forgot password?
                     </button>
                   </DialogTrigger>
@@ -267,7 +267,7 @@ export const LoginPage = () => {
                 className={`w-full rounded-full py-3 px-4 font-medium transition-all duration-300 ${
                   email && password
                     ? "text-white cursor-pointer glow-brand hover:glow-brand-intense hover:-translate-y-0.5"
-                    : "bg-foreground/5 text-muted-foreground border border-foreground/10 cursor-not-allowed"
+                    : "bg-[#f9fafb] dark:bg-foreground/5 text-muted-foreground border border-foreground/10 cursor-not-allowed"
                 }`}
                 style={email && password ? { background: submitGradient } : undefined}
               >
@@ -281,7 +281,7 @@ export const LoginPage = () => {
                 Don't have an account?{' '}
                 <Link 
                   to={`/signup${redirect ? `?redirect=${redirect}` : ''}`}
-                  className="text-primary hover:text-primary/80 transition-colors font-medium"
+                  className="text-[#a855f7] hover:text-[#a855f7]/80 dark:text-primary dark:hover:text-primary/80 transition-colors font-medium"
                 >
                   Create one here
                 </Link>
