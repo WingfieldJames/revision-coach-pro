@@ -103,7 +103,7 @@ export const SignupPage = () => {
   const isFormValid = email && password && confirmPassword && password === confirmPassword;
 
   return (
-    <div className="min-h-screen w-full bg-background relative overflow-hidden">
+    <div className="min-h-screen w-full bg-white dark:bg-background relative overflow-hidden">
       <SEOHead 
         title="Create Account | A* AI – A-Level Economics Revision"
         description="Join 1000+ students using A* AI to master A-Level Economics. Create your free account and start revising with AI trained on real past papers."
@@ -111,17 +111,17 @@ export const SignupPage = () => {
       />
       
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-background">
+      <div className="absolute inset-0 bg-white dark:bg-background">
         <CanvasRevealEffect
           animationSpeed={10}
-          containerClassName="bg-background"
+          containerClassName="bg-white dark:bg-background"
           colors={canvasColors}
           opacities={[0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1]}
           dotSize={3}
           showGradient={true}
           direction="edges"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-background dark:via-background/80" />
       </div>
 
       {/* Content Layer */}
