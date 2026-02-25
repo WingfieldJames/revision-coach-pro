@@ -17,8 +17,8 @@ const EDEXCEL_ECONOMICS_FREE_PROMPTS = [
 export const FreeVersionPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
 
-  const handleEssayMarkerSubmit = (message: string) => {
-    chatRef.current?.submitMessage(message);
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
+    chatRef.current?.submitMessage(message, imageDataUrl);
   };
 
   return (

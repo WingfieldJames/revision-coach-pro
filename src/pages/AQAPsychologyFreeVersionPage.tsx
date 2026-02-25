@@ -18,8 +18,8 @@ const AQA_PSYCHOLOGY_PROMPTS = [
 export const AQAPsychologyFreeVersionPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
 
-  const handleEssayMarkerSubmit = (message: string) => {
-    chatRef.current?.submitMessage(message);
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
+    chatRef.current?.submitMessage(message, imageDataUrl);
   };
 
   return (

@@ -17,8 +17,8 @@ const CIE_ECONOMICS_FREE_PROMPTS = [
 export const CIEFreeVersionPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
 
-  const handleEssayMarkerSubmit = (message: string) => {
-    chatRef.current?.submitMessage(message);
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
+    chatRef.current?.submitMessage(message, imageDataUrl);
   };
 
   return (

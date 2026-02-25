@@ -98,7 +98,7 @@ interface HeaderProps {
   gradeBoundariesSubject?: 'economics' | 'maths';
   productId?: string;
   productSlug?: string;
-  onEssayMarkerSubmit?: (message: string) => void;
+  onEssayMarkerSubmit?: (message: string, imageDataUrl?: string) => void;
   essayMarkerLabel?: string;
   essayMarkerFixedMark?: number;
   essayMarkerCustomMarks?: number[];
@@ -332,7 +332,7 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {showEssayMarker && (
-          <Popover open={essayMarkerOpen} onOpenChange={setEssayMarkerOpen}>
+          <Popover open={essayMarkerOpen} onOpenChange={(open) => { if (open || !document.querySelector('.essay-marker-file-open')) setEssayMarkerOpen(open); }} modal={false}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -343,7 +343,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="hidden sm:inline">{essayMarkerLabel}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[90vw] max-w-md p-0 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+            <PopoverContent className="w-[90vw] max-w-md p-0 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8} onOpenAutoFocus={(e) => e.preventDefault()} onInteractOutside={(e) => { if ((e.target as HTMLElement)?.closest('input[type="file"]') || document.querySelector('.essay-marker-file-open')) e.preventDefault(); }}>
               <div className="p-4">
                 <EssayMarkerTool tier={tier} productId={productId} onSubmitToChat={onEssayMarkerSubmit} onClose={() => setEssayMarkerOpen(false)} fixedMark={essayMarkerFixedMark} toolLabel={essayMarkerLabel} customMarks={essayMarkerCustomMarks} />
               </div>

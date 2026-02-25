@@ -79,8 +79,8 @@ export const DynamicPremiumPage = () => {
   const features = trainer?.selected_features || [];
   const hasFeature = (id: string) => features.includes(id);
 
-  const handleEssayMarkerSubmit = (message: string) => {
-    chatRef.current?.submitMessage(message);
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
+    chatRef.current?.submitMessage(message, imageDataUrl);
   };
 
   const subjectName = `${product.exam_board} ${product.subject}`;

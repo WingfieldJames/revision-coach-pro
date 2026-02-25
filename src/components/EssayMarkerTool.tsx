@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { PenLine, Loader2, Image, FileText } from 'lucide-react';
+import { PenLine, Loader2, Image, FileText, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,7 +33,7 @@ const markPrompts: Record<number, string> = {
 interface EssayMarkerToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
-  onSubmitToChat?: (message: string) => void;
+  onSubmitToChat?: (message: string, imageDataUrl?: string) => void;
   onClose?: () => void;
   fixedMark?: number;
   toolLabel?: string;
@@ -56,12 +56,13 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   // Default to image upload on touch devices (mobile/iPad), text on desktop
   const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
   const [inputMode, setInputMode] = useState<'text' | 'image'>(isTouchDevice ? 'image' : 'text');
-  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [monthlyUsage, setMonthlyUsage] = useState<number>(0);
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
+  const [attachedFiles, setAttachedFiles] = useState<{ file: File; preview: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const filePickerOpen = useRef(false);
 
   // Load current month's usage for free tier
   useEffect(() => {
@@ -196,58 +197,45 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     );
   }
 
-  const handleImageUpload = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Image must be less than 10MB');
-      return;
-    }
-    
-    setIsAnalyzingImage(true);
-    try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
-        const { data, error } = await supabase.functions.invoke('analyze-image', {
-          body: {
-            image: base64,
-            imageType: 'exam_question'
-          }
-        });
-        
-        if (error) throw error;
-        if (data?.extractedText) {
-          setEssayText(prev => prev ? `${prev}\n\n${data.extractedText}` : data.extractedText);
-          toast.success('Text extracted from image');
-        } else {
-          toast.error('Could not extract text from image');
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    filePickerOpen.current = false;
+    const files = e.target.files;
+    if (files) {
+      Array.from(files).forEach(file => {
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error('File must be less than 10MB');
+          return;
         }
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error('Image analysis error:', error);
-      toast.error('Failed to analyze image');
-    } finally {
-      setIsAnalyzingImage(false);
+        const preview = file.type.startsWith('image/') ? URL.createObjectURL(file) : '';
+        setAttachedFiles(prev => [...prev, { file, preview }]);
+      });
     }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleImageUpload(file);
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+  const removeAttachment = (index: number) => {
+    setAttachedFiles(prev => {
+      const removed = prev[index];
+      if (removed.preview) URL.revokeObjectURL(removed.preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const openFilePicker = () => {
+    filePickerOpen.current = true;
+    // Add marker class so the popover knows not to close
+    document.body.classList.add('essay-marker-file-open');
+    fileInputRef.current?.click();
+    // Remove marker after a delay (file dialog closed)
+    setTimeout(() => {
+      document.body.classList.remove('essay-marker-file-open');
+      filePickerOpen.current = false;
+    }, 1000);
   };
 
   const handleMarkEssay = async () => {
-    if (!essayText.trim()) {
-      toast.error('Please enter your essay first');
+    if (!essayText.trim() && attachedFiles.length === 0) {
+      toast.error('Please enter your essay or attach an image');
       return;
     }
 
@@ -260,13 +248,27 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
       }
     }
 
-    // Use fixedMark if provided, otherwise use selectedMark
     const markToUse = fixedMark ?? selectedMark;
-    const prompt = `Mark my ${markToUse} marker. Use exact marking criteria.\n\n${essayText}`;
+    const textPart = essayText.trim() ? `\n\n${essayText}` : '';
+    const prompt = `Mark my ${markToUse} marker. Use exact marking criteria.${textPart}`;
+    
+    // If there are image attachments, convert to base64 and pass via onSubmitToChat
+    // The RAGChat component handles vision-based analysis
     
     if (onSubmitToChat) {
       setIsSubmitting(true);
-      onSubmitToChat(prompt);
+      
+      // Convert first attached image to base64 for vision analysis
+      let imageDataUrl: string | undefined;
+      if (attachedFiles.length > 0 && attachedFiles[0].file.type.startsWith('image/')) {
+        imageDataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(attachedFiles[0].file);
+        });
+      }
+      
+      onSubmitToChat(prompt, imageDataUrl);
 
       // Increment usage AFTER successful submission
       if (tier === 'free' && user) {
@@ -292,6 +294,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
       }
       // Reset state
       setEssayText('');
+      setAttachedFiles([]);
       setIsSubmitting(false);
     } else {
       // Fallback: copy to clipboard
@@ -302,6 +305,8 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
 
   const reset = () => {
     setEssayText('');
+    attachedFiles.forEach(f => { if (f.preview) URL.revokeObjectURL(f.preview); });
+    setAttachedFiles([]);
     setInputMode('text');
   };
 
@@ -404,39 +409,50 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
         ) : (
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Upload Photo</label>
-            <div 
-              className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {isAnalyzingImage ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground">Extracting text...</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Image className="w-8 h-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Click to upload a photo of your essay
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    PNG, JPG up to 10MB
-                  </p>
-                </div>
-              )}
-            </div>
-            {essayText && (
-              <div className="mt-3 p-3 bg-muted rounded-lg">
-                <p className="text-xs font-medium text-foreground mb-1">Extracted Text:</p>
-                <p className="text-xs text-muted-foreground line-clamp-3">{essayText}</p>
+            
+            {/* Attachment previews */}
+            {attachedFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {attachedFiles.map((af, i) => (
+                  <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border bg-muted">
+                    {af.preview ? (
+                      <img src={af.preview} alt="Attached" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <button
+                      onClick={() => removeAttachment(i)}
+                      className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-background/80 hover:bg-background text-foreground"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
+
+            <div 
+              className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={openFilePicker}
+            >
+              <div className="flex flex-col items-center gap-2">
+                <Image className="w-8 h-8 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  {attachedFiles.length > 0 ? 'Add another photo' : 'Click to upload a photo of your essay'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PNG, JPG up to 10MB
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          {essayText && (
+          {(essayText || attachedFiles.length > 0) && (
             <Button
               variant="outline"
               size="sm"
@@ -448,8 +464,8 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
           )}
           <Button
             onClick={handleMarkEssay}
-            disabled={!essayText.trim() || isSubmitting || isLoadingUsage}
-            className={`${essayText ? 'flex-1' : 'w-full'} bg-gradient-brand hover:opacity-90 text-primary-foreground`}
+            disabled={(!essayText.trim() && attachedFiles.length === 0) || isSubmitting || isLoadingUsage}
+            className={`${(essayText || attachedFiles.length > 0) ? 'flex-1' : 'w-full'} bg-gradient-brand hover:opacity-90 text-primary-foreground`}
             size="sm"
           >
             {isSubmitting ? (
