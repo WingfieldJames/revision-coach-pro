@@ -243,7 +243,6 @@ export function SubjectPlanSelector() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="rounded-full px-5 py-2.5 text-sm font-semibold border border-border bg-background text-foreground flex items-center gap-2">
-                <span className="text-muted-foreground mr-1">Exam Board:</span>
                 {getBoardLabel()}
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>

@@ -421,7 +421,6 @@ export const ComparePage = () => {
 
               <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
                 <SelectTrigger className="rounded-full px-5 py-2.5 h-auto w-auto text-sm font-semibold border border-border bg-background text-foreground hover:bg-muted [&>svg]:ml-1">
-                  <span className="text-muted-foreground mr-1">Exam Board:</span>
                   <SelectValue placeholder="Select Exam Board" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
