@@ -224,7 +224,7 @@ export const LoginPage = () => {
               <div className="flex justify-end">
                 <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
                   <DialogTrigger asChild>
-                    <button type="button" className="text-sm text-[#a855f7] hover:text-[#a855f7]/80 dark:text-primary dark:hover:text-primary/80 transition-colors">
+                    <button type="button" className="text-sm text-[#1e3a8a] hover:text-[#a855f7] dark:text-primary dark:hover:text-primary/80 transition-colors">
                       Forgot password?
                     </button>
                   </DialogTrigger>
@@ -281,7 +281,7 @@ export const LoginPage = () => {
                 Don't have an account?{' '}
                 <Link 
                   to={`/signup${redirect ? `?redirect=${redirect}` : ''}`}
-                  className="text-[#a855f7] hover:text-[#a855f7]/80 dark:text-primary dark:hover:text-primary/80 transition-colors font-medium"
+                  className="text-[#1e3a8a] hover:text-[#a855f7] dark:text-primary dark:hover:text-primary/80 transition-colors font-medium"
                 >
                   Create one here
                 </Link>
