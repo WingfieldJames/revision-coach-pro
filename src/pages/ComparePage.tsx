@@ -346,71 +346,87 @@ export const ComparePage = () => {
 
           {/* Subject & Board Selection */}
           <ScrollReveal delay={0.1}>
-            {/* Desktop: Subject buttons + board dropdown */}
+            {/* Desktop: Connected toggle group + board dropdown on same line */}
             <div className="hidden md:flex items-center justify-center gap-4 mb-12">
-              <div className="inline-flex rounded-full border border-border overflow-hidden">
+              <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
                 {allSubjects.map((s) => (
                   <button
                     key={s}
                     onClick={() => {
                       setSubject(s);
-                      const defaultBoard = LEGACY_DEFAULT_BOARD[s] || (dynamicProducts.find(dp => dp.subject.toLowerCase().replace(/\s+/g, '-') === s)?.exam_board.toLowerCase()) || 'edexcel';
-                      setExamBoard(defaultBoard);
+                      const defaultBoard = LEGACY_DEFAULT_BOARD[s];
+                      if (defaultBoard) setExamBoard(defaultBoard);
+                      else {
+                        // Dynamic: pick first available board
+                        const dp = dynamicProducts.find(p => p.subject.toLowerCase().replace(/\s+/g, '-') === s);
+                        if (dp) setExamBoard(dp.exam_board.toLowerCase());
+                      }
                     }}
-                    className={`px-5 py-2.5 text-sm font-medium transition-all ${subject === s ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground hover:bg-muted'}`}
+                    className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
+                      subject === s
+                        ? 'bg-gradient-brand text-white'
+                        : 'text-foreground hover:bg-muted'
+                    }`}
                   >
                     {subjectLabels[s] || s}
                   </button>
                 ))}
               </div>
-              {boardsForSubject.length > 1 && (
-                <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
-                  <SelectTrigger className="w-[140px] rounded-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {boardsForSubject.map((b) => (
-                      <SelectItem key={b} value={b}>
-                        {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
 
-            {/* Mobile: Subject dropdown + board dropdown */}
-            <div className="md:hidden sticky top-[72px] z-40 bg-background/95 backdrop-blur-sm py-3 -mx-4 px-4 flex items-center justify-center gap-3 mb-8">
-              <Select value={subject} onValueChange={(val) => {
-                setSubject(val);
-                const defaultBoard = LEGACY_DEFAULT_BOARD[val] || (dynamicProducts.find(dp => dp.subject.toLowerCase().replace(/\s+/g, '-') === val)?.exam_board.toLowerCase()) || 'edexcel';
-                setExamBoard(defaultBoard);
-              }}>
-                <SelectTrigger className="w-[160px] rounded-full">
-                  <SelectValue />
+              <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
+                <SelectTrigger className="rounded-full px-6 py-2 h-auto w-auto text-sm font-medium border border-border bg-background text-foreground transition-all hover:bg-muted [&>svg]:ml-1">
+                  <span className="text-muted-foreground mr-1">Exam Board:</span>
+                  <SelectValue placeholder="Select Exam Board" />
                 </SelectTrigger>
-                <SelectContent>
-                  {allSubjects.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {subjectLabels[s] || s}
+                <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+                  {boardsForSubject.map(b => (
+                    <SelectItem key={b} value={b}>
+                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {boardsForSubject.length > 1 && (
-                <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
-                  <SelectTrigger className="w-[120px] rounded-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {boardsForSubject.map((b) => (
-                      <SelectItem key={b} value={b}>
-                        {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+            </div>
+
+            {/* Mobile: Two dropdown buttons */}
+            <div className="md:hidden sticky top-[72px] z-40 bg-background/95 backdrop-blur-sm py-3 -mx-4 px-4 flex items-center justify-center gap-3 mb-8">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="rounded-full px-5 py-2.5 text-sm font-semibold bg-gradient-brand text-white flex items-center gap-2 glow-brand">
+                    {subjectLabels[subject] || subject}
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+                  {allSubjects.map(s => (
+                    <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
+                      setSubject(s);
+                      const defaultBoard = LEGACY_DEFAULT_BOARD[s];
+                      if (defaultBoard) setExamBoard(defaultBoard);
+                      else {
+                        const dp = dynamicProducts.find(p => p.subject.toLowerCase().replace(/\s+/g, '-') === s);
+                        if (dp) setExamBoard(dp.exam_board.toLowerCase());
+                      }
+                    }}>
+                      {subjectLabels[s] || s}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
+                <SelectTrigger className="rounded-full px-5 py-2.5 h-auto w-auto text-sm font-semibold border border-border bg-background text-foreground hover:bg-muted [&>svg]:ml-1">
+                  <span className="text-muted-foreground mr-1">Exam Board:</span>
+                  <SelectValue placeholder="Select Exam Board" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+                  {boardsForSubject.map(b => (
+                    <SelectItem key={b} value={b}>
+                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </ScrollReveal>
 
