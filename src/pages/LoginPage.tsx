@@ -135,13 +135,14 @@ export const LoginPage = () => {
       {/* Animated Background */}
       <div className="absolute inset-0 bg-background">
         <CanvasRevealEffect
-          animationSpeed={3}
+          animationSpeed={10}
           containerClassName="bg-background"
           colors={canvasColors}
-          opacities={[0.05, 0.05, 0.08, 0.08, 0.1, 0.1, 0.12, 0.15, 0.15, 0.2]}
+          opacities={[0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1]}
           dotSize={3}
-          showGradient={false}
+          showGradient={true}
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
       </div>
 
       {/* Content Layer */}
