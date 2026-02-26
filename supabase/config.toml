@@ -62,3 +62,9 @@ verify_jwt = false
 
 [functions.delete-training-upload]
 verify_jwt = false
+
+[functions.backfill-training-data]
+verify_jwt = false
+
+[functions.erase-training-data]
+verify_jwt = false

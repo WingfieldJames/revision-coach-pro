@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Upload, CheckCircle2, Loader2, AlertCircle, FileText, Trash2, X, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizeSpecifications } from "@/lib/specNormalization";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -452,13 +453,14 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
                   onClick={() => {
                     try {
                       const parsed = JSON.parse(jsonEditorValue);
-                      if (!Array.isArray(parsed) || !parsed.every(s => typeof s === "string")) {
-                        setJsonError("JSON must be an array of strings");
+                      const normalized = normalizeSpecifications(parsed);
+                      if (!normalized || normalized.length === 0) {
+                        setJsonError("Could not extract spec points. Use an array of strings, or objects with content/text/point fields.");
                         return;
                       }
-                      setStagedSpecs(parsed);
+                      setStagedSpecs(normalized);
                       setJsonError(null);
-                      toast({ title: "JSON applied", description: `${parsed.length} spec points updated.` });
+                      toast({ title: "JSON applied", description: `${normalized.length} spec points updated.` });
                     } catch {
                       setJsonError("Invalid JSON — please fix syntax errors");
                     }
