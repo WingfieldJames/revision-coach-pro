@@ -249,10 +249,10 @@ export function BuildPage() {
     setSystemPromptSubmitted(spSubmitted);
     setExamTechniqueSubmitted(etSubmitted);
     setTrainerBioSubmitted(bioSubmitted);
-    setSystemPrompt(spSubmitted ? (existing.system_prompt || "") : "");
-    setExamTechnique(etSubmitted ? (existing.exam_technique || "") : "");
+    setSystemPrompt(existing.system_prompt || "");
+    setExamTechnique(existing.exam_technique || "");
     setTrainerImageUrl(existing.trainer_image_url || null);
-    setTrainerDescription(bioSubmitted ? (existing.trainer_description || "") : "");
+    setTrainerDescription(existing.trainer_description || "");
     setSelectedFeatures(Array.isArray(existing.selected_features) ? existing.selected_features : []);
     setExamDates(Array.isArray(existing.exam_dates) ? existing.exam_dates : []);
     setEssayMarkerMarks(
@@ -265,18 +265,60 @@ export function BuildPage() {
     if (savedSpecs && Array.isArray(savedSpecs) && savedSpecs.length > 0) {
       setStagedSpecData(savedSpecs);
       setSpecComplete(true);
+    } else if (existing.product_id) {
+      // Hydrate specs from document_chunks if not in staged_specifications
+      supabase
+        .from("document_chunks")
+        .select("content")
+        .eq("product_id", existing.product_id)
+        .contains("metadata", { content_type: "specification" } as any)
+        .order("created_at", { ascending: true })
+        .limit(2000)
+        .then(({ data: specChunks }) => {
+          if (specChunks && specChunks.length > 0) {
+            const specPoints = specChunks.map(c => c.content);
+            setStagedSpecData(specPoints);
+            setSpecComplete(true);
+          } else {
+            setStagedSpecData(null);
+            setSpecComplete(false);
+          }
+        });
     } else {
       setStagedSpecData(null);
-      if (existing.product_id) {
+      setSpecComplete(false);
+    }
+
+    // Hydrate empty text fields from document_chunks if product exists
+    if (existing.product_id) {
+      const productId = existing.product_id;
+      const needsExamTechnique = !existing.exam_technique || existing.exam_technique.trim().length === 0;
+      const needsSystemPrompt = !existing.system_prompt || existing.system_prompt.trim().length === 0;
+
+      if (needsExamTechnique || needsSystemPrompt) {
         supabase
           .from("document_chunks")
-          .select("id", { count: "exact", head: true })
-          .eq("product_id", existing.product_id)
-          .then(({ count }) => setSpecComplete((count || 0) > 0));
-      } else {
-        setSpecComplete(false);
+          .select("content, metadata")
+          .eq("product_id", productId)
+          .or("metadata->>content_type.eq.exam_technique,metadata->>content_type.eq.system_prompt")
+          .order("created_at", { ascending: true })
+          .then(({ data: chunks }) => {
+            if (!chunks || chunks.length === 0) return;
+            const etChunks = chunks.filter(c => (c.metadata as any)?.content_type === "exam_technique");
+            const spChunks = chunks.filter(c => (c.metadata as any)?.content_type === "system_prompt");
+
+            if (needsExamTechnique && etChunks.length > 0) {
+              const etText = etChunks.map(c => c.content).join("\n\n");
+              setExamTechnique(etText);
+            }
+            if (needsSystemPrompt && spChunks.length > 0) {
+              const spText = spChunks.map(c => c.content).join("\n\n");
+              setSystemPrompt(spText);
+            }
+          });
       }
     }
+
     setProjectLoaded(true);
     setHasUnsavedChanges(false);
     setHasSavedChangesSinceDeploy(false);
@@ -364,13 +406,13 @@ export function BuildPage() {
     if (projectLoaded) setHasUnsavedChanges(true);
   }, [projectLoaded]);
 
-  // Track text field changes — skip the initial hydration render
-  const hydratedRef = useRef(false);
+  // Track text field changes — skip hydration renders (both sync and async from document_chunks)
+  const hydratedRef = useRef(0);
+  const hydrationCountRef = useRef(2); // Allow up to 2 hydration cycles (initial + async document_chunks fetch)
   useEffect(() => {
     if (!projectLoaded) return;
-    // Skip the first time fields change after project loads (that's hydration, not user edits)
-    if (!hydratedRef.current) {
-      hydratedRef.current = true;
+    if (hydratedRef.current < hydrationCountRef.current) {
+      hydratedRef.current += 1;
       return;
     }
     setHasUnsavedChanges(true);
@@ -378,7 +420,7 @@ export function BuildPage() {
 
   // Reset hydration flag when switching projects
   useEffect(() => {
-    hydratedRef.current = false;
+    hydratedRef.current = 0;
     setHasUnsavedChanges(false);
   }, [selectedProjectId]);
 
@@ -1113,6 +1155,7 @@ export function BuildPage() {
 
           {/* Specification */}
           <SpecificationUploader
+            key={selectedProjectId}
             initialComplete={specComplete}
             initialStagedSpecs={stagedSpecData}
             isDeployed={projectStatus === "deployed"}
