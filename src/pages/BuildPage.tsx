@@ -77,7 +77,7 @@ const WEBSITE_FEATURES = [
   { id: "revision_guide", label: "Revision Guide", description: "AI-generated revision notes by topic", icon: BookMarked },
 ] as const;
 
-type SectionStatus = "empty" | "in_progress" | "complete";
+type SectionStatus = "empty" | "unsaved" | "saved" | "deployed";
 
 interface TrainerUpload {
   id: string;
@@ -102,24 +102,19 @@ interface ChatMessage {
   content: string;
 }
 
-function StatusIndicator({ status, onClick }: { status: SectionStatus; onClick?: () => void }) {
+function StatusIndicator({ status }: { status: SectionStatus }) {
   const statusMap = {
     empty: { icon: <Circle className="h-5 w-5 text-muted-foreground" />, label: "Empty" },
-    in_progress: { icon: <Clock className="h-5 w-5 text-orange-500" />, label: "In Progress" },
-    complete: { icon: <CheckCircle2 className="h-5 w-5 text-green-500" />, label: "Complete" },
+    unsaved: { icon: <Clock className="h-5 w-5 text-red-500" />, label: "Unsaved" },
+    saved: { icon: <Clock className="h-5 w-5 text-orange-500" />, label: "Saved" },
+    deployed: { icon: <CheckCircle2 className="h-5 w-5 text-green-500" />, label: "Deployed" },
   };
   const { icon, label } = statusMap[status];
   return (
-    <button onClick={onClick} className="flex items-center gap-1.5 text-sm hover:opacity-80 transition-opacity" title={`Click to change: ${label}`}>
+    <span className="flex items-center gap-1.5 text-sm" title={label}>
       {icon}
-    </button>
+    </span>
   );
-}
-
-function cycleStatus(s: SectionStatus): SectionStatus {
-  if (s === "empty") return "in_progress";
-  if (s === "in_progress") return "complete";
-  return "empty";
 }
 
 export function BuildPage() {
@@ -172,8 +167,7 @@ export function BuildPage() {
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
 
-  // Per-year submission tracking
-  const [submittedYears, setSubmittedYears] = useState<Set<string>>(new Set());
+  
 
   // Chat
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -247,6 +241,24 @@ export function BuildPage() {
     });
   }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       selectedFeatures, examDates, essayMarkerMarks, stagedSpecData]);
+
+  // savedSnapshotParsed for field-level comparison
+  const savedSnapshotParsed = useMemo(() => {
+    if (!savedSnapshot) return null;
+    try { return JSON.parse(savedSnapshot); } catch { return null; }
+  }, [savedSnapshot]);
+
+  // Helper: compute section status based on current vs saved vs deployed
+  const getSectionStatus = useCallback((fieldName: string, currentValue: string | any, isEmpty: boolean): SectionStatus => {
+    if (isEmpty) return "empty";
+    if (!savedSnapshotParsed) return "unsaved";
+    const savedValue = savedSnapshotParsed[fieldName];
+    const currentStr = typeof currentValue === "string" ? currentValue : JSON.stringify(currentValue);
+    const savedStr = typeof savedValue === "string" ? savedValue : JSON.stringify(savedValue);
+    if (currentStr !== savedStr) return "unsaved";
+    if (projectStatus === "deployed" && !hasSavedChangesSinceDeploy) return "deployed";
+    return "saved";
+  }, [savedSnapshotParsed, projectStatus, hasSavedChangesSinceDeploy]);
 
   // Derive hasUnsavedChanges from snapshot comparison
   useEffect(() => {
@@ -483,28 +495,7 @@ export function BuildPage() {
         .eq("project_id", projectId);
       const loaded = (data as TrainerUpload[]) || [];
       setUploads(loaded);
-      // Initialize submitted years: years where all uploads are done
-      const yearGroups = new Map<string, TrainerUpload[]>();
-      for (const u of loaded) {
-        if (u.section_type === "past_paper" && u.year) {
-          const arr = yearGroups.get(u.year) || [];
-          arr.push(u);
-          yearGroups.set(u.year, arr);
-        }
-      }
-      // Restore explicitly submitted years from localStorage (not auto-detected from processing status)
-      const storageKey = `submittedYears_${projectId}`;
-      try {
-        const saved = localStorage.getItem(storageKey);
-        if (saved) {
-          const parsed = JSON.parse(saved) as string[];
-          setSubmittedYears(new Set(parsed));
-        } else {
-          setSubmittedYears(new Set());
-        }
-      } catch {
-        setSubmittedYears(new Set());
-      }
+      // No more submittedYears tracking needed
     };
     loadUploads();
   }, [projectId]);
@@ -703,12 +694,13 @@ export function BuildPage() {
     return uploads.filter(u => u.section_type === "past_paper" && u.year === year);
   };
 
-  // Year status for progress sidebar — only "complete" if user pressed Submit
+  // Year status for progress sidebar
   const getYearStatus = (year: string): SectionStatus => {
     const yearUploads = getUploadsForYear(year);
     if (yearUploads.length === 0) return "empty";
-    if (submittedYears.has(year)) return "complete";
-    return "in_progress";
+    // Past papers are always "ready" once uploaded — status depends on deploy state
+    if (projectStatus === "deployed" && !hasSavedChangesSinceDeploy) return "deployed";
+    return "saved";
   };
 
   // Chat with mock chatbot (uses streaming like the main RAGChat)
@@ -1135,10 +1127,10 @@ export function BuildPage() {
 
           {/* Unsaved Changes Banner */}
           {hasUnsavedChanges && (
-            <div className="rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-3 flex items-center justify-between">
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-500 shrink-0" />
-                <p className="text-sm text-orange-600 dark:text-orange-400">You have unsaved changes</p>
+                <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
+                <p className="text-sm text-red-600 dark:text-red-400">You have unsaved changes</p>
               </div>
               <Button size="sm" variant="outline" onClick={handleSave} disabled={isSaving}>
                 {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
@@ -1154,12 +1146,7 @@ export function BuildPage() {
                 <CardTitle className="text-base flex items-center gap-2">
                   <User className="h-4 w-4" /> Meet the Brain
                 </CardTitle>
-                {trainerDescription.trim().length >= 10
-                  ? <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  : (trainerDescription.length > 0 || trainerImageUrl)
-                  ? <Clock className="h-5 w-5 text-orange-500" />
-                  : <Circle className="h-5 w-5 text-muted-foreground" />
-                }
+                <StatusIndicator status={getSectionStatus("trainerDescription", trainerDescription, !trainerDescription.trim() && !trainerImageUrl)} />
               </div>
             </CardHeader>
             <CardContent>
@@ -1207,12 +1194,7 @@ export function BuildPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">System Prompt</CardTitle>
-                {systemPrompt.trim().length >= 10
-                  ? <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  : systemPrompt.length > 0
-                  ? <Clock className="h-5 w-5 text-orange-500" />
-                  : <Circle className="h-5 w-5 text-muted-foreground" />
-                }
+                <StatusIndicator status={getSectionStatus("systemPrompt", systemPrompt, !systemPrompt.trim())} />
               </div>
             </CardHeader>
             <CardContent>
@@ -1230,12 +1212,7 @@ export function BuildPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Exam Technique</CardTitle>
-                {examTechnique.trim().length >= 10
-                  ? <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  : examTechnique.length > 0
-                  ? <Clock className="h-5 w-5 text-orange-500" />
-                  : <Circle className="h-5 w-5 text-muted-foreground" />
-                }
+                <StatusIndicator status={getSectionStatus("examTechnique", examTechnique, !examTechnique.trim())} />
               </div>
             </CardHeader>
             <CardContent>
@@ -1289,25 +1266,8 @@ export function BuildPage() {
                     onUploadFiles={handleMultiFileUpload}
                     onDeleteUpload={handleDeleteUpload}
                     uploading={!!uploading?.startsWith("past_paper" + year)}
-                    initialSubmitted={submittedYears.has(year)}
+                    initialDeployed={projectStatus === "deployed"}
                     productId={projects.find(p => p.id === selectedProjectId)?.product_id || null}
-                    onSubmitYear={(y) => {
-                      setSubmittedYears(prev => {
-                        const next = new Set(prev).add(y);
-                        try { localStorage.setItem(`submittedYears_${projectId}`, JSON.stringify(Array.from(next))); } catch {}
-                        return next;
-                      });
-                      markUnsaved();
-                    }}
-                    onEditYear={(y) => {
-                      setSubmittedYears(prev => {
-                        const next = new Set(prev);
-                        next.delete(y);
-                        try { localStorage.setItem(`submittedYears_${projectId}`, JSON.stringify(Array.from(next))); } catch {}
-                        return next;
-                      });
-                      markUnsaved();
-                    }}
                   />
                 );
               })}
@@ -1555,13 +1515,10 @@ export function BuildPage() {
                 <CardTitle className="text-base">Progress</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <ProgressRow label="Meet the Brain" status={trainerDescription.trim().length >= 10 ? "complete" : (trainerDescription.length > 0 || trainerImageUrl) ? "in_progress" : "empty"} />
-                <ProgressRow label="System Prompt" status={systemPrompt.trim().length >= 10 ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"} />
-                <ProgressRow label="Exam Technique" status={examTechnique.trim().length >= 10 ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"} />
-                <ProgressRow label="Specification" status={
-                  specStatusFromUploader === "success" || specComplete ? "complete" :
-                  specStatusFromUploader === "processing" ? "in_progress" : "empty"
-                } />
+                <ProgressRow label="Meet the Brain" status={getSectionStatus("trainerDescription", trainerDescription, !trainerDescription.trim() && !trainerImageUrl)} />
+                <ProgressRow label="System Prompt" status={getSectionStatus("systemPrompt", systemPrompt, !systemPrompt.trim())} />
+                <ProgressRow label="Exam Technique" status={getSectionStatus("examTechnique", examTechnique, !examTechnique.trim())} />
+                <ProgressRow label="Specification" status={getSectionStatus("stagedSpecData", JSON.stringify(stagedSpecData), !stagedSpecData || stagedSpecData.length === 0)} />
                 {PAPER_YEARS.map(year => (
                   <ProgressRow
                     key={year}
@@ -1570,7 +1527,7 @@ export function BuildPage() {
                   />
                 ))}
                 {customSections.map((s, i) => (
-                  <ProgressRow key={i} label={s.name || `Custom ${i + 1}`} status={s.content.length > 20 ? "complete" : s.content.length > 0 ? "in_progress" : "empty"} />
+                  <ProgressRow key={i} label={s.name || `Custom ${i + 1}`} status={getSectionStatus(`customSection_${i}`, s.content, !s.content.trim())} />
                 ))}
               </CardContent>
             </Card>
@@ -1586,10 +1543,10 @@ export function BuildPage() {
                   <p>Chunks: {uploads.reduce((sum, u) => sum + (u.chunks_created || 0), 0)}</p>
                 </div>
                 <TrainingProgressBar
-                  trainerBioStatus={trainerDescription.trim().length >= 10 ? "complete" : (trainerDescription.length > 0 || trainerImageUrl) ? "in_progress" : "empty"}
-                  systemPromptStatus={systemPrompt.trim().length >= 10 ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"}
-                  examTechniqueStatus={examTechnique.trim().length >= 10 ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"}
-                  specStatus={specStatusFromUploader === "success" || specComplete ? "complete" : specStatusFromUploader === "processing" ? "in_progress" : "empty"}
+                  trainerBioStatus={getSectionStatus("trainerDescription", trainerDescription, !trainerDescription.trim() && !trainerImageUrl)}
+                  systemPromptStatus={getSectionStatus("systemPrompt", systemPrompt, !systemPrompt.trim())}
+                  examTechniqueStatus={getSectionStatus("examTechnique", examTechnique, !examTechnique.trim())}
+                  specStatus={getSectionStatus("stagedSpecData", JSON.stringify(stagedSpecData), !stagedSpecData || stagedSpecData.length === 0)}
                   paperYears={PAPER_YEARS}
                   getYearStatus={getYearStatus}
                 />
@@ -1627,15 +1584,16 @@ function TrainingProgressBar({
   ];
 
   const total = sections.length;
-  const complete = sections.filter(s => s.status === "complete").length;
-  const inProgress = sections.filter(s => s.status === "in_progress").length;
-  const pct = Math.round((complete / total) * 100);
+  const deployed = sections.filter(s => s.status === "deployed").length;
+  const saved = sections.filter(s => s.status === "saved").length;
+  const unsaved = sections.filter(s => s.status === "unsaved").length;
+  const pct = Math.round((deployed / total) * 100);
 
   return (
     <div className="space-y-1.5 pt-2 border-t border-border">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium">{pct}% trained</span>
-        <span className="text-xs text-muted-foreground">{complete}/{total} sections</span>
+        <span className="text-xs font-medium">{pct}% deployed</span>
+        <span className="text-xs text-muted-foreground">{deployed}/{total} sections</span>
       </div>
       <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
         <div
@@ -1643,8 +1601,11 @@ function TrainingProgressBar({
           style={{ width: `${pct}%` }}
         />
       </div>
-      {inProgress > 0 && (
-        <p className="text-xs text-orange-500">{inProgress} section{inProgress > 1 ? "s" : ""} in progress</p>
+      {unsaved > 0 && (
+        <p className="text-xs text-red-500">{unsaved} section{unsaved > 1 ? "s" : ""} not saved</p>
+      )}
+      {saved > 0 && (
+        <p className="text-xs text-orange-500">{saved} section{saved > 1 ? "s" : ""} ready for deployment</p>
       )}
     </div>
   );
