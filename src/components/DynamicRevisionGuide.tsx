@@ -136,6 +136,32 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
       container.style.width = '210mm';
       container.style.background = '#ffffff';
       container.innerHTML = `
+        <style>
+          .pdf-content h1, .pdf-content h2, .pdf-content h3, .pdf-content h4 {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+          .pdf-content h1 + *, .pdf-content h2 + *, .pdf-content h3 + *, .pdf-content h4 + * {
+            page-break-before: avoid !important;
+            break-before: avoid !important;
+          }
+          .pdf-content img, .pdf-content figure, .pdf-content svg, .pdf-content table {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .pdf-content ul, .pdf-content ol {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .pdf-content p {
+            orphans: 3;
+            widows: 3;
+          }
+          .pdf-content section, .pdf-content blockquote {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+        </style>
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; line-height: 1.7; padding: 10px;">
           <div class="pdf-content">
             <div style="font-size: 22px; font-weight: 700; margin-bottom: 16px; border-bottom: 3px solid #7C3AED; padding-bottom: 12px;">${subjectName} — ${topicInput}</div>
