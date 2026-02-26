@@ -11,6 +11,7 @@ const LEGACY_CONFIGS: Record<string, {
   selectedFeatures: string[];
   examDates: Array<{ name: string; date: string }>;
   essayMarkerMarks: number[];
+  trainerDescription?: string;
 }> = {
   "aqa::economics": {
     selectedFeatures: ["my_ai", "diagram_generator", "essay_marker", "past_papers", "exam_countdown"],
@@ -20,6 +21,7 @@ const LEGACY_CONFIGS: Record<string, {
       { name: "Paper 3", date: "2026-06-04" },
     ],
     essayMarkerMarks: [9, 10, 15, 25],
+    trainerDescription: "Hi, I'm Etienne — founder of EasyNomics, UKMT Gold Award winner, and John Locke Economics shortlisted. I trained A* AI on AQA Economics to help you achieve the top grades.",
   },
   "edexcel::economics": {
     selectedFeatures: ["my_ai", "diagram_generator", "essay_marker", "past_papers", "revision_guide", "exam_countdown"],
@@ -29,6 +31,7 @@ const LEGACY_CONFIGS: Record<string, {
       { name: "Paper 3 (Microeconomics and Macroeconomics)", date: "2026-06-04" },
     ],
     essayMarkerMarks: [],
+    trainerDescription: "Hi, I'm James — I got A* in Economics with 90% across all papers, A*A*A at A-Level, and straight 9s at GCSE. I'm studying at LSE and built A* AI to help you achieve the same results.",
   },
   "cie::economics": {
     selectedFeatures: ["my_ai", "diagram_generator", "essay_marker", "past_papers", "exam_countdown"],
@@ -39,6 +42,7 @@ const LEGACY_CONFIGS: Record<string, {
       { name: "Paper 4 (Data Response & Essays)", date: "2026-05-20" },
     ],
     essayMarkerMarks: [],
+    trainerDescription: "Hi, I'm Carl — I got A*A*A* at A-Level as an international student and achieved 5A*s in IGCSE in one year. I'm studying at LSE and trained A* AI on CIE Economics.",
   },
   "ocr::physics": {
     selectedFeatures: ["my_ai", "essay_marker", "past_papers", "exam_countdown"],
@@ -48,6 +52,7 @@ const LEGACY_CONFIGS: Record<string, {
       { name: "Paper 3 (Unified Physics)", date: "2026-06-08" },
     ],
     essayMarkerMarks: [6],
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 200/200 in Physics and straight 9s at GCSE. I trained A* AI on OCR Physics past papers and mark schemes to help you ace your exams.",
   },
   "ocr::computer science": {
     selectedFeatures: ["my_ai", "diagram_generator", "essay_marker", "past_papers", "revision_guide", "exam_countdown"],
@@ -56,6 +61,7 @@ const LEGACY_CONFIGS: Record<string, {
       { name: "Paper 2 (Algorithms & Programming)", date: "2026-06-17" },
     ],
     essayMarkerMarks: [9, 12],
+    trainerDescription: "Hi, I'm Naman — I got A*A*A*A* at A-Level with straight 9s at GCSE and an 8.9 TMUA score. I trained A* AI on OCR Computer Science to help you master algorithms, data structures, and exam technique.",
   },
   "aqa::chemistry": {
     selectedFeatures: ["my_ai", "essay_marker", "past_papers", "exam_countdown"],
@@ -65,6 +71,7 @@ const LEGACY_CONFIGS: Record<string, {
       { name: "Paper 3 (All topics)", date: "2026-06-10" },
     ],
     essayMarkerMarks: [6],
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 197/200 in Chemistry and straight 9s at GCSE. I trained A* AI on AQA Chemistry to help you master every topic and ace your exams.",
   },
   "aqa::psychology": {
     selectedFeatures: ["my_ai", "essay_marker", "past_papers", "revision_guide", "exam_countdown"],
@@ -74,6 +81,7 @@ const LEGACY_CONFIGS: Record<string, {
       { name: "Paper 3 (Issues and Options)", date: "2026-06-08" },
     ],
     essayMarkerMarks: [16],
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level and straight 9s at GCSE. I trained A* AI on AQA Psychology past papers, mark schemes and specification to help you achieve top grades.",
   },
   "edexcel::mathematics": {
     selectedFeatures: ["my_ai", "past_papers", "revision_guide", "exam_countdown"],
@@ -83,6 +91,7 @@ const LEGACY_CONFIGS: Record<string, {
       { name: "Paper 3 (Stats & Mechanics)", date: "2026-06-15" },
     ],
     essayMarkerMarks: [],
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 236/240 in Mathematics and straight 9s at GCSE. I trained A* AI on Edexcel Maths past papers and specifications.",
   },
   "edexcel::mathematics applied": {
     selectedFeatures: ["my_ai", "past_papers", "revision_guide", "exam_countdown"],
@@ -92,6 +101,7 @@ const LEGACY_CONFIGS: Record<string, {
       { name: "Paper 3 (Stats & Mechanics)", date: "2026-06-15" },
     ],
     essayMarkerMarks: [],
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 236/240 in Mathematics and straight 9s at GCSE. I trained A* AI on Edexcel Maths Applied (Stats & Mechanics) content.",
   },
 };
 
@@ -231,6 +241,13 @@ serve(async (req) => {
             legacyConfig.essayMarkerMarks.length > 0) {
           updatePayload.essay_marker_marks = legacyConfig.essayMarkerMarks;
           updates.push(`essay_marker_marks (${legacyConfig.essayMarkerMarks.join(", ")})`);
+        }
+
+        // 7b. Backfill trainer_description
+        if ((!project.trainer_description || !project.trainer_description.trim()) && legacyConfig.trainerDescription) {
+          updatePayload.trainer_description = legacyConfig.trainerDescription;
+          updatePayload.trainer_bio_submitted = true;
+          updates.push("trainer_description (from legacy)");
         }
       }
 

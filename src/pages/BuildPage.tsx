@@ -281,10 +281,11 @@ export function BuildPage() {
     let initialExamTechnique = existing.exam_technique || "";
     const initialCustomSections = (existing.custom_sections as unknown as CustomSection[]) || [];
     const initialTrainerImageUrl = existing.trainer_image_url || null;
-    const initialTrainerDescription = existing.trainer_description || "";
 
-    // Legacy config fallback for features/dates/marks
+    // Legacy config fallback for features/dates/marks/bio
     const legacy = getLegacyConfig(existing.exam_board, existing.subject);
+
+    const initialTrainerDescription = existing.trainer_description?.trim() ? existing.trainer_description : (legacy?.trainerDescription || "");
 
     const dbFeatures = Array.isArray(existing.selected_features) ? existing.selected_features as string[] : [];
     const initialSelectedFeatures = dbFeatures.length > 0 ? dbFeatures : (legacy?.selectedFeatures || []);
