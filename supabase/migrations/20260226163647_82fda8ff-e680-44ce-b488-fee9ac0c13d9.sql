@@ -1,0 +1,1 @@
+UPDATE trainer_projects SET last_deployed_at = updated_at WHERE status = 'deployed' AND last_deployed_at IS NULL;
