@@ -1249,9 +1249,9 @@ export function BuildPage() {
             hasChangesSinceDeploy={hasSavedChangesSinceDeploy}
             onStatusChange={setSpecStatusFromUploader}
             onSpecDataChange={handleSpecDataChange}
+            statusIcon={<StatusIndicator status={getSectionStatus("stagedSpecData", JSON.stringify(stagedSpecData), !stagedSpecData || stagedSpecData.length === 0)} />}
             onReplaceDeployed={async () => {
               if (!projectId) return;
-              // Delete deployed spec chunks via edge function (needs service role)
               const { error } = await supabase.functions.invoke("deploy-subject", {
                 body: {
                   project_id: projectId,
@@ -1268,7 +1268,7 @@ export function BuildPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Past Papers</CardTitle>
-              <p className="text-xs text-muted-foreground">Upload QPs and Mark Schemes — they'll be auto-paired by paper number. Submit each year when ready.</p>
+              <p className="text-xs text-muted-foreground">Upload QPs and Mark Schemes — they'll be auto-paired by paper number.</p>
             </CardHeader>
             <CardContent className="space-y-3">
               {PAPER_YEARS.map(year => {

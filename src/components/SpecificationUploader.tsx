@@ -1,8 +1,8 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Loader2, AlertCircle, FileText, Trash2, X, Clock } from "lucide-react";
+import { Upload, Loader2, AlertCircle, FileText, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeSpecifications } from "@/lib/specNormalization";
 import {
@@ -24,43 +24,40 @@ interface SpecificationUploaderProps {
   initialStagedSpecs?: string[] | null;
   isDeployed?: boolean;
   hasChangesSinceDeploy?: boolean;
+  /** Status icon element from parent (tri-state) */
+  statusIcon?: ReactNode;
 }
 
-type UploadState = "idle" | "reading" | "processing" | "staged" | "submitted" | "error";
+type UploadState = "idle" | "reading" | "processing" | "ready" | "error";
 
-export function SpecificationUploader({ onStatusChange, onSpecDataChange, onReplaceDeployed, initialComplete, initialStagedSpecs, isDeployed, hasChangesSinceDeploy }: SpecificationUploaderProps) {
-  const [state, setState] = useState<UploadState>(initialComplete || (initialStagedSpecs && initialStagedSpecs.length > 0) ? "submitted" : "idle");
-  const [fileName, setFileName] = useState<string | null>(initialComplete ? "Specification (loaded)" : initialStagedSpecs ? "Specification (saved)" : null);
+export function SpecificationUploader({ onStatusChange, onSpecDataChange, onReplaceDeployed, initialComplete, initialStagedSpecs, isDeployed, hasChangesSinceDeploy, statusIcon }: SpecificationUploaderProps) {
+  const hasInitialData = initialComplete || (initialStagedSpecs && initialStagedSpecs.length > 0);
+  const [state, setState] = useState<UploadState>(hasInitialData ? "ready" : "idle");
+  const [fileName, setFileName] = useState<string | null>(
+    initialComplete ? "Specification (loaded)" : initialStagedSpecs ? "Specification (saved)" : null
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [stagedSpecs, setStagedSpecs] = useState<string[] | null>(initialStagedSpecs || null);
   const [showPreview, setShowPreview] = useState(false);
   const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
-  // Track whether a spec has ever been submitted/deployed (persists through edits)
-  const [hasBeenSubmitted, setHasBeenSubmitted] = useState(initialComplete || (initialStagedSpecs && initialStagedSpecs.length > 0) || false);
-  // Store the previously submitted specs so cancel can restore them
-  const [previousSpecs, setPreviousSpecs] = useState<string[] | null>(null);
-  const [previousFileName, setPreviousFileName] = useState<string | null>(null);
   const [showJsonEditor, setShowJsonEditor] = useState(false);
   const [jsonEditorValue, setJsonEditorValue] = useState("");
   const [jsonError, setJsonError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const pendingFileRef = useRef<File | null>(null);
 
   // Sync initialComplete prop
   useEffect(() => {
     if (initialComplete && state === "idle") {
-      setState("submitted");
+      setState("ready");
       setFileName("Specification (loaded)");
-      setHasBeenSubmitted(true);
     }
   }, [initialComplete]);
 
-  // Hydrate from async-loaded staged specs (prevents losing state after refresh)
+  // Hydrate from async-loaded staged specs
   useEffect(() => {
     if (initialStagedSpecs && initialStagedSpecs.length > 0) {
       setStagedSpecs(initialStagedSpecs);
-      setHasBeenSubmitted(true);
-      setState("submitted");
+      setState("ready");
       if (!fileName) setFileName("Specification (saved)");
     }
   }, [initialStagedSpecs, fileName]);
@@ -69,16 +66,14 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
   useEffect(() => {
     if (!onStatusChange) return;
     if (state === "reading" || state === "processing") onStatusChange("processing");
-    else if (state === "submitted") onStatusChange("success");
+    else if (state === "ready") onStatusChange("success");
     else if (state === "error") onStatusChange("error");
-    // staged but previously submitted — still report success (spec exists)
-    else if (state === "staged" && hasBeenSubmitted) onStatusChange("success");
     else onStatusChange("idle");
-  }, [state, onStatusChange, hasBeenSubmitted]);
+  }, [state, onStatusChange]);
 
-  // Report staged data changes to parent — persist in both staged and submitted states to prevent data loss
+  // Report staged data changes to parent
   useEffect(() => {
-    if (state === "submitted" || state === "staged") {
+    if (state === "ready") {
       onSpecDataChange?.(stagedSpecs);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,11 +87,8 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
       return;
     }
 
-    // Save current state before replacing
-    if (hasBeenSubmitted && stagedSpecs) {
-      setPreviousSpecs(stagedSpecs);
-      setPreviousFileName(fileName);
-    }
+    const previousSpecs = stagedSpecs;
+    const previousFileName = fileName;
 
     setFileName(file.name);
     setErrorMessage(null);
@@ -126,62 +118,29 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
 
       setStagedSpecs(data.specifications);
       setShowPreview(true);
-      setState("staged");
+      setState("ready");
       toast({
         title: "Specification parsed",
-        description: `Extracted ${data.specifications.length} spec points. Review and submit when ready.`,
+        description: `Extracted ${data.specifications.length} spec points.`,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to process PDF";
       setErrorMessage(message);
-      // If we had a previous submission, restore to submitted state on error
-      if (hasBeenSubmitted && previousSpecs) {
+      // Restore previous data on error
+      if (previousSpecs && previousSpecs.length > 0) {
         setStagedSpecs(previousSpecs);
         setFileName(previousFileName);
-        setState("submitted");
-        setPreviousSpecs(null);
-        setPreviousFileName(null);
+        setState("ready");
       } else {
         setState("error");
       }
       toast({ title: "Processing failed", description: message, variant: "destructive" });
     }
-  }, [hasBeenSubmitted, stagedSpecs, fileName, previousSpecs, previousFileName]);
+  }, [stagedSpecs, fileName]);
 
-  // Cancel: if previously submitted, go back to submitted. If fresh, go to idle.
-  const handleCancel = () => {
-    setShowJsonEditor(false);
-    setJsonError(null);
-    if (hasBeenSubmitted) {
-      if (previousSpecs) {
-        setStagedSpecs(previousSpecs);
-        setFileName(previousFileName);
-        setPreviousSpecs(null);
-        setPreviousFileName(null);
-      }
-      setState("submitted");
-      setShowPreview(false);
-    } else {
-      setStagedSpecs(null);
-      setFileName(null);
-      setShowPreview(false);
-      setState("idle");
-    }
-  };
-
-  const handleSubmit = () => {
-    if (!stagedSpecs || stagedSpecs.length === 0) return;
-    setState("submitted");
-    setHasBeenSubmitted(true);
-    setShowPreview(false);
-    setPreviousSpecs(null);
-    setPreviousFileName(null);
-    toast({ title: "Specification submitted", description: "Will be saved to database on deploy." });
-  };
-
-  // Replace flow: if already submitted, ask for confirmation first
+  // Replace flow: if spec data exists, ask for confirmation first
   const handleReplaceClick = () => {
-    if (hasBeenSubmitted) {
+    if (stagedSpecs && stagedSpecs.length > 0) {
       setShowReplaceConfirm(true);
     } else {
       inputRef.current?.click();
@@ -190,7 +149,6 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
 
   const handleReplaceConfirmed = async () => {
     setShowReplaceConfirm(false);
-    // If spec was deployed to DB, delete it
     if (initialComplete && onReplaceDeployed) {
       try {
         await onReplaceDeployed();
@@ -198,36 +156,34 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
         console.error("Failed to delete deployed spec data:", e);
       }
     }
-    // Reset to idle so tick/progress is removed until new upload completes
-    setHasBeenSubmitted(false);
     setStagedSpecs(null);
     setFileName(null);
-    setPreviousSpecs(null);
-    setPreviousFileName(null);
     setState("idle");
-    // Trigger file picker
     setTimeout(() => inputRef.current?.click(), 100);
   };
 
   const removeSpecPoint = (index: number) => {
-    setStagedSpecs(prev => prev ? prev.filter((_, i) => i !== index) : null);
+    setStagedSpecs(prev => {
+      const next = prev ? prev.filter((_, i) => i !== index) : null;
+      if (!next || next.length === 0) {
+        setState("idle");
+        setFileName(null);
+      }
+      return next;
+    });
   };
 
   const isProcessing = state === "reading" || state === "processing";
   const hasStagedData = stagedSpecs && stagedSpecs.length > 0;
 
-  // Header icon
-  const headerIcon = state === "submitted"
-    ? <CheckCircle2 className="h-5 w-5 text-green-500" />
-    : (state === "staged" && hasBeenSubmitted)
-    ? <CheckCircle2 className="h-5 w-5 text-green-500" />
-    : state === "staged"
-    ? <Clock className="h-5 w-5 text-orange-500" />
-    : state === "error"
-    ? <AlertCircle className="h-5 w-5 text-destructive" />
-    : isProcessing
-    ? <Loader2 className="h-5 w-5 animate-spin text-orange-500" />
-    : <div className="h-5 w-5 rounded-full border border-muted-foreground" />;
+  // Header icon — use parent's statusIcon if provided, else fallback
+  const headerIcon = statusIcon || (
+    isProcessing
+      ? <Loader2 className="h-5 w-5 animate-spin text-orange-500" />
+      : state === "error"
+      ? <AlertCircle className="h-5 w-5 text-destructive" />
+      : <div className="h-5 w-5 rounded-full border border-muted-foreground" />
+  );
 
   return (
     <Card>
@@ -266,81 +222,19 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Submitted (green done) state */}
-        {state === "submitted" && (
+        {/* Ready state — spec data exists */}
+        {state === "ready" && hasStagedData && (
           <div className="space-y-3">
-            <div className="rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3">
+            <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
               <div className="flex items-center gap-2 mb-1">
-                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                  {initialComplete && !hasStagedData
-                    ? "Specification loaded"
-                    : `${stagedSpecs?.length || 0} spec points submitted`}
-                </p>
-              </div>
-              {fileName && <p className="text-xs text-muted-foreground truncate ml-6">{fileName}</p>}
-              <p className="text-xs mt-1 ml-6">
-                {isDeployed && !hasChangesSinceDeploy ? (
-                  <span className="text-green-500">Live — deployed to database</span>
-                ) : isDeployed && hasChangesSinceDeploy ? (
-                  <span className="text-orange-500">Changes pending — re-deploy to update</span>
-                ) : (
-                  <span className="text-orange-500">Will be saved to database on deploy</span>
-                )}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs"
-                onClick={() => {
-                  // Save current state for potential cancel
-                  setPreviousSpecs(stagedSpecs);
-                  setPreviousFileName(fileName);
-                  setState("staged");
-                  setShowPreview(true);
-                }}
-              >
-                Edit
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-xs text-muted-foreground"
-                onClick={handleReplaceClick}
-              >
-                Replace
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Staged state — parsed but not yet submitted */}
-        {state === "staged" && (
-          <div className="space-y-3">
-            <div className={`rounded-lg border px-4 py-3 ${
-              hasBeenSubmitted
-                ? "border-green-500/30 bg-green-500/5"
-                : "border-orange-500/30 bg-orange-500/5"
-            }`}>
-              <div className="flex items-center gap-2 mb-1">
-                <FileText className={`h-4 w-4 shrink-0 ${hasBeenSubmitted ? "text-green-500" : "text-orange-500"}`} />
-                <p className={`text-sm font-medium ${
-                  hasBeenSubmitted
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-orange-600 dark:text-orange-400"
-                }`}>
-                  {stagedSpecs?.length || 0} spec points — review before submitting
+                <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <p className="text-sm font-medium">
+                  {stagedSpecs?.length || 0} spec points
                 </p>
               </div>
               {fileName && <p className="text-xs text-muted-foreground truncate ml-6">{fileName}</p>}
             </div>
-
             <div className="flex items-center gap-2">
-              <Button size="sm" onClick={handleSubmit} disabled={!hasStagedData}>
-                Submit
-              </Button>
               <Button
                 size="sm"
                 variant="ghost"
@@ -371,14 +265,6 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
                 onClick={handleReplaceClick}
               >
                 Replace
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-xs text-destructive"
-                onClick={handleCancel}
-              >
-                <X className="h-3 w-3 mr-1" /> Cancel
               </Button>
             </div>
           </div>
@@ -421,8 +307,8 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
           </div>
         )}
 
-        {/* Staging preview list */}
-        {showPreview && hasStagedData && (state === "staged" || state === "submitted") && (
+        {/* Preview list */}
+        {showPreview && hasStagedData && state === "ready" && (
           <div className="border border-border rounded-lg">
             <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-muted/50 rounded-t-lg">
               <span className="text-xs font-medium flex items-center gap-1.5">
@@ -433,7 +319,7 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
                 {stagedSpecs!.length} points
               </span>
             </div>
-            {showJsonEditor && state === "staged" ? (
+            {showJsonEditor ? (
               <div className="p-2 space-y-2">
                 <textarea
                   className="w-full min-h-[300px] max-h-[500px] text-xs font-mono p-3 rounded border border-border bg-background text-foreground resize-y focus:outline-none focus:ring-1 focus:ring-ring"
@@ -476,15 +362,13 @@ export function SpecificationUploader({ onStatusChange, onSpecDataChange, onRepl
                     <p className="flex-1 text-xs text-muted-foreground px-2 py-1.5 rounded bg-muted/30">
                       {spec}
                     </p>
-                    {state === "staged" && (
-                      <button
-                        onClick={() => removeSpecPoint(i)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive shrink-0 mt-0.5"
-                        title="Remove this spec point"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => removeSpecPoint(i)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive shrink-0 mt-0.5"
+                      title="Remove this spec point"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
                   </div>
                 ))}
               </div>
