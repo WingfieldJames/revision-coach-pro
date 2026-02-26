@@ -364,8 +364,23 @@ export function BuildPage() {
     if (projectLoaded) setHasUnsavedChanges(true);
   }, [projectLoaded]);
 
-  // Track text field changes
-  useEffect(() => { markUnsaved(); }, [systemPrompt, examTechnique, customSections, trainerDescription, selectedFeatures, examDates, essayMarkerMarks]);
+  // Track text field changes — skip the initial hydration render
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (!projectLoaded) return;
+    // Skip the first time fields change after project loads (that's hydration, not user edits)
+    if (!hydratedRef.current) {
+      hydratedRef.current = true;
+      return;
+    }
+    setHasUnsavedChanges(true);
+  }, [systemPrompt, examTechnique, customSections, trainerDescription, selectedFeatures, examDates, essayMarkerMarks]);
+
+  // Reset hydration flag when switching projects
+  useEffect(() => {
+    hydratedRef.current = false;
+    setHasUnsavedChanges(false);
+  }, [selectedProjectId]);
 
   // Manual Save handler
   const handleSave = async () => {
