@@ -6,6 +6,95 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Canonical live feature configs for legacy subjects (matches Header props)
+const LEGACY_CONFIGS: Record<string, {
+  selectedFeatures: string[];
+  examDates: Array<{ name: string; date: string }>;
+  essayMarkerMarks: number[];
+}> = {
+  "aqa::economics": {
+    selectedFeatures: ["my_ai", "diagram_generator", "essay_marker", "past_papers", "exam_countdown"],
+    examDates: [
+      { name: "Paper 1", date: "2026-05-11" },
+      { name: "Paper 2", date: "2026-05-18" },
+      { name: "Paper 3", date: "2026-06-04" },
+    ],
+    essayMarkerMarks: [9, 10, 15, 25],
+  },
+  "edexcel::economics": {
+    selectedFeatures: ["my_ai", "diagram_generator", "essay_marker", "past_papers", "revision_guide", "exam_countdown"],
+    examDates: [
+      { name: "Paper 1 (Markets and Business Behaviour)", date: "2026-05-11" },
+      { name: "Paper 2 (The National and Global Economy)", date: "2026-05-18" },
+      { name: "Paper 3 (Microeconomics and Macroeconomics)", date: "2026-06-04" },
+    ],
+    essayMarkerMarks: [],
+  },
+  "cie::economics": {
+    selectedFeatures: ["my_ai", "diagram_generator", "essay_marker", "past_papers", "exam_countdown"],
+    examDates: [
+      { name: "Paper 1 (Multiple Choice)", date: "2026-05-12" },
+      { name: "Paper 2 (Data Response & Essays)", date: "2026-05-22" },
+      { name: "Paper 3 (Multiple Choice)", date: "2026-06-10" },
+      { name: "Paper 4 (Data Response & Essays)", date: "2026-05-20" },
+    ],
+    essayMarkerMarks: [],
+  },
+  "ocr::physics": {
+    selectedFeatures: ["my_ai", "essay_marker", "past_papers", "exam_countdown"],
+    examDates: [
+      { name: "Paper 1 (Modelling Physics)", date: "2026-05-20" },
+      { name: "Paper 2 (Exploring Physics)", date: "2026-06-01" },
+      { name: "Paper 3 (Unified Physics)", date: "2026-06-08" },
+    ],
+    essayMarkerMarks: [6],
+  },
+  "ocr::computer science": {
+    selectedFeatures: ["my_ai", "diagram_generator", "essay_marker", "past_papers", "revision_guide", "exam_countdown"],
+    examDates: [
+      { name: "Paper 1 (Computer Systems)", date: "2026-06-10" },
+      { name: "Paper 2 (Algorithms & Programming)", date: "2026-06-17" },
+    ],
+    essayMarkerMarks: [9, 12],
+  },
+  "aqa::chemistry": {
+    selectedFeatures: ["my_ai", "essay_marker", "past_papers", "exam_countdown"],
+    examDates: [
+      { name: "Paper 1 (Inorganic & Physical)", date: "2026-05-13" },
+      { name: "Paper 2 (Organic & Physical)", date: "2026-05-20" },
+      { name: "Paper 3 (All topics)", date: "2026-06-10" },
+    ],
+    essayMarkerMarks: [6],
+  },
+  "aqa::psychology": {
+    selectedFeatures: ["my_ai", "essay_marker", "past_papers", "revision_guide", "exam_countdown"],
+    examDates: [
+      { name: "Paper 1 (Introductory Topics)", date: "2026-05-14" },
+      { name: "Paper 2 (Psychology in Context)", date: "2026-05-27" },
+      { name: "Paper 3 (Issues and Options)", date: "2026-06-08" },
+    ],
+    essayMarkerMarks: [16],
+  },
+  "edexcel::mathematics": {
+    selectedFeatures: ["my_ai", "past_papers", "revision_guide", "exam_countdown"],
+    examDates: [
+      { name: "Paper 1 (Pure Mathematics 1)", date: "2026-06-02" },
+      { name: "Paper 2 (Pure Mathematics 2)", date: "2026-06-09" },
+      { name: "Paper 3 (Stats & Mechanics)", date: "2026-06-15" },
+    ],
+    essayMarkerMarks: [],
+  },
+  "edexcel::mathematics applied": {
+    selectedFeatures: ["my_ai", "past_papers", "revision_guide", "exam_countdown"],
+    examDates: [
+      { name: "Paper 1 (Pure Mathematics 1)", date: "2026-06-02" },
+      { name: "Paper 2 (Pure Mathematics 2)", date: "2026-06-09" },
+      { name: "Paper 3 (Stats & Mechanics)", date: "2026-06-15" },
+    ],
+    essayMarkerMarks: [],
+  },
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -34,12 +123,12 @@ serve(async (req) => {
     for (const project of projects) {
       const updates: string[] = [];
       const updatePayload: Record<string, unknown> = {};
-
       const productId = project.product_id;
+      const legacyKey = `${(project.exam_board || "").toLowerCase()}::${(project.subject || "").toLowerCase()}`;
+      const legacyConfig = LEGACY_CONFIGS[legacyKey];
 
-      // 1. Backfill system_prompt from products.system_prompt_deluxe
+      // 1. Backfill system_prompt
       if (!project.system_prompt || project.system_prompt.trim().length === 0) {
-        // First try document_chunks
         const { data: spChunks } = await supabase
           .from("document_chunks")
           .select("content")
@@ -52,13 +141,11 @@ serve(async (req) => {
           updatePayload.system_prompt_submitted = true;
           updates.push("system_prompt (from chunks)");
         } else {
-          // Fallback to products table
           const { data: product } = await supabase
             .from("products")
             .select("system_prompt_deluxe")
             .eq("id", productId)
             .single();
-
           if (product?.system_prompt_deluxe) {
             updatePayload.system_prompt = product.system_prompt_deluxe;
             updatePayload.system_prompt_submitted = true;
@@ -67,7 +154,7 @@ serve(async (req) => {
         }
       }
 
-      // 2. Backfill exam_technique from document_chunks
+      // 2. Backfill exam_technique
       if (!project.exam_technique || project.exam_technique.trim().length === 0) {
         const { data: etChunks } = await supabase
           .from("document_chunks")
@@ -83,9 +170,9 @@ serve(async (req) => {
         }
       }
 
-      // 3. Backfill staged_specifications from document_chunks
-      if (!project.staged_specifications || 
-          !Array.isArray(project.staged_specifications) || 
+      // 3. Backfill staged_specifications
+      if (!project.staged_specifications ||
+          !Array.isArray(project.staged_specifications) ||
           project.staged_specifications.length === 0) {
         const { data: specChunks } = await supabase
           .from("document_chunks")
@@ -101,9 +188,9 @@ serve(async (req) => {
         }
       }
 
-      // 4. Backfill custom_sections from document_chunks
-      if (!project.custom_sections || 
-          !Array.isArray(project.custom_sections) || 
+      // 4. Backfill custom_sections
+      if (!project.custom_sections ||
+          !Array.isArray(project.custom_sections) ||
           project.custom_sections.length === 0) {
         const { data: csChunks } = await supabase
           .from("document_chunks")
@@ -120,6 +207,102 @@ serve(async (req) => {
           });
           updatePayload.custom_sections = sections;
           updates.push(`custom_sections (${sections.length})`);
+        }
+      }
+
+      // 5. Backfill selected_features from legacy config
+      if (legacyConfig) {
+        const currentFeatures = project.selected_features;
+        if (!currentFeatures || !Array.isArray(currentFeatures) || currentFeatures.length === 0) {
+          updatePayload.selected_features = legacyConfig.selectedFeatures;
+          updates.push(`selected_features (${legacyConfig.selectedFeatures.join(", ")})`);
+        }
+
+        // 6. Backfill exam_dates
+        const currentDates = project.exam_dates;
+        if (!currentDates || !Array.isArray(currentDates) || currentDates.length === 0) {
+          updatePayload.exam_dates = legacyConfig.examDates;
+          updates.push(`exam_dates (${legacyConfig.examDates.length} papers)`);
+        }
+
+        // 7. Backfill essay_marker_marks
+        const currentMarks = project.essay_marker_marks;
+        if ((!currentMarks || !Array.isArray(currentMarks) || currentMarks.length === 0) &&
+            legacyConfig.essayMarkerMarks.length > 0) {
+          updatePayload.essay_marker_marks = legacyConfig.essayMarkerMarks;
+          updates.push(`essay_marker_marks (${legacyConfig.essayMarkerMarks.join(", ")})`);
+        }
+      }
+
+      // 8. Backfill synthetic trainer_uploads for past papers from document_chunks
+      const { data: existingUploads } = await supabase
+        .from("trainer_uploads")
+        .select("id")
+        .eq("project_id", project.id)
+        .eq("section_type", "past_paper")
+        .limit(1);
+
+      if (!existingUploads || existingUploads.length === 0) {
+        // Find all past-paper-like chunks for this product
+        const { data: ppChunks } = await supabase
+          .from("document_chunks")
+          .select("metadata")
+          .eq("product_id", productId)
+          .limit(5000);
+
+        if (ppChunks && ppChunks.length > 0) {
+          // Group by year + paper_number + doc_type from metadata
+          const groups = new Map<string, { year: string; paperNumber: number | null; docType: string | null; count: number }>();
+
+          for (const chunk of ppChunks) {
+            const meta = chunk.metadata as any;
+            if (!meta) continue;
+
+            const contentType = meta.content_type || "";
+            // Skip non-paper content types
+            if (["system_prompt", "exam_technique", "specification", "custom_section"].includes(contentType)) continue;
+
+            const year = meta.year || meta.exam_year || null;
+            const paperNumber = meta.paper_number || meta.paper || null;
+            const docType = meta.doc_type || (contentType.includes("mark_scheme") ? "MS" : contentType.includes("paper") ? "QP" : null);
+
+            if (!year) continue;
+
+            const key = `${year}::${paperNumber || "null"}::${docType || "combined"}`;
+            const existing = groups.get(key);
+            if (existing) {
+              existing.count++;
+            } else {
+              groups.set(key, { year: String(year), paperNumber: paperNumber ? Number(paperNumber) : null, docType, count: 1 });
+            }
+          }
+
+          // Create synthetic trainer_uploads for each group
+          const insertsArray: any[] = [];
+          for (const [, group] of groups) {
+            insertsArray.push({
+              project_id: project.id,
+              section_type: "past_paper",
+              year: group.year,
+              paper_number: group.paperNumber,
+              doc_type: group.docType,
+              file_name: `Legacy import — ${group.year}${group.paperNumber ? ` P${group.paperNumber}` : ""}${group.docType ? ` ${group.docType}` : ""}`,
+              file_url: `legacy-import/${project.id}/${group.year}_${group.paperNumber || "all"}_${group.docType || "combined"}`,
+              processing_status: "done",
+              chunks_created: group.count,
+            });
+          }
+
+          if (insertsArray.length > 0) {
+            const { error: insertErr } = await supabase
+              .from("trainer_uploads")
+              .insert(insertsArray);
+            if (insertErr) {
+              updates.push(`ERROR inserting uploads: ${insertErr.message}`);
+            } else {
+              updates.push(`synthetic trainer_uploads (${insertsArray.length} records)`);
+            }
+          }
         }
       }
 
@@ -146,7 +329,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

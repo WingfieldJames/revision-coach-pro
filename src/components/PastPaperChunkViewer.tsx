@@ -14,9 +14,12 @@ interface PastPaperChunkViewerProps {
   uploadId: string;
   uploadLabel: string;
   productId: string | null;
+  year?: string | null;
+  paperNumber?: number | null;
+  docType?: string | null;
 }
 
-export function PastPaperChunkViewer({ uploadId, uploadLabel, productId }: PastPaperChunkViewerProps) {
+export function PastPaperChunkViewer({ uploadId, uploadLabel, productId, year, paperNumber, docType }: PastPaperChunkViewerProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [chunks, setChunks] = useState<ChunkData[] | null>(null);
@@ -28,36 +31,63 @@ export function PastPaperChunkViewer({ uploadId, uploadLabel, productId }: PastP
   const fetchChunks = async () => {
     setLoading(true);
     try {
-      // Query chunks that have this upload_id in metadata (individual chunks)
-      const { data: directChunks, error: err1 } = await supabase
-        .from("document_chunks")
-        .select("id, content, metadata")
-        .contains("metadata", { upload_id: uploadId });
+      const isLegacy = uploadId.startsWith("legacy-");
+      
+      if (isLegacy && productId) {
+        // Legacy import: query by product_id + year/paper metadata
+        let query = supabase
+          .from("document_chunks")
+          .select("id, content, metadata")
+          .eq("product_id", productId);
+        
+        // Filter by year if available
+        if (year) {
+          query = query.or(`metadata->>year.eq.${year},metadata->>exam_year.eq.${year}`);
+        }
+        
+        const { data, error } = await query.limit(500);
+        if (error) throw error;
+        
+        // Further filter by paper_number/doc_type in JS if provided
+        let filtered = data || [];
+        if (paperNumber) {
+          filtered = filtered.filter(c => {
+            const meta = c.metadata as any;
+            return meta?.paper_number == paperNumber || meta?.paper == paperNumber;
+          });
+        }
+        
+        setChunks(filtered as ChunkData[]);
+      } else {
+        // Standard query by upload_id metadata
+        const { data: directChunks, error: err1 } = await supabase
+          .from("document_chunks")
+          .select("id, content, metadata")
+          .contains("metadata", { upload_id: uploadId });
 
-      if (err1) throw err1;
+        if (err1) throw err1;
 
-      // Also query merged chunks where this upload is a source (QP or MS)
-      const { data: mergedQP, error: err2 } = await supabase
-        .from("document_chunks")
-        .select("id, content, metadata")
-        .contains("metadata", { source_qp_upload: uploadId });
+        const { data: mergedQP, error: err2 } = await supabase
+          .from("document_chunks")
+          .select("id, content, metadata")
+          .contains("metadata", { source_qp_upload: uploadId });
 
-      if (err2) throw err2;
+        if (err2) throw err2;
 
-      const { data: mergedMS, error: err3 } = await supabase
-        .from("document_chunks")
-        .select("id, content, metadata")
-        .contains("metadata", { source_ms_upload: uploadId });
+        const { data: mergedMS, error: err3 } = await supabase
+          .from("document_chunks")
+          .select("id, content, metadata")
+          .contains("metadata", { source_ms_upload: uploadId });
 
-      if (err3) throw err3;
+        if (err3) throw err3;
 
-      // Deduplicate by id
-      const allChunks = [...(directChunks || []), ...(mergedQP || []), ...(mergedMS || [])];
-      const uniqueMap = new Map<string, ChunkData>();
-      for (const c of allChunks) {
-        uniqueMap.set(c.id, c as ChunkData);
+        const allChunks = [...(directChunks || []), ...(mergedQP || []), ...(mergedMS || [])];
+        const uniqueMap = new Map<string, ChunkData>();
+        for (const c of allChunks) {
+          uniqueMap.set(c.id, c as ChunkData);
+        }
+        setChunks(Array.from(uniqueMap.values()));
       }
-      setChunks(Array.from(uniqueMap.values()));
     } catch (err) {
       console.error("Failed to fetch chunks:", err);
       toast({ title: "Failed to load chunks", variant: "destructive" });

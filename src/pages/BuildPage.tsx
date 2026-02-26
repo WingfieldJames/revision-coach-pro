@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle } from "lucide-react";
 import { normalizeSpecifications } from "@/lib/specNormalization";
+import { getLegacyConfig } from "@/lib/legacyLiveConfig";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
@@ -275,17 +276,26 @@ export function BuildPage() {
     setExamTechniqueSubmitted(etSubmitted);
     setTrainerBioSubmitted(bioSubmitted);
 
-    // Set initial values from trainer_projects
+    // Set initial values from trainer_projects, with legacy config fallback
     let initialSystemPrompt = existing.system_prompt || "";
     let initialExamTechnique = existing.exam_technique || "";
     const initialCustomSections = (existing.custom_sections as unknown as CustomSection[]) || [];
     const initialTrainerImageUrl = existing.trainer_image_url || null;
     const initialTrainerDescription = existing.trainer_description || "";
-    const initialSelectedFeatures = Array.isArray(existing.selected_features) ? existing.selected_features as string[] : [];
-    const initialExamDates = Array.isArray(existing.exam_dates) ? existing.exam_dates as Array<{ name: string; date: string }> : [];
-    const initialEssayMarkerMarks = Array.isArray(existing.essay_marker_marks) && existing.essay_marker_marks.length > 0
-      ? (existing.essay_marker_marks as number[]).join(', ')
-      : '';
+
+    // Legacy config fallback for features/dates/marks
+    const legacy = getLegacyConfig(existing.exam_board, existing.subject);
+
+    const dbFeatures = Array.isArray(existing.selected_features) ? existing.selected_features as string[] : [];
+    const initialSelectedFeatures = dbFeatures.length > 0 ? dbFeatures : (legacy?.selectedFeatures || []);
+
+    const dbDates = Array.isArray(existing.exam_dates) ? existing.exam_dates as Array<{ name: string; date: string }> : [];
+    const initialExamDates = dbDates.length > 0 ? dbDates : (legacy?.examDates || []);
+
+    const dbMarks = Array.isArray(existing.essay_marker_marks) ? existing.essay_marker_marks as number[] : [];
+    const initialEssayMarkerMarks = dbMarks.length > 0
+      ? dbMarks.join(', ')
+      : (legacy?.essayMarkerMarks && legacy.essayMarkerMarks.length > 0 ? legacy.essayMarkerMarks.join(', ') : '');
 
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
