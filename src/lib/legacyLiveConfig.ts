@@ -9,7 +9,9 @@ export interface LegacySubjectConfig {
   examDates: Array<{ name: string; date: string }>;
   essayMarkerMarks: number[];
   essayMarkerLabel?: string;
+  trainerName?: string;
   trainerDescription?: string;
+  trainerStatus?: string;
 }
 
 // Helper to serialise Date → YYYY-MM-DD string for storage
@@ -30,6 +32,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
       { name: "Paper 3", date: d(2026, 5, 4) },
     ],
     essayMarkerMarks: [9, 10, 15, 25],
+    trainerName: "Etienne",
+    trainerDescription: "Hi, I'm Etienne — founder of EasyNomics, UKMT Gold Award winner, and John Locke Economics shortlisted. I trained A* AI on AQA Economics to help you achieve the top grades.",
+    trainerStatus: "BSc Economics Student",
   },
 
   // ── Edexcel Economics ──
@@ -42,6 +47,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     ],
     essayMarkerMarks: [],
     essayMarkerLabel: "Essay Marker",
+    trainerName: "James",
+    trainerDescription: "Hi, I'm James — I got A* in Economics with 90% across all papers, A*A*A at A-Level, and straight 9s at GCSE. I'm studying at LSE and built A* AI to help you achieve the same results.",
+    trainerStatus: "LSE Student",
   },
 
   // ── CIE Economics ──
@@ -54,6 +62,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
       { name: "Paper 4 (Data Response & Essays)", date: d(2026, 4, 20) },
     ],
     essayMarkerMarks: [],
+    trainerName: "Carl",
+    trainerDescription: "Hi, I'm Carl — I got A*A*A* at A-Level as an international student and achieved 5A*s in IGCSE in one year. I'm studying at LSE and trained A* AI on CIE Economics.",
+    trainerStatus: "LSE Student",
   },
 
   // ── OCR Physics ──
@@ -66,6 +77,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     ],
     essayMarkerMarks: [6],
     essayMarkerLabel: "6-Marker Analysis",
+    trainerName: "Tudor",
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 200/200 in Physics and straight 9s at GCSE. I trained A* AI on OCR Physics past papers and mark schemes to help you ace your exams.",
+    trainerStatus: "Gap Year Student",
   },
 
   // ── OCR Computer Science ──
@@ -76,6 +90,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
       { name: "Paper 2 (Algorithms & Programming)", date: d(2026, 5, 17) },
     ],
     essayMarkerMarks: [9, 12],
+    trainerName: "Naman",
+    trainerDescription: "Hi, I'm Naman — I got A*A*A*A* at A-Level with straight 9s at GCSE and an 8.9 TMUA score. I trained A* AI on OCR Computer Science to help you master algorithms, data structures, and exam technique.",
+    trainerStatus: "Gap Year Student",
   },
 
   // ── AQA Chemistry ──
@@ -88,6 +105,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     ],
     essayMarkerMarks: [6],
     essayMarkerLabel: "6-Marker Analysis",
+    trainerName: "Tudor",
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 197/200 in Chemistry and straight 9s at GCSE. I trained A* AI on AQA Chemistry to help you master every topic and ace your exams.",
+    trainerStatus: "Gap Year Student",
   },
 
   // ── AQA Psychology ──
@@ -100,6 +120,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     ],
     essayMarkerMarks: [16],
     essayMarkerLabel: "16-Marker Analysis",
+    trainerName: "Tudor",
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level and straight 9s at GCSE. I trained A* AI on AQA Psychology past papers, mark schemes and specification to help you achieve top grades.",
+    trainerStatus: "Gap Year Student",
   },
 
   // ── Edexcel Mathematics (Pure) ──
@@ -111,6 +134,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
       { name: "Paper 3 (Stats & Mechanics)", date: d(2026, 5, 15) },
     ],
     essayMarkerMarks: [],
+    trainerName: "Tudor",
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 236/240 in Mathematics and straight 9s at GCSE. I trained A* AI on Edexcel Maths past papers and specifications.",
+    trainerStatus: "Gap Year Student",
   },
 
   // ── Edexcel Mathematics Applied ──
@@ -122,6 +148,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
       { name: "Paper 3 (Stats & Mechanics)", date: d(2026, 5, 15) },
     ],
     essayMarkerMarks: [],
+    trainerName: "Tudor",
+    trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 236/240 in Mathematics and straight 9s at GCSE. I trained A* AI on Edexcel Maths Applied (Stats & Mechanics) content.",
+    trainerStatus: "Gap Year Student",
   },
 };
 
