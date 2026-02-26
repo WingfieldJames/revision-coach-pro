@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3 } from "lucide-react";
+import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle } from "lucide-react";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
@@ -181,16 +181,14 @@ export function BuildPage() {
 
   // Deploying
   const [deploying, setDeploying] = useState(false);
-  const [deployingToWebsite, setDeployingToWebsite] = useState(false);
-  const [erasing, setErasing] = useState(false);
-  // Track if changes were made after deployment (enables re-deploy)
-  const [hasChangesSinceDeploy, setHasChangesSinceDeploy] = useState(false);
 
-  // Track whether project data has been loaded (prevent auto-save from overwriting on mount)
+  // Save & Deploy workflow
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasSavedChangesSinceDeploy, setHasSavedChangesSinceDeploy] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Track whether project data has been loaded (prevent overwriting on mount)
   const [projectLoaded, setProjectLoaded] = useState(false);
-
-  // Auto-save debounce
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check role access
   useEffect(() => {
@@ -280,7 +278,8 @@ export function BuildPage() {
       }
     }
     setProjectLoaded(true);
-    setHasChangesSinceDeploy(false);
+    setHasUnsavedChanges(false);
+    setHasSavedChangesSinceDeploy(false);
     setChatMessages([]);
   }, [selectedProjectId, projects]);
 
@@ -360,11 +359,24 @@ export function BuildPage() {
     loadUploads();
   }, [projectId]);
 
-  // Auto-save text fields
-  const autoSave = useCallback(() => {
-    if (!projectId || !projectLoaded) return;
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(async () => {
+  // Mark unsaved whenever content changes
+  const markUnsaved = useCallback(() => {
+    if (projectLoaded) setHasUnsavedChanges(true);
+  }, [projectLoaded]);
+
+  // Track text field changes
+  useEffect(() => { markUnsaved(); }, [systemPrompt, examTechnique, customSections, trainerDescription, selectedFeatures, examDates, essayMarkerMarks]);
+
+  // Manual Save handler
+  const handleSave = async () => {
+    if (!projectId) return;
+    setIsSaving(true);
+    try {
+      const parsedMarks = essayMarkerMarks
+        .split(',')
+        .map(s => parseInt(s.trim(), 10))
+        .filter(n => !isNaN(n) && n > 0);
+
       const { error } = await supabase
         .from("trainer_projects")
         .update({
@@ -372,13 +384,28 @@ export function BuildPage() {
           exam_technique: examTechnique,
           custom_sections: customSections as unknown as import("@/integrations/supabase/types").Json,
           trainer_description: trainerDescription,
+          trainer_image_url: trainerImageUrl,
+          selected_features: selectedFeatures as unknown as import("@/integrations/supabase/types").Json,
+          exam_dates: examDates as unknown as import("@/integrations/supabase/types").Json,
+          essay_marker_marks: (parsedMarks.length > 0 ? parsedMarks : []) as unknown as import("@/integrations/supabase/types").Json,
+          staged_specifications: stagedSpecData as unknown as import("@/integrations/supabase/types").Json,
+          system_prompt_submitted: systemPrompt.trim().length >= 10,
+          exam_technique_submitted: examTechnique.trim().length >= 10,
+          trainer_bio_submitted: trainerDescription.trim().length >= 10,
         })
         .eq("id", projectId);
-      if (error) console.error("Auto-save failed:", error);
-    }, 2000);
-  }, [projectId, projectLoaded, systemPrompt, examTechnique, customSections, trainerDescription]);
 
-  useEffect(() => { autoSave(); }, [systemPrompt, examTechnique, customSections, trainerDescription, autoSave]);
+      if (error) throw error;
+      setHasUnsavedChanges(false);
+      if (projectStatus === "deployed") setHasSavedChangesSinceDeploy(true);
+      toast({ title: "Changes saved" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Save failed";
+      toast({ title: "Save failed", description: message, variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Upload trainer image
   const handleTrainerImageUpload = async (file: File) => {
@@ -423,10 +450,9 @@ export function BuildPage() {
   const handleSpecDataChange = useCallback((specs: string[] | null) => {
     setStagedSpecData(specs);
     if (projectLoaded) {
-      persistSubmissionState({ staged_specifications: specs });
-      if (projectStatus === "deployed" && specs) setHasChangesSinceDeploy(true);
+      markUnsaved();
     }
-  }, [projectLoaded, persistSubmissionState, projectStatus]);
+  }, [projectLoaded, markUnsaved]);
 
   // File upload handler (supports multiple files)
   const handleFileUpload = async (file: File, sectionType: string, year?: string) => {
@@ -487,7 +513,7 @@ export function BuildPage() {
           .eq("id", uploadRecord.id);
       });
 
-      if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
+      markUnsaved();
       toast({ title: "Upload complete", description: `${file.name} uploaded. Processing in background.` });
 
       // Reload uploads immediately so new pending item appears
@@ -520,7 +546,7 @@ export function BuildPage() {
       });
       if (error) throw error;
       setUploads(prev => prev.filter(u => u.id !== uploadId));
-      if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
+      markUnsaved();
       toast({ title: "File removed", description: upload.file_name });
     } catch (err) {
       console.error("Delete failed:", err);
@@ -659,91 +685,41 @@ export function BuildPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
-  // Deploy
+  // Unified Deploy handler
   const handleDeploy = async () => {
     if (!projectId) return;
     setDeploying(true);
     try {
+      // Auto-save first if there are unsaved changes
+      if (hasUnsavedChanges) {
+        await handleSave();
+      }
+
       const submittedCustomSections = customSections.filter(s => s.content.length > 20);
+      const isFirstDeploy = projectStatus !== "deployed";
+
       const { data, error } = await supabase.functions.invoke("deploy-subject", {
         body: {
           project_id: projectId,
           staged_specifications: stagedSpecData || undefined,
-          staged_system_prompt: systemPromptSubmitted ? systemPrompt : undefined,
-          staged_exam_technique: examTechniqueSubmitted ? examTechnique : undefined,
+          staged_system_prompt: systemPrompt.trim().length >= 10 ? systemPrompt : undefined,
+          staged_exam_technique: examTechnique.trim().length >= 10 ? examTechnique : undefined,
           staged_custom_sections: submittedCustomSections.length > 0 ? submittedCustomSections : undefined,
+          // For first deploy, also activate on website
+          activate_website: isFirstDeploy ? true : undefined,
         },
       });
       if (error) throw error;
       setProjectStatus("deployed");
-      setHasChangesSinceDeploy(false);
+      setHasSavedChangesSinceDeploy(false);
       setStagedSpecData(null);
       setSpecComplete(true);
-      toast({ title: "Deployed!", description: data.message || "Subject deployed successfully." });
+      toast({ title: isFirstDeploy ? "Deployed to website! 🎉" : "Changes deployed!", description: data.message || "Subject deployed successfully." });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Deployment failed";
       toast({ title: "Deploy failed", description: message, variant: "destructive" });
     } finally {
       setDeploying(false);
-    }
-  };
-
-  // Erase all training data from database
-  const handleEraseTraining = async () => {
-    if (!projectId) return;
-    setErasing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("erase-training-data", {
-        body: { project_id: projectId },
-      });
-      if (error) throw error;
-      setProjectStatus("draft");
-      setHasChangesSinceDeploy(false);
-      toast({ title: "Training data erased", description: `${data.deleted} chunk(s) removed from the database.` });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Erase failed";
-      toast({ title: "Erase failed", description: message, variant: "destructive" });
-    } finally {
-      setErasing(false);
-    }
-  };
-
-  // Deploy to Website — activates the product so it appears on /compare and gets dynamic routes
-  const handleDeployToWebsite = async () => {
-    if (!projectId) return;
-    setDeployingToWebsite(true);
-    try {
-      // First ensure the subject has been deployed (has a product_id)
-      const { data: proj } = await supabase
-        .from("trainer_projects")
-        .select("product_id, exam_board, subject, selected_features")
-        .eq("id", projectId)
-        .single();
-
-      if (!proj?.product_id) {
-        toast({ title: "Deploy first", description: "Please deploy the training data before deploying to the website.", variant: "destructive" });
-        setDeployingToWebsite(false);
-        return;
-      }
-
-      // Activate the product — this makes it visible on /compare and dynamic routes
-      const { error: updateErr } = await supabase.functions.invoke("deploy-subject", {
-        body: {
-          project_id: projectId,
-          activate_website: true,
-        },
-      });
-      if (updateErr) throw updateErr;
-
-      toast({ 
-        title: "Deployed to website! 🎉", 
-        description: `${proj.exam_board} ${proj.subject} is now live at /s/${proj.exam_board.toLowerCase()}-${proj.subject.toLowerCase().replace(/\s+/g, '-')}/free` 
-      });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Website deployment failed";
-      toast({ title: "Deploy to website failed", description: message, variant: "destructive" });
-    } finally {
-      setDeployingToWebsite(false);
     }
   };
 
@@ -872,6 +848,21 @@ export function BuildPage() {
             </DropdownMenu>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={!hasUnsavedChanges || isSaving}
+              variant={hasUnsavedChanges ? "default" : "outline"}
+              className={!hasUnsavedChanges ? "opacity-60" : ""}
+            >
+              {isSaving ? (
+                <><Loader2 className="h-4 w-4 animate-spin mr-1" /> Saving...</>
+              ) : hasUnsavedChanges ? (
+                <><Save className="h-4 w-4 mr-1" /> Save Changes</>
+              ) : (
+                <><CheckCircle2 className="h-4 w-4 mr-1" /> Changes Saved</>
+              )}
+            </Button>
             <Badge variant={projectStatus === "deployed" ? "default" : "secondary"} className={
               projectStatus === "deployed" ? "bg-green-500/20 text-green-600 border-green-500/30 hover:bg-green-500/20" : ""
             }>
@@ -990,6 +981,20 @@ export function BuildPage() {
             </CardContent>
           </Card>
 
+          {/* Unsaved Changes Banner */}
+          {hasUnsavedChanges && (
+            <div className="rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-orange-500 shrink-0" />
+                <p className="text-sm text-orange-600 dark:text-orange-400">You have unsaved changes</p>
+              </div>
+              <Button size="sm" variant="outline" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+                Save Now
+              </Button>
+            </div>
+          )}
+
           {/* Meet the Brain */}
           <Card>
             <CardHeader className="pb-3">
@@ -997,7 +1002,7 @@ export function BuildPage() {
                 <CardTitle className="text-base flex items-center gap-2">
                   <User className="h-4 w-4" /> Meet the Brain
                 </CardTitle>
-                {trainerBioSubmitted
+                {trainerDescription.trim().length >= 10
                   ? <CheckCircle2 className="h-5 w-5 text-green-500" />
                   : (trainerDescription.length > 0 || trainerImageUrl)
                   ? <Clock className="h-5 w-5 text-orange-500" />
@@ -1006,83 +1011,42 @@ export function BuildPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {trainerBioSubmitted ? (
-                <div className="space-y-3">
-                  <div className="rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                      <p className="text-sm font-medium text-green-600 dark:text-green-400">Bio submitted</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      {trainerImageUrl && (
-                        <div className="h-16 w-16 rounded-full bg-muted overflow-hidden shrink-0">
-                          <TrainerImage filePath={trainerImageUrl} />
-                        </div>
-                      )}
-                      <p className="text-xs text-muted-foreground line-clamp-3">{trainerDescription}</p>
-                    </div>
-                  </div>
-                  <Button size="sm" variant="outline" className="text-xs" onClick={() => setTrainerBioSubmitted(false)}>
-                    Edit
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <input
-                      ref={trainerImageInputRef}
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={e => {
-                        const file = e.target.files?.[0];
-                        if (file) handleTrainerImageUpload(file);
-                      }}
-                    />
-                    <div
-                      className="h-20 w-20 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors overflow-hidden shrink-0"
-                      onClick={() => trainerImageInputRef.current?.click()}
-                    >
-                      {uploadingImage ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      ) : trainerImageUrl ? (
-                        <TrainerImage filePath={trainerImageUrl} />
-                      ) : (
-                        <ImagePlus className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      <p className="font-medium text-foreground">Your photo</p>
-                      <p className="text-xs">Click to upload a profile image</p>
-                    </div>
-                  </div>
-                  <Textarea
-                    value={trainerDescription}
-                    onChange={e => setTrainerDescription(e.target.value)}
-                    placeholder="Tell students about yourself... Your qualifications, teaching experience, what makes you passionate about this subject."
-                    className="min-h-[120px] text-sm"
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <input
+                    ref={trainerImageInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) handleTrainerImageUpload(file);
+                    }}
                   />
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">Auto-saves every 2 seconds</p>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (trainerDescription.trim().length < 10) {
-                          toast({ title: "Too short", description: "Please enter a more detailed bio.", variant: "destructive" });
-                          return;
-                        }
-                        setTrainerBioSubmitted(true);
-                        if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
-                        persistSubmissionState({ trainer_bio_submitted: true });
-                        toast({ title: "Bio submitted" });
-                      }}
-                      disabled={trainerDescription.trim().length === 0}
-                    >
-                      Submit
-                    </Button>
+                  <div
+                    className="h-20 w-20 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors overflow-hidden shrink-0"
+                    onClick={() => trainerImageInputRef.current?.click()}
+                  >
+                    {uploadingImage ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    ) : trainerImageUrl ? (
+                      <TrainerImage filePath={trainerImageUrl} />
+                    ) : (
+                      <ImagePlus className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground">Your photo</p>
+                    <p className="text-xs">Click to upload a profile image</p>
                   </div>
                 </div>
-              )}
+                <Textarea
+                  value={trainerDescription}
+                  onChange={e => setTrainerDescription(e.target.value)}
+                  placeholder="Tell students about yourself... Your qualifications, teaching experience, what makes you passionate about this subject."
+                  className="min-h-[120px] text-sm"
+                />
+              </div>
             </CardContent>
           </Card>
 
@@ -1091,7 +1055,7 @@ export function BuildPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">System Prompt</CardTitle>
-                {systemPromptSubmitted
+                {systemPrompt.trim().length >= 10
                   ? <CheckCircle2 className="h-5 w-5 text-green-500" />
                   : systemPrompt.length > 0
                   ? <Clock className="h-5 w-5 text-orange-500" />
@@ -1100,62 +1064,12 @@ export function BuildPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {systemPromptSubmitted ? (
-                <div className="space-y-3">
-                  <div className="rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                      <p className="text-sm font-medium text-green-600 dark:text-green-400">System prompt submitted</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-3">{systemPrompt}</p>
-                    <p className="text-xs mt-1">
-                      {projectStatus === "deployed" && !hasChangesSinceDeploy ? (
-                        <span className="text-green-500">Live — deployed to database</span>
-                      ) : projectStatus === "deployed" && hasChangesSinceDeploy ? (
-                        <span className="text-orange-500">Changes pending — re-deploy to update</span>
-                      ) : (
-                        <span className="text-orange-500">Will be saved to database on deploy</span>
-                      )}
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs"
-                    onClick={() => setSystemPromptSubmitted(false)}
-                  >
-                    Edit
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <Textarea
-                    value={systemPrompt}
-                    onChange={e => setSystemPrompt(e.target.value)}
-                    placeholder="Enter the AI tutor's system prompt... Define its personality, teaching style, and subject expertise."
-                    className="min-h-[200px] text-sm"
-                  />
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">Auto-saves every 2 seconds</p>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (systemPrompt.trim().length < 10) {
-                          toast({ title: "Too short", description: "Please enter a more detailed system prompt.", variant: "destructive" });
-                          return;
-                        }
-                        setSystemPromptSubmitted(true);
-                        if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
-                        persistSubmissionState({ system_prompt_submitted: true });
-                        toast({ title: "System prompt submitted", description: projectStatus === "deployed" ? "Re-deploy to apply changes." : "Will be saved to database on deploy." });
-                      }}
-                      disabled={systemPrompt.trim().length === 0}
-                    >
-                      Submit
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Textarea
+                value={systemPrompt}
+                onChange={e => setSystemPrompt(e.target.value)}
+                placeholder="Enter the AI tutor's system prompt... Define its personality, teaching style, and subject expertise."
+                className="min-h-[200px] text-sm"
+              />
             </CardContent>
           </Card>
 
@@ -1164,7 +1078,7 @@ export function BuildPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Exam Technique</CardTitle>
-                {examTechniqueSubmitted
+                {examTechnique.trim().length >= 10
                   ? <CheckCircle2 className="h-5 w-5 text-green-500" />
                   : examTechnique.length > 0
                   ? <Clock className="h-5 w-5 text-orange-500" />
@@ -1173,61 +1087,12 @@ export function BuildPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {examTechniqueSubmitted ? (
-                <div className="space-y-3">
-                  <div className="rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                      <p className="text-sm font-medium text-green-600 dark:text-green-400">Exam technique submitted</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-3">{examTechnique}</p>
-                    <p className="text-xs mt-1">
-                      {projectStatus === "deployed" && !hasChangesSinceDeploy ? (
-                        <span className="text-green-500">Live — deployed to database</span>
-                      ) : projectStatus === "deployed" && hasChangesSinceDeploy ? (
-                        <span className="text-orange-500">Changes pending — re-deploy to update</span>
-                      ) : (
-                        <span className="text-orange-500">Will be saved to database on deploy</span>
-                      )}
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs"
-                    onClick={() => setExamTechniqueSubmitted(false)}
-                  >
-                    Edit
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <Textarea
-                    value={examTechnique}
-                    onChange={e => setExamTechnique(e.target.value)}
-                    placeholder="Enter exam technique guidance... How to structure answers, common pitfalls, mark scheme tips."
-                    className="min-h-[150px] text-sm"
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (examTechnique.trim().length < 10) {
-                          toast({ title: "Too short", description: "Please enter more detailed exam technique guidance.", variant: "destructive" });
-                          return;
-                        }
-                        setExamTechniqueSubmitted(true);
-                        if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
-                        persistSubmissionState({ exam_technique_submitted: true });
-                        toast({ title: "Exam technique submitted", description: projectStatus === "deployed" ? "Re-deploy to apply changes." : "Will be saved to database on deploy." });
-                      }}
-                      disabled={examTechnique.trim().length === 0}
-                    >
-                      Submit
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <Textarea
+                value={examTechnique}
+                onChange={e => setExamTechnique(e.target.value)}
+                placeholder="Enter exam technique guidance... How to structure answers, common pitfalls, mark scheme tips."
+                className="min-h-[150px] text-sm"
+              />
             </CardContent>
           </Card>
 
@@ -1236,7 +1101,7 @@ export function BuildPage() {
             initialComplete={specComplete}
             initialStagedSpecs={stagedSpecData}
             isDeployed={projectStatus === "deployed"}
-            hasChangesSinceDeploy={hasChangesSinceDeploy}
+            hasChangesSinceDeploy={hasSavedChangesSinceDeploy}
             onStatusChange={setSpecStatusFromUploader}
             onSpecDataChange={handleSpecDataChange}
             onReplaceDeployed={async () => {
@@ -1279,7 +1144,7 @@ export function BuildPage() {
                         try { localStorage.setItem(`submittedYears_${projectId}`, JSON.stringify(Array.from(next))); } catch {}
                         return next;
                       });
-                      if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
+                      markUnsaved();
                     }}
                     onEditYear={(y) => {
                       setSubmittedYears(prev => {
@@ -1288,7 +1153,7 @@ export function BuildPage() {
                         try { localStorage.setItem(`submittedYears_${projectId}`, JSON.stringify(Array.from(next))); } catch {}
                         return next;
                       });
-                      if (projectStatus === "deployed") setHasChangesSinceDeploy(true);
+                      markUnsaved();
                     }}
                   />
                 );
@@ -1335,67 +1200,43 @@ export function BuildPage() {
           </Card>
 
           {/* Deploy Button */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button size="lg" className="w-full" disabled={(projectStatus === "deployed" && !hasChangesSinceDeploy) || deploying}>
-                {deploying ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Rocket className="h-5 w-5 mr-2" />}
-                {projectStatus === "deployed" && !hasChangesSinceDeploy
-                  ? "Already Deployed"
-                  : projectStatus === "deployed" && hasChangesSinceDeploy
-                  ? "Re-Deploy Changes"
-                  : "Deploy Subject"}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {projectStatus === "deployed" ? `Re-Deploy ${currentLabel}?` : `Deploy ${currentLabel}?`}
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {projectStatus === "deployed"
-                    ? "This will update the live product with your latest changes. Existing training data will be replaced — no duplicates will be created."
-                    : "This will make the subject live and create a new product entry. You'll need to manually add Stripe links and routes afterwards."}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeploy}>
-                  {projectStatus === "deployed" ? "Re-Deploy" : "Deploy"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          {/* Erase All Training Button */}
-          {projectStatus === "deployed" && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button size="lg" variant="outline" className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" disabled={erasing}>
-                  {erasing ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Trash2 className="h-5 w-5 mr-2" />}
-                  Erase All Training Data
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Erase all training data?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete <strong>all trained chunks</strong> from the database for {currentLabel}. The AI will have no knowledge until you re-deploy.
-                    <br /><br />
-                    Your uploaded files and portal content will <strong>not</strong> be affected — only the deployed training data will be removed.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>No, keep it</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleEraseTraining}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    Yes, erase everything
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+          {(() => {
+            const isFirstDeploy = projectStatus !== "deployed";
+            const deployDisabled = projectStatus === "deployed" && !hasSavedChangesSinceDeploy && !hasUnsavedChanges;
+            const deployLabel = isFirstDeploy
+              ? "Deploy to Website"
+              : deployDisabled
+              ? "Model Deployed"
+              : "Deploy Changes";
+            return (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="lg" className="w-full" disabled={deployDisabled || deploying} variant={deployDisabled ? "outline" : "default"}>
+                    {deploying ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : deployDisabled ? <CheckCircle2 className="h-5 w-5 mr-2" /> : <Rocket className="h-5 w-5 mr-2" />}
+                    {deployLabel}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {isFirstDeploy ? `Deploy ${currentLabel} to the website?` : `Re-Deploy ${currentLabel}?`}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {isFirstDeploy
+                        ? <>This will make <strong>{currentLabel}</strong> live on the website, creating chatbot pages, adding it to the subject selection, and enabling your chosen features.</>
+                        : "This will update the live product with your latest saved changes. Existing training data will be replaced — no duplicates will be created."}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeploy}>
+                      {isFirstDeploy ? "Yes, go live!" : "Re-Deploy"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            );
+          })()}
 
           {/* Website Deployment — Feature Selection */}
           <Card>
@@ -1470,32 +1311,6 @@ export function BuildPage() {
                     placeholder="e.g. 3, 4, 6, 15"
                     className="text-sm"
                   />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      const parsed = essayMarkerMarks
-                        .split(',')
-                        .map(s => parseInt(s.trim(), 10))
-                        .filter(n => !isNaN(n) && n > 0);
-                      if (parsed.length === 0) {
-                        toast({ title: "Invalid marks", description: "Enter at least one valid number.", variant: "destructive" });
-                        return;
-                      }
-                      if (projectId) {
-                        supabase
-                          .from("trainer_projects")
-                          .update({ essay_marker_marks: parsed as unknown as import("@/integrations/supabase/types").Json })
-                          .eq("id", projectId)
-                          .then(({ error }) => {
-                            if (error) console.error("Failed to save marks:", error);
-                            else toast({ title: "Mark options saved", description: `Marks: ${parsed.join(', ')}` });
-                          });
-                      }
-                    }}
-                  >
-                    Save Mark Options
-                  </Button>
                 </div>
               )}
             </CardContent>
@@ -1540,9 +1355,6 @@ export function BuildPage() {
                       onClick={() => {
                         const next = examDates.filter((_, i) => i !== idx);
                         setExamDates(next);
-                        if (projectId) {
-                          supabase.from("trainer_projects").update({ exam_dates: next as unknown as import("@/integrations/supabase/types").Json }).eq("id", projectId);
-                        }
                       }}
                     >
                       <Trash2 className="h-3 w-3" />
@@ -1559,58 +1371,8 @@ export function BuildPage() {
                 >
                   <Plus className="h-3 w-3 mr-1" /> Add Exam Date
                 </Button>
-                {examDates.length > 0 && examDates.some(d => d.name && d.date) && (
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      if (projectId) {
-                        supabase.from("trainer_projects").update({ exam_dates: examDates as unknown as import("@/integrations/supabase/types").Json }).eq("id", projectId)
-                          .then(({ error }) => {
-                            if (error) console.error("Failed to save exam dates:", error);
-                            else toast({ title: "Exam dates saved" });
-                          });
-                      }
-                    }}
-                    className="w-full bg-gradient-brand hover:opacity-90"
-                  >
-                    Save Exam Dates
-                  </Button>
-                )}
               </CardContent>
             </Card>
-          )}
-
-          {/* Deploy to Website Button */}
-          {projectStatus === "deployed" && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button size="lg" className="w-full bg-gradient-brand hover:opacity-90" disabled={deployingToWebsite}>
-                  {deployingToWebsite ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Globe className="h-5 w-5 mr-2" />}
-                  Deploy to Website
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Deploy {currentLabel} to the website?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will make <strong>{currentLabel}</strong> live on the website. It will:
-                    <ul className="list-disc ml-4 mt-2 space-y-1">
-                      <li>Create a free and premium chatbot page for students</li>
-                      <li>Add this subject to the /compare page selection</li>
-                      <li>Set up Stripe payment integration</li>
-                      <li>Use your "Meet the Brain" photo &amp; bio on the subject page</li>
-                      <li>Enable the features you selected above</li>
-                    </ul>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>No, not yet</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeployToWebsite}>
-                    Yes, go live!
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           )}
 
           {/* Remove from Website Button */}
@@ -1648,9 +1410,9 @@ export function BuildPage() {
                 <CardTitle className="text-base">Progress</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <ProgressRow label="Meet the Brain" status={trainerBioSubmitted ? "complete" : (trainerDescription.length > 0 || trainerImageUrl) ? "in_progress" : "empty"} />
-                <ProgressRow label="System Prompt" status={systemPromptSubmitted ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"} />
-                <ProgressRow label="Exam Technique" status={examTechniqueSubmitted ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"} />
+                <ProgressRow label="Meet the Brain" status={trainerDescription.trim().length >= 10 ? "complete" : (trainerDescription.length > 0 || trainerImageUrl) ? "in_progress" : "empty"} />
+                <ProgressRow label="System Prompt" status={systemPrompt.trim().length >= 10 ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"} />
+                <ProgressRow label="Exam Technique" status={examTechnique.trim().length >= 10 ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"} />
                 <ProgressRow label="Specification" status={
                   specStatusFromUploader === "success" || specComplete ? "complete" :
                   specStatusFromUploader === "processing" ? "in_progress" : "empty"
@@ -1679,9 +1441,9 @@ export function BuildPage() {
                   <p>Chunks: {uploads.reduce((sum, u) => sum + (u.chunks_created || 0), 0)}</p>
                 </div>
                 <TrainingProgressBar
-                  trainerBioStatus={trainerBioSubmitted ? "complete" : (trainerDescription.length > 0 || trainerImageUrl) ? "in_progress" : "empty"}
-                  systemPromptStatus={systemPromptSubmitted ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"}
-                  examTechniqueStatus={examTechniqueSubmitted ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"}
+                  trainerBioStatus={trainerDescription.trim().length >= 10 ? "complete" : (trainerDescription.length > 0 || trainerImageUrl) ? "in_progress" : "empty"}
+                  systemPromptStatus={systemPrompt.trim().length >= 10 ? "complete" : systemPrompt.length > 0 ? "in_progress" : "empty"}
+                  examTechniqueStatus={examTechnique.trim().length >= 10 ? "complete" : examTechnique.length > 0 ? "in_progress" : "empty"}
                   specStatus={specStatusFromUploader === "success" || specComplete ? "complete" : specStatusFromUploader === "processing" ? "in_progress" : "empty"}
                   paperYears={PAPER_YEARS}
                   getYearStatus={getYearStatus}
