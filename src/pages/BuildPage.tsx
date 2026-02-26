@@ -280,10 +280,11 @@ export function BuildPage() {
     let initialSystemPrompt = existing.system_prompt || "";
     let initialExamTechnique = existing.exam_technique || "";
     const initialCustomSections = (existing.custom_sections as unknown as CustomSection[]) || [];
-    const initialTrainerImageUrl = existing.trainer_image_url || null;
 
-    // Legacy config fallback for features/dates/marks/bio
+    // Legacy config fallback for features/dates/marks/bio/image
     const legacy = getLegacyConfig(existing.exam_board, existing.subject);
+
+    const initialTrainerImageUrl = existing.trainer_image_url || legacy?.trainerImageAsset || null;
 
     const initialTrainerDescription = existing.trainer_description?.trim() ? existing.trainer_description : (legacy?.trainerDescription || "");
 
@@ -1820,7 +1821,14 @@ function UploadChip({ upload }: { upload: TrainerUpload }) {
 function TrainerImage({ filePath }: { filePath: string }) {
   const [url, setUrl] = useState<string | null>(null);
   
+  // If the path is a static asset (starts with /) or a full URL, use it directly
+  const isDirectUrl = filePath.startsWith('/') || filePath.startsWith('http');
+
   useEffect(() => {
+    if (isDirectUrl) {
+      setUrl(filePath);
+      return;
+    }
     const getUrl = async () => {
       const { data } = await supabase.storage
         .from("trainer-uploads")
@@ -1828,7 +1836,7 @@ function TrainerImage({ filePath }: { filePath: string }) {
       if (data?.signedUrl) setUrl(data.signedUrl);
     };
     getUrl();
-  }, [filePath]);
+  }, [filePath, isDirectUrl]);
 
   if (!url) return <div className="w-full h-full bg-muted" />;
   return <img src={url} alt="Trainer" className="w-full h-full object-cover" />;
