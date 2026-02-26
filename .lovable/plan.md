@@ -1,70 +1,88 @@
 
-Goal: make /build faithfully mirror what is currently live for every subject (legacy + dynamic), and stop false “unsaved changes” on initial load.
 
-What I verified
-- /build currently hydrates text/spec/custom from `trainer_projects` + `document_chunks`, but Past Papers only from `trainer_uploads` by `project_id`.
-- Most legacy deployed subjects have `selected_features = []`, `exam_dates = []`, `essay_marker_marks = []`, empty trainer bio/image in `trainer_projects`, even though live pages enable tools via hardcoded `Header` props.
-- Many legacy products have substantial past-paper chunks in `document_chunks` but zero `trainer_uploads`, so /build shows empty Past Papers.
-- Unsaved banner is still race-prone because dirty tracking can run before hydration is fully “settled” across async child updates.
+# Rework Past Paper Submit Flow and Tri-State Progress Indicators
 
-Implementation plan
+## Overview
+Three changes: (1) remove the per-year "Submit" button from past papers -- uploaded files are automatically ready for Save, (2) introduce a three-state color system for section indicators (red = unsaved, orange = saved but not deployed, green = deployed), and (3) update the progress bar summary text and unsaved banner to match.
 
-1) Build a single “live config source of truth” map
-- Add a shared mapping (legacy subject+board → features, exam dates, essay marker marks/label behavior, trainer bio fallback text).
-- Use existing live page configs as canonical source (AQA Econ, OCR Physics, OCR CS, AQA Chem, AQA Psych, Edexcel Econ, Edexcel Maths, Edexcel Maths Applied, CIE Econ).
-- Keep dynamic subjects sourced from `trainer_projects` first.
+## 1. Remove "Submit" from Past Paper Year Cards
 
-2) Extend data sync/backfill (data update + edge function)
-- Upgrade `backfill-training-data` to also backfill if missing:
-  - `selected_features`
-  - `exam_dates`
-  - `essay_marker_marks`
-  - `trainer_description` (legacy fallback)
-- Keep existing backfills (system prompt, exam technique, specs, custom sections).
-- Add past-paper backfill logic:
-  - For projects with no `trainer_uploads`, derive year/paper/doc-type groups from `document_chunks.metadata`.
-  - Insert synthetic `trainer_uploads` rows (`processing_status='done'`, `section_type='past_paper'`, `chunks_created` from grouped counts, `year`, `doc_type`, `paper_number`, `file_name` like “Imported legacy paper …”).
-- No schema migration required (data-only update).
+**File: `src/components/PastPaperYearCard.tsx`**
+- Remove the `YearState` type and all submit/edit state machine logic (`state`, `handleSubmit`, `handleEdit`)
+- Remove `onSubmitYear` and `onEditYear` props
+- Simplify the card: if files exist, show them with an "Add files" button and delete buttons always visible (no locked "submitted" state)
+- Keep the delete confirmation dialog for deployed files
+- The card border stays neutral (no green border for "submitted" -- green will be controlled by the parent based on deploy state)
 
-3) Fix /build hydration so all live-relevant data appears
-- In `BuildPage`, hydrate in this order:
-  1. `trainer_projects`
-  2. chunk/product fallbacks (already partly done)
-  3. uploads (real + legacy-imported groups if needed)
-- For past papers: render from hydrated uploads so each year card reflects deployed reality even for legacy subjects.
-- For custom training data: surface non-standard imported content as “Custom Sections” only when not already represented by spec/exam-technique/past-paper.
+**File: `src/pages/BuildPage.tsx`**
+- Remove `submittedYears` state, localStorage logic, `onSubmitYear`/`onEditYear` callbacks
+- Remove `getYearStatus` function (replaced by new tri-state logic)
+- Past paper years with uploads are automatically included in the save payload
 
-4) Fix unsaved banner definitively
-- Replace current ref timing with explicit `isHydrating` gate:
-  - `isHydrating = true` before any state set
-  - set all fields
-  - compute and set final `savedSnapshot` from fully hydrated state
-  - then `isHydrating = false`
-- Dirty effect rule: `hasUnsavedChanges = !isHydrating && currentSnapshot !== savedSnapshot`.
-- Add deep-equality guard in child callbacks (`onSpecDataChange`) to ignore no-op state writes.
+## 2. Tri-State Section Indicators
 
-5) Improve chunk viewer compatibility for legacy imports
-- In `PastPaperChunkViewer`, keep existing upload-id queries.
-- Add fallback query path for legacy imported rows using `(product_id + year + paper_number/doc_type)` matching metadata keys so reviewers can still inspect/edit chunks.
+Introduce a new status type with three meaningful states:
 
-6) Validation checklist before handoff
-- Open /build and switch all deployed subjects:
-  - no unsaved banner on first load
-  - system prompt, exam technique, spec, past papers, feature toggles, exam dates populated to match live behavior
-- OCR Physics specifically:
-  - My AI, essay marker (6-marker), past papers, exam countdown shown as selected
-  - past-paper year cards populated from existing deployed chunks
-- Save does not appear dirty immediately after load.
-- Deploy button state remains correct with Save → Deploy workflow.
+```text
+"empty"    -> grey circle (no data entered)
+"unsaved"  -> RED clock icon (data changed locally, not saved to DB)
+"saved"    -> ORANGE clock icon (saved to DB, not yet deployed)
+"deployed" -> GREEN check icon (live on website)
+```
 
-Files expected to change
-- `src/pages/BuildPage.tsx`
-- `src/components/PastPaperChunkViewer.tsx`
-- `supabase/functions/backfill-training-data/index.ts`
-- `supabase/config.toml` only if function config needs update
-- optional shared config helper (legacy live feature map) in `src/lib/...`
+**How each section's state is determined:**
+- Compare current form value against `savedSnapshot` (from last DB save) AND against deployed state (`projectStatus === "deployed"` and whether the section existed at last deploy)
+- If current value differs from saved snapshot -> RED (unsaved)
+- If current value matches saved snapshot but project has saved-since-deploy changes -> ORANGE (saved, not deployed)
+- If section is deployed and unchanged -> GREEN (deployed)
+- If empty -> grey circle
 
-Risk controls
-- Backfill only when target field is empty to avoid overwriting trainer edits.
-- Scope every sync by `project.product_id` and project’s own subject/board.
-- Keep operation idempotent so reruns are safe.
+**File: `src/pages/BuildPage.tsx`**
+- Update `SectionStatus` type to `"empty" | "unsaved" | "saved" | "deployed"`
+- Update `StatusIndicator` component:
+  - `empty`: grey `Circle`
+  - `unsaved`: RED `Clock` icon
+  - `saved`: ORANGE `Clock` icon  
+  - `deployed`: GREEN `CheckCircle2` icon
+- Remove `cycleStatus` (no longer needed -- status is computed, not manually cycled)
+- Add a `savedSnapshotParsed` memo that parses `savedSnapshot` JSON for field-level comparison
+- Create a helper `getSectionStatus(fieldName, currentValue, savedValue, isDeployed)` that returns the correct status
+
+## 3. Update Unsaved Changes Banner
+
+**File: `src/pages/BuildPage.tsx`**
+- Change the banner color from orange to RED:
+  - Border: `border-red-500/30`
+  - Background: `bg-red-500/10`
+  - Icon color: `text-red-500`
+  - Text color: `text-red-600 dark:text-red-400`
+  - Text: "You have unsaved changes" (stays the same)
+
+## 4. Update Progress Bar and Summary Text
+
+**File: `src/pages/BuildPage.tsx` -- `TrainingProgressBar` component**
+- Track three counts: `unsaved` (red), `saved` (orange/ready for deploy), `deployed` (green)
+- Show summary lines:
+  - If unsaved > 0: `"X sections not saved"` in red text
+  - If saved > 0: `"X sections ready for deployment"` in orange text (replaces "X sections in progress")
+  - Keep the percentage bar showing deployed sections as green fill
+- `ProgressRow` component updated to use new status colors
+
+## Technical Details
+
+### Section status computation logic (pseudo-code):
+```
+for each section:
+  if (content is empty/below threshold) -> "empty"
+  else if (current content !== saved snapshot content) -> "unsaved"  
+  else if (project is deployed AND no changes since deploy) -> "deployed"
+  else -> "saved" (in DB but not deployed yet)
+```
+
+### Past paper status:
+- A year with uploads is either "unsaved" (new uploads since last save), "saved" (uploads exist and are saved), or "deployed" (project is deployed and year data hasn't changed)
+
+### Files to change:
+1. **`src/components/PastPaperYearCard.tsx`** -- simplify by removing submit/edit state machine
+2. **`src/pages/BuildPage.tsx`** -- new tri-state logic, banner color, progress bar text, remove submittedYears
+
