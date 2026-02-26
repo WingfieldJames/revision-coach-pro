@@ -1,50 +1,81 @@
 
 
-## Plan: Fix Progress Tracking and Re-Deploy Button Behavior
+# Revamped Save & Deploy Workflow for Build Portal
 
-### Problem 1: Progress sidebar shows green ticks without explicit Submit
+## Overview
+Restructure the Build Portal to follow a clear 3-step workflow: **Edit -> Save -> Deploy**. Remove the dangerous "Erase All Training Data" button, add an explicit "Save" button with unsaved-changes tracking, and separate the "Deploy" button so trainers can save progress without going live.
 
-Currently, when loading uploads from the database, any year where all files have `processing_status === "done"` is auto-added to `submittedYears` (lines 346-352 in BuildPage.tsx). This means the Progress sidebar shows a green tick even though the trainer never explicitly pressed "Submit" for that year.
+## Changes
 
-The `PastPaperYearCard` also has the same issue -- `initialSubmitted` is set to `true` when all uploads are done (line 1268), causing the card to render in "submitted" state with no Submit button visible.
+### 1. Remove "Erase All Training Data" button
+- Delete the entire `AlertDialog` block for erasing training data (lines 1369-1398)
+- Remove the `erasing` state variable and `handleEraseTraining` function (lines 185, 692-709)
 
-**Fix:**
-- Stop auto-populating `submittedYears` based on processing status alone
-- Track explicit year submissions in the database by adding a `submitted_years` JSON column to `trainer_projects`, or by storing it in the existing `custom_sections`-style pattern
-- Since we can't add DB columns directly, we'll store submitted years as a JSON array in a new field on `trainer_projects`. However, since we can't alter the table schema here, we can repurpose the existing project data or store it alongside the project load logic
-- Simplest approach: persist `submittedYears` as part of the trainer_projects update (we can store it in the existing JSON-capable columns or use local state that only marks complete on explicit Submit)
-- On load, only restore years that were explicitly submitted (not just "all files done")
+### 2. Add explicit "Save Changes" button with unsaved-changes tracking
+- Add a new state `hasUnsavedChanges` (boolean) that gets set to `true` whenever any content changes: system prompt edits, exam technique edits, trainer bio edits, file uploads/deletions, spec changes, custom section changes, feature toggles, exam dates, essay marker marks
+- Add a new state `isSaving` for the save button loading state
+- Replace the current auto-save behavior: the existing 2-second auto-save will be replaced by the manual "Save" button. When clicked, it persists all current data to the `trainer_projects` table (system prompt, exam technique, trainer description, custom sections, selected features, exam dates, essay marker marks, submission flags, staged specs)
+- After saving, set `hasUnsavedChanges = false` and also set a new flag `hasSavedChangesSinceDeploy = true` (if the project was previously deployed)
+- The Save button appears in the header bar (top-right area, next to the status badge):
+  - Default state: "Save Changes" (clickable, primary style)
+  - After saving: "Changes Saved" (disabled/muted appearance with a checkmark icon)
+  - When saving: shows a spinner
 
-For the `PastPaperYearCard`, change `initialSubmitted` to only be true when the year is in the persisted submitted set, not when all files are processed.
+### 3. Unsaved changes reminder banner
+- When `hasUnsavedChanges` is `true`, show a small sticky banner/toast-style bar at the top of the content area (below the header) with text like: "You have unsaved changes" and a link/button pointing to the Save button
+- This disappears once the user clicks Save
 
-### Problem 2: Re-Deploy button should appear when files are added/edited/deleted
+### 4. Restructure the Deploy button
+- The current "Deploy Subject" / "Re-Deploy Changes" button becomes the "Deploy" button with the following states:
+  - **First-time deploy (status = 'draft')**: Button reads "Deploy to Website" and is clickable. On click, it runs the full deploy flow (creates product, deploys chunks, activates on website -- combining the old "Deploy" and "Deploy to Website" into one action for first-time)
+  - **Deployed, no new saved changes**: Button reads "Model Deployed" and is disabled/greyed out with a checkmark
+  - **Deployed, has saved but undeployed changes**: Button reads "Deploy Changes" and is clickable. On click, it re-deploys the latest saved data
+- This replaces both the old "Deploy Subject" button AND the separate "Deploy to Website" button -- they merge into one unified deploy action
+- The "Remove from Website" button remains as-is (separate destructive action)
 
-The current code already sets `hasChangesSinceDeploy = true` when files are added (line 484) or deleted (line 517) on a deployed project. However, there are edge cases:
+### 5. New state tracking
+- `hasUnsavedChanges`: tracks whether the current in-memory state differs from what's saved in the DB
+- `hasSavedChangesSinceDeploy`: tracks whether saved DB data differs from what's deployed live (replaces the existing `hasChangesSinceDeploy`)
+- When a project loads, both start as `false`
+- Any edit sets `hasUnsavedChanges = true`
+- Clicking Save sets `hasUnsavedChanges = false` and (if deployed) sets `hasSavedChangesSinceDeploy = true`
+- Clicking Deploy sets `hasSavedChangesSinceDeploy = false`
 
-- The `PastPaperYearCard` submit/edit actions don't trigger `setHasChangesSinceDeploy(true)` -- submitting or un-submitting a year on a deployed project should also flag changes
-- The re-deploy button text and state are correct, but we should ensure it's always enabled for deployed projects when any file-level change occurs
+### 6. Remove per-section "Submit" buttons
+- The individual "Submit" buttons on System Prompt, Exam Technique, and Meet the Brain sections are removed. Instead, editing any of these sections just marks `hasUnsavedChanges = true`, and all data gets persisted when the global "Save" button is clicked
+- The per-section status indicators (green checkmark, orange clock) remain but now reflect whether content has been entered (not whether "Submit" was clicked)
 
-**Fix:**
-- Add `setHasChangesSinceDeploy(true)` to the `onSubmitYear` and `onEditYear` callbacks
-- Ensure the deploy button label clearly shows "Re-Deploy Changes" whenever there are pending changes
+## Technical Details
 
-### Files to modify
+### Files Modified
+- `src/pages/BuildPage.tsx` -- all changes are in this single file
 
-1. **`src/pages/BuildPage.tsx`**:
-   - Remove auto-population of `submittedYears` from the upload loading effect (lines 346-352). Instead, only populate from a persisted source
-   - Change `initialSubmitted` prop on `PastPaperYearCard` (line 1268) to use the persisted submitted years set, not processing status
-   - Add `setHasChangesSinceDeploy(true)` to `onSubmitYear` and `onEditYear` callbacks when `projectStatus === "deployed"`
-   - Store submitted years in `trainer_projects` via a new auto-save mechanism (using an unused JSON column or piggybacking on an existing one)
+### State Changes Summary
+```text
+Remove:  erasing, hasChangesSinceDeploy
+Add:     hasUnsavedChanges, hasSavedChangesSinceDeploy, isSaving
+Keep:    deploying, projectStatus, all content states
+```
 
-### Technical Detail: Persisting Submitted Years
+### Save Handler Logic
+```text
+handleSave():
+  1. Set isSaving = true
+  2. Update trainer_projects row with ALL current field values
+  3. Persist submission flags based on whether content exists
+  4. Set hasUnsavedChanges = false
+  5. If projectStatus === 'deployed', set hasSavedChangesSinceDeploy = true
+  6. Show toast "Changes saved"
+  7. Set isSaving = false
+```
 
-Since we need submitted years to survive page refreshes, we have two options:
-- **Option A**: Store in a new DB column (requires migration)
-- **Option B**: Store inside the existing `custom_sections` or `staged_specifications` JSON -- not ideal as it pollutes data
-
-Best approach: We'll need a small migration to add a `submitted_paper_years` jsonb column to `trainer_projects`. Alternatively, we can encode it as part of the existing project update pattern without a new column by storing it as a convention within an existing JSON field.
-
-Given the constraint, the cleanest path is to persist `submittedYears` using a Supabase migration for a new column, then load/save it alongside other project data. If a migration is not feasible right now, we can use localStorage as a fallback keyed by project ID (less robust but no schema change needed).
-
-I will use localStorage keyed by project ID as an interim solution, and persist to DB when the trainer deploys.
+### Deploy Handler Logic
+```text
+handleDeploy():
+  1. If hasUnsavedChanges, auto-save first
+  2. Call deploy-subject edge function (same as current)
+  3. If first deploy (draft), also activate on website
+  4. Set hasSavedChangesSinceDeploy = false
+  5. Set projectStatus = 'deployed'
+```
 
