@@ -288,9 +288,12 @@ serve(async (req) => {
       console.log(`Saved ${customChunksCreated} custom section chunks`);
     }
 
+    const deployTimestamp = new Date().toISOString();
     await supabase.from("trainer_projects").update({
       status: "deployed",
       product_id: productId,
+      last_deployed_at: deployTimestamp,
+      updated_at: deployTimestamp,
     }).eq("id", project_id);
 
     // Count total chunks

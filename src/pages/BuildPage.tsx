@@ -281,7 +281,8 @@ export function BuildPage() {
     if (existing.status === "deployed" && existing.last_deployed_at && existing.updated_at) {
       const deployedAt = new Date(existing.last_deployed_at).getTime();
       const updatedAt = new Date(existing.updated_at).getTime();
-      setHasSavedChangesSinceDeploy(updatedAt > deployedAt);
+      // Use 60s tolerance: the deploy process itself bumps updated_at via save + status update
+      setHasSavedChangesSinceDeploy(updatedAt - deployedAt > 60000);
     } else {
       setHasSavedChangesSinceDeploy(false);
     }
@@ -857,12 +858,7 @@ export function BuildPage() {
         },
       });
       if (error) throw error;
-      // Update last_deployed_at in DB
-      const now = new Date().toISOString();
-      await supabase
-        .from("trainer_projects")
-        .update({ last_deployed_at: now })
-        .eq("id", projectId);
+      // last_deployed_at is now set server-side by deploy-subject
       setProjectStatus("deployed");
       setHasSavedChangesSinceDeploy(false);
       setSpecComplete(true);
