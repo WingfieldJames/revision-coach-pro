@@ -253,6 +253,9 @@ export function PastPaperYearCard({
                     uploadId={u.id}
                     uploadLabel={getFileLabel(u)}
                     productId={productId || null}
+                    year={u.year}
+                    paperNumber={u.paper_number}
+                    docType={u.doc_type}
                   />
                 )}
                 {state !== "submitted" && (
