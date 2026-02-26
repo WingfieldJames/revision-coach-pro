@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle } from "lucide-react";
+import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle } from "lucide-react";
+import { normalizeSpecifications } from "@/lib/specNormalization";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
@@ -233,15 +234,39 @@ export function BuildPage() {
     loadProjects();
   }, [hasAccess, user]);
 
+  // Canonical snapshot for dirty tracking
+  const [savedSnapshot, setSavedSnapshot] = useState<string>("");
+  const hydrationDoneRef = useRef(false);
+
+  // Compute current form state as a stable string for comparison
+  const currentFormSnapshot = useMemo(() => {
+    return JSON.stringify({
+      systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData,
+    });
+  }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData]);
+
+  // Derive hasUnsavedChanges from snapshot comparison
+  useEffect(() => {
+    if (!hydrationDoneRef.current) return;
+    setHasUnsavedChanges(currentFormSnapshot !== savedSnapshot);
+  }, [currentFormSnapshot, savedSnapshot]);
+
   // Load project data when selectedProjectId changes
   useEffect(() => {
     if (!selectedProjectId || !hasAccess || !user) return;
     const existing = projects.find(p => p.id === selectedProjectId);
     if (!existing) return;
 
+    // Reset hydration flag — prevent dirty tracking until all async loads finish
+    hydrationDoneRef.current = false;
+    setHasUnsavedChanges(false);
+    setHasSavedChangesSinceDeploy(false);
+
     setProjectId(existing.id);
-    setCustomSections((existing.custom_sections as unknown as CustomSection[]) || []);
     setProjectStatus(existing.status);
+    setChatMessages([]);
 
     const spSubmitted = !!existing.system_prompt_submitted;
     const etSubmitted = !!existing.exam_technique_submitted;
@@ -249,80 +274,151 @@ export function BuildPage() {
     setSystemPromptSubmitted(spSubmitted);
     setExamTechniqueSubmitted(etSubmitted);
     setTrainerBioSubmitted(bioSubmitted);
-    setSystemPrompt(existing.system_prompt || "");
-    setExamTechnique(existing.exam_technique || "");
-    setTrainerImageUrl(existing.trainer_image_url || null);
-    setTrainerDescription(existing.trainer_description || "");
-    setSelectedFeatures(Array.isArray(existing.selected_features) ? existing.selected_features : []);
-    setExamDates(Array.isArray(existing.exam_dates) ? existing.exam_dates : []);
-    setEssayMarkerMarks(
-      Array.isArray(existing.essay_marker_marks) && existing.essay_marker_marks.length > 0
-        ? existing.essay_marker_marks.join(', ')
-        : ''
-    );
 
+    // Set initial values from trainer_projects
+    let initialSystemPrompt = existing.system_prompt || "";
+    let initialExamTechnique = existing.exam_technique || "";
+    const initialCustomSections = (existing.custom_sections as unknown as CustomSection[]) || [];
+    const initialTrainerImageUrl = existing.trainer_image_url || null;
+    const initialTrainerDescription = existing.trainer_description || "";
+    const initialSelectedFeatures = Array.isArray(existing.selected_features) ? existing.selected_features as string[] : [];
+    const initialExamDates = Array.isArray(existing.exam_dates) ? existing.exam_dates as Array<{ name: string; date: string }> : [];
+    const initialEssayMarkerMarks = Array.isArray(existing.essay_marker_marks) && existing.essay_marker_marks.length > 0
+      ? (existing.essay_marker_marks as number[]).join(', ')
+      : '';
+
+    setCustomSections(initialCustomSections);
+    setTrainerImageUrl(initialTrainerImageUrl);
+    setTrainerDescription(initialTrainerDescription);
+    setSelectedFeatures(initialSelectedFeatures);
+    setExamDates(initialExamDates);
+    setEssayMarkerMarks(initialEssayMarkerMarks);
+
+    // Handle specs with normalization
     const savedSpecs = existing.staged_specifications;
-    if (savedSpecs && Array.isArray(savedSpecs) && savedSpecs.length > 0) {
-      setStagedSpecData(savedSpecs);
+    const normalizedSpecs = normalizeSpecifications(savedSpecs);
+    if (normalizedSpecs && normalizedSpecs.length > 0) {
+      setStagedSpecData(normalizedSpecs);
       setSpecComplete(true);
-    } else if (existing.product_id) {
-      // Hydrate specs from document_chunks if not in staged_specifications
-      supabase
-        .from("document_chunks")
-        .select("content")
-        .eq("product_id", existing.product_id)
-        .contains("metadata", { content_type: "specification" } as any)
-        .order("created_at", { ascending: true })
-        .limit(2000)
-        .then(({ data: specChunks }) => {
-          if (specChunks && specChunks.length > 0) {
-            const specPoints = specChunks.map(c => c.content);
-            setStagedSpecData(specPoints);
-            setSpecComplete(true);
-          } else {
-            setStagedSpecData(null);
-            setSpecComplete(false);
-          }
-        });
     } else {
       setStagedSpecData(null);
       setSpecComplete(false);
     }
 
-    // Hydrate empty text fields from document_chunks if product exists
-    if (existing.product_id) {
-      const productId = existing.product_id;
-      const needsExamTechnique = !existing.exam_technique || existing.exam_technique.trim().length === 0;
-      const needsSystemPrompt = !existing.system_prompt || existing.system_prompt.trim().length === 0;
+    // Set text fields initially — will be overridden by async hydration if empty
+    setSystemPrompt(initialSystemPrompt);
+    setExamTechnique(initialExamTechnique);
 
-      if (needsExamTechnique || needsSystemPrompt) {
-        supabase
-          .from("document_chunks")
-          .select("content, metadata")
-          .eq("product_id", productId)
-          .or("metadata->>content_type.eq.exam_technique,metadata->>content_type.eq.system_prompt")
-          .order("created_at", { ascending: true })
-          .then(({ data: chunks }) => {
-            if (!chunks || chunks.length === 0) return;
-            const etChunks = chunks.filter(c => (c.metadata as any)?.content_type === "exam_technique");
-            const spChunks = chunks.filter(c => (c.metadata as any)?.content_type === "system_prompt");
+    // Async hydration from document_chunks and products for empty fields
+    const hydrateAsync = async () => {
+      let hydratedSP = initialSystemPrompt;
+      let hydratedET = initialExamTechnique;
+      let hydratedSpecs = normalizedSpecs;
+      let hydratedCustomSections = initialCustomSections;
 
-            if (needsExamTechnique && etChunks.length > 0) {
-              const etText = etChunks.map(c => c.content).join("\n\n");
-              setExamTechnique(etText);
+      if (existing.product_id) {
+        const productId = existing.product_id;
+        const needsSP = !hydratedSP.trim();
+        const needsET = !hydratedET.trim();
+        const needsSpecs = !hydratedSpecs || hydratedSpecs.length === 0;
+        const needsCustomSections = hydratedCustomSections.length === 0;
+
+        // Fetch from document_chunks if needed
+        if (needsSP || needsET || needsSpecs || needsCustomSections) {
+          const contentTypes: string[] = [];
+          if (needsSP) contentTypes.push("system_prompt");
+          if (needsET) contentTypes.push("exam_technique");
+          if (needsSpecs) contentTypes.push("specification");
+          if (needsCustomSections) contentTypes.push("custom_section");
+
+          const orFilter = contentTypes.map(ct => `metadata->>content_type.eq.${ct}`).join(",");
+          const { data: chunks } = await supabase
+            .from("document_chunks")
+            .select("content, metadata")
+            .eq("product_id", productId)
+            .or(orFilter)
+            .order("created_at", { ascending: true })
+            .limit(2000);
+
+          if (chunks && chunks.length > 0) {
+            if (needsSP) {
+              const spChunks = chunks.filter(c => (c.metadata as any)?.content_type === "system_prompt");
+              if (spChunks.length > 0) hydratedSP = spChunks.map(c => c.content).join("\n\n");
             }
-            if (needsSystemPrompt && spChunks.length > 0) {
-              const spText = spChunks.map(c => c.content).join("\n\n");
-              setSystemPrompt(spText);
+            if (needsET) {
+              const etChunks = chunks.filter(c => (c.metadata as any)?.content_type === "exam_technique");
+              if (etChunks.length > 0) hydratedET = etChunks.map(c => c.content).join("\n\n");
             }
-          });
+            if (needsSpecs) {
+              const specChunks = chunks.filter(c => (c.metadata as any)?.content_type === "specification");
+              if (specChunks.length > 0) {
+                hydratedSpecs = specChunks.map(c => c.content);
+              }
+            }
+            if (needsCustomSections) {
+              const csChunks = chunks.filter(c => (c.metadata as any)?.content_type === "custom_section");
+              if (csChunks.length > 0) {
+                // Parse "[Section Name]\nContent" format
+                const sections: CustomSection[] = [];
+                for (const chunk of csChunks) {
+                  const match = chunk.content.match(/^\[([^\]]+)\]\n([\s\S]*)$/);
+                  if (match) {
+                    sections.push({ name: match[1], content: match[2] });
+                  } else {
+                    sections.push({ name: "Imported Section", content: chunk.content });
+                  }
+                }
+                hydratedCustomSections = sections;
+              }
+            }
+          }
+        }
+
+        // Fallback: system prompt from products table
+        if (!hydratedSP.trim()) {
+          const { data: product } = await supabase
+            .from("products")
+            .select("system_prompt_deluxe")
+            .eq("id", productId)
+            .single();
+          if (product?.system_prompt_deluxe) {
+            hydratedSP = product.system_prompt_deluxe;
+          }
+        }
       }
-    }
 
-    setProjectLoaded(true);
-    setHasUnsavedChanges(false);
-    setHasSavedChangesSinceDeploy(false);
-    setChatMessages([]);
+      // Apply all hydrated values
+      setSystemPrompt(hydratedSP);
+      setExamTechnique(hydratedET);
+      if (hydratedSpecs && hydratedSpecs.length > 0) {
+        setStagedSpecData(hydratedSpecs);
+        setSpecComplete(true);
+      }
+      if (hydratedCustomSections.length > 0 && initialCustomSections.length === 0) {
+        setCustomSections(hydratedCustomSections);
+      }
+
+      // Now set the baseline snapshot AFTER all hydration is done
+      const snapshot = JSON.stringify({
+        systemPrompt: hydratedSP,
+        examTechnique: hydratedET,
+        customSections: hydratedCustomSections.length > 0 ? hydratedCustomSections : initialCustomSections,
+        trainerDescription: initialTrainerDescription,
+        trainerImageUrl: initialTrainerImageUrl,
+        selectedFeatures: initialSelectedFeatures,
+        examDates: initialExamDates,
+        essayMarkerMarks: initialEssayMarkerMarks,
+        stagedSpecData: hydratedSpecs && hydratedSpecs.length > 0 ? hydratedSpecs : null,
+      });
+      setSavedSnapshot(snapshot);
+      setProjectLoaded(true);
+      // Enable dirty tracking after a tick to let React settle
+      requestAnimationFrame(() => {
+        hydrationDoneRef.current = true;
+      });
+    };
+
+    hydrateAsync();
   }, [selectedProjectId, projects]);
 
   // Create new project
@@ -401,28 +497,8 @@ export function BuildPage() {
     loadUploads();
   }, [projectId]);
 
-  // Mark unsaved whenever content changes
-  const markUnsaved = useCallback(() => {
-    if (projectLoaded) setHasUnsavedChanges(true);
-  }, [projectLoaded]);
-
-  // Track text field changes — skip hydration renders (both sync and async from document_chunks)
-  const hydratedRef = useRef(0);
-  const hydrationCountRef = useRef(2); // Allow up to 2 hydration cycles (initial + async document_chunks fetch)
-  useEffect(() => {
-    if (!projectLoaded) return;
-    if (hydratedRef.current < hydrationCountRef.current) {
-      hydratedRef.current += 1;
-      return;
-    }
-    setHasUnsavedChanges(true);
-  }, [systemPrompt, examTechnique, customSections, trainerDescription, selectedFeatures, examDates, essayMarkerMarks]);
-
-  // Reset hydration flag when switching projects
-  useEffect(() => {
-    hydratedRef.current = 0;
-    setHasUnsavedChanges(false);
-  }, [selectedProjectId]);
+  // markUnsaved is now a no-op — dirty state is derived from snapshot comparison
+  const markUnsaved = useCallback(() => {}, []);
 
   // Manual Save handler
   const handleSave = async () => {
@@ -453,6 +529,8 @@ export function BuildPage() {
         .eq("id", projectId);
 
       if (error) throw error;
+      // Update the saved snapshot to match current state
+      setSavedSnapshot(currentFormSnapshot);
       setHasUnsavedChanges(false);
       if (projectStatus === "deployed") setHasSavedChangesSinceDeploy(true);
       toast({ title: "Changes saved" });
@@ -506,10 +584,7 @@ export function BuildPage() {
 
   const handleSpecDataChange = useCallback((specs: string[] | null) => {
     setStagedSpecData(specs);
-    if (projectLoaded) {
-      markUnsaved();
-    }
-  }, [projectLoaded, markUnsaved]);
+  }, []);
 
   // File upload handler (supports multiple files)
   const handleFileUpload = async (file: File, sectionType: string, year?: string) => {
@@ -905,6 +980,14 @@ export function BuildPage() {
             </DropdownMenu>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-xs text-muted-foreground"
+              onClick={() => window.open("/build/about", "_blank")}
+            >
+              <HelpCircle className="h-4 w-4 mr-1" /> How do I use the training portal?
+            </Button>
             <Button
               size="sm"
               onClick={handleSave}
@@ -1318,14 +1401,6 @@ export function BuildPage() {
                           ? selectedFeatures.filter(f => f !== feature.id)
                           : [...selectedFeatures, feature.id];
                         setSelectedFeatures(next);
-                        // Persist immediately
-                        if (projectId) {
-                          supabase
-                            .from("trainer_projects")
-                            .update({ selected_features: next as unknown as import("@/integrations/supabase/types").Json })
-                            .eq("id", projectId)
-                            .then(({ error }) => { if (error) console.error("Failed to save features:", error); });
-                        }
                       }}
                       className={`flex items-start gap-3 rounded-lg border-2 p-3 text-left transition-all ${
                         isSelected

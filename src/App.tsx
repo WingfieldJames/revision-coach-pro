@@ -38,6 +38,7 @@ import NotFound from "./pages/NotFound";
 import { BuildPage } from "./pages/BuildPage";
 import { DynamicFreePage } from "./pages/DynamicFreePage";
 import { DynamicPremiumPage } from "./pages/DynamicPremiumPage";
+import { BuildAboutPage } from "./pages/BuildAboutPage";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/test-rag" element={<TestRAGChatPage />} />
             <Route path="/build" element={<BuildPage />} />
+            <Route path="/build/about" element={<BuildAboutPage />} />
             <Route path="/s/:slug/free" element={<DynamicFreePage />} />
             <Route path="/s/:slug/premium" element={<DynamicPremiumPage />} />
             <Route path="*" element={<NotFound />} />
