@@ -863,8 +863,10 @@ export function BuildPage() {
         .eq("id", projectId);
       setProjectStatus("deployed");
       setHasSavedChangesSinceDeploy(false);
-      setStagedSpecData(null);
       setSpecComplete(true);
+      // Update saved snapshot to match current state so no false "unsaved changes"
+      setSavedSnapshot(currentFormSnapshot);
+      setHasUnsavedChanges(false);
       toast({ title: isFirstDeploy ? "Deployed to website! 🎉" : "Changes deployed!", description: data.message || "Subject deployed successfully." });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Deployment failed";
