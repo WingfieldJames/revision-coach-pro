@@ -444,7 +444,7 @@ export const Header: React.FC<HeaderProps> = ({
                       BEST VALUE
                     </div>
                     <h3 className="text-xl font-bold mb-1">💎 Exam Season Pass</h3>
-                    <p className="text-3xl font-bold mb-1">£24.99</p>
+                    <p className="text-3xl font-bold mb-1">£39.99</p>
                     <p className="text-sm text-muted-foreground mb-4">One-time payment • Expires 30th June 2026</p>
                     <ul className="space-y-2 mb-4 text-sm">
                       <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All past papers & mark schemes</li>
@@ -460,7 +460,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                   <div className="p-6 rounded-xl border border-border bg-muted">
                     <h3 className="text-xl font-bold mb-1">💎 Monthly</h3>
-                    <p className="text-3xl font-bold mb-1">£6.99<span className="text-base font-normal">/mo</span></p>
+                    <p className="text-3xl font-bold mb-1">£8.99<span className="text-base font-normal">/mo</span></p>
                     <p className="text-sm text-muted-foreground mb-4">Cancel anytime</p>
                     <ul className="space-y-2 mb-4 text-sm">
                       <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All premium features included</li>

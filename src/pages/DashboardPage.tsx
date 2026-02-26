@@ -454,7 +454,7 @@ export const DashboardPage = () => {
               )}
             </h2>
             <p className="text-3xl font-bold mb-2">
-              <span className="line-through text-red-500 text-lg">£49.99</span> £24.99
+              <span className="line-through text-red-500 text-lg">£49.99</span> £39.99
             </p>
             <p className="text-sm text-muted-foreground mb-6">One-time payment • Expires 30th June 2026</p>
             <ul className="space-y-3 mb-8">
