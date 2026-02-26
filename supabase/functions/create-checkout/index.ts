@@ -180,7 +180,7 @@ serve(async (req) => {
               name: `${productName} (Monthly)`,
               description: "Premium AI-powered academic assistance - Monthly subscription"
             },
-            unit_amount: product?.monthly_price || 699, // £6.99 in pence
+            unit_amount: product?.monthly_price || 899, // £8.99 in pence
             recurring: {
               interval: 'month',
             },

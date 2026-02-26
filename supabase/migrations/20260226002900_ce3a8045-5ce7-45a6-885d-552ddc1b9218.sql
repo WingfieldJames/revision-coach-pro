@@ -1,0 +1,1 @@
+UPDATE products SET monthly_price = 899, lifetime_price = 3999 WHERE active = true;
