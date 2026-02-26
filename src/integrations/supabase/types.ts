@@ -290,6 +290,7 @@ export type Database = {
           exam_technique: string | null
           exam_technique_submitted: boolean
           id: string
+          last_deployed_at: string | null
           product_id: string | null
           selected_features: Json | null
           staged_specifications: Json | null
@@ -312,6 +313,7 @@ export type Database = {
           exam_technique?: string | null
           exam_technique_submitted?: boolean
           id?: string
+          last_deployed_at?: string | null
           product_id?: string | null
           selected_features?: Json | null
           staged_specifications?: Json | null
@@ -334,6 +336,7 @@ export type Database = {
           exam_technique?: string | null
           exam_technique_submitted?: boolean
           id?: string
+          last_deployed_at?: string | null
           product_id?: string | null
           selected_features?: Json | null
           staged_specifications?: Json | null
