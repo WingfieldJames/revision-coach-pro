@@ -513,8 +513,8 @@ export function BuildPage() {
   const markUnsaved = useCallback(() => {}, []);
 
   // Manual Save handler
-  const handleSave = async () => {
-    if (!projectId) return;
+  const handleSave = async ({ silent = false }: { silent?: boolean } = {}): Promise<boolean> => {
+    if (!projectId) return false;
     setIsSaving(true);
     try {
       const parsedMarks = essayMarkerMarks
@@ -545,10 +545,12 @@ export function BuildPage() {
       setSavedSnapshot(currentFormSnapshot);
       setHasUnsavedChanges(false);
       if (projectStatus === "deployed") setHasSavedChangesSinceDeploy(true);
-      toast({ title: "Changes saved" });
+      if (!silent) toast({ title: "Changes saved" });
+      return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Save failed";
-      toast({ title: "Save failed", description: message, variant: "destructive" });
+      if (!silent) toast({ title: "Save failed", description: message, variant: "destructive" });
+      return false;
     } finally {
       setIsSaving(false);
     }
@@ -835,11 +837,11 @@ export function BuildPage() {
     if (!projectId) return;
     setDeploying(true);
     try {
-      // Auto-save first if there are unsaved changes
-      if (hasUnsavedChanges) {
-        await handleSave();
+      // Always save current state before deploy to avoid state drift and stale payloads
+      const saveSuccessful = await handleSave({ silent: true });
+      if (!saveSuccessful) {
+        throw new Error("Could not save changes before deployment. Please try again.");
       }
-
       const submittedCustomSections = customSections.filter(s => s.content.length > 20);
       const isFirstDeploy = projectStatus !== "deployed";
 
@@ -1011,7 +1013,7 @@ export function BuildPage() {
             </Button>
             <Button
               size="sm"
-              onClick={handleSave}
+              onClick={() => { void handleSave(); }}
               disabled={!hasUnsavedChanges || isSaving}
               variant={hasUnsavedChanges ? "default" : "outline"}
               className={!hasUnsavedChanges ? "opacity-60" : ""}
@@ -1149,7 +1151,7 @@ export function BuildPage() {
                 <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
                 <p className="text-sm text-red-600 dark:text-red-400">You have unsaved changes</p>
               </div>
-              <Button size="sm" variant="outline" onClick={handleSave} disabled={isSaving}>
+              <Button size="sm" variant="outline" onClick={() => { void handleSave(); }} disabled={isSaving}>
                 {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Save className="h-3 w-3 mr-1" />}
                 Save Now
               </Button>
@@ -1251,7 +1253,7 @@ export function BuildPage() {
             hasChangesSinceDeploy={hasSavedChangesSinceDeploy}
             onStatusChange={setSpecStatusFromUploader}
             onSpecDataChange={handleSpecDataChange}
-            statusIcon={<StatusIndicator status={getSectionStatus("stagedSpecData", JSON.stringify(stagedSpecData), !stagedSpecData || stagedSpecData.length === 0)} />}
+            statusIcon={<StatusIndicator status={getSectionStatus("stagedSpecData", stagedSpecData, !stagedSpecData || stagedSpecData.length === 0)} />}
             onReplaceDeployed={async () => {
               if (!projectId) return;
               const { error } = await supabase.functions.invoke("deploy-subject", {
@@ -1535,7 +1537,7 @@ export function BuildPage() {
                 <ProgressRow label="Meet the Brain" status={getSectionStatus("trainerDescription", trainerDescription, !trainerDescription.trim() && !trainerImageUrl)} />
                 <ProgressRow label="System Prompt" status={getSectionStatus("systemPrompt", systemPrompt, !systemPrompt.trim())} />
                 <ProgressRow label="Exam Technique" status={getSectionStatus("examTechnique", examTechnique, !examTechnique.trim())} />
-                <ProgressRow label="Specification" status={getSectionStatus("stagedSpecData", JSON.stringify(stagedSpecData), !stagedSpecData || stagedSpecData.length === 0)} />
+                <ProgressRow label="Specification" status={getSectionStatus("stagedSpecData", stagedSpecData, !stagedSpecData || stagedSpecData.length === 0)} />
                 {PAPER_YEARS.map(year => (
                   <ProgressRow
                     key={year}
@@ -1563,7 +1565,7 @@ export function BuildPage() {
                   trainerBioStatus={getSectionStatus("trainerDescription", trainerDescription, !trainerDescription.trim() && !trainerImageUrl)}
                   systemPromptStatus={getSectionStatus("systemPrompt", systemPrompt, !systemPrompt.trim())}
                   examTechniqueStatus={getSectionStatus("examTechnique", examTechnique, !examTechnique.trim())}
-                  specStatus={getSectionStatus("stagedSpecData", JSON.stringify(stagedSpecData), !stagedSpecData || stagedSpecData.length === 0)}
+                  specStatus={getSectionStatus("stagedSpecData", stagedSpecData, !stagedSpecData || stagedSpecData.length === 0)}
                   paperYears={PAPER_YEARS}
                   getYearStatus={getYearStatus}
                 />

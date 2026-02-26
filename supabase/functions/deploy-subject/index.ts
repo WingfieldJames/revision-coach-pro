@@ -6,7 +6,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function generateEmbedding(lovableApiKey: string, content: string): Promise<number[] | null> {
+async function generateEmbedding(lovableApiKey: string, content: string, timeoutMs = 8000): Promise<number[] | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
       method: "POST",
@@ -15,13 +18,47 @@ async function generateEmbedding(lovableApiKey: string, content: string): Promis
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ model: "text-embedding-3-small", input: content }),
+      signal: controller.signal,
     });
     if (!resp.ok) return null;
     const data = await resp.json();
     return data.data?.[0]?.embedding || null;
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      console.warn("Embedding generation timed out; continuing without embedding");
+    }
     return null;
+  } finally {
+    clearTimeout(timeoutId);
   }
+}
+
+function sanitizeSpecPoint(value: unknown): string | null {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+
+  if (value === null || value === undefined) return null;
+
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    for (const key of ["content", "point", "text", "description", "name"]) {
+      const field = obj[key];
+      if (typeof field === "string" && field.trim().length > 0) {
+        return field.trim();
+      }
+    }
+    try {
+      const serialized = JSON.stringify(value);
+      return serialized.length > 0 ? serialized : null;
+    } catch {
+      return null;
+    }
+  }
+
+  const fallback = String(value).trim();
+  return fallback.length > 0 ? fallback : null;
 }
 
 serve(async (req) => {
@@ -148,7 +185,11 @@ serve(async (req) => {
     // Save staged specification data if provided
     let specChunksCreated = 0;
     if (staged_specifications && Array.isArray(staged_specifications) && staged_specifications.length > 0) {
-      console.log(`Saving ${staged_specifications.length} staged specification points...`);
+      const normalizedSpecPoints = staged_specifications
+        .map((specPoint: unknown) => sanitizeSpecPoint(specPoint))
+        .filter((specPoint): specPoint is string => !!specPoint);
+
+      console.log(`Saving ${normalizedSpecPoints.length} staged specification points...`);
 
       // Delete any existing spec chunks for this product first
       await supabase
@@ -157,7 +198,7 @@ serve(async (req) => {
         .eq("product_id", productId)
         .contains("metadata", { content_type: "specification" });
 
-      for (const specPoint of staged_specifications) {
+      for (const specPoint of normalizedSpecPoints) {
         const embedding = await generateEmbedding(lovableApiKey, specPoint);
         const { error: insertErr } = await supabase.from("document_chunks").insert({
           product_id: productId,
