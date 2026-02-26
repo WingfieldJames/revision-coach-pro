@@ -156,7 +156,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
             onClick={() => handleUpgrade('lifetime')}
             disabled={isCheckingOut}
           >
-            {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £24.99'}
+            {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £39.99'}
           </Button>
           <Button 
             variant="outline"
@@ -164,7 +164,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
             onClick={() => handleUpgrade('monthly')}
             disabled={isCheckingOut}
           >
-            Monthly – £6.99/mo
+            Monthly – £8.99/mo
           </Button>
         </div>
         

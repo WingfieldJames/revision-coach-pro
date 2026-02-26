@@ -199,7 +199,7 @@ export const ComparePage = () => {
   };
 
   const getPricing = () => {
-    return { monthly: '£6.99', lifetime: '£24.99', monthlyStrike: '£12.99', lifetimeStrike: '£49.99' };
+    return { monthly: '£8.99', lifetime: '£39.99', monthlyStrike: '£12.99', lifetimeStrike: '£49.99' };
   };
 
   useEffect(() => {
