@@ -64,6 +64,8 @@ interface TrainerProject {
   selected_features: string[] | null;
   exam_dates: any[] | null;
   essay_marker_marks: number[] | null;
+  updated_at: string;
+  last_deployed_at: string | null;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
@@ -275,7 +277,14 @@ export function BuildPage() {
     // Reset hydration flag — prevent dirty tracking until all async loads finish
     hydrationDoneRef.current = false;
     setHasUnsavedChanges(false);
-    setHasSavedChangesSinceDeploy(false);
+    // Determine if there are saved changes since last deploy
+    if (existing.status === "deployed" && existing.last_deployed_at && existing.updated_at) {
+      const deployedAt = new Date(existing.last_deployed_at).getTime();
+      const updatedAt = new Date(existing.updated_at).getTime();
+      setHasSavedChangesSinceDeploy(updatedAt > deployedAt);
+    } else {
+      setHasSavedChangesSinceDeploy(false);
+    }
 
     setProjectId(existing.id);
     setProjectStatus(existing.status);
@@ -846,6 +855,12 @@ export function BuildPage() {
         },
       });
       if (error) throw error;
+      // Update last_deployed_at in DB
+      const now = new Date().toISOString();
+      await supabase
+        .from("trainer_projects")
+        .update({ last_deployed_at: now })
+        .eq("id", projectId);
       setProjectStatus("deployed");
       setHasSavedChangesSinceDeploy(false);
       setStagedSpecData(null);

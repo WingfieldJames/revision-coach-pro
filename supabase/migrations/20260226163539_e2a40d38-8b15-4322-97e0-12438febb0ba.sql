@@ -1,0 +1,1 @@
+ALTER TABLE public.trainer_projects ADD COLUMN last_deployed_at timestamp with time zone DEFAULT NULL;
