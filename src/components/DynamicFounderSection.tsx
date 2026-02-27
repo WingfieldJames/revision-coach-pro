@@ -1,7 +1,7 @@
 // This file provides a dynamic "Meet the Brain" section for trainer-deployed subjects
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Quote, Award } from 'lucide-react';
+import { Quote, Award, GraduationCap, BookOpen } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FounderSection } from '@/components/ui/founder-section';
 
@@ -15,17 +15,27 @@ interface DynamicFounderSectionProps {
 export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject, fallbackExamBoard }: DynamicFounderSectionProps) {
   const [trainerImageUrl, setTrainerImageUrl] = useState<string | null>(null);
   const [trainerDescription, setTrainerDescription] = useState<string | null>(null);
+  const [trainerName, setTrainerName] = useState<string | null>(null);
+  const [trainerStatus, setTrainerStatus] = useState<string | null>(null);
+  const [trainerAchievements, setTrainerAchievements] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase
         .from('trainer_projects')
-        .select('trainer_image_url, trainer_description')
+        .select('trainer_image_url, trainer_description, trainer_name, trainer_status, trainer_achievements')
         .eq('product_id', productId)
-        .maybeSingle();
+        .maybeSingle() as { data: any };
       if (data) {
         setTrainerDescription(data.trainer_description);
+        setTrainerName(data.trainer_name || null);
+        setTrainerStatus(data.trainer_status || null);
+        setTrainerAchievements(
+          Array.isArray(data.trainer_achievements) 
+            ? (data.trainer_achievements as string[]).filter((a: string) => a && a.trim()) 
+            : []
+        );
         if (data.trainer_image_url) {
           const { data: signed } = await supabase.storage
             .from('trainer-uploads')
@@ -50,6 +60,8 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
   };
+
+  const achievementIcons = [Award, GraduationCap, BookOpen];
 
   return (
     <section className="py-16 px-6 bg-gradient-to-br from-muted/50 via-background to-muted/30">
@@ -85,11 +97,12 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
           </div>
 
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            {trainerImageUrl && (
-              <div className="flex-shrink-0">
+            {/* Photo + Name + Status */}
+            <div className="flex-shrink-0">
+              {trainerImageUrl && (
                 <motion.div className="relative" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
                   <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg bg-muted">
-                    <img src={trainerImageUrl} alt="Trainer" className="w-full h-full object-cover" />
+                    <img src={trainerImageUrl} alt={trainerName || "Trainer"} className="w-full h-full object-cover" />
                   </div>
                   <motion.div
                     className="absolute -inset-2 border-2 border-primary/20 rounded-2xl"
@@ -97,13 +110,44 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
                     transition={{ duration: 3, repeat: Infinity }}
                   />
                 </motion.div>
-              </div>
-            )}
+              )}
+              {/* Name and status below photo */}
+              {(trainerName || trainerStatus) && (
+                <div className="text-center mt-4">
+                  {trainerName && <h3 className="text-xl font-bold text-foreground">{trainerName}</h3>}
+                  {trainerStatus && <p className="text-sm text-primary font-medium">{trainerStatus}</p>}
+                </div>
+              )}
+            </div>
 
+            {/* Content */}
             <div className="flex-1 text-center md:text-left">
-              <blockquote className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
+              <blockquote className="hidden md:block text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
                 "{trainerDescription}"
               </blockquote>
+
+              {/* Achievement badges */}
+              {trainerAchievements.length > 0 && (
+                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                  {trainerAchievements.map((achievement, i) => {
+                    const Icon = achievementIcons[i % achievementIcons.length];
+                    return (
+                      <motion.div
+                        key={i}
+                        className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }}
+                        whileHover={{ scale: 1.05, backgroundColor: "hsl(var(--primary) / 0.15)" }}
+                      >
+                        <Icon className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-medium text-foreground">{achievement}</span>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
