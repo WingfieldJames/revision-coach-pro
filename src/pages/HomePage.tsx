@@ -6,7 +6,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ChevronDown, Instagram, Calendar, BookOpen, GraduationCap, Search, FileCheck, Star } from "lucide-react";
+import { ChevronDown, Instagram, Calendar, BookOpen, GraduationCap, Search, FileCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -145,7 +145,7 @@ export const HomePage = () => {
               className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm"
               style={{ boxShadow: "var(--shadow-glow)" }}
             >
-              <Star className="w-4 h-4 text-[#FFC83D] fill-[#FFC83D]" />
+              <span className="text-base">⭐</span>
               <span className="text-foreground text-sm font-medium">
                 Loved by 2k+ students with a 4.9 star rating
               </span>
