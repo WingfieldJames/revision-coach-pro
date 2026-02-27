@@ -60,6 +60,9 @@ interface TrainerProject {
   staged_specifications: any;
   trainer_image_url: string | null;
   trainer_description: string | null;
+  trainer_name: string | null;
+  trainer_status: string | null;
+  trainer_achievements: string[] | null;
   trainer_bio_submitted: boolean;
   selected_features: string[] | null;
   exam_dates: any[] | null;
@@ -156,6 +159,9 @@ export function BuildPage() {
   // Meet the Brain
   const [trainerImageUrl, setTrainerImageUrl] = useState<string | null>(null);
   const [trainerDescription, setTrainerDescription] = useState("");
+  const [trainerName, setTrainerName] = useState("");
+  const [trainerStatus, setTrainerStatus] = useState("");
+  const [trainerAchievements, setTrainerAchievements] = useState<string[]>(["", "", ""]);
   const [trainerBioSubmitted, setTrainerBioSubmitted] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const trainerImageInputRef = useRef<HTMLInputElement>(null);
@@ -239,9 +245,11 @@ export function BuildPage() {
   const currentFormSnapshot = useMemo(() => {
     return JSON.stringify({
       systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
+      trainerName, trainerStatus, trainerAchievements,
       selectedFeatures, examDates, essayMarkerMarks, stagedSpecData,
     });
   }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
+      trainerName, trainerStatus, trainerAchievements,
       selectedFeatures, examDates, essayMarkerMarks, stagedSpecData]);
 
   // savedSnapshotParsed for field-level comparison
@@ -310,6 +318,11 @@ export function BuildPage() {
 
     const initialTrainerDescription = existing.trainer_description?.trim() ? existing.trainer_description : (legacy?.trainerDescription || "");
 
+    const initialTrainerName = (existing as any).trainer_name?.trim() ? (existing as any).trainer_name : (legacy?.trainerName || "");
+    const initialTrainerStatus = (existing as any).trainer_status?.trim() ? (existing as any).trainer_status : (legacy?.trainerStatus || "");
+    const dbAchievements = Array.isArray((existing as any).trainer_achievements) ? (existing as any).trainer_achievements as string[] : [];
+    const initialTrainerAchievements = dbAchievements.length > 0 && dbAchievements.some((a: string) => a.trim()) ? dbAchievements : ["", "", ""];
+
     const dbFeatures = Array.isArray(existing.selected_features) ? existing.selected_features as string[] : [];
     const initialSelectedFeatures = dbFeatures.length > 0 ? dbFeatures : (legacy?.selectedFeatures || []);
 
@@ -324,6 +337,9 @@ export function BuildPage() {
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
     setTrainerDescription(initialTrainerDescription);
+    setTrainerName(initialTrainerName);
+    setTrainerStatus(initialTrainerStatus);
+    setTrainerAchievements(initialTrainerAchievements);
     setSelectedFeatures(initialSelectedFeatures);
     setExamDates(initialExamDates);
     setEssayMarkerMarks(initialEssayMarkerMarks);
@@ -439,6 +455,9 @@ export function BuildPage() {
         customSections: hydratedCustomSections.length > 0 ? hydratedCustomSections : initialCustomSections,
         trainerDescription: initialTrainerDescription,
         trainerImageUrl: initialTrainerImageUrl,
+        trainerName: initialTrainerName,
+        trainerStatus: initialTrainerStatus,
+        trainerAchievements: initialTrainerAchievements,
         selectedFeatures: initialSelectedFeatures,
         examDates: initialExamDates,
         essayMarkerMarks: initialEssayMarkerMarks,
@@ -531,6 +550,9 @@ export function BuildPage() {
           custom_sections: customSections as unknown as import("@/integrations/supabase/types").Json,
           trainer_description: trainerDescription,
           trainer_image_url: trainerImageUrl,
+          trainer_name: trainerName,
+          trainer_status: trainerStatus,
+          trainer_achievements: trainerAchievements as unknown as import("@/integrations/supabase/types").Json,
           selected_features: selectedFeatures as unknown as import("@/integrations/supabase/types").Json,
           exam_dates: examDates as unknown as import("@/integrations/supabase/types").Json,
           essay_marker_marks: (parsedMarks.length > 0 ? parsedMarks : []) as unknown as import("@/integrations/supabase/types").Json,
@@ -538,7 +560,7 @@ export function BuildPage() {
           system_prompt_submitted: systemPrompt.trim().length >= 10,
           exam_technique_submitted: examTechnique.trim().length >= 10,
           trainer_bio_submitted: trainerDescription.trim().length >= 10,
-        })
+        } as any)
         .eq("id", projectId);
 
       if (error) throw error;
@@ -1194,12 +1216,50 @@ export function BuildPage() {
                     <p className="text-xs">Click to upload a profile image</p>
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-1 block">Your name</Label>
+                    <Input
+                      value={trainerName}
+                      onChange={e => setTrainerName(e.target.value)}
+                      placeholder="e.g. James"
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-1 block">Current status</Label>
+                    <Input
+                      value={trainerStatus}
+                      onChange={e => setTrainerStatus(e.target.value)}
+                      placeholder="e.g. LSE Student"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
                 <Textarea
                   value={trainerDescription}
                   onChange={e => setTrainerDescription(e.target.value)}
                   placeholder="Tell students about yourself... Your qualifications, teaching experience, what makes you passionate about this subject."
                   className="min-h-[120px] text-sm"
                 />
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-2 block">Top 3 achievements (shown as badges)</Label>
+                  <div className="space-y-2">
+                    {trainerAchievements.map((achievement, i) => (
+                      <Input
+                        key={i}
+                        value={achievement}
+                        onChange={e => {
+                          const updated = [...trainerAchievements];
+                          updated[i] = e.target.value;
+                          setTrainerAchievements(updated);
+                        }}
+                        placeholder={i === 0 ? "e.g. A* in Economics (90%)" : i === 1 ? "e.g. Straight 9s at GCSE" : "e.g. A*A*A at A-Level"}
+                        className="text-sm"
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
