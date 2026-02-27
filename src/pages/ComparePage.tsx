@@ -510,12 +510,14 @@ export const ComparePage = () => {
         {/* Mobile: Founder Section first, then stacked testimonials */}
         <div className="md:hidden">
           <div className="relative">
-            {getDynamicProduct()
-              ? <DynamicFounderSection productId={getDynamicProduct()!.id} subjectLabel={subjectLabels[subject] || subject} />
-              : LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology'
-              ? <FounderSection subject={subject as any} examBoard={examBoard as any} />
-              : null
-            }
+            {(() => {
+              const dp = getDynamicProduct();
+              const productId = dp?.id || PRODUCT_IDS[getCurrentProductSlug() || ''];
+              if (productId) {
+                return <DynamicFounderSection productId={productId} subjectLabel={subjectLabels[subject] || subject} fallbackSubject={LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology' ? subject as any : undefined} fallbackExamBoard={examBoard as any} />;
+              }
+              return null;
+            })()}
           </div>
           
           <div className="relative py-12 px-4">
@@ -560,12 +562,14 @@ export const ComparePage = () => {
         {/* Desktop: Founder Section then Testimonials marquee */}
         <div className="hidden md:block">
           <div className="relative">
-            {getDynamicProduct()
-              ? <DynamicFounderSection productId={getDynamicProduct()!.id} subjectLabel={subjectLabels[subject] || subject} />
-              : LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology'
-              ? <FounderSection subject={subject as any} examBoard={examBoard as any} />
-              : null
-            }
+            {(() => {
+              const dp = getDynamicProduct();
+              const productId = dp?.id || PRODUCT_IDS[getCurrentProductSlug() || ''];
+              if (productId) {
+                return <DynamicFounderSection productId={productId} subjectLabel={subjectLabels[subject] || subject} fallbackSubject={LEGACY_SUBJECTS.includes(subject) && subject !== 'psychology' ? subject as any : undefined} fallbackExamBoard={examBoard as any} />;
+              }
+              return null;
+            })()}
           </div>
 
           <div className="relative">

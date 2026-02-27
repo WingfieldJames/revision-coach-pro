@@ -3,13 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Quote, Award } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { FounderSection } from '@/components/ui/founder-section';
 
 interface DynamicFounderSectionProps {
   productId: string;
   subjectLabel: string;
+  fallbackSubject?: string;
+  fallbackExamBoard?: string;
 }
 
-export function DynamicFounderSection({ productId, subjectLabel }: DynamicFounderSectionProps) {
+export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject, fallbackExamBoard }: DynamicFounderSectionProps) {
   const [trainerImageUrl, setTrainerImageUrl] = useState<string | null>(null);
   const [trainerDescription, setTrainerDescription] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +38,13 @@ export function DynamicFounderSection({ productId, subjectLabel }: DynamicFounde
     load();
   }, [productId]);
 
-  if (loading || !trainerDescription) return null;
+  if (loading) return null;
+  if (!trainerDescription) {
+    if (fallbackSubject) {
+      return <FounderSection subject={fallbackSubject as any} examBoard={fallbackExamBoard as any} />;
+    }
+    return null;
+  }
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
