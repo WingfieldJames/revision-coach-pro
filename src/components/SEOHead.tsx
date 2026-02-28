@@ -8,11 +8,11 @@ interface SEOHeadProps {
 }
 
 const BASE_URL = 'https://astarai.co.uk';
-const DEFAULT_IMAGE = `${BASE_URL}/lovable-uploads/fa6e3eef-a0ca-4e4b-ae8e-a54b14afc7f9.png`;
+const DEFAULT_IMAGE = `${BASE_URL}/lovable-uploads/0dc58ad9-fc2a-47f7-82fb-dfc3a3839383.png`;
 
 export const SEOHead = ({
-  title = "A* AI – the AI BUILT for your exam board. A-Level Economics, Computer Science, Physics & more",
-  description = "Join 1000+ students using A* AI for A-Level revision. Economics (Edexcel, AQA, CIE), Computer Science (OCR) & Physics (OCR). Trained on past papers (2017-2025). Free to try.",
+  title = "A* AI - the AI that actually understands your exam board",
+  description = "Join 2000+ students using A* AI for A-Level revision. Economics, Maths, Physics, Chemistry, Computer Science & more. Trained on past papers & mark schemes.",
   canonical = BASE_URL,
   ogImage = DEFAULT_IMAGE,
 }: SEOHeadProps) => {
