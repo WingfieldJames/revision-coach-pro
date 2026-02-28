@@ -103,8 +103,9 @@ export const DynamicFreePage = () => {
           examSubjectName={subjectName}
           hideUserDetails
           productId={product.id}
-          productSlug={product.slug}
-          showUpgradeButton
+           productSlug={product.slug}
+           showUpgradeButton
+           showMyMistakes={hasFeature('my_mistakes')}
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
           essayMarkerCustomMarks={
             trainer?.essay_marker_marks && trainer.essay_marker_marks.length > 0

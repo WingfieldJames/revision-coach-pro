@@ -418,6 +418,53 @@ export type Database = {
           },
         ]
       }
+      user_mistakes: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          next_review_at: string
+          note: string | null
+          product_id: string
+          question_image_url: string | null
+          question_text: string | null
+          review_count: number
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          next_review_at?: string
+          note?: string | null
+          product_id: string
+          question_image_url?: string | null
+          question_text?: string | null
+          review_count?: number
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          next_review_at?: string
+          note?: string | null
+          product_id?: string
+          question_image_url?: string | null
+          question_text?: string | null
+          review_count?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_mistakes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_preferences: {
         Row: {
           additional_info: string | null

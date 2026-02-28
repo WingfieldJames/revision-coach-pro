@@ -38,8 +38,9 @@ export const EdexcelMathsAppliedFreeVersionPage = () => {
           hideUserDetails 
           productId={EDEXCEL_MATHS_APPLIED_PRODUCT_ID}
           productSlug="edexcel-mathematics-applied"
-          showUpgradeButton
-          mathsMode="applied"
+           showUpgradeButton
+           mathsMode="applied"
+           showMyMistakes
         />
       </div>
       

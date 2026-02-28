@@ -167,6 +167,7 @@ export const EdexcelMathsPremiumPage = () => {
           productSlug="edexcel-mathematics"
           showUpgradeButton
           mathsMode="pure"
+          showMyMistakes
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
