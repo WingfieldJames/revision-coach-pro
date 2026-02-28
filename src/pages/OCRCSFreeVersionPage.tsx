@@ -45,8 +45,9 @@ export const OCRCSFreeVersionPage = () => {
           revisionGuideBoard="ocr-cs"
           productId={OCR_CS_PRODUCT_ID}
           productSlug="ocr-computer-science"
-          showUpgradeButton
-          essayMarkerCustomMarks={[9, 12]}
+           showUpgradeButton
+           showMyMistakes
+           essayMarkerCustomMarks={[9, 12]}
           onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>

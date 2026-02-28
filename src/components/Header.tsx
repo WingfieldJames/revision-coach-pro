@@ -12,7 +12,8 @@ import { RevisionGuideTool } from '@/components/RevisionGuideTool';
 import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { GradeBoundariesTool } from '@/components/GradeBoundariesTool';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
-import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen, ChevronDown, TrendingUp } from 'lucide-react';
+import { MyMistakesTool } from '@/components/MyMistakesTool';
+import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen, ChevronDown, TrendingUp, RotateCcw } from 'lucide-react';
 import { checkProductAccess } from '@/lib/productAccess';
 import {
   Dialog,
@@ -105,6 +106,7 @@ interface HeaderProps {
   mathsMode?: 'pure' | 'applied';
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
+  showMyMistakes?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -135,6 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
   mathsMode,
   customPastPaperContent,
   customRevisionGuideContent,
+  showMyMistakes = false,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -148,6 +151,8 @@ export const Header: React.FC<HeaderProps> = ({
   const [examCountdownOpen, setExamCountdownOpen] = useState(false);
   const [pastPaperFinderOpen, setPastPaperFinderOpen] = useState(false);
   const [revisionGuideOpen, setRevisionGuideOpen] = useState(false);
+  const [myMistakesOpen, setMyMistakesOpen] = useState(false);
+  const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [isDeluxe, setIsDeluxe] = useState(false);
 
@@ -184,6 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
       setPastPaperFinderOpen(false);
       setGradeBoundariesOpen(false);
       setRevisionGuideOpen(false);
+      setMyMistakesOpen(false);
     };
     window.addEventListener('blur', closeAllPopovers);
     return () => window.removeEventListener('blur', closeAllPopovers);
@@ -381,6 +387,29 @@ export const Header: React.FC<HeaderProps> = ({
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-lg p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               {customRevisionGuideContent || <RevisionGuideTool board={revisionGuideBoard} tier={tier} productId={productId} />}
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {showMyMistakes && (
+          <Popover open={myMistakesOpen} onOpenChange={setMyMistakesOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 relative"
+              >
+                <RotateCcw className="h-4 w-4" />
+                <span className="hidden sm:inline">My Mistakes</span>
+                {mistakesDueCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
+                    {mistakesDueCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
+              <MyMistakesTool productId={productId} onDueCountChange={setMistakesDueCount} />
             </PopoverContent>
           </Popover>
         )}
