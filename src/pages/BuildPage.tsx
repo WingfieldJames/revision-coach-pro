@@ -1434,7 +1434,7 @@ export function BuildPage() {
                 <Globe className="h-5 w-5 text-primary" />
                 <CardTitle className="text-base">Website Deployment</CardTitle>
               </div>
-              <p className="text-xs text-muted-foreground">Select which features you'd like enabled on your subject's student-facing page. Click a feature to toggle it on or off.</p>
+              <p className="text-xs text-muted-foreground">Select which features you'd like enabled on your subject's student-facing page. Click a feature to toggle it on or off. <span className="font-semibold text-foreground">Remember to Save &amp; Re-Deploy for changes to go live.</span></p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
