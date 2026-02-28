@@ -1,63 +1,112 @@
 
-## Urgent SEO Recovery Plan (What’s actually happening + ETA)
 
-### What I verified right now
-- Your **codebase is fixed** (new sitemap + cleaned metadata).
-- But your **live domain is not serving those fixes yet**.
-- Evidence:
-  - Preview environment sitemap shows updated entries and `lastmod=2026-02-27`.
-  - `https://astarai.co.uk/sitemap.xml` is still serving the **old sitemap** (`2026-01-11`, missing newer pages).
-- This means Google is still crawling stale production SEO assets, so the “drop” is very likely a **deployment sync issue**, not a penalty from your Build feature.
+## My Mistakes -- Spaced Repetition Feature
 
-### Important expectation setting
-- I can’t promise an exact minute it returns to #1.
-- I can give a realistic window once production serves the corrected files:
-  - **Brand query visibility recovery:** often **24–72 hours**
-  - **Full ranking stabilization:** typically **3–14 days**
-  - Can be faster if Google recrawls quickly; slower if crawl frequency dipped.
+### Overview
+Add a "My Mistakes" tool to all maths chatbots (Edexcel Pure, Edexcel Applied) and OCR CS, plus make it available in the Build portal for dynamic subjects. Users can log questions they got wrong (image or text), add notes, and get reminded to retry them on a spaced repetition schedule (day 4, 16, 35, 70). A red notification badge shows how many are due for review.
 
-## Action plan to fix ASAP
+---
 
-### 1) Force production to serve the corrected build (highest priority)
-- Redeploy Vercel from the branch/commit that contains:
-  - updated `public/sitemap.xml`
-  - cleaned `index.html` metadata setup
-- Then immediately verify on live:
-  - `https://astarai.co.uk/sitemap.xml` shows `2026-02-27` and all subject URLs
-  - `https://astarai.co.uk/robots.txt` still references the sitemap correctly
+### 1. Database Table
 
-### 2) Trigger re-crawl immediately
-- In Google Search Console:
-  - Submit/re-submit `https://astarai.co.uk/sitemap.xml`
-  - URL Inspection → Request Indexing for:
-    - `/`
-    - `/compare`
-    - highest-traffic subject pages
+Create a `user_mistakes` table:
 
-### 3) Rule out indexing blockers in GSC
-- Check:
-  - Manual Actions (should be none)
-  - Security Issues (should be none)
-  - Pages indexing report for “Crawled - currently not indexed”, “Duplicate”, “Alternate page with canonical”
-- If there is a canonical mismatch or duplicate cluster, we’ll adjust canonicals next.
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, default gen_random_uuid() |
+| user_id | uuid | NOT NULL |
+| product_id | uuid | NOT NULL |
+| question_text | text | nullable (user may upload image only) |
+| question_image_url | text | nullable (base64 data URL stored directly) |
+| note | text | nullable |
+| created_at | timestamptz | default now() |
+| next_review_at | timestamptz | default now() + interval '4 days' |
+| review_count | integer | default 0 |
+| completed | boolean | default false |
 
-### 4) Monitor next 48 hours
-- Track:
-  - impressions/clicks for branded queries
-  - coverage changes after sitemap re-submit
-- If no movement after 72 hours, next step is a deeper audit of:
-  - canonical consistency across all routes
-  - render parity (server HTML vs hydrated head tags)
-  - potential duplicate content across domains
+RLS policies:
+- Users can SELECT, INSERT, UPDATE, DELETE their own rows (`auth.uid() = user_id`)
 
-## Technical notes
-- Current root cause is most likely **environment drift**:
-  - Preview has correct SEO assets
-  - Production still serves old assets
-- Until production serves updated sitemap/meta setup, Google will continue using stale crawl signals.
+The spaced repetition intervals are: review_count 0 = day 4, 1 = day 16, 2 = day 35, 3 = day 70, 4+ = completed.
 
-## Delivery timeline estimate (practical)
-- **Today (within 1 hour):** force correct deploy + verify live sitemap/robots
-- **Today to +24h:** submit sitemap + request indexing on key URLs
-- **+24 to +72h:** likely return of branded visibility
-- **+3 to +14 days:** broader ranking normalization
+---
+
+### 2. New Component: `MyMistakesTool.tsx`
+
+Follows the exact same pattern as RevisionGuideTool, ExamCountdown, etc. (header with icon + gradient box, content area).
+
+**Two views:**
+
+**A) Add Mistake View (default)**
+- Upload area for an image (same drag/drop pattern as ImageUploadTool) OR text input for typing the question
+- Text area for a note ("What did I get wrong?")
+- "Save Mistake" button
+
+**B) My Mistakes List View**
+- Toggle between "Add" and "View All" tabs
+- Lists all saved mistakes (newest first), each showing:
+  - Question preview (thumbnail if image, text snippet if text)
+  - Note
+  - Next review date or "Due now" badge
+  - "Mark as Reviewed" button (advances to next interval)
+  - Delete option
+
+**Notification count:** Computed client-side by counting rows where `next_review_at <= now()` and `completed = false`.
+
+---
+
+### 3. Header Integration
+
+- Add new props to Header: `showMyMistakes?: boolean`
+- Add state: `myMistakesOpen`
+- Add Popover between Revision Guide and Exam Countdown
+- Icon: `AlertCircle` or `RotateCcw` from lucide-react
+- Button label: "My Mistakes"
+- Red notification badge: small absolute-positioned circle with count, only shown when due count > 0
+- Requires `productId` and user auth to query/insert
+
+---
+
+### 4. Pages to Update
+
+Add `showMyMistakes` prop to Header in these pages:
+- `EdexcelMathsFreeVersionPage.tsx`
+- `EdexcelMathsPremiumPage.tsx`
+- `EdexcelMathsAppliedFreeVersionPage.tsx`
+- `EdexcelMathsAppliedPremiumPage.tsx`
+- `OCRCSFreeVersionPage.tsx`
+- `OCRCSPremiumPage.tsx`
+
+---
+
+### 5. Build Portal Integration
+
+Add to the `WEBSITE_FEATURES` array in `BuildPage.tsx`:
+```
+{ id: "my_mistakes", label: "My Mistakes", description: "Spaced repetition tracker for questions students got wrong", icon: RotateCcw }
+```
+
+Add to `DynamicFreePage.tsx` and `DynamicPremiumPage.tsx`:
+```
+showMyMistakes={hasFeature('my_mistakes')}
+```
+
+---
+
+### 6. Files Changed
+
+| File | Change |
+|------|--------|
+| New migration | Create `user_mistakes` table + RLS |
+| `src/components/MyMistakesTool.tsx` | **New file** -- full component |
+| `src/components/Header.tsx` | Add `showMyMistakes` prop, popover, notification badge |
+| `src/pages/EdexcelMathsFreeVersionPage.tsx` | Add `showMyMistakes` |
+| `src/pages/EdexcelMathsPremiumPage.tsx` | Add `showMyMistakes` |
+| `src/pages/EdexcelMathsAppliedFreeVersionPage.tsx` | Add `showMyMistakes` |
+| `src/pages/EdexcelMathsAppliedPremiumPage.tsx` | Add `showMyMistakes` |
+| `src/pages/OCRCSFreeVersionPage.tsx` | Add `showMyMistakes` |
+| `src/pages/OCRCSPremiumPage.tsx` | Add `showMyMistakes` |
+| `src/pages/BuildPage.tsx` | Add to WEBSITE_FEATURES |
+| `src/pages/DynamicFreePage.tsx` | Wire up `showMyMistakes` |
+| `src/pages/DynamicPremiumPage.tsx` | Wire up `showMyMistakes` |
+
