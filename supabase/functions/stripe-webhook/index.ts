@@ -284,58 +284,73 @@ serve(async (req) => {
         break;
       }
       
-      case "invoice.payment_succeeded": {
+      case "invoice.payment_succeeded":
+      case "invoice.paid": {
         // Handle subscription renewals (monthly payments)
         const invoice = event.data.object as Stripe.Invoice;
-        logStep("Processing invoice payment", { 
-          invoiceId: invoice.id, 
-          subscriptionId: invoice.subscription 
+        logStep("Processing invoice payment", {
+          invoiceId: invoice.id,
+          subscriptionId: invoice.subscription,
+          billingReason: invoice.billing_reason,
+          eventType: event.type,
         });
-        
-        // Only process recurring subscription invoices
-        if (invoice.subscription && invoice.billing_reason === 'subscription_cycle') {
-          const stripeSubscriptionId = invoice.subscription as string;
+
+        const stripeSubscriptionId = invoice.subscription as string | null;
+        const isRecurringInvoice =
+          !!stripeSubscriptionId &&
+          (invoice.billing_reason === "subscription_cycle" || invoice.billing_reason === "subscription_create" || event.type === "invoice.paid");
+
+        if (isRecurringInvoice && stripeSubscriptionId) {
           let customerEmail = invoice.customer_email;
-          
+
           if (!customerEmail && invoice.customer) {
             try {
-              const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer;
+              const customer = (await stripe.customers.retrieve(invoice.customer as string)) as Stripe.Customer;
               customerEmail = customer.email;
             } catch (err) {
               logStep("ERROR: Failed to retrieve customer for renewal", { error: err.message });
             }
           }
-          
-          if (customerEmail) {
-            // Extend subscription by one month
-            const subscriptionEnd = new Date();
-            subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
-            
+
+          let subscriptionEndIso: string | null = null;
+          try {
+            const liveSub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+            subscriptionEndIso = new Date(liveSub.current_period_end * 1000).toISOString();
+          } catch (err) {
+            logStep("ERROR: Failed to retrieve live subscription period", {
+              stripeSubscriptionId,
+              error: err.message,
+            });
+          }
+
+          if (customerEmail && subscriptionEndIso) {
             // Update user_subscriptions table (primary)
             const { error: subError } = await supabaseClient
               .from('user_subscriptions')
-              .update({ 
-                subscription_end: subscriptionEnd.toISOString(),
+              .update({
+                subscription_end: subscriptionEndIso,
+                active: true,
+                cancelled_at: null,
                 updated_at: new Date().toISOString()
               })
-              .eq('stripe_subscription_id', stripeSubscriptionId)
-              .eq('active', true);
+              .eq('stripe_subscription_id', stripeSubscriptionId);
 
             if (subError) {
               logStep("ERROR: Failed to renew user_subscriptions", { stripeSubscriptionId, error: subError });
             } else {
-              logStep("Successfully renewed user_subscriptions", { 
+              logStep("Successfully renewed user_subscriptions", {
                 stripeSubscriptionId,
-                newEndDate: subscriptionEnd.toISOString() 
+                newEndDate: subscriptionEndIso
               });
             }
-            
+
             // Also update legacy users table for backward compatibility
             const { error } = await supabaseClient
               .from('users')
-              .update({ 
+              .update({
                 is_premium: true,
-                subscription_end: subscriptionEnd.toISOString(),
+                subscription_tier: 'Deluxe',
+                subscription_end: subscriptionEndIso,
                 updated_at: new Date().toISOString()
               })
               .eq('email', customerEmail);
@@ -343,15 +358,17 @@ serve(async (req) => {
             if (error) {
               logStep("ERROR: Failed to renew users table", { email: customerEmail, error });
             } else {
-              logStep("Successfully renewed monthly subscription in users table", { 
-                email: customerEmail, 
-                newEndDate: subscriptionEnd.toISOString() 
+              logStep("Successfully renewed monthly subscription in users table", {
+                email: customerEmail,
+                newEndDate: subscriptionEndIso
               });
             }
           }
         } else {
-          logStep("Skipping invoice - not a subscription renewal", { 
-            billingReason: invoice.billing_reason 
+          logStep("Skipping invoice - not a subscription renewal", {
+            billingReason: invoice.billing_reason,
+            hasSubscription: !!invoice.subscription,
+            eventType: event.type,
           });
         }
         break;

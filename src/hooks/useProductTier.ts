@@ -17,14 +17,26 @@ export function useProductTier(productId: string) {
       try {
         const { data: sub } = await supabase
           .from('user_subscriptions')
-          .select('tier, subscription_end')
+          .select('tier, subscription_end, payment_type')
           .eq('user_id', user.id)
           .eq('product_id', productId)
           .eq('active', true)
           .maybeSingle();
 
         if (sub?.tier === 'deluxe') {
-          if (!sub.subscription_end || new Date(sub.subscription_end) > new Date()) {
+          if (!sub.subscription_end) {
+            setTier('deluxe');
+            setIsLoading(false);
+            return;
+          }
+
+          const endDate = new Date(sub.subscription_end);
+          const now = new Date();
+          const isMonthly = sub.payment_type === 'monthly';
+          const graceMs = 7 * 24 * 60 * 60 * 1000;
+          const withinGrace = now.getTime() - endDate.getTime() <= graceMs;
+
+          if (endDate > now || (isMonthly && withinGrace)) {
             setTier('deluxe');
             setIsLoading(false);
             return;

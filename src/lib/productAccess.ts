@@ -35,8 +35,17 @@ export const checkProductAccess = async (
     // Check if subscription is still valid
     if (subscription.subscription_end) {
       const endDate = new Date(subscription.subscription_end);
-      if (endDate < new Date()) {
-        return { hasAccess: false, tier: 'free' };
+      const now = new Date();
+
+      // Safety net for webhook delays: keep monthly users active for 7 days grace.
+      if (endDate < now) {
+        const isMonthly = subscription.payment_type === 'monthly';
+        const graceMs = 7 * 24 * 60 * 60 * 1000;
+        const withinGrace = now.getTime() - endDate.getTime() <= graceMs;
+
+        if (!isMonthly || !withinGrace) {
+          return { hasAccess: false, tier: 'free' };
+        }
       }
     }
     
