@@ -133,9 +133,9 @@ export const HomePage = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4">
+      <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-lg:-mt-8 md:max-lg:pt-8">
         <HeroBackgroundPaths>
-          <div className="px-6 sm:px-8 py-6 sm:py-24 md:py-32 text-center max-w-5xl mx-auto">
+          <div className="px-6 sm:px-8 py-6 sm:py-24 md:py-32 md:max-lg:py-16 text-center max-w-5xl mx-auto">
             {/* Social Proof Pill - Desktop only */}
             <div
               className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm"
