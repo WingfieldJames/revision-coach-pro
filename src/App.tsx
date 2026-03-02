@@ -39,6 +39,7 @@ import { BuildPage } from "./pages/BuildPage";
 import { DynamicFreePage } from "./pages/DynamicFreePage";
 import { DynamicPremiumPage } from "./pages/DynamicPremiumPage";
 import { BuildAboutPage } from "./pages/BuildAboutPage";
+import { GCSEComparePage } from "./pages/GCSEComparePage";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/compare" element={<ComparePage />} />
+            <Route path="/gcse" element={<GCSEComparePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/contact" element={<ContactPage />} />

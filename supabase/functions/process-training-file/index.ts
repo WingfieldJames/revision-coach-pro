@@ -23,65 +23,102 @@ Return ONLY a JSON object (no markdown):
 }`;
 }
 
-function buildQPExtractionPrompt(year: string): string {
-  return `You are an exam paper extraction expert. Extract each question from this Question Paper.
+function buildQPExtractionPrompt(year: string, subject: string, examBoard: string): string {
+  return `You are an exam paper extraction expert. Extract the COMPLETE structured content of this Question Paper.
 
-FOCUS ON:
-- The question number and sub-part labels (a), (b)(i), (b)(ii) etc.
-- The actual question text students must answer
-- Any context, data, stimulus material, or source text given WITH the question
-- Mark allocations per part
-- Whether it's a multiple choice, short answer, or extended response question
+CRITICAL RULES:
+- Extract EVERY question in the EXACT order they appear in the paper
+- Include ALL sub-parts (a), (b)(i), (b)(ii), (c), etc. as separate questions
+- Include ALL marks for each question/sub-part
+- Include ANY stimulus material, extracts, figures, data, or context given WITH the question
+- Questions must be numbered EXACTLY as printed (e.g. "1(a)", "1(b)(i)", "2(c)")
+- For papers with sections (Section A, Section B), group questions by section
+- Do NOT skip any questions, even if they seem repetitive or simple
+- Do NOT reorder questions — maintain the original paper order
+- For MCQs, include all options (A, B, C, D) in the question text
 
 SKIP/IGNORE:
-- Cover page instructions, rubric, "Answer ALL questions", "Write in black ink" etc.
-- Blank pages, formula sheets, periodic tables, data booklets references
+- Cover page instructions, rubric ("Answer ALL questions", "Write in black ink")
+- Blank pages, formula sheets, periodic tables, data booklets
 - Page numbers, headers, footers, copyright notices
-- Administrative text about exam conditions
 
-Output as a JSON array of objects, one per question:
-[
-  {
-    "question_number": "1",
-    "question_text": "Full question text including all sub-parts with their labels and mark allocations. Include any context/stimulus material given.",
-    "total_marks": 6,
-    "topic": "Topic this question covers"
-  }
-]
-
-Year: ${year}
-Be thorough - capture every question with its full context.`;
+Output the result as a SINGLE JSON object with this exact structure:
+{
+  "papers": [
+    {
+      "exam_board": "${examBoard}",
+      "qualification": "Detected from paper header or use '${examBoard} ${subject}'",
+      "series": "June ${year}",
+      "paper_code": "The paper code from the header (e.g. 9EC0/03, 7405/2, H446/01)",
+      "paper": "June ${year} Paper [number]",
+      "total_marks": 100,
+      "sections": [
+        {
+          "name": "Section A",
+          "total_marks": 50,
+          "notes": "Any section-level instructions or notes (e.g. 'Answer ALL questions')",
+          "context": {
+            "figures": ["Description of any figures/diagrams provided for this section"],
+            "extracts": ["Full text or summary of any extracts/data provided for this section"]
+          },
+          "questions": [
+            {
+              "number": "1(a)",
+              "question": "The COMPLETE question text exactly as written. Include all context references.",
+              "marks": 5,
+              "year": ${year},
+              "paper": "June ${year} Paper [number]",
+              "extract": "If this question references specific data/extracts/figures, describe them here. Otherwise null.",
+              "mark_scheme": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
 
-function buildMSExtractionPrompt(year: string): string {
-  return `You are a mark scheme extraction expert. Extract the mark scheme for each question from this document.
+IMPORTANT:
+- If the paper has no explicit sections, use a single section with name "Full Paper"
+- Detect the paper code, total marks, and qualification from the paper header
+- For each question, include the FULL question text — do not truncate or summarise
+- Extract descriptions of all figures, tables, and data even if you can't read the exact values
+- Subject: ${subject}, Board: ${examBoard}, Year: ${year}
 
-FOCUS ON:
-- The correct answers and acceptable alternative answers
-- Mark allocation codes (M1, A1, B1, AO1, AO2, AO3 etc.) and what earns each mark
-- Examiner comments, guidance notes, and "Accept/Reject" clarifications
-- Required working or method steps
-- Level descriptors for extended response questions (what gets Level 1, 2, 3 etc.)
-- Key indicative content students should include
+Be EXHAUSTIVE — every question must be captured with complete text and correct marks.`;
+}
+
+function buildMSExtractionPrompt(year: string, subject: string, examBoard: string): string {
+  return `You are a mark scheme extraction expert. Extract the COMPLETE mark scheme for every question.
+
+CRITICAL RULES:
+- Extract mark scheme for EVERY question in the EXACT order they appear
+- Include ALL sub-parts matching the question paper numbering (1(a), 1(b)(i), etc.)
+- Include the correct answers and ALL acceptable alternative answers
+- Include mark codes (M1, A1, B1, AO1, AO2, AO3 etc.) and what earns each mark
+- Include examiner guidance, "Accept/Reject" clarifications
+- Include required working or method steps
+- For extended response questions, include level descriptors (Level 1, 2, 3 etc.) with mark ranges
+- Include indicative content students should include
 
 SKIP/IGNORE:
 - Cover page, administrative headers, "Mark Scheme" title pages
-- General marking instructions that appear at the start (e.g. "Use ticks to indicate marks")
+- General marking instructions that appear at the start
 - Copyright notices, page numbers, blank pages
 - Generic rubric about how to use the mark scheme
 
 Output as a JSON array of objects, one per question:
 [
   {
-    "question_number": "1",
-    "mark_scheme": "The actual marking points, acceptable answers, mark codes, and any examiner guidance for all sub-parts",
+    "question_number": "1(a)",
+    "mark_scheme": "The COMPLETE marking points, acceptable answers, mark codes, level descriptors, and examiner guidance",
     "total_marks": 6,
     "topic": "Topic this question covers"
   }
 ]
 
-Year: ${year}
-Be thorough - capture every question's marking points and examiner guidance.`;
+Subject: ${subject}, Board: ${examBoard}, Year: ${year}
+Be EXHAUSTIVE — capture every question's marking points, level descriptors, and examiner guidance.`;
 }
 
 function buildSpecificationPrompt(): string {
@@ -432,13 +469,44 @@ serve(async (req) => {
       // Step 2: Extract content based on doc_type
       console.log(`Step 2: Extracting ${classification.doc_type} content...`);
       const extractionPrompt = classification.doc_type === "qp"
-        ? buildQPExtractionPrompt(year || "unknown")
-        : buildMSExtractionPrompt(year || "unknown");
+        ? buildQPExtractionPrompt(year || "unknown", project.subject || "unknown", project.exam_board || "unknown")
+        : buildMSExtractionPrompt(year || "unknown", project.subject || "unknown", project.exam_board || "unknown");
 
       let chunks: Array<Record<string, unknown>>;
       try {
         const extractRaw = await callAI(lovableApiKey, extractionPrompt, base64, mimeType);
-        chunks = parseJSONArray(extractRaw);
+        
+        if (classification.doc_type === "qp") {
+          // QP returns structured JSON object — flatten sections[].questions[] into a flat array
+          try {
+            const structured = parseJSONObject(extractRaw);
+            const papers = (structured.papers as any[]) || [structured];
+            const flatQuestions: Array<Record<string, unknown>> = [];
+            for (const paper of papers) {
+              const sections = paper.sections || [{ questions: paper.questions || [] }];
+              for (const section of sections) {
+                const questions = section.questions || [];
+                for (const q of questions) {
+                  flatQuestions.push({
+                    question_number: q.number || q.question_number || "",
+                    question_text: q.question || q.question_text || "",
+                    total_marks: q.marks || q.total_marks || 0,
+                    topic: q.topic || section.name || "",
+                    extract: q.extract || null,
+                    paper_code: paper.paper_code || "",
+                    paper_name: paper.paper || "",
+                  });
+                }
+              }
+            }
+            chunks = flatQuestions;
+          } catch {
+            // Fallback: try parsing as flat array
+            chunks = parseJSONArray(extractRaw);
+          }
+        } else {
+          chunks = parseJSONArray(extractRaw);
+        }
       } catch (err) {
         console.error("Extraction failed:", err);
         if (String(err).includes("AI_ERROR:429")) {
@@ -457,8 +525,9 @@ serve(async (req) => {
       let chunksCreated = 0;
       for (const chunk of chunks) {
         const qNum = chunk.question_number || "";
+        const extractInfo = chunk.extract ? `\nContext: ${chunk.extract}` : "";
         const content = classification.doc_type === "qp"
-          ? `Question ${qNum}: ${chunk.question_text || ""}`
+          ? `Question ${qNum}: ${chunk.question_text || ""}${extractInfo}`
           : `Mark Scheme Q${qNum}: ${chunk.mark_scheme || ""}`;
 
         const embedding = await generateEmbedding(lovableApiKey, content);

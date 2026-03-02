@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const EXAM_BOARDS = ["AQA", "OCR", "Edexcel", "CIE", "WJEC", "SQA"];
+const QUALIFICATION_TYPES = ["A Level", "GCSE"];
 
 interface TrainerProject {
   id: string;
@@ -133,6 +134,7 @@ export function BuildPage() {
 
   // New Subject dialog
   const [showNewSubjectDialog, setShowNewSubjectDialog] = useState(false);
+  const [newQualificationType, setNewQualificationType] = useState("A Level");
   const [newSubjectName, setNewSubjectName] = useState("");
   const [newExamBoard, setNewExamBoard] = useState("");
 
@@ -498,8 +500,9 @@ export function BuildPage() {
       .insert({
         subject: newSubjectName.trim(),
         exam_board: newExamBoard.trim(),
+        qualification_type: newQualificationType,
         created_by: user.id,
-      })
+      } as any)
       .select("*")
       .single();
     if (error) {
@@ -512,7 +515,8 @@ export function BuildPage() {
     setShowNewSubjectDialog(false);
     setNewSubjectName("");
     setNewExamBoard("");
-    toast({ title: "Subject created", description: `${newProject.exam_board} ${newProject.subject}` });
+    setNewQualificationType("A Level");
+    toast({ title: "Subject created", description: `${newQualificationType} · ${newProject.exam_board} ${newProject.subject}` });
   };
 
   // Load uploads when project changes
@@ -978,7 +982,7 @@ export function BuildPage() {
   }
 
   const currentProject = projects.find(p => p.id === selectedProjectId);
-  const currentLabel = currentProject ? `${currentProject.exam_board} ${currentProject.subject}` : "Select Subject";
+  const currentLabel = currentProject ? `${(currentProject as any).qualification_type || 'A Level'} · ${currentProject.exam_board} ${currentProject.subject}` : "Select Subject";
 
   return (
     <div className="min-h-screen bg-background">
@@ -997,14 +1001,19 @@ export function BuildPage() {
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[260px]">
+              <DropdownMenuContent align="start" className="w-[300px]">
                 {projects.map(proj => (
                   <DropdownMenuItem
                     key={proj.id}
                     onClick={() => setSelectedProjectId(proj.id)}
                     className="flex items-center justify-between gap-2 cursor-pointer"
                   >
-                    <span className="font-medium">{proj.exam_board} {proj.subject}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-normal shrink-0">
+                        {(proj as any).qualification_type || 'A Level'}
+                      </Badge>
+                      <span className="font-medium">{proj.exam_board} {proj.subject}</span>
+                    </div>
                     <span className={`h-2 w-2 rounded-full shrink-0 ${
                       proj.status === "deployed" ? "bg-green-500" : "bg-muted-foreground/40"
                     }`} />
@@ -1062,6 +1071,19 @@ export function BuildPage() {
             <DialogDescription>Add a new subject to train your AI tutor on.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Qualification Type</Label>
+              <Select value={newQualificationType} onValueChange={setNewQualificationType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {QUALIFICATION_TYPES.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Subject Name</Label>
               <Input
