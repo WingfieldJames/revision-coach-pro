@@ -292,6 +292,7 @@ export type Database = {
           id: string
           last_deployed_at: string | null
           product_id: string | null
+          qualification_type: string
           selected_features: Json | null
           staged_specifications: Json | null
           status: string
@@ -318,6 +319,7 @@ export type Database = {
           id?: string
           last_deployed_at?: string | null
           product_id?: string | null
+          qualification_type?: string
           selected_features?: Json | null
           staged_specifications?: Json | null
           status?: string
@@ -344,6 +346,7 @@ export type Database = {
           id?: string
           last_deployed_at?: string | null
           product_id?: string | null
+          qualification_type?: string
           selected_features?: Json | null
           staged_specifications?: Json | null
           status?: string
