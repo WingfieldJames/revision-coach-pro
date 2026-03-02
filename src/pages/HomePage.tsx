@@ -133,7 +133,7 @@ export const HomePage = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:-mt-2 md:max-xl:pt-2">
+      <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4">
         <HeroBackgroundPaths>
           <div className="px-6 sm:px-8 py-6 sm:py-24 md:py-32 md:max-xl:py-6 text-center max-w-5xl mx-auto">
             {/* Social Proof Pill - Desktop only */}
