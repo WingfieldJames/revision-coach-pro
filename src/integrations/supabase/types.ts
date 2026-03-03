@@ -233,6 +233,7 @@ export type Database = {
           lifetime_price: number
           monthly_price: number
           name: string
+          qualification_type: string
           slug: string
           stripe_lifetime_price_id: string | null
           stripe_monthly_price_id: string | null
@@ -251,6 +252,7 @@ export type Database = {
           lifetime_price: number
           monthly_price: number
           name: string
+          qualification_type?: string
           slug: string
           stripe_lifetime_price_id?: string | null
           stripe_monthly_price_id?: string | null
@@ -269,6 +271,7 @@ export type Database = {
           lifetime_price?: number
           monthly_price?: number
           name?: string
+          qualification_type?: string
           slug?: string
           stripe_lifetime_price_id?: string | null
           stripe_monthly_price_id?: string | null
