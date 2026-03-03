@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS qualification_type text NOT NULL DEFAULT 'A Level';

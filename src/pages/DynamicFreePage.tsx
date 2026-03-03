@@ -49,7 +49,7 @@ export const DynamicFreePage = () => {
 
       const { data: tp } = await supabase
         .from('trainer_projects')
-        .select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks')
+        .select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type')
         .eq('product_id', prod.id)
         .maybeSingle();
       setTrainer(tp as TrainerConfig | null);
@@ -73,6 +73,7 @@ export const DynamicFreePage = () => {
     chatRef.current?.submitMessage(message, imageDataUrl);
   };
 
+  const qualType = (trainer as any)?.qualification_type || 'A-Level';
   const subjectName = `${product.exam_board} ${product.subject}`;
 
   // Parse exam dates from trainer config
@@ -87,8 +88,8 @@ export const DynamicFreePage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title={`Free A* AI – ${subjectName} A-Level Revision | Try Now`}
-        description={`Try A* AI free for ${subjectName}. AI trained on the ${product.exam_board} ${product.subject} specification.`}
+        title={`Free A* AI – ${subjectName} ${qualType} Revision | Try Now`}
+        description={`Try A* AI free for ${subjectName}. AI trained on the ${product.exam_board} ${product.subject} ${qualType} specification.`}
         canonical={`https://astarai.co.uk/${product.slug}-free-version`}
       />
       <RandomChatbotBackground />
@@ -125,8 +126,8 @@ export const DynamicFreePage = () => {
         <RAGChat
           productId={product.id}
           subjectName={subjectName}
-          subjectDescription={`Your personal A* ${product.subject} tutor. Ask me anything!`}
-          footerText={`Powered by A* AI • Trained on ${subjectName} specification`}
+          subjectDescription={`Your personal A* ${qualType} ${product.subject} tutor. Ask me anything!`}
+          footerText={`Powered by A* AI • Trained on ${subjectName} ${qualType} specification`}
           placeholder={`Ask about ${product.subject}...`}
           suggestedPrompts={[
             { text: `What topics are in the ${product.exam_board} ${product.subject} spec?` },

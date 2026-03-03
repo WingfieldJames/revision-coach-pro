@@ -95,12 +95,12 @@ export const ComparePage = () => {
     const loadDynamic = async () => {
       const { data } = await supabase
         .from('products')
-        .select('id, slug, subject, exam_board, name')
+        .select('id, slug, subject, exam_board, name, qualification_type')
         .eq('active', true);
       if (data) {
-        // Filter out legacy products (already hardcoded)
+        // Filter out legacy products (already hardcoded) and GCSE products
         const legacySlugs = new Set(Object.keys(PRODUCT_IDS));
-        const dynamic = data.filter((p: any) => !legacySlugs.has(p.slug));
+        const dynamic = data.filter((p: any) => !legacySlugs.has(p.slug) && (p.qualification_type || 'A Level') !== 'GCSE');
         setDynamicProducts(dynamic as DynamicProduct[]);
       }
     };
