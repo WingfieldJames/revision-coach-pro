@@ -50,7 +50,7 @@ export const DynamicFreePage = () => {
 
       const { data: tp } = await supabase
         .from('trainer_projects')
-        .select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type')
+        .select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts')
         .eq('product_id', prod.id)
         .maybeSingle();
       setTrainer(tp as TrainerConfig | null);
