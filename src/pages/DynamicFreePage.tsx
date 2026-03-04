@@ -25,6 +25,7 @@ interface TrainerConfig {
   selected_features: string[] | null;
   exam_dates: any[] | null;
   essay_marker_marks: number[] | null;
+  suggested_prompts: Array<{ text: string; usesPersonalization?: boolean }> | null;
 }
 
 export const DynamicFreePage = () => {
