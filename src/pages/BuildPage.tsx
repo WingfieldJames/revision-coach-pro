@@ -173,6 +173,7 @@ export function BuildPage() {
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [examDates, setExamDates] = useState<Array<{ name: string; date: string }>>([]);
   const [essayMarkerMarks, setEssayMarkerMarks] = useState<string>("");
+  const [suggestedPrompts, setSuggestedPrompts] = useState<Array<{ text: string; usesPersonalization?: boolean }>>([]);
 
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
@@ -249,11 +250,11 @@ export function BuildPage() {
     return JSON.stringify({
       systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
-      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData,
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts,
     });
   }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
-      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData]);
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts]);
 
   // savedSnapshotParsed for field-level comparison
   const savedSnapshotParsed = useMemo(() => {
@@ -337,6 +338,9 @@ export function BuildPage() {
       ? dbMarks.join(', ')
       : (legacy?.essayMarkerMarks && legacy.essayMarkerMarks.length > 0 ? legacy.essayMarkerMarks.join(', ') : '');
 
+    const dbSuggestedPrompts = Array.isArray((existing as any).suggested_prompts) ? (existing as any).suggested_prompts as Array<{ text: string; usesPersonalization?: boolean }> : [];
+    const initialSuggestedPrompts = dbSuggestedPrompts.length > 0 ? dbSuggestedPrompts : [];
+
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
     setTrainerDescription(initialTrainerDescription);
@@ -346,6 +350,7 @@ export function BuildPage() {
     setSelectedFeatures(initialSelectedFeatures);
     setExamDates(initialExamDates);
     setEssayMarkerMarks(initialEssayMarkerMarks);
+    setSuggestedPrompts(initialSuggestedPrompts);
 
     // Handle specs with normalization
     const savedSpecs = existing.staged_specifications;
@@ -465,6 +470,7 @@ export function BuildPage() {
         examDates: initialExamDates,
         essayMarkerMarks: initialEssayMarkerMarks,
         stagedSpecData: hydratedSpecs && hydratedSpecs.length > 0 ? hydratedSpecs : null,
+        suggestedPrompts: initialSuggestedPrompts,
       });
       setSavedSnapshot(snapshot);
       setProjectLoaded(true);
@@ -562,6 +568,7 @@ export function BuildPage() {
           exam_dates: examDates as unknown as import("@/integrations/supabase/types").Json,
           essay_marker_marks: (parsedMarks.length > 0 ? parsedMarks : []) as unknown as import("@/integrations/supabase/types").Json,
           staged_specifications: stagedSpecData as unknown as import("@/integrations/supabase/types").Json,
+          suggested_prompts: suggestedPrompts as unknown as import("@/integrations/supabase/types").Json,
           system_prompt_submitted: systemPrompt.trim().length >= 10,
           exam_technique_submitted: examTechnique.trim().length >= 10,
           trainer_bio_submitted: trainerDescription.trim().length >= 10,
@@ -1516,6 +1523,57 @@ export function BuildPage() {
                   />
                 </div>
               )}
+
+              {/* Suggested Prompts */}
+              <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                <div className="flex items-center gap-2">
+                  <Bot className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-medium">Suggested Prompts</p>
+                </div>
+                <p className="text-xs text-muted-foreground">These appear as clickable prompt suggestions when students first open the chatbot. Add up to 4.</p>
+                {suggestedPrompts.map((sp, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      value={sp.text}
+                      onChange={e => {
+                        const next = [...suggestedPrompts];
+                        next[idx] = { ...next[idx], text: e.target.value };
+                        setSuggestedPrompts(next);
+                      }}
+                      placeholder={`e.g. What topics are in the spec?`}
+                      className="flex-1 text-sm"
+                    />
+                    <label className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
+                      <Checkbox
+                        checked={!!sp.usesPersonalization}
+                        onCheckedChange={(checked) => {
+                          const next = [...suggestedPrompts];
+                          next[idx] = { ...next[idx], usesPersonalization: !!checked };
+                          setSuggestedPrompts(next);
+                        }}
+                      />
+                      Personal
+                    </label>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSuggestedPrompts(suggestedPrompts.filter((_, i) => i !== idx))}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                {suggestedPrompts.length < 4 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSuggestedPrompts([...suggestedPrompts, { text: "" }])}
+                    className="w-full"
+                  >
+                    <Plus className="h-3 w-3 mr-1" /> Add Prompt
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 

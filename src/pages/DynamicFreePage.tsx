@@ -25,6 +25,7 @@ interface TrainerConfig {
   selected_features: string[] | null;
   exam_dates: any[] | null;
   essay_marker_marks: number[] | null;
+  suggested_prompts: Array<{ text: string; usesPersonalization?: boolean }> | null;
 }
 
 export const DynamicFreePage = () => {
@@ -49,10 +50,10 @@ export const DynamicFreePage = () => {
 
       const { data: tp } = await supabase
         .from('trainer_projects')
-        .select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type')
+        .select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts')
         .eq('product_id', prod.id)
         .maybeSingle();
-      setTrainer(tp as TrainerConfig | null);
+      setTrainer(tp as unknown as TrainerConfig | null);
       setLoading(false);
     };
     load();
@@ -129,11 +130,15 @@ export const DynamicFreePage = () => {
           subjectDescription={`Your personal A* ${qualType} ${product.subject} tutor. Ask me anything!`}
           footerText={`Powered by A* AI • Trained on ${subjectName} ${qualType} specification`}
           placeholder={`Ask about ${product.subject}...`}
-          suggestedPrompts={[
-            { text: `What topics are in the ${product.exam_board} ${product.subject} spec?` },
-            { text: "How do I structure a long answer question?" },
-            { text: "Create me a full revision plan", usesPersonalization: true },
-          ]}
+          suggestedPrompts={
+            trainer?.suggested_prompts && trainer.suggested_prompts.length > 0
+              ? trainer.suggested_prompts.filter(p => p.text?.trim())
+              : [
+                  { text: `What topics are in the ${product.exam_board} ${product.subject} spec?` },
+                  { text: "How do I structure a long answer question?" },
+                  { text: "Create me a full revision plan", usesPersonalization: true },
+                ]
+          }
           chatRef={chatRef}
         />
       </div>
