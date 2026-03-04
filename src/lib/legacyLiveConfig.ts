@@ -14,6 +14,7 @@ export interface LegacySubjectConfig {
   trainerStatus?: string;
   /** Static asset path for the trainer profile image (used as fallback when no storage upload exists) */
   trainerImageAsset?: string;
+  suggestedPrompts?: Array<{ text: string; usesPersonalization?: boolean }>;
 }
 
 // Helper to serialise Date → YYYY-MM-DD string for storage
