@@ -350,6 +350,7 @@ export function BuildPage() {
     setSelectedFeatures(initialSelectedFeatures);
     setExamDates(initialExamDates);
     setEssayMarkerMarks(initialEssayMarkerMarks);
+    setSuggestedPrompts(initialSuggestedPrompts);
 
     // Handle specs with normalization
     const savedSpecs = existing.staged_specifications;
