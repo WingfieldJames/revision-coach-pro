@@ -53,7 +53,7 @@ export const DynamicFreePage = () => {
         .select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts')
         .eq('product_id', prod.id)
         .maybeSingle();
-      setTrainer(tp as TrainerConfig | null);
+      setTrainer(tp as unknown as TrainerConfig | null);
       setLoading(false);
     };
     load();
