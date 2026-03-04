@@ -125,6 +125,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Naman — I got A*A*A*A* at A-Level with straight 9s at GCSE and an 8.9 TMUA score. I trained A* AI on OCR Computer Science to help you master algorithms, data structures, and exam technique.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/naman-founder.png",
+    suggestedPrompts: [
+      { text: "Explain binary search algorithm" },
+      { text: "What are the different data types?" },
+      { text: "How do I structure a 9-mark question?" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── AQA Chemistry ──
