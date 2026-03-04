@@ -300,6 +300,7 @@ export type Database = {
           staged_specifications: Json | null
           status: string
           subject: string
+          suggested_prompts: Json | null
           system_prompt: string | null
           system_prompt_submitted: boolean
           trainer_achievements: Json | null
@@ -327,6 +328,7 @@ export type Database = {
           staged_specifications?: Json | null
           status?: string
           subject: string
+          suggested_prompts?: Json | null
           system_prompt?: string | null
           system_prompt_submitted?: boolean
           trainer_achievements?: Json | null
@@ -354,6 +356,7 @@ export type Database = {
           staged_specifications?: Json | null
           status?: string
           subject?: string
+          suggested_prompts?: Json | null
           system_prompt?: string | null
           system_prompt_submitted?: boolean
           trainer_achievements?: Json | null
