@@ -250,11 +250,11 @@ export function BuildPage() {
     return JSON.stringify({
       systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
-      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData,
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts,
     });
   }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
-      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData]);
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts]);
 
   // savedSnapshotParsed for field-level comparison
   const savedSnapshotParsed = useMemo(() => {
