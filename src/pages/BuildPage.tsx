@@ -470,6 +470,7 @@ export function BuildPage() {
         examDates: initialExamDates,
         essayMarkerMarks: initialEssayMarkerMarks,
         stagedSpecData: hydratedSpecs && hydratedSpecs.length > 0 ? hydratedSpecs : null,
+        suggestedPrompts: initialSuggestedPrompts,
       });
       setSavedSnapshot(snapshot);
       setProjectLoaded(true);
