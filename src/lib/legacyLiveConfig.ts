@@ -190,6 +190,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 236/240 in Mathematics and straight 9s at GCSE. I trained A* AI on Edexcel Maths past papers and specifications.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/tudor-founder.jpg",
+    suggestedPrompts: [
+      { text: "Explain integration by parts" },
+      { text: "How do I approach a proof question?" },
+      { text: "Find past paper questions on differentiation" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── Edexcel Mathematics Applied ──
