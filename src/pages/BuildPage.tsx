@@ -1523,6 +1523,57 @@ export function BuildPage() {
                   />
                 </div>
               )}
+
+              {/* Suggested Prompts */}
+              <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                <div className="flex items-center gap-2">
+                  <Bot className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-medium">Suggested Prompts</p>
+                </div>
+                <p className="text-xs text-muted-foreground">These appear as clickable prompt suggestions when students first open the chatbot. Add up to 4.</p>
+                {suggestedPrompts.map((sp, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      value={sp.text}
+                      onChange={e => {
+                        const next = [...suggestedPrompts];
+                        next[idx] = { ...next[idx], text: e.target.value };
+                        setSuggestedPrompts(next);
+                      }}
+                      placeholder={`e.g. What topics are in the spec?`}
+                      className="flex-1 text-sm"
+                    />
+                    <label className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
+                      <Checkbox
+                        checked={!!sp.usesPersonalization}
+                        onCheckedChange={(checked) => {
+                          const next = [...suggestedPrompts];
+                          next[idx] = { ...next[idx], usesPersonalization: !!checked };
+                          setSuggestedPrompts(next);
+                        }}
+                      />
+                      Personal
+                    </label>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSuggestedPrompts(suggestedPrompts.filter((_, i) => i !== idx))}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                {suggestedPrompts.length < 4 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSuggestedPrompts([...suggestedPrompts, { text: "" }])}
+                    className="w-full"
+                  >
+                    <Plus className="h-3 w-3 mr-1" /> Add Prompt
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 
