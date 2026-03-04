@@ -173,6 +173,7 @@ export function BuildPage() {
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [examDates, setExamDates] = useState<Array<{ name: string; date: string }>>([]);
   const [essayMarkerMarks, setEssayMarkerMarks] = useState<string>("");
+  const [suggestedPrompts, setSuggestedPrompts] = useState<Array<{ text: string; usesPersonalization?: boolean }>>([]);
 
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
