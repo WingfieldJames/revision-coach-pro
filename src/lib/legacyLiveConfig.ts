@@ -83,6 +83,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Carl — I got A*A*A* at A-Level as an international student and achieved 5A*s in IGCSE in one year. I'm studying at LSE and trained A* AI on CIE Economics.",
     trainerStatus: "LSE Student",
     trainerImageAsset: "/src/assets/carl-founder.png",
+    suggestedPrompts: [
+      { text: "Explain the difference between demand-pull and cost-push inflation" },
+      { text: "What are the characteristics of perfect competition?" },
+      { text: "How do I structure an essay for Paper 4?" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── OCR Physics ──
