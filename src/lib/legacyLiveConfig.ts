@@ -61,6 +61,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm James — I got A* in Economics with 90% across all papers, A*A*A at A-Level, and straight 9s at GCSE. I'm studying at LSE and built A* AI to help you achieve the same results.",
     trainerStatus: "LSE Student",
     trainerImageAsset: "/src/assets/james-founder.png",
+    suggestedPrompts: [
+      { text: "Find all PEQs related to externalities" },
+      { text: "Explain Spec Point 2.2 (AD)" },
+      { text: "How do I structure a 25 marker" },
+      { text: "Give me application for trade agreements" },
+    ],
   },
 
   // ── CIE Economics ──
