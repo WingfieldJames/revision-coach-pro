@@ -411,8 +411,19 @@ serve(async (req) => {
           .maybeSingle();
         
         if (sub?.tier === 'deluxe') {
-          if (!sub.subscription_end || new Date(sub.subscription_end) > new Date()) {
+          const now = new Date();
+          const endDate = sub.subscription_end ? new Date(sub.subscription_end) : null;
+          if (!endDate || endDate > now) {
+            // No end date or still active
             tier = 'deluxe';
+          } else {
+            // End date passed — allow 7-day grace period for monthly webhook delays
+            const graceMs = 7 * 24 * 60 * 60 * 1000;
+            const withinGrace = now.getTime() - endDate.getTime() <= graceMs;
+            if (withinGrace) {
+              tier = 'deluxe';
+              console.log(`Deluxe tier granted via grace period for user ${user_id} (ended ${sub.subscription_end})`);
+            }
           }
         }
       } catch (err) {
