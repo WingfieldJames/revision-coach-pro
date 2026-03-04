@@ -105,6 +105,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 200/200 in Physics and straight 9s at GCSE. I trained A* AI on OCR Physics past papers and mark schemes to help you ace your exams.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/tudor-founder.jpg",
+    suggestedPrompts: [
+      { text: "Explain Newton's laws of motion" },
+      { text: "What is electromagnetic induction?" },
+      { text: "How do I approach 6-mark questions?" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── OCR Computer Science ──
