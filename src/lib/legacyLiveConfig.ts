@@ -211,6 +211,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 236/240 in Mathematics and straight 9s at GCSE. I trained A* AI on Edexcel Maths Applied (Stats & Mechanics) content.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/tudor-founder.jpg",
+    suggestedPrompts: [
+      { text: "Explain Newton's second law problems" },
+      { text: "How do I approach a hypothesis test?" },
+      { text: "Find past paper questions on normal distribution" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 };
 
