@@ -40,7 +40,7 @@ import { DynamicFreePage } from "./pages/DynamicFreePage";
 import { DynamicPremiumPage } from "./pages/DynamicPremiumPage";
 import { BuildAboutPage } from "./pages/BuildAboutPage";
 import { GCSEComparePage } from "./pages/GCSEComparePage";
-
+import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
