@@ -339,7 +339,7 @@ export function BuildPage() {
       : (legacy?.essayMarkerMarks && legacy.essayMarkerMarks.length > 0 ? legacy.essayMarkerMarks.join(', ') : '');
 
     const dbSuggestedPrompts = Array.isArray((existing as any).suggested_prompts) ? (existing as any).suggested_prompts as Array<{ text: string; usesPersonalization?: boolean }> : [];
-    const initialSuggestedPrompts = dbSuggestedPrompts.length > 0 ? dbSuggestedPrompts : [];
+    const initialSuggestedPrompts = dbSuggestedPrompts.length > 0 ? dbSuggestedPrompts : (legacy?.suggestedPrompts || []);
 
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
