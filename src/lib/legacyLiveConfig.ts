@@ -147,6 +147,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 197/200 in Chemistry and straight 9s at GCSE. I trained A* AI on AQA Chemistry to help you master every topic and ace your exams.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/tudor-founder.jpg",
+    suggestedPrompts: [
+      { text: "Explain the mechanism of nucleophilic substitution" },
+      { text: "What is Le Chatelier's principle?" },
+      { text: "How do I approach 6-mark questions?" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── AQA Psychology ──
