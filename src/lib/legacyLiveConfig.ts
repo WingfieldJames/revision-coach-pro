@@ -39,6 +39,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Etienne — founder of EasyNomics, UKMT Gold Award winner, and John Locke Economics shortlisted. I trained A* AI on AQA Economics to help you achieve the top grades.",
     trainerStatus: "BSc Economics Student",
     trainerImageAsset: "/src/assets/etienne-founder.png",
+    suggestedPrompts: [
+      { text: "Explain Spec Point (4.1.5 Market Structures)" },
+      { text: "Find all past exam questions on Economic Growth" },
+      { text: "How do I structure a 25 marker" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── Edexcel Economics ──
