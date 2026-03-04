@@ -14,6 +14,7 @@ export interface LegacySubjectConfig {
   trainerStatus?: string;
   /** Static asset path for the trainer profile image (used as fallback when no storage upload exists) */
   trainerImageAsset?: string;
+  suggestedPrompts?: Array<{ text: string; usesPersonalization?: boolean }>;
 }
 
 // Helper to serialise Date → YYYY-MM-DD string for storage
@@ -38,6 +39,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Etienne — founder of EasyNomics, UKMT Gold Award winner, and John Locke Economics shortlisted. I trained A* AI on AQA Economics to help you achieve the top grades.",
     trainerStatus: "BSc Economics Student",
     trainerImageAsset: "/src/assets/etienne-founder.png",
+    suggestedPrompts: [
+      { text: "Explain Spec Point (4.1.5 Market Structures)" },
+      { text: "Find all past exam questions on Economic Growth" },
+      { text: "How do I structure a 25 marker" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── Edexcel Economics ──
@@ -54,6 +61,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm James — I got A* in Economics with 90% across all papers, A*A*A at A-Level, and straight 9s at GCSE. I'm studying at LSE and built A* AI to help you achieve the same results.",
     trainerStatus: "LSE Student",
     trainerImageAsset: "/src/assets/james-founder.png",
+    suggestedPrompts: [
+      { text: "Find all PEQs related to externalities" },
+      { text: "Explain Spec Point 2.2 (AD)" },
+      { text: "How do I structure a 25 marker" },
+      { text: "Give me application for trade agreements" },
+    ],
   },
 
   // ── CIE Economics ──
@@ -70,6 +83,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Carl — I got A*A*A* at A-Level as an international student and achieved 5A*s in IGCSE in one year. I'm studying at LSE and trained A* AI on CIE Economics.",
     trainerStatus: "LSE Student",
     trainerImageAsset: "/src/assets/carl-founder.png",
+    suggestedPrompts: [
+      { text: "Explain the difference between demand-pull and cost-push inflation" },
+      { text: "What are the characteristics of perfect competition?" },
+      { text: "How do I structure an essay for Paper 4?" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── OCR Physics ──
@@ -86,6 +105,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 200/200 in Physics and straight 9s at GCSE. I trained A* AI on OCR Physics past papers and mark schemes to help you ace your exams.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/tudor-founder.jpg",
+    suggestedPrompts: [
+      { text: "Explain Newton's laws of motion" },
+      { text: "What is electromagnetic induction?" },
+      { text: "How do I approach 6-mark questions?" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── OCR Computer Science ──
@@ -100,6 +125,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Naman — I got A*A*A*A* at A-Level with straight 9s at GCSE and an 8.9 TMUA score. I trained A* AI on OCR Computer Science to help you master algorithms, data structures, and exam technique.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/naman-founder.png",
+    suggestedPrompts: [
+      { text: "Explain binary search algorithm" },
+      { text: "What are the different data types?" },
+      { text: "How do I structure a 9-mark question?" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── AQA Chemistry ──
@@ -116,6 +147,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 197/200 in Chemistry and straight 9s at GCSE. I trained A* AI on AQA Chemistry to help you master every topic and ace your exams.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/tudor-founder.jpg",
+    suggestedPrompts: [
+      { text: "Explain the mechanism of nucleophilic substitution" },
+      { text: "What is Le Chatelier's principle?" },
+      { text: "How do I approach 6-mark questions?" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── AQA Psychology ──
@@ -132,6 +169,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level and straight 9s at GCSE. I trained A* AI on AQA Psychology past papers, mark schemes and specification to help you achieve top grades.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/tudor-founder.jpg",
+    suggestedPrompts: [
+      { text: "Explain Milgram's study on obedience" },
+      { text: "Find past exam questions on attachment" },
+      { text: "How do I structure a 16-mark question?" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── Edexcel Mathematics (Pure) ──
@@ -147,6 +190,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 236/240 in Mathematics and straight 9s at GCSE. I trained A* AI on Edexcel Maths past papers and specifications.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/tudor-founder.jpg",
+    suggestedPrompts: [
+      { text: "Explain integration by parts" },
+      { text: "How do I approach a proof question?" },
+      { text: "Find past paper questions on differentiation" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 
   // ── Edexcel Mathematics Applied ──
@@ -162,6 +211,12 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
     trainerDescription: "Hi, I'm Tudor — I got A*A*A*A* at A-Level with 236/240 in Mathematics and straight 9s at GCSE. I trained A* AI on Edexcel Maths Applied (Stats & Mechanics) content.",
     trainerStatus: "Gap Year Student",
     trainerImageAsset: "/src/assets/tudor-founder.jpg",
+    suggestedPrompts: [
+      { text: "Explain Newton's second law problems" },
+      { text: "How do I approach a hypothesis test?" },
+      { text: "Find past paper questions on normal distribution" },
+      { text: "Create me a full revision plan", usesPersonalization: true },
+    ],
   },
 };
 
