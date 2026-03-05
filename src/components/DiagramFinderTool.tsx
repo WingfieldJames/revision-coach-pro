@@ -21,42 +21,49 @@ interface IncrementToolUsageResponse {
 
 const FREE_MONTHLY_DIAGRAM_LIMIT = 3;
 
+export interface CustomDiagram {
+  id: string;
+  title: string;
+  imagePath: string; // signed URL or storage path
+}
+
 interface DiagramFinderToolProps {
   subject?: 'economics' | 'cs';
   tier?: 'free' | 'deluxe';
   productId?: string;
+  customDiagrams?: CustomDiagram[];
 }
 
 export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({ 
   subject = 'economics',
   tier = 'deluxe',
-  productId
+  productId,
+  customDiagrams,
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [inputText, setInputText] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [matchedDiagram, setMatchedDiagram] = useState<Diagram | CSDiagram | null>(null);
+  const [matchedDiagram, setMatchedDiagram] = useState<Diagram | CSDiagram | CustomDiagram | null>(null);
   const [noMatch, setNoMatch] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [monthlyUsage, setMonthlyUsage] = useState<number>(0);
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
 
-  // Load current month's usage for free tier
+  const hasCustomDiagrams = customDiagrams && customDiagrams.length > 0;
+
   useEffect(() => {
     const loadUsage = async () => {
       if (tier !== 'free' || !user) {
         setIsLoadingUsage(false);
         return;
       }
-
       try {
         const { data, error } = await supabase.rpc('get_tool_usage', {
           p_user_id: user.id,
           p_product_id: productId || null,
           p_tool_type: 'diagram_generator'
         });
-
         if (!error && data) {
           const typedData = data as unknown as ToolUsageResponse;
           setMonthlyUsage(typedData.count || 0);
@@ -67,41 +74,22 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
         setIsLoadingUsage(false);
       }
     };
-
     loadUsage();
   }, [tier, user, productId]);
 
   const handleUpgrade = async (paymentType: 'monthly' | 'lifetime' = 'lifetime') => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
+    if (!user) { navigate('/login'); return; }
     setIsCheckingOut(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        navigate('/login');
-        return;
-      }
-
+      if (!sessionData.session) { navigate('/login'); return; }
       const affiliateCode = localStorage.getItem('affiliate_code') || undefined;
-
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        headers: {
-          Authorization: `Bearer ${sessionData.session.access_token}`
-        },
-        body: {
-          paymentType,
-          productId: productId,
-          affiliateCode
-        }
+        headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
+        body: { paymentType, productId, affiliateCode }
       });
-
       if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
+      if (data?.url) window.location.href = data.url;
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error('Failed to start checkout. Please try again.');
@@ -110,11 +98,9 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
     }
   };
 
-  // Check if user has exceeded monthly limit (free tier only)
   const hasExceededLimit = tier === 'free' && monthlyUsage >= FREE_MONTHLY_DIAGRAM_LIMIT;
   const remainingUses = FREE_MONTHLY_DIAGRAM_LIMIT - monthlyUsage;
 
-  // Show upgrade prompt when limit exceeded for free tier
   if (tier === 'free' && hasExceededLimit && !isLoadingUsage) {
     return (
       <div className="space-y-4">
@@ -127,66 +113,24 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
             You've used all {FREE_MONTHLY_DIAGRAM_LIMIT} free diagram searches this month. Upgrade for unlimited access!
           </p>
         </div>
-        
-        <div className="bg-muted/50 rounded-xl p-4">
-          <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
-          <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Unlimited diagram searches</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Unlimited essay marking</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Unlimited daily prompts</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Image upload & OCR analysis</span>
-            </li>
-          </ul>
-        </div>
-        
         <div className="space-y-2">
-          <Button 
-            className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
-            onClick={() => handleUpgrade('lifetime')}
-            disabled={isCheckingOut}
-          >
+          <Button className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold" onClick={() => handleUpgrade('lifetime')} disabled={isCheckingOut}>
             {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £39.99'}
           </Button>
-          <Button 
-            variant="outline"
-            className="w-full"
-            onClick={() => handleUpgrade('monthly')}
-            disabled={isCheckingOut}
-          >
+          <Button variant="outline" className="w-full" onClick={() => handleUpgrade('monthly')} disabled={isCheckingOut}>
             Monthly – £8.99/mo
           </Button>
         </div>
-        
-        <p className="text-xs text-center text-muted-foreground">
-          Your free uses reset at the start of each month
-        </p>
       </div>
     );
   }
 
   const findDiagram = async () => {
-    if (!inputText.trim()) {
-      return;
-    }
+    if (!inputText.trim()) return;
 
-    // For free tier, check usage limit before proceeding
-    if (tier === 'free' && user) {
-      if (monthlyUsage >= FREE_MONTHLY_DIAGRAM_LIMIT) {
-        setMonthlyUsage(monthlyUsage);
-        toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
-        return;
-      }
+    if (tier === 'free' && user && monthlyUsage >= FREE_MONTHLY_DIAGRAM_LIMIT) {
+      toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
+      return;
     }
 
     setIsSearching(true);
@@ -194,9 +138,14 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
     setNoMatch(false);
 
     try {
-      const { data, error } = await supabase.functions.invoke('find-diagram', {
-        body: { text: inputText, subject }
-      });
+      const body: any = { text: inputText, subject };
+      
+      // If custom diagrams, send their IDs and titles to the edge function
+      if (hasCustomDiagrams) {
+        body.custom_diagrams = customDiagrams!.map(d => ({ id: d.id, title: d.title }));
+      }
+
+      const { data, error } = await supabase.functions.invoke('find-diagram', { body });
 
       if (error) {
         console.error('Find diagram error:', error);
@@ -206,20 +155,30 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
       let actionSucceeded = false;
 
       if (data?.diagramId) {
-        // Search in the appropriate diagram set
-        const diagramSet = subject === 'cs' ? csDiagrams : diagrams;
-        const found = diagramSet.find(d => d.id === data.diagramId);
-        if (found) {
-          setMatchedDiagram(found);
-          actionSucceeded = true;
+        if (hasCustomDiagrams) {
+          // Look up in custom diagrams
+          const found = customDiagrams!.find(d => d.id === data.diagramId);
+          if (found) {
+            setMatchedDiagram(found);
+            actionSucceeded = true;
+          } else {
+            setNoMatch(true);
+          }
         } else {
-          setNoMatch(true);
+          // Look up in built-in diagram sets
+          const diagramSet = subject === 'cs' ? csDiagrams : diagrams;
+          const found = diagramSet.find(d => d.id === data.diagramId);
+          if (found) {
+            setMatchedDiagram(found);
+            actionSucceeded = true;
+          } else {
+            setNoMatch(true);
+          }
         }
       } else {
         setNoMatch(true);
       }
 
-      // Only increment usage AFTER successful action
       if (actionSucceeded && tier === 'free' && user) {
         try {
           const { data: usageData, error: usageError } = await supabase.rpc('increment_tool_usage', {
@@ -249,11 +208,16 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
     setNoMatch(false);
   };
 
-  const subjectLabel = subject === 'cs' ? 'Computer Science' : 'Economics';
+  const subjectLabel = hasCustomDiagrams ? 'your subject' : subject === 'cs' ? 'Computer Science' : 'Economics';
+
+  // Get the image path based on diagram type
+  const getImageSrc = (diagram: Diagram | CSDiagram | CustomDiagram) => {
+    if ('imagePath' in diagram) return diagram.imagePath;
+    return '';
+  };
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-gradient-brand">
           <BarChart2 className="w-5 h-5 text-primary-foreground" />
@@ -266,7 +230,6 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
         </div>
       </div>
 
-      {/* Free tier usage indicator */}
       {tier === 'free' && !isLoadingUsage && (
         <div className="bg-muted/50 rounded-lg p-2 text-center">
           <p className="text-xs text-muted-foreground">
@@ -275,19 +238,14 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
         </div>
       )}
 
-      {/* Input Area */}
       {!matchedDiagram && (
         <div className="space-y-3">
           <Textarea
-            placeholder={subject === 'cs' 
-              ? "Paste your question or topic here... e.g. 'Explain how a stack data structure works'"
-              : "Paste your question or topic here... e.g. 'Explain using a diagram what happens when aggregate demand increases'"
-            }
+            placeholder={`Paste your question or topic here...`}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             className="min-h-[100px] resize-none text-sm"
           />
-          
           <Button
             onClick={findDiagram}
             disabled={isSearching || !inputText.trim() || isLoadingUsage}
@@ -295,53 +253,36 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
             size="sm"
           >
             {isSearching ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Searching...
-              </>
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Searching...</>
             ) : (
-              <>
-                <Search className="w-4 h-4 mr-2" />
-                Find Diagram
-              </>
+              <><Search className="w-4 h-4 mr-2" />Find Diagram</>
             )}
           </Button>
         </div>
       )}
 
-      {/* No Match Result */}
       {noMatch && (
         <div className="text-center py-4">
-          <p className="text-sm text-muted-foreground mb-3">
-            No matching diagram found for your text.
-          </p>
-          <Button variant="outline" size="sm" onClick={reset}>
-            Try Again
-          </Button>
+          <p className="text-sm text-muted-foreground mb-3">No matching diagram found for your text.</p>
+          <Button variant="outline" size="sm" onClick={reset}>Try Again</Button>
         </div>
       )}
 
-      {/* Matched Diagram */}
       {matchedDiagram && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-medium text-foreground">{matchedDiagram.title}</h4>
-            <button
-              onClick={reset}
-              className="p-1.5 hover:bg-muted rounded-full transition-colors"
-            >
+            <button onClick={reset} className="p-1.5 hover:bg-muted rounded-full transition-colors">
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
-          
           <div className="rounded-lg border border-border overflow-hidden bg-white">
             <img
-              src={matchedDiagram.imagePath}
+              src={getImageSrc(matchedDiagram)}
               alt={matchedDiagram.title}
               className="w-full h-auto object-contain"
             />
           </div>
-          
           <Button variant="outline" size="sm" onClick={reset} className="w-full">
             Search for Another Diagram
           </Button>

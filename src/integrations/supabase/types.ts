@@ -287,6 +287,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           custom_sections: Json | null
+          diagram_library: Json | null
           essay_marker_marks: Json | null
           exam_board: string
           exam_dates: Json | null
@@ -315,6 +316,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custom_sections?: Json | null
+          diagram_library?: Json | null
           essay_marker_marks?: Json | null
           exam_board: string
           exam_dates?: Json | null
@@ -343,6 +345,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custom_sections?: Json | null
+          diagram_library?: Json | null
           essay_marker_marks?: Json | null
           exam_board?: string
           exam_dates?: Json | null

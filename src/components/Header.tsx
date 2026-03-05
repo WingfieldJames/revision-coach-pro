@@ -92,6 +92,7 @@ interface HeaderProps {
   toolsLocked?: boolean;
   hideUserDetails?: boolean;
   diagramSubject?: 'economics' | 'cs';
+  customDiagramData?: Array<{ id: string; title: string; imagePath: string }>;
   pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
   revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
   gradeBoundariesSubject?: 'economics' | 'maths';
@@ -123,6 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
   toolsLocked = false,
   hideUserDetails = false,
   diagramSubject = 'economics',
+  customDiagramData,
   pastPaperBoard = 'edexcel',
   revisionGuideBoard = 'edexcel',
   gradeBoundariesSubject = 'economics',
@@ -329,7 +331,7 @@ export const Header: React.FC<HeaderProps> = ({
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-md p-0 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <div className="p-4">
-                <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} />
+                <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} customDiagrams={customDiagramData} />
               </div>
             </PopoverContent>
           </Popover>

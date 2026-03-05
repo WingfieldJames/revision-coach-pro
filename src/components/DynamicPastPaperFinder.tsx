@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, FileSearch, Loader2, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -67,6 +67,17 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
     loadSpecs();
   }, [productId]);
 
+  // Filter spec points based on search query (autocomplete)
+  const filteredSpecPoints = useMemo(() => {
+    if (!searchQuery.trim()) return specPoints;
+    const q = searchQuery.toLowerCase();
+    return specPoints.filter(sp => {
+      const topic = (sp.topic || '').toLowerCase();
+      const content = sp.content.toLowerCase();
+      return topic.includes(q) || content.includes(q);
+    });
+  }, [searchQuery, specPoints]);
+
   const handleSearch = async (query: string) => {
     if (!query.trim()) return;
     setSearchQuery(query);
@@ -83,7 +94,6 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
         headers['Authorization'] = `Bearer ${sessionData.session.access_token}`;
       }
 
-      // Use rag-chat with search_only to get semantic search results
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`, {
         method: 'POST',
         headers,
@@ -102,7 +112,6 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
       const data = await resp.json();
       const chunks: SearchResult[] = (data.results || data.chunks || []);
 
-      // Filter to only paper/combined chunks
       const paperResults = chunks.filter((c: SearchResult) => {
         const ct = String(c.metadata?.content_type || '');
         return ct.includes('paper') || ct.includes('combined') || ct.includes('question') || ct.includes('mark_scheme');
@@ -184,7 +193,7 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
     );
   }
 
-  // Search view with spec points
+  // Search view with autocomplete spec points
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
@@ -239,8 +248,29 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
         )}
       </Button>
 
-      {/* Spec points browser */}
-      {!searching && specPoints.length > 0 && (
+      {/* Autocomplete spec points - shown as user types */}
+      {!searching && searchQuery.trim() && filteredSpecPoints.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
+            <p className="text-xs font-medium text-muted-foreground">Matching spec points:</p>
+          </div>
+          <div className="max-h-[200px] overflow-y-auto space-y-1 pr-1">
+            {filteredSpecPoints.slice(0, 10).map((sp) => (
+              <button
+                key={sp.id}
+                onClick={() => handleSearch(sp.topic || sp.content.slice(0, 80))}
+                className="w-full text-left px-3 py-2 text-xs rounded-md border border-border hover:bg-muted/50 transition-colors line-clamp-2"
+              >
+                {sp.topic || sp.content.slice(0, 100)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Full spec browser when no search query */}
+      {!searching && !searchQuery.trim() && specPoints.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center gap-1.5">
             <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
