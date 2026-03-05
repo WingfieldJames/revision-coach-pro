@@ -124,6 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
   toolsLocked = false,
   hideUserDetails = false,
   diagramSubject = 'economics',
+  customDiagramData,
   pastPaperBoard = 'edexcel',
   revisionGuideBoard = 'edexcel',
   gradeBoundariesSubject = 'economics',
