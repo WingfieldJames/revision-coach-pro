@@ -184,11 +184,6 @@ export const RevisionTimetable: React.FC = () => {
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mb-12">
-      {/* Header */}
-      <div className="flex items-center justify-center gap-2 mb-6">
-        <CalendarDays className="h-5 w-5 text-muted-foreground" />
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Revision Timetable</h2>
-      </div>
 
       {/* Subject cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
