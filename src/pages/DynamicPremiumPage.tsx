@@ -140,13 +140,14 @@ export const DynamicPremiumPage = () => {
           footerText={`Powered by A* AI • Trained on ${subjectName} ${qualType} specification`}
           placeholder={`Ask about ${product.subject}...`}
           suggestedPrompts={
-            trainer?.suggested_prompts && trainer.suggested_prompts.length > 0
-              ? trainer.suggested_prompts.filter(p => p.text?.trim())
-              : [
-                  { text: `What topics are in the ${product.exam_board} ${product.subject} spec?` },
-                  { text: "How do I structure a long answer question?" },
-                  { text: "Create me a full revision plan", usesPersonalization: true },
-                ]
+            (() => {
+              const filtered = (trainer?.suggested_prompts || []).filter(p => p.text?.trim());
+              return filtered.length > 0 ? filtered : [
+                { text: `What topics are in the ${product.exam_board} ${product.subject} spec?` },
+                { text: "How do I structure a long answer question?" },
+                { text: "Create me a full revision plan", usesPersonalization: true },
+              ];
+            })()
           }
           chatRef={chatRef}
         />
