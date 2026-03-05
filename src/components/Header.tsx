@@ -331,7 +331,7 @@ export const Header: React.FC<HeaderProps> = ({
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-md p-0 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
               <div className="p-4">
-                <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} />
+                <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} customDiagrams={customDiagramData} />
               </div>
             </PopoverContent>
           </Popover>
