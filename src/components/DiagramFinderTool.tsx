@@ -211,9 +211,29 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
 
   const subjectLabel = hasCustomDiagrams ? 'your subject' : subject === 'cs' ? 'Computer Science' : 'Economics';
 
+  // Resolve signed URL when a custom diagram is matched
+  useEffect(() => {
+    if (!matchedDiagram || !('imagePath' in matchedDiagram)) {
+      setResolvedImageUrl(null);
+      return;
+    }
+    const path = matchedDiagram.imagePath;
+    if (path.startsWith('/') || path.startsWith('http')) {
+      setResolvedImageUrl(path);
+      return;
+    }
+    const resolve = async () => {
+      const { data } = await supabase.storage
+        .from('trainer-uploads')
+        .createSignedUrl(path, 3600);
+      if (data?.signedUrl) setResolvedImageUrl(data.signedUrl);
+    };
+    resolve();
+  }, [matchedDiagram]);
+
   // Get the image path based on diagram type
   const getImageSrc = (diagram: Diagram | CSDiagram | CustomDiagram) => {
-    if ('imagePath' in diagram) return diagram.imagePath;
+    if ('imagePath' in diagram) return resolvedImageUrl || diagram.imagePath;
     return '';
   };
 
