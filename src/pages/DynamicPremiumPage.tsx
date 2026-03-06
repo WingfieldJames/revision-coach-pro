@@ -112,7 +112,7 @@ export const DynamicPremiumPage = () => {
           showPastPaperFinder={hasFeature('past_papers')}
           showRevisionGuide={hasFeature('revision_guide')}
           showExamCountdown={hasFeature('exam_countdown')}
-          showDiagramGenerator={hasFeature('diagram_generator')}
+          showDiagramTool={hasFeature('diagram_generator')}
           customDiagramData={trainer?.diagram_library && trainer.diagram_library.length > 0 ? trainer.diagram_library : undefined}
           examDates={examDates}
           examSubjectName={subjectName}
