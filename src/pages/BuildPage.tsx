@@ -2023,7 +2023,6 @@ function UploadChip({ upload }: { upload: TrainerUpload }) {
 function TrainerImage({ filePath }: { filePath: string }) {
   const [url, setUrl] = useState<string | null>(null);
   
-  // If the path is a static asset (starts with /) or a full URL, use it directly
   const isDirectUrl = filePath.startsWith('/') || filePath.startsWith('http');
 
   useEffect(() => {
@@ -2042,4 +2041,27 @@ function TrainerImage({ filePath }: { filePath: string }) {
 
   if (!url) return <div className="w-full h-full bg-muted" />;
   return <img src={url} alt="Trainer" className="w-full h-full object-cover" />;
+}
+
+function DiagramThumbnail({ filePath }: { filePath: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  
+  const isDirectUrl = filePath.startsWith('/') || filePath.startsWith('http');
+
+  useEffect(() => {
+    if (isDirectUrl) {
+      setUrl(filePath);
+      return;
+    }
+    const getUrl = async () => {
+      const { data } = await supabase.storage
+        .from("trainer-uploads")
+        .createSignedUrl(filePath, 3600);
+      if (data?.signedUrl) setUrl(data.signedUrl);
+    };
+    getUrl();
+  }, [filePath, isDirectUrl]);
+
+  if (!url) return <div className="w-full h-full bg-muted animate-pulse" />;
+  return <img src={url} alt="Diagram" className="w-full h-full object-contain" />;
 }
