@@ -578,6 +578,7 @@ export function BuildPage() {
           essay_marker_marks: (parsedMarks.length > 0 ? parsedMarks : []) as unknown as import("@/integrations/supabase/types").Json,
           staged_specifications: stagedSpecData as unknown as import("@/integrations/supabase/types").Json,
           suggested_prompts: suggestedPrompts as unknown as import("@/integrations/supabase/types").Json,
+          diagram_library: diagramLibrary as unknown as import("@/integrations/supabase/types").Json,
           system_prompt_submitted: systemPrompt.trim().length >= 10,
           exam_technique_submitted: examTechnique.trim().length >= 10,
           trainer_bio_submitted: trainerDescription.trim().length >= 10,
