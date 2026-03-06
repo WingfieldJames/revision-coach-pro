@@ -345,6 +345,9 @@ export function BuildPage() {
     const hasValidDbPrompts = dbSuggestedPrompts.filter(p => p.text?.trim()).length > 0;
     const initialSuggestedPrompts = hasValidDbPrompts ? dbSuggestedPrompts : (legacy?.suggestedPrompts || []);
 
+    const dbDiagramLibrary = Array.isArray((existing as any).diagram_library) ? (existing as any).diagram_library as Array<{ id: string; title: string; imagePath: string }> : [];
+    const initialDiagramLibrary = dbDiagramLibrary;
+
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
     setTrainerDescription(initialTrainerDescription);
