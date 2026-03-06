@@ -28,6 +28,7 @@ interface TrainerConfig {
   exam_dates: any[] | null;
   essay_marker_marks: number[] | null;
   suggested_prompts: Array<{ text: string; usesPersonalization?: boolean }> | null;
+  diagram_library: Array<{ id: string; title: string; imagePath: string }> | null;
 }
 
 export const DynamicPremiumPage = () => {
