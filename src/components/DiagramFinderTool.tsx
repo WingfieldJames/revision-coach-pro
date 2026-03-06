@@ -48,9 +48,30 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
   const [noMatch, setNoMatch] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [monthlyUsage, setMonthlyUsage] = useState<number>(0);
+  const [resolvedImageUrl, setResolvedImageUrl] = useState<string | null>(null);
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
 
   const hasCustomDiagrams = customDiagrams && customDiagrams.length > 0;
+
+  // Resolve signed URL when a custom diagram is matched (must be before early returns)
+  useEffect(() => {
+    if (!matchedDiagram || !('imagePath' in matchedDiagram)) {
+      setResolvedImageUrl(null);
+      return;
+    }
+    const path = matchedDiagram.imagePath;
+    if (path.startsWith('/') || path.startsWith('http')) {
+      setResolvedImageUrl(path);
+      return;
+    }
+    const resolve = async () => {
+      const { data } = await supabase.storage
+        .from('trainer-uploads')
+        .createSignedUrl(path, 3600);
+      if (data?.signedUrl) setResolvedImageUrl(data.signedUrl);
+    };
+    resolve();
+  }, [matchedDiagram]);
 
   useEffect(() => {
     const loadUsage = async () => {
@@ -212,7 +233,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
 
   // Get the image path based on diagram type
   const getImageSrc = (diagram: Diagram | CSDiagram | CustomDiagram) => {
-    if ('imagePath' in diagram) return diagram.imagePath;
+    if ('imagePath' in diagram) return resolvedImageUrl || diagram.imagePath;
     return '';
   };
 

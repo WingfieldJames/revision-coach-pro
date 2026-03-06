@@ -70,6 +70,7 @@ interface TrainerProject {
   essay_marker_marks: number[] | null;
   updated_at: string;
   last_deployed_at: string | null;
+  diagram_library: Array<{ id: string; title: string; imagePath: string }> | null;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
@@ -174,6 +175,9 @@ export function BuildPage() {
   const [examDates, setExamDates] = useState<Array<{ name: string; date: string }>>([]);
   const [essayMarkerMarks, setEssayMarkerMarks] = useState<string>("");
   const [suggestedPrompts, setSuggestedPrompts] = useState<Array<{ text: string; usesPersonalization?: boolean }>>([]);
+  const [diagramLibrary, setDiagramLibrary] = useState<Array<{ id: string; title: string; imagePath: string }>>([]);
+  const [uploadingDiagram, setUploadingDiagram] = useState(false);
+  const diagramImageInputRef = useRef<HTMLInputElement>(null);
 
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
@@ -250,11 +254,11 @@ export function BuildPage() {
     return JSON.stringify({
       systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
-      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts,
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary,
     });
   }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
-      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts]);
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary]);
 
   // savedSnapshotParsed for field-level comparison
   const savedSnapshotParsed = useMemo(() => {
@@ -342,6 +346,9 @@ export function BuildPage() {
     const hasValidDbPrompts = dbSuggestedPrompts.filter(p => p.text?.trim()).length > 0;
     const initialSuggestedPrompts = hasValidDbPrompts ? dbSuggestedPrompts : (legacy?.suggestedPrompts || []);
 
+    const dbDiagramLibrary = Array.isArray((existing as any).diagram_library) ? (existing as any).diagram_library as Array<{ id: string; title: string; imagePath: string }> : [];
+    const initialDiagramLibrary = dbDiagramLibrary;
+
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
     setTrainerDescription(initialTrainerDescription);
@@ -352,6 +359,7 @@ export function BuildPage() {
     setExamDates(initialExamDates);
     setEssayMarkerMarks(initialEssayMarkerMarks);
     setSuggestedPrompts(initialSuggestedPrompts);
+    setDiagramLibrary(initialDiagramLibrary);
 
     // Handle specs with normalization
     const savedSpecs = existing.staged_specifications;
@@ -472,6 +480,7 @@ export function BuildPage() {
         essayMarkerMarks: initialEssayMarkerMarks,
         stagedSpecData: hydratedSpecs && hydratedSpecs.length > 0 ? hydratedSpecs : null,
         suggestedPrompts: initialSuggestedPrompts,
+        diagramLibrary: initialDiagramLibrary,
       });
       setSavedSnapshot(snapshot);
       setProjectLoaded(true);
@@ -570,6 +579,7 @@ export function BuildPage() {
           essay_marker_marks: (parsedMarks.length > 0 ? parsedMarks : []) as unknown as import("@/integrations/supabase/types").Json,
           staged_specifications: stagedSpecData as unknown as import("@/integrations/supabase/types").Json,
           suggested_prompts: suggestedPrompts as unknown as import("@/integrations/supabase/types").Json,
+          diagram_library: diagramLibrary as unknown as import("@/integrations/supabase/types").Json,
           system_prompt_submitted: systemPrompt.trim().length >= 10,
           exam_technique_submitted: examTechnique.trim().length >= 10,
           trainer_bio_submitted: trainerDescription.trim().length >= 10,
@@ -1525,6 +1535,81 @@ export function BuildPage() {
                 </div>
               )}
 
+              {/* Diagram Library */}
+              {selectedFeatures.includes("diagram_generator") && (
+                <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-medium">Diagram Library</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Upload diagram images with titles. The AI will match student questions to the most relevant diagram.</p>
+                  <input
+                    ref={diagramImageInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !projectId) return;
+                      setUploadingDiagram(true);
+                      try {
+                        const filePath = `${projectId}/diagram_${Date.now()}_${file.name}`;
+                        const { error: uploadErr } = await supabase.storage
+                          .from("trainer-uploads")
+                          .upload(filePath, file, { upsert: true });
+                        if (uploadErr) throw uploadErr;
+                        const newDiagram = {
+                          id: `custom-${Date.now()}`,
+                          title: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+                          imagePath: filePath,
+                        };
+                        setDiagramLibrary(prev => [...prev, newDiagram]);
+                        toast({ title: "Diagram uploaded", description: "Give it a title below." });
+                      } catch (err) {
+                        toast({ title: "Upload failed", variant: "destructive" });
+                      } finally {
+                        setUploadingDiagram(false);
+                        e.target.value = "";
+                      }
+                    }}
+                  />
+                  {diagramLibrary.map((diagram, idx) => (
+                    <div key={diagram.id} className="flex items-center gap-2 border border-border rounded-lg p-2">
+                      <div className="h-12 w-12 rounded bg-muted overflow-hidden shrink-0">
+                        <DiagramThumbnail filePath={diagram.imagePath} />
+                      </div>
+                      <Input
+                        value={diagram.title}
+                        onChange={e => {
+                          const next = [...diagramLibrary];
+                          next[idx] = { ...next[idx], title: e.target.value };
+                          setDiagramLibrary(next);
+                        }}
+                        placeholder="Diagram title..."
+                        className="flex-1 text-sm"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDiagramLibrary(prev => prev.filter((_, i) => i !== idx))}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => diagramImageInputRef.current?.click()}
+                    disabled={uploadingDiagram}
+                    className="w-full"
+                  >
+                    {uploadingDiagram ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+                    Add Diagram
+                  </Button>
+                </div>
+              )}
+
               {/* Suggested Prompts */}
               <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                 <div className="flex items-center gap-2">
@@ -1939,7 +2024,6 @@ function UploadChip({ upload }: { upload: TrainerUpload }) {
 function TrainerImage({ filePath }: { filePath: string }) {
   const [url, setUrl] = useState<string | null>(null);
   
-  // If the path is a static asset (starts with /) or a full URL, use it directly
   const isDirectUrl = filePath.startsWith('/') || filePath.startsWith('http');
 
   useEffect(() => {
@@ -1958,4 +2042,27 @@ function TrainerImage({ filePath }: { filePath: string }) {
 
   if (!url) return <div className="w-full h-full bg-muted" />;
   return <img src={url} alt="Trainer" className="w-full h-full object-cover" />;
+}
+
+function DiagramThumbnail({ filePath }: { filePath: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  
+  const isDirectUrl = filePath.startsWith('/') || filePath.startsWith('http');
+
+  useEffect(() => {
+    if (isDirectUrl) {
+      setUrl(filePath);
+      return;
+    }
+    const getUrl = async () => {
+      const { data } = await supabase.storage
+        .from("trainer-uploads")
+        .createSignedUrl(filePath, 3600);
+      if (data?.signedUrl) setUrl(data.signedUrl);
+    };
+    getUrl();
+  }, [filePath, isDirectUrl]);
+
+  if (!url) return <div className="w-full h-full bg-muted animate-pulse" />;
+  return <img src={url} alt="Diagram" className="w-full h-full object-contain" />;
 }
