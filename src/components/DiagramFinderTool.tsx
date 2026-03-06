@@ -48,6 +48,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
   const [noMatch, setNoMatch] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [monthlyUsage, setMonthlyUsage] = useState<number>(0);
+  const [resolvedImageUrl, setResolvedImageUrl] = useState<string | null>(null);
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
 
   const hasCustomDiagrams = customDiagrams && customDiagrams.length > 0;
