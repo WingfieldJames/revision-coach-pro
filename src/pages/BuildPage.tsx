@@ -358,6 +358,7 @@ export function BuildPage() {
     setExamDates(initialExamDates);
     setEssayMarkerMarks(initialEssayMarkerMarks);
     setSuggestedPrompts(initialSuggestedPrompts);
+    setDiagramLibrary(initialDiagramLibrary);
 
     // Handle specs with normalization
     const savedSpecs = existing.staged_specifications;
