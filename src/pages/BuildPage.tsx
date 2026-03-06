@@ -1534,6 +1534,81 @@ export function BuildPage() {
                 </div>
               )}
 
+              {/* Diagram Library */}
+              {selectedFeatures.includes("diagram_generator") && (
+                <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-medium">Diagram Library</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Upload diagram images with titles. The AI will match student questions to the most relevant diagram.</p>
+                  <input
+                    ref={diagramImageInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !projectId) return;
+                      setUploadingDiagram(true);
+                      try {
+                        const filePath = `${projectId}/diagram_${Date.now()}_${file.name}`;
+                        const { error: uploadErr } = await supabase.storage
+                          .from("trainer-uploads")
+                          .upload(filePath, file, { upsert: true });
+                        if (uploadErr) throw uploadErr;
+                        const newDiagram = {
+                          id: `custom-${Date.now()}`,
+                          title: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+                          imagePath: filePath,
+                        };
+                        setDiagramLibrary(prev => [...prev, newDiagram]);
+                        toast({ title: "Diagram uploaded", description: "Give it a title below." });
+                      } catch (err) {
+                        toast({ title: "Upload failed", variant: "destructive" });
+                      } finally {
+                        setUploadingDiagram(false);
+                        e.target.value = "";
+                      }
+                    }}
+                  />
+                  {diagramLibrary.map((diagram, idx) => (
+                    <div key={diagram.id} className="flex items-center gap-2 border border-border rounded-lg p-2">
+                      <div className="h-12 w-12 rounded bg-muted overflow-hidden shrink-0">
+                        <DiagramThumbnail filePath={diagram.imagePath} />
+                      </div>
+                      <Input
+                        value={diagram.title}
+                        onChange={e => {
+                          const next = [...diagramLibrary];
+                          next[idx] = { ...next[idx], title: e.target.value };
+                          setDiagramLibrary(next);
+                        }}
+                        placeholder="Diagram title..."
+                        className="flex-1 text-sm"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDiagramLibrary(prev => prev.filter((_, i) => i !== idx))}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => diagramImageInputRef.current?.click()}
+                    disabled={uploadingDiagram}
+                    className="w-full"
+                  >
+                    {uploadingDiagram ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+                    Add Diagram
+                  </Button>
+                </div>
+              )}
+
               {/* Suggested Prompts */}
               <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                 <div className="flex items-center gap-2">
