@@ -70,6 +70,7 @@ interface TrainerProject {
   essay_marker_marks: number[] | null;
   updated_at: string;
   last_deployed_at: string | null;
+  diagram_library: Array<{ id: string; title: string; imagePath: string }> | null;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
