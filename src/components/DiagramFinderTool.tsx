@@ -53,6 +53,26 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
 
   const hasCustomDiagrams = customDiagrams && customDiagrams.length > 0;
 
+  // Resolve signed URL when a custom diagram is matched (must be before early returns)
+  useEffect(() => {
+    if (!matchedDiagram || !('imagePath' in matchedDiagram)) {
+      setResolvedImageUrl(null);
+      return;
+    }
+    const path = matchedDiagram.imagePath;
+    if (path.startsWith('/') || path.startsWith('http')) {
+      setResolvedImageUrl(path);
+      return;
+    }
+    const resolve = async () => {
+      const { data } = await supabase.storage
+        .from('trainer-uploads')
+        .createSignedUrl(path, 3600);
+      if (data?.signedUrl) setResolvedImageUrl(data.signedUrl);
+    };
+    resolve();
+  }, [matchedDiagram]);
+
   useEffect(() => {
     const loadUsage = async () => {
       if (tier !== 'free' || !user) {
