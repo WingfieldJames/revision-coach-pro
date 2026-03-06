@@ -174,6 +174,9 @@ export function BuildPage() {
   const [examDates, setExamDates] = useState<Array<{ name: string; date: string }>>([]);
   const [essayMarkerMarks, setEssayMarkerMarks] = useState<string>("");
   const [suggestedPrompts, setSuggestedPrompts] = useState<Array<{ text: string; usesPersonalization?: boolean }>>([]);
+  const [diagramLibrary, setDiagramLibrary] = useState<Array<{ id: string; title: string; imagePath: string }>>([]);
+  const [uploadingDiagram, setUploadingDiagram] = useState(false);
+  const diagramImageInputRef = useRef<HTMLInputElement>(null);
 
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
