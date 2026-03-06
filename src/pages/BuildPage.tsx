@@ -479,6 +479,7 @@ export function BuildPage() {
         essayMarkerMarks: initialEssayMarkerMarks,
         stagedSpecData: hydratedSpecs && hydratedSpecs.length > 0 ? hydratedSpecs : null,
         suggestedPrompts: initialSuggestedPrompts,
+        diagramLibrary: initialDiagramLibrary,
       });
       setSavedSnapshot(snapshot);
       setProjectLoaded(true);
