@@ -9,13 +9,19 @@ const corsHeaders = {
 // --- Prompt builders ---
 
 function buildClassificationPrompt(): string {
-  return `You are a document classification expert. Analyze this document and determine:
+  return `You are a document classification expert. You handle exam papers from ANY exam board worldwide (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject.
+
+Analyze this document carefully — look at the title page, headers, watermarks, question formatting, and content.
+
+Determine:
 1. Is it a Question Paper (QP) or a Mark Scheme (MS)?
-2. What paper number is it? (e.g. Paper 1, Paper 2, Paper 3)
+   - QP: Contains questions students must answer (may have MCQs, short answer, essay questions, data response, etc.)
+   - MS: Contains answers, mark allocations, level descriptors, examiner guidance, acceptable/reject answers
+2. What paper number is it? (e.g. Paper 1, Paper 2, Paper 3, Component 1, Unit 1, etc.)
+   - Look for codes like "Paper 1", "P1", "Component 01", "Unit 1", "7182/1", "H556/01", "9EC0/01"
+   - If no paper number is evident, default to 1
 
-Look at the title page, headers, and content to determine this.
-
-Return ONLY a JSON object (no markdown):
+Return ONLY a JSON object (no markdown, no code fences):
 {
   "doc_type": "qp" or "ms",
   "paper_number": 1 or 2 or 3 etc,
@@ -24,50 +30,58 @@ Return ONLY a JSON object (no markdown):
 }
 
 function buildQPExtractionPrompt(year: string, subject: string, examBoard: string): string {
-  return `You are an exam paper extraction expert. Extract the COMPLETE structured content of this Question Paper.
+  return `You are a universal exam paper extraction expert. You can handle Question Papers from ANY exam board (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject (Sciences, Maths, Humanities, Languages, etc.).
 
-CRITICAL RULES — READ CAREFULLY:
+Different boards structure their papers very differently:
+- Some use numbered sections (Section A, B, C) — detect and preserve these
+- Some use "0 1", "0 2" style numbering (AQA) — normalize to "1", "2" etc.
+- Some have MCQ sections followed by written sections (OCR Physics) — capture both
+- Some embed stimulus material, extracts, data, graphs, or case studies before questions — capture these
+- Some have "answer booklet" style with spaces between questions — ignore the spaces
+- Some use lettered sub-parts (a)(b)(c), others use Roman numerals (i)(ii)(iii), others use both — preserve the original scheme
+- Some have "choose one from" optional questions — note this
+
+CRITICAL RULES:
 - Process the paper PAGE BY PAGE from start to finish. Do not skip any page.
-- Question numbers MUST follow the paper's numbering scheme exactly (e.g. "1(a)", "1(b)(i)", "2(c)")
+- Question numbers MUST follow the paper's own numbering scheme exactly
 - Each question's text must be the COMPLETE verbatim wording — never summarize or truncate
-- For MCQs, include the full stem AND all option text (A, B, C, D) with exact wording
-- Extract EVERY question in the EXACT order they appear in the paper
-- Include ALL sub-parts (a), (b)(i), (b)(ii), (c), etc. as separate questions
-- Include ALL marks for each question/sub-part
-- Include ANY stimulus material, extracts, figures, data, or context given WITH the question
-- For papers with sections (Section A, Section B), group questions by section
+- For MCQs, include the full stem AND all options (A, B, C, D) with exact wording
+- Extract EVERY question and sub-part in the EXACT order they appear
+- Include ALL marks for each question/sub-part (shown in brackets like [4] or [4 marks])
+- Include ANY stimulus material, extracts, data tables, figure descriptions, or context given WITH or BEFORE the question
 - Do NOT skip any questions, even if they seem repetitive or simple
 - Do NOT reorder questions — maintain the original paper order
+- For questions referencing figures/graphs/diagrams, describe what the figure shows as best you can
 
 SKIP/IGNORE:
-- Cover page instructions, rubric ("Answer ALL questions", "Write in black ink")
-- Blank pages, formula sheets, periodic tables, data booklets
-- Page numbers, headers, footers, copyright notices
+- Cover page boilerplate instructions ("Answer ALL questions", "Write in black ink", candidate details)
+- Blank/lined answer pages, formula sheets, periodic tables, data booklets
+- Page numbers, headers, footers, copyright notices, barcodes
 
-Output the result as a SINGLE JSON object with this exact structure:
+Output as a SINGLE JSON object:
 {
   "question_count": <total number of individual questions/sub-parts extracted>,
   "papers": [
     {
       "exam_board": "${examBoard}",
-      "qualification": "Detected from paper header or use '${examBoard} ${subject}'",
+      "qualification": "Detected from paper header",
       "series": "June ${year}",
-      "paper_code": "The paper code from the header (e.g. 9EC0/03, 7405/2, H446/01)",
+      "paper_code": "The paper code from the header (e.g. 9EC0/03, 7405/2, H446/01, 7182/1)",
       "paper": "June ${year} Paper [number]",
-      "total_marks": 100,
+      "total_marks": <total marks for the paper>,
       "sections": [
         {
           "name": "Section A",
-          "total_marks": 50,
-          "notes": "Any section-level instructions or notes (e.g. 'Answer ALL questions')",
+          "total_marks": <section marks if stated>,
+          "notes": "Any section-level instructions",
           "context": {
             "figures": ["Description of any figures/diagrams provided for this section"],
-            "extracts": ["Full text or summary of any extracts/data provided for this section"]
+            "extracts": ["Full text of any extracts/data provided for this section"]
           },
           "questions": [
             {
               "number": "1(a)",
-              "question": "The COMPLETE question text exactly as written. Include all context references.",
+              "question": "The COMPLETE question text exactly as written.",
               "marks": 5,
               "year": ${year},
               "paper": "June ${year} Paper [number]",
@@ -84,38 +98,41 @@ Output the result as a SINGLE JSON object with this exact structure:
 IMPORTANT:
 - If the paper has no explicit sections, use a single section with name "Full Paper"
 - Detect the paper code, total marks, and qualification from the paper header
-- For each question, include the FULL question text — do not truncate or summarise
-- Extract descriptions of all figures, tables, and data even if you can't read the exact values
 - Subject: ${subject}, Board: ${examBoard}, Year: ${year}
-
-Be EXHAUSTIVE — every question must be captured with complete text and correct marks.`;
+- Be EXHAUSTIVE — every question must be captured with complete text and correct marks.`;
 }
 
 function buildMSExtractionPrompt(year: string, subject: string, examBoard: string): string {
-  return `You are a mark scheme extraction expert. Extract the COMPLETE mark scheme for every question.
+  return `You are a universal mark scheme extraction expert. You handle Mark Schemes from ANY exam board (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject.
 
-CRITICAL RULES — READ CAREFULLY:
+Different boards format mark schemes very differently:
+- AQA uses AO1/AO2/AO3 assessment objective codes with level descriptors
+- OCR uses grouped marking with "Response", "Marks", "Guidance" columns
+- Edexcel uses M1/A1/B1 mark codes with "Accept/Reject" columns
+- CIE uses a simple "Marks" and "Guidance" format
+- Some have indicative content tables, others use bullet points
+- Some have banded level descriptors (Level 1/2/3/4) for extended responses
+- Some mark schemes are in table format, others in flowing text
+
+CRITICAL RULES:
 - Process the mark scheme PAGE BY PAGE from start to finish. Do not skip any page.
-- Question numbers MUST follow the paper's numbering scheme exactly — match the question paper numbering (1(a), 1(b)(i), etc.)
+- Question numbers MUST match the question paper's numbering exactly (1(a), 1(b)(i), 01.1, etc.)
 - Extract mark scheme for EVERY question in the EXACT order they appear
-- Include ALL sub-parts matching the question paper numbering
-- Include the correct answers and ALL acceptable alternative answers
-- Include mark codes (M1, A1, B1, AO1, AO2, AO3 etc.) and what earns each mark
+- Include the correct answers AND all acceptable alternative answers
+- Include mark codes (M1, A1, B1, AO1, AO2, AO3, etc.) where present
 - Include examiner guidance, "Accept/Reject" clarifications
 - Include required working or method steps
-- For extended response questions, include level descriptors (Level 1, 2, 3 etc.) with mark ranges
-- Include indicative content students should include
-- Each question's mark scheme text must be COMPLETE — never summarize or truncate
+- For extended response questions, include level descriptors with mark ranges AND indicative content
+- Each question's mark scheme must be COMPLETE — never summarize or truncate
 
 SKIP/IGNORE:
 - Cover page, administrative headers, "Mark Scheme" title pages
-- General marking instructions that appear at the start
+- Generic marking instructions at the start ("How to use this mark scheme")
 - Copyright notices, page numbers, blank pages
-- Generic rubric about how to use the mark scheme
 
 Output as a JSON object:
 {
-  "question_count": <total number of individual questions/sub-parts extracted>,
+  "question_count": <total number of individual questions/sub-parts>,
   "marks": [
     {
       "question_number": "1(a)",
@@ -127,23 +144,44 @@ Output as a JSON object:
 }
 
 Subject: ${subject}, Board: ${examBoard}, Year: ${year}
-Be EXHAUSTIVE — capture every question's marking points, level descriptors, and examiner guidance.`;
+Be EXHAUSTIVE — capture every marking point, level descriptor, and examiner guidance.`;
 }
 
 function buildSpecificationPrompt(): string {
-  return `You are a document extraction expert. Extract ALL specification points, topics, and sub-topics from this document.
+  return `You are a universal specification/syllabus extraction expert. You handle specifications from ANY exam board (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject.
 
-Output as a JSON array of objects, each representing one topic or sub-topic:
+Different boards structure specifications very differently:
+- AQA uses numbered sections like "3.1.1 Atomic structure"
+- Edexcel uses "Theme" or "Topic" groupings with sub-points
+- OCR uses component-based organisation
+- CIE uses numbered syllabus content with learning objectives
+- IB uses assessment criteria and topic outlines
+- Some have nested hierarchies (Topic > Sub-topic > Point), others are flat lists
+
+CRITICAL RULES:
+- Extract ONLY testable learning objectives, content points, and syllabus requirements
+- Include topic numbers/codes if present (e.g. "3.1.1", "Theme 1.2.3")
+- Preserve the hierarchical context (e.g. "Mechanics > Forces: Newton's laws")
+- Be EXHAUSTIVE — capture every single testable point
+- Preserve original wording as closely as possible
+
+SKIP/IGNORE:
+- Table of contents, introductions, "about this qualification"
+- Assessment overview, exam structure, command words, mark scheme guidance
+- Administration info, entry codes, grading info, contact details
+- Copyright notices, appendices with formulae/data sheets
+
+Output as a JSON array:
 [
   {
-    "topic": "Topic name",
+    "topic": "Topic name (with number if present)",
     "subtopic": "Sub-topic name or null",
     "content": "Full specification content for this point",
     "content_type": "specification"
   }
 ]
 
-Be exhaustive - capture every single specification point. Include topic numbers/codes if present.`;
+Be exhaustive — every testable learning objective must be captured.`;
 }
 
 function buildGenericPrompt(sectionType: string): string {

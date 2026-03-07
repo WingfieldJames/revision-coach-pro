@@ -183,6 +183,36 @@ export function BuildPage() {
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
 
+  // Track files currently processing (for tab-close warning + polling)
+  const hasProcessingFiles = useMemo(
+    () => uploads.some(u => u.processing_status === "processing" || u.processing_status === "pending"),
+    [uploads]
+  );
+
+  // Warn user before closing tab if files are processing
+  useEffect(() => {
+    if (!hasProcessingFiles) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasProcessingFiles]);
+
+  // Auto-poll uploads while files are processing
+  useEffect(() => {
+    if (!hasProcessingFiles || !projectId) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("trainer_uploads")
+        .select("*")
+        .eq("project_id", projectId);
+      if (data) setUploads(data as TrainerUpload[]);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [hasProcessingFiles, projectId]);
+
 
   
 
@@ -707,7 +737,7 @@ export function BuildPage() {
       });
 
       markUnsaved();
-      toast({ title: "Upload complete", description: `${file.name} uploaded. Processing in background.` });
+      toast({ title: "Processing started", description: `${file.name} is being analysed by AI. This may take 1-3 minutes — please don't close this tab.`, duration: 8000 });
 
       // Reload uploads immediately so new pending item appears
       const { data: updatedUploads } = await supabase
