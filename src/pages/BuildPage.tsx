@@ -183,6 +183,36 @@ export function BuildPage() {
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
 
+  // Track files currently processing (for tab-close warning + polling)
+  const hasProcessingFiles = useMemo(
+    () => uploads.some(u => u.processing_status === "processing" || u.processing_status === "pending"),
+    [uploads]
+  );
+
+  // Warn user before closing tab if files are processing
+  useEffect(() => {
+    if (!hasProcessingFiles) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasProcessingFiles]);
+
+  // Auto-poll uploads while files are processing
+  useEffect(() => {
+    if (!hasProcessingFiles || !projectId) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("trainer_uploads")
+        .select("*")
+        .eq("project_id", projectId);
+      if (data) setUploads(data as TrainerUpload[]);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [hasProcessingFiles, projectId]);
+
 
   
 
