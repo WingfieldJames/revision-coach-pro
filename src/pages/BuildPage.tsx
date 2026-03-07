@@ -737,7 +737,7 @@ export function BuildPage() {
       });
 
       markUnsaved();
-      toast({ title: "Upload complete", description: `${file.name} uploaded. Processing in background.` });
+      toast({ title: "Processing started", description: `${file.name} is being analysed by AI. This may take 1-3 minutes — please don't close this tab.`, duration: 8000 });
 
       // Reload uploads immediately so new pending item appears
       const { data: updatedUploads } = await supabase
