@@ -747,47 +747,33 @@ export function BuildPage() {
     }
   };
 
-  // Direct text entry — submit text straight into document_chunks
-  const handleTextEntrySubmit = async () => {
-    if (!textEntryTitle.trim() || !textEntryContent.trim()) {
-      toast({ title: "Missing fields", description: "Please provide both a title and content.", variant: "destructive" });
-      return;
-    }
+  // Direct text entry — submit text straight into document_chunks (per year)
+  const handleAddText = async (title: string, content: string, year: string) => {
     const product = projects.find(p => p.id === selectedProjectId);
     if (!product?.product_id) {
-      toast({ title: "Deploy first", description: "You need to deploy the subject at least once before adding direct text entries.", variant: "destructive" });
+      toast({ title: "Deploy first", description: "Deploy the subject at least once before adding direct text.", variant: "destructive" });
       return;
     }
-    setTextEntrySubmitting(true);
     try {
-      const chunk = {
-        product_id: product.product_id,
-        content: `[${textEntryTitle.trim()}]\n${textEntryContent.trim()}`,
-        metadata: {
-          content_type: "past_paper",
-          source: "direct_text",
-          title: textEntryTitle.trim(),
-        },
-      };
-
-      // Generate embedding via ingest-content edge function
       const { error } = await supabase.functions.invoke("ingest-content", {
-        body: { product_id: product.product_id, chunks: [{ content: chunk.content, metadata: chunk.metadata }] },
+        body: {
+          product_id: product.product_id,
+          chunks: [{
+            content: `[${title}]\n${content}`,
+            metadata: { content_type: "past_paper", source: "direct_text", title, year },
+          }],
+        },
       });
       if (error) throw error;
-
-      setTextEntryTitle("");
-      setTextEntryContent("");
-      setShowTextEntry(false);
       markUnsaved();
-      toast({ title: "Text added ✓", description: `"${textEntryTitle.trim()}" added to training data.` });
+      toast({ title: "Text added ✓", description: `"${title}" added to training data.` });
     } catch (err) {
       console.error("Text entry failed:", err);
       toast({ title: "Failed to add text", description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
-    } finally {
-      setTextEntrySubmitting(false);
+      throw err; // re-throw so the card knows it failed
     }
   };
+
 
 
   const getUploadsForYear = (year: string) => {
