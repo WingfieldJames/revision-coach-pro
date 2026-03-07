@@ -1,10 +1,14 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Loader2,
   Plus,
   X,
   FileText,
+  Type,
+  Send,
 } from "lucide-react";
 import { PastPaperChunkViewer } from "@/components/PastPaperChunkViewer";
 import {
@@ -35,8 +39,8 @@ interface PastPaperYearCardProps {
   uploads: TrainerUpload[];
   onUploadFiles: (files: FileList, year: string) => Promise<void>;
   onDeleteUpload: (uploadId: string, deleteChunks?: boolean) => Promise<void>;
+  onAddText?: (title: string, content: string, year: string) => Promise<void>;
   uploading: boolean;
-  /** If the year had files previously deployed */
   initialDeployed?: boolean;
   productId?: string | null;
 }
@@ -46,6 +50,7 @@ export function PastPaperYearCard({
   uploads,
   onUploadFiles,
   onDeleteUpload,
+  onAddText,
   uploading,
   initialDeployed,
   productId,
@@ -53,16 +58,18 @@ export function PastPaperYearCard({
   const inputRef = useRef<HTMLInputElement>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [showTextEntry, setShowTextEntry] = useState(false);
+  const [textTitle, setTextTitle] = useState("");
+  const [textContent, setTextContent] = useState("");
+  const [textSubmitting, setTextSubmitting] = useState(false);
 
   const hasFiles = uploads.length > 0;
   const isDeployed = !!initialDeployed;
 
   const handleDeleteFile = async (uploadId: string) => {
     if (isDeployed) {
-      // Deployed file — need confirmation
       setConfirmDeleteId(uploadId);
     } else {
-      // Not deployed — just remove immediately
       await onDeleteUpload(uploadId, false);
     }
   };
@@ -75,6 +82,19 @@ export function PastPaperYearCard({
     } finally {
       setDeleting(false);
       setConfirmDeleteId(null);
+    }
+  };
+
+  const handleTextSubmit = async () => {
+    if (!onAddText || !textTitle.trim() || !textContent.trim()) return;
+    setTextSubmitting(true);
+    try {
+      await onAddText(textTitle.trim(), textContent.trim(), year);
+      setTextTitle("");
+      setTextContent("");
+      setShowTextEntry(false);
+    } finally {
+      setTextSubmitting(false);
     }
   };
 
@@ -111,7 +131,7 @@ export function PastPaperYearCard({
         }}
       />
 
-      {/* Delete confirmation dialog for deployed files */}
+      {/* Delete confirmation dialog */}
       <AlertDialog open={!!confirmDeleteId} onOpenChange={(open) => !open && setConfirmDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -138,17 +158,58 @@ export function PastPaperYearCard({
       {/* Header row */}
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">{year}</span>
-        <Button
-          size="sm"
-          variant="outline"
-          className="text-xs h-7"
-          onClick={() => inputRef.current?.click()}
-          disabled={uploading}
-        >
-          {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
-          Add files
-        </Button>
+        <div className="flex items-center gap-1.5">
+          {onAddText && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs h-7"
+              onClick={() => setShowTextEntry(!showTextEntry)}
+            >
+              <Type className="h-3 w-3 mr-1" />
+              Add text
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-7"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+            Add files
+          </Button>
+        </div>
       </div>
+
+      {/* Inline text entry */}
+      {showTextEntry && (
+        <div className="space-y-2 p-2.5 rounded-md border border-border bg-muted/20">
+          <Input
+            placeholder="Title (e.g. 'Paper 1 Q3 - Supply & Demand')"
+            value={textTitle}
+            onChange={e => setTextTitle(e.target.value)}
+            className="text-xs h-8"
+          />
+          <Textarea
+            placeholder="Paste question text, mark scheme content, or any training material..."
+            value={textContent}
+            onChange={e => setTextContent(e.target.value)}
+            rows={4}
+            className="text-xs"
+          />
+          <Button
+            size="sm"
+            className="w-full h-7 text-xs"
+            onClick={handleTextSubmit}
+            disabled={textSubmitting || !textTitle.trim() || !textContent.trim()}
+          >
+            {textSubmitting ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Send className="h-3 w-3 mr-1" />}
+            Add to Training Data
+          </Button>
+        </div>
+      )}
 
       {/* File list */}
       {hasFiles && (
@@ -186,7 +247,7 @@ export function PastPaperYearCard({
       )}
 
       {/* Empty state */}
-      {!hasFiles && (
+      {!hasFiles && !showTextEntry && (
         <p className="text-xs text-muted-foreground">No files uploaded yet</p>
       )}
     </div>
