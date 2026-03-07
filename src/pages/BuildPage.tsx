@@ -183,6 +183,12 @@ export function BuildPage() {
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
 
+  // Direct text entry for past papers
+  const [textEntryTitle, setTextEntryTitle] = useState("");
+  const [textEntryContent, setTextEntryContent] = useState("");
+  const [textEntrySubmitting, setTextEntrySubmitting] = useState(false);
+  const [showTextEntry, setShowTextEntry] = useState(false);
+
   
 
   // Chat
@@ -746,7 +752,49 @@ export function BuildPage() {
     }
   };
 
-  // Get all uploads for a given year
+  // Direct text entry — submit text straight into document_chunks
+  const handleTextEntrySubmit = async () => {
+    if (!textEntryTitle.trim() || !textEntryContent.trim()) {
+      toast({ title: "Missing fields", description: "Please provide both a title and content.", variant: "destructive" });
+      return;
+    }
+    const product = projects.find(p => p.id === selectedProjectId);
+    if (!product?.product_id) {
+      toast({ title: "Deploy first", description: "You need to deploy the subject at least once before adding direct text entries.", variant: "destructive" });
+      return;
+    }
+    setTextEntrySubmitting(true);
+    try {
+      const chunk = {
+        product_id: product.product_id,
+        content: `[${textEntryTitle.trim()}]\n${textEntryContent.trim()}`,
+        metadata: {
+          content_type: "past_paper",
+          source: "direct_text",
+          title: textEntryTitle.trim(),
+        },
+      };
+
+      // Generate embedding via ingest-content edge function
+      const { error } = await supabase.functions.invoke("ingest-content", {
+        body: { product_id: product.product_id, chunks: [{ content: chunk.content, metadata: chunk.metadata }] },
+      });
+      if (error) throw error;
+
+      setTextEntryTitle("");
+      setTextEntryContent("");
+      setShowTextEntry(false);
+      markUnsaved();
+      toast({ title: "Text added ✓", description: `"${textEntryTitle.trim()}" added to training data.` });
+    } catch (err) {
+      console.error("Text entry failed:", err);
+      toast({ title: "Failed to add text", description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+    } finally {
+      setTextEntrySubmitting(false);
+    }
+  };
+
+
   const getUploadsForYear = (year: string) => {
     return uploads.filter(u => u.section_type === "past_paper" && u.year === year);
   };
@@ -1368,8 +1416,8 @@ export function BuildPage() {
           {/* Past Papers */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Past Papers</CardTitle>
-              <p className="text-xs text-muted-foreground">Upload QPs and Mark Schemes — they'll be auto-paired by paper number.</p>
+              <CardTitle className="text-base">Past Papers & Training Content</CardTitle>
+              <p className="text-xs text-muted-foreground">Upload QPs and Mark Schemes, or add text directly to training data.</p>
             </CardHeader>
             <CardContent className="space-y-3">
               {PAPER_YEARS.map(year => {
@@ -1387,6 +1435,46 @@ export function BuildPage() {
                   />
                 );
               })}
+
+              {/* Direct Text Entry */}
+              <div className="border-t border-border pt-3 mt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => setShowTextEntry(!showTextEntry)}
+                >
+                  <FileText className="h-3.5 w-3.5 mr-1.5" />
+                  {showTextEntry ? "Hide Text Entry" : "Add Text Directly"}
+                </Button>
+
+                {showTextEntry && (
+                  <div className="mt-3 space-y-2 p-3 rounded-lg border border-border bg-muted/20">
+                    <p className="text-xs text-muted-foreground">Paste text content directly into the training data. Give it a descriptive title so the AI can identify it.</p>
+                    <Input
+                      placeholder="Title (e.g. 'June 2023 Paper 1 Q3 - Supply & Demand')"
+                      value={textEntryTitle}
+                      onChange={e => setTextEntryTitle(e.target.value)}
+                    />
+                    <Textarea
+                      placeholder="Paste your question text, mark scheme content, or any training material here..."
+                      value={textEntryContent}
+                      onChange={e => setTextEntryContent(e.target.value)}
+                      rows={6}
+                      className="text-xs"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={handleTextEntrySubmit}
+                      disabled={textEntrySubmitting || !textEntryTitle.trim() || !textEntryContent.trim()}
+                      className="w-full"
+                    >
+                      {textEntrySubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Send className="h-3.5 w-3.5 mr-1.5" />}
+                      Add to Training Data
+                    </Button>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
