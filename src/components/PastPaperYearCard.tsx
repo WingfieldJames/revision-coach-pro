@@ -107,11 +107,18 @@ export function PastPaperYearCard({
 
   const getStatusBadge = (u: TrainerUpload) => {
     if (u.processing_status === "done") return <span className="text-[10px] text-green-500">{u.chunks_created} chunks</span>;
-    if (u.processing_status === "processing") return <Loader2 className="h-3 w-3 animate-spin text-orange-500" />;
-    if (u.processing_status === "pending") return <span className="text-[10px] text-muted-foreground">Pending</span>;
+    if (u.processing_status === "processing") return (
+      <span className="flex items-center gap-1 text-[10px] text-orange-500">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Analysing...
+      </span>
+    );
+    if (u.processing_status === "pending") return <span className="text-[10px] text-muted-foreground">Queued</span>;
     if (u.processing_status === "error") return <span className="text-[10px] text-destructive">Error</span>;
     return null;
   };
+
+  const processingCount = uploads.filter(u => u.processing_status === "processing" || u.processing_status === "pending").length;
 
   const fileToDelete = confirmDeleteId ? uploads.find(u => u.id === confirmDeleteId) : null;
 
