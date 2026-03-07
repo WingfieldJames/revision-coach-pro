@@ -30,50 +30,58 @@ Return ONLY a JSON object (no markdown, no code fences):
 }
 
 function buildQPExtractionPrompt(year: string, subject: string, examBoard: string): string {
-  return `You are an exam paper extraction expert. Extract the COMPLETE structured content of this Question Paper.
+  return `You are a universal exam paper extraction expert. You can handle Question Papers from ANY exam board (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject (Sciences, Maths, Humanities, Languages, etc.).
 
-CRITICAL RULES — READ CAREFULLY:
+Different boards structure their papers very differently:
+- Some use numbered sections (Section A, B, C) — detect and preserve these
+- Some use "0 1", "0 2" style numbering (AQA) — normalize to "1", "2" etc.
+- Some have MCQ sections followed by written sections (OCR Physics) — capture both
+- Some embed stimulus material, extracts, data, graphs, or case studies before questions — capture these
+- Some have "answer booklet" style with spaces between questions — ignore the spaces
+- Some use lettered sub-parts (a)(b)(c), others use Roman numerals (i)(ii)(iii), others use both — preserve the original scheme
+- Some have "choose one from" optional questions — note this
+
+CRITICAL RULES:
 - Process the paper PAGE BY PAGE from start to finish. Do not skip any page.
-- Question numbers MUST follow the paper's numbering scheme exactly (e.g. "1(a)", "1(b)(i)", "2(c)")
+- Question numbers MUST follow the paper's own numbering scheme exactly
 - Each question's text must be the COMPLETE verbatim wording — never summarize or truncate
-- For MCQs, include the full stem AND all option text (A, B, C, D) with exact wording
-- Extract EVERY question in the EXACT order they appear in the paper
-- Include ALL sub-parts (a), (b)(i), (b)(ii), (c), etc. as separate questions
-- Include ALL marks for each question/sub-part
-- Include ANY stimulus material, extracts, figures, data, or context given WITH the question
-- For papers with sections (Section A, Section B), group questions by section
+- For MCQs, include the full stem AND all options (A, B, C, D) with exact wording
+- Extract EVERY question and sub-part in the EXACT order they appear
+- Include ALL marks for each question/sub-part (shown in brackets like [4] or [4 marks])
+- Include ANY stimulus material, extracts, data tables, figure descriptions, or context given WITH or BEFORE the question
 - Do NOT skip any questions, even if they seem repetitive or simple
 - Do NOT reorder questions — maintain the original paper order
+- For questions referencing figures/graphs/diagrams, describe what the figure shows as best you can
 
 SKIP/IGNORE:
-- Cover page instructions, rubric ("Answer ALL questions", "Write in black ink")
-- Blank pages, formula sheets, periodic tables, data booklets
-- Page numbers, headers, footers, copyright notices
+- Cover page boilerplate instructions ("Answer ALL questions", "Write in black ink", candidate details)
+- Blank/lined answer pages, formula sheets, periodic tables, data booklets
+- Page numbers, headers, footers, copyright notices, barcodes
 
-Output the result as a SINGLE JSON object with this exact structure:
+Output as a SINGLE JSON object:
 {
   "question_count": <total number of individual questions/sub-parts extracted>,
   "papers": [
     {
       "exam_board": "${examBoard}",
-      "qualification": "Detected from paper header or use '${examBoard} ${subject}'",
+      "qualification": "Detected from paper header",
       "series": "June ${year}",
-      "paper_code": "The paper code from the header (e.g. 9EC0/03, 7405/2, H446/01)",
+      "paper_code": "The paper code from the header (e.g. 9EC0/03, 7405/2, H446/01, 7182/1)",
       "paper": "June ${year} Paper [number]",
-      "total_marks": 100,
+      "total_marks": <total marks for the paper>,
       "sections": [
         {
           "name": "Section A",
-          "total_marks": 50,
-          "notes": "Any section-level instructions or notes (e.g. 'Answer ALL questions')",
+          "total_marks": <section marks if stated>,
+          "notes": "Any section-level instructions",
           "context": {
             "figures": ["Description of any figures/diagrams provided for this section"],
-            "extracts": ["Full text or summary of any extracts/data provided for this section"]
+            "extracts": ["Full text of any extracts/data provided for this section"]
           },
           "questions": [
             {
               "number": "1(a)",
-              "question": "The COMPLETE question text exactly as written. Include all context references.",
+              "question": "The COMPLETE question text exactly as written.",
               "marks": 5,
               "year": ${year},
               "paper": "June ${year} Paper [number]",
@@ -90,11 +98,8 @@ Output the result as a SINGLE JSON object with this exact structure:
 IMPORTANT:
 - If the paper has no explicit sections, use a single section with name "Full Paper"
 - Detect the paper code, total marks, and qualification from the paper header
-- For each question, include the FULL question text — do not truncate or summarise
-- Extract descriptions of all figures, tables, and data even if you can't read the exact values
 - Subject: ${subject}, Board: ${examBoard}, Year: ${year}
-
-Be EXHAUSTIVE — every question must be captured with complete text and correct marks.`;
+- Be EXHAUSTIVE — every question must be captured with complete text and correct marks.`;
 }
 
 function buildMSExtractionPrompt(year: string, subject: string, examBoard: string): string {
