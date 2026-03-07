@@ -103,30 +103,36 @@ IMPORTANT:
 }
 
 function buildMSExtractionPrompt(year: string, subject: string, examBoard: string): string {
-  return `You are a mark scheme extraction expert. Extract the COMPLETE mark scheme for every question.
+  return `You are a universal mark scheme extraction expert. You handle Mark Schemes from ANY exam board (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject.
 
-CRITICAL RULES — READ CAREFULLY:
+Different boards format mark schemes very differently:
+- AQA uses AO1/AO2/AO3 assessment objective codes with level descriptors
+- OCR uses grouped marking with "Response", "Marks", "Guidance" columns
+- Edexcel uses M1/A1/B1 mark codes with "Accept/Reject" columns
+- CIE uses a simple "Marks" and "Guidance" format
+- Some have indicative content tables, others use bullet points
+- Some have banded level descriptors (Level 1/2/3/4) for extended responses
+- Some mark schemes are in table format, others in flowing text
+
+CRITICAL RULES:
 - Process the mark scheme PAGE BY PAGE from start to finish. Do not skip any page.
-- Question numbers MUST follow the paper's numbering scheme exactly — match the question paper numbering (1(a), 1(b)(i), etc.)
+- Question numbers MUST match the question paper's numbering exactly (1(a), 1(b)(i), 01.1, etc.)
 - Extract mark scheme for EVERY question in the EXACT order they appear
-- Include ALL sub-parts matching the question paper numbering
-- Include the correct answers and ALL acceptable alternative answers
-- Include mark codes (M1, A1, B1, AO1, AO2, AO3 etc.) and what earns each mark
+- Include the correct answers AND all acceptable alternative answers
+- Include mark codes (M1, A1, B1, AO1, AO2, AO3, etc.) where present
 - Include examiner guidance, "Accept/Reject" clarifications
 - Include required working or method steps
-- For extended response questions, include level descriptors (Level 1, 2, 3 etc.) with mark ranges
-- Include indicative content students should include
-- Each question's mark scheme text must be COMPLETE — never summarize or truncate
+- For extended response questions, include level descriptors with mark ranges AND indicative content
+- Each question's mark scheme must be COMPLETE — never summarize or truncate
 
 SKIP/IGNORE:
 - Cover page, administrative headers, "Mark Scheme" title pages
-- General marking instructions that appear at the start
+- Generic marking instructions at the start ("How to use this mark scheme")
 - Copyright notices, page numbers, blank pages
-- Generic rubric about how to use the mark scheme
 
 Output as a JSON object:
 {
-  "question_count": <total number of individual questions/sub-parts extracted>,
+  "question_count": <total number of individual questions/sub-parts>,
   "marks": [
     {
       "question_number": "1(a)",
@@ -138,7 +144,7 @@ Output as a JSON object:
 }
 
 Subject: ${subject}, Board: ${examBoard}, Year: ${year}
-Be EXHAUSTIVE — capture every question's marking points, level descriptors, and examiner guidance.`;
+Be EXHAUSTIVE — capture every marking point, level descriptor, and examiner guidance.`;
 }
 
 function buildSpecificationPrompt(): string {
