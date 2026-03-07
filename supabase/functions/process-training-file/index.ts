@@ -9,13 +9,19 @@ const corsHeaders = {
 // --- Prompt builders ---
 
 function buildClassificationPrompt(): string {
-  return `You are a document classification expert. Analyze this document and determine:
+  return `You are a document classification expert. You handle exam papers from ANY exam board worldwide (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject.
+
+Analyze this document carefully — look at the title page, headers, watermarks, question formatting, and content.
+
+Determine:
 1. Is it a Question Paper (QP) or a Mark Scheme (MS)?
-2. What paper number is it? (e.g. Paper 1, Paper 2, Paper 3)
+   - QP: Contains questions students must answer (may have MCQs, short answer, essay questions, data response, etc.)
+   - MS: Contains answers, mark allocations, level descriptors, examiner guidance, acceptable/reject answers
+2. What paper number is it? (e.g. Paper 1, Paper 2, Paper 3, Component 1, Unit 1, etc.)
+   - Look for codes like "Paper 1", "P1", "Component 01", "Unit 1", "7182/1", "H556/01", "9EC0/01"
+   - If no paper number is evident, default to 1
 
-Look at the title page, headers, and content to determine this.
-
-Return ONLY a JSON object (no markdown):
+Return ONLY a JSON object (no markdown, no code fences):
 {
   "doc_type": "qp" or "ms",
   "paper_number": 1 or 2 or 3 etc,
