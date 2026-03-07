@@ -183,6 +183,12 @@ export function BuildPage() {
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
 
+  // Direct text entry for past papers
+  const [textEntryTitle, setTextEntryTitle] = useState("");
+  const [textEntryContent, setTextEntryContent] = useState("");
+  const [textEntrySubmitting, setTextEntrySubmitting] = useState(false);
+  const [showTextEntry, setShowTextEntry] = useState(false);
+
   
 
   // Chat
