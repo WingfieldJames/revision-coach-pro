@@ -253,8 +253,18 @@ export function PastPaperYearCard({
         </div>
       )}
 
+      {/* Processing banner */}
+      {processingCount > 0 && (
+        <div className="flex items-center gap-2 p-2 rounded-md bg-orange-500/10 border border-orange-500/20">
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-orange-500 shrink-0" />
+          <span className="text-xs text-orange-600 dark:text-orange-400">
+            AI is analysing {processingCount} file{processingCount > 1 ? 's' : ''}. This may take 1-3 minutes — don't close this tab.
+          </span>
+        </div>
+      )}
+
       {/* Empty state */}
-      {!hasFiles && !showTextEntry && (
+      {!hasFiles && !showTextEntry && processingCount === 0 && (
         <p className="text-xs text-muted-foreground">No files uploaded yet</p>
       )}
     </div>
