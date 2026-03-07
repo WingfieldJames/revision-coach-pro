@@ -1410,52 +1410,13 @@ export function BuildPage() {
                     uploads={yearUploads}
                     onUploadFiles={handleMultiFileUpload}
                     onDeleteUpload={handleDeleteUpload}
+                    onAddText={handleAddText}
                     uploading={!!uploading?.startsWith("past_paper" + year)}
                     initialDeployed={projectStatus === "deployed"}
                     productId={projects.find(p => p.id === selectedProjectId)?.product_id || null}
                   />
                 );
               })}
-
-              {/* Direct Text Entry */}
-              <div className="border-t border-border pt-3 mt-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs"
-                  onClick={() => setShowTextEntry(!showTextEntry)}
-                >
-                  <FileText className="h-3.5 w-3.5 mr-1.5" />
-                  {showTextEntry ? "Hide Text Entry" : "Add Text Directly"}
-                </Button>
-
-                {showTextEntry && (
-                  <div className="mt-3 space-y-2 p-3 rounded-lg border border-border bg-muted/20">
-                    <p className="text-xs text-muted-foreground">Paste text content directly into the training data. Give it a descriptive title so the AI can identify it.</p>
-                    <Input
-                      placeholder="Title (e.g. 'June 2023 Paper 1 Q3 - Supply & Demand')"
-                      value={textEntryTitle}
-                      onChange={e => setTextEntryTitle(e.target.value)}
-                    />
-                    <Textarea
-                      placeholder="Paste your question text, mark scheme content, or any training material here..."
-                      value={textEntryContent}
-                      onChange={e => setTextEntryContent(e.target.value)}
-                      rows={6}
-                      className="text-xs"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleTextEntrySubmit}
-                      disabled={textEntrySubmitting || !textEntryTitle.trim() || !textEntryContent.trim()}
-                      className="w-full"
-                    >
-                      {textEntrySubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Send className="h-3.5 w-3.5 mr-1.5" />}
-                      Add to Training Data
-                    </Button>
-                  </div>
-                )}
-              </div>
             </CardContent>
           </Card>
 
