@@ -148,19 +148,40 @@ Be EXHAUSTIVE — capture every marking point, level descriptor, and examiner gu
 }
 
 function buildSpecificationPrompt(): string {
-  return `You are a document extraction expert. Extract ALL specification points, topics, and sub-topics from this document.
+  return `You are a universal specification/syllabus extraction expert. You handle specifications from ANY exam board (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject.
 
-Output as a JSON array of objects, each representing one topic or sub-topic:
+Different boards structure specifications very differently:
+- AQA uses numbered sections like "3.1.1 Atomic structure"
+- Edexcel uses "Theme" or "Topic" groupings with sub-points
+- OCR uses component-based organisation
+- CIE uses numbered syllabus content with learning objectives
+- IB uses assessment criteria and topic outlines
+- Some have nested hierarchies (Topic > Sub-topic > Point), others are flat lists
+
+CRITICAL RULES:
+- Extract ONLY testable learning objectives, content points, and syllabus requirements
+- Include topic numbers/codes if present (e.g. "3.1.1", "Theme 1.2.3")
+- Preserve the hierarchical context (e.g. "Mechanics > Forces: Newton's laws")
+- Be EXHAUSTIVE — capture every single testable point
+- Preserve original wording as closely as possible
+
+SKIP/IGNORE:
+- Table of contents, introductions, "about this qualification"
+- Assessment overview, exam structure, command words, mark scheme guidance
+- Administration info, entry codes, grading info, contact details
+- Copyright notices, appendices with formulae/data sheets
+
+Output as a JSON array:
 [
   {
-    "topic": "Topic name",
+    "topic": "Topic name (with number if present)",
     "subtopic": "Sub-topic name or null",
     "content": "Full specification content for this point",
     "content_type": "specification"
   }
 ]
 
-Be exhaustive - capture every single specification point. Include topic numbers/codes if present.`;
+Be exhaustive — every testable learning objective must be captured.`;
 }
 
 function buildGenericPrompt(sectionType: string): string {
