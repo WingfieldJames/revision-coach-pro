@@ -72,7 +72,10 @@ export function MeetTheFounders() {
                 {founder.name}
               </h3>
               <p className={`text-xs sm:text-sm font-medium ${isDark ? 'text-primary' : 'text-muted-foreground'}`}>
-                {founder.role}
+                {founder.university}
+              </p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                {founder.stats}
               </p>
             </motion.div>
           ))}
