@@ -233,7 +233,7 @@ export const HomePage = () => {
         </ScrollReveal>
       </section>
 
-      <MobileFoundersSection />
+      
 
       {/* Testimonials Section - Desktop */}
       <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden bg-background">
