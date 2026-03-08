@@ -7,11 +7,10 @@ import { Separator } from '@/components/ui/separator';
 import {
   Menu, ArrowLeft, Sparkles, TrendingUp, PenLine, FileSearch,
   BookOpen, BarChart2, RotateCcw, Timer, Crown, ChevronRight,
-  GraduationCap, Home, X,
+  GraduationCap, Home, Wrench,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
-import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 
@@ -48,7 +47,6 @@ export interface ChatbotSidebarProps {
   subjectName: string;
   productId?: string;
   productSlug?: string;
-  // Tool visibility
   showMyAI?: boolean;
   showGradeBoundaries?: boolean;
   showPastPaperFinder?: boolean;
@@ -57,7 +55,6 @@ export interface ChatbotSidebarProps {
   showDiagramTool?: boolean;
   showMyMistakes?: boolean;
   showExamCountdown?: boolean;
-  // Tool config
   diagramSubject?: 'economics' | 'cs';
   customDiagramData?: Array<{ id: string; title: string; imagePath: string }>;
   pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
@@ -126,7 +123,6 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
     checkDeluxe();
   }, [user, productSlug]);
 
-  // Reset view when sidebar closes
   useEffect(() => {
     if (!open) setTimeout(() => setView('menu'), 300);
   }, [open]);
@@ -202,34 +198,37 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   return (
     <>
       <Sheet open={open} onOpenChange={(o) => { if (fileDialogOpen.current && !o) return; setOpen(o); }}>
+        {/* Prominent centered trigger button */}
         <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="fixed left-3 top-3 z-[60] h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-lg hover:shadow-xl transition-all"
+          <button
+            className="fixed left-1/2 -translate-x-1/2 top-3 z-[60] flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-background/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 group"
           >
-            <Menu className="h-5 w-5" />
-          </Button>
+            <Menu className="h-4 w-4 text-primary group-hover:text-primary/80 transition-colors" />
+            <span className="text-sm font-semibold text-foreground">Menu & Tools</span>
+            {daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-destructive/10 text-destructive">
+                <Timer className="h-2.5 w-2.5" />
+                {daysUntilFirstExam}d
+              </span>
+            )}
+          </button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[340px] sm:w-[380px] p-0 flex flex-col border-r border-border bg-background z-[70]">
+        <SheetContent side="left" className="w-[340px] sm:w-[380px] p-0 flex flex-col border-r border-border bg-background z-[70] [&>button:last-child]:hidden">
           {view === 'menu' ? (
             <>
-              {/* Header */}
+              {/* Header with close button */}
               <div className="px-5 pt-5 pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0">
                     <GraduationCap className="h-5 w-5 text-primary shrink-0" />
                     <h2 className="font-bold text-lg truncate">{subjectName}</h2>
                   </div>
-                  {daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
-                    <button
-                      onClick={() => setView('exam-countdown')}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
-                    >
-                      <Timer className="h-3 w-3" />
-                      {daysUntilFirstExam}d
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted transition-colors shrink-0"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
 
@@ -237,6 +236,41 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
               <ScrollArea className="flex-1">
                 <div className="px-3 py-3">
+                  {/* TOOLS FIRST - prominent section */}
+                  {visibleTools.length > 0 && (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-1.5 px-2 py-1.5">
+                        <Wrench className="h-3 w-3 text-primary" />
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
+                          Your Tools
+                        </p>
+                      </div>
+                      <div className="space-y-0.5">
+                        {visibleTools.map(tool => (
+                          <button
+                            key={tool.id}
+                            onClick={() => setView(tool.id)}
+                            className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl text-sm text-foreground hover:bg-primary/5 border border-transparent hover:border-primary/10 transition-all text-left group"
+                          >
+                            <span className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+                              <span className="text-primary">{tool.icon}</span>
+                            </span>
+                            <span className="font-medium">{tool.label}</span>
+                            {tool.badge && tool.badge > 0 ? (
+                              <span className="ml-auto h-5 min-w-5 px-1 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
+                                {tool.badge}
+                              </span>
+                            ) : (
+                              <ChevronRight className="ml-auto h-3.5 w-3.5 text-muted-foreground/50" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <Separator className="my-2" />
+
                   {/* Subject Navigator */}
                   <div className="mb-1">
                     <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -264,40 +298,6 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                     </div>
                   </div>
 
-                  {visibleTools.length > 0 && (
-                    <>
-                      <Separator className="my-2" />
-
-                      {/* Tools */}
-                      <div className="mb-1">
-                        <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          Tools
-                        </p>
-                        <div className="space-y-0.5">
-                          {visibleTools.map(tool => (
-                            <button
-                              key={tool.id}
-                              onClick={() => setView(tool.id)}
-                              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group relative"
-                            >
-                              <span className="text-muted-foreground group-hover:text-primary transition-colors">
-                                {tool.icon}
-                              </span>
-                              <span>{tool.label}</span>
-                              {tool.badge && tool.badge > 0 ? (
-                                <span className="ml-auto h-5 min-w-5 px-1 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
-                                  {tool.badge}
-                                </span>
-                              ) : (
-                                <ChevronRight className="ml-auto h-3.5 w-3.5 text-muted-foreground/50" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
                   <Separator className="my-2" />
 
                   {/* Navigation */}
@@ -323,7 +323,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                 </div>
               </ScrollArea>
 
-              {/* Upgrade CTA / Deluxe Badge - fixed at bottom */}
+              {/* Upgrade CTA / Deluxe Badge */}
               <div className="px-4 py-4 border-t border-border">
                 {isDeluxe ? (
                   <div className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: 'var(--gradient-brand)' }}>
