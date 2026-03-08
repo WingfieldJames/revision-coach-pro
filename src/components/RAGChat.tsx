@@ -133,8 +133,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const chatHistoryCtx = useChatHistoryContext();
   const { createConversation, saveMessage, loadMessages, fetchConversations } = useChatHistory(productId);
   const conversationIdRef = useRef<string | null>(null);
+  const loadMessagesRef = useRef(loadMessages);
+  loadMessagesRef.current = loadMessages;
 
-  // Register handlers for sidebar communication
+  // Register handlers for sidebar communication (run once)
   useEffect(() => {
     if (!chatHistoryCtx) return;
     chatHistoryCtx.registerHandlers({
@@ -145,7 +147,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         setLimitReached(false);
       },
       onLoadConversation: async (id: string) => {
-        const msgs = await loadMessages(id);
+        const msgs = await loadMessagesRef.current(id);
         setMessages(msgs.map(m => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
@@ -156,7 +158,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         setLimitReached(false);
       },
     });
-  }, [chatHistoryCtx, loadMessages]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatHistoryCtx]);
 
   // Helper to persist a message
   const persistMessage = useCallback(async (role: 'user' | 'assistant', content: string, imageUrl?: string) => {
