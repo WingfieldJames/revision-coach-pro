@@ -26,7 +26,7 @@ export const AQAChemistryPremiumPage = () => {
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
-  const chatRef = useRef<RAGChatRef>(null);
+  
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -77,9 +77,6 @@ export const AQAChemistryPremiumPage = () => {
     }
   }, [user, loading]);
 
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-    chatRef.current?.submitMessage(message, imageDataUrl);
-  };
 
   // Loading state
   if (loading || checkingAccess) {
@@ -160,7 +157,6 @@ export const AQAChemistryPremiumPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool
-          showEssayMarker
           showPastPaperFinder
           showExamCountdown
           examDates={AQA_CHEMISTRY_EXAMS}
@@ -169,9 +165,6 @@ export const AQAChemistryPremiumPage = () => {
           productId={productId}
           productSlug="aqa-chemistry"
           showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
-          essayMarkerLabel="6-Marker Analysis"
-          essayMarkerFixedMark={6}
         />
       </div>
       
@@ -183,7 +176,6 @@ export const AQAChemistryPremiumPage = () => {
           footerText="Powered by A* AI • Trained on AQA Chemistry past papers & mark schemes"
           placeholder="Ask me anything about AQA Chemistry A-Level..."
           suggestedPrompts={AQA_CHEMISTRY_PROMPTS}
-          chatRef={chatRef}
         />
       </div>
     </div>

@@ -1,9 +1,9 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { RAGChat } from '@/components/RAGChat';
 import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -18,7 +18,7 @@ const CIE_ECONOMICS_PROMPTS = [
 ];
 
 export const CIEPremiumPage = () => {
-  const chatRef = useRef<RAGChatRef>(null);
+  const { user, loading } = useAuth();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -37,9 +37,6 @@ export const CIEPremiumPage = () => {
     checkAccess();
   }, [user, loading, navigate]);
 
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-    chatRef.current?.submitMessage(message, imageDataUrl);
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -52,8 +49,6 @@ export const CIEPremiumPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showDiagramTool 
-          showEssayMarker
           showPastPaperFinder
           showExamCountdown
           examDates={CIE_ECONOMICS_EXAMS}
@@ -62,7 +57,6 @@ export const CIEPremiumPage = () => {
           productId={CIE_PRODUCT_ID}
           productSlug="cie-economics"
           showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -75,7 +69,7 @@ export const CIEPremiumPage = () => {
           placeholder="Ask any CIE Economics question..."
           suggestedPrompts={CIE_ECONOMICS_PROMPTS}
           enableDiagrams
-          chatRef={chatRef}
+          diagramSubject="economics"
         />
       </div>
     </div>

@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { RAGChat } from '@/components/RAGChat';
 import { checkProductAccess } from '@/lib/productAccess';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
@@ -23,7 +23,6 @@ export const PremiumVersionPage = () => {
   const navigate = useNavigate();
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
-  const chatRef = useRef<RAGChatRef>(null);
 
   useEffect(() => {
     const verifyAccess = async () => {
@@ -52,9 +51,6 @@ export const PremiumVersionPage = () => {
     verifyAccess();
   }, [user, loading, navigate]);
 
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-    chatRef.current?.submitMessage(message, imageDataUrl);
-  };
 
   if (loading || checkingAccess) {
     return (
@@ -94,9 +90,7 @@ export const PremiumVersionPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showDiagramTool 
           showGradeBoundaries
-          showEssayMarker 
           showPastPaperFinder
           showRevisionGuide
           revisionGuideBoard="edexcel"
@@ -107,7 +101,6 @@ export const PremiumVersionPage = () => {
           productId={EDEXCEL_PRODUCT_ID}
           productSlug="edexcel-economics"
           showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -119,7 +112,8 @@ export const PremiumVersionPage = () => {
           footerText="Powered by A* AI • Trained on Edexcel Economics specification"
           placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..."
           suggestedPrompts={EDEXCEL_ECONOMICS_PROMPTS}
-          chatRef={chatRef}
+          enableDiagrams
+          diagramSubject="economics"
         />
       </div>
     </div>

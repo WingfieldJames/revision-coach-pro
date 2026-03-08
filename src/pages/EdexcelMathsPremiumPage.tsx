@@ -168,7 +168,6 @@ export const EdexcelMathsPremiumPage = () => {
           showUpgradeButton
           mathsMode="pure"
           showMyMistakes
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -180,7 +179,6 @@ export const EdexcelMathsPremiumPage = () => {
           footerText="Powered by A* AI • Trained on Edexcel Mathematics past papers & mark schemes"
           placeholder="Ask me anything about Edexcel A-Level Maths..."
           suggestedPrompts={EDEXCEL_MATHS_PROMPTS}
-          chatRef={chatRef}
         />
       </div>
     </div>
