@@ -38,21 +38,21 @@
     --input: 240 6% 90%;
     --ring: 271 81% 56%;
 
-    /* Brand gradient - navy to purple for light */
-    --gradient-brand: linear-gradient(135deg, #1e3a8a 0%, #a855f7 100%);
-    --gradient-from: #1e3a8a;
-    --gradient-via1: #4f46e5;
-    --gradient-via2: #7c3aed;
-    --gradient-to: #a855f7;
+    /* Brand gradient - refined deep purple, less aggressive */
+    --gradient-brand: linear-gradient(135deg, #4f36b3 0%, #7c5ce7 100%);
+    --gradient-from: #4f36b3;
+    --gradient-via1: #5f45d2;
+    --gradient-via2: #6c52de;
+    --gradient-to: #7c5ce7;
 
-    --shadow-card: 0 2px 12px rgba(30, 58, 138, 0.06);
-    --shadow-elevated: 0 4px 20px rgba(168, 85, 247, 0.08);
-    --shadow-glow: 0 0 20px rgba(30, 58, 138, 0.15), 0 0 40px rgba(168, 85, 247, 0.08);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 0 0 1px rgba(79, 54, 179, 0.08);
 
-    --glow-1: rgba(30, 58, 138, 0.3);
-    --glow-2: rgba(168, 85, 247, 0.15);
-    --glow-1-intense: rgba(30, 58, 138, 0.4);
-    --glow-2-intense: rgba(168, 85, 247, 0.2);
+    --glow-1: rgba(79, 54, 179, 0.12);
+    --glow-2: rgba(124, 92, 231, 0.06);
+    --glow-1-intense: rgba(79, 54, 179, 0.18);
+    --glow-2-intense: rgba(124, 92, 231, 0.10);
 
     --transition-smooth: all 0.2s ease;
     --radius: 0.5rem;
