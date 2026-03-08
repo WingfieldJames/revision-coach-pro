@@ -409,54 +409,15 @@ export const RevisionTimetable: React.FC = () => {
       {/* Subject cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
         {subjects.map((s, i) => (
-          <SubjectAutocomplete
+          <SubjectCard
+            key={s.id}
             subject={s}
             index={i}
             disabled={!!generated}
+            canRemove={subjects.length > 1}
             onUpdate={(patch) => updateSubject(s.id, patch)}
-            onRemove={subjects.length > 1 ? () => removeSubject(s.id) : undefined}
+            onRemove={() => removeSubject(s.id)}
           />
-
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Predicted</label>
-                <select
-                  value={s.predicted}
-                  onChange={(e) => updateSubject(s.id, { predicted: e.target.value as Grade })}
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  disabled={!!generated}
-                >
-                  {GRADES.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Target</label>
-                <select
-                  value={s.target}
-                  onChange={(e) => updateSubject(s.id, { target: e.target.value as Grade })}
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  disabled={!!generated}
-                >
-                  {GRADES.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Priority: {["Low", "Medium-Low", "Medium", "High", "Critical"][s.importance - 1]}</label>
-              <Slider
-                min={1}
-                max={5}
-                step={1}
-                value={[s.importance]}
-                onValueChange={([v]) => updateSubject(s.id, { importance: v })}
-                disabled={!!generated}
-              />
-            </div>
-          </div>
         ))}
       </div>
 
