@@ -16,6 +16,7 @@ import 'katex/dist/katex.min.css';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProductTier } from '@/hooks/useProductTier';
 import { diagrams } from '@/data/diagrams';
 import { csDiagrams } from '@/data/csDiagrams';
 interface Message {
@@ -114,7 +115,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ dataUrl: string; file: File } | null>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
-  const [effectiveTier, setEffectiveTier] = useState<'free' | 'deluxe'>('free');
+  const { tier: effectiveTier } = useProductTier(productId);
   const [limitReached, setLimitReached] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -157,35 +158,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     fetchPreferences();
   }, [user, productId]);
 
-  // Auto-detect subscription tier
-  useEffect(() => {
-    const detectTier = async () => {
-      if (!user) {
-        setEffectiveTier('free');
-        return;
-      }
-      try {
-        const { data: sub } = await supabase
-          .from('user_subscriptions')
-          .select('tier, subscription_end')
-          .eq('user_id', user.id)
-          .eq('product_id', productId)
-          .eq('active', true)
-          .maybeSingle();
-        
-        if (sub?.tier === 'deluxe') {
-          if (!sub.subscription_end || new Date(sub.subscription_end) > new Date()) {
-            setEffectiveTier('deluxe');
-            return;
-          }
-        }
-        setEffectiveTier('free');
-      } catch {
-        setEffectiveTier('free');
-      }
-    };
-    detectTier();
-  }, [user, productId]);
+  // Tier is now provided by useProductTier hook (handles grace periods, payment_type, etc.)
 
   // Auto-scroll only for user messages (not during AI response)
   useEffect(() => {

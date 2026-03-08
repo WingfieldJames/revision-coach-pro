@@ -41,6 +41,7 @@ import { DynamicPremiumPage } from "./pages/DynamicPremiumPage";
 import { BuildAboutPage } from "./pages/BuildAboutPage";
 import { GCSEComparePage } from "./pages/GCSEComparePage";
 import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -92,6 +93,7 @@ const App = () => (
             <Route path="/s/:slug/free" element={<DynamicFreePage />} />
             <Route path="/s/:slug/premium" element={<DynamicPremiumPage />} />
             <Route path="/select" element={<SubjectSelectionPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

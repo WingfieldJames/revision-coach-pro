@@ -264,15 +264,18 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
 
     console.log(`Prompt length: ${prompt.length}, System prompt length: ${systemPrompt.length}`);
 
-    // Call Lovable AI (non-streaming)
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Call Lovable AI gateway (non-streaming)
+    const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+    const aiModel = "google/gemini-2.5-flash";
+
+    const response = await fetch(aiUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: aiModel,
         max_tokens: 8000,
         messages: [
           { role: "system", content: systemPrompt },

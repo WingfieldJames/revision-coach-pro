@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle } from "lucide-react";
+import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle, RefreshCw } from "lucide-react";
 import { normalizeSpecifications } from "@/lib/specNormalization";
 import { getLegacyConfig } from "@/lib/legacyLiveConfig";
+import { diagrams } from "@/data/diagrams";
+import { csDiagrams } from "@/data/csDiagrams";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
@@ -182,6 +184,8 @@ export function BuildPage() {
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
+  // Chunk counts from document_chunks (covers legacy + processed uploads)
+  const [chunkStats, setChunkStats] = useState<{ pastPaperChunks: number; specChunks: number }>({ pastPaperChunks: 0, specChunks: 0 });
 
   // Track files currently processing (for tab-close warning + polling)
   const hasProcessingFiles = useMemo(
@@ -378,7 +382,16 @@ export function BuildPage() {
     const initialSuggestedPrompts = hasValidDbPrompts ? dbSuggestedPrompts : (legacy?.suggestedPrompts || []);
 
     const dbDiagramLibrary = Array.isArray((existing as any).diagram_library) ? (existing as any).diagram_library as Array<{ id: string; title: string; imagePath: string }> : [];
-    const initialDiagramLibrary = dbDiagramLibrary;
+    // Fallback: populate from static diagram libraries for legacy subjects
+    let initialDiagramLibrary = dbDiagramLibrary;
+    if (dbDiagramLibrary.length === 0) {
+      const subjectLower = existing.subject.toLowerCase();
+      if (subjectLower === 'computer science') {
+        initialDiagramLibrary = csDiagrams.map(d => ({ id: d.id, title: d.title, imagePath: d.imagePath }));
+      } else if (subjectLower === 'economics') {
+        initialDiagramLibrary = diagrams.map(d => ({ id: d.id, title: d.title, imagePath: d.imagePath }));
+      }
+    }
 
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
@@ -566,7 +579,25 @@ export function BuildPage() {
     toast({ title: "Subject created", description: `${newQualificationType} · ${newProject.exam_board} ${newProject.subject}` });
   };
 
-  // Load uploads when project changes
+  // Load uploads + chunk stats when project changes
+  const loadChunkStats = useCallback(async () => {
+    const currentProduct = projects.find(p => p.id === selectedProjectId);
+    const pid = currentProduct?.product_id;
+    if (!pid) { setChunkStats({ pastPaperChunks: 0, specChunks: 0 }); return; }
+    // Count past paper chunks (content_type contains 'paper' or 'mark_scheme' or 'combined')
+    const { count: ppCount } = await supabase
+      .from("document_chunks")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", pid)
+      .or("metadata->>content_type.ilike.%paper%,metadata->>content_type.ilike.%mark_scheme%,metadata->>content_type.eq.combined");
+    const { count: specCount } = await supabase
+      .from("document_chunks")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", pid)
+      .eq("metadata->>content_type", "specification");
+    setChunkStats({ pastPaperChunks: ppCount || 0, specChunks: specCount || 0 });
+  }, [projects, selectedProjectId]);
+
   useEffect(() => {
     if (!projectId) return;
     const loadUploads = async () => {
@@ -576,10 +607,10 @@ export function BuildPage() {
         .eq("project_id", projectId);
       const loaded = (data as TrainerUpload[]) || [];
       setUploads(loaded);
-      // No more submittedYears tracking needed
     };
     loadUploads();
-  }, [projectId]);
+    loadChunkStats();
+  }, [projectId, loadChunkStats]);
 
   // markUnsaved is now a no-op — dirty state is derived from snapshot comparison
   const markUnsaved = useCallback(() => {}, []);
@@ -1670,7 +1701,125 @@ export function BuildPage() {
                 </div>
               )}
 
-              {/* Suggested Prompts */}
+              {/* Past Paper Finder Config */}
+              {selectedFeatures.includes("past_papers") && (() => {
+                const ppUploads = uploads.filter(u => u.section_type === "past_paper");
+                const processedUploads = ppUploads.filter(u => u.processing_status === "processed");
+                const pendingUploads = ppUploads.filter(u => u.processing_status === "pending" || u.processing_status === "processing");
+                const errorUploads = ppUploads.filter(u => u.processing_status === "error");
+                const yearsWithPapers = [...new Set(ppUploads.map(u => u.year).filter(Boolean))].sort().reverse();
+                const hasSpec = specComplete && stagedSpecData && stagedSpecData.length > 0;
+                const totalPaperChunks = chunkStats.pastPaperChunks;
+                const hasTrainingData = processedUploads.length > 0 || totalPaperChunks > 0;
+                const isReady = hasSpec && hasTrainingData;
+                return (
+                  <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-primary" />
+                      <p className="text-sm font-medium">Past Paper Finder — Readiness</p>
+                      {isReady ? (
+                        <Badge variant="outline" className="text-xs border-green-500/30 text-green-600 dark:text-green-400 ml-auto">Ready</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs border-yellow-500/30 text-yellow-600 dark:text-yellow-400 ml-auto">Incomplete</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">The Past Paper Finder maps specification points to exam questions. It requires both a specification and past papers to function.</p>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-xs">
+                        {hasSpec ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
+                        <span className={hasSpec ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
+                          Specification: {hasSpec ? `${stagedSpecData!.length} points indexed` : "Not uploaded"}
+                          {chunkStats.specChunks > 0 && <span className="text-muted-foreground ml-1">({chunkStats.specChunks} chunks deployed)</span>}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {hasTrainingData ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
+                        <span className={hasTrainingData ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
+                          Training Data: {totalPaperChunks > 0 ? `${totalPaperChunks} question chunks indexed` : "No chunks indexed yet"}
+                          {processedUploads.length > 0 && <span className="text-muted-foreground ml-1">({processedUploads.length} file{processedUploads.length !== 1 ? "s" : ""} processed)</span>}
+                          {pendingUploads.length > 0 && <span className="text-muted-foreground ml-1">({pendingUploads.length} processing…)</span>}
+                          {errorUploads.length > 0 && <span className="text-destructive ml-1">({errorUploads.length} failed)</span>}
+                        </span>
+                      </div>
+                    </div>
+                    {yearsWithPapers.length > 0 && (
+                      <div className="pt-1">
+                        <p className="text-xs text-muted-foreground mb-1.5">Uploaded papers by year:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {yearsWithPapers.map(year => {
+                            const count = ppUploads.filter(u => u.year === year).length;
+                            return (
+                              <Badge key={year} variant="secondary" className="text-xs">
+                                {year} ({count} file{count !== 1 ? "s" : ""})
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full text-xs"
+                      onClick={loadChunkStats}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" /> Refresh Index Stats
+                    </Button>
+                    {!hasSpec && (
+                      <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 rounded p-2">
+                        ⚠️ Upload a specification in the "Specification" section above to enable spec-to-question mapping.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Revision Guide Config */}
+              {selectedFeatures.includes("revision_guide") && (() => {
+                const hasSpec = specComplete && stagedSpecData && stagedSpecData.length > 0;
+                const ppUploads = uploads.filter(u => u.section_type === "past_paper" && u.processing_status === "processed");
+                const hasPaperData = ppUploads.length > 0 || chunkStats.pastPaperChunks > 0;
+                return (
+                  <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                    <div className="flex items-center gap-2">
+                      <BookMarked className="h-4 w-4 text-primary" />
+                      <p className="text-sm font-medium">Revision Guide — Readiness</p>
+                      {hasSpec ? (
+                        <Badge variant="outline" className="text-xs border-green-500/30 text-green-600 dark:text-green-400 ml-auto">Ready</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs border-yellow-500/30 text-yellow-600 dark:text-yellow-400 ml-auto">Needs Spec</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">The Revision Guide generates branded PDF notes for any topic. It pulls from the specification, exam technique, and past paper content to create comprehensive guides.</p>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-xs">
+                        {hasSpec ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
+                        <span className={hasSpec ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
+                          Specification: {hasSpec ? `${stagedSpecData!.length} points available` : "Required — not yet uploaded"}
+                          {chunkStats.specChunks > 0 && <span className="text-muted-foreground ml-1">({chunkStats.specChunks} chunks deployed)</span>}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {(examTechnique?.trim().length || 0) >= 10 ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <Circle className="h-3.5 w-3.5 text-muted-foreground" />}
+                        <span className="text-muted-foreground">
+                          Exam Technique: {(examTechnique?.trim().length || 0) >= 10 ? "Provided" : "Optional — adds exam tips to guides"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {hasPaperData ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <Circle className="h-3.5 w-3.5 text-muted-foreground" />}
+                        <span className="text-muted-foreground">
+                          Past Papers: {chunkStats.pastPaperChunks > 0 ? `${chunkStats.pastPaperChunks} question chunks indexed` : (ppUploads.length > 0 ? `${ppUploads.length} files processed` : "Optional — adds real exam context")}
+                        </span>
+                      </div>
+                    </div>
+                    {!hasSpec && (
+                      <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 rounded p-2">
+                        ⚠️ A specification is required to generate revision guides. Upload one in the "Specification" section above.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
               <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                 <div className="flex items-center gap-2">
                   <Bot className="h-4 w-4 text-primary" />
