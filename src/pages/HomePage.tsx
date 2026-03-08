@@ -18,8 +18,8 @@ import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import { SubjectPlanSelector } from "@/components/SubjectPlanSelector";
 import logo from "@/assets/logo.png";
 import logoDark from "@/assets/logo-dark.png";
-import phoneImg from "@/assets/phone-mockup.png";
-import laptopImg from "@/assets/laptop-mockup.png";
+import phoneImg from "@/assets/phone.png";
+import laptopImg from "@/assets/laptop.png";
 
 const revisionFeatures = [
   {
