@@ -7,7 +7,7 @@ function HeroFloatingPaths({ position, mobileOnly = false }: { position: number;
     const { theme } = useTheme();
     const isDark = theme === 'dark';
 
-    const paths = Array.from({ length: 28 }, (_, i) => ({
+    const paths = Array.from({ length: 12 }, (_, i) => ({
         id: i,
         d: `M-${1000 - i * 15 * position} ${110 + i * 11 + Math.sin(i * 0.5) * 28}C-${
             600 - i * 12 * position
@@ -18,12 +18,10 @@ function HeroFloatingPaths({ position, mobileOnly = false }: { position: number;
         } ${1400 + i * 10 * position} ${180 + i * 7} ${2200 + i * 15 * position} ${
             140 + i * 13 + Math.sin(i * 0.6) * 22
         }`,
-        color: i % 3 === 0
-            ? `rgba(${isDark ? '255, 154, 46' : '147, 51, 234'}, ${0.08 + i * 0.003})`
-            : i % 3 === 1
-            ? `rgba(${isDark ? '255, 77, 141' : '124, 58, 237'}, ${0.08 + i * 0.003})`
-            : `rgba(${isDark ? '255, 200, 61' : '168, 85, 247'}, ${0.08 + i * 0.003})`,
-        width: 0.8 + i * 0.06,
+        color: isDark
+            ? (i % 2 === 0 ? `rgba(255, 154, 46, ${0.04 + i * 0.003})` : `rgba(255, 77, 141, ${0.04 + i * 0.003})`)
+            : `rgba(79, 54, 179, ${0.03 + i * 0.002})`,
+        width: 0.6 + i * 0.04,
     }));
 
     const visibilityClass = mobileOnly ? "block md:hidden" : "hidden md:block";
