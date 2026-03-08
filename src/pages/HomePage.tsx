@@ -267,7 +267,7 @@ export const HomePage = () => {
           <ScrollReveal className="text-center mb-12">
             <h2 className={sectionHeadingClass}>
               <span className="text-foreground">What our </span>
-              <span className="text-gradient-brand">users</span>
+              <span className="text-primary">users</span>
               <span className="text-foreground"> say</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mt-4">
