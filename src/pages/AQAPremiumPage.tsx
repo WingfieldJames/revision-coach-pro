@@ -51,9 +51,6 @@ export const AQAPremiumPage = () => {
     verifyAccess();
   }, [user, loading, navigate]);
 
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-    chatRef.current?.submitMessage(message, imageDataUrl);
-  };
 
   if (loading || checkingAccess) {
     return (
