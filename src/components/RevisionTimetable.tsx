@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -8,11 +8,10 @@ import { motion } from "framer-motion";
 
 /* ─── constants ─── */
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const HOURS = Array.from({ length: 16 }, (_, i) => i + 6); // 6..21 → represents 06:00-22:00
+const HOURS = Array.from({ length: 16 }, (_, i) => i + 6);
 const GRADES = ["U", "E", "D", "C", "B", "A", "A*"] as const;
 type Grade = (typeof GRADES)[number];
 
-// Subject type categories for cognitive load scheduling
 const SUBJECT_TYPES = [
   "STEM - Heavy Calculation",
   "STEM - Conceptual",
@@ -20,6 +19,50 @@ const SUBJECT_TYPES = [
   "Language / Memory-Heavy",
 ] as const;
 type SubjectType = (typeof SUBJECT_TYPES)[number];
+
+/* ─── default subject catalogue ─── */
+const KNOWN_SUBJECTS: { name: string; type: SubjectType }[] = [
+  { name: "Mathematics", type: "STEM - Heavy Calculation" },
+  { name: "Further Mathematics", type: "STEM - Heavy Calculation" },
+  { name: "Physics", type: "STEM - Heavy Calculation" },
+  { name: "Chemistry", type: "STEM - Heavy Calculation" },
+  { name: "Accounting", type: "STEM - Heavy Calculation" },
+  { name: "Statistics", type: "STEM - Heavy Calculation" },
+  { name: "Biology", type: "STEM - Conceptual" },
+  { name: "Computer Science", type: "STEM - Conceptual" },
+  { name: "Electronics", type: "STEM - Conceptual" },
+  { name: "Environmental Science", type: "STEM - Conceptual" },
+  { name: "Psychology", type: "STEM - Conceptual" },
+  { name: "Geography", type: "STEM - Conceptual" },
+  { name: "Economics", type: "STEM - Conceptual" },
+  { name: "Business Studies", type: "STEM - Conceptual" },
+  { name: "English Literature", type: "Essay-Based / Humanities" },
+  { name: "English Language", type: "Essay-Based / Humanities" },
+  { name: "History", type: "Essay-Based / Humanities" },
+  { name: "Politics", type: "Essay-Based / Humanities" },
+  { name: "Philosophy", type: "Essay-Based / Humanities" },
+  { name: "Sociology", type: "Essay-Based / Humanities" },
+  { name: "Religious Studies", type: "Essay-Based / Humanities" },
+  { name: "Law", type: "Essay-Based / Humanities" },
+  { name: "Media Studies", type: "Essay-Based / Humanities" },
+  { name: "Art", type: "Essay-Based / Humanities" },
+  { name: "Music", type: "Essay-Based / Humanities" },
+  { name: "Drama", type: "Essay-Based / Humanities" },
+  { name: "Film Studies", type: "Essay-Based / Humanities" },
+  { name: "PE", type: "Essay-Based / Humanities" },
+  { name: "Design & Technology", type: "Essay-Based / Humanities" },
+  { name: "French", type: "Language / Memory-Heavy" },
+  { name: "Spanish", type: "Language / Memory-Heavy" },
+  { name: "German", type: "Language / Memory-Heavy" },
+  { name: "Italian", type: "Language / Memory-Heavy" },
+  { name: "Mandarin", type: "Language / Memory-Heavy" },
+  { name: "Arabic", type: "Language / Memory-Heavy" },
+  { name: "Latin", type: "Language / Memory-Heavy" },
+  { name: "Greek", type: "Language / Memory-Heavy" },
+  { name: "Japanese", type: "Language / Memory-Heavy" },
+  { name: "Russian", type: "Language / Memory-Heavy" },
+  { name: "Urdu", type: "Language / Memory-Heavy" },
+];
 
 const SUBJECT_COLORS = [
   { bg: "rgba(147,51,234,0.25)", border: "rgba(147,51,234,0.5)", text: "hsl(var(--foreground))" },
@@ -31,7 +74,7 @@ const SUBJECT_COLORS = [
 ];
 
 /* ─── storage keys ─── */
-const SUBJECTS_KEY = "astar_timetable_subjects_v2";
+const SUBJECTS_KEY = "astar_timetable_subjects_v3";
 const SLOTS_KEY = "astar_timetable_free_slots";
 const GENERATED_KEY = "astar_timetable_generated_v2";
 
@@ -43,14 +86,21 @@ interface Subject {
   target: Grade;
   importance: number;
   subjectType: SubjectType;
+  isCustom: boolean;
 }
 
 type SlotMap = Record<string, boolean>;
 interface ScheduledSlot {
   subject: string;
-  technique: string; // e.g. "Active Recall", "Practice Questions", "Spaced Review"
+  technique: string;
 }
 type GeneratedMap = Record<string, ScheduledSlot>;
+
+const defaultSubjects = (): Subject[] => [
+  { id: "1", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false },
+  { id: "2", name: "", predicted: "C", target: "A", importance: 3, subjectType: "Essay-Based / Humanities", isCustom: false },
+  { id: "3", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false },
+];
 
 /* ─── scientific scheduling techniques ─── */
 const TECHNIQUES_BY_TYPE: Record<SubjectType, string[]> = {
@@ -60,7 +110,6 @@ const TECHNIQUES_BY_TYPE: Record<SubjectType, string[]> = {
   "Language / Memory-Heavy": ["Flashcard Drill", "Spaced Recall", "Active Writing", "Practice Translation"],
 };
 
-// Cognitive load ratings: higher = more mentally demanding
 const COGNITIVE_LOAD: Record<SubjectType, number> = {
   "STEM - Heavy Calculation": 5,
   "STEM - Conceptual": 4,
@@ -68,16 +117,14 @@ const COGNITIVE_LOAD: Record<SubjectType, number> = {
   "Language / Memory-Heavy": 3,
 };
 
-// Energy curve: morning peak, post-lunch dip, afternoon recovery, evening decline
-// Maps hour (6-21) to energy multiplier (0-1)
 function energyLevel(hour: number): number {
-  if (hour >= 6 && hour <= 8) return 0.7;   // warm-up
-  if (hour >= 9 && hour <= 11) return 1.0;  // peak focus
-  if (hour === 12) return 0.6;              // lunch dip
-  if (hour >= 13 && hour <= 14) return 0.5; // post-lunch slump
-  if (hour >= 15 && hour <= 17) return 0.85; // afternoon recovery
-  if (hour >= 18 && hour <= 19) return 0.7;  // evening
-  return 0.5;                                // late evening
+  if (hour >= 6 && hour <= 8) return 0.7;
+  if (hour >= 9 && hour <= 11) return 1.0;
+  if (hour === 12) return 0.6;
+  if (hour >= 13 && hour <= 14) return 0.5;
+  if (hour >= 15 && hour <= 17) return 0.85;
+  if (hour >= 18 && hour <= 19) return 0.7;
+  return 0.5;
 }
 
 /* ─── helpers ─── */
@@ -93,13 +140,6 @@ function loadJSON<T>(key: string, fallback: T): T {
   }
 }
 
-const defaultSubjects = (): Subject[] => [
-  { id: "1", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual" },
-  { id: "2", name: "", predicted: "C", target: "A", importance: 3, subjectType: "Essay-Based / Humanities" },
-  { id: "3", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual" },
-];
-
-/* ─── scientific scheduling algorithm ─── */
 function generateScientificTimetable(
   subjects: Subject[],
   freeSlots: SlotMap
@@ -253,6 +293,170 @@ function generateScientificTimetable(
   return result;
 }
 
+/* ─── SubjectCard with autocomplete ─── */
+const SubjectCard: React.FC<{
+  subject: Subject;
+  index: number;
+  disabled: boolean;
+  canRemove: boolean;
+  onUpdate: (patch: Partial<Subject>) => void;
+  onRemove: () => void;
+}> = ({ subject, index, disabled, canRemove, onUpdate, onRemove }) => {
+  const [query, setQuery] = useState(subject.name);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const filtered = query.trim()
+    ? KNOWN_SUBJECTS.filter(k => k.name.toLowerCase().includes(query.toLowerCase()))
+    : [];
+
+  const showCustomOption = query.trim().length > 0 && !KNOWN_SUBJECTS.some(k => k.name.toLowerCase() === query.toLowerCase());
+
+  const selectKnownSubject = (known: { name: string; type: SubjectType }) => {
+    setQuery(known.name);
+    onUpdate({ name: known.name, subjectType: known.type, isCustom: false });
+    setShowDropdown(false);
+  };
+
+  const selectCustom = () => {
+    onUpdate({ name: query.trim(), isCustom: true });
+    setShowDropdown(false);
+  };
+
+  const handleInputChange = (val: string) => {
+    setQuery(val);
+    setShowDropdown(true);
+    // If they clear or change from a known subject, mark as needing re-selection
+    if (!KNOWN_SUBJECTS.some(k => k.name.toLowerCase() === val.toLowerCase())) {
+      onUpdate({ name: val, isCustom: true });
+    }
+  };
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-4 relative">
+      {canRemove && (
+        <button onClick={onRemove} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground">
+          <X className="h-4 w-4" />
+        </button>
+      )}
+
+      {/* Subject autocomplete input */}
+      <div ref={wrapperRef} className="relative mb-3">
+        <Input
+          placeholder={`Subject ${index + 1}`}
+          value={query}
+          onChange={(e) => handleInputChange(e.target.value)}
+          onFocus={() => { if (query.trim()) setShowDropdown(true); }}
+          className="text-sm"
+          disabled={disabled}
+        />
+        {showDropdown && (filtered.length > 0 || showCustomOption) && !disabled && (
+          <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-popover shadow-lg">
+            {filtered.slice(0, 8).map((k) => (
+              <button
+                key={k.name}
+                onClick={() => selectKnownSubject(k)}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center justify-between"
+              >
+                <span>{k.name}</span>
+                <span className="text-[10px] text-muted-foreground">{k.type.split(" - ")[0]}</span>
+              </button>
+            ))}
+            {showCustomOption && (
+              <>
+                {filtered.length > 0 && <div className="border-t border-border" />}
+                <button
+                  onClick={selectCustom}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors text-primary"
+                >
+                  + Add "<span className="font-medium">{query.trim()}</span>" as custom subject
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Subject Type - only show for custom subjects */}
+      {subject.isCustom && (
+        <div className="mb-3">
+          <label className="text-xs text-muted-foreground mb-1 block">Subject Type</label>
+          <select
+            value={subject.subjectType}
+            onChange={(e) => onUpdate({ subjectType: e.target.value as SubjectType })}
+            className="w-full h-9 rounded-md border border-input bg-background px-2 text-xs"
+            disabled={disabled}
+          >
+            {SUBJECT_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Show matched type badge for known subjects */}
+      {!subject.isCustom && subject.name.trim() && (
+        <div className="mb-3">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+            {subject.subjectType}
+          </span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Predicted</label>
+          <select
+            value={subject.predicted}
+            onChange={(e) => onUpdate({ predicted: e.target.value as Grade })}
+            className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+            disabled={disabled}
+          >
+            {GRADES.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Target</label>
+          <select
+            value={subject.target}
+            onChange={(e) => onUpdate({ target: e.target.value as Grade })}
+            className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+            disabled={disabled}
+          >
+            {GRADES.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <div>
+        <label className="text-xs text-muted-foreground mb-1 block">Priority: {["Low", "Medium-Low", "Medium", "High", "Critical"][subject.importance - 1]}</label>
+        <Slider
+          min={1}
+          max={5}
+          step={1}
+          value={[subject.importance]}
+          onValueChange={([v]) => onUpdate({ importance: v })}
+          disabled={disabled}
+        />
+      </div>
+    </div>
+  );
+};
+
 /* ─── component ─── */
 export const RevisionTimetable: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>(() => loadJSON(SUBJECTS_KEY, defaultSubjects()));
@@ -270,7 +474,7 @@ export const RevisionTimetable: React.FC = () => {
 
   const addSubject = () => {
     if (subjects.length >= 6) return;
-    setSubjects((prev) => [...prev, { id: crypto.randomUUID(), name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual" }]);
+    setSubjects((prev) => [...prev, { id: crypto.randomUUID(), name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false }]);
   };
 
   const removeSubject = (id: string) => setSubjects((prev) => prev.filter((s) => s.id !== id));
@@ -369,75 +573,15 @@ export const RevisionTimetable: React.FC = () => {
       {/* Subject cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
         {subjects.map((s, i) => (
-          <div key={s.id} className="bg-card border border-border rounded-2xl p-4 relative">
-            {subjects.length > 1 && (
-              <button onClick={() => removeSubject(s.id)} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground">
-                <X className="h-4 w-4" />
-              </button>
-            )}
-            <Input
-              placeholder={`Subject ${i + 1}`}
-              value={s.name}
-              onChange={(e) => updateSubject(s.id, { name: e.target.value })}
-              className="mb-3 text-sm"
-              disabled={!!generated}
-            />
-
-            {/* Subject Type */}
-            <div className="mb-3">
-              <label className="text-xs text-muted-foreground mb-1 block">Subject Type</label>
-              <select
-                value={s.subjectType}
-                onChange={(e) => updateSubject(s.id, { subjectType: e.target.value as SubjectType })}
-                className="w-full h-9 rounded-md border border-input bg-background px-2 text-xs"
-                disabled={!!generated}
-              >
-                {SUBJECT_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Predicted</label>
-                <select
-                  value={s.predicted}
-                  onChange={(e) => updateSubject(s.id, { predicted: e.target.value as Grade })}
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  disabled={!!generated}
-                >
-                  {GRADES.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Target</label>
-                <select
-                  value={s.target}
-                  onChange={(e) => updateSubject(s.id, { target: e.target.value as Grade })}
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  disabled={!!generated}
-                >
-                  {GRADES.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Priority: {["Low", "Medium-Low", "Medium", "High", "Critical"][s.importance - 1]}</label>
-              <Slider
-                min={1}
-                max={5}
-                step={1}
-                value={[s.importance]}
-                onValueChange={([v]) => updateSubject(s.id, { importance: v })}
-                disabled={!!generated}
-              />
-            </div>
-          </div>
+          <SubjectCard
+            key={s.id}
+            subject={s}
+            index={i}
+            disabled={!!generated}
+            canRemove={subjects.length > 1}
+            onUpdate={(patch) => updateSubject(s.id, patch)}
+            onRemove={() => removeSubject(s.id)}
+          />
         ))}
       </div>
 
