@@ -1,112 +1,45 @@
 
 
-## My Mistakes -- Spaced Repetition Feature
+## Match Dynamic Past Paper Finder to Legacy Design
 
-### Overview
-Add a "My Mistakes" tool to all maths chatbots (Edexcel Pure, Edexcel Applied) and OCR CS, plus make it available in the Build portal for dynamic subjects. Users can log questions they got wrong (image or text), add notes, and get reminded to retry them on a spaced repetition schedule (day 4, 16, 35, 70). A red notification badge shows how many are due for review.
+### Problem
+The `DynamicPastPaperFinder` has two design mismatches vs the legacy `PastPaperFinderTool`:
 
----
+1. **Search UX**: Dynamic shows all spec points immediately on load; legacy shows nothing until user starts typing
+2. **Results formatting**: Dynamic shows raw chunk text in plain cards; legacy shows beautifully structured cards with Paper/Year/Section header, marks badge, question number, question text, and italic extract (as in the screenshot)
 
-### 1. Database Table
+### Changes
 
-Create a `user_mistakes` table:
+#### 1. Fix search UX in `DynamicPastPaperFinder.tsx`
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | PK, default gen_random_uuid() |
-| user_id | uuid | NOT NULL |
-| product_id | uuid | NOT NULL |
-| question_text | text | nullable (user may upload image only) |
-| question_image_url | text | nullable (base64 data URL stored directly) |
-| note | text | nullable |
-| created_at | timestamptz | default now() |
-| next_review_at | timestamptz | default now() + interval '4 days' |
-| review_count | integer | default 0 |
-| completed | boolean | default false |
+Match the legacy two-step flow:
+- Show nothing when search is empty (remove the "browse all spec points" section)
+- As user types, show filtered spec points as clickable suggestions (same style as legacy: BookOpen icon, ChevronRight on hover)
+- Clicking a spec point selects it (shown as a highlighted pill with dismiss ✕) but does NOT immediately search
+- User clicks "Search Past Papers" button to trigger the search
+- Add a hint text at the bottom when no query: `Try: "topic1", "topic2"...`
 
-RLS policies:
-- Users can SELECT, INSERT, UPDATE, DELETE their own rows (`auth.uid() = user_id`)
+#### 2. Format results cards to match legacy exactly
 
-The spaced repetition intervals are: review_count 0 = day 4, 1 = day 16, 2 = day 35, 3 = day 70, 4+ = completed.
-
----
-
-### 2. New Component: `MyMistakesTool.tsx`
-
-Follows the exact same pattern as RevisionGuideTool, ExamCountdown, etc. (header with icon + gradient box, content area).
-
-**Two views:**
-
-**A) Add Mistake View (default)**
-- Upload area for an image (same drag/drop pattern as ImageUploadTool) OR text input for typing the question
-- Text area for a note ("What did I get wrong?")
-- "Save Mistake" button
-
-**B) My Mistakes List View**
-- Toggle between "Add" and "View All" tabs
-- Lists all saved mistakes (newest first), each showing:
-  - Question preview (thumbnail if image, text snippet if text)
-  - Note
-  - Next review date or "Due now" badge
-  - "Mark as Reviewed" button (advances to next interval)
-  - Delete option
-
-**Notification count:** Computed client-side by counting rows where `next_review_at <= now()` and `completed = false`.
-
----
-
-### 3. Header Integration
-
-- Add new props to Header: `showMyMistakes?: boolean`
-- Add state: `myMistakesOpen`
-- Add Popover between Revision Guide and Exam Countdown
-- Icon: `AlertCircle` or `RotateCcw` from lucide-react
-- Button label: "My Mistakes"
-- Red notification badge: small absolute-positioned circle with count, only shown when due count > 0
-- Requires `productId` and user auth to query/insert
-
----
-
-### 4. Pages to Update
-
-Add `showMyMistakes` prop to Header in these pages:
-- `EdexcelMathsFreeVersionPage.tsx`
-- `EdexcelMathsPremiumPage.tsx`
-- `EdexcelMathsAppliedFreeVersionPage.tsx`
-- `EdexcelMathsAppliedPremiumPage.tsx`
-- `OCRCSFreeVersionPage.tsx`
-- `OCRCSPremiumPage.tsx`
-
----
-
-### 5. Build Portal Integration
-
-Add to the `WEBSITE_FEATURES` array in `BuildPage.tsx`:
+Parse the chunk metadata to render structured cards identical to legacy:
 ```
-{ id: "my_mistakes", label: "My Mistakes", description: "Spaced repetition tracker for questions students got wrong", icon: RotateCcw }
+Paper {paper_number} • June {year} • {topic/section}    [marks badge]
+Q{question_number}
+{question text}
+  | {extract in italic with left border}
 ```
 
-Add to `DynamicFreePage.tsx` and `DynamicPremiumPage.tsx`:
-```
-showMyMistakes={hasFeature('my_mistakes')}
-```
+Specifically:
+- Header line: `Paper {metadata.paper_number} • June {metadata.year} • {metadata.topic}` in purple/primary
+- Marks badge: `{metadata.total_marks} marks` in a rounded pill (bg-primary/10, text-primary, font-bold)
+- Question number: `Q{metadata.question_number}` in bold
+- Question text: extract from content (strip "Question X(Y):" prefix)
+- Extract: if content contains "Context:" section, show it italic with left border (border-l-2 border-primary/30)
 
----
+#### 3. Add selected spec point state
 
-### 6. Files Changed
+Add `selectedSpecPoint` state (like legacy's `selectedSpec`). Clicking a suggestion sets this and populates the search bar. The search button is only enabled when a spec point is selected OR the user has typed a free-text query.
 
-| File | Change |
-|------|--------|
-| New migration | Create `user_mistakes` table + RLS |
-| `src/components/MyMistakesTool.tsx` | **New file** -- full component |
-| `src/components/Header.tsx` | Add `showMyMistakes` prop, popover, notification badge |
-| `src/pages/EdexcelMathsFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/BuildPage.tsx` | Add to WEBSITE_FEATURES |
-| `src/pages/DynamicFreePage.tsx` | Wire up `showMyMistakes` |
-| `src/pages/DynamicPremiumPage.tsx` | Wire up `showMyMistakes` |
+### Files Changed
+- `src/components/DynamicPastPaperFinder.tsx` — rewrite UI to match legacy pattern exactly
 
