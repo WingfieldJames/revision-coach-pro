@@ -38,7 +38,7 @@ export function MeetTheFounders() {
   const isDark = theme === 'dark';
 
   return (
-    <section className="py-16 md:py-20 px-8">
+    <section className="py-16 md:py-20 px-8 bg-muted">
       <div className="max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-12 md:mb-16">
           <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-4 leading-[1.2] tracking-tight">
