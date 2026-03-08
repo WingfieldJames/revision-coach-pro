@@ -195,10 +195,16 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
       }
       const chunks: SearchResult[] = (data.results || data.chunks || []);
 
-      const paperTypes = ['paper', 'combined', 'question', 'mark_scheme', 'past_paper', 'past_paper_qp', 'past_paper_ms', 'paper_1', 'paper_2', 'paper_3'];
+      const paperTypes = ['paper', 'combined', 'question', 'past_paper', 'past_paper_qp', 'paper_1', 'paper_2', 'paper_3'];
       const paperResults = chunks.filter((c: SearchResult) => {
         const ct = String(c.metadata?.content_type || '');
-        return paperTypes.some(t => ct.includes(t));
+        const content = (c.content || '').trim();
+        // Exclude pure mark scheme chunks
+        if (content.match(/^Mark Scheme/i)) return false;
+        // Include paper-type chunks or chunks with figure references
+        const isPaper = paperTypes.some(t => ct.includes(t));
+        const hasFigure = /Figure\s+\d+/i.test(content) || /Figure\s+\d+/i.test(c.metadata?.topic || '');
+        return isPaper || hasFigure;
       });
 
       const maxResults = tier === 'free' ? 5 : 10;
