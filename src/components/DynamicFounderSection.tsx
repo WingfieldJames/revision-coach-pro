@@ -21,29 +21,48 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Reset state when productId changes to prevent stale data
+    setTrainerImageUrl(null);
+    setTrainerDescription(null);
+    setTrainerName(null);
+    setTrainerStatus(null);
+    setTrainerAchievements([]);
+    setLoading(true);
+
     const load = async () => {
-      const { data } = await supabase
-        .from('trainer_projects')
-        .select('trainer_image_url, trainer_description, trainer_name, trainer_status, trainer_achievements')
-        .eq('product_id', productId)
-        .maybeSingle() as { data: any };
-      if (data) {
-        setTrainerDescription(data.trainer_description);
-        setTrainerName(data.trainer_name || null);
-        setTrainerStatus(data.trainer_status || null);
-        setTrainerAchievements(
-          Array.isArray(data.trainer_achievements) 
-            ? (data.trainer_achievements as string[]).filter((a: string) => a && a.trim()) 
-            : []
-        );
-        if (data.trainer_image_url) {
-          const { data: signed } = await supabase.storage
-            .from('trainer-uploads')
-            .createSignedUrl(data.trainer_image_url, 3600);
-          if (signed?.signedUrl) setTrainerImageUrl(signed.signedUrl);
+      try {
+        const { data } = await supabase
+          .from('trainer_projects')
+          .select('trainer_image_url, trainer_description, trainer_name, trainer_status, trainer_achievements')
+          .eq('product_id', productId)
+          .maybeSingle() as { data: any };
+        if (data) {
+          setTrainerDescription(data.trainer_description);
+          setTrainerName(data.trainer_name || null);
+          setTrainerStatus(data.trainer_status || null);
+          setTrainerAchievements(
+            Array.isArray(data.trainer_achievements) 
+              ? (data.trainer_achievements as string[]).filter((a: string) => a && a.trim()) 
+              : []
+          );
+          if (data.trainer_image_url) {
+            const url = data.trainer_image_url as string;
+            // Static paths (starting with /) or full URLs don't need signed URL
+            if (url.startsWith('/') || url.startsWith('http')) {
+              setTrainerImageUrl(url);
+            } else {
+              const { data: signed } = await supabase.storage
+                .from('trainer-uploads')
+                .createSignedUrl(url, 3600);
+              if (signed?.signedUrl) setTrainerImageUrl(signed.signedUrl);
+            }
+          }
         }
+      } catch (err) {
+        console.error('Failed to load trainer data:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     load();
   }, [productId]);
