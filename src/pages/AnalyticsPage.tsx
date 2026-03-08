@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -95,7 +95,6 @@ interface AnalyticsData {
 }
 
 export const AnalyticsPage = () => {
-  const { user } = useAuth();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,12 +102,6 @@ export const AnalyticsPage = () => {
 
   useEffect(() => {
     const fetchAnalytics = async () => {
-      if (!user) {
-        setError("Please log in");
-        setLoading(false);
-        return;
-      }
-
       const { data: result, error: fnError } = await supabase.functions.invoke(
         "get-analytics"
       );
@@ -130,7 +123,7 @@ export const AnalyticsPage = () => {
     };
 
     fetchAnalytics();
-  }, [user]);
+  }, []);
 
   // Get filtered daily prompts for selected product
   const getFilteredDailyPrompts = () => {
