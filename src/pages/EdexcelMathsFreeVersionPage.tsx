@@ -1,9 +1,13 @@
 import React from 'react';
-import { Header } from '@/components/Header';
+import { Link } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
+import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
+import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const EDEXCEL_MATHS_PRODUCT_ID = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
 
@@ -15,44 +19,17 @@ const EDEXCEL_MATHS_PROMPTS = [
 ];
 
 export const EdexcelMathsFreeVersionPage = () => {
+  const { theme } = useTheme();
+  const currentLogo = theme === 'dark' ? logo : logoDark;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SEOHead 
-        title="Free A* AI – Edexcel Mathematics A-Level Revision | Try Now"
-        description="Try A* AI free for Edexcel Mathematics. AI trained on Edexcel Maths past papers for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
-        canonical="https://astarai.co.uk/edexcel-maths-free-version"
-      />
+      <SEOHead title="Free A* AI – Edexcel Mathematics A-Level Revision | Try Now" description="Try A* AI free for Edexcel Mathematics." canonical="https://astarai.co.uk/edexcel-maths-free-version" />
       <RandomChatbotBackground />
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
-        <Header
-          showImageTool 
-          showPastPaperFinder
-          pastPaperBoard="edexcel-maths"
-          showRevisionGuide
-          revisionGuideBoard="edexcel-maths"
-          showGradeBoundaries
-          gradeBoundariesSubject="maths"
-          showExamCountdown
-          examDates={EDEXCEL_MATHS_EXAMS}
-          examSubjectName="Edexcel Maths"
-          hideUserDetails 
-          productId={EDEXCEL_MATHS_PRODUCT_ID}
-          productSlug="edexcel-mathematics"
-           showUpgradeButton
-           mathsMode="pure"
-           showMyMistakes
-        />
-      </div>
-      
+      <ChatbotSidebar subjectName="Edexcel Maths (Pure)" productId={EDEXCEL_MATHS_PRODUCT_ID} productSlug="edexcel-mathematics" showMyAI showPastPaperFinder pastPaperBoard="edexcel-maths" showRevisionGuide revisionGuideBoard="edexcel-maths" showGradeBoundaries gradeBoundariesSubject="maths" showExamCountdown examDates={EDEXCEL_MATHS_EXAMS} examSubjectName="Edexcel Maths" showMyMistakes />
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2"><div className="flex items-center pl-12"><Link to="/" className="flex items-center"><img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" /></Link></div></div>
       <div className="flex-1 relative z-10">
-        <RAGChat 
-          productId={EDEXCEL_MATHS_PRODUCT_ID}
-          subjectName="Edexcel Mathematics"
-          subjectDescription="Your personal A* Maths tutor. Ask me anything!"
-          footerText="Powered by A* AI • Trained on Edexcel Mathematics specification"
-          placeholder="Ask about calculus, algebra, statistics..."
-          suggestedPrompts={EDEXCEL_MATHS_PROMPTS}
-        />
+        <RAGChat productId={EDEXCEL_MATHS_PRODUCT_ID} subjectName="Edexcel Mathematics" subjectDescription="Your personal A* Maths tutor. Ask me anything!" footerText="Powered by A* AI • Trained on Edexcel Mathematics specification" placeholder="Ask about calculus, algebra, statistics..." suggestedPrompts={EDEXCEL_MATHS_PROMPTS} />
       </div>
     </div>
   );

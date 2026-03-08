@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
+import { useNavigate, Link } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { RAGChat } from '@/components/RAGChat';
+import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { checkProductAccess } from '@/lib/productAccess';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
@@ -21,36 +24,25 @@ const EDEXCEL_ECONOMICS_PROMPTS = [
 export const PremiumVersionPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const currentLogo = theme === 'dark' ? logo : logoDark;
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
 
   useEffect(() => {
     const verifyAccess = async () => {
       if (!loading) {
-        if (!user) {
-          navigate('/login?redirect=premium');
-          return;
-        }
-        
+        if (!user) { navigate('/login?redirect=premium'); return; }
         try {
           const access = await checkProductAccess(user.id, 'edexcel-economics');
-          if (!access.hasAccess || access.tier !== 'deluxe') {
-            navigate('/compare');
-            return;
-          }
-          
+          if (!access.hasAccess || access.tier !== 'deluxe') { navigate('/compare'); return; }
           setHasAccess(true);
           setCheckingAccess(false);
-        } catch (err) {
-          console.error('Error verifying access:', err);
-          navigate('/compare');
-        }
+        } catch { navigate('/compare'); }
       }
     };
-    
     verifyAccess();
   }, [user, loading, navigate]);
-
 
   if (loading || checkingAccess) {
     return (
@@ -68,12 +60,8 @@ export const PremiumVersionPage = () => {
       <div className="h-screen w-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Premium Access Required</h1>
-          <p className="text-muted-foreground mb-6">
-            You need a premium subscription to access this content.
-          </p>
-          <Button variant="brand" onClick={() => navigate('/compare')}>
-            Upgrade to Premium
-          </Button>
+          <p className="text-muted-foreground mb-6">You need a premium subscription to access this content.</p>
+          <Button variant="brand" onClick={() => navigate('/compare')}>Upgrade to Premium</Button>
         </div>
       </div>
     );
@@ -87,21 +75,27 @@ export const PremiumVersionPage = () => {
         canonical="https://astarai.co.uk/premium"
       />
       <RandomChatbotBackground />
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
-        <Header
-          showImageTool 
-          showGradeBoundaries
-          showPastPaperFinder
-          showRevisionGuide
-          revisionGuideBoard="edexcel"
-          showExamCountdown
-          examDates={EDEXCEL_ECONOMICS_EXAMS}
-          examSubjectName="Edexcel Economics"
-          hideUserDetails 
-          productId={EDEXCEL_PRODUCT_ID}
-          productSlug="edexcel-economics"
-          showUpgradeButton
-        />
+
+      <ChatbotSidebar
+        subjectName="Edexcel Economics"
+        productId={EDEXCEL_PRODUCT_ID}
+        productSlug="edexcel-economics"
+        showMyAI
+        showGradeBoundaries
+        showPastPaperFinder
+        showRevisionGuide
+        revisionGuideBoard="edexcel"
+        showExamCountdown
+        examDates={EDEXCEL_ECONOMICS_EXAMS}
+        examSubjectName="Edexcel Economics"
+      />
+
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2">
+        <div className="flex items-center pl-12">
+          <Link to="/" className="flex items-center">
+            <img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" />
+          </Link>
+        </div>
       </div>
       
       <div className="flex-1 relative z-10">
