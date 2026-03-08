@@ -244,9 +244,9 @@
   /* ── Light-mode overrides for My AI & Exam Countdown panels ── */
   /* Override --primary and --ring to deep blue inside these panels (light only) */
   :root .my-ai-panel {
-    --primary: 222 75% 31%;
-    --ring: 222 75% 31%;
-    --primary-variant: 222 75% 45%;
+    --primary: 263 70% 50%;
+    --ring: 263 70% 50%;
+    --primary-variant: 263 60% 58%;
   }
 
   :root .my-ai-panel .panel-badge,
