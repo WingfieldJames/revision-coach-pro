@@ -30,15 +30,15 @@ import {
 import { Check } from 'lucide-react';
 
 const SUBJECTS = [
-  { name: 'Edexcel Economics', freePath: '/free-version', premiumPath: '/premium', icon: '📈' },
-  { name: 'AQA Economics', freePath: '/aqa-free-version', premiumPath: '/aqa-premium', icon: '📊' },
-  { name: 'CIE Economics', freePath: '/cie-free-version', premiumPath: '/cie-premium', icon: '🌍' },
-  { name: 'OCR Computer Science', freePath: '/ocr-cs-free-version', premiumPath: '/ocr-cs-premium', icon: '💻' },
-  { name: 'OCR Physics', freePath: '/ocr-physics-free-version', premiumPath: '/ocr-physics-premium', icon: '⚡' },
-  { name: 'AQA Chemistry', freePath: '/aqa-chemistry-free-version', premiumPath: '/aqa-chemistry-premium', icon: '🧪' },
-  { name: 'AQA Psychology', freePath: '/aqa-psychology-free-version', premiumPath: '/aqa-psychology-premium', icon: '🧠' },
-  { name: 'Edexcel Maths (Pure)', freePath: '/edexcel-maths-free-version', premiumPath: '/edexcel-maths-premium', icon: '🔢' },
-  { name: 'Edexcel Maths (Applied)', freePath: '/edexcel-maths-applied-free-version', premiumPath: '/edexcel-maths-applied-premium', icon: '📐' },
+  { name: 'Edexcel Economics', freePath: '/free-version', premiumPath: '/premium', slug: 'edexcel-economics', icon: '📈' },
+  { name: 'AQA Economics', freePath: '/aqa-free-version', premiumPath: '/aqa-premium', slug: 'aqa-economics', icon: '📊' },
+  { name: 'CIE Economics', freePath: '/cie-free-version', premiumPath: '/cie-premium', slug: 'cie-economics', icon: '🌍' },
+  { name: 'OCR Computer Science', freePath: '/ocr-cs-free-version', premiumPath: '/ocr-cs-premium', slug: 'ocr-cs', icon: '💻' },
+  { name: 'OCR Physics', freePath: '/ocr-physics-free-version', premiumPath: '/ocr-physics-premium', slug: 'ocr-physics', icon: '⚡' },
+  { name: 'AQA Chemistry', freePath: '/aqa-chemistry-free-version', premiumPath: '/aqa-chemistry-premium', slug: 'aqa-chemistry', icon: '🧪' },
+  { name: 'AQA Psychology', freePath: '/aqa-psychology-free-version', premiumPath: '/aqa-psychology-premium', slug: 'aqa-psychology', icon: '🧠' },
+  { name: 'Edexcel Maths (Pure)', freePath: '/edexcel-maths-free-version', premiumPath: '/edexcel-maths-premium', slug: 'edexcel-maths', icon: '🔢' },
+  { name: 'Edexcel Maths (Applied)', freePath: '/edexcel-maths-applied-free-version', premiumPath: '/edexcel-maths-applied-premium', slug: 'edexcel-maths-applied', icon: '📐' },
 ];
 
 type ToolView = 'menu' | 'my-ai' | 'grade-boundaries' | 'past-papers' | 'revision-guide' | 'essay-marker' | 'diagrams' | 'my-mistakes' | 'exam-countdown';
@@ -148,8 +148,17 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
     return location.pathname === freePath || location.pathname === premPath;
   };
 
-  const navigateToSubject = (freePath: string, premPath: string) => {
-    navigate(isPremiumRoute ? premPath : freePath);
+  const navigateToSubject = async (freePath: string, premPath: string, slug: string) => {
+    if (user) {
+      try {
+        const { hasAccess, tier: t } = await checkProductAccess(user.id, slug);
+        navigate(hasAccess && t === 'deluxe' ? premPath : freePath);
+      } catch {
+        navigate(freePath);
+      }
+    } else {
+      navigate(freePath);
+    }
     setOpen(false);
   };
 
@@ -282,7 +291,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                         return (
                           <button
                             key={s.freePath}
-                            onClick={() => navigateToSubject(s.freePath, s.premiumPath)}
+                            onClick={() => navigateToSubject(s.freePath, s.premiumPath, s.slug)}
                             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left ${
                               active
                                 ? 'bg-primary/10 text-primary font-semibold'
