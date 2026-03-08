@@ -5,6 +5,21 @@ import { Quote, Award, GraduationCap, BookOpen } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FounderSection } from '@/components/ui/founder-section';
 
+// Map of legacy /src/assets/ paths to actual imported assets
+import tudorFounder from '@/assets/tudor-founder.jpg';
+import jamesFounder from '@/assets/james-founder.png';
+import namanFounder from '@/assets/naman-founder.png';
+import etienneFounder from '@/assets/etienne-founder.png';
+import carlFounder from '@/assets/carl-founder.png';
+
+const LEGACY_ASSET_MAP: Record<string, string> = {
+  '/src/assets/tudor-founder.jpg': tudorFounder,
+  '/src/assets/james-founder.png': jamesFounder,
+  '/src/assets/naman-founder.png': namanFounder,
+  '/src/assets/etienne-founder.png': etienneFounder,
+  '/src/assets/carl-founder.png': carlFounder,
+};
+
 interface DynamicFounderSectionProps {
   productId: string;
   subjectLabel: string;
