@@ -288,7 +288,7 @@ export const HomePage = () => {
           <div className="text-center mb-6">
             <h2 className="text-[1.25rem] font-bold leading-[1.2]">
               <span className="text-foreground">What our </span>
-              <span className="text-gradient-brand">users</span>
+              <span className="text-primary">users</span>
               <span className="text-foreground"> say</span>
             </h2>
             <p className="text-muted-foreground text-xs mt-2">Join 2000+ students and teachers achieving real results</p>
