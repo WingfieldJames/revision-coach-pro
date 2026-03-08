@@ -11,6 +11,8 @@ import { toast } from "@/hooks/use-toast";
 import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle } from "lucide-react";
 import { normalizeSpecifications } from "@/lib/specNormalization";
 import { getLegacyConfig } from "@/lib/legacyLiveConfig";
+import { diagrams } from "@/data/diagrams";
+import { csDiagrams } from "@/data/csDiagrams";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
@@ -378,7 +380,16 @@ export function BuildPage() {
     const initialSuggestedPrompts = hasValidDbPrompts ? dbSuggestedPrompts : (legacy?.suggestedPrompts || []);
 
     const dbDiagramLibrary = Array.isArray((existing as any).diagram_library) ? (existing as any).diagram_library as Array<{ id: string; title: string; imagePath: string }> : [];
-    const initialDiagramLibrary = dbDiagramLibrary;
+    // Fallback: populate from static diagram libraries for legacy subjects
+    let initialDiagramLibrary = dbDiagramLibrary;
+    if (dbDiagramLibrary.length === 0) {
+      const subjectLower = existing.subject.toLowerCase();
+      if (subjectLower === 'computer science') {
+        initialDiagramLibrary = csDiagrams.map(d => ({ id: d.id, title: d.title, imagePath: d.imagePath }));
+      } else if (subjectLower === 'economics') {
+        initialDiagramLibrary = diagrams.map(d => ({ id: d.id, title: d.title, imagePath: d.imagePath }));
+      }
+    }
 
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
