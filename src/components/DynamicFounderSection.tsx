@@ -62,10 +62,16 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
           );
           if (data.trainer_image_url) {
             const url = data.trainer_image_url as string;
-            // Static paths (starting with /) or full URLs don't need signed URL
-            if (url.startsWith('/') || url.startsWith('http')) {
+            // Check legacy /src/assets/ paths first (these don't exist at runtime)
+            if (LEGACY_ASSET_MAP[url]) {
+              setTrainerImageUrl(LEGACY_ASSET_MAP[url]);
+            } else if (url.startsWith('http')) {
+              setTrainerImageUrl(url);
+            } else if (url.startsWith('/') && !url.startsWith('/src/')) {
+              // Public folder paths work directly
               setTrainerImageUrl(url);
             } else {
+              // Storage path — get signed URL
               const { data: signed } = await supabase.storage
                 .from('trainer-uploads')
                 .createSignedUrl(url, 3600);
