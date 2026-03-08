@@ -380,7 +380,16 @@ export function BuildPage() {
     const initialSuggestedPrompts = hasValidDbPrompts ? dbSuggestedPrompts : (legacy?.suggestedPrompts || []);
 
     const dbDiagramLibrary = Array.isArray((existing as any).diagram_library) ? (existing as any).diagram_library as Array<{ id: string; title: string; imagePath: string }> : [];
-    const initialDiagramLibrary = dbDiagramLibrary;
+    // Fallback: populate from static diagram libraries for legacy subjects
+    let initialDiagramLibrary = dbDiagramLibrary;
+    if (dbDiagramLibrary.length === 0) {
+      const subjectLower = existing.subject.toLowerCase();
+      if (subjectLower === 'computer science') {
+        initialDiagramLibrary = csDiagrams.map(d => ({ id: d.id, title: d.title, imagePath: d.imagePath }));
+      } else if (subjectLower === 'economics') {
+        initialDiagramLibrary = diagrams.map(d => ({ id: d.id, title: d.title, imagePath: d.imagePath }));
+      }
+    }
 
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
