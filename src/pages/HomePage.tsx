@@ -388,8 +388,8 @@ export const HomePage = () => {
           <div className="max-w-4xl mx-auto relative z-10 px-2 md:px-0">
             <ScrollReveal>
               <h2 className={`${sectionHeadingClass} text-center mb-6`}>
-                <span className="text-foreground">Frequently asked </span>
-                <span className="text-gradient-brand">questions</span>
+               <span className="text-foreground">Frequently asked </span>
+               <span className="text-primary">questions</span>
               </h2>
               <p className="text-center text-muted-foreground mb-8 text-lg">
                 Everything you need to know about A* AI and revision.
