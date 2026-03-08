@@ -19,7 +19,6 @@ const CIE_ECONOMICS_PROMPTS = [
 
 export const CIEPremiumPage = () => {
   const { user, loading } = useAuth();
-  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
