@@ -257,7 +257,7 @@
 
   /* Exam countdown timeline colours – light mode only */
   :root .exam-countdown-panel .panel-timeline-line {
-    background: linear-gradient(to bottom, #1e3a8a, #1e3a8a, rgba(30,58,138,0.3));
+    background: linear-gradient(to bottom, hsl(263 70% 50%), hsl(263 70% 50%), hsl(263 70% 50% / 0.3));
   }
 
   :root .exam-countdown-panel .panel-dot-filled {
