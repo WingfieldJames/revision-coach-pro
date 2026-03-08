@@ -5,23 +5,16 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
-  Menu, ArrowLeft, Sparkles, TrendingUp, PenLine, FileSearch,
-  BookOpen, BarChart2, RotateCcw, Timer, Crown, ChevronRight,
-  GraduationCap, Home, Wrench,
+  Menu, ArrowLeft, Sparkles, Timer, Crown, ChevronRight,
+  GraduationCap, Home, MessageSquare, Plus, Trash2, LogIn,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/lib/supabase';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
-
-import { MyAIPreferences } from '@/components/MyAIPreferences';
-import { GradeBoundariesTool } from '@/components/GradeBoundariesTool';
-import { PastPaperFinderTool } from '@/components/PastPaperFinderTool';
-import { RevisionGuideTool } from '@/components/RevisionGuideTool';
-import { EssayMarkerTool } from '@/components/EssayMarkerTool';
-import { DiagramFinderTool } from '@/components/DiagramFinderTool';
-import { MyMistakesTool } from '@/components/MyMistakesTool';
-import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
+import { useChatHistory, ChatConversation } from '@/hooks/useChatHistory';
+import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
+import { ExamDate } from '@/components/ExamCountdown';
 import { fileDialogOpen } from '@/lib/fileDialogState';
 
 import {
@@ -41,12 +34,11 @@ const SUBJECTS = [
   { name: 'Edexcel Maths (Applied)', freePath: '/edexcel-maths-applied-free-version', premiumPath: '/edexcel-maths-applied-premium', slug: 'edexcel-maths-applied' },
 ];
 
-type ToolView = 'menu' | 'my-ai' | 'grade-boundaries' | 'past-papers' | 'revision-guide' | 'essay-marker' | 'diagrams' | 'my-mistakes' | 'exam-countdown';
-
 export interface ChatbotSidebarProps {
   subjectName: string;
   productId?: string;
   productSlug?: string;
+  // Legacy tool props — kept for backward compat but ignored in sidebar now
   showMyAI?: boolean;
   showGradeBoundaries?: boolean;
   showPastPaperFinder?: boolean;
@@ -57,9 +49,9 @@ export interface ChatbotSidebarProps {
   showExamCountdown?: boolean;
   diagramSubject?: 'economics' | 'cs';
   customDiagramData?: Array<{ id: string; title: string; imagePath: string }>;
-  pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
-  revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
-  gradeBoundariesSubject?: 'economics' | 'maths';
+  pastPaperBoard?: string;
+  revisionGuideBoard?: string;
+  gradeBoundariesSubject?: string;
   essayMarkerLabel?: string;
   essayMarkerFixedMark?: number;
   essayMarkerCustomMarks?: number[];
@@ -70,47 +62,70 @@ export interface ChatbotSidebarProps {
   customRevisionGuideContent?: React.ReactNode;
 }
 
+// Group conversations by date
+const groupConversations = (convos: ChatConversation[]) => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 86400000);
+  const weekAgo = new Date(today.getTime() - 7 * 86400000);
+
+  const groups: { label: string; items: ChatConversation[] }[] = [
+    { label: 'Today', items: [] },
+    { label: 'Yesterday', items: [] },
+    { label: 'Last 7 Days', items: [] },
+    { label: 'Older', items: [] },
+  ];
+
+  convos.forEach(c => {
+    const d = new Date(c.updated_at);
+    if (d >= today) groups[0].items.push(c);
+    else if (d >= yesterday) groups[1].items.push(c);
+    else if (d >= weekAgo) groups[2].items.push(c);
+    else groups[3].items.push(c);
+  });
+
+  return groups.filter(g => g.items.length > 0);
+};
+
+const formatRelativeTime = (dateStr: string) => {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return 'now';
+  if (diffMin < 60) return `${diffMin}m`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h`;
+  const diffDay = Math.floor(diffHr / 24);
+  return `${diffDay}d`;
+};
+
 export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   subjectName,
   productId,
   productSlug,
-  showMyAI = false,
-  showGradeBoundaries = false,
-  showPastPaperFinder = false,
-  showRevisionGuide = false,
-  showEssayMarker = false,
-  showDiagramTool = false,
-  showMyMistakes = false,
-  showExamCountdown = false,
-  diagramSubject = 'economics',
-  customDiagramData,
-  pastPaperBoard = 'edexcel',
-  revisionGuideBoard = 'edexcel',
-  gradeBoundariesSubject = 'economics',
-  essayMarkerLabel = 'Essay Marker',
-  essayMarkerFixedMark,
-  essayMarkerCustomMarks,
-  onEssayMarkerSubmit,
   examDates = [],
-  examSubjectName = 'Exams',
-  customPastPaperContent,
-  customRevisionGuideContent,
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState<ToolView>('menu');
   const [isDeluxe, setIsDeluxe] = useState(false);
-  const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
-  const isPremiumRoute = location.pathname.includes('premium');
-  const tier = isDeluxe ? 'deluxe' : 'free';
+  const chatHistoryCtx = useChatHistoryContext();
+  const { conversations, loading, deleteConversation, fetchConversations } = useChatHistory(productId);
 
   const daysUntilFirstExam = examDates.length > 0
     ? Math.ceil((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24))
     : null;
+
+  // Refresh conversations when context signals
+  useEffect(() => {
+    if (chatHistoryCtx?.refreshKey) {
+      fetchConversations();
+    }
+  }, [chatHistoryCtx?.refreshKey, fetchConversations]);
 
   useEffect(() => {
     const checkDeluxe = async () => {
@@ -122,10 +137,6 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
     };
     checkDeluxe();
   }, [user, productSlug]);
-
-  useEffect(() => {
-    if (!open) setTimeout(() => setView('menu'), 300);
-  }, [open]);
 
   const handleUpgradeClick = async (paymentType: 'monthly' | 'lifetime') => {
     if (!user) { window.location.href = '/login?redirect=stripe'; return; }
@@ -162,53 +173,28 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
     setOpen(false);
   };
 
-  const toolItems: Array<{ id: ToolView; label: string; icon: React.ReactNode; show: boolean; badge?: number }> = [
-    { id: 'my-ai', label: 'My AI', icon: <Sparkles className="h-4 w-4" />, show: showMyAI },
-    { id: 'grade-boundaries', label: 'Grade Boundaries', icon: <TrendingUp className="h-4 w-4" />, show: showGradeBoundaries },
-    { id: 'past-papers', label: 'Past Papers', icon: <FileSearch className="h-4 w-4" />, show: showPastPaperFinder },
-    { id: 'revision-guide', label: 'Revision Guide', icon: <BookOpen className="h-4 w-4" />, show: showRevisionGuide },
-    { id: 'essay-marker', label: essayMarkerLabel, icon: <PenLine className="h-4 w-4" />, show: showEssayMarker },
-    { id: 'diagrams', label: 'Diagram Generator', icon: <BarChart2 className="h-4 w-4" />, show: showDiagramTool },
-    { id: 'my-mistakes', label: 'My Mistakes', icon: <RotateCcw className="h-4 w-4" />, show: showMyMistakes, badge: mistakesDueCount },
-    { id: 'exam-countdown', label: 'Exam Timeline', icon: <Timer className="h-4 w-4" />, show: showExamCountdown && examDates.length > 0 },
-  ];
+  const handleNewChat = () => {
+    chatHistoryCtx?.onNewChat();
+  };
 
-  const visibleTools = toolItems.filter(t => t.show);
+  const handleLoadConversation = (id: string) => {
+    chatHistoryCtx?.onLoadConversation(id);
+  };
 
-  const renderToolContent = () => {
-    switch (view) {
-      case 'my-ai': return <MyAIPreferences />;
-      case 'grade-boundaries': return <GradeBoundariesTool subject={gradeBoundariesSubject} />;
-      case 'past-papers': return customPastPaperContent || <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />;
-      case 'revision-guide': return customRevisionGuideContent || <RevisionGuideTool board={revisionGuideBoard} tier={tier} productId={productId} />;
-      case 'essay-marker': return (
-        <EssayMarkerTool
-          tier={tier}
-          productId={productId}
-          onSubmitToChat={(msg, img) => { onEssayMarkerSubmit?.(msg, img); setOpen(false); }}
-          onClose={() => setView('menu')}
-          fixedMark={essayMarkerFixedMark}
-          toolLabel={essayMarkerLabel}
-          customMarks={essayMarkerCustomMarks}
-        />
-      );
-      case 'diagrams': return <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} customDiagrams={customDiagramData} />;
-      case 'my-mistakes': return <MyMistakesTool productId={productId} onDueCountChange={setMistakesDueCount} />;
-      case 'exam-countdown': return <ExamCountdown exams={examDates} subjectName={examSubjectName} />;
-      default: return null;
+  const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    await deleteConversation(id);
+    if (chatHistoryCtx?.currentConversationId === id) {
+      chatHistoryCtx?.onNewChat();
     }
   };
 
-  const getToolTitle = () => {
-    const tool = toolItems.find(t => t.id === view);
-    return tool?.label || '';
-  };
+  const grouped = groupConversations(conversations);
 
   return (
     <>
       <Sheet open={open} onOpenChange={(o) => { if (fileDialogOpen.current && !o) return; setOpen(o); }} modal={false}>
-        {/* Left-side vertically centered trigger button */}
-         <SheetTrigger asChild>
+        <SheetTrigger asChild>
           <button
             className="fixed left-3 top-1/2 -translate-y-1/2 z-[60] flex flex-col items-center gap-1.5 px-2.5 py-3 rounded-2xl border border-border bg-background/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
           >
@@ -223,151 +209,175 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
           </button>
         </SheetTrigger>
         <SheetContent noOverlay side="left" className="top-[5.5rem] h-[calc(100vh-5.5rem)] w-[340px] sm:top-[5.5rem] sm:h-[calc(100vh-5.5rem)] sm:w-[380px] p-0 flex flex-col border-r border-border bg-background z-[55] [&>button:last-child]:hidden">
-          {view === 'menu' ? (
-            <>
-              {/* Header with close button */}
-              <div className="px-5 pt-5 pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <GraduationCap className="h-5 w-5 text-primary shrink-0" />
-                    <h2 className="font-bold text-lg truncate">{subjectName}</h2>
+          {/* Header with close button */}
+          <div className="px-5 pt-5 pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <GraduationCap className="h-5 w-5 text-primary shrink-0" />
+                <h2 className="font-bold text-lg truncate">{subjectName}</h2>
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted transition-colors shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <Separator />
+
+          <ScrollArea className="flex-1">
+            <div className="px-3 py-3">
+              {/* Chat History Section */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <MessageSquare className="h-3 w-3 text-primary" />
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
+                      Chat History
+                    </p>
                   </div>
                   <button
-                    onClick={() => setOpen(false)}
-                    className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted transition-colors shrink-0"
+                    onClick={handleNewChat}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
                   >
-                    <ArrowLeft className="h-4 w-4" />
+                    <Plus className="h-3 w-3" />
+                    New Chat
                   </button>
                 </div>
-              </div>
 
-              <Separator />
-
-              <ScrollArea className="flex-1">
-                <div className="px-3 py-3">
-                  {/* TOOLS FIRST - prominent section */}
-                  {visibleTools.length > 0 && (
-                    <div className="mb-3">
-                      <div className="flex items-center gap-1.5 px-2 py-1.5">
-                        <Wrench className="h-3 w-3 text-primary" />
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-                          Your Tools
-                        </p>
-                      </div>
-                      <div className="space-y-0.5">
-                        {visibleTools.map(tool => (
-                          <button
-                            key={tool.id}
-                            onClick={() => setView(tool.id)}
-                            className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl text-sm text-foreground hover:bg-primary/5 border border-transparent hover:border-primary/10 transition-all text-left group"
-                          >
-                            <span className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
-                              <span className="text-primary">{tool.icon}</span>
-                            </span>
-                            <span className="font-medium">{tool.label}</span>
-                            {tool.badge && tool.badge > 0 ? (
-                              <span className="ml-auto h-5 min-w-5 px-1 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
-                                {tool.badge}
-                              </span>
-                            ) : (
-                              <ChevronRight className="ml-auto h-3.5 w-3.5 text-muted-foreground/50" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <Separator className="my-2" />
-
-                  {/* Subject Navigator */}
-                  <div className="mb-1">
-                    <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Switch Subject
-                    </p>
-                    <div className="space-y-0.5">
-                      {SUBJECTS.map(s => {
-                        const active = isCurrentSubject(s.freePath, s.premiumPath);
-                        return (
-                          <button
-                            key={s.freePath}
-                            onClick={() => navigateToSubject(s.freePath, s.premiumPath, s.slug)}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left ${
-                              active
-                                ? 'bg-primary/10 text-primary font-semibold'
-                                : 'text-foreground hover:bg-muted'
-                            }`}
-                          >
-                            
-                            <span className="truncate">{s.name}</span>
-                            {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
-                          </button>
-                        );
-                      })}
-                    </div>
+                {!user ? (
+                  <div className="px-3 py-6 text-center">
+                    <LogIn className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground mb-3">Log in to save your chat history</p>
+                    <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
+                      Log In
+                    </Button>
                   </div>
-
-                  <Separator className="my-2" />
-
-                  {/* Navigation */}
-                  <div className="mb-1">
-                    <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Navigation
-                    </p>
-                    <button
-                      onClick={() => { navigate('/'); setOpen(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group"
-                    >
-                      <Home className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                      <span>Home</span>
-                    </button>
-                    <button
-                      onClick={() => { navigate('/compare'); setOpen(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group"
-                    >
-                      <GraduationCap className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                      <span>All Subjects</span>
-                    </button>
+                ) : loading ? (
+                  <div className="px-3 py-6 text-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">Loading chats...</p>
                   </div>
-                </div>
-              </ScrollArea>
-
-              {/* Upgrade CTA / Deluxe Badge */}
-              <div className="px-4 py-4 border-t border-border">
-                {isDeluxe ? (
-                  <div className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: 'var(--gradient-brand)' }}>
-                    <Crown className="h-4 w-4" />
-                    <span>You're Deluxe! ✨</span>
+                ) : conversations.length === 0 ? (
+                  <div className="px-3 py-6 text-center">
+                    <MessageSquare className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No conversations yet</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Start chatting to see your history here</p>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => { setOpen(false); setUpgradeDialogOpen(true); }}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
-                    style={{ background: 'var(--gradient-brand)' }}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span>Upgrade to Deluxe</span>
-                  </button>
+                  <div className="space-y-2">
+                    {grouped.map(group => (
+                      <div key={group.label}>
+                        <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                          {group.label}
+                        </p>
+                        <div className="space-y-0.5">
+                          {group.items.map(convo => {
+                            const isActive = chatHistoryCtx?.currentConversationId === convo.id;
+                            return (
+                              <button
+                                key={convo.id}
+                                onClick={() => handleLoadConversation(convo.id)}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all text-left group ${
+                                  isActive
+                                    ? 'bg-primary/10 text-primary font-semibold'
+                                    : 'text-foreground hover:bg-muted'
+                                }`}
+                              >
+                                <MessageSquare className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                <span className="flex-1 truncate text-xs">{convo.title}</span>
+                                <span className="text-[10px] text-muted-foreground/60 shrink-0">
+                                  {formatRelativeTime(convo.updated_at)}
+                                </span>
+                                <button
+                                  onClick={(e) => handleDeleteConversation(e, convo.id)}
+                                  className="h-5 w-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all shrink-0"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
-            </>
-          ) : (
-            <>
-              {/* Tool Detail View */}
-              <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setView('menu')}>
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <h3 className="font-semibold text-base truncate">{getToolTitle()}</h3>
-              </div>
-              <Separator />
-              <ScrollArea className="flex-1">
-                <div className="p-4">
-                  {renderToolContent()}
+
+              <Separator className="my-2" />
+
+              {/* Subject Navigator */}
+              <div className="mb-1">
+                <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Switch Subject
+                </p>
+                <div className="space-y-0.5">
+                  {SUBJECTS.map(s => {
+                    const active = isCurrentSubject(s.freePath, s.premiumPath);
+                    return (
+                      <button
+                        key={s.freePath}
+                        onClick={() => navigateToSubject(s.freePath, s.premiumPath, s.slug)}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left ${
+                          active
+                            ? 'bg-primary/10 text-primary font-semibold'
+                            : 'text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        <span className="truncate">{s.name}</span>
+                        {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
+                      </button>
+                    );
+                  })}
                 </div>
-              </ScrollArea>
-            </>
-          )}
+              </div>
+
+              <Separator className="my-2" />
+
+              {/* Navigation */}
+              <div className="mb-1">
+                <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Navigation
+                </p>
+                <button
+                  onClick={() => { navigate('/'); setOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group"
+                >
+                  <Home className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span>Home</span>
+                </button>
+                <button
+                  onClick={() => { navigate('/compare'); setOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group"
+                >
+                  <GraduationCap className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span>All Subjects</span>
+                </button>
+              </div>
+            </div>
+          </ScrollArea>
+
+          {/* Upgrade CTA / Deluxe Badge */}
+          <div className="px-4 py-4 border-t border-border">
+            {isDeluxe ? (
+              <div className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: 'var(--gradient-brand)' }}>
+                <Crown className="h-4 w-4" />
+                <span>You're Deluxe! ✨</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setOpen(false); setUpgradeDialogOpen(true); }}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
+                style={{ background: 'var(--gradient-brand)' }}
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>Upgrade to Deluxe</span>
+              </button>
+            )}
+          </div>
         </SheetContent>
       </Sheet>
 
