@@ -208,9 +208,9 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
     <>
       <Sheet open={open} onOpenChange={(o) => { if (fileDialogOpen.current && !o) return; setOpen(o); }}>
         {/* Left-side vertically centered trigger button */}
-        <SheetTrigger asChild>
+         <SheetTrigger asChild>
           <button
-            className="fixed left-3 top-1/2 -translate-y-1/2 z-[60] flex flex-col items-center gap-1.5 px-2.5 py-3 rounded-2xl border border-border bg-background/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
+            className="fixed left-3 top-[5.5rem] z-[60] flex flex-col items-center gap-1.5 px-2.5 py-3 rounded-2xl border border-border bg-background/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
           >
             <Menu className="h-5 w-5 text-primary group-hover:text-primary/80 transition-colors" />
             <span className="text-[10px] font-semibold text-foreground leading-tight text-center">Menu<br/>&amp; Tools</span>
