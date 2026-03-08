@@ -103,7 +103,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [open, setOpen] = useState(true); // Start open
+  const [open, setOpen] = useState(false); // Start closed
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
