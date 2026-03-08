@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "@/hooks/use-toast";
-import { Plus, X, RotateCcw, CalendarDays, Brain, Zap, Shuffle, Clock } from "lucide-react";
-import { motion } from "framer-motion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Plus, X, RotateCcw, Brain, Zap, Shuffle, Clock, Moon, Download, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ─── constants ─── */
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const HOURS = Array.from({ length: 16 }, (_, i) => i + 6);
-const GRADES = ["U", "E", "D", "C", "B", "A", "A*"] as const;
+const HOURS = Array.from({ length: 16 }, (_, i) => i + 6); // 06:00–21:00 (represents 06:00–22:00 blocks)
+const GRADES = ["U", "G", "F", "E", "D", "C", "B", "A", "A*"] as const;
 type Grade = (typeof GRADES)[number];
 
 const SUBJECT_TYPES = [
@@ -64,19 +65,20 @@ const KNOWN_SUBJECTS: { name: string; type: SubjectType }[] = [
   { name: "Urdu", type: "Language / Memory-Heavy" },
 ];
 
+/* Subject colours — solid, accessible against white text */
 const SUBJECT_COLORS = [
-  { bg: "rgba(147,51,234,0.25)", border: "rgba(147,51,234,0.5)", text: "hsl(var(--foreground))" },
-  { bg: "rgba(59,130,246,0.25)", border: "rgba(59,130,246,0.5)", text: "hsl(var(--foreground))" },
-  { bg: "rgba(16,185,129,0.25)", border: "rgba(16,185,129,0.5)", text: "hsl(var(--foreground))" },
-  { bg: "rgba(245,158,11,0.25)", border: "rgba(245,158,11,0.5)", text: "hsl(var(--foreground))" },
-  { bg: "rgba(239,68,68,0.25)", border: "rgba(239,68,68,0.5)", text: "hsl(var(--foreground))" },
-  { bg: "rgba(14,165,233,0.25)", border: "rgba(14,165,233,0.5)", text: "hsl(var(--foreground))" },
+  { bg: "#7C3AED", bgLight: "rgba(124,58,237,0.15)", border: "rgba(124,58,237,0.4)" },
+  { bg: "#2563EB", bgLight: "rgba(37,99,235,0.15)", border: "rgba(37,99,235,0.4)" },
+  { bg: "#059669", bgLight: "rgba(5,150,105,0.15)", border: "rgba(5,150,105,0.4)" },
+  { bg: "#D97706", bgLight: "rgba(217,119,6,0.15)", border: "rgba(217,119,6,0.4)" },
+  { bg: "#E11D48", bgLight: "rgba(225,29,72,0.15)", border: "rgba(225,29,72,0.4)" },
+  { bg: "#0891B2", bgLight: "rgba(8,145,178,0.15)", border: "rgba(8,145,178,0.4)" },
 ];
 
 /* ─── storage keys ─── */
-const SUBJECTS_KEY = "astar_timetable_subjects_v3";
-const SLOTS_KEY = "astar_timetable_free_slots";
-const GENERATED_KEY = "astar_timetable_generated_v2";
+const SUBJECTS_KEY = "astar_timetable_subjects_v4";
+const SLOTS_KEY = "astar_timetable_free_slots_v2";
+const GENERATED_KEY = "astar_timetable_generated_v3";
 
 /* ─── types ─── */
 interface Subject {
@@ -84,7 +86,7 @@ interface Subject {
   name: string;
   predicted: Grade;
   target: Grade;
-  importance: number;
+  importance: number; // 0–100 slider
   subjectType: SubjectType;
   isCustom: boolean;
 }
@@ -95,37 +97,6 @@ interface ScheduledSlot {
   technique: string;
 }
 type GeneratedMap = Record<string, ScheduledSlot>;
-
-const defaultSubjects = (): Subject[] => [
-  { id: "1", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false },
-  { id: "2", name: "", predicted: "C", target: "A", importance: 3, subjectType: "Essay-Based / Humanities", isCustom: false },
-  { id: "3", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false },
-];
-
-/* ─── scientific scheduling techniques ─── */
-const TECHNIQUES_BY_TYPE: Record<SubjectType, string[]> = {
-  "STEM - Heavy Calculation": ["Practice Problems", "Worked Examples", "Timed Drills", "Error Analysis"],
-  "STEM - Conceptual": ["Active Recall", "Concept Mapping", "Feynman Technique", "Past Papers"],
-  "Essay-Based / Humanities": ["Essay Plans", "Timed Essays", "Source Analysis", "Model Answer Review"],
-  "Language / Memory-Heavy": ["Flashcard Drill", "Spaced Recall", "Active Writing", "Practice Translation"],
-};
-
-const COGNITIVE_LOAD: Record<SubjectType, number> = {
-  "STEM - Heavy Calculation": 5,
-  "STEM - Conceptual": 4,
-  "Essay-Based / Humanities": 3,
-  "Language / Memory-Heavy": 3,
-};
-
-function energyLevel(hour: number): number {
-  if (hour >= 6 && hour <= 8) return 0.7;
-  if (hour >= 9 && hour <= 11) return 1.0;
-  if (hour === 12) return 0.6;
-  if (hour >= 13 && hour <= 14) return 0.5;
-  if (hour >= 15 && hour <= 17) return 0.85;
-  if (hour >= 18 && hour <= 19) return 0.7;
-  return 0.5;
-}
 
 /* ─── helpers ─── */
 const gradeIndex = (g: Grade) => GRADES.indexOf(g);
@@ -140,160 +111,173 @@ function loadJSON<T>(key: string, fallback: T): T {
   }
 }
 
-function generateScientificTimetable(
-  subjects: Subject[],
-  freeSlots: SlotMap
-): GeneratedMap {
-  const filledSubjects = subjects.filter(s => s.name.trim());
-  const freeKeys = Object.keys(freeSlots).filter(k => freeSlots[k]);
+function energyTier(hour: number): "high" | "medium" | "low" {
+  if (hour >= 6 && hour <= 9) return "high";
+  if (hour >= 10 && hour <= 13) return "medium";
+  return "low";
+}
 
-  // 1. Calculate weighted priority scores
-  const priorities = filledSubjects.map(s => {
+/* ─── defaults ─── */
+const defaultSubjects = (): Subject[] => [
+  { id: "1", name: "", predicted: "C", target: "A", importance: 50, subjectType: "STEM - Conceptual", isCustom: false },
+  { id: "2", name: "", predicted: "C", target: "A", importance: 50, subjectType: "Essay-Based / Humanities", isCustom: false },
+  { id: "3", name: "", predicted: "C", target: "A", importance: 50, subjectType: "STEM - Conceptual", isCustom: false },
+];
+
+function defaultSlots(): SlotMap {
+  const slots: SlotMap = {};
+  for (const day of ["Mon", "Tue", "Wed", "Thu", "Fri"]) {
+    for (let h = 6; h <= 13; h++) {
+      slots[slotKey(day, h)] = true;
+    }
+  }
+  return slots;
+}
+
+/* ─── SESSION TYPES per spec ─── */
+const SESSION_SEQUENCE = ["Review Notes", "Active Recall", "Practice Questions", "Past Paper"];
+const SESSION_CYCLE = ["Active Recall", "Spaced Review", "Practice Questions"];
+
+function getSessionType(weekIndex: number, isLowEnergy: boolean): string {
+  if (isLowEnergy) return weekIndex === 0 ? "Review Notes" : "Spaced Review";
+  if (weekIndex < SESSION_SEQUENCE.length) return SESSION_SEQUENCE[weekIndex];
+  const cycleIdx = (weekIndex - SESSION_SEQUENCE.length) % SESSION_CYCLE.length;
+  return SESSION_CYCLE[cycleIdx];
+}
+
+/* ─── SCHEDULING ALGORITHM (per spec) ─── */
+function generateTimetable(subjects: Subject[], freeSlots: SlotMap): GeneratedMap {
+  const filled = subjects.filter(s => s.name.trim());
+  const freeKeys = Object.keys(freeSlots).filter(k => freeSlots[k]);
+  const totalHours = freeKeys.length;
+
+  // Step 1: Calculate subject weights
+  const weighted = filled.map(s => {
     const gap = gradeIndex(s.target) - gradeIndex(s.predicted);
-    const urgency = Math.max(gap, 0);
-    // Weight = (grade gap + 1) * importance * cognitive difficulty factor
-    const cogFactor = COGNITIVE_LOAD[s.subjectType] / 3;
-    return {
-      subject: s,
-      weight: (urgency + 1) * s.importance * cogFactor,
-      cognitiveLoad: COGNITIVE_LOAD[s.subjectType],
-      techniques: TECHNIQUES_BY_TYPE[s.subjectType],
-    };
+    const baseWeight = Math.max(gap, 1);
+    const priorityMultiplier = 0.5 + (s.importance / 100);
+    return { subject: s, weight: baseWeight * priorityMultiplier, gap };
   });
 
-  const totalWeight = priorities.reduce((a, p) => a + p.weight, 0);
+  const totalWeight = weighted.reduce((a, w) => a + w.weight, 0);
 
-  // 2. Calculate slot allocation per subject
-  const totalSlotCount = freeKeys.length;
-  const allocation = priorities.map(p => ({
-    ...p,
-    slots: Math.max(1, Math.round((p.weight / totalWeight) * totalSlotCount)),
+  // Allocate hours proportionally
+  const allocation = weighted.map(w => ({
+    ...w,
+    hours: Math.max(1, Math.round((w.weight / totalWeight) * totalHours)),
   }));
 
-  // Fix rounding
-  let diff = totalSlotCount - allocation.reduce((a, x) => a + x.slots, 0);
-  let idx = 0;
-  while (diff !== 0) {
-    allocation[idx % allocation.length].slots += diff > 0 ? 1 : -1;
-    diff += diff > 0 ? -1 : 1;
-    idx++;
+  // Fix rounding: give remainder to highest-weight
+  let diff = totalHours - allocation.reduce((a, x) => a + x.hours, 0);
+  allocation.sort((a, b) => b.weight - a.weight);
+  let fixIdx = 0;
+  while (diff !== 0 && fixIdx < 100) {
+    const target = fixIdx % allocation.length;
+    if (diff > 0) { allocation[target].hours++; diff--; }
+    else if (allocation[target].hours > 1) { allocation[target].hours--; diff++; }
+    fixIdx++;
   }
 
-  // 3. Parse and sort slots by day then hour
+  // Step 2 & 3: Parse slots and classify by energy
   const parsedSlots = freeKeys.map(key => {
-    const parts = key.split("-");
-    const day = parts[0];
-    const hour = parseInt(parts[1], 10);
-    return { key, day, hour, dayIdx: DAYS.indexOf(day) };
-  }).sort((a, b) => a.dayIdx !== b.dayIdx ? a.dayIdx - b.dayIdx : a.hour - b.hour);
+    const [day, hourStr] = key.split("-");
+    const hour = parseInt(hourStr, 10);
+    return { key, day, hour, dayIdx: DAYS.indexOf(day), energy: energyTier(hour) };
+  });
 
-  // 4. Classify slots by energy suitability
-  // High-energy slots get high-cognitive subjects, low-energy slots get lighter subjects
-  const slotsWithEnergy = parsedSlots.map(s => ({
-    ...s,
-    energy: energyLevel(s.hour),
+  // Sort: high energy first, then medium, then low
+  const energyOrder = { high: 0, medium: 1, low: 2 };
+  parsedSlots.sort((a, b) => {
+    if (energyOrder[a.energy] !== energyOrder[b.energy]) return energyOrder[a.energy] - energyOrder[b.energy];
+    return a.dayIdx !== b.dayIdx ? a.dayIdx - b.dayIdx : a.hour - b.hour;
+  });
+
+  // Step 4: Sort subjects by difficulty (grade gap desc) for priority
+  const sortedAlloc = [...allocation].sort((a, b) => b.gap - a.gap);
+
+  // Build a round-robin pool
+  const pool: { name: string; remaining: number; gap: number }[] = sortedAlloc.map(a => ({
+    name: a.subject.name,
+    remaining: a.hours,
+    gap: a.gap,
   }));
-
-  // 5. Build subject pool with techniques (spaced repetition pattern)
-  interface SubjectBlock {
-    name: string;
-    cognitiveLoad: number;
-    technique: string;
-    priority: number;
-  }
-
-  const subjectPool: SubjectBlock[] = [];
-  for (const alloc of allocation) {
-    const techniques = alloc.techniques;
-    for (let i = 0; i < alloc.slots; i++) {
-      // Cycle through techniques for variety (interleaving)
-      const technique = techniques[i % techniques.length];
-      subjectPool.push({
-        name: alloc.subject.name,
-        cognitiveLoad: alloc.cognitiveLoad,
-        technique,
-        priority: alloc.weight,
-      });
-    }
-  }
-
-  // 6. Assign subjects to slots using energy-matching algorithm
-  // Sort pool by cognitive load descending
-  subjectPool.sort((a, b) => b.cognitiveLoad - a.cognitiveLoad);
-
-  // Sort slots by energy descending
-  const slotsByEnergy = [...slotsWithEnergy].sort((a, b) => b.energy - a.energy);
 
   const result: GeneratedMap = {};
-  const assignedSlots = new Set<string>();
-  const assignedBlocks: SubjectBlock[] = [];
+  const subjectWeekCount: Record<string, number> = {};
+  const subjectDaySlots: Record<string, Set<string>> = {};
 
-  // First pass: match high-cognitive subjects to high-energy slots
-  for (const block of subjectPool) {
-    // Find best available slot
-    let bestSlot = null;
-    let bestScore = -Infinity;
+  // Round-robin allocation with interleaving
+  let slotIdx = 0;
+  let poolIdx = 0;
+  let consecutiveCount = 0;
+  let lastSubject = "";
 
-    for (const slot of slotsByEnergy) {
-      if (assignedSlots.has(slot.key)) continue;
+  while (slotIdx < parsedSlots.length && pool.some(p => p.remaining > 0)) {
+    const slot = parsedSlots[slotIdx];
 
-      // Score = energy match + anti-consecutive bonus + daily variety bonus
-      let score = slot.energy * block.cognitiveLoad;
+    // Find next subject with remaining hours (round-robin)
+    let attempts = 0;
+    while (attempts < pool.length) {
+      const candidate = pool[poolIdx % pool.length];
+      if (candidate.remaining > 0) {
+        // Interleaving check: no 3+ consecutive
+        if (candidate.name === lastSubject && consecutiveCount >= 2) {
+          // Try next subject
+          poolIdx++;
+          attempts++;
+          continue;
+        }
 
-      // Anti-consecutive: penalize if same subject was in adjacent slot
-      const prevKey = slotKey(slot.day, slot.hour - 1);
-      const nextKey = slotKey(slot.day, slot.hour + 1);
-      if (result[prevKey]?.subject === block.name) score -= 2;
-      if (result[nextKey]?.subject === block.name) score -= 2;
+        // Spaced repetition: prefer distributing across different days
+        if (!subjectDaySlots[candidate.name]) subjectDaySlots[candidate.name] = new Set();
+        
+        const isLowEnergy = slot.energy === "low";
+        const weekIdx = subjectWeekCount[candidate.name] || 0;
 
-      // Check for 3+ consecutive same subject (strong penalty)
-      const prev2Key = slotKey(slot.day, slot.hour - 2);
-      if (result[prevKey]?.subject === block.name && result[prev2Key]?.subject === block.name) {
-        score -= 10; // heavily penalize 3+ consecutive
+        result[slot.key] = {
+          subject: candidate.name,
+          technique: getSessionType(weekIdx, isLowEnergy),
+        };
+
+        subjectWeekCount[candidate.name] = weekIdx + 1;
+        subjectDaySlots[candidate.name].add(slot.day);
+        candidate.remaining--;
+
+        if (candidate.name === lastSubject) {
+          consecutiveCount++;
+        } else {
+          consecutiveCount = 1;
+          lastSubject = candidate.name;
+        }
+
+        poolIdx++;
+        break;
       }
-
-      // Daily variety: bonus if this subject hasn't been seen much today
-      const sameDayCount = Object.entries(result)
-        .filter(([k, v]) => k.startsWith(slot.day + "-") && v.subject === block.name)
-        .length;
-      score -= sameDayCount * 0.5;
-
-      // Spaced distribution: prefer even spread across days
-      const totalDaysWithSubject = new Set(
-        Object.entries(result)
-          .filter(([, v]) => v.subject === block.name)
-          .map(([k]) => k.split("-")[0])
-      ).size;
-      if (!Object.entries(result).some(([k, v]) => k.startsWith(slot.day + "-") && v.subject === block.name)) {
-        score += 1.5; // bonus for spreading to new day
-      }
-
-      if (score > bestScore) {
-        bestScore = score;
-        bestSlot = slot;
-      }
+      poolIdx++;
+      attempts++;
     }
-
-    if (bestSlot) {
-      result[bestSlot.key] = { subject: block.name, technique: block.technique };
-      assignedSlots.add(bestSlot.key);
-      assignedBlocks.push(block);
-    }
+    slotIdx++;
   }
 
-  // Fill any remaining unassigned free slots with the highest-priority subject
+  // Fill any remaining unassigned slots
   for (const slot of parsedSlots) {
-    if (!assignedSlots.has(slot.key)) {
-      const topSubject = allocation[0];
-      const technique = topSubject.techniques[Math.floor(Math.random() * topSubject.techniques.length)];
-      result[slot.key] = { subject: topSubject.subject.name, technique };
+    if (!result[slot.key]) {
+      const topSubject = sortedAlloc[0];
+      const weekIdx = subjectWeekCount[topSubject.subject.name] || 0;
+      result[slot.key] = {
+        subject: topSubject.subject.name,
+        technique: getSessionType(weekIdx, slot.energy === "low"),
+      };
+      subjectWeekCount[topSubject.subject.name] = weekIdx + 1;
     }
   }
 
   return result;
 }
 
-/* ─── SubjectCard with autocomplete ─── */
+/* ──────────────────────────────────────────────
+   SubjectCard with autocomplete
+   ────────────────────────────────────────────── */
 const SubjectCard: React.FC<{
   subject: Subject;
   index: number;
@@ -306,12 +290,9 @@ const SubjectCard: React.FC<{
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) setShowDropdown(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -320,45 +301,47 @@ const SubjectCard: React.FC<{
   const filtered = query.trim()
     ? KNOWN_SUBJECTS.filter(k => k.name.toLowerCase().includes(query.toLowerCase()))
     : [];
-
   const showCustomOption = query.trim().length > 0 && !KNOWN_SUBJECTS.some(k => k.name.toLowerCase() === query.toLowerCase());
 
-  const selectKnownSubject = (known: { name: string; type: SubjectType }) => {
+  const selectKnown = (known: { name: string; type: SubjectType }) => {
     setQuery(known.name);
     onUpdate({ name: known.name, subjectType: known.type, isCustom: false });
     setShowDropdown(false);
   };
-
   const selectCustom = () => {
     onUpdate({ name: query.trim(), isCustom: true });
     setShowDropdown(false);
   };
-
-  const handleInputChange = (val: string) => {
+  const handleInput = (val: string) => {
     setQuery(val);
     setShowDropdown(true);
-    // If they clear or change from a known subject, mark as needing re-selection
     if (!KNOWN_SUBJECTS.some(k => k.name.toLowerCase() === val.toLowerCase())) {
       onUpdate({ name: val, isCustom: true });
     }
   };
 
+  const priorityLabel = subject.importance < 33 ? "Low" : subject.importance < 66 ? "Medium" : "High";
+
+  // Show warning if predicted >= target
+  const gap = gradeIndex(subject.target) - gradeIndex(subject.predicted);
+  const atOrAbove = subject.name.trim() && gap <= 0;
+
   return (
-    <div className="bg-card border border-border rounded-2xl p-4 relative">
+    <div className="bg-card border border-border rounded-2xl p-4 relative shadow-sm">
       {canRemove && (
-        <button onClick={onRemove} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground">
+        <button onClick={onRemove} className="absolute top-2.5 right-2.5 text-muted-foreground hover:text-foreground transition-colors">
           <X className="h-4 w-4" />
         </button>
       )}
 
-      {/* Subject autocomplete input */}
+      {/* Autocomplete input */}
       <div ref={wrapperRef} className="relative mb-3">
         <Input
           placeholder={`Subject ${index + 1}`}
           value={query}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={(e) => handleInput(e.target.value)}
           onFocus={() => { if (query.trim()) setShowDropdown(true); }}
-          className="text-sm"
+          className="text-sm font-medium"
           disabled={disabled}
         />
         {showDropdown && (filtered.length > 0 || showCustomOption) && !disabled && (
@@ -366,7 +349,7 @@ const SubjectCard: React.FC<{
             {filtered.slice(0, 8).map((k) => (
               <button
                 key={k.name}
-                onClick={() => selectKnownSubject(k)}
+                onClick={() => selectKnown(k)}
                 className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center justify-between"
               >
                 <span>{k.name}</span>
@@ -376,11 +359,8 @@ const SubjectCard: React.FC<{
             {showCustomOption && (
               <>
                 {filtered.length > 0 && <div className="border-t border-border" />}
-                <button
-                  onClick={selectCustom}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors text-primary"
-                >
-                  + Add "<span className="font-medium">{query.trim()}</span>" as custom subject
+                <button onClick={selectCustom} className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors text-primary">
+                  + Add &quot;{query.trim()}&quot; as custom subject
                 </button>
               </>
             )}
@@ -388,7 +368,7 @@ const SubjectCard: React.FC<{
         )}
       </div>
 
-      {/* Subject Type - only show for custom subjects */}
+      {/* Subject type: only for custom */}
       {subject.isCustom && (
         <div className="mb-3">
           <label className="text-xs text-muted-foreground mb-1 block">Subject Type</label>
@@ -398,14 +378,10 @@ const SubjectCard: React.FC<{
             className="w-full h-9 rounded-md border border-input bg-background px-2 text-xs"
             disabled={disabled}
           >
-            {SUBJECT_TYPES.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
+            {SUBJECT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
       )}
-
-      {/* Show matched type badge for known subjects */}
       {!subject.isCustom && subject.name.trim() && (
         <div className="mb-3">
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
@@ -414,6 +390,7 @@ const SubjectCard: React.FC<{
         </div>
       )}
 
+      {/* Grades */}
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Predicted</label>
@@ -422,11 +399,7 @@ const SubjectCard: React.FC<{
             onChange={(e) => onUpdate({ predicted: e.target.value as Grade })}
             className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
             disabled={disabled}
-          >
-            {GRADES.map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
+          >{GRADES.map(g => <option key={g} value={g}>{g}</option>)}</select>
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Target</label>
@@ -435,105 +408,108 @@ const SubjectCard: React.FC<{
             onChange={(e) => onUpdate({ target: e.target.value as Grade })}
             className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
             disabled={disabled}
-          >
-            {GRADES.map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
+          >{GRADES.map(g => <option key={g} value={g}>{g}</option>)}</select>
         </div>
       </div>
+
+      {/* At/above warning */}
+      {atOrAbove && (
+        <p className="text-[10px] text-amber-600 mb-2">
+          You're already at or above your target! We'll still allocate maintenance review time.
+        </p>
+      )}
+
+      {/* Priority slider 0-100 */}
       <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Priority: {["Low", "Medium-Low", "Medium", "High", "Critical"][subject.importance - 1]}</label>
+        <label className="text-xs text-muted-foreground mb-1 block">
+          Priority: <span className="font-semibold text-foreground">{priorityLabel}</span>
+        </label>
         <Slider
-          min={1}
-          max={5}
+          min={0}
+          max={100}
           step={1}
           value={[subject.importance]}
           onValueChange={([v]) => onUpdate({ importance: v })}
           disabled={disabled}
+          className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
         />
       </div>
     </div>
   );
 };
 
-/* ─── component ─── */
+/* ──────────────────────────────────────────────
+   Main component
+   ────────────────────────────────────────────── */
 export const RevisionTimetable: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>(() => loadJSON(SUBJECTS_KEY, defaultSubjects()));
-  const [freeSlots, setFreeSlots] = useState<SlotMap>(() => loadJSON(SLOTS_KEY, {}));
+  const [freeSlots, setFreeSlots] = useState<SlotMap>(() => loadJSON(SLOTS_KEY, defaultSlots()));
   const [generated, setGenerated] = useState<GeneratedMap | null>(() => loadJSON(GENERATED_KEY, null));
+  const [isGenerating, setIsGenerating] = useState(false);
+  const timetableRef = useRef<HTMLDivElement>(null);
 
-  // persist
+  // Persist
   useEffect(() => localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects)), [subjects]);
   useEffect(() => localStorage.setItem(SLOTS_KEY, JSON.stringify(freeSlots)), [freeSlots]);
   useEffect(() => localStorage.setItem(GENERATED_KEY, JSON.stringify(generated)), [generated]);
 
-  /* ─── subject handlers ─── */
   const updateSubject = (id: string, patch: Partial<Subject>) =>
-    setSubjects((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+    setSubjects(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s));
 
   const addSubject = () => {
     if (subjects.length >= 6) return;
-    setSubjects((prev) => [...prev, { id: crypto.randomUUID(), name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false }]);
+    setSubjects(prev => [...prev, { id: crypto.randomUUID(), name: "", predicted: "C", target: "A", importance: 50, subjectType: "STEM - Conceptual", isCustom: false }]);
   };
 
-  const removeSubject = (id: string) => setSubjects((prev) => prev.filter((s) => s.id !== id));
+  const removeSubject = (id: string) => setSubjects(prev => prev.filter(s => s.id !== id));
 
-  /* ─── slot toggle ─── */
-  const toggleSlot = useCallback(
-    (day: string, hour: number) => {
-      if (generated) return;
-      const key = slotKey(day, hour);
-      setFreeSlots((prev) => {
-        const next = { ...prev };
-        if (next[key]) delete next[key];
-        else next[key] = true;
-        return next;
+  const toggleSlot = useCallback((day: string, hour: number) => {
+    if (generated) return;
+    const key = slotKey(day, hour);
+    setFreeSlots(prev => {
+      const next = { ...prev };
+      if (next[key]) delete next[key]; else next[key] = true;
+      return next;
+    });
+  }, [generated]);
+
+  const toggleDay = (day: string) => {
+    if (generated) return;
+    const allSelected = HOURS.every(h => freeSlots[slotKey(day, h)]);
+    setFreeSlots(prev => {
+      const next = { ...prev };
+      HOURS.forEach(h => {
+        if (allSelected) delete next[slotKey(day, h)];
+        else next[slotKey(day, h)] = true;
       });
-    },
-    [generated]
-  );
-
-  /* ─── bulk slot selection ─── */
-  const selectAllDay = (day: string) => {
-    if (generated) return;
-    setFreeSlots(prev => {
-      const next = { ...prev };
-      HOURS.forEach(h => { next[slotKey(day, h)] = true; });
       return next;
     });
   };
 
-  const clearAllDay = (day: string) => {
-    if (generated) return;
-    setFreeSlots(prev => {
-      const next = { ...prev };
-      HOURS.forEach(h => { delete next[slotKey(day, h)]; });
-      return next;
-    });
-  };
-
-  /* ─── generate ─── */
   const generate = () => {
-    const filledSubjects = subjects.filter((s) => s.name.trim());
-    if (filledSubjects.length === 0) {
+    const filled = subjects.filter(s => s.name.trim());
+    if (filled.length === 0) {
       toast({ title: "Add at least one subject", description: "Enter a subject name to continue.", variant: "destructive" });
       return;
     }
-    for (const s of filledSubjects) {
-      if (gradeIndex(s.target) < gradeIndex(s.predicted)) {
-        toast({ title: `Target grade for ${s.name} is below predicted`, description: "Target must be ≥ predicted grade.", variant: "destructive" });
-        return;
-      }
-    }
-    const freeKeys = Object.keys(freeSlots).filter((k) => freeSlots[k]);
+    const freeKeys = Object.keys(freeSlots).filter(k => freeSlots[k]);
     if (freeKeys.length === 0) {
-      toast({ title: "No free periods selected", description: "Click on time blocks to mark your free periods.", variant: "destructive" });
+      toast({ title: "No free periods selected", description: "Click on time blocks to mark your available hours.", variant: "destructive" });
       return;
     }
+    if (freeKeys.length < filled.length) {
+      toast({ title: "Very limited time", description: "With limited hours, we'll focus on your highest-priority subjects.", variant: "default" });
+    }
 
-    const result = generateScientificTimetable(filledSubjects, freeSlots);
-    setGenerated(result);
+    setIsGenerating(true);
+    setTimeout(() => {
+      const result = generateTimetable(filled, freeSlots);
+      setGenerated(result);
+      setIsGenerating(false);
+      setTimeout(() => {
+        timetableRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }, 1500);
   };
 
   const reset = () => {
@@ -541,111 +517,162 @@ export const RevisionTimetable: React.FC = () => {
     localStorage.removeItem(GENERATED_KEY);
   };
 
-  /* ─── get subject color ─── */
+  const downloadPDF = async () => {
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const element = timetableRef.current;
+      if (!element) return;
+      html2pdf()
+        .set({
+          margin: 8,
+          filename: "revision-timetable.pdf",
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        })
+        .from(element)
+        .save();
+    } catch {
+      toast({ title: "PDF download failed", description: "Please try again.", variant: "destructive" });
+    }
+  };
+
+  /* ─── colour map ─── */
   const subjectColorMap: Record<string, (typeof SUBJECT_COLORS)[0]> = {};
-  subjects.filter((s) => s.name.trim()).forEach((s, i) => {
+  subjects.filter(s => s.name.trim()).forEach((s, i) => {
     subjectColorMap[s.name] = SUBJECT_COLORS[i % SUBJECT_COLORS.length];
   });
 
-  // Stats
   const freeKeys = Object.keys(freeSlots).filter(k => freeSlots[k]);
   const totalFreeHours = freeKeys.length;
+  const filledCount = subjects.filter(s => s.name.trim()).length;
+  const canGenerate = filledCount > 0 && totalFreeHours > 0 && !isGenerating;
+
+  /* ─── breakdown stats ─── */
+  const breakdown = generated
+    ? Object.values(generated).reduce<Record<string, { hours: number; techniques: Set<string> }>>((acc, s) => {
+        if (!acc[s.subject]) acc[s.subject] = { hours: 0, techniques: new Set() };
+        acc[s.subject].hours++;
+        acc[s.subject].techniques.add(s.technique);
+        return acc;
+      }, {})
+    : {};
+  const totalGeneratedHours = Object.values(breakdown).reduce((a, b) => a + b.hours, 0);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mb-12">
-
-      {/* Scientific methods info banner */}
-      <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 mb-6">
+    <div className="mb-12">
+      {/* Science-Backed Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="bg-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-5 mb-8"
+      >
         <div className="flex items-start gap-3">
-          <Brain className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Brain className="h-5 w-5 text-primary" />
+          </div>
           <div>
-            <p className="text-sm font-semibold text-foreground mb-1">Science-Backed Scheduling</p>
-            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><Zap className="h-3 w-3 text-primary" /> Energy-optimised slots</span>
-              <span className="flex items-center gap-1"><Shuffle className="h-3 w-3 text-primary" /> Interleaved practice</span>
-              <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-primary" /> Spaced repetition</span>
-              <span className="flex items-center gap-1"><Brain className="h-3 w-3 text-primary" /> Cognitive load matching</span>
+            <p className="text-sm font-semibold text-foreground mb-2">Science-Backed Scheduling</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { icon: <Zap className="h-3 w-3" />, label: "Energy-optimised slots" },
+                { icon: <Shuffle className="h-3 w-3" />, label: "Interleaved practice" },
+                { icon: <Clock className="h-3 w-3" />, label: "Spaced repetition" },
+                { icon: <Brain className="h-3 w-3" />, label: "Cognitive load matching" },
+              ].map(p => (
+                <span key={p.label} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                  {p.icon} {p.label}
+                </span>
+              ))}
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Subject cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-        {subjects.map((s, i) => (
-          <SubjectCard
-            key={s.id}
-            subject={s}
-            index={i}
-            disabled={!!generated}
-            canRemove={subjects.length > 1}
-            onUpdate={(patch) => updateSubject(s.id, patch)}
-            onRemove={() => removeSubject(s.id)}
-          />
-        ))}
-      </div>
-
-      {/* Add subject */}
-      {subjects.length < 6 && !generated && (
-        <div className="flex justify-center mb-6">
-          <Button variant="outline" size="sm" onClick={addSubject} className="flex items-center gap-1.5 text-sm">
-            <Plus className="h-4 w-4" /> Add Subject (max 6)
-          </Button>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+          {subjects.map((s, i) => (
+            <SubjectCard
+              key={s.id}
+              subject={s}
+              index={i}
+              disabled={!!generated}
+              canRemove={subjects.length > 1}
+              onUpdate={(patch) => updateSubject(s.id, patch)}
+              onRemove={() => removeSubject(s.id)}
+            />
+          ))}
         </div>
-      )}
 
-      {/* Free hours counter */}
+        {subjects.length < 6 && !generated && (
+          <div className="flex justify-center mb-8">
+            <Button variant="outline" size="sm" onClick={addSubject} className="flex items-center gap-1.5 text-sm">
+              <Plus className="h-4 w-4" /> Add Subject (max 6)
+            </Button>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Hours counter */}
       {!generated && (
-        <div className="text-center mb-3">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="text-center mb-3"
+        >
           <p className="text-sm text-muted-foreground">
-            {totalFreeHours > 0 
-              ? <><span className="font-semibold text-primary">{totalFreeHours}</span> hours selected — click cells to toggle, click day headers to select/clear entire days</>
+            {totalFreeHours > 0
+              ? <><span className="font-semibold text-primary">{totalFreeHours} hours</span> selected — click cells to toggle, click day headers to select/clear entire days</>
               : "Click on time blocks below to mark your free study periods"
             }
           </p>
-        </div>
+        </motion.div>
       )}
 
-      {/* Weekly grid */}
-      <div className="bg-muted border border-border rounded-2xl p-3 sm:p-4 mb-4 overflow-x-auto">
-        <div className="min-w-[520px]">
-          {/* Day headers with select/clear buttons */}
-          <div className="grid grid-cols-[48px_repeat(7,1fr)] gap-1 mb-1">
-            <div /> {/* spacer for time column */}
-            {DAYS.map((d) => (
-              <div key={d} className="text-center">
-                <button
-                  onClick={() => {
-                    const allSelected = HOURS.every(h => freeSlots[slotKey(d, h)]);
-                    if (allSelected) clearAllDay(d); else selectAllDay(d);
-                  }}
-                  className="text-xs font-semibold text-muted-foreground hover:text-primary transition-colors py-1 w-full"
-                  disabled={!!generated}
-                >
-                  {d}
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Energy indicator bar */}
-          <div className="grid grid-cols-[48px_repeat(7,1fr)] gap-1 mb-1">
-            <div className="flex items-center justify-end pr-2 text-[9px] text-muted-foreground/50">⚡</div>
+      {/* Availability grid */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.45 }}
+        className="bg-card border border-border rounded-2xl p-3 sm:p-4 mb-6 overflow-x-auto shadow-sm"
+      >
+        <div className="min-w-[560px]">
+          {/* Day headers */}
+          <div className="grid grid-cols-[56px_repeat(7,1fr)] gap-1 mb-1">
+            <div />
             {DAYS.map(d => (
-              <div key={d} className="h-1 rounded-full bg-muted" />
+              <button
+                key={d}
+                onClick={() => toggleDay(d)}
+                className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors py-1.5 text-center"
+                disabled={!!generated}
+              >
+                {d}
+              </button>
             ))}
           </div>
 
           {/* Time rows */}
-          {HOURS.map((h) => {
-            const energy = energyLevel(h);
-            const energyColor = energy >= 0.85 ? 'bg-green-500/20' : energy >= 0.6 ? 'bg-yellow-500/15' : 'bg-orange-500/10';
+          {HOURS.map(h => {
+            const tier = energyTier(h);
+            const isEvening = h >= 20;
+            const isMorning = h >= 6 && h <= 9;
+
             return (
-              <div key={h} className="grid grid-cols-[48px_repeat(7,1fr)] gap-1 mb-1">
-                <div className={`flex items-center justify-end pr-2 text-xs text-muted-foreground tabular-nums rounded-l-md ${energyColor}`}>
-                  {String(h).padStart(2, "0")}:00
+              <div key={h} className="grid grid-cols-[56px_repeat(7,1fr)] gap-1 mb-1">
+                <div className="flex items-center justify-end pr-2 gap-1 text-xs text-muted-foreground tabular-nums">
+                  {isMorning && <Zap className="h-3 w-3 text-amber-500" />}
+                  {isEvening && <Moon className="h-3 w-3 text-indigo-400" />}
+                  <span>{String(h).padStart(2, "0")}:00</span>
                 </div>
-                {DAYS.map((d) => {
+                {DAYS.map(d => {
                   const key = slotKey(d, h);
                   const isFree = !!freeSlots[key];
                   const assigned = generated?.[key];
@@ -655,27 +682,21 @@ export const RevisionTimetable: React.FC = () => {
                     <button
                       key={key}
                       onClick={() => toggleSlot(d, h)}
-                      className={`h-10 rounded-md text-[9px] font-medium leading-tight transition-all duration-150 px-1 flex flex-col items-center justify-center ${
+                      className={`h-11 rounded-lg text-[9px] font-medium leading-tight transition-all duration-150 px-1 flex flex-col items-center justify-center ${
                         assigned
-                          ? "border"
+                          ? "text-white shadow-sm"
                           : isFree
-                          ? "border border-transparent"
-                          : "bg-accent border border-transparent hover:border-border"
+                          ? "bg-primary/20 border border-primary/30"
+                          : "bg-muted/50 border border-transparent hover:border-border hover:bg-muted"
                       }`}
-                      style={
-                        assigned && color
-                          ? { background: color.bg, borderColor: color.border, color: color.text }
-                          : isFree
-                          ? { background: "var(--gradient-brand)", color: "white" }
-                          : undefined
-                      }
+                      style={assigned && color ? { backgroundColor: color.bg } : undefined}
                       title={assigned ? `${assigned.subject}: ${assigned.technique}` : undefined}
                       disabled={!!generated}
                     >
                       {assigned ? (
                         <>
-                          <span className="truncate w-full text-center font-semibold text-[9px]">{assigned.subject}</span>
-                          <span className="truncate w-full text-center opacity-70 text-[7px]">{assigned.technique}</span>
+                          <span className="truncate w-full text-center font-bold text-[9px]">{assigned.subject}</span>
+                          <span className="truncate w-full text-center opacity-80 text-[7px]">{assigned.technique}</span>
                         </>
                       ) : ""}
                     </button>
@@ -685,54 +706,141 @@ export const RevisionTimetable: React.FC = () => {
             );
           })}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Legend (when generated) */}
-      {generated && (
-        <div className="space-y-3 mb-4">
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs">
-            {Object.entries(subjectColorMap).map(([name, color]) => (
-              <span key={name} className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded" style={{ background: color.bg, border: `1px solid ${color.border}` }} />
-                {name}
+      {/* Generate button */}
+      {!generated && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex justify-center mb-8"
+        >
+          <Button
+            onClick={generate}
+            disabled={!canGenerate}
+            className="px-8 py-6 text-base font-semibold rounded-xl shadow-lg w-full max-w-[600px]"
+            style={{ background: canGenerate ? "var(--gradient-brand)" : undefined }}
+          >
+            {isGenerating ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Optimising your schedule...
               </span>
-            ))}
-          </div>
-
-          {/* Energy legend */}
-          <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500/40" /> Peak Focus (9-11am)</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500/40" /> Good Focus</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500/40" /> Light Study</span>
-          </div>
-
-          {/* Stats */}
-          <div className="flex justify-center gap-6 text-xs text-muted-foreground">
-            {Object.entries(
-              Object.values(generated).reduce<Record<string, number>>((acc, s) => {
-                acc[s.subject] = (acc[s.subject] || 0) + 1;
-                return acc;
-              }, {})
-            ).map(([name, count]) => (
-              <span key={name}><span className="font-semibold text-foreground">{count}h</span> {name}</span>
-            ))}
-          </div>
-        </div>
+            ) : (
+              <span className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Generate My Timetable
+              </span>
+            )}
+          </Button>
+        </motion.div>
       )}
 
-      {/* Action buttons */}
-      <div className="flex justify-center gap-3">
-        {!generated ? (
-          <Button variant="brand" size="lg" onClick={generate} className="flex items-center gap-2">
-            <Brain className="h-4 w-4" />
-            Generate Smart Timetable
-          </Button>
-        ) : (
-          <Button variant="outline" size="sm" onClick={reset} className="flex items-center gap-1.5">
-            <RotateCcw className="h-4 w-4" /> Reset & Re-generate
-          </Button>
+      {/* Generated output */}
+      <AnimatePresence>
+        {generated && (
+          <motion.div
+            ref={timetableRef}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Legend */}
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs mb-4">
+              {Object.entries(subjectColorMap).map(([name, color]) => (
+                <span key={name} className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded" style={{ backgroundColor: color.bg }} />
+                  <span className="font-medium">{name}</span>
+                </span>
+              ))}
+            </div>
+
+            {/* Breakdown summary */}
+            <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 mb-6 shadow-sm">
+              {/* Stacked bar */}
+              <div className="h-4 rounded-full overflow-hidden flex mb-4">
+                {Object.entries(breakdown).map(([name, data]) => (
+                  <div
+                    key={name}
+                    className="h-full transition-all"
+                    style={{
+                      width: `${(data.hours / totalGeneratedHours) * 100}%`,
+                      backgroundColor: subjectColorMap[name]?.bg || "#888",
+                    }}
+                    title={`${name}: ${data.hours}h`}
+                  />
+                ))}
+              </div>
+
+              {/* Stat cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Object.entries(breakdown).map(([name, data]) => {
+                  const pct = Math.round((data.hours / totalGeneratedHours) * 100);
+                  const color = subjectColorMap[name];
+                  return (
+                    <div
+                      key={name}
+                      className="rounded-xl p-3 border"
+                      style={{ backgroundColor: color?.bgLight, borderColor: color?.border }}
+                    >
+                      <p className="font-semibold text-sm text-foreground mb-1">{name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-bold text-foreground">{data.hours}h/week</span> · {pct}% of total
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Sessions: {Array.from(data.techniques).join(", ")}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              <Button variant="outline" size="sm" onClick={reset} className="flex items-center gap-1.5">
+                <RotateCcw className="h-4 w-4" /> Reset & Re-generate
+              </Button>
+              <Button variant="outline" size="sm" onClick={downloadPDF} className="flex items-center gap-1.5">
+                <Download className="h-4 w-4" /> Download as PDF
+              </Button>
+            </div>
+
+            {/* Science explainer accordion */}
+            <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-sm">
+              <h3 className="font-semibold text-sm text-foreground mb-3">How does this work?</h3>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="spaced">
+                  <AccordionTrigger className="text-sm">Spaced Repetition</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground">
+                    We schedule review sessions at increasing intervals — you'll revisit weaker subjects more frequently to lock in long-term memory. Research shows that spacing out practice over time leads to significantly better retention than massed study.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="interleaved">
+                  <AccordionTrigger className="text-sm">Interleaved Practice</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground">
+                    Instead of marathon sessions on one subject, we mix topics throughout the day. Research shows this improves retention and problem-solving ability compared to blocked practice, even though it may feel harder in the moment.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="recall">
+                  <AccordionTrigger className="text-sm">Active Recall</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground">
+                    Each session includes a retrieval practice component — testing yourself is proven to be 2–3× more effective than re-reading notes. We assign "Active Recall" and "Practice Questions" sessions to maximise this effect.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="cognitive">
+                  <AccordionTrigger className="text-sm">Cognitive Load Matching</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground">
+                    We place your hardest subjects during peak energy hours (mornings) and lighter review in the evenings. This aligns with research on circadian rhythms and cognitive performance, ensuring you tackle demanding material when your brain is at its sharpest.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </motion.div>
         )}
-      </div>
-    </motion.div>
+      </AnimatePresence>
+    </div>
   );
 };
