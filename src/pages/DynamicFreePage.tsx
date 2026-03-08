@@ -135,7 +135,7 @@ export const DynamicFreePage = () => {
               ];
             })()
           }
-          chatRef={chatRef}
+          />
         />
       </div>
     </div>

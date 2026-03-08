@@ -49,8 +49,6 @@ export const CIEPremiumPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showDiagramTool 
-          showEssayMarker
           showPastPaperFinder
           showExamCountdown
           examDates={CIE_ECONOMICS_EXAMS}
@@ -59,7 +57,6 @@ export const CIEPremiumPage = () => {
           productId={CIE_PRODUCT_ID}
           productSlug="cie-economics"
           showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -72,7 +69,7 @@ export const CIEPremiumPage = () => {
           placeholder="Ask any CIE Economics question..."
           suggestedPrompts={CIE_ECONOMICS_PROMPTS}
           enableDiagrams
-          chatRef={chatRef}
+          diagramSubject="economics"
         />
       </div>
     </div>

@@ -144,7 +144,7 @@ export const DynamicPremiumPage = () => {
               ];
             })()
           }
-          chatRef={chatRef}
+          />
         />
       </div>
     </div>

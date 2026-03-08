@@ -157,7 +157,6 @@
         <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
          <Header
            showImageTool
-           showEssayMarker
            showPastPaperFinder
            pastPaperBoard="aqa-psychology"
            showRevisionGuide
@@ -169,9 +168,6 @@
            productId={productId}
            productSlug="aqa-psychology"
            showUpgradeButton
-           onEssayMarkerSubmit={handleEssayMarkerSubmit}
-           essayMarkerLabel="16-Marker Analysis"
-           essayMarkerFixedMark={16}
          />
         </div>
        
@@ -183,7 +179,6 @@
            footerText="Powered by A* AI • Trained on AQA Psychology past papers & mark schemes"
            placeholder="Ask me anything about AQA Psychology A-Level..."
            suggestedPrompts={AQA_PSYCHOLOGY_PROMPTS}
-           chatRef={chatRef}
          />
        </div>
      </div>

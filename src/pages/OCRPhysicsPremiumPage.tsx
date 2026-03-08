@@ -157,9 +157,8 @@ export const OCRPhysicsPremiumPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool
-          showEssayMarker
-           showPastPaperFinder
-           pastPaperBoard="ocr-physics"
+          showPastPaperFinder
+          pastPaperBoard="ocr-physics"
           showExamCountdown
           examDates={OCR_PHYSICS_EXAMS}
           examSubjectName="OCR Physics"
@@ -167,9 +166,6 @@ export const OCRPhysicsPremiumPage = () => {
           productId={productId}
           productSlug="ocr-physics"
           showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
-          essayMarkerLabel="6-Marker Analysis"
-          essayMarkerFixedMark={6}
         />
       </div>
       
@@ -181,7 +177,6 @@ export const OCRPhysicsPremiumPage = () => {
           footerText="Powered by A* AI • Trained on OCR Physics past papers & mark schemes"
           placeholder="Ask me anything about OCR Physics A-Level..."
           suggestedPrompts={OCR_PHYSICS_PROMPTS}
-          chatRef={chatRef}
         />
       </div>
     </div>
