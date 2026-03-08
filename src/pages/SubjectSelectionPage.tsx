@@ -37,6 +37,7 @@ export const SubjectSelectionPage = () => {
   const [selectedLevel, setSelectedLevel] = useState<'alevel' | 'gcse' | null>(null);
   const [selectedSubjects, setSelectedSubjects] = useState<SubjectOption[]>([]);
   const [dynamicALevelSubjects, setDynamicALevelSubjects] = useState<SubjectOption[]>([]);
+  const subjectsRef = useRef<HTMLDivElement>(null);
 
   // Load dynamic A-Level subjects from products table
   useEffect(() => {
