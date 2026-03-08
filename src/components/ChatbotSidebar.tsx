@@ -206,11 +206,11 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
   return (
     <>
-      <Sheet open={open} onOpenChange={(o) => { if (fileDialogOpen.current && !o) return; setOpen(o); }}>
+      <Sheet open={open} onOpenChange={(o) => { if (fileDialogOpen.current && !o) return; setOpen(o); }} modal={false}>
         {/* Left-side vertically centered trigger button */}
          <SheetTrigger asChild>
           <button
-            className="fixed left-3 top-[5.5rem] z-[60] flex flex-col items-center gap-1.5 px-2.5 py-3 rounded-2xl border border-border bg-background/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
+            className="fixed left-3 top-1/2 -translate-y-1/2 z-[60] flex flex-col items-center gap-1.5 px-2.5 py-3 rounded-2xl border border-border bg-background/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
           >
             <Menu className="h-5 w-5 text-primary group-hover:text-primary/80 transition-colors" />
             <span className="text-[10px] font-semibold text-foreground leading-tight text-center">Menu<br/>&amp; Tools</span>
@@ -222,7 +222,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             )}
           </button>
         </SheetTrigger>
-        <SheetContent side="left" className="top-[5.5rem] h-[calc(100vh-5.5rem)] w-[340px] sm:top-24 sm:h-[calc(100vh-6rem)] sm:w-[380px] p-0 flex flex-col border-r border-border bg-background z-[70] [&>button:last-child]:hidden">
+        <SheetContent noOverlay side="left" className="top-[5.5rem] h-[calc(100vh-5.5rem)] w-[340px] sm:top-[5.5rem] sm:h-[calc(100vh-5.5rem)] sm:w-[380px] p-0 flex flex-col border-r border-border bg-background z-[55] [&>button:last-child]:hidden">
           {view === 'menu' ? (
             <>
               {/* Header with close button */}
