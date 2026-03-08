@@ -271,7 +271,7 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
     const response = await fetch(aiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${openaiApiKey}`,
+        Authorization: `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

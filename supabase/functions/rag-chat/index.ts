@@ -617,7 +617,7 @@ When a student asks you to mark their essay, answer, or response:
     const response = await fetch(aiUrl, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${openaiApiKey}`,
+        "Authorization": `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
