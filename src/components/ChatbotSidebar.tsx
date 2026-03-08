@@ -298,7 +298,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                                 : 'text-foreground hover:bg-muted'
                             }`}
                           >
-                            <span className="text-base">{s.icon}</span>
+                            
                             <span className="truncate">{s.name}</span>
                             {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
                           </button>
