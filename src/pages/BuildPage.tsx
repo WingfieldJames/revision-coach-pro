@@ -1778,6 +1778,7 @@ export function BuildPage() {
               {selectedFeatures.includes("revision_guide") && (() => {
                 const hasSpec = specComplete && stagedSpecData && stagedSpecData.length > 0;
                 const ppUploads = uploads.filter(u => u.section_type === "past_paper" && u.processing_status === "processed");
+                const hasPaperData = ppUploads.length > 0 || chunkStats.pastPaperChunks > 0;
                 return (
                   <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                     <div className="flex items-center gap-2">
@@ -1795,6 +1796,7 @@ export function BuildPage() {
                         {hasSpec ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
                         <span className={hasSpec ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
                           Specification: {hasSpec ? `${stagedSpecData!.length} points available` : "Required — not yet uploaded"}
+                          {chunkStats.specChunks > 0 && <span className="text-muted-foreground ml-1">({chunkStats.specChunks} chunks deployed)</span>}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs">
@@ -1804,9 +1806,9 @@ export function BuildPage() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs">
-                        {ppUploads.length > 0 ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <Circle className="h-3.5 w-3.5 text-muted-foreground" />}
+                        {hasPaperData ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <Circle className="h-3.5 w-3.5 text-muted-foreground" />}
                         <span className="text-muted-foreground">
-                          Past Papers: {ppUploads.length > 0 ? `${ppUploads.length} papers enriching guides` : "Optional — adds real exam context"}
+                          Past Papers: {chunkStats.pastPaperChunks > 0 ? `${chunkStats.pastPaperChunks} question chunks indexed` : (ppUploads.length > 0 ? `${ppUploads.length} files processed` : "Optional — adds real exam context")}
                         </span>
                       </div>
                     </div>
