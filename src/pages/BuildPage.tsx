@@ -1709,7 +1709,9 @@ export function BuildPage() {
                 const errorUploads = ppUploads.filter(u => u.processing_status === "error");
                 const yearsWithPapers = [...new Set(ppUploads.map(u => u.year).filter(Boolean))].sort().reverse();
                 const hasSpec = specComplete && stagedSpecData && stagedSpecData.length > 0;
-                const isReady = hasSpec && processedUploads.length > 0;
+                const totalPaperChunks = chunkStats.pastPaperChunks;
+                const hasTrainingData = processedUploads.length > 0 || totalPaperChunks > 0;
+                const isReady = hasSpec && hasTrainingData;
                 return (
                   <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                     <div className="flex items-center gap-2">
@@ -1727,12 +1729,14 @@ export function BuildPage() {
                         {hasSpec ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
                         <span className={hasSpec ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
                           Specification: {hasSpec ? `${stagedSpecData!.length} points indexed` : "Not uploaded"}
+                          {chunkStats.specChunks > 0 && <span className="text-muted-foreground ml-1">({chunkStats.specChunks} chunks deployed)</span>}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs">
-                        {processedUploads.length > 0 ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
-                        <span className={processedUploads.length > 0 ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
-                          Past Papers: {processedUploads.length} file{processedUploads.length !== 1 ? "s" : ""} processed
+                        {hasTrainingData ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
+                        <span className={hasTrainingData ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
+                          Training Data: {totalPaperChunks > 0 ? `${totalPaperChunks} question chunks indexed` : "No chunks indexed yet"}
+                          {processedUploads.length > 0 && <span className="text-muted-foreground ml-1">({processedUploads.length} file{processedUploads.length !== 1 ? "s" : ""} processed)</span>}
                           {pendingUploads.length > 0 && <span className="text-muted-foreground ml-1">({pendingUploads.length} processing…)</span>}
                           {errorUploads.length > 0 && <span className="text-destructive ml-1">({errorUploads.length} failed)</span>}
                         </span>
@@ -1740,7 +1744,7 @@ export function BuildPage() {
                     </div>
                     {yearsWithPapers.length > 0 && (
                       <div className="pt-1">
-                        <p className="text-xs text-muted-foreground mb-1.5">Papers by year:</p>
+                        <p className="text-xs text-muted-foreground mb-1.5">Uploaded papers by year:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {yearsWithPapers.map(year => {
                             const count = ppUploads.filter(u => u.year === year).length;
@@ -1753,6 +1757,14 @@ export function BuildPage() {
                         </div>
                       </div>
                     )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full text-xs"
+                      onClick={loadChunkStats}
+                    >
+                      <Activity className="h-3 w-3 mr-1" /> Refresh Index Stats
+                    </Button>
                     {!hasSpec && (
                       <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 rounded p-2">
                         ⚠️ Upload a specification in the "Specification" section above to enable spec-to-question mapping.
