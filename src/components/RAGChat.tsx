@@ -396,6 +396,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         setIsAnimating(true);
         animateNextWord();
       }
+      // Persist assistant response
+      if (fullContentRef.current) {
+        persistMessage('assistant', fullContentRef.current);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [...prev, {
