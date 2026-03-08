@@ -6,7 +6,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ChevronDown, Instagram, Youtube, Calendar, BookOpen, GraduationCap, Search, FileCheck } from "lucide-react";
+import { ChevronDown, Instagram, Youtube, Linkedin, Calendar, BookOpen, GraduationCap, Search, FileCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -551,6 +551,14 @@ export const HomePage = () => {
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <Youtube size={24} />
+            </a>
+            <a
+              href="https://www.linkedin.com/company/astar-ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Linkedin size={24} />
             </a>
             <p className="text-sm text-muted-foreground">© 2025 A* AI</p>
           </div>

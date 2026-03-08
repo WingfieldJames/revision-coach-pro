@@ -1,6 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { Instagram, Youtube } from 'lucide-react';
+import { Instagram, Youtube, Linkedin } from 'lucide-react';
 import { SEOHead } from '@/components/SEOHead';
 import { useTheme } from '@/contexts/ThemeContext';
 import logo from '@/assets/logo.png';
@@ -72,6 +72,9 @@ const NotFound = () => {
             </a>
             <a href="https://www.youtube.com/@a_star_ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Youtube size={24} />
+            </a>
+            <a href="https://www.linkedin.com/company/astar-ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Linkedin size={24} />
             </a>
             <p className="text-sm text-muted-foreground">
               © 2025 A* AI

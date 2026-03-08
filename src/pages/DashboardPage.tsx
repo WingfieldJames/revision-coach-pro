@@ -10,7 +10,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Trash2, ExternalLink, Instagram, Youtube, ChevronDown, AlertCircle } from 'lucide-react';
+import { Trash2, ExternalLink, Instagram, Youtube, Linkedin, ChevronDown, AlertCircle } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
@@ -719,6 +719,9 @@ export const DashboardPage = () => {
             </a>
             <a href="https://www.youtube.com/@a_star_ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Youtube size={24} />
+            </a>
+            <a href="https://www.linkedin.com/company/astar-ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Linkedin size={24} />
             </a>
             <p className="text-sm text-muted-foreground">
               © 2025 A* AI

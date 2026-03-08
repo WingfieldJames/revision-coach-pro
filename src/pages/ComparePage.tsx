@@ -7,7 +7,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
-import { ChevronDown, Check, Star, Instagram, Youtube } from 'lucide-react';
+import { ChevronDown, Check, Star, Instagram, Youtube, Linkedin } from 'lucide-react';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.png';
@@ -654,6 +654,9 @@ export const ComparePage = () => {
               </a>
               <a href="https://www.youtube.com/@a_star_ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Youtube size={24} />
+              </a>
+              <a href="https://www.linkedin.com/company/astar-ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Linkedin size={24} />
               </a>
               <p className="text-sm text-muted-foreground">
                 © 2025 A* AI
