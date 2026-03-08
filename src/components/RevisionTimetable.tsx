@@ -409,34 +409,13 @@ export const RevisionTimetable: React.FC = () => {
       {/* Subject cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
         {subjects.map((s, i) => (
-          <div key={s.id} className="bg-card border border-border rounded-2xl p-4 relative">
-            {subjects.length > 1 && (
-              <button onClick={() => removeSubject(s.id)} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground">
-                <X className="h-4 w-4" />
-              </button>
-            )}
-            <Input
-              placeholder={`Subject ${i + 1}`}
-              value={s.name}
-              onChange={(e) => updateSubject(s.id, { name: e.target.value })}
-              className="mb-3 text-sm"
-              disabled={!!generated}
-            />
-
-            {/* Subject Type */}
-            <div className="mb-3">
-              <label className="text-xs text-muted-foreground mb-1 block">Subject Type</label>
-              <select
-                value={s.subjectType}
-                onChange={(e) => updateSubject(s.id, { subjectType: e.target.value as SubjectType })}
-                className="w-full h-9 rounded-md border border-input bg-background px-2 text-xs"
-                disabled={!!generated}
-              >
-                {SUBJECT_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
+          <SubjectAutocomplete
+            subject={s}
+            index={i}
+            disabled={!!generated}
+            onUpdate={(patch) => updateSubject(s.id, patch)}
+            onRemove={subjects.length > 1 ? () => removeSubject(s.id) : undefined}
+          />
 
             <div className="grid grid-cols-2 gap-2 mb-3">
               <div>
