@@ -35,7 +35,7 @@ export const SubjectSelectionPage = () => {
   const currentLogo = theme === 'dark' ? logo : logoDark;
 
   const [selectedLevel, setSelectedLevel] = useState<'alevel' | 'gcse' | null>(null);
-  const [selectedSubject, setSelectedSubject] = useState<SubjectOption | null>(null);
+  const [selectedSubjects, setSelectedSubjects] = useState<SubjectOption[]>([]);
   const [dynamicALevelSubjects, setDynamicALevelSubjects] = useState<SubjectOption[]>([]);
 
   // Load dynamic A-Level subjects from products table
