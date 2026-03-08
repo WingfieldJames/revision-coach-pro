@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -8,11 +8,10 @@ import { motion } from "framer-motion";
 
 /* ─── constants ─── */
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const HOURS = Array.from({ length: 16 }, (_, i) => i + 6); // 6..21 → represents 06:00-22:00
+const HOURS = Array.from({ length: 16 }, (_, i) => i + 6);
 const GRADES = ["U", "E", "D", "C", "B", "A", "A*"] as const;
 type Grade = (typeof GRADES)[number];
 
-// Subject type categories for cognitive load scheduling
 const SUBJECT_TYPES = [
   "STEM - Heavy Calculation",
   "STEM - Conceptual",
@@ -20,6 +19,50 @@ const SUBJECT_TYPES = [
   "Language / Memory-Heavy",
 ] as const;
 type SubjectType = (typeof SUBJECT_TYPES)[number];
+
+/* ─── default subject catalogue ─── */
+const KNOWN_SUBJECTS: { name: string; type: SubjectType }[] = [
+  { name: "Mathematics", type: "STEM - Heavy Calculation" },
+  { name: "Further Mathematics", type: "STEM - Heavy Calculation" },
+  { name: "Physics", type: "STEM - Heavy Calculation" },
+  { name: "Chemistry", type: "STEM - Heavy Calculation" },
+  { name: "Accounting", type: "STEM - Heavy Calculation" },
+  { name: "Statistics", type: "STEM - Heavy Calculation" },
+  { name: "Biology", type: "STEM - Conceptual" },
+  { name: "Computer Science", type: "STEM - Conceptual" },
+  { name: "Electronics", type: "STEM - Conceptual" },
+  { name: "Environmental Science", type: "STEM - Conceptual" },
+  { name: "Psychology", type: "STEM - Conceptual" },
+  { name: "Geography", type: "STEM - Conceptual" },
+  { name: "Economics", type: "STEM - Conceptual" },
+  { name: "Business Studies", type: "STEM - Conceptual" },
+  { name: "English Literature", type: "Essay-Based / Humanities" },
+  { name: "English Language", type: "Essay-Based / Humanities" },
+  { name: "History", type: "Essay-Based / Humanities" },
+  { name: "Politics", type: "Essay-Based / Humanities" },
+  { name: "Philosophy", type: "Essay-Based / Humanities" },
+  { name: "Sociology", type: "Essay-Based / Humanities" },
+  { name: "Religious Studies", type: "Essay-Based / Humanities" },
+  { name: "Law", type: "Essay-Based / Humanities" },
+  { name: "Media Studies", type: "Essay-Based / Humanities" },
+  { name: "Art", type: "Essay-Based / Humanities" },
+  { name: "Music", type: "Essay-Based / Humanities" },
+  { name: "Drama", type: "Essay-Based / Humanities" },
+  { name: "Film Studies", type: "Essay-Based / Humanities" },
+  { name: "PE", type: "Essay-Based / Humanities" },
+  { name: "Design & Technology", type: "Essay-Based / Humanities" },
+  { name: "French", type: "Language / Memory-Heavy" },
+  { name: "Spanish", type: "Language / Memory-Heavy" },
+  { name: "German", type: "Language / Memory-Heavy" },
+  { name: "Italian", type: "Language / Memory-Heavy" },
+  { name: "Mandarin", type: "Language / Memory-Heavy" },
+  { name: "Arabic", type: "Language / Memory-Heavy" },
+  { name: "Latin", type: "Language / Memory-Heavy" },
+  { name: "Greek", type: "Language / Memory-Heavy" },
+  { name: "Japanese", type: "Language / Memory-Heavy" },
+  { name: "Russian", type: "Language / Memory-Heavy" },
+  { name: "Urdu", type: "Language / Memory-Heavy" },
+];
 
 const SUBJECT_COLORS = [
   { bg: "rgba(147,51,234,0.25)", border: "rgba(147,51,234,0.5)", text: "hsl(var(--foreground))" },
@@ -31,7 +74,7 @@ const SUBJECT_COLORS = [
 ];
 
 /* ─── storage keys ─── */
-const SUBJECTS_KEY = "astar_timetable_subjects_v2";
+const SUBJECTS_KEY = "astar_timetable_subjects_v3";
 const SLOTS_KEY = "astar_timetable_free_slots";
 const GENERATED_KEY = "astar_timetable_generated_v2";
 
@@ -43,60 +86,20 @@ interface Subject {
   target: Grade;
   importance: number;
   subjectType: SubjectType;
+  isCustom: boolean;
 }
 
 type SlotMap = Record<string, boolean>;
 interface ScheduledSlot {
   subject: string;
-  technique: string; // e.g. "Active Recall", "Practice Questions", "Spaced Review"
+  technique: string;
 }
 type GeneratedMap = Record<string, ScheduledSlot>;
 
-/* ─── scientific scheduling techniques ─── */
-const TECHNIQUES_BY_TYPE: Record<SubjectType, string[]> = {
-  "STEM - Heavy Calculation": ["Practice Problems", "Worked Examples", "Timed Drills", "Error Analysis"],
-  "STEM - Conceptual": ["Active Recall", "Concept Mapping", "Feynman Technique", "Past Papers"],
-  "Essay-Based / Humanities": ["Essay Plans", "Timed Essays", "Source Analysis", "Model Answer Review"],
-  "Language / Memory-Heavy": ["Flashcard Drill", "Spaced Recall", "Active Writing", "Practice Translation"],
-};
-
-// Cognitive load ratings: higher = more mentally demanding
-const COGNITIVE_LOAD: Record<SubjectType, number> = {
-  "STEM - Heavy Calculation": 5,
-  "STEM - Conceptual": 4,
-  "Essay-Based / Humanities": 3,
-  "Language / Memory-Heavy": 3,
-};
-
-// Energy curve: morning peak, post-lunch dip, afternoon recovery, evening decline
-// Maps hour (6-21) to energy multiplier (0-1)
-function energyLevel(hour: number): number {
-  if (hour >= 6 && hour <= 8) return 0.7;   // warm-up
-  if (hour >= 9 && hour <= 11) return 1.0;  // peak focus
-  if (hour === 12) return 0.6;              // lunch dip
-  if (hour >= 13 && hour <= 14) return 0.5; // post-lunch slump
-  if (hour >= 15 && hour <= 17) return 0.85; // afternoon recovery
-  if (hour >= 18 && hour <= 19) return 0.7;  // evening
-  return 0.5;                                // late evening
-}
-
-/* ─── helpers ─── */
-const gradeIndex = (g: Grade) => GRADES.indexOf(g);
-const slotKey = (day: string, hour: number) => `${day}-${hour}`;
-
-function loadJSON<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
 const defaultSubjects = (): Subject[] => [
-  { id: "1", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual" },
-  { id: "2", name: "", predicted: "C", target: "A", importance: 3, subjectType: "Essay-Based / Humanities" },
-  { id: "3", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual" },
+  { id: "1", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false },
+  { id: "2", name: "", predicted: "C", target: "A", importance: 3, subjectType: "Essay-Based / Humanities", isCustom: false },
+  { id: "3", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false },
 ];
 
 /* ─── scientific scheduling algorithm ─── */
