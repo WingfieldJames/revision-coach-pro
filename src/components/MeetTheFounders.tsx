@@ -7,24 +7,28 @@ import tanujKakumani from '@/assets/tanuj-kakumani.jpg';
 
 interface Founder {
   name: string;
-  role: string;
+  university: string;
+  stats: string;
   image: string;
 }
 
 const founders: Founder[] = [
   {
     name: 'Henry Li',
-    role: 'Co-Founder',
+    university: 'LSE PPE',
+    stats: 'A-Level: 4A* · GCSE: 11 9s',
     image: henryLi,
   },
   {
     name: 'James Wingfield',
-    role: 'Co-Founder',
+    university: 'LSE Management',
+    stats: 'A-Level: A*A*A · GCSE: 11 9s',
     image: jamesFounder,
   },
   {
     name: 'Tanuj Kakumani',
-    role: 'Co-Founder',
+    university: 'Imperial EFDS',
+    stats: 'A-Level: A*A*A*A · GCSE: 7 9s',
     image: tanujKakumani,
   },
 ];
@@ -68,7 +72,10 @@ export function MeetTheFounders() {
                 {founder.name}
               </h3>
               <p className={`text-xs sm:text-sm font-medium ${isDark ? 'text-primary' : 'text-muted-foreground'}`}>
-                {founder.role}
+                {founder.university}
+              </p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                {founder.stats}
               </p>
             </motion.div>
           ))}
