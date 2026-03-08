@@ -23,7 +23,6 @@ export const AQAPremiumPage = () => {
   const navigate = useNavigate();
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
-  const chatRef = useRef<RAGChatRef>(null);
 
   useEffect(() => {
     const verifyAccess = async () => {
