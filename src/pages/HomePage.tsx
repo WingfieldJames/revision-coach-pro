@@ -147,11 +147,11 @@ export const HomePage = () => {
                 </div>
 
                 {/* Main Headline */}
-                <h1 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] font-bold mb-4 leading-[1.15]">
+                <h1 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] font-bold mb-4 leading-[1.15] tracking-tight">
                   <div className="text-foreground">The AI that actually</div>
                   <div>
                     <span className="text-foreground">understands </span>
-                    <span className="text-gradient-brand">A-Level </span>
+                    <span className="text-primary">A-Level </span>
                     <span
                       className="relative inline-block overflow-hidden text-left"
                       style={{ width: "7em", height: "1.15em", verticalAlign: "bottom" }}
@@ -159,7 +159,7 @@ export const HomePage = () => {
                       <AnimatePresence mode="wait">
                         <motion.span
                           key={subjects[currentSubjectIndex]}
-                          className="absolute left-0 bottom-0 text-gradient-brand"
+                          className="absolute left-0 bottom-0 text-primary"
                           initial={{ y: "100%", opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           exit={{ y: "-100%", opacity: 0 }}
