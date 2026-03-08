@@ -26,7 +26,7 @@ export const AQAChemistryPremiumPage = () => {
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
-  const chatRef = useRef<RAGChatRef>(null);
+  
 
   useEffect(() => {
     const checkAccess = async () => {
