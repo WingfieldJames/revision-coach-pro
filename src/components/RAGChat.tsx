@@ -133,8 +133,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const chatHistoryCtx = useChatHistoryContext();
   const { createConversation, saveMessage, loadMessages, fetchConversations } = useChatHistory(productId);
   const conversationIdRef = useRef<string | null>(null);
+  const loadMessagesRef = useRef(loadMessages);
+  loadMessagesRef.current = loadMessages;
 
-  // Register handlers for sidebar communication
+  // Register handlers for sidebar communication (run once)
   useEffect(() => {
     if (!chatHistoryCtx) return;
     chatHistoryCtx.registerHandlers({
@@ -145,7 +147,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         setLimitReached(false);
       },
       onLoadConversation: async (id: string) => {
-        const msgs = await loadMessages(id);
+        const msgs = await loadMessagesRef.current(id);
         setMessages(msgs.map(m => ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
@@ -156,14 +158,29 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         setLimitReached(false);
       },
     });
-  }, [chatHistoryCtx, loadMessages]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatHistoryCtx]);
+
+  // Generate a smart title from user message
+  const generateTitle = (userMsg: string, assistantMsg?: string): string => {
+    // Clean up the message
+    const cleaned = userMsg.replace(/\n/g, ' ').trim();
+    if (cleaned.length <= 50) return cleaned || 'New Chat';
+    // Cut at word boundary around 50 chars
+    const cut = cleaned.slice(0, 60);
+    const lastSpace = cut.lastIndexOf(' ');
+    return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut) + '...';
+  };
+
+  const firstUserMsgRef = useRef<string | null>(null);
 
   // Helper to persist a message
   const persistMessage = useCallback(async (role: 'user' | 'assistant', content: string, imageUrl?: string) => {
     if (!user) return;
     // Create conversation on first user message
     if (!conversationIdRef.current && role === 'user') {
-      const title = content.slice(0, 80) || 'New Chat';
+      firstUserMsgRef.current = content;
+      const title = generateTitle(content);
       const newId = await createConversation(title);
       if (newId) {
         conversationIdRef.current = newId;
@@ -172,6 +189,16 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     }
     if (conversationIdRef.current) {
       await saveMessage(conversationIdRef.current, role, content, imageUrl);
+      // After first assistant response, update title with AI-aware summary
+      if (role === 'assistant' && firstUserMsgRef.current) {
+        const betterTitle = generateTitle(firstUserMsgRef.current);
+        firstUserMsgRef.current = null; // Only do this once
+        try {
+          await supabase.from('chat_conversations')
+            .update({ title: betterTitle })
+            .eq('id', conversationIdRef.current);
+        } catch {}
+      }
       chatHistoryCtx?.triggerRefresh();
     }
   }, [user, createConversation, saveMessage, chatHistoryCtx]);
