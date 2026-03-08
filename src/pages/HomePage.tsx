@@ -131,8 +131,7 @@ export const HomePage = () => {
               <div className="flex-1 text-center md:text-left">
                 {/* Social Proof Pill */}
                 <div
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-foreground/10 bg-foreground/5 backdrop-blur-sm"
-                  style={{ boxShadow: "var(--shadow-glow)" }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm"
                 >
                   <span className="text-base">⭐</span>
                   <span className="text-foreground text-xs sm:text-sm font-medium">
