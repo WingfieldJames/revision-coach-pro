@@ -108,6 +108,7 @@ interface HeaderProps {
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
   showMyMistakes?: boolean;
+  showStartStudyingButton?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
