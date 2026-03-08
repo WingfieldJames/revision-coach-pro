@@ -205,9 +205,9 @@ export const HomePage = () => {
         </HeroBackgroundPaths>
       </section>
 
-      {/* Trained by A* Students - Desktop */}
-      <div className="hidden md:block" data-section="founders">
-        <FoundersCarousel />
+      {/* Meet the Founders */}
+      <div data-section="founders">
+        <MeetTheFounders />
       </div>
 
       {/* See A* AI in action - Demo Video */}
