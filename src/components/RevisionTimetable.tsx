@@ -310,7 +310,7 @@ export const RevisionTimetable: React.FC = () => {
 
   const addSubject = () => {
     if (subjects.length >= 6) return;
-    setSubjects((prev) => [...prev, { id: crypto.randomUUID(), name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual" }]);
+    setSubjects((prev) => [...prev, { id: crypto.randomUUID(), name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false }]);
   };
 
   const removeSubject = (id: string) => setSubjects((prev) => prev.filter((s) => s.id !== id));
