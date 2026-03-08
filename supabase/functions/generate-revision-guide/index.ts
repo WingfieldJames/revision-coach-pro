@@ -264,16 +264,14 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
 
     console.log(`Prompt length: ${prompt.length}, System prompt length: ${systemPrompt.length}`);
 
-    // Call OpenAI (non-streaming) with fallback to Lovable AI
-    const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || lovableApiKey;
-    const isOpenAI = !!Deno.env.get("OPENAI_API_KEY");
-    const aiUrl = isOpenAI ? "https://api.openai.com/v1/chat/completions" : "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const aiModel = isOpenAI ? "gpt-4o" : "google/gemini-3-flash-preview";
+    // Call Lovable AI gateway (non-streaming)
+    const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+    const aiModel = "google/gemini-2.5-flash";
 
     const response = await fetch(aiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${openaiApiKey}`,
+        Authorization: `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

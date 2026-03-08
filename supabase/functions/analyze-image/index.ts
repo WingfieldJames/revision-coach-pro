@@ -71,15 +71,13 @@ If there are diagrams, describe the labels/text ON the diagram only (axis labels
 
     console.log("Sending image for analysis, type:", imageType, "user:", user.id);
 
-    const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || LOVABLE_API_KEY;
-    const isOpenAI = !!Deno.env.get("OPENAI_API_KEY");
-    const aiUrl = isOpenAI ? "https://api.openai.com/v1/chat/completions" : "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const aiModel = isOpenAI ? "gpt-4o" : "google/gemini-2.5-flash";
+    const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+    const aiModel = "google/gemini-2.5-flash";
 
     const response = await fetch(aiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${openaiApiKey}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
