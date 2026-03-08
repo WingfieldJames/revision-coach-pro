@@ -207,15 +207,15 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   return (
     <>
       <Sheet open={open} onOpenChange={(o) => { if (fileDialogOpen.current && !o) return; setOpen(o); }}>
-        {/* Prominent centered trigger button */}
+        {/* Left-side vertically centered trigger button */}
         <SheetTrigger asChild>
           <button
-            className="fixed left-1/2 -translate-x-1/2 top-3 z-[60] flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-background/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 group"
+            className="fixed left-3 top-1/2 -translate-y-1/2 z-[60] flex flex-col items-center gap-1.5 px-2.5 py-3 rounded-2xl border border-border bg-background/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
           >
-            <Menu className="h-4 w-4 text-primary group-hover:text-primary/80 transition-colors" />
-            <span className="text-sm font-semibold text-foreground">Menu & Tools</span>
+            <Menu className="h-5 w-5 text-primary group-hover:text-primary/80 transition-colors" />
+            <span className="text-[10px] font-semibold text-foreground leading-tight text-center">Menu<br/>&amp; Tools</span>
             {daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-destructive/10 text-destructive">
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-destructive/10 text-destructive">
                 <Timer className="h-2.5 w-2.5" />
                 {daysUntilFirstExam}d
               </span>
