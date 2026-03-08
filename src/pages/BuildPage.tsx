@@ -579,7 +579,25 @@ export function BuildPage() {
     toast({ title: "Subject created", description: `${newQualificationType} · ${newProject.exam_board} ${newProject.subject}` });
   };
 
-  // Load uploads when project changes
+  // Load uploads + chunk stats when project changes
+  const loadChunkStats = useCallback(async () => {
+    const currentProduct = projects.find(p => p.id === selectedProjectId);
+    const pid = currentProduct?.product_id;
+    if (!pid) { setChunkStats({ pastPaperChunks: 0, specChunks: 0 }); return; }
+    // Count past paper chunks (content_type contains 'paper' or 'mark_scheme' or 'combined')
+    const { count: ppCount } = await supabase
+      .from("document_chunks")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", pid)
+      .or("metadata->>content_type.ilike.%paper%,metadata->>content_type.ilike.%mark_scheme%,metadata->>content_type.eq.combined");
+    const { count: specCount } = await supabase
+      .from("document_chunks")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", pid)
+      .eq("metadata->>content_type", "specification");
+    setChunkStats({ pastPaperChunks: ppCount || 0, specChunks: specCount || 0 });
+  }, [projects, selectedProjectId]);
+
   useEffect(() => {
     if (!projectId) return;
     const loadUploads = async () => {
@@ -589,10 +607,10 @@ export function BuildPage() {
         .eq("project_id", projectId);
       const loaded = (data as TrainerUpload[]) || [];
       setUploads(loaded);
-      // No more submittedYears tracking needed
     };
     loadUploads();
-  }, [projectId]);
+    loadChunkStats();
+  }, [projectId, loadChunkStats]);
 
   // markUnsaved is now a no-op — dirty state is derived from snapshot comparison
   const markUnsaved = useCallback(() => {}, []);
