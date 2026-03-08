@@ -683,15 +683,38 @@ serve(async (req) => {
       }
 
       // Step 3: Sort chunks by question number for consistent ordering
+      // Parse question numbers like "1", "1a", "1(a)", "1(a)(i)", "1(b)(ii)", "01.1", "2.3"
+      function parseQuestionNumber(qn: string): number[] {
+        const parts: number[] = [];
+        // Normalize: remove spaces, lowercase
+        const s = qn.trim().toLowerCase();
+        // Match segments: digits, letters, roman numerals in parens
+        const tokens = s.match(/(\d+)|([a-z])|(\((?:i{1,3}|iv|v|vi{0,3})\))/g) || [];
+        for (const tok of tokens) {
+          if (/^\d+$/.test(tok)) {
+            parts.push(parseInt(tok, 10));
+          } else if (/^[a-z]$/.test(tok)) {
+            parts.push(tok.charCodeAt(0) - 96); // a=1, b=2, ...
+          } else {
+            // Roman numeral in parens like (i), (ii), (iii), (iv), (v), (vi)
+            const roman = tok.replace(/[()]/g, "");
+            const romanMap: Record<string, number> = { i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7 };
+            parts.push(romanMap[roman] || 0);
+          }
+        }
+        return parts;
+      }
+
       chunks.sort((a, b) => {
-        const aNum = String(a.question_number || "");
-        const bNum = String(b.question_number || "");
-        // Extract leading integer for primary sort
-        const aMain = parseInt(aNum.replace(/[^0-9]/g, "")) || 0;
-        const bMain = parseInt(bNum.replace(/[^0-9]/g, "")) || 0;
-        if (aMain !== bMain) return aMain - bMain;
-        // Secondary sort by full string (handles sub-parts like 1a, 1b, 1(a)(i))
-        return aNum.localeCompare(bNum, undefined, { numeric: true, sensitivity: "base" });
+        const aParts = parseQuestionNumber(String(a.question_number || ""));
+        const bParts = parseQuestionNumber(String(b.question_number || ""));
+        const len = Math.max(aParts.length, bParts.length);
+        for (let i = 0; i < len; i++) {
+          const aVal = aParts[i] ?? -1;
+          const bVal = bParts[i] ?? -1;
+          if (aVal !== bVal) return aVal - bVal;
+        }
+        return 0;
       });
 
       // Insert individual chunks with upload_id in metadata
