@@ -181,8 +181,7 @@ export const HomePage = () => {
                 <div className="flex flex-col sm:flex-row items-center md:items-start gap-4">
                   <button
                     onClick={handlePickSubject}
-                    className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
-                    style={{ background: "var(--gradient-brand)" }}
+                    className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
                   >
                     Pick Your Subject →
                   </button>
