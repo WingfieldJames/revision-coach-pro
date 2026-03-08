@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle } from "lucide-react";
+import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle, RefreshCw } from "lucide-react";
 import { normalizeSpecifications } from "@/lib/specNormalization";
 import { getLegacyConfig } from "@/lib/legacyLiveConfig";
 import { diagrams } from "@/data/diagrams";
@@ -184,6 +184,8 @@ export function BuildPage() {
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
+  // Chunk counts from document_chunks (covers legacy + processed uploads)
+  const [chunkStats, setChunkStats] = useState<{ pastPaperChunks: number; specChunks: number }>({ pastPaperChunks: 0, specChunks: 0 });
 
   // Track files currently processing (for tab-close warning + polling)
   const hasProcessingFiles = useMemo(
@@ -577,7 +579,25 @@ export function BuildPage() {
     toast({ title: "Subject created", description: `${newQualificationType} · ${newProject.exam_board} ${newProject.subject}` });
   };
 
-  // Load uploads when project changes
+  // Load uploads + chunk stats when project changes
+  const loadChunkStats = useCallback(async () => {
+    const currentProduct = projects.find(p => p.id === selectedProjectId);
+    const pid = currentProduct?.product_id;
+    if (!pid) { setChunkStats({ pastPaperChunks: 0, specChunks: 0 }); return; }
+    // Count past paper chunks (content_type contains 'paper' or 'mark_scheme' or 'combined')
+    const { count: ppCount } = await supabase
+      .from("document_chunks")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", pid)
+      .or("metadata->>content_type.ilike.%paper%,metadata->>content_type.ilike.%mark_scheme%,metadata->>content_type.eq.combined");
+    const { count: specCount } = await supabase
+      .from("document_chunks")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", pid)
+      .eq("metadata->>content_type", "specification");
+    setChunkStats({ pastPaperChunks: ppCount || 0, specChunks: specCount || 0 });
+  }, [projects, selectedProjectId]);
+
   useEffect(() => {
     if (!projectId) return;
     const loadUploads = async () => {
@@ -587,10 +607,10 @@ export function BuildPage() {
         .eq("project_id", projectId);
       const loaded = (data as TrainerUpload[]) || [];
       setUploads(loaded);
-      // No more submittedYears tracking needed
     };
     loadUploads();
-  }, [projectId]);
+    loadChunkStats();
+  }, [projectId, loadChunkStats]);
 
   // markUnsaved is now a no-op — dirty state is derived from snapshot comparison
   const markUnsaved = useCallback(() => {}, []);
@@ -1689,7 +1709,9 @@ export function BuildPage() {
                 const errorUploads = ppUploads.filter(u => u.processing_status === "error");
                 const yearsWithPapers = [...new Set(ppUploads.map(u => u.year).filter(Boolean))].sort().reverse();
                 const hasSpec = specComplete && stagedSpecData && stagedSpecData.length > 0;
-                const isReady = hasSpec && processedUploads.length > 0;
+                const totalPaperChunks = chunkStats.pastPaperChunks;
+                const hasTrainingData = processedUploads.length > 0 || totalPaperChunks > 0;
+                const isReady = hasSpec && hasTrainingData;
                 return (
                   <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                     <div className="flex items-center gap-2">
@@ -1707,12 +1729,14 @@ export function BuildPage() {
                         {hasSpec ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
                         <span className={hasSpec ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
                           Specification: {hasSpec ? `${stagedSpecData!.length} points indexed` : "Not uploaded"}
+                          {chunkStats.specChunks > 0 && <span className="text-muted-foreground ml-1">({chunkStats.specChunks} chunks deployed)</span>}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs">
-                        {processedUploads.length > 0 ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
-                        <span className={processedUploads.length > 0 ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
-                          Past Papers: {processedUploads.length} file{processedUploads.length !== 1 ? "s" : ""} processed
+                        {hasTrainingData ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
+                        <span className={hasTrainingData ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
+                          Training Data: {totalPaperChunks > 0 ? `${totalPaperChunks} question chunks indexed` : "No chunks indexed yet"}
+                          {processedUploads.length > 0 && <span className="text-muted-foreground ml-1">({processedUploads.length} file{processedUploads.length !== 1 ? "s" : ""} processed)</span>}
                           {pendingUploads.length > 0 && <span className="text-muted-foreground ml-1">({pendingUploads.length} processing…)</span>}
                           {errorUploads.length > 0 && <span className="text-destructive ml-1">({errorUploads.length} failed)</span>}
                         </span>
@@ -1720,7 +1744,7 @@ export function BuildPage() {
                     </div>
                     {yearsWithPapers.length > 0 && (
                       <div className="pt-1">
-                        <p className="text-xs text-muted-foreground mb-1.5">Papers by year:</p>
+                        <p className="text-xs text-muted-foreground mb-1.5">Uploaded papers by year:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {yearsWithPapers.map(year => {
                             const count = ppUploads.filter(u => u.year === year).length;
@@ -1733,6 +1757,14 @@ export function BuildPage() {
                         </div>
                       </div>
                     )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full text-xs"
+                      onClick={loadChunkStats}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" /> Refresh Index Stats
+                    </Button>
                     {!hasSpec && (
                       <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 rounded p-2">
                         ⚠️ Upload a specification in the "Specification" section above to enable spec-to-question mapping.
@@ -1746,6 +1778,7 @@ export function BuildPage() {
               {selectedFeatures.includes("revision_guide") && (() => {
                 const hasSpec = specComplete && stagedSpecData && stagedSpecData.length > 0;
                 const ppUploads = uploads.filter(u => u.section_type === "past_paper" && u.processing_status === "processed");
+                const hasPaperData = ppUploads.length > 0 || chunkStats.pastPaperChunks > 0;
                 return (
                   <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                     <div className="flex items-center gap-2">
@@ -1763,6 +1796,7 @@ export function BuildPage() {
                         {hasSpec ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
                         <span className={hasSpec ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
                           Specification: {hasSpec ? `${stagedSpecData!.length} points available` : "Required — not yet uploaded"}
+                          {chunkStats.specChunks > 0 && <span className="text-muted-foreground ml-1">({chunkStats.specChunks} chunks deployed)</span>}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs">
@@ -1772,9 +1806,9 @@ export function BuildPage() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs">
-                        {ppUploads.length > 0 ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <Circle className="h-3.5 w-3.5 text-muted-foreground" />}
+                        {hasPaperData ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <Circle className="h-3.5 w-3.5 text-muted-foreground" />}
                         <span className="text-muted-foreground">
-                          Past Papers: {ppUploads.length > 0 ? `${ppUploads.length} papers enriching guides` : "Optional — adds real exam context"}
+                          Past Papers: {chunkStats.pastPaperChunks > 0 ? `${chunkStats.pastPaperChunks} question chunks indexed` : (ppUploads.length > 0 ? `${ppUploads.length} files processed` : "Optional — adds real exam context")}
                         </span>
                       </div>
                     </div>
