@@ -1,6 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { Instagram, Youtube } from 'lucide-react';
+import { Instagram, Youtube, Linkedin } from 'lucide-react';
 import { SEOHead } from '@/components/SEOHead';
 import { useTheme } from '@/contexts/ThemeContext';
 import logo from '@/assets/logo.png';
