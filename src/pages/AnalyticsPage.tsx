@@ -99,10 +99,11 @@ export const AnalyticsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<string>("all");
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      // Call without auth to avoid JWT verification issues
+  const fetchAnalytics = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
+    try {
       const response = await fetch(
         `https://xoipyycgycmpflfnrlty.supabase.co/functions/v1/get-analytics`,
         {
@@ -114,25 +115,23 @@ export const AnalyticsPage = () => {
         }
       );
       const result = await response.json();
-      const fnError = response.ok ? null : result;
-
-      if (fnError) {
-        setError(fnError.message || "Failed to load analytics");
-        setLoading(false);
-        return;
+      if (response.ok && !result?.error) {
+        setData(result);
+        setLastUpdated(new Date());
+        setError(null);
+      } else {
+        if (!isBackground) setError(result?.error || "Failed to load analytics");
       }
+    } catch (e) {
+      if (!isBackground) setError("Network error");
+    }
+    if (!isBackground) setLoading(false);
+  };
 
-      if (result?.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
-      }
-
-      setData(result);
-      setLoading(false);
-    };
-
+  useEffect(() => {
     fetchAnalytics();
+    const interval = setInterval(() => fetchAnalytics(true), 30000);
+    return () => clearInterval(interval);
   }, []);
 
   // Get filtered daily prompts for selected product
