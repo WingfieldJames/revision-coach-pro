@@ -1763,7 +1763,7 @@ export function BuildPage() {
                       className="w-full text-xs"
                       onClick={loadChunkStats}
                     >
-                      <Activity className="h-3 w-3 mr-1" /> Refresh Index Stats
+                      <RefreshCw className="h-3 w-3 mr-1" /> Refresh Index Stats
                     </Button>
                     {!hasSpec && (
                       <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 rounded p-2">
