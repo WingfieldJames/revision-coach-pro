@@ -57,10 +57,10 @@
     --transition-smooth: all 0.2s ease;
     --radius: 0.5rem;
 
-    /* Line animation colors - purple in light */
-    --line-color-1: #9333EA;
-    --line-color-2: #7C3AED;
-    --line-color-3: #A855F7;
+    /* Line animation colors - subtle in light */
+    --line-color-1: #6c52de;
+    --line-color-2: #5f45d2;
+    --line-color-3: #7c5ce7;
 
     /* Shugar tabs design tokens - light */
     --ds-gray-200: hsla(0, 0%, 90%, 1);
