@@ -222,7 +222,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             )}
           </button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[340px] sm:w-[380px] p-0 flex flex-col border-r border-border bg-background z-[70] [&>button:last-child]:hidden">
+        <SheetContent side="left" className="top-[5.5rem] h-[calc(100vh-5.5rem)] w-[340px] sm:top-24 sm:h-[calc(100vh-6rem)] sm:w-[380px] p-0 flex flex-col border-r border-border bg-background z-[70] [&>button:last-child]:hidden">
           {view === 'menu' ? (
             <>
               {/* Header with close button */}
