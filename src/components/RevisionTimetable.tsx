@@ -293,6 +293,170 @@ function generateScientificTimetable(
   return result;
 }
 
+/* ─── SubjectCard with autocomplete ─── */
+const SubjectCard: React.FC<{
+  subject: Subject;
+  index: number;
+  disabled: boolean;
+  canRemove: boolean;
+  onUpdate: (patch: Partial<Subject>) => void;
+  onRemove: () => void;
+}> = ({ subject, index, disabled, canRemove, onUpdate, onRemove }) => {
+  const [query, setQuery] = useState(subject.name);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const filtered = query.trim()
+    ? KNOWN_SUBJECTS.filter(k => k.name.toLowerCase().includes(query.toLowerCase()))
+    : [];
+
+  const showCustomOption = query.trim().length > 0 && !KNOWN_SUBJECTS.some(k => k.name.toLowerCase() === query.toLowerCase());
+
+  const selectKnownSubject = (known: { name: string; type: SubjectType }) => {
+    setQuery(known.name);
+    onUpdate({ name: known.name, subjectType: known.type, isCustom: false });
+    setShowDropdown(false);
+  };
+
+  const selectCustom = () => {
+    onUpdate({ name: query.trim(), isCustom: true });
+    setShowDropdown(false);
+  };
+
+  const handleInputChange = (val: string) => {
+    setQuery(val);
+    setShowDropdown(true);
+    // If they clear or change from a known subject, mark as needing re-selection
+    if (!KNOWN_SUBJECTS.some(k => k.name.toLowerCase() === val.toLowerCase())) {
+      onUpdate({ name: val, isCustom: true });
+    }
+  };
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-4 relative">
+      {canRemove && (
+        <button onClick={onRemove} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground">
+          <X className="h-4 w-4" />
+        </button>
+      )}
+
+      {/* Subject autocomplete input */}
+      <div ref={wrapperRef} className="relative mb-3">
+        <Input
+          placeholder={`Subject ${index + 1}`}
+          value={query}
+          onChange={(e) => handleInputChange(e.target.value)}
+          onFocus={() => { if (query.trim()) setShowDropdown(true); }}
+          className="text-sm"
+          disabled={disabled}
+        />
+        {showDropdown && (filtered.length > 0 || showCustomOption) && !disabled && (
+          <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-popover shadow-lg">
+            {filtered.slice(0, 8).map((k) => (
+              <button
+                key={k.name}
+                onClick={() => selectKnownSubject(k)}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center justify-between"
+              >
+                <span>{k.name}</span>
+                <span className="text-[10px] text-muted-foreground">{k.type.split(" - ")[0]}</span>
+              </button>
+            ))}
+            {showCustomOption && (
+              <>
+                {filtered.length > 0 && <div className="border-t border-border" />}
+                <button
+                  onClick={selectCustom}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors text-primary"
+                >
+                  + Add "<span className="font-medium">{query.trim()}</span>" as custom subject
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Subject Type - only show for custom subjects */}
+      {subject.isCustom && (
+        <div className="mb-3">
+          <label className="text-xs text-muted-foreground mb-1 block">Subject Type</label>
+          <select
+            value={subject.subjectType}
+            onChange={(e) => onUpdate({ subjectType: e.target.value as SubjectType })}
+            className="w-full h-9 rounded-md border border-input bg-background px-2 text-xs"
+            disabled={disabled}
+          >
+            {SUBJECT_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Show matched type badge for known subjects */}
+      {!subject.isCustom && subject.name.trim() && (
+        <div className="mb-3">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+            {subject.subjectType}
+          </span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Predicted</label>
+          <select
+            value={subject.predicted}
+            onChange={(e) => onUpdate({ predicted: e.target.value as Grade })}
+            className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+            disabled={disabled}
+          >
+            {GRADES.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Target</label>
+          <select
+            value={subject.target}
+            onChange={(e) => onUpdate({ target: e.target.value as Grade })}
+            className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+            disabled={disabled}
+          >
+            {GRADES.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <div>
+        <label className="text-xs text-muted-foreground mb-1 block">Priority: {["Low", "Medium-Low", "Medium", "High", "Critical"][subject.importance - 1]}</label>
+        <Slider
+          min={1}
+          max={5}
+          step={1}
+          value={[subject.importance]}
+          onValueChange={([v]) => onUpdate({ importance: v })}
+          disabled={disabled}
+        />
+      </div>
+    </div>
+  );
+};
+
 /* ─── component ─── */
 export const RevisionTimetable: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>(() => loadJSON(SUBJECTS_KEY, defaultSubjects()));
