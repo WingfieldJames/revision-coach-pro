@@ -25,14 +25,24 @@ Deno.serve(async (req) => {
       .from("users")
       .select("*", { count: "exact", head: true });
 
-    // 2. Daily signups (last 90 days) - get all users and group client-side
+    // 2. Daily signups (last 90 days) - paginate to avoid 1000-row limit
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-    const { data: recentUsers } = await adminClient
-      .from("users")
-      .select("created_at")
-      .gte("created_at", ninetyDaysAgo.toISOString())
-      .order("created_at", { ascending: true });
+    let recentUsers: any[] = [];
+    let from = 0;
+    const PAGE_SIZE = 1000;
+    while (true) {
+      const { data: page } = await adminClient
+        .from("users")
+        .select("created_at")
+        .gte("created_at", ninetyDaysAgo.toISOString())
+        .order("created_at", { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (!page || page.length === 0) break;
+      recentUsers = recentUsers.concat(page);
+      if (page.length < PAGE_SIZE) break;
+      from += PAGE_SIZE;
+    }
 
     // Group by day
     const dailySignups: Record<string, number> = {};
