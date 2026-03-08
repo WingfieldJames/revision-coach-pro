@@ -214,11 +214,19 @@ export const AnalyticsPage = () => {
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
               Internal dashboard · {new Date().toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+              {lastUpdated && (
+                <span className="ml-2 text-xs opacity-70">
+                  · Updated {lastUpdated.toLocaleTimeString("en-GB")}
+                </span>
+              )}
             </p>
           </div>
-          <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-            Admin
-          </Badge>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-2 w-2 rounded-full bg-green-500 animate-pulse" title="Auto-refreshing every 30s" />
+            <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+              Live
+            </Badge>
+          </div>
         </div>
 
         {/* ============ SECTION 1: KPI CARDS ============ */}
