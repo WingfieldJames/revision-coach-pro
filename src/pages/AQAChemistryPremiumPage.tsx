@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AQA_CHEMISTRY_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
-import logo from '@/assets/logo.png';
-import logoDark from '@/assets/logo-dark.png';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const AQA_CHEMISTRY_SLUG = 'aqa-chemistry';
 const AQA_CHEMISTRY_PROMPTS = [
@@ -25,8 +23,6 @@ const AQA_CHEMISTRY_PROMPTS = [
 export const AQAChemistryPremiumPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const { theme } = useTheme();
-  const currentLogo = theme === 'dark' ? logo : logoDark;
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
@@ -55,7 +51,7 @@ export const AQAChemistryPremiumPage = () => {
       <SEOHead title="Deluxe A* AI – AQA Chemistry | AI Tutor" description="Your personal AQA Chemistry A* tutor." canonical="https://astarai.co.uk/aqa-chemistry-premium" />
       <RandomChatbotBackground />
       <ChatbotSidebar subjectName="AQA Chemistry" productId={productId} productSlug="aqa-chemistry" showMyAI showPastPaperFinder showExamCountdown examDates={AQA_CHEMISTRY_EXAMS} examSubjectName="AQA Chemistry" />
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2"><div className="flex items-center pl-12"><Link to="/" className="flex items-center"><img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" /></Link></div></div>
+      <ChatbotToolbar subjectName="AQA Chemistry" productId={productId} productSlug="aqa-chemistry" showMyAI showPastPaperFinder showExamCountdown examDates={AQA_CHEMISTRY_EXAMS} examSubjectName="AQA Chemistry" />
       <div className="flex-1 relative z-10">
         <RAGChat productId={productId} subjectName="AQA Chemistry Deluxe" subjectDescription="Your personal A* Chemistry tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Chemistry past papers & mark schemes" placeholder="Ask me anything about AQA Chemistry A-Level..." suggestedPrompts={AQA_CHEMISTRY_PROMPTS} />
       </div>

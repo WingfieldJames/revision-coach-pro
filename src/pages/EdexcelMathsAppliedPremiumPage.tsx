@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
-import logo from '@/assets/logo.png';
-import logoDark from '@/assets/logo-dark.png';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const EDEXCEL_MATHS_APPLIED_SLUG = 'edexcel-mathematics-applied';
 const EDEXCEL_MATHS_APPLIED_PROMPTS = [
@@ -25,8 +23,6 @@ const EDEXCEL_MATHS_APPLIED_PROMPTS = [
 export const EdexcelMathsAppliedPremiumPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const { theme } = useTheme();
-  const currentLogo = theme === 'dark' ? logo : logoDark;
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
@@ -55,7 +51,7 @@ export const EdexcelMathsAppliedPremiumPage = () => {
       <SEOHead title="Deluxe A* AI – Edexcel Maths Applied | AI Tutor" description="Your personal Edexcel Mathematics Applied A* tutor." canonical="https://astarai.co.uk/edexcel-maths-applied-premium" />
       <RandomChatbotBackground />
       <ChatbotSidebar subjectName="Edexcel Maths (Applied)" productId={productId} productSlug="edexcel-mathematics-applied" showMyAI showPastPaperFinder pastPaperBoard="edexcel-maths-applied" showRevisionGuide revisionGuideBoard="edexcel-maths-applied" showGradeBoundaries gradeBoundariesSubject="maths" showExamCountdown examDates={EDEXCEL_MATHS_EXAMS} examSubjectName="Edexcel Maths" showMyMistakes />
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2"><div className="flex items-center pl-12"><Link to="/" className="flex items-center"><img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" /></Link></div></div>
+      <ChatbotToolbar subjectName="Edexcel Maths (Applied)" productId={productId} productSlug="edexcel-mathematics-applied" showMyAI showPastPaperFinder pastPaperBoard="edexcel-maths-applied" showRevisionGuide revisionGuideBoard="edexcel-maths-applied" showGradeBoundaries gradeBoundariesSubject="maths" showExamCountdown examDates={EDEXCEL_MATHS_EXAMS} examSubjectName="Edexcel Maths" showMyMistakes />
       <div className="flex-1 relative z-10">
         <RAGChat productId={productId} subjectName="Edexcel Mathematics Applied Deluxe" subjectDescription="Your personal A* Stats & Mechanics tutor. Ask me anything!" footerText="Powered by A* AI • Edexcel Mathematics Applied (Stats & Mechanics)" placeholder="Ask me anything about Stats & Mechanics..." suggestedPrompts={EDEXCEL_MATHS_APPLIED_PROMPTS} />
       </div>

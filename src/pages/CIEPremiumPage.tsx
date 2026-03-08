@@ -1,15 +1,13 @@
 import React, { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
-import logo from '@/assets/logo.png';
-import logoDark from '@/assets/logo-dark.png';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const CIE_PRODUCT_ID = "9a710cf9-0523-4c1f-82c6-0e02b19087e5";
 
@@ -23,8 +21,6 @@ const CIE_ECONOMICS_PROMPTS = [
 export const CIEPremiumPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const { theme } = useTheme();
-  const currentLogo = theme === 'dark' ? logo : logoDark;
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -41,7 +37,7 @@ export const CIEPremiumPage = () => {
       <SEOHead title="Deluxe A* AI – CIE Economics | Full Past Paper Training" description="Access A* AI Deluxe for CIE/Cambridge Economics." canonical="https://astarai.co.uk/cie-premium" />
       <RandomChatbotBackground />
       <ChatbotSidebar subjectName="CIE Economics" productId={CIE_PRODUCT_ID} productSlug="cie-economics" showMyAI showPastPaperFinder showExamCountdown examDates={CIE_ECONOMICS_EXAMS} examSubjectName="CIE Economics" />
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2"><div className="flex items-center pl-12"><Link to="/" className="flex items-center"><img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" /></Link></div></div>
+      <ChatbotToolbar subjectName="CIE Economics" productId={CIE_PRODUCT_ID} productSlug="cie-economics" showMyAI showPastPaperFinder showExamCountdown examDates={CIE_ECONOMICS_EXAMS} examSubjectName="CIE Economics" />
       <div className="flex-1 relative z-10">
         <RAGChat productId={CIE_PRODUCT_ID} subjectName="CIE Economics Deluxe" subjectDescription="Your personal A* CIE Economics tutor with full past paper access. Ask me anything!" footerText="Powered by A* AI • Trained on CIE Economics specification" placeholder="Ask any CIE Economics question..." suggestedPrompts={CIE_ECONOMICS_PROMPTS} enableDiagrams diagramSubject="economics" />
       </div>
