@@ -55,15 +55,13 @@ function parseChunkDisplay(chunk: SearchResult) {
     return { headerLabel: '', marks: null, questionNum: '', questionText: '', extract: '', isMarkScheme: true };
   }
 
-  // Strip mark scheme portion from combined chunks
-  const msIndex = questionText.indexOf('Mark Scheme:');
-  if (msIndex > 0) {
-    questionText = questionText.slice(0, msIndex).trim();
-  }
-  // Also strip "MS:" style mark scheme sections
-  const msIndex2 = questionText.indexOf('\nMS:');
-  if (msIndex2 > 0) {
-    questionText = questionText.slice(0, msIndex2).trim();
+  // Strip ALL mark scheme content from combined chunks (multiple possible formats)
+  const msPatterns = ['Mark Scheme:', 'Mark scheme:', '\nMS:', '\nms:', 'Marking Points:', 'Mark Allocation:'];
+  for (const pat of msPatterns) {
+    const idx = questionText.indexOf(pat);
+    if (idx > 0) {
+      questionText = questionText.slice(0, idx).trim();
+    }
   }
 
   const prefixMatch = questionText.match(/^Question\s+\d+[a-z]?\s*(\([a-z]+\))?\s*:?\s*/i);
