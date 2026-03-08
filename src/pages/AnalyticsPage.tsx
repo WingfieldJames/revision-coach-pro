@@ -123,7 +123,7 @@ export const AnalyticsPage = () => {
     };
 
     fetchAnalytics();
-  }, [user]);
+  }, []);
 
   // Get filtered daily prompts for selected product
   const getFilteredDailyPrompts = () => {
