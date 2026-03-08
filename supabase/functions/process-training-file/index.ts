@@ -400,8 +400,9 @@ async function attemptMerge(
       : "Mark scheme not available";
     const totalMarks = (qpChunk.metadata as Record<string, unknown>)?.total_marks ||
       (msChunk?.metadata as Record<string, unknown>)?.total_marks || "unknown";
+    const marksLabel = totalMarks && totalMarks !== "unknown" ? ` [${totalMarks} marks]` : "";
 
-    const combined = `Question ${qNum}: ${qpContent}\n\nMark Scheme: ${msContent}\n\nTotal Marks: ${totalMarks}`;
+    const combined = `Question ${qNum}${marksLabel}: ${qpContent}\n\nMark Scheme: ${msContent}`;
 
     if (msChunk) idsToDelete.push(msChunk.id);
 
@@ -681,14 +682,28 @@ serve(async (req) => {
         }
       }
 
-      // Step 3: Insert individual chunks with upload_id in metadata
+      // Step 3: Sort chunks by question number for consistent ordering
+      chunks.sort((a, b) => {
+        const aNum = String(a.question_number || "");
+        const bNum = String(b.question_number || "");
+        // Extract leading integer for primary sort
+        const aMain = parseInt(aNum.replace(/[^0-9]/g, "")) || 0;
+        const bMain = parseInt(bNum.replace(/[^0-9]/g, "")) || 0;
+        if (aMain !== bMain) return aMain - bMain;
+        // Secondary sort by full string (handles sub-parts like 1a, 1b, 1(a)(i))
+        return aNum.localeCompare(bNum, undefined, { numeric: true, sensitivity: "base" });
+      });
+
+      // Insert individual chunks with upload_id in metadata
       let chunksCreated = 0;
       for (const chunk of chunks) {
         const qNum = chunk.question_number || "";
+        const marks = chunk.total_marks || 0;
+        const marksLabel = marks ? ` [${marks} marks]` : "";
         const extractInfo = chunk.extract ? `\nContext: ${chunk.extract}` : "";
         const content = classification.doc_type === "qp"
-          ? `Question ${qNum}: ${chunk.question_text || ""}${extractInfo}`
-          : `Mark Scheme Q${qNum}: ${chunk.mark_scheme || ""}`;
+          ? `Question ${qNum}${marksLabel}: ${chunk.question_text || ""}${extractInfo}`
+          : `Mark Scheme Q${qNum}${marksLabel}: ${chunk.mark_scheme || ""}`;
 
         const embedding = await generateEmbedding(lovableApiKey, content);
 
