@@ -552,6 +552,14 @@ export const HomePage = () => {
             >
               <Youtube size={24} />
             </a>
+            <a
+              href="https://www.linkedin.com/company/astar-ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Linkedin size={24} />
+            </a>
             <p className="text-sm text-muted-foreground">© 2025 A* AI</p>
           </div>
 
