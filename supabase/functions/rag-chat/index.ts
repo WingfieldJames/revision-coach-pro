@@ -29,6 +29,35 @@ const CONTENT_TYPES = {
   CASE_STUDY: 'case_study',
 } as const;
 
+// Economics Diagrams for inline rendering
+const ECONOMICS_DIAGRAMS = [
+  { id: 'ppf', title: 'Production Possibility Frontier (PPF)', keywords: ['ppf', 'production possibility frontier', 'ppc', 'opportunity cost', 'trade-off', 'scarcity'], imagePath: '/diagrams/ppf.jpg' },
+  { id: 'ppf-shift', title: 'Shift of PPF', keywords: ['ppf shift', 'economic growth', 'outward shift', 'inward shift', 'productive capacity'], imagePath: '/diagrams/ppf-shift.jpg' },
+  { id: 'supply-demand-equilibrium', title: 'Supply and Demand Equilibrium', keywords: ['supply and demand', 'equilibrium', 'market equilibrium', 'market clearing'], imagePath: '/diagrams/supply-demand-equilibrium.jpg' },
+  { id: 'demand-shift-right', title: 'Demand Shifts Right (Increase in Demand)', keywords: ['demand increase', 'demand shift right', 'rise in demand', 'rightward shift demand'], imagePath: '/diagrams/demand-shift-right.jpg' },
+  { id: 'demand-shift-left', title: 'Demand Shifts Left (Decrease in Demand)', keywords: ['demand decrease', 'demand shift left', 'fall in demand', 'leftward shift demand'], imagePath: '/diagrams/demand-shift-left.jpg' },
+  { id: 'supply-shift-right', title: 'Supply Shifts Right (Increase in Supply)', keywords: ['supply increase', 'supply shift right', 'rise in supply'], imagePath: '/diagrams/supply-shift-right.jpg' },
+  { id: 'supply-shift-left', title: 'Supply Shifts Left (Decrease in Supply)', keywords: ['supply decrease', 'supply shift left', 'fall in supply'], imagePath: '/diagrams/supply-shift-left.jpg' },
+  { id: 'specific-tax', title: 'Specific Tax', keywords: ['specific tax', 'indirect tax', 'per unit tax'], imagePath: '/diagrams/specific-tax.jpg' },
+  { id: 'ad-valorem-tax', title: 'Ad Valorem Tax', keywords: ['ad valorem', 'percentage tax', 'vat'], imagePath: '/diagrams/ad-valorem-tax.jpg' },
+  { id: 'subsidy', title: 'Subsidy', keywords: ['subsidy', 'government subsidy', 'price subsidy'], imagePath: '/diagrams/subsidy.jpg' },
+  { id: 'maximum-price', title: 'Maximum Price (Price Ceiling)', keywords: ['maximum price', 'price ceiling', 'price cap', 'rent control'], imagePath: '/diagrams/maximum-price.jpg' },
+  { id: 'minimum-price', title: 'Minimum Price (Price Floor)', keywords: ['minimum price', 'price floor', 'minimum wage'], imagePath: '/diagrams/minimum-price.jpg' },
+  { id: 'negative-externality-production', title: 'Negative Externality in Production', keywords: ['negative externality', 'external cost', 'market failure', 'msc', 'mpc', 'welfare loss'], imagePath: '/diagrams/negative-externality-production.jpg' },
+  { id: 'positive-externality-consumption', title: 'Positive Externality in Consumption', keywords: ['positive externality', 'external benefit', 'msb', 'mpb', 'merit good'], imagePath: '/diagrams/positive-externality-consumption.jpg' },
+  { id: 'producer-consumer-surplus', title: 'Producer and Consumer Surplus', keywords: ['consumer surplus', 'producer surplus', 'total surplus', 'welfare'], imagePath: '/diagrams/producer-consumer-surplus.jpg' },
+  { id: 'ad-sras', title: 'AD/AS Model', keywords: ['aggregate demand', 'aggregate supply', 'ad/as', 'ad as', 'macroeconomic equilibrium'], imagePath: '/diagrams/ad-as-basic.png' },
+  { id: 'demand-pull-inflation', title: 'Demand-Pull Inflation', keywords: ['demand pull inflation', 'demand pull', 'ad shift right'], imagePath: '/diagrams/demand-pull-inflation.jpg' },
+  { id: 'cost-push-inflation', title: 'Cost-Push Inflation', keywords: ['cost push inflation', 'cost push', 'sras shift left'], imagePath: '/diagrams/cost-push-inflation.jpg' },
+  { id: 'monopoly', title: 'Monopoly Diagram', keywords: ['monopoly', 'monopolist', 'price maker', 'supernormal profit', 'deadweight loss'], imagePath: '/diagrams/monopoly.png' },
+  { id: 'perfect-competition', title: 'Perfect Competition', keywords: ['perfect competition', 'price taker', 'normal profit', 'perfectly competitive'], imagePath: '/diagrams/perfect-competition.png' },
+  { id: 'circular-flow', title: 'Circular Flow of Income', keywords: ['circular flow', 'injections', 'withdrawals', 'leakages', 'national income'], imagePath: '/diagrams/circular-flow-of-income.jpg' },
+  { id: 'phillips-curve', title: 'Phillips Curve', keywords: ['phillips curve', 'inflation unemployment trade-off'], imagePath: '/diagrams/phillips-curve.png' },
+  { id: 'trade-cycle', title: 'Trade/Business Cycle', keywords: ['trade cycle', 'business cycle', 'boom', 'recession', 'recovery', 'slump'], imagePath: '/diagrams/trade-cycle.jpg' },
+  { id: 'profit-maximisation', title: 'Profit Maximisation (MC=MR)', keywords: ['profit maximisation', 'mc=mr', 'profit maximizing', 'marginal cost marginal revenue'], imagePath: '/diagrams/profit-maximisation.jpg' },
+  { id: 'price-discrimination', title: 'Price Discrimination', keywords: ['price discrimination', 'first degree', 'second degree', 'third degree'], imagePath: '/diagrams/price-discrimination.jpg' },
+];
+
 // CS Diagrams for inline rendering
 const CS_DIAGRAMS = [
   { id: 'von-neumann-architecture', title: 'Von Neumann Architecture', keywords: ['von neumann', 'cpu', 'processor', 'ram', 'memory', 'bus', 'data bus', 'address bus', 'control bus', 'alu', 'control unit', 'registers', 'mar', 'mdr', 'pc', 'program counter', 'cir', 'accumulator', 'fetch decode execute', 'fde'], imagePath: '/diagrams/cs/von-neumann-architecture.jpg' },
@@ -50,11 +79,10 @@ const CS_DIAGRAMS = [
 
 // Find relevant diagram based on message content
 function findRelevantDiagram(message: string, subject: string): { id: string; title: string; imagePath: string } | null {
-  if (subject !== 'cs') return null;
-  
   const lowerMessage = message.toLowerCase();
+  const diagramSet = subject === 'cs' ? CS_DIAGRAMS : ECONOMICS_DIAGRAMS;
   
-  for (const diagram of CS_DIAGRAMS) {
+  for (const diagram of diagramSet) {
     for (const keyword of diagram.keywords) {
       if (lowerMessage.includes(keyword)) {
         return { id: diagram.id, title: diagram.title, imagePath: diagram.imagePath };
