@@ -37,9 +37,6 @@ export const CIEPremiumPage = () => {
     checkAccess();
   }, [user, loading, navigate]);
 
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-    chatRef.current?.submitMessage(message, imageDataUrl);
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
