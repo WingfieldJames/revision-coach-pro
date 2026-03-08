@@ -184,6 +184,8 @@ export function BuildPage() {
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
+  // Chunk counts from document_chunks (covers legacy + processed uploads)
+  const [chunkStats, setChunkStats] = useState<{ pastPaperChunks: number; specChunks: number }>({ pastPaperChunks: 0, specChunks: 0 });
 
   // Track files currently processing (for tab-close warning + polling)
   const hasProcessingFiles = useMemo(
