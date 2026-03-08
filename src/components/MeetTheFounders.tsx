@@ -16,7 +16,7 @@ const founders: Founder[] = [
   {
     name: 'Henry Li',
     university: 'LSE PPE',
-    stats: 'A-Level: 4A* · GCSE: 11 9s',
+    stats: 'A-Level: A*A*A*A* · GCSE: 11 9s',
     image: henryLi,
   },
   {
