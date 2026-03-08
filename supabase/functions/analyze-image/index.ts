@@ -69,16 +69,21 @@ If there are diagrams, describe the labels/text ON the diagram only (axis labels
     
     let userPrompt = `Extract ALL text from this image EXACTLY as written. Do not summarize or interpret - just transcribe the exact characters you see. Preserve the original formatting and structure.`;
 
-    console.log("Sending image to Lovable AI for analysis, type:", imageType, "user:", user.id);
+    console.log("Sending image for analysis, type:", imageType, "user:", user.id);
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || LOVABLE_API_KEY;
+    const isOpenAI = !!Deno.env.get("OPENAI_API_KEY");
+    const aiUrl = isOpenAI ? "https://api.openai.com/v1/chat/completions" : "https://ai.gateway.lovable.dev/v1/chat/completions";
+    const aiModel = isOpenAI ? "gpt-4o" : "google/gemini-2.5-flash";
+
+    const response = await fetch(aiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${openaiApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: aiModel,
         messages: [
           { role: "system", content: systemPrompt },
           { 
