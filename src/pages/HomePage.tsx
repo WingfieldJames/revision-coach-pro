@@ -83,7 +83,7 @@ const revisionFeatures = [
 ];
 
 /** Shared heading class matching FoundersCarousel / hero style */
-const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2]";
+const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight";
 
 export const HomePage = () => {
   const { user, loading } = useAuth();
@@ -131,8 +131,7 @@ export const HomePage = () => {
               <div className="flex-1 text-center md:text-left">
                 {/* Social Proof Pill */}
                 <div
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-foreground/10 bg-foreground/5 backdrop-blur-sm"
-                  style={{ boxShadow: "var(--shadow-glow)" }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm"
                 >
                   <span className="text-base">⭐</span>
                   <span className="text-foreground text-xs sm:text-sm font-medium">
@@ -147,11 +146,11 @@ export const HomePage = () => {
                 </div>
 
                 {/* Main Headline */}
-                <h1 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] font-bold mb-4 leading-[1.15]">
+                <h1 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] font-bold mb-4 leading-[1.15] tracking-tight">
                   <div className="text-foreground">The AI that actually</div>
                   <div>
                     <span className="text-foreground">understands </span>
-                    <span className="text-gradient-brand">A-Level </span>
+                    <span className="text-primary">A-Level </span>
                     <span
                       className="relative inline-block overflow-hidden text-left"
                       style={{ width: "7em", height: "1.15em", verticalAlign: "bottom" }}
@@ -159,7 +158,7 @@ export const HomePage = () => {
                       <AnimatePresence mode="wait">
                         <motion.span
                           key={subjects[currentSubjectIndex]}
-                          className="absolute left-0 bottom-0 text-gradient-brand"
+                          className="absolute left-0 bottom-0 text-primary"
                           initial={{ y: "100%", opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           exit={{ y: "-100%", opacity: 0 }}
@@ -181,8 +180,7 @@ export const HomePage = () => {
                 <div className="flex flex-col sm:flex-row items-center md:items-start gap-4">
                   <button
                     onClick={handlePickSubject}
-                    className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
-                    style={{ background: "var(--gradient-brand)" }}
+                    className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
                   >
                     Pick Your Subject →
                   </button>
@@ -267,7 +265,7 @@ export const HomePage = () => {
           <ScrollReveal className="text-center mb-12">
             <h2 className={sectionHeadingClass}>
               <span className="text-foreground">What our </span>
-              <span className="text-gradient-brand">users</span>
+              <span className="text-primary">users</span>
               <span className="text-foreground"> say</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mt-4">
@@ -288,7 +286,7 @@ export const HomePage = () => {
           <div className="text-center mb-6">
             <h2 className="text-[1.25rem] font-bold leading-[1.2]">
               <span className="text-foreground">What our </span>
-              <span className="text-gradient-brand">users</span>
+              <span className="text-primary">users</span>
               <span className="text-foreground"> say</span>
             </h2>
             <p className="text-muted-foreground text-xs mt-2">Join 2000+ students and teachers achieving real results</p>
@@ -316,8 +314,8 @@ export const HomePage = () => {
       <section data-section="how-it-works" className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
         <ScrollReveal className="relative z-10 text-center mb-8 md:mb-12">
           <h2 className={`${sectionHeadingClass} text-[1.2rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] whitespace-nowrap md:whitespace-normal`}>
-            <span className="text-foreground">Everything you need to get an </span>
-            <span className="text-gradient-brand">A*</span>
+             <span className="text-foreground">Everything you need to get an </span>
+             <span className="text-primary">A*</span>
           </h2>
           <p className="text-muted-foreground mt-3 text-sm sm:text-base md:text-lg whitespace-nowrap md:whitespace-normal">Tailored to your exam board. Built to get you the grade.</p>
         </ScrollReveal>
@@ -388,8 +386,8 @@ export const HomePage = () => {
           <div className="max-w-4xl mx-auto relative z-10 px-2 md:px-0">
             <ScrollReveal>
               <h2 className={`${sectionHeadingClass} text-center mb-6`}>
-                <span className="text-foreground">Frequently asked </span>
-                <span className="text-gradient-brand">questions</span>
+               <span className="text-foreground">Frequently asked </span>
+               <span className="text-primary">questions</span>
               </h2>
               <p className="text-center text-muted-foreground mb-8 text-lg">
                 Everything you need to know about A* AI and revision.
@@ -489,8 +487,8 @@ export const HomePage = () => {
       <section data-section="pick-subject-bottom" className="py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-8 md:mb-12">
           <h2 className={sectionHeadingClass}>
-            <span className="text-foreground">Choose your </span>
-            <span className="text-gradient-brand">subject</span>
+             <span className="text-foreground">Choose your </span>
+             <span className="text-primary">subject</span>
           </h2>
         </ScrollReveal>
         <SubjectPlanSelector />
@@ -537,23 +535,23 @@ export const HomePage = () => {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-6 text-muted-foreground">
-            <Link to="/compare" className="text-gradient-brand hover:opacity-80 transition-opacity">
+            <Link to="/compare" className="text-primary hover:text-primary/80 transition-opacity">
               Plans
             </Link>
             <span>•</span>
-            <Link to="/#faq" className="text-gradient-brand hover:opacity-80 transition-opacity">
+            <Link to="/#faq" className="text-primary hover:text-primary/80 transition-opacity">
               FAQs
             </Link>
             <span>•</span>
             <Link
               to="/login"
-              className="text-gradient-brand hover:opacity-80 transition-opacity"
+              className="text-primary hover:text-primary/80 transition-opacity"
               onClick={() => window.scrollTo(0, 0)}
             >
               Sign in
             </Link>
             <span>•</span>
-            <Link to="/contact" className="text-gradient-brand hover:opacity-80 transition-opacity">
+            <Link to="/contact" className="text-primary hover:text-primary/80 transition-opacity">
               Contact
             </Link>
           </div>
