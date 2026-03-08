@@ -30,15 +30,15 @@ import {
 import { Check } from 'lucide-react';
 
 const SUBJECTS = [
-  { name: 'Edexcel Economics', freePath: '/free-version', premiumPath: '/premium', slug: 'edexcel-economics', icon: '📈' },
-  { name: 'AQA Economics', freePath: '/aqa-free-version', premiumPath: '/aqa-premium', slug: 'aqa-economics', icon: '📊' },
-  { name: 'CIE Economics', freePath: '/cie-free-version', premiumPath: '/cie-premium', slug: 'cie-economics', icon: '🌍' },
-  { name: 'OCR Computer Science', freePath: '/ocr-cs-free-version', premiumPath: '/ocr-cs-premium', slug: 'ocr-cs', icon: '💻' },
-  { name: 'OCR Physics', freePath: '/ocr-physics-free-version', premiumPath: '/ocr-physics-premium', slug: 'ocr-physics', icon: '⚡' },
-  { name: 'AQA Chemistry', freePath: '/aqa-chemistry-free-version', premiumPath: '/aqa-chemistry-premium', slug: 'aqa-chemistry', icon: '🧪' },
-  { name: 'AQA Psychology', freePath: '/aqa-psychology-free-version', premiumPath: '/aqa-psychology-premium', slug: 'aqa-psychology', icon: '🧠' },
-  { name: 'Edexcel Maths (Pure)', freePath: '/edexcel-maths-free-version', premiumPath: '/edexcel-maths-premium', slug: 'edexcel-maths', icon: '🔢' },
-  { name: 'Edexcel Maths (Applied)', freePath: '/edexcel-maths-applied-free-version', premiumPath: '/edexcel-maths-applied-premium', slug: 'edexcel-maths-applied', icon: '📐' },
+  { name: 'Edexcel Economics', freePath: '/free-version', premiumPath: '/premium', slug: 'edexcel-economics' },
+  { name: 'AQA Economics', freePath: '/aqa-free-version', premiumPath: '/aqa-premium', slug: 'aqa-economics' },
+  { name: 'CIE Economics', freePath: '/cie-free-version', premiumPath: '/cie-premium', slug: 'cie-economics' },
+  { name: 'OCR Computer Science', freePath: '/ocr-cs-free-version', premiumPath: '/ocr-cs-premium', slug: 'ocr-cs' },
+  { name: 'OCR Physics', freePath: '/ocr-physics-free-version', premiumPath: '/ocr-physics-premium', slug: 'ocr-physics' },
+  { name: 'AQA Chemistry', freePath: '/aqa-chemistry-free-version', premiumPath: '/aqa-chemistry-premium', slug: 'aqa-chemistry' },
+  { name: 'AQA Psychology', freePath: '/aqa-psychology-free-version', premiumPath: '/aqa-psychology-premium', slug: 'aqa-psychology' },
+  { name: 'Edexcel Maths (Pure)', freePath: '/edexcel-maths-free-version', premiumPath: '/edexcel-maths-premium', slug: 'edexcel-maths' },
+  { name: 'Edexcel Maths (Applied)', freePath: '/edexcel-maths-applied-free-version', premiumPath: '/edexcel-maths-applied-premium', slug: 'edexcel-maths-applied' },
 ];
 
 type ToolView = 'menu' | 'my-ai' | 'grade-boundaries' | 'past-papers' | 'revision-guide' | 'essay-marker' | 'diagrams' | 'my-mistakes' | 'exam-countdown';
@@ -298,7 +298,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                                 : 'text-foreground hover:bg-muted'
                             }`}
                           >
-                            <span className="text-base">{s.icon}</span>
+                            
                             <span className="truncate">{s.name}</span>
                             {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
                           </button>
