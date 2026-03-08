@@ -1,9 +1,13 @@
 import React from 'react';
-import { Header } from '@/components/Header';
+import { Link } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
+import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const AQA_PRODUCT_ID = "17ade690-8c44-4961-83b5-0edf42a9faea";
 
@@ -15,6 +19,9 @@ const AQA_ECONOMICS_FREE_PROMPTS = [
 ];
 
 export const AQAFreeVersionPage = () => {
+  const { theme } = useTheme();
+  const currentLogo = theme === 'dark' ? logo : logoDark;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -23,19 +30,25 @@ export const AQAFreeVersionPage = () => {
         canonical="https://astarai.co.uk/aqa-free-version"
       />
       <RandomChatbotBackground />
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
-        <Header
-          showImageTool 
-          showPastPaperFinder
-          pastPaperBoard="aqa"
-          showExamCountdown
-          examDates={AQA_ECONOMICS_EXAMS}
-          examSubjectName="AQA Economics"
-          hideUserDetails 
-          productId={AQA_PRODUCT_ID}
-          productSlug="aqa-economics"
-          showUpgradeButton
-        />
+
+      <ChatbotSidebar
+        subjectName="AQA Economics"
+        productId={AQA_PRODUCT_ID}
+        productSlug="aqa-economics"
+        showMyAI
+        showPastPaperFinder
+        pastPaperBoard="aqa"
+        showExamCountdown
+        examDates={AQA_ECONOMICS_EXAMS}
+        examSubjectName="AQA Economics"
+      />
+
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2">
+        <div className="flex items-center pl-12">
+          <Link to="/" className="flex items-center">
+            <img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" />
+          </Link>
+        </div>
       </div>
       
       <div className="flex-1 relative z-10">
