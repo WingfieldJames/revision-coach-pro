@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -22,8 +22,10 @@ const AQA_ECONOMICS_PROMPTS = [
 export const AQAPremiumPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const chatRef = useRef<RAGChatRef>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
   useEffect(() => {
     const verifyAccess = async () => {
@@ -46,14 +48,28 @@ export const AQAPremiumPage = () => {
     return (<div className="h-screen w-screen bg-background flex items-center justify-center"><div className="text-center"><h1 className="text-2xl font-bold mb-4">Premium Access Required</h1><p className="text-muted-foreground mb-6">You need a premium subscription.</p><Button variant="brand" onClick={() => navigate('/compare')}>Upgrade to Premium</Button></div></div>);
   }
 
+  const sharedProps = {
+    subjectName: "AQA Economics",
+    productId: AQA_PRODUCT_ID,
+    productSlug: "aqa-economics",
+    showMyAI: true,
+    showPastPaperFinder: true,
+    pastPaperBoard: "aqa" as const,
+    showEssayMarker: true,
+    showExamCountdown: true,
+    examDates: AQA_ECONOMICS_EXAMS,
+    examSubjectName: "AQA Economics",
+    onEssayMarkerSubmit: handleEssayMarkerSubmit,
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead title="Deluxe A* AI – AQA Economics | Full Past Paper Training" description="Access A* AI Deluxe for AQA Economics." canonical="https://astarai.co.uk/aqa-premium" />
       <RandomChatbotBackground />
-      <ChatbotSidebar subjectName="AQA Economics" productId={AQA_PRODUCT_ID} productSlug="aqa-economics" showMyAI showPastPaperFinder pastPaperBoard="aqa" showExamCountdown examDates={AQA_ECONOMICS_EXAMS} examSubjectName="AQA Economics" />
-      <ChatbotToolbar subjectName="AQA Economics" productId={AQA_PRODUCT_ID} productSlug="aqa-economics" showMyAI showPastPaperFinder pastPaperBoard="aqa" showExamCountdown examDates={AQA_ECONOMICS_EXAMS} examSubjectName="AQA Economics" />
+      <ChatbotSidebar {...sharedProps} />
+      <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={AQA_PRODUCT_ID} subjectName="AQA Economics" subjectDescription="Your personal A* Economics tutor. Ask me anything about AQA A-Level Economics!" footerText="Powered by A* AI • Trained on AQA Economics specification" placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..." suggestedPrompts={AQA_ECONOMICS_PROMPTS} enableDiagrams diagramSubject="economics" />
+        <RAGChat productId={AQA_PRODUCT_ID} subjectName="AQA Economics" subjectDescription="Your personal A* Economics tutor. Ask me anything about AQA A-Level Economics!" footerText="Powered by A* AI • Trained on AQA Economics specification" placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..." suggestedPrompts={AQA_ECONOMICS_PROMPTS} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
@@ -16,14 +16,30 @@ const CIE_ECONOMICS_FREE_PROMPTS = [
 ];
 
 export const CIEFreeVersionPage = () => {
+  const chatRef = useRef<RAGChatRef>(null);
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
+
+  const sharedProps = {
+    subjectName: "CIE Economics",
+    productId: CIE_PRODUCT_ID,
+    productSlug: "cie-economics",
+    showMyAI: true,
+    showPastPaperFinder: true,
+    showEssayMarker: true,
+    showExamCountdown: true,
+    examDates: CIE_ECONOMICS_EXAMS,
+    examSubjectName: "CIE Economics",
+    onEssayMarkerSubmit: handleEssayMarkerSubmit,
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead title="Free A* AI – CIE Economics A-Level Revision | Try Now" description="Try A* AI free for CIE/Cambridge Economics." canonical="https://astarai.co.uk/cie-free-version" />
       <RandomChatbotBackground />
-      <ChatbotSidebar subjectName="CIE Economics" productId={CIE_PRODUCT_ID} productSlug="cie-economics" showMyAI showPastPaperFinder showExamCountdown examDates={CIE_ECONOMICS_EXAMS} examSubjectName="CIE Economics" />
-      <ChatbotToolbar subjectName="CIE Economics" productId={CIE_PRODUCT_ID} productSlug="cie-economics" showMyAI showPastPaperFinder showExamCountdown examDates={CIE_ECONOMICS_EXAMS} examSubjectName="CIE Economics" />
+      <ChatbotSidebar {...sharedProps} />
+      <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={CIE_PRODUCT_ID} subjectName="CIE Economics" subjectDescription="Your free CIE Economics revision assistant" footerText="A* AI can make mistakes. Verify important info." placeholder="Ask any CIE Economics question..." suggestedPrompts={CIE_ECONOMICS_FREE_PROMPTS} enableDiagrams diagramSubject="economics" />
+        <RAGChat productId={CIE_PRODUCT_ID} subjectName="CIE Economics" subjectDescription="Your free CIE Economics revision assistant" footerText="A* AI can make mistakes. Verify important info." placeholder="Ask any CIE Economics question..." suggestedPrompts={CIE_ECONOMICS_FREE_PROMPTS} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
       </div>
     </div>
   );

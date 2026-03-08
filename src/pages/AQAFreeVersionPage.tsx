@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
@@ -16,50 +16,31 @@ const AQA_ECONOMICS_FREE_PROMPTS = [
 ];
 
 export const AQAFreeVersionPage = () => {
+  const chatRef = useRef<RAGChatRef>(null);
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
+
+  const sharedProps = {
+    subjectName: "AQA Economics",
+    productId: AQA_PRODUCT_ID,
+    productSlug: "aqa-economics",
+    showMyAI: true,
+    showPastPaperFinder: true,
+    pastPaperBoard: "aqa" as const,
+    showEssayMarker: true,
+    showExamCountdown: true,
+    examDates: AQA_ECONOMICS_EXAMS,
+    examSubjectName: "AQA Economics",
+    onEssayMarkerSubmit: handleEssayMarkerSubmit,
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SEOHead 
-        title="Free A* AI – AQA Economics A-Level Revision | Try Now"
-        description="Try A* AI free for AQA Economics. AI trained on AQA past papers for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
-        canonical="https://astarai.co.uk/aqa-free-version"
-      />
+      <SEOHead title="Free A* AI – AQA Economics A-Level Revision | Try Now" description="Try A* AI free for AQA Economics." canonical="https://astarai.co.uk/aqa-free-version" />
       <RandomChatbotBackground />
-
-      <ChatbotSidebar
-        subjectName="AQA Economics"
-        productId={AQA_PRODUCT_ID}
-        productSlug="aqa-economics"
-        showMyAI
-        showPastPaperFinder
-        pastPaperBoard="aqa"
-        showExamCountdown
-        examDates={AQA_ECONOMICS_EXAMS}
-        examSubjectName="AQA Economics"
-      />
-
-      <ChatbotToolbar
-        subjectName="AQA Economics"
-        productId={AQA_PRODUCT_ID}
-        productSlug="aqa-economics"
-        showMyAI
-        showPastPaperFinder
-        pastPaperBoard="aqa"
-        showExamCountdown
-        examDates={AQA_ECONOMICS_EXAMS}
-        examSubjectName="AQA Economics"
-      />
-      
+      <ChatbotSidebar {...sharedProps} />
+      <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat 
-          productId={AQA_PRODUCT_ID}
-          subjectName="AQA Economics"
-          subjectDescription="Your free AQA Economics revision assistant"
-          footerText="A* AI can make mistakes. Verify important info."
-          placeholder="Ask any AQA Economics question..."
-          suggestedPrompts={AQA_ECONOMICS_FREE_PROMPTS}
-          enableDiagrams
-          diagramSubject="economics"
-        />
+        <RAGChat productId={AQA_PRODUCT_ID} subjectName="AQA Economics" subjectDescription="Your free AQA Economics revision assistant" footerText="A* AI can make mistakes. Verify important info." placeholder="Ask any AQA Economics question..." suggestedPrompts={AQA_ECONOMICS_FREE_PROMPTS} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
       </div>
     </div>
   );
