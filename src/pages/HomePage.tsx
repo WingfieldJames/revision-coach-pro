@@ -12,8 +12,7 @@ import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeroBackgroundPaths } from "@/components/ui/hero-background-paths";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { FoundersCarousel } from "@/components/FoundersCarousel";
-import { MobileFoundersSection } from "@/components/MobileFoundersSection";
+import { MeetTheFounders } from "@/components/MeetTheFounders";
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from "@/components/ui/testimonials-columns";
 import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import { SubjectPlanSelector } from "@/components/SubjectPlanSelector";
@@ -206,9 +205,9 @@ export const HomePage = () => {
         </HeroBackgroundPaths>
       </section>
 
-      {/* Trained by A* Students - Desktop */}
-      <div className="hidden md:block" data-section="founders">
-        <FoundersCarousel />
+      {/* Meet the Founders */}
+      <div data-section="founders">
+        <MeetTheFounders />
       </div>
 
       {/* See A* AI in action - Demo Video */}
@@ -234,7 +233,7 @@ export const HomePage = () => {
         </ScrollReveal>
       </section>
 
-      <MobileFoundersSection />
+      
 
       {/* Testimonials Section - Desktop */}
       <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden bg-background">
