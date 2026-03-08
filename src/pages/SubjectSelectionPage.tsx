@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
@@ -37,6 +37,7 @@ export const SubjectSelectionPage = () => {
   const [selectedLevel, setSelectedLevel] = useState<'alevel' | 'gcse' | null>(null);
   const [selectedSubjects, setSelectedSubjects] = useState<SubjectOption[]>([]);
   const [dynamicALevelSubjects, setDynamicALevelSubjects] = useState<SubjectOption[]>([]);
+  const subjectsRef = useRef<HTMLDivElement>(null);
 
   // Load dynamic A-Level subjects from products table
   useEffect(() => {
@@ -126,7 +127,13 @@ export const SubjectSelectionPage = () => {
               <p className="text-xs text-muted-foreground mt-1">Years 10–11</p>
             </button>
             <button
-              onClick={() => setSelectedLevel(selectedLevel === 'alevel' ? null : 'alevel')}
+              onClick={() => {
+                const newLevel = selectedLevel === 'alevel' ? null : 'alevel';
+                setSelectedLevel(newLevel);
+                if (newLevel === 'alevel') {
+                  setTimeout(() => subjectsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
+                }
+              }}
               className={`rounded-xl border-2 p-6 text-center transition-all ${
                 selectedLevel === 'alevel'
                   ? 'border-primary bg-primary/5'
@@ -148,7 +155,7 @@ export const SubjectSelectionPage = () => {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="space-y-4">
+                <div ref={subjectsRef} className="space-y-4">
                   <p className="text-center text-sm font-medium text-muted-foreground">Select your subject</p>
                   <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
                     {allALevelSubjects.map((subject) => (
