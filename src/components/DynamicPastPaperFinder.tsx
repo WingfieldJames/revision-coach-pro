@@ -22,6 +22,21 @@ interface DynamicPastPaperFinderProps {
   tier?: 'free' | 'deluxe';
 }
 
+// Normalize question numbers: strip leading zeros, convert dot notation to sub-parts
+function normalizeQuestionNumber(qn: string): string {
+  if (!qn) return '';
+  // Handle "01.3" format -> "1(c)", "02.1" -> "2(a)" etc.
+  const dotMatch = qn.match(/^0*(\d+)\.(\d+)$/);
+  if (dotMatch) {
+    const main = dotMatch[1];
+    const sub = parseInt(dotMatch[2], 10);
+    const subLetter = String.fromCharCode(96 + sub); // 1->a, 2->b, 3->c
+    return `${main}(${subLetter})`;
+  }
+  // Strip leading zeros from simple numbers
+  return qn.replace(/^0+/, '') || qn;
+}
+
 // Parse structured data from chunk content/metadata
 function parseChunkDisplay(chunk: SearchResult) {
   const meta = chunk.metadata || {};
@@ -29,28 +44,54 @@ function parseChunkDisplay(chunk: SearchResult) {
   const paperNum = meta.paper_number ? `Paper ${meta.paper_number}` : '';
   const section = meta.topic || meta.section || '';
   const marks = meta.total_marks || meta.marks || null;
-  const questionNum = meta.question_number || '';
+  const rawQn = meta.question_number || '';
+  const questionNum = normalizeQuestionNumber(String(rawQn));
 
   // Try to extract question text - strip "Question X(Y):" prefix
   let questionText = chunk.content || '';
+  
+  // Skip mark scheme content entirely
+  if (questionText.match(/^Mark Scheme/i)) {
+    return { headerLabel: '', marks: null, questionNum: '', questionText: '', extract: '', isMarkScheme: true };
+  }
+
+  // Strip mark scheme portion from combined chunks
+  const msIndex = questionText.indexOf('Mark Scheme:');
+  if (msIndex > 0) {
+    questionText = questionText.slice(0, msIndex).trim();
+  }
+  // Also strip "MS:" style mark scheme sections
+  const msIndex2 = questionText.indexOf('\nMS:');
+  if (msIndex2 > 0) {
+    questionText = questionText.slice(0, msIndex2).trim();
+  }
+
   const prefixMatch = questionText.match(/^Question\s+\d+[a-z]?\s*(\([a-z]+\))?\s*:?\s*/i);
   if (prefixMatch) {
     questionText = questionText.slice(prefixMatch[0].length);
   }
 
-  // Try to extract context/extract section
+  // Extract figure/context/extract section and preserve it prominently
   let extract = '';
-  const contextMatch = questionText.match(/(?:Context|Extract|Source):\s*([\s\S]*?)(?:\n\n|$)/i);
+  const contextMatch = questionText.match(/(?:Context|Extract|Source|Figure\s+\d+):\s*([\s\S]*?)(?:\n\n|$)/i);
   if (contextMatch) {
-    extract = contextMatch[1].trim();
+    extract = contextMatch[0].trim();
     questionText = questionText.replace(contextMatch[0], '').trim();
+  }
+  
+  // Also check for inline figure references to highlight
+  if (!extract) {
+    const figureRef = questionText.match(/((?:Using |See |Refer to )?Figure\s+\d+[^.]*\.)/i);
+    if (figureRef) {
+      extract = figureRef[1].trim();
+    }
   }
 
   // Build header label
   const headerParts = [paperNum, year ? `June ${year}` : '', section].filter(Boolean);
   const headerLabel = headerParts.length > 0 ? headerParts.join(' • ') : 'Past Paper';
 
-  return { headerLabel, marks, questionNum, questionText: questionText.slice(0, 500), extract };
+  return { headerLabel, marks, questionNum, questionText: questionText.slice(0, 500), extract, isMarkScheme: false };
 }
 
 export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
@@ -154,10 +195,16 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
       }
       const chunks: SearchResult[] = (data.results || data.chunks || []);
 
-      const paperTypes = ['paper', 'combined', 'question', 'mark_scheme', 'past_paper', 'past_paper_qp', 'past_paper_ms', 'paper_1', 'paper_2', 'paper_3'];
+      const paperTypes = ['paper', 'combined', 'question', 'past_paper', 'past_paper_qp', 'paper_1', 'paper_2', 'paper_3'];
       const paperResults = chunks.filter((c: SearchResult) => {
         const ct = String(c.metadata?.content_type || '');
-        return paperTypes.some(t => ct.includes(t));
+        const content = (c.content || '').trim();
+        // Exclude pure mark scheme chunks
+        if (content.match(/^Mark Scheme/i)) return false;
+        // Include paper-type chunks or chunks with figure references
+        const isPaper = paperTypes.some(t => ct.includes(t));
+        const hasFigure = /Figure\s+\d+/i.test(content) || /Figure\s+\d+/i.test(c.metadata?.topic || '');
+        return isPaper || hasFigure;
       });
 
       const maxResults = tier === 'free' ? 5 : 10;
@@ -213,7 +260,8 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
             </div>
           ) : (
             results.map((chunk) => {
-              const { headerLabel, marks, questionNum, questionText, extract } = parseChunkDisplay(chunk);
+              const { headerLabel, marks, questionNum, questionText, extract, isMarkScheme } = parseChunkDisplay(chunk);
+              if (isMarkScheme || !questionText.trim()) return null;
               return (
                 <div key={chunk.id} className="border border-border rounded-lg p-3 bg-background hover:bg-muted/30 transition-colors">
                   <div className="flex items-center justify-between mb-1.5">

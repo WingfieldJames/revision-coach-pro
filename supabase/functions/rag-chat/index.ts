@@ -405,8 +405,8 @@ serve(async (req) => {
       console.log(`search_only mode for product ${product_id}: "${searchQuery.substring(0, 80)}"`);
 
       const PAPER_CONTENT_TYPES = [
-        'paper_1', 'paper_2', 'paper_3', 'mark_scheme',
-        'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined',
+        'paper_1', 'paper_2', 'paper_3',
+        'past_paper', 'past_paper_qp', 'combined',
       ];
 
       const { data: allChunks, error: chunkError } = await supabaseAdmin
