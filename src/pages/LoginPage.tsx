@@ -215,7 +215,7 @@ export const LoginPage = () => {
               <div className="flex justify-end">
                 <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
                   <DialogTrigger asChild>
-                    <button type="button" className="text-sm text-[#1e3a8a] hover:text-[#a855f7] dark:text-primary dark:hover:text-primary/80 transition-colors">
+                    <button type="button" className="text-sm text-primary hover:text-primary/80 dark:text-primary dark:hover:text-primary/80 transition-colors">
                       Forgot password?
                     </button>
                   </DialogTrigger>
