@@ -233,6 +233,10 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
           toast.error(errorData.message || 'Rate limit reached. Try again later.');
           return;
         }
+        if (response.status === 402) {
+          toast.error('AI service is temporarily unavailable. Please try again later.');
+          return;
+        }
         throw new Error(errorData.error || `Request failed with status ${response.status}`);
       }
 
