@@ -291,7 +291,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                         return (
                           <button
                             key={s.freePath}
-                            onClick={() => navigateToSubject(s.freePath, s.premiumPath)}
+                            onClick={() => navigateToSubject(s.freePath, s.premiumPath, s.slug)}
                             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left ${
                               active
                                 ? 'bg-primary/10 text-primary font-semibold'
