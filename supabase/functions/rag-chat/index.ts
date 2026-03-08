@@ -565,24 +565,33 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       user_preferences
     );
     
-    // Find relevant diagram for deluxe users
+    // Always try to find a relevant diagram based on message content
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
-    if (enable_diagrams && tier === 'deluxe') {
-      relevantDiagram = findRelevantDiagram(message, diagram_subject);
-      if (relevantDiagram) {
-        console.log(`Found relevant diagram: ${relevantDiagram.title}`);
-      }
+    const diagramSubject = enable_diagrams ? diagram_subject : 'economics';
+    relevantDiagram = findRelevantDiagram(message, diagramSubject);
+    if (relevantDiagram) {
+      console.log(`Found relevant diagram: ${relevantDiagram.title}`);
     }
     
     // Build final system prompt with context injection
     let finalSystemPrompt = personalizedPrompt;
+    
+    // Add essay marking instructions
+    finalSystemPrompt += `\n\n--- ESSAY MARKING CAPABILITY ---
+When a student asks you to mark their essay, answer, or response:
+1. If they haven't specified how many marks the question is worth, ASK them: "How many marks is this question worth?" before marking.
+2. Once you know the mark value, provide detailed feedback using the marking criteria from your training data.
+3. Give a mark out of the total, identify what they did well, what's missing, and how to improve.
+4. If they upload an image of their work, analyse it and mark it the same way.
+5. Use exact marking criteria and level descriptors from your training data where available.`;
+
     if (relevantContext) {
       finalSystemPrompt += `\n\n--- TRAINING DATA CONTEXT ---\nUse the following information to inform your responses:\n\n${relevantContext}`;
     }
     
-    // Add diagram instruction for deluxe users if relevant
+    // Add diagram instruction if relevant
     if (relevantDiagram) {
-      finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---\nA relevant diagram is available for this topic: "${relevantDiagram.title}". The system will display this diagram automatically. Reference it in your explanation where appropriate.`;
+      finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---\nA relevant diagram is available for this topic: "${relevantDiagram.title}". The system will display this diagram automatically alongside your response. Reference it naturally in your explanation where appropriate.`;
     }
     
     console.log(`System prompt length: ${finalSystemPrompt.length} chars (context: ${relevantContext.length} chars)`);
