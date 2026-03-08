@@ -109,7 +109,15 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
         return;
       }
 
-      const data = await resp.json();
+      let data: any;
+      const respText = await resp.text();
+      try {
+        data = JSON.parse(respText);
+      } catch {
+        // If response is SSE stream, try to extract first JSON object
+        const jsonMatch = respText.match(/\{[\s\S]*\}/);
+        data = jsonMatch ? JSON.parse(jsonMatch[0]) : { results: [] };
+      }
       const chunks: SearchResult[] = (data.results || data.chunks || []);
 
       const paperResults = chunks.filter((c: SearchResult) => {
