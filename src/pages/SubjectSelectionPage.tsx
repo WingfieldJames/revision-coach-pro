@@ -159,7 +159,7 @@ export const SubjectSelectionPage = () => {
                         className={`rounded-lg border-2 p-4 text-left transition-all ${
                           subject.comingSoon
                             ? 'border-border opacity-50 cursor-not-allowed'
-                            : selectedSubject?.slug === subject.slug
+                            : selectedSubjects.some((s) => s.slug === subject.slug)
                             ? 'border-primary bg-primary/5'
                             : 'border-border hover:border-primary/50'
                         }`}
