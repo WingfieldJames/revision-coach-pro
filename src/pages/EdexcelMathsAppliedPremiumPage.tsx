@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,9 +23,11 @@ const EDEXCEL_MATHS_APPLIED_PROMPTS = [
 export const EdexcelMathsAppliedPremiumPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const chatRef = useRef<RAGChatRef>(null);
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -46,14 +48,33 @@ export const EdexcelMathsAppliedPremiumPage = () => {
   if (!user) return (<div className="min-h-screen bg-background flex flex-col"><Header /><div className="flex-1 flex items-center justify-center"><div className="text-center max-w-md px-6"><h1 className="text-2xl font-bold mb-4">Sign In Required</h1><Button variant="brand" onClick={() => navigate('/login')}>Sign In</Button></div></div></div>);
   if (!hasAccess || !productId) return (<div className="min-h-screen bg-background flex flex-col"><Header /><div className="flex-1 flex items-center justify-center"><div className="text-center max-w-md px-6"><h1 className="text-2xl font-bold mb-4">Premium Access Required</h1><div className="flex flex-col gap-3"><Button variant="brand" onClick={() => navigate('/compare')}>View Plans</Button><Button variant="outline" onClick={() => navigate('/edexcel-maths-applied-free-version')}>Try Free Version</Button></div></div></div></div>);
 
+  const sharedProps = {
+    subjectName: "Edexcel Maths (Applied)",
+    productId,
+    productSlug: "edexcel-mathematics-applied",
+    showMyAI: true,
+    showPastPaperFinder: true,
+    pastPaperBoard: "edexcel-maths-applied" as const,
+    showRevisionGuide: true,
+    revisionGuideBoard: "edexcel-maths-applied" as const,
+    showGradeBoundaries: true,
+    gradeBoundariesSubject: "maths" as const,
+    showEssayMarker: true,
+    showExamCountdown: true,
+    examDates: EDEXCEL_MATHS_EXAMS,
+    examSubjectName: "Edexcel Maths",
+    showMyMistakes: true,
+    onEssayMarkerSubmit: handleEssayMarkerSubmit,
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead title="Deluxe A* AI – Edexcel Maths Applied | AI Tutor" description="Your personal Edexcel Mathematics Applied A* tutor." canonical="https://astarai.co.uk/edexcel-maths-applied-premium" />
       <RandomChatbotBackground />
-      <ChatbotSidebar subjectName="Edexcel Maths (Applied)" productId={productId} productSlug="edexcel-mathematics-applied" showMyAI showPastPaperFinder pastPaperBoard="edexcel-maths-applied" showRevisionGuide revisionGuideBoard="edexcel-maths-applied" showGradeBoundaries gradeBoundariesSubject="maths" showExamCountdown examDates={EDEXCEL_MATHS_EXAMS} examSubjectName="Edexcel Maths" showMyMistakes />
-      <ChatbotToolbar subjectName="Edexcel Maths (Applied)" productId={productId} productSlug="edexcel-mathematics-applied" showMyAI showPastPaperFinder pastPaperBoard="edexcel-maths-applied" showRevisionGuide revisionGuideBoard="edexcel-maths-applied" showGradeBoundaries gradeBoundariesSubject="maths" showExamCountdown examDates={EDEXCEL_MATHS_EXAMS} examSubjectName="Edexcel Maths" showMyMistakes />
+      <ChatbotSidebar {...sharedProps} />
+      <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={productId} subjectName="Edexcel Mathematics Applied Deluxe" subjectDescription="Your personal A* Stats & Mechanics tutor. Ask me anything!" footerText="Powered by A* AI • Edexcel Mathematics Applied (Stats & Mechanics)" placeholder="Ask me anything about Stats & Mechanics..." suggestedPrompts={EDEXCEL_MATHS_APPLIED_PROMPTS} />
+        <RAGChat productId={productId} subjectName="Edexcel Mathematics Applied Deluxe" subjectDescription="Your personal A* Stats & Mechanics tutor. Ask me anything!" footerText="Powered by A* AI • Edexcel Mathematics Applied (Stats & Mechanics)" placeholder="Ask me anything about Stats & Mechanics..." suggestedPrompts={EDEXCEL_MATHS_APPLIED_PROMPTS} chatRef={chatRef} />
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat } from '@/components/RAGChat';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,9 +23,11 @@ const AQA_CHEMISTRY_PROMPTS = [
 export const AQAChemistryPremiumPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const chatRef = useRef<RAGChatRef>(null);
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -46,14 +48,27 @@ export const AQAChemistryPremiumPage = () => {
   if (!user) return (<div className="min-h-screen bg-background flex flex-col"><Header /><div className="flex-1 flex items-center justify-center"><div className="text-center max-w-md px-6"><h1 className="text-2xl font-bold mb-4">Sign In Required</h1><Button variant="brand" onClick={() => navigate('/login')}>Sign In</Button></div></div></div>);
   if (!hasAccess || !productId) return (<div className="min-h-screen bg-background flex flex-col"><Header /><div className="flex-1 flex items-center justify-center"><div className="text-center max-w-md px-6"><h1 className="text-2xl font-bold mb-4">Premium Access Required</h1><div className="flex flex-col gap-3"><Button variant="brand" onClick={() => navigate('/compare')}>View Plans</Button><Button variant="outline" onClick={() => navigate('/aqa-chemistry-free-version')}>Try Free Version</Button></div></div></div></div>);
 
+  const sharedProps = {
+    subjectName: "AQA Chemistry",
+    productId,
+    productSlug: "aqa-chemistry",
+    showMyAI: true,
+    showPastPaperFinder: true,
+    showEssayMarker: true,
+    showExamCountdown: true,
+    examDates: AQA_CHEMISTRY_EXAMS,
+    examSubjectName: "AQA Chemistry",
+    onEssayMarkerSubmit: handleEssayMarkerSubmit,
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead title="Deluxe A* AI – AQA Chemistry | AI Tutor" description="Your personal AQA Chemistry A* tutor." canonical="https://astarai.co.uk/aqa-chemistry-premium" />
       <RandomChatbotBackground />
-      <ChatbotSidebar subjectName="AQA Chemistry" productId={productId} productSlug="aqa-chemistry" showMyAI showPastPaperFinder showExamCountdown examDates={AQA_CHEMISTRY_EXAMS} examSubjectName="AQA Chemistry" />
-      <ChatbotToolbar subjectName="AQA Chemistry" productId={productId} productSlug="aqa-chemistry" showMyAI showPastPaperFinder showExamCountdown examDates={AQA_CHEMISTRY_EXAMS} examSubjectName="AQA Chemistry" />
+      <ChatbotSidebar {...sharedProps} />
+      <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={productId} subjectName="AQA Chemistry Deluxe" subjectDescription="Your personal A* Chemistry tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Chemistry past papers & mark schemes" placeholder="Ask me anything about AQA Chemistry A-Level..." suggestedPrompts={AQA_CHEMISTRY_PROMPTS} />
+        <RAGChat productId={productId} subjectName="AQA Chemistry Deluxe" subjectDescription="Your personal A* Chemistry tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Chemistry past papers & mark schemes" placeholder="Ask me anything about AQA Chemistry A-Level..." suggestedPrompts={AQA_CHEMISTRY_PROMPTS} chatRef={chatRef} />
       </div>
     </div>
   );
