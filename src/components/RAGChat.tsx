@@ -16,6 +16,7 @@ import 'katex/dist/katex.min.css';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProductTier } from '@/hooks/useProductTier';
 import { diagrams } from '@/data/diagrams';
 import { csDiagrams } from '@/data/csDiagrams';
 interface Message {
