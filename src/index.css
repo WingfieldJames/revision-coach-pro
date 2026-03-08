@@ -265,7 +265,7 @@
   }
 
   :root .exam-countdown-panel .panel-dot-outline {
-    border: 2px solid #1e3a8a;
+    border: 2px solid hsl(263 70% 50%);
   }
 
   :root .exam-countdown-panel .panel-dot-inner {
