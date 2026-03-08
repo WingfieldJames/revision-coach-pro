@@ -108,25 +108,16 @@ export const DynamicPremiumPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool={hasFeature('my_ai')}
-          showEssayMarker={hasFeature('essay_marker')}
           showPastPaperFinder={hasFeature('past_papers')}
           showRevisionGuide={hasFeature('revision_guide')}
           showExamCountdown={hasFeature('exam_countdown')}
-          showDiagramTool={hasFeature('diagram_generator')}
-          customDiagramData={trainer?.diagram_library && trainer.diagram_library.length > 0 ? trainer.diagram_library : undefined}
           examDates={examDates}
           examSubjectName={subjectName}
           hideUserDetails
           productId={product.id}
-           productSlug={product.slug}
-           showUpgradeButton
-           showMyMistakes={hasFeature('my_mistakes')}
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
-          essayMarkerCustomMarks={
-            trainer?.essay_marker_marks && trainer.essay_marker_marks.length > 0
-              ? trainer.essay_marker_marks
-              : undefined
-          }
+          productSlug={product.slug}
+          showUpgradeButton
+          showMyMistakes={hasFeature('my_mistakes')}
           customPastPaperContent={
             <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="deluxe" />
           }
