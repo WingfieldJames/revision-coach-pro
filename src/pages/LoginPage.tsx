@@ -272,7 +272,7 @@ export const LoginPage = () => {
                 Don't have an account?{' '}
                 <Link 
                   to={`/signup${redirect ? `?redirect=${redirect}` : ''}`}
-                  className="text-[#1e3a8a] hover:text-[#a855f7] dark:text-primary dark:hover:text-primary/80 transition-colors font-medium"
+                  className="text-primary hover:text-primary/80 transition-colors font-medium"
                 >
                   Create one here
                 </Link>

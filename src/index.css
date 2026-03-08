@@ -205,7 +205,7 @@
 
   /* Light mode only gradient for chatbot subject heading */
   .light-gradient-subject {
-    background: linear-gradient(135deg, #1e3a8a 0%, #a855f7 100%);
+    background: linear-gradient(135deg, #4f36b3 0%, #7c5ce7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
