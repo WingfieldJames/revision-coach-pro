@@ -95,7 +95,6 @@ interface AnalyticsData {
 }
 
 export const AnalyticsPage = () => {
-  const { user } = useAuth();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,12 +102,6 @@ export const AnalyticsPage = () => {
 
   useEffect(() => {
     const fetchAnalytics = async () => {
-      if (!user) {
-        setError("Please log in");
-        setLoading(false);
-        return;
-      }
-
       const { data: result, error: fnError } = await supabase.functions.invoke(
         "get-analytics"
       );
