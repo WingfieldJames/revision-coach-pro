@@ -199,31 +199,33 @@ export const HomePage = () => {
                 <p className="text-xs sm:text-sm text-muted-foreground mt-4">Get started free • No card needed</p>
               </div>
 
-              {/* Right side - Phone mockups */}
-              <div className="hidden md:flex flex-1 justify-center items-center relative">
+              {/* Right side - Device mockups */}
+              <div className="hidden md:flex flex-1 justify-center items-end relative min-h-[400px]">
                 <motion.div
-                  className="relative"
+                  className="relative z-10"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                 >
                   <img
-                    src={phoneImg}
+                    src="/lovable-uploads/hero-mobile-phone-transparent.png"
                     alt="A* AI on mobile"
-                    className="w-[280px] lg:w-[320px] drop-shadow-2xl relative z-10"
+                    className="w-[260px] lg:w-[300px] drop-shadow-2xl"
                   />
                 </motion.div>
                 <motion.div
-                  className="absolute -right-4 lg:-right-8 top-8"
+                  className="absolute right-0 lg:-right-6 top-4 z-0"
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
                 >
-                  <img
-                    src={laptopImg}
-                    alt="A* AI on laptop"
-                    className="w-[240px] lg:w-[280px] drop-shadow-2xl rounded-xl"
-                  />
+                  <div className="w-[260px] lg:w-[300px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated bg-card">
+                    <img
+                      src="/lovable-uploads/hero-ipad-demo.jpg"
+                      alt="A* AI on desktop"
+                      className="w-full h-auto"
+                    />
+                  </div>
                 </motion.div>
               </div>
             </div>
