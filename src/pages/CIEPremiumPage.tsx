@@ -18,7 +18,7 @@ const CIE_ECONOMICS_PROMPTS = [
 ];
 
 export const CIEPremiumPage = () => {
-  const chatRef = useRef<RAGChatRef>(null);
+  const { user, loading } = useAuth();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
