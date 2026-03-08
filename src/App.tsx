@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ChatHistoryProvider } from "@/contexts/ChatHistoryContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAffiliateTracking } from "./hooks/useAffiliateTracking";
@@ -53,6 +54,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
     <AuthProvider>
+    <ChatHistoryProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -98,6 +100,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+    </ChatHistoryProvider>
     </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>

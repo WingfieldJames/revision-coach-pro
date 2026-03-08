@@ -19,6 +19,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProductTier } from '@/hooks/useProductTier';
 import { diagrams } from '@/data/diagrams';
 import { csDiagrams } from '@/data/csDiagrams';
+import { useChatHistory } from '@/hooks/useChatHistory';
+import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -127,6 +129,52 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const animationRef = useRef<number | null>(null);
   const fullContentRef = useRef('');
 
+  // Chat history persistence
+  const chatHistoryCtx = useChatHistoryContext();
+  const { createConversation, saveMessage, loadMessages, fetchConversations } = useChatHistory(productId);
+  const conversationIdRef = useRef<string | null>(null);
+
+  // Register handlers for sidebar communication
+  useEffect(() => {
+    if (!chatHistoryCtx) return;
+    chatHistoryCtx.registerHandlers({
+      onNewChat: () => {
+        setMessages([]);
+        conversationIdRef.current = null;
+        chatHistoryCtx.setCurrentConversationId(null);
+        setLimitReached(false);
+      },
+      onLoadConversation: async (id: string) => {
+        const msgs = await loadMessages(id);
+        setMessages(msgs.map(m => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+          imageUrl: m.image_url || undefined,
+        })));
+        conversationIdRef.current = id;
+        chatHistoryCtx.setCurrentConversationId(id);
+        setLimitReached(false);
+      },
+    });
+  }, [chatHistoryCtx, loadMessages]);
+
+  // Helper to persist a message
+  const persistMessage = useCallback(async (role: 'user' | 'assistant', content: string, imageUrl?: string) => {
+    if (!user) return;
+    // Create conversation on first user message
+    if (!conversationIdRef.current && role === 'user') {
+      const title = content.slice(0, 80) || 'New Chat';
+      const newId = await createConversation(title);
+      if (newId) {
+        conversationIdRef.current = newId;
+        chatHistoryCtx?.setCurrentConversationId(newId);
+      }
+    }
+    if (conversationIdRef.current) {
+      await saveMessage(conversationIdRef.current, role, content, imageUrl);
+      chatHistoryCtx?.triggerRefresh();
+    }
+  }, [user, createConversation, saveMessage, chatHistoryCtx]);
   // Fetch user preferences for this product
   useEffect(() => {
     const fetchPreferences = async () => {
@@ -232,6 +280,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   }, [isAnimating, animateNextWord]);
   const handleSendWithMessage = async (messageText: string, imageDataUrl?: string) => {
     if (!messageText.trim() && !imageDataUrl || isLoading) return;
+    // Persist user message
+    persistMessage('user', messageText, imageDataUrl);
 
     // Reset animation state
     bufferRef.current = '';
@@ -345,6 +395,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       if (bufferRef.current.length > 0 && !animationRef.current) {
         setIsAnimating(true);
         animateNextWord();
+      }
+      // Persist assistant response
+      if (fullContentRef.current) {
+        persistMessage('assistant', fullContentRef.current);
       }
     } catch (error) {
       console.error('Chat error:', error);
