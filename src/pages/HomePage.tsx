@@ -537,23 +537,23 @@ export const HomePage = () => {
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-6 text-muted-foreground">
-            <Link to="/compare" className="text-gradient-brand hover:opacity-80 transition-opacity">
+            <Link to="/compare" className="text-primary hover:text-primary/80 transition-opacity">
               Plans
             </Link>
             <span>•</span>
-            <Link to="/#faq" className="text-gradient-brand hover:opacity-80 transition-opacity">
+            <Link to="/#faq" className="text-primary hover:text-primary/80 transition-opacity">
               FAQs
             </Link>
             <span>•</span>
             <Link
               to="/login"
-              className="text-gradient-brand hover:opacity-80 transition-opacity"
+              className="text-primary hover:text-primary/80 transition-opacity"
               onClick={() => window.scrollTo(0, 0)}
             >
               Sign in
             </Link>
             <span>•</span>
-            <Link to="/contact" className="text-gradient-brand hover:opacity-80 transition-opacity">
+            <Link to="/contact" className="text-primary hover:text-primary/80 transition-opacity">
               Contact
             </Link>
           </div>
