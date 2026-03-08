@@ -10,7 +10,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Trash2, ExternalLink, Instagram, ChevronDown, AlertCircle } from 'lucide-react';
+import { Trash2, ExternalLink, Instagram, Youtube, ChevronDown, AlertCircle } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 import { checkProductAccess, ProductAccess } from '@/lib/productAccess';

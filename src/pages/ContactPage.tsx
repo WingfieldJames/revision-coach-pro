@@ -1,7 +1,7 @@
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { Link } from 'react-router-dom';
-import { Mail, Instagram } from 'lucide-react';
+import { Mail, Instagram, Youtube } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
