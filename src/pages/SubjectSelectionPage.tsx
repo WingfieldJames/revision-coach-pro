@@ -35,7 +35,7 @@ export const SubjectSelectionPage = () => {
   const currentLogo = theme === 'dark' ? logo : logoDark;
 
   const [selectedLevel, setSelectedLevel] = useState<'alevel' | 'gcse' | null>(null);
-  const [selectedSubject, setSelectedSubject] = useState<SubjectOption | null>(null);
+  const [selectedSubjects, setSelectedSubjects] = useState<SubjectOption[]>([]);
   const [dynamicALevelSubjects, setDynamicALevelSubjects] = useState<SubjectOption[]>([]);
 
   // Load dynamic A-Level subjects from products table
@@ -85,11 +85,15 @@ export const SubjectSelectionPage = () => {
 
   const handleSubjectSelect = (subject: SubjectOption) => {
     if (subject.comingSoon) return;
-    setSelectedSubject(subject);
+    setSelectedSubjects((prev) => {
+      const isSelected = prev.some((s) => s.slug === subject.slug);
+      if (isSelected) return prev.filter((s) => s.slug !== subject.slug);
+      return [...prev, subject];
+    });
   };
 
   const handleNext = () => {
-    if (!selectedSubject) return;
+    if (selectedSubjects.length === 0) return;
     navigate('/compare');
   };
 
@@ -155,7 +159,7 @@ export const SubjectSelectionPage = () => {
                         className={`rounded-lg border-2 p-4 text-left transition-all ${
                           subject.comingSoon
                             ? 'border-border opacity-50 cursor-not-allowed'
-                            : selectedSubject?.slug === subject.slug
+                            : selectedSubjects.some((s) => s.slug === subject.slug)
                             ? 'border-primary bg-primary/5'
                             : 'border-border hover:border-primary/50'
                         }`}
@@ -179,7 +183,7 @@ export const SubjectSelectionPage = () => {
 
                   {/* Next button */}
                   <AnimatePresence>
-                    {selectedSubject && !selectedSubject.comingSoon && (
+                    {selectedSubjects.length > 0 && (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
