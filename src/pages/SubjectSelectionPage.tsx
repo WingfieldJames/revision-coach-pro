@@ -155,7 +155,7 @@ export const SubjectSelectionPage = () => {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="space-y-4">
+                <div ref={subjectsRef} className="space-y-4">
                   <p className="text-center text-sm font-medium text-muted-foreground">Select your subject</p>
                   <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
                     {allALevelSubjects.map((subject) => (
