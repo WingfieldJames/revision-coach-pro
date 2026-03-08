@@ -19,6 +19,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProductTier } from '@/hooks/useProductTier';
 import { diagrams } from '@/data/diagrams';
 import { csDiagrams } from '@/data/csDiagrams';
+import { useChatHistory } from '@/hooks/useChatHistory';
+import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
