@@ -273,7 +273,7 @@
   }
 
   :root .exam-countdown-panel .panel-accent-text {
-    color: #1e3a8a;
+    color: hsl(263 70% 50%);
   }
 
   /* Dark mode – revert to theme primary (orange) */
