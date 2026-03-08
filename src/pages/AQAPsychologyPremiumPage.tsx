@@ -77,9 +77,6 @@
      }
    }, [user, loading]);
  
-   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-     chatRef.current?.submitMessage(message, imageDataUrl);
-   };
  
    // Loading state
    if (loading || checkingAccess) {
