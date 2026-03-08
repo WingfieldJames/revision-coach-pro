@@ -83,7 +83,7 @@ const revisionFeatures = [
 ];
 
 /** Shared heading class matching FoundersCarousel / hero style */
-const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2]";
+const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight";
 
 export const HomePage = () => {
   const { user, loading } = useAuth();
