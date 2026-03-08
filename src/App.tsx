@@ -41,6 +41,7 @@ import { DynamicPremiumPage } from "./pages/DynamicPremiumPage";
 import { BuildAboutPage } from "./pages/BuildAboutPage";
 import { GCSEComparePage } from "./pages/GCSEComparePage";
 import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
