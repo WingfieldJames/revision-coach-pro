@@ -367,7 +367,57 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false } = await req.json();
+    const body = await req.json();
+    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query } = body;
+
+    // search_only mode: keyword search for past paper chunks, return JSON
+    if (search_only && product_id) {
+      const searchQuery = query || message || '';
+      console.log(`search_only mode for product ${product_id}: "${searchQuery.substring(0, 80)}"`);
+
+      const PAPER_CONTENT_TYPES = [
+        'paper_1', 'paper_2', 'paper_3', 'mark_scheme',
+        'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined',
+      ];
+
+      const { data: allChunks, error: chunkError } = await supabaseAdmin
+        .from('document_chunks')
+        .select('id, content, metadata')
+        .eq('product_id', product_id);
+
+      if (chunkError || !allChunks) {
+        console.error('search_only chunk fetch error:', chunkError);
+        return new Response(JSON.stringify({ results: [] }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Filter to paper-type chunks only
+      const paperChunks = allChunks.filter((c: any) => {
+        const ct = String(c.metadata?.content_type || '');
+        return PAPER_CONTENT_TYPES.includes(ct);
+      });
+
+      // Score by keyword relevance
+      const keywords = searchQuery.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+      const scored = paperChunks.map((c: any) => {
+        const text = (c.content + ' ' + JSON.stringify(c.metadata || {})).toLowerCase();
+        let score = 0;
+        for (const kw of keywords) {
+          const matches = text.split(kw).length - 1;
+          score += matches;
+        }
+        return { ...c, similarity: score };
+      }).filter((c: any) => c.similarity > 0)
+        .sort((a: any, b: any) => b.similarity - a.similarity)
+        .slice(0, 15);
+
+      console.log(`search_only: ${paperChunks.length} paper chunks, ${scored.length} matched`);
+
+      return new Response(JSON.stringify({ results: scored }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (!message) {
       throw new Error("message is required");
