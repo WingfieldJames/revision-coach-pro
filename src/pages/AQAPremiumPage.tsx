@@ -90,19 +90,15 @@ export const AQAPremiumPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showDiagramTool 
-          showEssayMarker 
-           showPastPaperFinder
-           pastPaperBoard="aqa"
-           showExamCountdown
+          showPastPaperFinder
+          pastPaperBoard="aqa"
+          showExamCountdown
           examDates={AQA_ECONOMICS_EXAMS}
           examSubjectName="AQA Economics"
           hideUserDetails 
           productId={AQA_PRODUCT_ID}
           productSlug="aqa-economics"
           showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
-          essayMarkerCustomMarks={[9, 10, 15, 25]}
         />
       </div>
       
@@ -114,7 +110,8 @@ export const AQAPremiumPage = () => {
           footerText="Powered by A* AI • Trained on AQA Economics specification"
           placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..."
           suggestedPrompts={AQA_ECONOMICS_PROMPTS}
-          chatRef={chatRef}
+          enableDiagrams
+          diagramSubject="economics"
         />
       </div>
     </div>

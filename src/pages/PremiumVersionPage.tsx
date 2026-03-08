@@ -90,9 +90,7 @@ export const PremiumVersionPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showDiagramTool 
           showGradeBoundaries
-          showEssayMarker 
           showPastPaperFinder
           showRevisionGuide
           revisionGuideBoard="edexcel"
@@ -103,7 +101,6 @@ export const PremiumVersionPage = () => {
           productId={EDEXCEL_PRODUCT_ID}
           productSlug="edexcel-economics"
           showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -115,7 +112,8 @@ export const PremiumVersionPage = () => {
           footerText="Powered by A* AI • Trained on Edexcel Economics specification"
           placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..."
           suggestedPrompts={EDEXCEL_ECONOMICS_PROMPTS}
-          chatRef={chatRef}
+          enableDiagrams
+          diagramSubject="economics"
         />
       </div>
     </div>
