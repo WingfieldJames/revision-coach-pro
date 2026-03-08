@@ -17,9 +17,9 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 10%;
 
-    /* Purple gradient accent for light mode */
-    --primary: 271 81% 56%;
-    --primary-variant: 271 91% 65%;
+    /* Deep purple accent for light mode — restrained, not gradient-heavy */
+    --primary: 263 70% 50%;
+    --primary-variant: 263 60% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 211 23% 98%;
