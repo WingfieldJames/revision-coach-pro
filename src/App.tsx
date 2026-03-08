@@ -100,6 +100,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+    </ChatHistoryProvider>
     </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
