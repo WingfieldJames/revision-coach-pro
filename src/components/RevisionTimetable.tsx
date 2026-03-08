@@ -102,7 +102,44 @@ const defaultSubjects = (): Subject[] => [
   { id: "3", name: "", predicted: "C", target: "A", importance: 3, subjectType: "STEM - Conceptual", isCustom: false },
 ];
 
-/* ─── scientific scheduling algorithm ─── */
+/* ─── scientific scheduling techniques ─── */
+const TECHNIQUES_BY_TYPE: Record<SubjectType, string[]> = {
+  "STEM - Heavy Calculation": ["Practice Problems", "Worked Examples", "Timed Drills", "Error Analysis"],
+  "STEM - Conceptual": ["Active Recall", "Concept Mapping", "Feynman Technique", "Past Papers"],
+  "Essay-Based / Humanities": ["Essay Plans", "Timed Essays", "Source Analysis", "Model Answer Review"],
+  "Language / Memory-Heavy": ["Flashcard Drill", "Spaced Recall", "Active Writing", "Practice Translation"],
+};
+
+const COGNITIVE_LOAD: Record<SubjectType, number> = {
+  "STEM - Heavy Calculation": 5,
+  "STEM - Conceptual": 4,
+  "Essay-Based / Humanities": 3,
+  "Language / Memory-Heavy": 3,
+};
+
+function energyLevel(hour: number): number {
+  if (hour >= 6 && hour <= 8) return 0.7;
+  if (hour >= 9 && hour <= 11) return 1.0;
+  if (hour === 12) return 0.6;
+  if (hour >= 13 && hour <= 14) return 0.5;
+  if (hour >= 15 && hour <= 17) return 0.85;
+  if (hour >= 18 && hour <= 19) return 0.7;
+  return 0.5;
+}
+
+/* ─── helpers ─── */
+const gradeIndex = (g: Grade) => GRADES.indexOf(g);
+const slotKey = (day: string, hour: number) => `${day}-${hour}`;
+
+function loadJSON<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function generateScientificTimetable(
   subjects: Subject[],
   freeSlots: SlotMap
