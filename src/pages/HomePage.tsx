@@ -152,9 +152,9 @@ export const HomePage = () => {
                     <span className="text-foreground">understands </span>
                     <span className="text-primary">A-Level </span>
                     <span
-                      className="relative inline-block overflow-hidden text-left"
-                      style={{ width: "7em", height: "1.15em", verticalAlign: "bottom" }}
-                    >
+                       className="relative inline-block overflow-hidden text-left"
+                       style={{ width: "10.5em", height: "1.15em", verticalAlign: "bottom" }}
+                     >
                       <AnimatePresence mode="wait">
                         <motion.span
                           key={subjects[currentSubjectIndex]}
