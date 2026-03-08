@@ -135,7 +135,6 @@ export const DynamicFreePage = () => {
               ];
             })()
           }
-          />
         />
       </div>
     </div>

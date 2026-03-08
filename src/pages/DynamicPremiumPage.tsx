@@ -144,7 +144,6 @@ export const DynamicPremiumPage = () => {
               ];
             })()
           }
-          />
         />
       </div>
     </div>
