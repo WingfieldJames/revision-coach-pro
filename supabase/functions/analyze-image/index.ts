@@ -77,7 +77,7 @@ If there are diagrams, describe the labels/text ON the diagram only (axis labels
     const response = await fetch(aiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${openaiApiKey}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
