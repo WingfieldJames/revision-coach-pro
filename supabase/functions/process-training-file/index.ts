@@ -400,8 +400,9 @@ async function attemptMerge(
       : "Mark scheme not available";
     const totalMarks = (qpChunk.metadata as Record<string, unknown>)?.total_marks ||
       (msChunk?.metadata as Record<string, unknown>)?.total_marks || "unknown";
+    const marksLabel = totalMarks && totalMarks !== "unknown" ? ` [${totalMarks} marks]` : "";
 
-    const combined = `Question ${qNum}: ${qpContent}\n\nMark Scheme: ${msContent}\n\nTotal Marks: ${totalMarks}`;
+    const combined = `Question ${qNum}${marksLabel}: ${qpContent}\n\nMark Scheme: ${msContent}`;
 
     if (msChunk) idsToDelete.push(msChunk.id);
 
