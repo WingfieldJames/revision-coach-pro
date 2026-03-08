@@ -1,112 +1,65 @@
 
 
-## My Mistakes -- Spaced Repetition Feature
+## Plan: Fix Past Paper Finder for All Dynamic Subjects
 
-### Overview
-Add a "My Mistakes" tool to all maths chatbots (Edexcel Pure, Edexcel Applied) and OCR CS, plus make it available in the Build portal for dynamic subjects. Users can log questions they got wrong (image or text), add notes, and get reminded to retry them on a spaced repetition schedule (day 4, 16, 35, 70). A red notification badge shows how many are due for review.
+### Problems Identified
 
----
+1. **Mark schemes appearing in results**: The `search_only` mode in `rag-chat` includes `past_paper_ms` in the allowed content types, so pure mark scheme chunks (like the 76 AQA Geo 2019 ones) show up as student-facing results with content like "Mark Scheme Q01.3: ..."
+2. **Wrong years**: The 2019 year issue is specific to AQA Geo's `past_paper_ms` chunks — they were ingested as standalone mark schemes, never merged. This makes it look like everything is from 2019.
+3. **Wrong question numbers**: The `past_paper_ms` chunks use a different format (e.g., `01.3` instead of `1(c)`), and the frontend `parseChunkDisplay` function doesn't normalize these.
+4. **Figures not included**: Questions reference figures (e.g., "Using Figure 14") but the figure descriptions are only in the `Context:` field of the chunk content. No figure images are linked. The user wants figure chunks from training data to be discoverable/included.
 
-### 1. Database Table
+### Solution
 
-Create a `user_mistakes` table:
+#### 1. Edge Function: Exclude mark schemes from search results (`rag-chat/index.ts`)
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | PK, default gen_random_uuid() |
-| user_id | uuid | NOT NULL |
-| product_id | uuid | NOT NULL |
-| question_text | text | nullable (user may upload image only) |
-| question_image_url | text | nullable (base64 data URL stored directly) |
-| note | text | nullable |
-| created_at | timestamptz | default now() |
-| next_review_at | timestamptz | default now() + interval '4 days' |
-| review_count | integer | default 0 |
-| completed | boolean | default false |
+In the `search_only` block (~line 407), remove `past_paper_ms` and `mark_scheme` from `PAPER_CONTENT_TYPES`:
 
-RLS policies:
-- Users can SELECT, INSERT, UPDATE, DELETE their own rows (`auth.uid() = user_id`)
-
-The spaced repetition intervals are: review_count 0 = day 4, 1 = day 16, 2 = day 35, 3 = day 70, 4+ = completed.
-
----
-
-### 2. New Component: `MyMistakesTool.tsx`
-
-Follows the exact same pattern as RevisionGuideTool, ExamCountdown, etc. (header with icon + gradient box, content area).
-
-**Two views:**
-
-**A) Add Mistake View (default)**
-- Upload area for an image (same drag/drop pattern as ImageUploadTool) OR text input for typing the question
-- Text area for a note ("What did I get wrong?")
-- "Save Mistake" button
-
-**B) My Mistakes List View**
-- Toggle between "Add" and "View All" tabs
-- Lists all saved mistakes (newest first), each showing:
-  - Question preview (thumbnail if image, text snippet if text)
-  - Note
-  - Next review date or "Due now" badge
-  - "Mark as Reviewed" button (advances to next interval)
-  - Delete option
-
-**Notification count:** Computed client-side by counting rows where `next_review_at <= now()` and `completed = false`.
-
----
-
-### 3. Header Integration
-
-- Add new props to Header: `showMyMistakes?: boolean`
-- Add state: `myMistakesOpen`
-- Add Popover between Revision Guide and Exam Countdown
-- Icon: `AlertCircle` or `RotateCcw` from lucide-react
-- Button label: "My Mistakes"
-- Red notification badge: small absolute-positioned circle with count, only shown when due count > 0
-- Requires `productId` and user auth to query/insert
-
----
-
-### 4. Pages to Update
-
-Add `showMyMistakes` prop to Header in these pages:
-- `EdexcelMathsFreeVersionPage.tsx`
-- `EdexcelMathsPremiumPage.tsx`
-- `EdexcelMathsAppliedFreeVersionPage.tsx`
-- `EdexcelMathsAppliedPremiumPage.tsx`
-- `OCRCSFreeVersionPage.tsx`
-- `OCRCSPremiumPage.tsx`
-
----
-
-### 5. Build Portal Integration
-
-Add to the `WEBSITE_FEATURES` array in `BuildPage.tsx`:
-```
-{ id: "my_mistakes", label: "My Mistakes", description: "Spaced repetition tracker for questions students got wrong", icon: RotateCcw }
+```typescript
+const PAPER_CONTENT_TYPES = [
+  'paper_1', 'paper_2', 'paper_3',
+  'past_paper', 'past_paper_qp', 'combined',
+];
 ```
 
-Add to `DynamicFreePage.tsx` and `DynamicPremiumPage.tsx`:
-```
-showMyMistakes={hasFeature('my_mistakes')}
-```
+This ensures only question-paper-side chunks appear in the Past Paper Finder results. Mark schemes will never surface as standalone results.
 
----
+#### 2. Frontend: Better metadata parsing in `DynamicPastPaperFinder.tsx`
 
-### 6. Files Changed
+Update `parseChunkDisplay` to:
+- **Skip chunks whose content starts with "Mark Scheme"** as a safety net
+- **Extract year properly** from metadata, falling back to content parsing
+- **Normalize question numbers** (convert `01.3` to `1(c)` format or just display as-is but cleaned up)
+- **Extract figure references** from the content/context and display them prominently
+- **Strip mark scheme text** from combined chunks that contain both QP and MS text — only show the question portion
+
+Specifically:
+- Add a `content.startsWith('Mark Scheme')` filter in the results display
+- Parse `Context: Figure X: description` into a proper extract display
+- Clean question number format: strip leading zeros, display sub-parts naturally
+
+#### 3. Frontend: Include figure chunks in search results
+
+Update the `paperTypes` filter in `handleSearch` (~line 157) to also match chunks that have figure-related content. This means:
+- When processing results, check if `content` or `metadata.topic` contains "Figure" references
+- Display figure context prominently as italicized extracts (already partially working via the `extract` variable)
+
+For figure titles from training data: since figures are described inline within question chunks (in the `Context:` field), they're already part of the search results. The fix is to parse and display the `Context:` field more prominently rather than stripping it. Update `parseChunkDisplay` to preserve figure descriptions.
+
+#### 4. All subjects benefit
+
+These changes are in the shared `DynamicPastPaperFinder.tsx` component and the `rag-chat` edge function — so every dynamic subject (AQA Geo, OCR Physics, etc.) gets the fixes automatically.
+
+### Files to Change
 
 | File | Change |
 |------|--------|
-| New migration | Create `user_mistakes` table + RLS |
-| `src/components/MyMistakesTool.tsx` | **New file** -- full component |
-| `src/components/Header.tsx` | Add `showMyMistakes` prop, popover, notification badge |
-| `src/pages/EdexcelMathsFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/BuildPage.tsx` | Add to WEBSITE_FEATURES |
-| `src/pages/DynamicFreePage.tsx` | Wire up `showMyMistakes` |
-| `src/pages/DynamicPremiumPage.tsx` | Wire up `showMyMistakes` |
+| `supabase/functions/rag-chat/index.ts` | Remove `past_paper_ms` and `mark_scheme` from `PAPER_CONTENT_TYPES` in search_only mode |
+| `src/components/DynamicPastPaperFinder.tsx` | Filter out mark scheme chunks client-side, improve question number display, better figure/context extraction |
+
+### Technical Notes
+
+- The 76 AQA Geo `past_paper_ms` chunks with year 2019 are legacy data that were ingested as standalone mark schemes. They should not appear in student-facing search results.
+- The `past_paper` chunks (years 2018, 2020-2024) have proper metadata: correct year, question_number, paper_number, marks, and topic. Some include mark scheme text inline (after "Mark Scheme:") which should be stripped from display.
+- No database migration needed — this is purely logic/display fixes.
 
