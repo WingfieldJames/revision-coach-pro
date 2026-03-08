@@ -171,7 +171,8 @@ function detectContentTypePriorities(userMessage: string): string[] {
   // Past paper / practice question keywords
   if (lowerMessage.includes('practice') || lowerMessage.includes('question') ||
       lowerMessage.includes('past paper') || lowerMessage.includes('example')) {
-    priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3);
+    priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3,
+      'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined');
   }
   
   // Definition / concept keywords
