@@ -260,7 +260,8 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
             </div>
           ) : (
             results.map((chunk) => {
-              const { headerLabel, marks, questionNum, questionText, extract } = parseChunkDisplay(chunk);
+              const { headerLabel, marks, questionNum, questionText, extract, isMarkScheme } = parseChunkDisplay(chunk);
+              if (isMarkScheme || !questionText.trim()) return null;
               return (
                 <div key={chunk.id} className="border border-border rounded-lg p-3 bg-background hover:bg-muted/30 transition-colors">
                   <div className="flex items-center justify-between mb-1.5">
