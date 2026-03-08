@@ -148,8 +148,17 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
     return location.pathname === freePath || location.pathname === premPath;
   };
 
-  const navigateToSubject = (freePath: string, premPath: string) => {
-    navigate(isPremiumRoute ? premPath : freePath);
+  const navigateToSubject = async (freePath: string, premPath: string, slug: string) => {
+    if (user) {
+      try {
+        const { hasAccess, tier: t } = await checkProductAccess(user.id, slug);
+        navigate(hasAccess && t === 'deluxe' ? premPath : freePath);
+      } catch {
+        navigate(freePath);
+      }
+    } else {
+      navigate(freePath);
+    }
     setOpen(false);
   };
 
