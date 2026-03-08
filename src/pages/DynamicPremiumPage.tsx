@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 import { ExamDate } from '@/components/ExamCountdown';
@@ -11,9 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
 import { Loader2 } from 'lucide-react';
-import logo from '@/assets/logo.png';
-import logoDark from '@/assets/logo-dark.png';
-import { useTheme } from '@/contexts/ThemeContext';
 
 interface ProductConfig {
   id: string; name: string; slug: string; subject: string; exam_board: string; system_prompt_deluxe: string | null;
@@ -29,8 +27,6 @@ export const DynamicPremiumPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { theme } = useTheme();
-  const currentLogo = theme === 'dark' ? logo : logoDark;
   const chatRef = useRef<RAGChatRef>(null);
   const [product, setProduct] = useState<ProductConfig | null>(null);
   const [trainer, setTrainer] = useState<TrainerConfig | null>(null);
@@ -62,25 +58,27 @@ export const DynamicPremiumPage = () => {
   const subjectName = `${product.exam_board} ${product.subject}`;
   const examDates: ExamDate[] = (trainer?.exam_dates || []).filter((d: any) => d.name && d.date).map((d: any) => ({ name: d.name, date: new Date(d.date), description: d.description || '' }));
 
+  const sharedProps = {
+    subjectName,
+    productId: product.id,
+    productSlug: product.slug,
+    showMyAI: hasFeature('my_ai'),
+    showPastPaperFinder: hasFeature('past_papers'),
+    showRevisionGuide: hasFeature('revision_guide'),
+    showExamCountdown: hasFeature('exam_countdown'),
+    examDates,
+    examSubjectName: subjectName,
+    showMyMistakes: hasFeature('my_mistakes'),
+    customPastPaperContent: <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="deluxe" />,
+    customRevisionGuideContent: <DynamicRevisionGuide productId={product.id} subjectName={subjectName} tier="deluxe" />,
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead title={`Deluxe A* AI – ${subjectName} ${qualType} | Full Training`} description={`Access A* AI Deluxe for ${subjectName} ${qualType}.`} canonical={`https://astarai.co.uk/${product.slug}-premium`} />
       <RandomChatbotBackground />
-      <ChatbotSidebar
-        subjectName={subjectName}
-        productId={product.id}
-        productSlug={product.slug}
-        showMyAI={hasFeature('my_ai')}
-        showPastPaperFinder={hasFeature('past_papers')}
-        showRevisionGuide={hasFeature('revision_guide')}
-        showExamCountdown={hasFeature('exam_countdown')}
-        examDates={examDates}
-        examSubjectName={subjectName}
-        showMyMistakes={hasFeature('my_mistakes')}
-        customPastPaperContent={<DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="deluxe" />}
-        customRevisionGuideContent={<DynamicRevisionGuide productId={product.id} subjectName={subjectName} tier="deluxe" />}
-      />
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2"><div className="flex items-center pl-12"><Link to="/" className="flex items-center"><img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" /></Link></div></div>
+      <ChatbotSidebar {...sharedProps} />
+      <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
         <RAGChat
           productId={product.id} subjectName={`${subjectName} Deluxe`}

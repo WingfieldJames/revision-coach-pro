@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
-import logo from '@/assets/logo.png';
-import logoDark from '@/assets/logo-dark.png';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const OCR_PHYSICS_SLUG = 'ocr-physics';
 const OCR_PHYSICS_PROMPTS = [
@@ -25,8 +23,6 @@ const OCR_PHYSICS_PROMPTS = [
 export const OCRPhysicsPremiumPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const { theme } = useTheme();
-  const currentLogo = theme === 'dark' ? logo : logoDark;
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
@@ -55,7 +51,7 @@ export const OCRPhysicsPremiumPage = () => {
       <SEOHead title="Deluxe A* AI – OCR Physics | AI Tutor" description="Your personal OCR Physics A* tutor." canonical="https://astarai.co.uk/ocr-physics-premium" />
       <RandomChatbotBackground />
       <ChatbotSidebar subjectName="OCR Physics" productId={productId} productSlug="ocr-physics" showMyAI showPastPaperFinder pastPaperBoard="ocr-physics" showExamCountdown examDates={OCR_PHYSICS_EXAMS} examSubjectName="OCR Physics" />
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2"><div className="flex items-center pl-12"><Link to="/" className="flex items-center"><img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" /></Link></div></div>
+      <ChatbotToolbar subjectName="OCR Physics" productId={productId} productSlug="ocr-physics" showMyAI showPastPaperFinder pastPaperBoard="ocr-physics" showExamCountdown examDates={OCR_PHYSICS_EXAMS} examSubjectName="OCR Physics" />
       <div className="flex-1 relative z-10">
         <RAGChat productId={productId} subjectName="OCR Physics Deluxe" subjectDescription="Your personal A* Physics tutor. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Physics past papers & mark schemes" placeholder="Ask me anything about OCR Physics A-Level..." suggestedPrompts={OCR_PHYSICS_PROMPTS} />
       </div>
