@@ -120,7 +120,7 @@ export const HomePage = () => {
   return (
     <div className="min-h-screen bg-background font-sans">
       <SEOHead canonical="https://astarai.co.uk/" />
-      <Header showNavLinks />
+      <Header showNavLinks showStartStudyingButton />
 
       {/* Hero Section */}
       <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4">

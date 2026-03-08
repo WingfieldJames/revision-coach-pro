@@ -108,6 +108,7 @@ interface HeaderProps {
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
   showMyMistakes?: boolean;
+  showStartStudyingButton?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -140,6 +141,7 @@ export const Header: React.FC<HeaderProps> = ({
   customPastPaperContent,
   customRevisionGuideContent,
   showMyMistakes = false,
+  showStartStudyingButton = false,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -442,9 +444,18 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      {/* Right side: Upgrade Now / Deluxe badge on chatbot pages */}
+      {/* Right side: Upgrade Now / Deluxe badge on chatbot pages OR Start Studying on home */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {showUpgradeButton && (
+        {showStartStudyingButton && user ? (
+          <div className="hidden sm:flex items-center">
+            <Button 
+              onClick={() => navigate('/dashboard')} 
+              className="bg-primary text-primary-foreground rounded-full px-6 py-2 font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
+            >
+              Start Studying
+            </Button>
+          </div>
+        ) : showUpgradeButton ? (
           isDeluxe ? (
             <div
               className="flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-sm font-semibold"
@@ -505,15 +516,12 @@ export const Header: React.FC<HeaderProps> = ({
               </DialogContent>
             </Dialog>
           )
-        )}
+        ) : null}
 
-        {user && !hideUserDetails && (
+        {user && !hideUserDetails && !showStartStudyingButton && (
           <div className="hidden sm:flex items-center">
-            <Button 
-              onClick={() => navigate('/dashboard')} 
-              className="bg-primary text-primary-foreground rounded-full px-6 py-2 font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
-            >
-              Start Studying
+            <Button variant="outline" size="sm" onClick={handleSignOut} className="text-xs sm:text-sm px-2 sm:px-3">
+              Sign Out
             </Button>
           </div>
         )}
