@@ -12,13 +12,53 @@ import namanFounder from '@/assets/naman-founder.png';
 import etienneFounder from '@/assets/etienne-founder.png';
 import carlFounder from '@/assets/carl-founder.png';
 
+// Build a comprehensive map that handles multiple possible path formats
 const LEGACY_ASSET_MAP: Record<string, string> = {
+  // Full /src/assets/ paths
   '/src/assets/tudor-founder.jpg': tudorFounder,
   '/src/assets/james-founder.png': jamesFounder,
   '/src/assets/naman-founder.png': namanFounder,
   '/src/assets/etienne-founder.png': etienneFounder,
   '/src/assets/carl-founder.png': carlFounder,
+  // Filename-only fallbacks
+  'tudor-founder.jpg': tudorFounder,
+  'james-founder.png': jamesFounder,
+  'naman-founder.png': namanFounder,
+  'etienne-founder.png': etienneFounder,
+  'carl-founder.png': carlFounder,
+  // src/assets/ without leading slash
+  'src/assets/tudor-founder.jpg': tudorFounder,
+  'src/assets/james-founder.png': jamesFounder,
+  'src/assets/naman-founder.png': namanFounder,
+  'src/assets/etienne-founder.png': etienneFounder,
+  'src/assets/carl-founder.png': carlFounder,
 };
+
+// Per-founder image positioning for proper cropping
+const FOUNDER_IMAGE_STYLES: Record<string, string> = {
+  'tudor-founder.jpg': 'object-cover object-[center_25%] scale-110',
+  'james-founder.png': 'object-cover object-top',
+  'naman-founder.png': 'object-cover object-top',
+  'etienne-founder.png': 'object-cover object-top',
+  'carl-founder.png': 'object-cover object-top',
+};
+
+function getImageStyle(url: string): string {
+  // Extract filename from any path format
+  const filename = url.split('/').pop() || '';
+  return FOUNDER_IMAGE_STYLES[filename] || 'object-cover object-top';
+}
+
+function resolveImageUrl(url: string): string | null {
+  // Direct match in legacy map
+  if (LEGACY_ASSET_MAP[url]) return LEGACY_ASSET_MAP[url];
+  
+  // Try filename-only match
+  const filename = url.split('/').pop() || '';
+  if (LEGACY_ASSET_MAP[filename]) return LEGACY_ASSET_MAP[filename];
+  
+  return null;
+}
 
 interface DynamicFounderSectionProps {
   productId: string;
@@ -29,6 +69,7 @@ interface DynamicFounderSectionProps {
 
 export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject, fallbackExamBoard }: DynamicFounderSectionProps) {
   const [trainerImageUrl, setTrainerImageUrl] = useState<string | null>(null);
+  const [trainerImageStyle, setTrainerImageStyle] = useState<string>('object-cover object-top');
   const [trainerDescription, setTrainerDescription] = useState<string | null>(null);
   const [trainerName, setTrainerName] = useState<string | null>(null);
   const [trainerStatus, setTrainerStatus] = useState<string | null>(null);
@@ -36,7 +77,6 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Reset state when productId changes to prevent stale data
     setTrainerImageUrl(null);
     setTrainerDescription(null);
     setTrainerName(null);
@@ -62,20 +102,27 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
           );
           if (data.trainer_image_url) {
             const url = data.trainer_image_url as string;
-            // Check legacy /src/assets/ paths first (these don't exist at runtime)
-            if (LEGACY_ASSET_MAP[url]) {
-              setTrainerImageUrl(LEGACY_ASSET_MAP[url]);
+            
+            // Try resolving from legacy asset map (handles multiple path formats)
+            const resolved = resolveImageUrl(url);
+            if (resolved) {
+              setTrainerImageUrl(resolved);
+              setTrainerImageStyle(getImageStyle(url));
             } else if (url.startsWith('http')) {
               setTrainerImageUrl(url);
+              setTrainerImageStyle(getImageStyle(url));
             } else if (url.startsWith('/') && !url.startsWith('/src/')) {
-              // Public folder paths work directly
               setTrainerImageUrl(url);
+              setTrainerImageStyle(getImageStyle(url));
             } else {
               // Storage path — get signed URL
               const { data: signed } = await supabase.storage
                 .from('trainer-uploads')
                 .createSignedUrl(url, 3600);
-              if (signed?.signedUrl) setTrainerImageUrl(signed.signedUrl);
+              if (signed?.signedUrl) {
+                setTrainerImageUrl(signed.signedUrl);
+                setTrainerImageStyle(getImageStyle(url));
+              }
             }
           }
         }
@@ -142,7 +189,7 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
               {trainerImageUrl && (
                 <motion.div className="relative" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
                   <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-lg bg-muted">
-                    <img src={trainerImageUrl} alt={trainerName || "Trainer"} className="w-full h-full object-cover" />
+                    <img src={trainerImageUrl} alt={trainerName || "Trainer"} className={`w-full h-full ${trainerImageStyle}`} />
                   </div>
                   <motion.div
                     className="absolute -inset-2 border-2 border-primary/20 rounded-2xl"
@@ -151,7 +198,6 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
                   />
                 </motion.div>
               )}
-              {/* Name and status below photo */}
               {(trainerName || trainerStatus) && (
                 <div className="text-center mt-4">
                   {trainerName && <h3 className="text-xl font-bold text-foreground">{trainerName}</h3>}
@@ -166,7 +212,6 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
                 "{trainerDescription}"
               </blockquote>
 
-              {/* Achievement badges */}
               {trainerAchievements.length > 0 && (
                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                   {trainerAchievements.map((achievement, i) => {
