@@ -5,6 +5,21 @@ import { Quote, Award, GraduationCap, BookOpen } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { FounderSection } from '@/components/ui/founder-section';
 
+// Map of legacy /src/assets/ paths to actual imported assets
+import tudorFounder from '@/assets/tudor-founder.jpg';
+import jamesFounder from '@/assets/james-founder.png';
+import namanFounder from '@/assets/naman-founder.png';
+import etienneFounder from '@/assets/etienne-founder.png';
+import carlFounder from '@/assets/carl-founder.png';
+
+const LEGACY_ASSET_MAP: Record<string, string> = {
+  '/src/assets/tudor-founder.jpg': tudorFounder,
+  '/src/assets/james-founder.png': jamesFounder,
+  '/src/assets/naman-founder.png': namanFounder,
+  '/src/assets/etienne-founder.png': etienneFounder,
+  '/src/assets/carl-founder.png': carlFounder,
+};
+
 interface DynamicFounderSectionProps {
   productId: string;
   subjectLabel: string;
@@ -47,10 +62,16 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
           );
           if (data.trainer_image_url) {
             const url = data.trainer_image_url as string;
-            // Static paths (starting with /) or full URLs don't need signed URL
-            if (url.startsWith('/') || url.startsWith('http')) {
+            // Check legacy /src/assets/ paths first (these don't exist at runtime)
+            if (LEGACY_ASSET_MAP[url]) {
+              setTrainerImageUrl(LEGACY_ASSET_MAP[url]);
+            } else if (url.startsWith('http')) {
+              setTrainerImageUrl(url);
+            } else if (url.startsWith('/') && !url.startsWith('/src/')) {
+              // Public folder paths work directly
               setTrainerImageUrl(url);
             } else {
+              // Storage path — get signed URL
               const { data: signed } = await supabase.storage
                 .from('trainer-uploads')
                 .createSignedUrl(url, 3600);
