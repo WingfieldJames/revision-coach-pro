@@ -132,9 +132,18 @@ export const LoginPage = () => {
         canonical="https://astarai.co.uk/login"
       />
       
-      {/* Subtle Background */}
+      {/* Animated Background */}
       <div className="absolute inset-0 bg-[#f9fafb] dark:bg-background">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent dark:from-primary/10" />
+        <CanvasRevealEffect
+          animationSpeed={10}
+          containerClassName="bg-[#f9fafb] dark:bg-background"
+          colors={canvasColors}
+          opacities={[0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1]}
+          dotSize={3}
+          showGradient={false}
+          direction="edges"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f9fafb] via-[#f9fafb]/80 to-transparent dark:from-background dark:via-background/80" />
       </div>
 
       {/* Content Layer */}
@@ -215,7 +224,7 @@ export const LoginPage = () => {
               <div className="flex justify-end">
                 <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
                   <DialogTrigger asChild>
-                    <button type="button" className="text-sm text-primary hover:text-primary/80 dark:text-primary dark:hover:text-primary/80 transition-colors">
+                    <button type="button" className="text-sm text-[#1e3a8a] hover:text-[#a855f7] dark:text-primary dark:hover:text-primary/80 transition-colors">
                       Forgot password?
                     </button>
                   </DialogTrigger>
@@ -272,7 +281,7 @@ export const LoginPage = () => {
                 Don't have an account?{' '}
                 <Link 
                   to={`/signup${redirect ? `?redirect=${redirect}` : ''}`}
-                  className="text-primary hover:text-primary/80 transition-colors font-medium"
+                  className="text-[#1e3a8a] hover:text-[#a855f7] dark:text-primary dark:hover:text-primary/80 transition-colors font-medium"
                 >
                   Create one here
                 </Link>

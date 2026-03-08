@@ -1,26 +1,25 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useRef } from 'react';
+import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat } from '@/components/RAGChat';
-import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
-import logo from '@/assets/logo.png';
-import logoDark from '@/assets/logo-dark.png';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const AQA_PRODUCT_ID = "17ade690-8c44-4961-83b5-0edf42a9faea";
 
 const AQA_ECONOMICS_FREE_PROMPTS = [
-  { text: "Explain Spec Point (4.1.5 Market Structures)" },
-  { text: "Find all past exam questions on Economic Growth" },
-  { text: "Layout the structure of the exam" },
-  { text: "Create me a full revision plan", usesPersonalization: true },
+  { text: "Explain the difference between demand-pull and cost-push inflation" },
+  { text: "What are the characteristics of perfect competition?" },
+  { text: "Help me understand the Phillips Curve" },
+  { text: "What causes market failure?" },
 ];
 
 export const AQAFreeVersionPage = () => {
-  const { theme } = useTheme();
-  const currentLogo = theme === 'dark' ? logo : logoDark;
+  const chatRef = useRef<RAGChatRef>(null);
+
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
+    chatRef.current?.submitMessage(message, imageDataUrl);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -30,25 +29,23 @@ export const AQAFreeVersionPage = () => {
         canonical="https://astarai.co.uk/aqa-free-version"
       />
       <RandomChatbotBackground />
-
-      <ChatbotSidebar
-        subjectName="AQA Economics"
-        productId={AQA_PRODUCT_ID}
-        productSlug="aqa-economics"
-        showMyAI
-        showPastPaperFinder
-        pastPaperBoard="aqa"
-        showExamCountdown
-        examDates={AQA_ECONOMICS_EXAMS}
-        examSubjectName="AQA Economics"
-      />
-
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2">
-        <div className="flex items-center pl-12">
-          <Link to="/" className="flex items-center">
-            <img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" />
-          </Link>
-        </div>
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+        <Header
+          showImageTool 
+          showDiagramTool 
+          showEssayMarker 
+          showPastPaperFinder
+          pastPaperBoard="aqa"
+          showExamCountdown
+          examDates={AQA_ECONOMICS_EXAMS}
+          examSubjectName="AQA Economics"
+          hideUserDetails 
+          productId={AQA_PRODUCT_ID}
+          productSlug="aqa-economics"
+          showUpgradeButton
+          essayMarkerCustomMarks={[9, 10, 15, 25]}
+          onEssayMarkerSubmit={handleEssayMarkerSubmit}
+        />
       </div>
       
       <div className="flex-1 relative z-10">
@@ -59,8 +56,7 @@ export const AQAFreeVersionPage = () => {
           footerText="A* AI can make mistakes. Verify important info."
           placeholder="Ask any AQA Economics question..."
           suggestedPrompts={AQA_ECONOMICS_FREE_PROMPTS}
-          enableDiagrams
-          diagramSubject="economics"
+          chatRef={chatRef}
         />
       </div>
     </div>

@@ -29,35 +29,6 @@ const CONTENT_TYPES = {
   CASE_STUDY: 'case_study',
 } as const;
 
-// Economics Diagrams for inline rendering
-const ECONOMICS_DIAGRAMS = [
-  { id: 'ppf', title: 'Production Possibility Frontier (PPF)', keywords: ['ppf', 'production possibility frontier', 'ppc', 'opportunity cost', 'trade-off', 'scarcity'], imagePath: '/diagrams/ppf.jpg' },
-  { id: 'ppf-shift', title: 'Shift of PPF', keywords: ['ppf shift', 'economic growth', 'outward shift', 'inward shift', 'productive capacity'], imagePath: '/diagrams/ppf-shift.jpg' },
-  { id: 'supply-demand-equilibrium', title: 'Supply and Demand Equilibrium', keywords: ['supply and demand', 'equilibrium', 'market equilibrium', 'market clearing'], imagePath: '/diagrams/supply-demand-equilibrium.jpg' },
-  { id: 'demand-shift-right', title: 'Demand Shifts Right (Increase in Demand)', keywords: ['demand increase', 'demand shift right', 'rise in demand', 'rightward shift demand'], imagePath: '/diagrams/demand-shift-right.jpg' },
-  { id: 'demand-shift-left', title: 'Demand Shifts Left (Decrease in Demand)', keywords: ['demand decrease', 'demand shift left', 'fall in demand', 'leftward shift demand'], imagePath: '/diagrams/demand-shift-left.jpg' },
-  { id: 'supply-shift-right', title: 'Supply Shifts Right (Increase in Supply)', keywords: ['supply increase', 'supply shift right', 'rise in supply'], imagePath: '/diagrams/supply-shift-right.jpg' },
-  { id: 'supply-shift-left', title: 'Supply Shifts Left (Decrease in Supply)', keywords: ['supply decrease', 'supply shift left', 'fall in supply'], imagePath: '/diagrams/supply-shift-left.jpg' },
-  { id: 'specific-tax', title: 'Specific Tax', keywords: ['specific tax', 'indirect tax', 'per unit tax'], imagePath: '/diagrams/specific-tax.jpg' },
-  { id: 'ad-valorem-tax', title: 'Ad Valorem Tax', keywords: ['ad valorem', 'percentage tax', 'vat'], imagePath: '/diagrams/ad-valorem-tax.jpg' },
-  { id: 'subsidy', title: 'Subsidy', keywords: ['subsidy', 'government subsidy', 'price subsidy'], imagePath: '/diagrams/subsidy.jpg' },
-  { id: 'maximum-price', title: 'Maximum Price (Price Ceiling)', keywords: ['maximum price', 'price ceiling', 'price cap', 'rent control'], imagePath: '/diagrams/maximum-price.jpg' },
-  { id: 'minimum-price', title: 'Minimum Price (Price Floor)', keywords: ['minimum price', 'price floor', 'minimum wage'], imagePath: '/diagrams/minimum-price.jpg' },
-  { id: 'negative-externality-production', title: 'Negative Externality in Production', keywords: ['negative externality', 'external cost', 'market failure', 'msc', 'mpc', 'welfare loss'], imagePath: '/diagrams/negative-externality-production.jpg' },
-  { id: 'positive-externality-consumption', title: 'Positive Externality in Consumption', keywords: ['positive externality', 'external benefit', 'msb', 'mpb', 'merit good'], imagePath: '/diagrams/positive-externality-consumption.jpg' },
-  { id: 'producer-consumer-surplus', title: 'Producer and Consumer Surplus', keywords: ['consumer surplus', 'producer surplus', 'total surplus', 'welfare'], imagePath: '/diagrams/producer-consumer-surplus.jpg' },
-  { id: 'ad-sras', title: 'AD/AS Model', keywords: ['aggregate demand', 'aggregate supply', 'ad/as', 'ad as', 'macroeconomic equilibrium'], imagePath: '/diagrams/ad-as-basic.png' },
-  { id: 'demand-pull-inflation', title: 'Demand-Pull Inflation', keywords: ['demand pull inflation', 'demand pull', 'ad shift right'], imagePath: '/diagrams/demand-pull-inflation.jpg' },
-  { id: 'cost-push-inflation', title: 'Cost-Push Inflation', keywords: ['cost push inflation', 'cost push', 'sras shift left'], imagePath: '/diagrams/cost-push-inflation.jpg' },
-  { id: 'monopoly', title: 'Monopoly Diagram', keywords: ['monopoly', 'monopolist', 'price maker', 'supernormal profit', 'deadweight loss'], imagePath: '/diagrams/monopoly.png' },
-  { id: 'perfect-competition', title: 'Perfect Competition', keywords: ['perfect competition', 'price taker', 'normal profit', 'perfectly competitive'], imagePath: '/diagrams/perfect-competition.png' },
-  { id: 'circular-flow', title: 'Circular Flow of Income', keywords: ['circular flow', 'injections', 'withdrawals', 'leakages', 'national income'], imagePath: '/diagrams/circular-flow-of-income.jpg' },
-  { id: 'phillips-curve', title: 'Phillips Curve', keywords: ['phillips curve', 'inflation unemployment trade-off'], imagePath: '/diagrams/phillips-curve.png' },
-  { id: 'trade-cycle', title: 'Trade/Business Cycle', keywords: ['trade cycle', 'business cycle', 'boom', 'recession', 'recovery', 'slump'], imagePath: '/diagrams/trade-cycle.jpg' },
-  { id: 'profit-maximisation', title: 'Profit Maximisation (MC=MR)', keywords: ['profit maximisation', 'mc=mr', 'profit maximizing', 'marginal cost marginal revenue'], imagePath: '/diagrams/profit-maximisation.jpg' },
-  { id: 'price-discrimination', title: 'Price Discrimination', keywords: ['price discrimination', 'first degree', 'second degree', 'third degree'], imagePath: '/diagrams/price-discrimination.jpg' },
-];
-
 // CS Diagrams for inline rendering
 const CS_DIAGRAMS = [
   { id: 'von-neumann-architecture', title: 'Von Neumann Architecture', keywords: ['von neumann', 'cpu', 'processor', 'ram', 'memory', 'bus', 'data bus', 'address bus', 'control bus', 'alu', 'control unit', 'registers', 'mar', 'mdr', 'pc', 'program counter', 'cir', 'accumulator', 'fetch decode execute', 'fde'], imagePath: '/diagrams/cs/von-neumann-architecture.jpg' },
@@ -79,10 +50,11 @@ const CS_DIAGRAMS = [
 
 // Find relevant diagram based on message content
 function findRelevantDiagram(message: string, subject: string): { id: string; title: string; imagePath: string } | null {
-  const lowerMessage = message.toLowerCase();
-  const diagramSet = subject === 'cs' ? CS_DIAGRAMS : ECONOMICS_DIAGRAMS;
+  if (subject !== 'cs') return null;
   
-  for (const diagram of diagramSet) {
+  const lowerMessage = message.toLowerCase();
+  
+  for (const diagram of CS_DIAGRAMS) {
     for (const keyword of diagram.keywords) {
       if (lowerMessage.includes(keyword)) {
         return { id: diagram.id, title: diagram.title, imagePath: diagram.imagePath };
@@ -199,8 +171,7 @@ function detectContentTypePriorities(userMessage: string): string[] {
   // Past paper / practice question keywords
   if (lowerMessage.includes('practice') || lowerMessage.includes('question') ||
       lowerMessage.includes('past paper') || lowerMessage.includes('example')) {
-    priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3,
-      'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined');
+    priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3);
   }
   
   // Definition / concept keywords
@@ -396,57 +367,7 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const body = await req.json();
-    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query } = body;
-
-    // search_only mode: keyword search for past paper chunks, return JSON
-    if (search_only && product_id) {
-      const searchQuery = query || message || '';
-      console.log(`search_only mode for product ${product_id}: "${searchQuery.substring(0, 80)}"`);
-
-      const PAPER_CONTENT_TYPES = [
-        'paper_1', 'paper_2', 'paper_3', 'mark_scheme',
-        'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined',
-      ];
-
-      const { data: allChunks, error: chunkError } = await supabaseAdmin
-        .from('document_chunks')
-        .select('id, content, metadata')
-        .eq('product_id', product_id);
-
-      if (chunkError || !allChunks) {
-        console.error('search_only chunk fetch error:', chunkError);
-        return new Response(JSON.stringify({ results: [] }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      // Filter to paper-type chunks only
-      const paperChunks = allChunks.filter((c: any) => {
-        const ct = String(c.metadata?.content_type || '');
-        return PAPER_CONTENT_TYPES.includes(ct);
-      });
-
-      // Score by keyword relevance
-      const keywords = searchQuery.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
-      const scored = paperChunks.map((c: any) => {
-        const text = (c.content + ' ' + JSON.stringify(c.metadata || {})).toLowerCase();
-        let score = 0;
-        for (const kw of keywords) {
-          const matches = text.split(kw).length - 1;
-          score += matches;
-        }
-        return { ...c, similarity: score };
-      }).filter((c: any) => c.similarity > 0)
-        .sort((a: any, b: any) => b.similarity - a.similarity)
-        .slice(0, 15);
-
-      console.log(`search_only: ${paperChunks.length} paper chunks, ${scored.length} matched`);
-
-      return new Response(JSON.stringify({ results: scored }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false } = await req.json();
 
     if (!message) {
       throw new Error("message is required");
@@ -565,33 +486,24 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       user_preferences
     );
     
-    // Always try to find a relevant diagram based on message content
+    // Find relevant diagram for deluxe users
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
-    const diagramSubject = enable_diagrams ? diagram_subject : 'economics';
-    relevantDiagram = findRelevantDiagram(message, diagramSubject);
-    if (relevantDiagram) {
-      console.log(`Found relevant diagram: ${relevantDiagram.title}`);
+    if (enable_diagrams && tier === 'deluxe') {
+      relevantDiagram = findRelevantDiagram(message, diagram_subject);
+      if (relevantDiagram) {
+        console.log(`Found relevant diagram: ${relevantDiagram.title}`);
+      }
     }
     
     // Build final system prompt with context injection
     let finalSystemPrompt = personalizedPrompt;
-    
-    // Add essay marking instructions
-    finalSystemPrompt += `\n\n--- ESSAY MARKING CAPABILITY ---
-When a student asks you to mark their essay, answer, or response:
-1. If they haven't specified how many marks the question is worth, ASK them: "How many marks is this question worth?" before marking.
-2. Once you know the mark value, provide detailed feedback using the marking criteria from your training data.
-3. Give a mark out of the total, identify what they did well, what's missing, and how to improve.
-4. If they upload an image of their work, analyse it and mark it the same way.
-5. Use exact marking criteria and level descriptors from your training data where available.`;
-
     if (relevantContext) {
       finalSystemPrompt += `\n\n--- TRAINING DATA CONTEXT ---\nUse the following information to inform your responses:\n\n${relevantContext}`;
     }
     
-    // Add diagram instruction if relevant
+    // Add diagram instruction for deluxe users if relevant
     if (relevantDiagram) {
-      finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---\nA relevant diagram is available for this topic: "${relevantDiagram.title}". The system will display this diagram automatically alongside your response. Reference it naturally in your explanation where appropriate.`;
+      finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---\nA relevant diagram is available for this topic: "${relevantDiagram.title}". The system will display this diagram automatically. Reference it in your explanation where appropriate.`;
     }
     
     console.log(`System prompt length: ${finalSystemPrompt.length} chars (context: ${relevantContext.length} chars)`);
@@ -610,18 +522,15 @@ When a student asks you to mark their essay, answer, or response:
       userMessageContent = message;
     }
 
-    // Call AI gateway for response (streaming)
-    const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const aiModel = "google/gemini-2.5-flash";
-
-    const response = await fetch(aiUrl, {
+    // Call Lovable AI for response (streaming)
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: aiModel,
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: finalSystemPrompt },
           ...history,

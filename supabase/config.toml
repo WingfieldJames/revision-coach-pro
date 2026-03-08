@@ -68,6 +68,3 @@ verify_jwt = false
 
 [functions.erase-training-data]
 verify_jwt = false
-
-[functions.get-analytics]
-verify_jwt = false

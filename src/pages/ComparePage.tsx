@@ -7,7 +7,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button';
-import { ChevronDown, Check, Star, Instagram, Youtube, Linkedin } from 'lucide-react';
+import { ChevronDown, Check, Star, Instagram } from 'lucide-react';
 import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import hannahImage from '/lovable-uploads/c9b3bf59-2df9-461f-a0ee-b47e9f0bad36.png';
@@ -626,6 +626,12 @@ export const ComparePage = () => {
         {/* Footer */}
         <footer className="py-16 px-8 text-center border-t border-border/30 relative">
           <ScrollReveal className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <img src={currentLogo} alt="A* AI" className="h-12 sm:h-14" />
+              <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Instagram size={20} />
+              </a>
+            </div>
             
             <p className="text-muted-foreground mb-6">
               Your AI-powered A-Level revision coach
@@ -651,12 +657,6 @@ export const ComparePage = () => {
               </a>
               <a href="https://www.tiktok.com/@a.star.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
-              </a>
-              <a href="https://www.youtube.com/@a_star_ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Youtube size={24} />
-              </a>
-              <a href="https://www.linkedin.com/company/astar-ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Linkedin size={24} />
               </a>
               <p className="text-sm text-muted-foreground">
                 © 2025 A* AI

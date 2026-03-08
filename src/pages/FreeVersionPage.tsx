@@ -1,13 +1,9 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useRef } from 'react';
+import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat } from '@/components/RAGChat';
-import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
-import logo from '@/assets/logo.png';
-import logoDark from '@/assets/logo-dark.png';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
@@ -19,8 +15,11 @@ const EDEXCEL_ECONOMICS_FREE_PROMPTS = [
 ];
 
 export const FreeVersionPage = () => {
-  const { theme } = useTheme();
-  const currentLogo = theme === 'dark' ? logo : logoDark;
+  const chatRef = useRef<RAGChatRef>(null);
+
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
+    chatRef.current?.submitMessage(message, imageDataUrl);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -30,27 +29,24 @@ export const FreeVersionPage = () => {
         canonical="https://astarai.co.uk/free-version"
       />
       <RandomChatbotBackground />
-
-      <ChatbotSidebar
-        subjectName="Edexcel Economics"
-        productId={EDEXCEL_PRODUCT_ID}
-        productSlug="edexcel-economics"
-        showMyAI
-        showGradeBoundaries
-        showPastPaperFinder
-        showRevisionGuide
-        revisionGuideBoard="edexcel"
-        showExamCountdown
-        examDates={EDEXCEL_ECONOMICS_EXAMS}
-        examSubjectName="Edexcel Economics"
-      />
-
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-3 sm:px-6 py-2">
-        <div className="flex items-center pl-12">
-          <Link to="/" className="flex items-center">
-            <img src={currentLogo} alt="A* AI logo" className="h-12 sm:h-14" />
-          </Link>
-        </div>
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+        <Header
+          showImageTool 
+          showDiagramTool 
+          showGradeBoundaries
+          showEssayMarker 
+          showPastPaperFinder
+          showRevisionGuide
+          revisionGuideBoard="edexcel"
+          showExamCountdown
+          examDates={EDEXCEL_ECONOMICS_EXAMS}
+          examSubjectName="Edexcel Economics"
+          hideUserDetails 
+          productId={EDEXCEL_PRODUCT_ID}
+          productSlug="edexcel-economics"
+          showUpgradeButton
+          onEssayMarkerSubmit={handleEssayMarkerSubmit}
+        />
       </div>
       
       <div className="flex-1 relative z-10">
@@ -62,8 +58,7 @@ export const FreeVersionPage = () => {
           placeholder="Ask any Edexcel Economics question..."
           suggestedPrompts={EDEXCEL_ECONOMICS_FREE_PROMPTS}
           tier="deluxe"
-          enableDiagrams
-          diagramSubject="economics"
+          chatRef={chatRef}
         />
       </div>
     </div>
