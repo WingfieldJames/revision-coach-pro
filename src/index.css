@@ -96,8 +96,8 @@
     --popover: 271 50% 8%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 31 100% 59%;
-    --primary-variant: 340 100% 65%;
+    --primary: 263 70% 50%;
+    --primary-variant: 263 60% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 271 40% 12%;
@@ -114,28 +114,28 @@
 
     --border: 271 25% 18%;
     --input: 271 25% 18%;
-    --ring: 31 100% 59%;
+    --ring: 271 81% 56%;
 
-    /* Brand gradient - orange/pink for dark */
-    --gradient-brand: linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%);
-    --gradient-from: #FFC83D;
-    --gradient-via1: #FF9A2E;
-    --gradient-via2: #FF6A3D;
-    --gradient-to: #FF4D8D;
+    /* Brand gradient - purple for dark mode */
+    --gradient-brand: linear-gradient(135deg, #4f36b3 0%, #6c52de 50%, #7c5ce7 100%);
+    --gradient-from: #4f36b3;
+    --gradient-via1: #5f45d2;
+    --gradient-via2: #6c52de;
+    --gradient-to: #7c5ce7;
 
-    --shadow-card: 0 2px 12px rgba(255, 154, 46, 0.06);
-    --shadow-elevated: 0 4px 20px rgba(255, 77, 141, 0.08);
-    --shadow-glow: 0 0 20px rgba(255, 154, 46, 0.15), 0 0 40px rgba(255, 77, 141, 0.08);
+    --shadow-card: 0 2px 12px rgba(79, 54, 179, 0.06);
+    --shadow-elevated: 0 4px 20px rgba(124, 92, 231, 0.08);
+    --shadow-glow: 0 0 20px rgba(79, 54, 179, 0.15), 0 0 40px rgba(124, 92, 231, 0.08);
 
-    --glow-1: rgba(255, 154, 46, 0.3);
-    --glow-2: rgba(255, 77, 141, 0.15);
-    --glow-1-intense: rgba(255, 154, 46, 0.4);
-    --glow-2-intense: rgba(255, 77, 141, 0.2);
+    --glow-1: rgba(79, 54, 179, 0.3);
+    --glow-2: rgba(124, 92, 231, 0.15);
+    --glow-1-intense: rgba(79, 54, 179, 0.4);
+    --glow-2-intense: rgba(124, 92, 231, 0.2);
 
-    /* Line animation colors - warm in dark */
-    --line-color-1: #FF9A2E;
-    --line-color-2: #FF4D8D;
-    --line-color-3: #FFC83D;
+    /* Line animation colors - purple in dark */
+    --line-color-1: #6c52de;
+    --line-color-2: #5f45d2;
+    --line-color-3: #7c5ce7;
 
     /* Shugar tabs design tokens - dark */
     --ds-gray-200: hsla(0, 0%, 12%, 1);
@@ -148,16 +148,16 @@
     --geist-foreground: #fff;
     --geist-success: #0070f3;
     --geist-warning: #f5a623;
-    --geist-violet: #FF9A2E;
+    --geist-violet: #7C3AED;
 
     --sidebar-background: 271 50% 6%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 31 100% 59%;
+    --sidebar-primary: 263 70% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 271 30% 12%;
     --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 271 25% 18%;
-    --sidebar-ring: 31 100% 59%;
+    --sidebar-ring: 271 81% 56%;
   }
 }
 
