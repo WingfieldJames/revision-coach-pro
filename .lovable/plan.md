@@ -1,112 +1,95 @@
 
 
-## My Mistakes -- Spaced Repetition Feature
+# Plan: Replace "Your Tools" with Chat History in Sidebar
 
-### Overview
-Add a "My Mistakes" tool to all maths chatbots (Edexcel Pure, Edexcel Applied) and OCR CS, plus make it available in the Build portal for dynamic subjects. Users can log questions they got wrong (image or text), add notes, and get reminded to retry them on a spaced repetition schedule (day 4, 16, 35, 70). A red notification badge shows how many are due for review.
+## Current State
+- Messages in `RAGChat.tsx` are stored in React state only (`useState<Message[]>([])`) — no persistence
+- No database tables for chat conversations or messages exist
+- The sidebar has a "Your Tools" section that needs to be replaced with chat history
+- The top toolbar already has all the tools, so removing them from the sidebar is safe
 
----
+## What We'll Build
 
-### 1. Database Table
+The sidebar's "Your Tools" section becomes a **Chat History** panel where users can:
+- See a list of previous conversations grouped by date (Today, Yesterday, Last 7 Days, Older)
+- Click a conversation to load it back into the chat
+- Start a new conversation (clears current chat)
+- Delete old conversations
+- Each conversation shows a title (auto-generated from the first user message, truncated)
 
-Create a `user_mistakes` table:
+## Database Changes
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | PK, default gen_random_uuid() |
-| user_id | uuid | NOT NULL |
-| product_id | uuid | NOT NULL |
-| question_text | text | nullable (user may upload image only) |
-| question_image_url | text | nullable (base64 data URL stored directly) |
-| note | text | nullable |
-| created_at | timestamptz | default now() |
-| next_review_at | timestamptz | default now() + interval '4 days' |
-| review_count | integer | default 0 |
-| completed | boolean | default false |
+**New table: `chat_conversations`**
+- `id` (uuid, PK)
+- `user_id` (uuid, NOT NULL)
+- `product_id` (uuid, nullable)
+- `title` (text) — first ~80 chars of first user message
+- `created_at` (timestamptz)
+- `updated_at` (timestamptz)
 
-RLS policies:
-- Users can SELECT, INSERT, UPDATE, DELETE their own rows (`auth.uid() = user_id`)
+**New table: `chat_messages`**
+- `id` (uuid, PK)
+- `conversation_id` (uuid, FK → chat_conversations)
+- `role` (text) — 'user' or 'assistant'
+- `content` (text)
+- `image_url` (text, nullable) — base64 or storage URL
+- `created_at` (timestamptz)
 
-The spaced repetition intervals are: review_count 0 = day 4, 1 = day 16, 2 = day 35, 3 = day 70, 4+ = completed.
+**RLS policies:** Users can only CRUD their own conversations and messages (via `auth.uid() = user_id` on conversations, and join-based check on messages).
 
----
+## Component Changes
 
-### 2. New Component: `MyMistakesTool.tsx`
+### 1. `src/components/ChatbotSidebar.tsx`
+- Remove the "Your Tools" section entirely (tools list, tool detail views, all tool imports)
+- Remove `ToolView` type and tool rendering logic
+- Replace with a **Chat History** section:
+  - Header: "Chat History" with `MessageSquare` icon
+  - "New Chat" button at top
+  - List of conversations sorted by `updated_at` desc, grouped by date
+  - Each item shows truncated title + relative time
+  - Click loads conversation into RAGChat
+  - Trash icon to delete a conversation
+- Keep: Subject Navigator, Navigation, Upgrade CTA sections unchanged
 
-Follows the exact same pattern as RevisionGuideTool, ExamCountdown, etc. (header with icon + gradient box, content area).
+### 2. `src/components/RAGChat.tsx`
+- Add `conversationId` state tracking current conversation
+- On first user message in a new conversation: create a `chat_conversations` row, set the title
+- On every message send/receive: insert into `chat_messages`
+- Expose a way for sidebar to set `conversationId` and load messages
+- Add a `onConversationChange` callback prop or use a shared context/ref
+- "New Chat" resets messages and conversationId
 
-**Two views:**
+### 3. New hook: `src/hooks/useChatHistory.ts`
+- Fetches conversations for current user + product
+- Provides `loadConversation(id)`, `deleteConversation(id)`, `createConversation()`
+- Returns conversations list with loading state
 
-**A) Add Mistake View (default)**
-- Upload area for an image (same drag/drop pattern as ImageUploadTool) OR text input for typing the question
-- Text area for a note ("What did I get wrong?")
-- "Save Mistake" button
+### 4. Prop Threading
+- `ChatbotSidebar` gets new props: `onLoadConversation`, `onNewChat`, `conversations[]`
+- `RAGChat` gets new props or ref methods: `loadConversation(id)`, current `conversationId`
+- Each page wires these together (similar pattern to existing `onEssayMarkerSubmit` wiring via refs)
 
-**B) My Mistakes List View**
-- Toggle between "Add" and "View All" tabs
-- Lists all saved mistakes (newest first), each showing:
-  - Question preview (thumbnail if image, text snippet if text)
-  - Note
-  - Next review date or "Due now" badge
-  - "Mark as Reviewed" button (advances to next interval)
-  - Delete option
+## Data Flow
 
-**Notification count:** Computed client-side by counting rows where `next_review_at <= now()` and `completed = false`.
+```text
+User clicks conversation in sidebar
+  → ChatbotSidebar calls onLoadConversation(id)
+  → Page handler calls chatRef.current.loadConversation(id)
+  → RAGChat fetches messages from chat_messages table
+  → RAGChat sets messages state + conversationId
 
----
+User sends first message in empty chat
+  → RAGChat creates chat_conversations row
+  → RAGChat inserts user message into chat_messages
+  → On AI response, inserts assistant message into chat_messages
+  → Sidebar auto-refreshes conversation list
 
-### 3. Header Integration
-
-- Add new props to Header: `showMyMistakes?: boolean`
-- Add state: `myMistakesOpen`
-- Add Popover between Revision Guide and Exam Countdown
-- Icon: `AlertCircle` or `RotateCcw` from lucide-react
-- Button label: "My Mistakes"
-- Red notification badge: small absolute-positioned circle with count, only shown when due count > 0
-- Requires `productId` and user auth to query/insert
-
----
-
-### 4. Pages to Update
-
-Add `showMyMistakes` prop to Header in these pages:
-- `EdexcelMathsFreeVersionPage.tsx`
-- `EdexcelMathsPremiumPage.tsx`
-- `EdexcelMathsAppliedFreeVersionPage.tsx`
-- `EdexcelMathsAppliedPremiumPage.tsx`
-- `OCRCSFreeVersionPage.tsx`
-- `OCRCSPremiumPage.tsx`
-
----
-
-### 5. Build Portal Integration
-
-Add to the `WEBSITE_FEATURES` array in `BuildPage.tsx`:
-```
-{ id: "my_mistakes", label: "My Mistakes", description: "Spaced repetition tracker for questions students got wrong", icon: RotateCcw }
-```
-
-Add to `DynamicFreePage.tsx` and `DynamicPremiumPage.tsx`:
-```
-showMyMistakes={hasFeature('my_mistakes')}
+User clicks "New Chat"
+  → RAGChat clears messages, resets conversationId to null
 ```
 
----
-
-### 6. Files Changed
-
-| File | Change |
-|------|--------|
-| New migration | Create `user_mistakes` table + RLS |
-| `src/components/MyMistakesTool.tsx` | **New file** -- full component |
-| `src/components/Header.tsx` | Add `showMyMistakes` prop, popover, notification badge |
-| `src/pages/EdexcelMathsFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/BuildPage.tsx` | Add to WEBSITE_FEATURES |
-| `src/pages/DynamicFreePage.tsx` | Wire up `showMyMistakes` |
-| `src/pages/DynamicPremiumPage.tsx` | Wire up `showMyMistakes` |
+## Auth Requirement
+- Chat history only works for logged-in users
+- If not logged in, sidebar shows a prompt to log in to save chat history
+- Unauthenticated users still get the current ephemeral chat behavior
 
