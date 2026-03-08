@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { RAGChat } from '@/components/RAGChat';
 import { checkProductAccess } from '@/lib/productAccess';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
