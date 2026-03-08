@@ -65,10 +65,13 @@ export const DynamicPremiumPage = () => {
     showMyAI: hasFeature('my_ai'),
     showPastPaperFinder: hasFeature('past_papers'),
     showRevisionGuide: hasFeature('revision_guide'),
+    showEssayMarker: hasFeature('essay_marker'),
     showExamCountdown: hasFeature('exam_countdown'),
     examDates,
     examSubjectName: subjectName,
     showMyMistakes: hasFeature('my_mistakes'),
+    onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    essayMarkerCustomMarks: trainer?.essay_marker_marks || undefined,
     customPastPaperContent: <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="deluxe" />,
     customRevisionGuideContent: <DynamicRevisionGuide productId={product.id} subjectName={subjectName} tier="deluxe" />,
   };
