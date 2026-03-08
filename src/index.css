@@ -261,7 +261,7 @@
   }
 
   :root .exam-countdown-panel .panel-dot-filled {
-    background-color: #1e3a8a;
+    background-color: hsl(263 70% 50%);
   }
 
   :root .exam-countdown-panel .panel-dot-outline {
