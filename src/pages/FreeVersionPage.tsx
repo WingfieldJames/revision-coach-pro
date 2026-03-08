@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { RAGChat } from '@/components/RAGChat';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
@@ -15,12 +15,6 @@ const EDEXCEL_ECONOMICS_FREE_PROMPTS = [
 ];
 
 export const FreeVersionPage = () => {
-  const chatRef = useRef<RAGChatRef>(null);
-
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-    chatRef.current?.submitMessage(message, imageDataUrl);
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -32,9 +26,7 @@ export const FreeVersionPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showDiagramTool 
           showGradeBoundaries
-          showEssayMarker 
           showPastPaperFinder
           showRevisionGuide
           revisionGuideBoard="edexcel"
@@ -45,7 +37,6 @@ export const FreeVersionPage = () => {
           productId={EDEXCEL_PRODUCT_ID}
           productSlug="edexcel-economics"
           showUpgradeButton
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -58,7 +49,8 @@ export const FreeVersionPage = () => {
           placeholder="Ask any Edexcel Economics question..."
           suggestedPrompts={EDEXCEL_ECONOMICS_FREE_PROMPTS}
           tier="deluxe"
-          chatRef={chatRef}
+          enableDiagrams
+          diagramSubject="economics"
         />
       </div>
     </div>

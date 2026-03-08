@@ -1,26 +1,20 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { RAGChat } from '@/components/RAGChat';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 
 const AQA_PRODUCT_ID = "17ade690-8c44-4961-83b5-0edf42a9faea";
 
 const AQA_ECONOMICS_FREE_PROMPTS = [
-  { text: "Explain the difference between demand-pull and cost-push inflation" },
-  { text: "What are the characteristics of perfect competition?" },
-  { text: "Help me understand the Phillips Curve" },
-  { text: "What causes market failure?" },
+  { text: "Explain Spec Point (4.1.5 Market Structures)" },
+  { text: "Find all past exam questions on Economic Growth" },
+  { text: "Layout the structure of the exam" },
+  { text: "Create me a full revision plan", usesPersonalization: true },
 ];
 
 export const AQAFreeVersionPage = () => {
-  const chatRef = useRef<RAGChatRef>(null);
-
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-    chatRef.current?.submitMessage(message, imageDataUrl);
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -32,8 +26,6 @@ export const AQAFreeVersionPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showDiagramTool 
-          showEssayMarker 
           showPastPaperFinder
           pastPaperBoard="aqa"
           showExamCountdown
@@ -43,8 +35,6 @@ export const AQAFreeVersionPage = () => {
           productId={AQA_PRODUCT_ID}
           productSlug="aqa-economics"
           showUpgradeButton
-          essayMarkerCustomMarks={[9, 10, 15, 25]}
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
         />
       </div>
       
@@ -56,7 +46,8 @@ export const AQAFreeVersionPage = () => {
           footerText="A* AI can make mistakes. Verify important info."
           placeholder="Ask any AQA Economics question..."
           suggestedPrompts={AQA_ECONOMICS_FREE_PROMPTS}
-          chatRef={chatRef}
+          enableDiagrams
+          diagramSubject="economics"
         />
       </div>
     </div>

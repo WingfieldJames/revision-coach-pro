@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { RAGChat } from '@/components/RAGChat';
 import { OCR_CS_EXAMS } from '@/components/ExamCountdown';
 
 const OCR_CS_PRODUCT_ID = "5d05830b-de7b-4206-8f49-6d3695324eb6";
@@ -15,12 +15,6 @@ const OCR_CS_PROMPTS = [
 ];
 
 export const OCRCSFreeVersionPage = () => {
-  const chatRef = useRef<RAGChatRef>(null);
-
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-    chatRef.current?.submitMessage(message, imageDataUrl);
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead 
@@ -32,8 +26,6 @@ export const OCRCSFreeVersionPage = () => {
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
         <Header
           showImageTool 
-          showDiagramTool 
-          showEssayMarker 
           showPastPaperFinder
           showRevisionGuide
           showExamCountdown
@@ -45,10 +37,8 @@ export const OCRCSFreeVersionPage = () => {
           revisionGuideBoard="ocr-cs"
           productId={OCR_CS_PRODUCT_ID}
           productSlug="ocr-computer-science"
-           showUpgradeButton
-           showMyMistakes
-           essayMarkerCustomMarks={[9, 12]}
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
+          showUpgradeButton
+          showMyMistakes
         />
       </div>
       
@@ -60,7 +50,8 @@ export const OCRCSFreeVersionPage = () => {
           footerText="Powered by A* AI • Trained on OCR Computer Science specification"
           placeholder="Ask about algorithms, data structures, programming..."
           suggestedPrompts={OCR_CS_PROMPTS}
-          chatRef={chatRef}
+          enableDiagrams
+          diagramSubject="cs"
         />
       </div>
     </div>
