@@ -85,11 +85,15 @@ export const SubjectSelectionPage = () => {
 
   const handleSubjectSelect = (subject: SubjectOption) => {
     if (subject.comingSoon) return;
-    setSelectedSubject(subject);
+    setSelectedSubjects((prev) => {
+      const isSelected = prev.some((s) => s.slug === subject.slug);
+      if (isSelected) return prev.filter((s) => s.slug !== subject.slug);
+      return [...prev, subject];
+    });
   };
 
   const handleNext = () => {
-    if (!selectedSubject) return;
+    if (selectedSubjects.length === 0) return;
     navigate('/compare');
   };
 
