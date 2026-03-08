@@ -626,12 +626,6 @@ export const ComparePage = () => {
         {/* Footer */}
         <footer className="py-16 px-8 text-center border-t border-border/30 relative">
           <ScrollReveal className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <img src={currentLogo} alt="A* AI" className="h-12 sm:h-14" />
-              <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Instagram size={20} />
-              </a>
-            </div>
             
             <p className="text-muted-foreground mb-6">
               Your AI-powered A-Level revision coach
