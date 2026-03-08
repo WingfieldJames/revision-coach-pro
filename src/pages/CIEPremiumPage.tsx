@@ -1,9 +1,9 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
-import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { RAGChat } from '@/components/RAGChat';
 import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
