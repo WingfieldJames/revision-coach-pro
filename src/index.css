@@ -86,7 +86,6 @@
   }
 
   .dark {
-    /* Dark theme - exact current design */
     --background: 271 77% 5%;
     --foreground: 0 0% 100%;
 
@@ -96,8 +95,8 @@
     --popover: 271 50% 8%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 263 70% 50%;
-    --primary-variant: 263 60% 58%;
+    --primary: 24 95% 53%;
+    --primary-variant: 27 96% 61%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 271 40% 12%;
@@ -114,30 +113,27 @@
 
     --border: 271 25% 18%;
     --input: 271 25% 18%;
-    --ring: 271 81% 56%;
+    --ring: 24 95% 53%;
 
-    /* Brand gradient - purple for dark mode */
-    --gradient-brand: linear-gradient(135deg, #4f36b3 0%, #6c52de 50%, #7c5ce7 100%);
-    --gradient-from: #4f36b3;
-    --gradient-via1: #5f45d2;
-    --gradient-via2: #6c52de;
-    --gradient-to: #7c5ce7;
+    --gradient-brand: linear-gradient(135deg, #f97316, #fb923c, #f59e0b);
+    --gradient-from: #f97316;
+    --gradient-via1: #fb923c;
+    --gradient-via2: #f59e0b;
+    --gradient-to: #f59e0b;
 
-    --shadow-card: 0 2px 12px rgba(79, 54, 179, 0.06);
-    --shadow-elevated: 0 4px 20px rgba(124, 92, 231, 0.08);
-    --shadow-glow: 0 0 20px rgba(79, 54, 179, 0.15), 0 0 40px rgba(124, 92, 231, 0.08);
+    --shadow-card: 0 2px 12px rgba(249, 115, 22, 0.06);
+    --shadow-elevated: 0 4px 20px rgba(251, 146, 60, 0.08);
+    --shadow-glow: 0 0 20px rgba(249, 115, 22, 0.15), 0 0 40px rgba(251, 146, 60, 0.08);
 
-    --glow-1: rgba(79, 54, 179, 0.3);
-    --glow-2: rgba(124, 92, 231, 0.15);
-    --glow-1-intense: rgba(79, 54, 179, 0.4);
-    --glow-2-intense: rgba(124, 92, 231, 0.2);
+    --glow-1: rgba(249, 115, 22, 0.3);
+    --glow-2: rgba(251, 146, 60, 0.15);
+    --glow-1-intense: rgba(249, 115, 22, 0.4);
+    --glow-2-intense: rgba(251, 146, 60, 0.2);
 
-    /* Line animation colors - purple in dark */
-    --line-color-1: #6c52de;
-    --line-color-2: #5f45d2;
-    --line-color-3: #7c5ce7;
+    --line-color-1: #f97316;
+    --line-color-2: #fb923c;
+    --line-color-3: #f59e0b;
 
-    /* Shugar tabs design tokens - dark */
     --ds-gray-200: hsla(0, 0%, 12%, 1);
     --ds-gray-900: hsla(0, 0%, 63%, 1);
     --ds-gray-1000: hsla(0, 0%, 93%, 1);
@@ -152,12 +148,12 @@
 
     --sidebar-background: 271 50% 6%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 263 70% 50%;
+    --sidebar-primary: 24 95% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 271 30% 12%;
     --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 271 25% 18%;
-    --sidebar-ring: 271 81% 56%;
+    --sidebar-ring: 24 95% 53%;
   }
 }
 
