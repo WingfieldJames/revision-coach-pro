@@ -44,6 +44,7 @@ import { GCSEComparePage } from "./pages/GCSEComparePage";
 import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
+import { FeedbackResultsPage } from "./pages/FeedbackResultsPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -98,6 +99,7 @@ const App = () => (
             <Route path="/select" element={<SubjectSelectionPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/feedback-results" element={<FeedbackResultsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
