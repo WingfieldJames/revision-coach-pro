@@ -16,6 +16,7 @@ export const FeedbackPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, profile, loading } = useAuth();
+  const { theme } = useTheme();
 
   const feedbackType = searchParams.get('type') === 'deluxe' ? 'deluxe' : 'free';
   const isDeluxe = profile?.is_premium || feedbackType === 'deluxe';
