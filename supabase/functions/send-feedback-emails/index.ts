@@ -297,6 +297,9 @@ serve(async (req) => {
         } else {
           errors++;
         }
+
+        // Rate limit: wait 600ms between emails
+        await sleep(600);
       }
     }
 
