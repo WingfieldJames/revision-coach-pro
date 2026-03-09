@@ -11,7 +11,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const BASE_URL = "https://astarai.lovable.app";
-const FROM_EMAIL = "A* AI <feedback@astarai.co.uk>"; // Update this after verifying domain in Resend
+const FROM_EMAIL = "A* AI <onboarding@resend.dev>"; // Using Resend test sender until astarai.co.uk is verified
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
