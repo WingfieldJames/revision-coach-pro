@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Check } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -88,6 +90,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [openPopover, setOpenPopover] = useState<string | null>(null);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   const isPremiumRoute = location.pathname.includes('premium');
   const tier = isDeluxe ? 'deluxe' : 'free';
@@ -229,7 +232,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
           </div>
         ) : (
           <button
-            onClick={() => handleUpgradeClick('lifetime')}
+            onClick={() => setUpgradeDialogOpen(true)}
             className="flex items-center gap-1.5 rounded-full text-white text-sm font-semibold px-4 py-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
             style={{ background: 'var(--gradient-brand)' }}
           >
@@ -238,6 +241,40 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
           </button>
         )}
       </div>
+
+      {/* Upgrade Dialog */}
+      {!isDeluxe && (
+        <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">Upgrade to Deluxe</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 sm:grid-cols-2 mt-2">
+              <div className="p-6 rounded-xl border-2 border-primary bg-primary/5">
+                <h3 className="font-bold text-lg mb-1">Monthly</h3>
+                <p className="text-2xl font-bold mb-3">£8.99<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                <ul className="space-y-2 text-sm mb-4">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Unlimited prompts</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All tools unlocked</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Cancel anytime</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Priority support</li>
+                </ul>
+                <Button variant="brand" size="lg" className="w-full" onClick={() => { setUpgradeDialogOpen(false); handleUpgradeClick('monthly'); }}>Get Monthly</Button>
+              </div>
+              <div className="p-6 rounded-xl border border-border bg-muted">
+                <h3 className="font-bold text-lg mb-1">Exam Season Pass</h3>
+                <p className="text-2xl font-bold mb-3">£39.99</p>
+                <ul className="space-y-2 text-sm mb-4">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Everything in Monthly</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Valid until June 2026</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Flexible one-time payment</li>
+                </ul>
+                <Button variant="outline" size="lg" className="w-full" onClick={() => { setUpgradeDialogOpen(false); handleUpgradeClick('lifetime'); }}>Get Season Pass</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
