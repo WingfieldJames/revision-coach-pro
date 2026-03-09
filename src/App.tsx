@@ -43,6 +43,7 @@ import { BuildAboutPage } from "./pages/BuildAboutPage";
 import { GCSEComparePage } from "./pages/GCSEComparePage";
 import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { FeedbackPage } from "./pages/FeedbackPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
