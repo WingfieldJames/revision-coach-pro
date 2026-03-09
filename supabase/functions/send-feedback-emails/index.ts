@@ -11,7 +11,9 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const BASE_URL = "https://astarai.lovable.app";
-const FROM_EMAIL = "A* AI <feedback@astarai.co.uk>"; // Update this after verifying domain in Resend
+const FROM_EMAIL = "A* AI <onboarding@resend.dev>"; // Using Resend test sender until astarai.co.uk is verified
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -130,6 +132,27 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Test mode: send a test email to a specific address
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (body.test_email) {
+      const type = body.type || "free";
+      const feedbackUrl = `${BASE_URL}/feedback?type=${type}`;
+      const html = type === "deluxe" 
+        ? getDeluxeUserEmailHtml(feedbackUrl) 
+        : getFreeUserEmailHtml(feedbackUrl);
+      const subject = type === "deluxe" 
+        ? "How's Deluxe treating you? ⭐" 
+        : "How's your A* AI experience? 📚";
+      
+      const success = await sendEmail(body.test_email, subject, html);
+      return new Response(JSON.stringify({ success, test: true, to: body.test_email }), {
+        status: success ? 200 : 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+  } catch (_) {}
+
   logStep("Starting feedback email job");
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -203,6 +226,9 @@ serve(async (req) => {
         } else {
           errors++;
         }
+
+        // Rate limit: wait 600ms between emails (max ~1.6/sec)
+        await sleep(600);
       }
     }
 
@@ -271,6 +297,9 @@ serve(async (req) => {
         } else {
           errors++;
         }
+
+        // Rate limit: wait 600ms between emails
+        await sleep(600);
       }
     }
 
