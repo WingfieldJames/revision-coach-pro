@@ -63,29 +63,63 @@ function getFreeUserEmailHtml(feedbackUrl: string): string {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="text-align: center; margin-bottom: 30px;">
-    <h1 style="color: #1a1a1a; margin-bottom: 10px;">How's your A* AI experience?</h1>
-  </div>
-  
-  <p>Hey there! 👋</p>
-  
-  <p>You've been using A* AI for 2 weeks now, and we'd love to hear how it's going!</p>
-  
-  <p>Your feedback helps us make A* AI even better for students like you. It only takes 30 seconds:</p>
-  
-  <div style="text-align: center; margin: 30px 0;">
-    <a href="${feedbackUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px;">Share Your Feedback</a>
-  </div>
-  
-  <p>Whether it's a quick thought or detailed suggestions, we read every response.</p>
-  
-  <p>Thanks for being part of the A* AI community! 🎓</p>
-  
-  <p style="color: #666; font-size: 14px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
-    The A* AI Team<br>
-    <a href="https://astarai.lovable.app" style="color: #667eea;">astarai.lovable.app</a>
-  </p>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 460px; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding: 32px 32px 16px;">
+              <img src="https://astarai.lovable.app/brand-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
+            </td>
+          </tr>
+          <!-- Stars decoration -->
+          <tr>
+            <td align="center" style="padding: 0 32px 8px;">
+              <span style="font-size: 28px;">⭐⭐⭐⭐⭐</span>
+            </td>
+          </tr>
+          <!-- Heading -->
+          <tr>
+            <td align="center" style="padding: 8px 32px 4px;">
+              <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #1a1a1a;">How's your experience?</h1>
+            </td>
+          </tr>
+          <!-- Subtext -->
+          <tr>
+            <td align="center" style="padding: 4px 32px 24px;">
+              <p style="margin: 0; font-size: 14px; color: #71717a; line-height: 1.5;">
+                You've been using A* AI for 2 weeks now. We'd love your honest feedback — it takes 30 seconds.
+              </p>
+            </td>
+          </tr>
+          <!-- CTA Button -->
+          <tr>
+            <td align="center" style="padding: 0 32px 24px;">
+              <a href="${feedbackUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 10px; font-weight: 600; font-size: 15px; letter-spacing: 0.3px;">Submit Feedback</a>
+            </td>
+          </tr>
+          <!-- Upgrade CTA -->
+          <tr>
+            <td style="padding: 0 32px 24px; border-top: 1px solid #e4e4e7;">
+              <p style="margin: 16px 0 8px; font-size: 13px; color: #71717a; text-align: center;">Ready to unlock unlimited access?</p>
+              <p style="margin: 0; text-align: center;">
+                <a href="https://astarai.lovable.app/compare" style="font-size: 13px; color: #667eea; text-decoration: none; font-weight: 600;">Upgrade to Deluxe →</a>
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding: 16px 32px 24px; border-top: 1px solid #e4e4e7;">
+              <p style="margin: 0; font-size: 12px; color: #a1a1aa;">The A* AI Team</p>
+              <a href="https://astarai.lovable.app" style="font-size: 12px; color: #667eea; text-decoration: none;">astarai.lovable.app</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
   `.trim();
@@ -99,29 +133,54 @@ function getDeluxeUserEmailHtml(feedbackUrl: string): string {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="text-align: center; margin-bottom: 30px;">
-    <h1 style="color: #1a1a1a; margin-bottom: 10px;">How's Deluxe treating you? ⭐</h1>
-  </div>
-  
-  <p>Hey there! 👋</p>
-  
-  <p>You've been a Deluxe member for 2 weeks now — thank you for your support!</p>
-  
-  <p>We'd love to hear how the premium features are working for you. Your feedback directly shapes what we build next:</p>
-  
-  <div style="text-align: center; margin: 30px 0;">
-    <a href="${feedbackUrl}" style="display: inline-block; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px;">Share Your Deluxe Feedback</a>
-  </div>
-  
-  <p>Is there a feature you wish we had? Something that could work better? We're all ears!</p>
-  
-  <p>Thanks for helping us build the best A-Level study tool! 🚀</p>
-  
-  <p style="color: #666; font-size: 14px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
-    The A* AI Team<br>
-    <a href="https://astarai.lovable.app" style="color: #f5576c;">astarai.lovable.app</a>
-  </p>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 460px; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding: 32px 32px 16px;">
+              <img src="https://astarai.lovable.app/brand-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
+            </td>
+          </tr>
+          <!-- Stars decoration -->
+          <tr>
+            <td align="center" style="padding: 0 32px 8px;">
+              <span style="font-size: 28px;">⭐⭐⭐⭐⭐</span>
+            </td>
+          </tr>
+          <!-- Heading -->
+          <tr>
+            <td align="center" style="padding: 8px 32px 4px;">
+              <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #1a1a1a;">How's your experience with Deluxe?</h1>
+            </td>
+          </tr>
+          <!-- Subtext -->
+          <tr>
+            <td align="center" style="padding: 4px 32px 24px;">
+              <p style="margin: 0; font-size: 14px; color: #71717a; line-height: 1.5;">
+                You've been a Deluxe member for 2 weeks — thank you for your support! We'd love your honest feedback.
+              </p>
+            </td>
+          </tr>
+          <!-- CTA Button -->
+          <tr>
+            <td align="center" style="padding: 0 32px 24px;">
+              <a href="${feedbackUrl}" style="display: inline-block; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 10px; font-weight: 600; font-size: 15px; letter-spacing: 0.3px;">Submit Feedback</a>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding: 16px 32px 24px; border-top: 1px solid #e4e4e7;">
+              <p style="margin: 0; font-size: 12px; color: #a1a1aa;">The A* AI Team</p>
+              <a href="https://astarai.lovable.app" style="font-size: 12px; color: #f5576c; text-decoration: none;">astarai.lovable.app</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
   `.trim();
