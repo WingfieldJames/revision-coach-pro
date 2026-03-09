@@ -97,6 +97,7 @@ const App = () => (
             <Route path="/s/:slug/premium" element={<DynamicPremiumPage />} />
             <Route path="/select" element={<SubjectSelectionPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
