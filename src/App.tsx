@@ -99,6 +99,7 @@ const App = () => (
             <Route path="/select" element={<SubjectSelectionPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/feedback-results" element={<FeedbackResultsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
