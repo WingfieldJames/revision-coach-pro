@@ -90,6 +90,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [openPopover, setOpenPopover] = useState<string | null>(null);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   const isPremiumRoute = location.pathname.includes('premium');
   const tier = isDeluxe ? 'deluxe' : 'free';
