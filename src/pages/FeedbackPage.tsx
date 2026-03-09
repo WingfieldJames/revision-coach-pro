@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
 
 export const FeedbackPage: React.FC = () => {
   const [searchParams] = useSearchParams();
