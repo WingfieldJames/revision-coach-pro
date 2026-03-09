@@ -1,11 +1,11 @@
 import React, { useRef } from 'react';
-import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
+import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { AQA_CHEMISTRY_EXAMS } from '@/components/ExamCountdown';
 
-// AQA Chemistry product ID from database
 const AQA_CHEMISTRY_PRODUCT_ID = "3e5bf02e-1424-4bb3-88f9-2a9c58798444";
 
 const AQA_CHEMISTRY_PROMPTS = [
@@ -17,47 +17,16 @@ const AQA_CHEMISTRY_PROMPTS = [
 
 export const AQAChemistryFreeVersionPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
-
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
-    chatRef.current?.submitMessage(message, imageDataUrl);
-  };
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SEOHead 
-        title="Free A* AI – AQA Chemistry A-Level Revision | Try Now"
-        description="Try A* AI free for AQA Chemistry. AI trained on AQA Chemistry past papers for spec-aligned responses. Upgrade to Deluxe for full mark scheme feedback."
-        canonical="https://astarai.co.uk/aqa-chemistry-free-version"
-      />
+      <SEOHead title="Free A* AI – AQA Chemistry A-Level Revision | Try Now" description="Try A* AI free for AQA Chemistry." canonical="https://astarai.co.uk/aqa-chemistry-free-version" />
       <RandomChatbotBackground />
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
-        <Header
-          showImageTool 
-          showEssayMarker
-          showPastPaperFinder
-          showExamCountdown
-          examDates={AQA_CHEMISTRY_EXAMS}
-          examSubjectName="AQA Chemistry"
-          hideUserDetails 
-          productId={AQA_CHEMISTRY_PRODUCT_ID}
-          productSlug="aqa-chemistry"
-          showUpgradeButton
-          essayMarkerLabel="6-Marker Analysis"
-          essayMarkerFixedMark={6}
-          onEssayMarkerSubmit={handleEssayMarkerSubmit}
-        />
-      </div>
-      
+      <ChatbotSidebar subjectName="AQA Chemistry" productId={AQA_CHEMISTRY_PRODUCT_ID} productSlug="aqa-chemistry" showMyAI showEssayMarker showPastPaperFinder showExamCountdown examDates={AQA_CHEMISTRY_EXAMS} examSubjectName="AQA Chemistry" essayMarkerLabel="6-Marker Analysis" essayMarkerFixedMark={6} onEssayMarkerSubmit={handleEssayMarkerSubmit} />
+      <ChatbotToolbar subjectName="AQA Chemistry" productId={AQA_CHEMISTRY_PRODUCT_ID} productSlug="aqa-chemistry" showMyAI showEssayMarker showPastPaperFinder showExamCountdown examDates={AQA_CHEMISTRY_EXAMS} examSubjectName="AQA Chemistry" essayMarkerLabel="6-Marker Analysis" essayMarkerFixedMark={6} onEssayMarkerSubmit={handleEssayMarkerSubmit} />
       <div className="flex-1 relative z-10">
-        <RAGChat 
-          productId={AQA_CHEMISTRY_PRODUCT_ID}
-          subjectName="AQA Chemistry"
-          subjectDescription="Your personal A* Chemistry tutor. Ask me anything!"
-          footerText="Powered by A* AI • Trained on AQA Chemistry specification"
-          placeholder="Ask about organic, inorganic, or physical chemistry..."
-          suggestedPrompts={AQA_CHEMISTRY_PROMPTS}
-          chatRef={chatRef}
-        />
+        <RAGChat productId={AQA_CHEMISTRY_PRODUCT_ID} subjectName="AQA Chemistry" subjectDescription="Your personal A* Chemistry tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Chemistry specification" placeholder="Ask about organic, inorganic, or physical chemistry..." suggestedPrompts={AQA_CHEMISTRY_PROMPTS} chatRef={chatRef} />
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@11.2.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -50,14 +49,6 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const requestedProductId = typeof body?.product_id === "string" ? body.product_id : null;
 
-    const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY");
-    const stripe = stripeSecret
-      ? new Stripe(stripeSecret, {
-          apiVersion: "2023-10-16",
-          httpClient: Stripe.createFetchHttpClient(),
-        })
-      : null;
-
     const { data: subscriptions, error: subError } = await supabaseAdmin
       .from("user_subscriptions")
       .select("id, product_id, tier, payment_type, active, subscription_end, stripe_subscription_id, cancelled_at")
@@ -81,43 +72,71 @@ serve(async (req) => {
       let isValid = isDeluxe && (!endDate || endDate > now);
       let normalizedEnd: string | null = sub.subscription_end;
 
-      if (!isValid && isDeluxe && sub.payment_type === "monthly" && sub.stripe_subscription_id && stripe) {
-        try {
-          const stripeSub = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
-          const status = stripeSub.status;
-          const currentPeriodEndIso = new Date(stripeSub.current_period_end * 1000).toISOString();
-          const stripeLooksActive = ACTIVE_STRIPE_STATUSES.has(status);
+      // For monthly subs that look expired, try to heal from Stripe
+      if (!isValid && isDeluxe && sub.payment_type === "monthly" && sub.stripe_subscription_id) {
+        const stripeSecret = Deno.env.get("STRIPE_SECRET_KEY");
+        if (stripeSecret) {
+          try {
+            // Use fetch directly instead of Stripe SDK to avoid Deno compatibility issues
+            const stripeRes = await fetch(
+              `https://api.stripe.com/v1/subscriptions/${sub.stripe_subscription_id}`,
+              {
+                headers: {
+                  "Authorization": `Bearer ${stripeSecret}`,
+                },
+              }
+            );
 
-          if (stripeLooksActive && new Date(currentPeriodEndIso) > now) {
-            const { error: healError } = await supabaseAdmin
-              .from("user_subscriptions")
-              .update({
-                active: true,
-                cancelled_at: null,
-                subscription_end: currentPeriodEndIso,
-                updated_at: new Date().toISOString(),
-              })
-              .eq("id", sub.id);
+            if (stripeRes.ok) {
+              const stripeSub = await stripeRes.json();
+              const status = stripeSub.status;
+              const currentPeriodEndIso = new Date(stripeSub.current_period_end * 1000).toISOString();
+              const stripeLooksActive = ACTIVE_STRIPE_STATUSES.has(status);
 
-            if (!healError) {
-              healedSubscriptions += 1;
-              normalizedEnd = currentPeriodEndIso;
-              isValid = true;
-              console.log("Healed monthly subscription from Stripe", {
-                user_id: user.id,
-                sub_id: sub.id,
-                stripe_subscription_id: sub.stripe_subscription_id,
-                current_period_end: currentPeriodEndIso,
-              });
+              if (stripeLooksActive && new Date(currentPeriodEndIso) > now) {
+                const { error: healError } = await supabaseAdmin
+                  .from("user_subscriptions")
+                  .update({
+                    active: true,
+                    cancelled_at: null,
+                    subscription_end: currentPeriodEndIso,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq("id", sub.id);
+
+                if (!healError) {
+                  healedSubscriptions += 1;
+                  normalizedEnd = currentPeriodEndIso;
+                  isValid = true;
+                  console.log("Healed monthly subscription from Stripe", {
+                    user_id: user.id,
+                    sub_id: sub.id,
+                    stripe_subscription_id: sub.stripe_subscription_id,
+                    current_period_end: currentPeriodEndIso,
+                  });
+                } else {
+                  console.error("Failed to heal monthly subscription", healError);
+                }
+              }
             } else {
-              console.error("Failed to heal monthly subscription", healError);
+              console.error("Stripe API error:", stripeRes.status, await stripeRes.text());
             }
+          } catch (stripeErr) {
+            console.error("Stripe verification failed for subscription", {
+              stripe_subscription_id: sub.stripe_subscription_id,
+              error: stripeErr instanceof Error ? stripeErr.message : String(stripeErr),
+            });
           }
-        } catch (stripeErr) {
-          console.error("Stripe verification failed for subscription", {
-            stripe_subscription_id: sub.stripe_subscription_id,
-            error: stripeErr instanceof Error ? stripeErr.message : String(stripeErr),
-          });
+        }
+      }
+
+      // For monthly subs without Stripe healing, apply 7-day grace period
+      if (!isValid && isDeluxe && sub.payment_type === "monthly" && endDate) {
+        const graceMs = 7 * 24 * 60 * 60 * 1000;
+        const withinGrace = now.getTime() - endDate.getTime() <= graceMs;
+        if (withinGrace) {
+          isValid = true;
+          console.log("Monthly sub within 7-day grace period", { sub_id: sub.id });
         }
       }
 

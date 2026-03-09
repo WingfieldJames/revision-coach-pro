@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle } from "lucide-react";
+import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle, RefreshCw } from "lucide-react";
 import { normalizeSpecifications } from "@/lib/specNormalization";
 import { getLegacyConfig } from "@/lib/legacyLiveConfig";
+import { diagrams } from "@/data/diagrams";
+import { csDiagrams } from "@/data/csDiagrams";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +72,7 @@ interface TrainerProject {
   essay_marker_marks: number[] | null;
   updated_at: string;
   last_deployed_at: string | null;
+  diagram_library: Array<{ id: string; title: string; imagePath: string }> | null;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
@@ -173,10 +176,47 @@ export function BuildPage() {
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [examDates, setExamDates] = useState<Array<{ name: string; date: string }>>([]);
   const [essayMarkerMarks, setEssayMarkerMarks] = useState<string>("");
+  const [suggestedPrompts, setSuggestedPrompts] = useState<Array<{ text: string; usesPersonalization?: boolean }>>([]);
+  const [diagramLibrary, setDiagramLibrary] = useState<Array<{ id: string; title: string; imagePath: string }>>([]);
+  const [uploadingDiagram, setUploadingDiagram] = useState(false);
+  const diagramImageInputRef = useRef<HTMLInputElement>(null);
 
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
+  // Chunk counts from document_chunks (covers legacy + processed uploads)
+  const [chunkStats, setChunkStats] = useState<{ pastPaperChunks: number; specChunks: number }>({ pastPaperChunks: 0, specChunks: 0 });
+
+  // Track files currently processing (for tab-close warning + polling)
+  const hasProcessingFiles = useMemo(
+    () => uploads.some(u => u.processing_status === "processing" || u.processing_status === "pending"),
+    [uploads]
+  );
+
+  // Warn user before closing tab if files are processing
+  useEffect(() => {
+    if (!hasProcessingFiles) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasProcessingFiles]);
+
+  // Auto-poll uploads while files are processing
+  useEffect(() => {
+    if (!hasProcessingFiles || !projectId) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("trainer_uploads")
+        .select("*")
+        .eq("project_id", projectId);
+      if (data) setUploads(data as TrainerUpload[]);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [hasProcessingFiles, projectId]);
+
 
   
 
@@ -249,11 +289,11 @@ export function BuildPage() {
     return JSON.stringify({
       systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
-      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData,
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary,
     });
   }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
-      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData]);
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary]);
 
   // savedSnapshotParsed for field-level comparison
   const savedSnapshotParsed = useMemo(() => {
@@ -337,6 +377,22 @@ export function BuildPage() {
       ? dbMarks.join(', ')
       : (legacy?.essayMarkerMarks && legacy.essayMarkerMarks.length > 0 ? legacy.essayMarkerMarks.join(', ') : '');
 
+    const dbSuggestedPrompts = Array.isArray((existing as any).suggested_prompts) ? (existing as any).suggested_prompts as Array<{ text: string; usesPersonalization?: boolean }> : [];
+    const hasValidDbPrompts = dbSuggestedPrompts.filter(p => p.text?.trim()).length > 0;
+    const initialSuggestedPrompts = hasValidDbPrompts ? dbSuggestedPrompts : (legacy?.suggestedPrompts || []);
+
+    const dbDiagramLibrary = Array.isArray((existing as any).diagram_library) ? (existing as any).diagram_library as Array<{ id: string; title: string; imagePath: string }> : [];
+    // Fallback: populate from static diagram libraries for legacy subjects
+    let initialDiagramLibrary = dbDiagramLibrary;
+    if (dbDiagramLibrary.length === 0) {
+      const subjectLower = existing.subject.toLowerCase();
+      if (subjectLower === 'computer science') {
+        initialDiagramLibrary = csDiagrams.map(d => ({ id: d.id, title: d.title, imagePath: d.imagePath }));
+      } else if (subjectLower === 'economics') {
+        initialDiagramLibrary = diagrams.map(d => ({ id: d.id, title: d.title, imagePath: d.imagePath }));
+      }
+    }
+
     setCustomSections(initialCustomSections);
     setTrainerImageUrl(initialTrainerImageUrl);
     setTrainerDescription(initialTrainerDescription);
@@ -346,6 +402,8 @@ export function BuildPage() {
     setSelectedFeatures(initialSelectedFeatures);
     setExamDates(initialExamDates);
     setEssayMarkerMarks(initialEssayMarkerMarks);
+    setSuggestedPrompts(initialSuggestedPrompts);
+    setDiagramLibrary(initialDiagramLibrary);
 
     // Handle specs with normalization
     const savedSpecs = existing.staged_specifications;
@@ -465,6 +523,8 @@ export function BuildPage() {
         examDates: initialExamDates,
         essayMarkerMarks: initialEssayMarkerMarks,
         stagedSpecData: hydratedSpecs && hydratedSpecs.length > 0 ? hydratedSpecs : null,
+        suggestedPrompts: initialSuggestedPrompts,
+        diagramLibrary: initialDiagramLibrary,
       });
       setSavedSnapshot(snapshot);
       setProjectLoaded(true);
@@ -519,7 +579,25 @@ export function BuildPage() {
     toast({ title: "Subject created", description: `${newQualificationType} · ${newProject.exam_board} ${newProject.subject}` });
   };
 
-  // Load uploads when project changes
+  // Load uploads + chunk stats when project changes
+  const loadChunkStats = useCallback(async () => {
+    const currentProduct = projects.find(p => p.id === selectedProjectId);
+    const pid = currentProduct?.product_id;
+    if (!pid) { setChunkStats({ pastPaperChunks: 0, specChunks: 0 }); return; }
+    // Count past paper chunks (content_type contains 'paper' or 'mark_scheme' or 'combined')
+    const { count: ppCount } = await supabase
+      .from("document_chunks")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", pid)
+      .or("metadata->>content_type.ilike.%paper%,metadata->>content_type.ilike.%mark_scheme%,metadata->>content_type.eq.combined");
+    const { count: specCount } = await supabase
+      .from("document_chunks")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", pid)
+      .eq("metadata->>content_type", "specification");
+    setChunkStats({ pastPaperChunks: ppCount || 0, specChunks: specCount || 0 });
+  }, [projects, selectedProjectId]);
+
   useEffect(() => {
     if (!projectId) return;
     const loadUploads = async () => {
@@ -529,10 +607,10 @@ export function BuildPage() {
         .eq("project_id", projectId);
       const loaded = (data as TrainerUpload[]) || [];
       setUploads(loaded);
-      // No more submittedYears tracking needed
     };
     loadUploads();
-  }, [projectId]);
+    loadChunkStats();
+  }, [projectId, loadChunkStats]);
 
   // markUnsaved is now a no-op — dirty state is derived from snapshot comparison
   const markUnsaved = useCallback(() => {}, []);
@@ -562,6 +640,8 @@ export function BuildPage() {
           exam_dates: examDates as unknown as import("@/integrations/supabase/types").Json,
           essay_marker_marks: (parsedMarks.length > 0 ? parsedMarks : []) as unknown as import("@/integrations/supabase/types").Json,
           staged_specifications: stagedSpecData as unknown as import("@/integrations/supabase/types").Json,
+          suggested_prompts: suggestedPrompts as unknown as import("@/integrations/supabase/types").Json,
+          diagram_library: diagramLibrary as unknown as import("@/integrations/supabase/types").Json,
           system_prompt_submitted: systemPrompt.trim().length >= 10,
           exam_technique_submitted: examTechnique.trim().length >= 10,
           trainer_bio_submitted: trainerDescription.trim().length >= 10,
@@ -688,7 +768,7 @@ export function BuildPage() {
       });
 
       markUnsaved();
-      toast({ title: "Upload complete", description: `${file.name} uploaded. Processing in background.` });
+      toast({ title: "Processing started", description: `${file.name} is being analysed by AI. This may take 1-3 minutes — please don't close this tab.`, duration: 8000 });
 
       // Reload uploads immediately so new pending item appears
       const { data: updatedUploads } = await supabase
@@ -728,7 +808,35 @@ export function BuildPage() {
     }
   };
 
-  // Get all uploads for a given year
+  // Direct text entry — submit text straight into document_chunks (per year)
+  const handleAddText = async (title: string, content: string, year: string) => {
+    const product = projects.find(p => p.id === selectedProjectId);
+    if (!product?.product_id) {
+      toast({ title: "Deploy first", description: "Deploy the subject at least once before adding direct text.", variant: "destructive" });
+      return;
+    }
+    try {
+      const { error } = await supabase.functions.invoke("ingest-content", {
+        body: {
+          product_id: product.product_id,
+          chunks: [{
+            content: `[${title}]\n${content}`,
+            metadata: { content_type: "past_paper", source: "direct_text", title, year },
+          }],
+        },
+      });
+      if (error) throw error;
+      markUnsaved();
+      toast({ title: "Text added ✓", description: `"${title}" added to training data.` });
+    } catch (err) {
+      console.error("Text entry failed:", err);
+      toast({ title: "Failed to add text", description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+      throw err; // re-throw so the card knows it failed
+    }
+  };
+
+
+
   const getUploadsForYear = (year: string) => {
     return uploads.filter(u => u.section_type === "past_paper" && u.year === year);
   };
@@ -1350,8 +1458,8 @@ export function BuildPage() {
           {/* Past Papers */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Past Papers</CardTitle>
-              <p className="text-xs text-muted-foreground">Upload QPs and Mark Schemes — they'll be auto-paired by paper number.</p>
+              <CardTitle className="text-base">Past Papers & Training Content</CardTitle>
+              <p className="text-xs text-muted-foreground">Upload QPs and Mark Schemes, or add text directly to training data.</p>
             </CardHeader>
             <CardContent className="space-y-3">
               {PAPER_YEARS.map(year => {
@@ -1363,6 +1471,7 @@ export function BuildPage() {
                     uploads={yearUploads}
                     onUploadFiles={handleMultiFileUpload}
                     onDeleteUpload={handleDeleteUpload}
+                    onAddText={handleAddText}
                     uploading={!!uploading?.startsWith("past_paper" + year)}
                     initialDeployed={projectStatus === "deployed"}
                     productId={projects.find(p => p.id === selectedProjectId)?.product_id || null}
@@ -1516,6 +1625,250 @@ export function BuildPage() {
                   />
                 </div>
               )}
+
+              {/* Diagram Library */}
+              {selectedFeatures.includes("diagram_generator") && (
+                <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-medium">Diagram Library</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Upload diagram images with titles. The AI will match student questions to the most relevant diagram.</p>
+                  <input
+                    ref={diagramImageInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !projectId) return;
+                      setUploadingDiagram(true);
+                      try {
+                        const filePath = `${projectId}/diagram_${Date.now()}_${file.name}`;
+                        const { error: uploadErr } = await supabase.storage
+                          .from("trainer-uploads")
+                          .upload(filePath, file, { upsert: true });
+                        if (uploadErr) throw uploadErr;
+                        const newDiagram = {
+                          id: `custom-${Date.now()}`,
+                          title: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+                          imagePath: filePath,
+                        };
+                        setDiagramLibrary(prev => [...prev, newDiagram]);
+                        toast({ title: "Diagram uploaded", description: "Give it a title below." });
+                      } catch (err) {
+                        toast({ title: "Upload failed", variant: "destructive" });
+                      } finally {
+                        setUploadingDiagram(false);
+                        e.target.value = "";
+                      }
+                    }}
+                  />
+                  {diagramLibrary.map((diagram, idx) => (
+                    <div key={diagram.id} className="flex items-center gap-2 border border-border rounded-lg p-2">
+                      <div className="h-12 w-12 rounded bg-muted overflow-hidden shrink-0">
+                        <DiagramThumbnail filePath={diagram.imagePath} />
+                      </div>
+                      <Input
+                        value={diagram.title}
+                        onChange={e => {
+                          const next = [...diagramLibrary];
+                          next[idx] = { ...next[idx], title: e.target.value };
+                          setDiagramLibrary(next);
+                        }}
+                        placeholder="Diagram title..."
+                        className="flex-1 text-sm"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDiagramLibrary(prev => prev.filter((_, i) => i !== idx))}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => diagramImageInputRef.current?.click()}
+                    disabled={uploadingDiagram}
+                    className="w-full"
+                  >
+                    {uploadingDiagram ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
+                    Add Diagram
+                  </Button>
+                </div>
+              )}
+
+              {/* Past Paper Finder Config */}
+              {selectedFeatures.includes("past_papers") && (() => {
+                const ppUploads = uploads.filter(u => u.section_type === "past_paper");
+                const processedUploads = ppUploads.filter(u => u.processing_status === "processed");
+                const pendingUploads = ppUploads.filter(u => u.processing_status === "pending" || u.processing_status === "processing");
+                const errorUploads = ppUploads.filter(u => u.processing_status === "error");
+                const yearsWithPapers = [...new Set(ppUploads.map(u => u.year).filter(Boolean))].sort().reverse();
+                const hasSpec = specComplete && stagedSpecData && stagedSpecData.length > 0;
+                const totalPaperChunks = chunkStats.pastPaperChunks;
+                const hasTrainingData = processedUploads.length > 0 || totalPaperChunks > 0;
+                const isReady = hasSpec && hasTrainingData;
+                return (
+                  <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-primary" />
+                      <p className="text-sm font-medium">Past Paper Finder — Readiness</p>
+                      {isReady ? (
+                        <Badge variant="outline" className="text-xs border-green-500/30 text-green-600 dark:text-green-400 ml-auto">Ready</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs border-yellow-500/30 text-yellow-600 dark:text-yellow-400 ml-auto">Incomplete</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">The Past Paper Finder maps specification points to exam questions. It requires both a specification and past papers to function.</p>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-xs">
+                        {hasSpec ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
+                        <span className={hasSpec ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
+                          Specification: {hasSpec ? `${stagedSpecData!.length} points indexed` : "Not uploaded"}
+                          {chunkStats.specChunks > 0 && <span className="text-muted-foreground ml-1">({chunkStats.specChunks} chunks deployed)</span>}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {hasTrainingData ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
+                        <span className={hasTrainingData ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
+                          Training Data: {totalPaperChunks > 0 ? `${totalPaperChunks} question chunks indexed` : "No chunks indexed yet"}
+                          {processedUploads.length > 0 && <span className="text-muted-foreground ml-1">({processedUploads.length} file{processedUploads.length !== 1 ? "s" : ""} processed)</span>}
+                          {pendingUploads.length > 0 && <span className="text-muted-foreground ml-1">({pendingUploads.length} processing…)</span>}
+                          {errorUploads.length > 0 && <span className="text-destructive ml-1">({errorUploads.length} failed)</span>}
+                        </span>
+                      </div>
+                    </div>
+                    {yearsWithPapers.length > 0 && (
+                      <div className="pt-1">
+                        <p className="text-xs text-muted-foreground mb-1.5">Uploaded papers by year:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {yearsWithPapers.map(year => {
+                            const count = ppUploads.filter(u => u.year === year).length;
+                            return (
+                              <Badge key={year} variant="secondary" className="text-xs">
+                                {year} ({count} file{count !== 1 ? "s" : ""})
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full text-xs"
+                      onClick={loadChunkStats}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" /> Refresh Index Stats
+                    </Button>
+                    {!hasSpec && (
+                      <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 rounded p-2">
+                        ⚠️ Upload a specification in the "Specification" section above to enable spec-to-question mapping.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Revision Guide Config */}
+              {selectedFeatures.includes("revision_guide") && (() => {
+                const hasSpec = specComplete && stagedSpecData && stagedSpecData.length > 0;
+                const ppUploads = uploads.filter(u => u.section_type === "past_paper" && u.processing_status === "processed");
+                const hasPaperData = ppUploads.length > 0 || chunkStats.pastPaperChunks > 0;
+                return (
+                  <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                    <div className="flex items-center gap-2">
+                      <BookMarked className="h-4 w-4 text-primary" />
+                      <p className="text-sm font-medium">Revision Guide — Readiness</p>
+                      {hasSpec ? (
+                        <Badge variant="outline" className="text-xs border-green-500/30 text-green-600 dark:text-green-400 ml-auto">Ready</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs border-yellow-500/30 text-yellow-600 dark:text-yellow-400 ml-auto">Needs Spec</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">The Revision Guide generates branded PDF notes for any topic. It pulls from the specification, exam technique, and past paper content to create comprehensive guides.</p>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-xs">
+                        {hasSpec ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />}
+                        <span className={hasSpec ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}>
+                          Specification: {hasSpec ? `${stagedSpecData!.length} points available` : "Required — not yet uploaded"}
+                          {chunkStats.specChunks > 0 && <span className="text-muted-foreground ml-1">({chunkStats.specChunks} chunks deployed)</span>}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {(examTechnique?.trim().length || 0) >= 10 ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <Circle className="h-3.5 w-3.5 text-muted-foreground" />}
+                        <span className="text-muted-foreground">
+                          Exam Technique: {(examTechnique?.trim().length || 0) >= 10 ? "Provided" : "Optional — adds exam tips to guides"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {hasPaperData ? <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> : <Circle className="h-3.5 w-3.5 text-muted-foreground" />}
+                        <span className="text-muted-foreground">
+                          Past Papers: {chunkStats.pastPaperChunks > 0 ? `${chunkStats.pastPaperChunks} question chunks indexed` : (ppUploads.length > 0 ? `${ppUploads.length} files processed` : "Optional — adds real exam context")}
+                        </span>
+                      </div>
+                    </div>
+                    {!hasSpec && (
+                      <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 rounded p-2">
+                        ⚠️ A specification is required to generate revision guides. Upload one in the "Specification" section above.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+              <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
+                <div className="flex items-center gap-2">
+                  <Bot className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-medium">Suggested Prompts</p>
+                </div>
+                <p className="text-xs text-muted-foreground">These appear as clickable prompt suggestions when students first open the chatbot. Add up to 4.</p>
+                {suggestedPrompts.map((sp, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      value={sp.text}
+                      onChange={e => {
+                        const next = [...suggestedPrompts];
+                        next[idx] = { ...next[idx], text: e.target.value };
+                        setSuggestedPrompts(next);
+                      }}
+                      placeholder={`e.g. What topics are in the spec?`}
+                      className="flex-1 text-sm"
+                    />
+                    <label className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
+                      <Checkbox
+                        checked={!!sp.usesPersonalization}
+                        onCheckedChange={(checked) => {
+                          const next = [...suggestedPrompts];
+                          next[idx] = { ...next[idx], usesPersonalization: !!checked };
+                          setSuggestedPrompts(next);
+                        }}
+                      />
+                      Personal
+                    </label>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSuggestedPrompts(suggestedPrompts.filter((_, i) => i !== idx))}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                {suggestedPrompts.length < 4 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSuggestedPrompts([...suggestedPrompts, { text: "" }])}
+                    className="w-full"
+                  >
+                    <Plus className="h-3 w-3 mr-1" /> Add Prompt
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -1880,7 +2233,6 @@ function UploadChip({ upload }: { upload: TrainerUpload }) {
 function TrainerImage({ filePath }: { filePath: string }) {
   const [url, setUrl] = useState<string | null>(null);
   
-  // If the path is a static asset (starts with /) or a full URL, use it directly
   const isDirectUrl = filePath.startsWith('/') || filePath.startsWith('http');
 
   useEffect(() => {
@@ -1899,4 +2251,27 @@ function TrainerImage({ filePath }: { filePath: string }) {
 
   if (!url) return <div className="w-full h-full bg-muted" />;
   return <img src={url} alt="Trainer" className="w-full h-full object-cover" />;
+}
+
+function DiagramThumbnail({ filePath }: { filePath: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  
+  const isDirectUrl = filePath.startsWith('/') || filePath.startsWith('http');
+
+  useEffect(() => {
+    if (isDirectUrl) {
+      setUrl(filePath);
+      return;
+    }
+    const getUrl = async () => {
+      const { data } = await supabase.storage
+        .from("trainer-uploads")
+        .createSignedUrl(filePath, 3600);
+      if (data?.signedUrl) setUrl(data.signedUrl);
+    };
+    getUrl();
+  }, [filePath, isDirectUrl]);
+
+  if (!url) return <div className="w-full h-full bg-muted animate-pulse" />;
+  return <img src={url} alt="Diagram" className="w-full h-full object-contain" />;
 }

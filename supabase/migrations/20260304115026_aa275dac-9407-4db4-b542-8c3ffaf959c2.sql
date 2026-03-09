@@ -1,0 +1,1 @@
+ALTER TABLE public.trainer_projects ADD COLUMN suggested_prompts jsonb DEFAULT '[]'::jsonb;

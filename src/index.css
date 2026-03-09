@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* A* AI Design System - Light/Dark Mode */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Inter:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -17,9 +17,9 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 10%;
 
-    /* Purple gradient accent for light mode */
-    --primary: 271 81% 56%;
-    --primary-variant: 271 91% 65%;
+    /* Deep purple accent for light mode — restrained, not gradient-heavy */
+    --primary: 263 70% 50%;
+    --primary-variant: 263 60% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 211 23% 98%;
@@ -38,29 +38,29 @@
     --input: 240 6% 90%;
     --ring: 271 81% 56%;
 
-    /* Brand gradient - navy to purple for light */
-    --gradient-brand: linear-gradient(135deg, #1e3a8a 0%, #a855f7 100%);
-    --gradient-from: #1e3a8a;
-    --gradient-via1: #4f46e5;
-    --gradient-via2: #7c3aed;
-    --gradient-to: #a855f7;
+    /* Brand gradient - refined deep purple, less aggressive */
+    --gradient-brand: linear-gradient(135deg, #4f36b3 0%, #7c5ce7 100%);
+    --gradient-from: #4f36b3;
+    --gradient-via1: #5f45d2;
+    --gradient-via2: #6c52de;
+    --gradient-to: #7c5ce7;
 
-    --shadow-card: 0 2px 12px rgba(30, 58, 138, 0.06);
-    --shadow-elevated: 0 4px 20px rgba(168, 85, 247, 0.08);
-    --shadow-glow: 0 0 20px rgba(30, 58, 138, 0.15), 0 0 40px rgba(168, 85, 247, 0.08);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 0 0 1px rgba(79, 54, 179, 0.08);
 
-    --glow-1: rgba(30, 58, 138, 0.3);
-    --glow-2: rgba(168, 85, 247, 0.15);
-    --glow-1-intense: rgba(30, 58, 138, 0.4);
-    --glow-2-intense: rgba(168, 85, 247, 0.2);
+    --glow-1: rgba(79, 54, 179, 0.12);
+    --glow-2: rgba(124, 92, 231, 0.06);
+    --glow-1-intense: rgba(79, 54, 179, 0.18);
+    --glow-2-intense: rgba(124, 92, 231, 0.10);
 
     --transition-smooth: all 0.2s ease;
     --radius: 0.5rem;
 
-    /* Line animation colors - purple in light */
-    --line-color-1: #9333EA;
-    --line-color-2: #7C3AED;
-    --line-color-3: #A855F7;
+    /* Line animation colors - subtle in light */
+    --line-color-1: #6c52de;
+    --line-color-2: #5f45d2;
+    --line-color-3: #7c5ce7;
 
     /* Shugar tabs design tokens - light */
     --ds-gray-200: hsla(0, 0%, 90%, 1);
@@ -86,7 +86,6 @@
   }
 
   .dark {
-    /* Dark theme - exact current design */
     --background: 271 77% 5%;
     --foreground: 0 0% 100%;
 
@@ -96,8 +95,8 @@
     --popover: 271 50% 8%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 31 100% 59%;
-    --primary-variant: 340 100% 65%;
+    --primary: 24 95% 53%;
+    --primary-variant: 27 96% 61%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 271 40% 12%;
@@ -114,30 +113,27 @@
 
     --border: 271 25% 18%;
     --input: 271 25% 18%;
-    --ring: 31 100% 59%;
+    --ring: 24 95% 53%;
 
-    /* Brand gradient - orange/pink for dark */
-    --gradient-brand: linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%);
-    --gradient-from: #FFC83D;
-    --gradient-via1: #FF9A2E;
-    --gradient-via2: #FF6A3D;
-    --gradient-to: #FF4D8D;
+    --gradient-brand: linear-gradient(135deg, #f97316, #fb923c, #f59e0b);
+    --gradient-from: #f97316;
+    --gradient-via1: #fb923c;
+    --gradient-via2: #f59e0b;
+    --gradient-to: #f59e0b;
 
-    --shadow-card: 0 2px 12px rgba(255, 154, 46, 0.06);
-    --shadow-elevated: 0 4px 20px rgba(255, 77, 141, 0.08);
-    --shadow-glow: 0 0 20px rgba(255, 154, 46, 0.15), 0 0 40px rgba(255, 77, 141, 0.08);
+    --shadow-card: 0 2px 12px rgba(249, 115, 22, 0.06);
+    --shadow-elevated: 0 4px 20px rgba(251, 146, 60, 0.08);
+    --shadow-glow: 0 0 20px rgba(249, 115, 22, 0.15), 0 0 40px rgba(251, 146, 60, 0.08);
 
-    --glow-1: rgba(255, 154, 46, 0.3);
-    --glow-2: rgba(255, 77, 141, 0.15);
-    --glow-1-intense: rgba(255, 154, 46, 0.4);
-    --glow-2-intense: rgba(255, 77, 141, 0.2);
+    --glow-1: rgba(249, 115, 22, 0.3);
+    --glow-2: rgba(251, 146, 60, 0.15);
+    --glow-1-intense: rgba(249, 115, 22, 0.4);
+    --glow-2-intense: rgba(251, 146, 60, 0.2);
 
-    /* Line animation colors - warm in dark */
-    --line-color-1: #FF9A2E;
-    --line-color-2: #FF4D8D;
-    --line-color-3: #FFC83D;
+    --line-color-1: #f97316;
+    --line-color-2: #fb923c;
+    --line-color-3: #f59e0b;
 
-    /* Shugar tabs design tokens - dark */
     --ds-gray-200: hsla(0, 0%, 12%, 1);
     --ds-gray-900: hsla(0, 0%, 63%, 1);
     --ds-gray-1000: hsla(0, 0%, 93%, 1);
@@ -148,16 +144,16 @@
     --geist-foreground: #fff;
     --geist-success: #0070f3;
     --geist-warning: #f5a623;
-    --geist-violet: #FF9A2E;
+    --geist-violet: #7C3AED;
 
     --sidebar-background: 271 50% 6%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 31 100% 59%;
+    --sidebar-primary: 24 95% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 271 30% 12%;
     --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 271 25% 18%;
-    --sidebar-ring: 31 100% 59%;
+    --sidebar-ring: 24 95% 53%;
   }
 }
 
@@ -205,7 +201,7 @@
 
   /* Light mode only gradient for chatbot subject heading */
   .light-gradient-subject {
-    background: linear-gradient(135deg, #1e3a8a 0%, #a855f7 100%);
+    background: linear-gradient(135deg, #4f36b3 0%, #7c5ce7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -244,36 +240,36 @@
   /* ── Light-mode overrides for My AI & Exam Countdown panels ── */
   /* Override --primary and --ring to deep blue inside these panels (light only) */
   :root .my-ai-panel {
-    --primary: 222 75% 31%;
-    --ring: 222 75% 31%;
-    --primary-variant: 222 75% 45%;
+    --primary: 263 70% 50%;
+    --ring: 263 70% 50%;
+    --primary-variant: 263 60% 58%;
   }
 
   :root .my-ai-panel .panel-badge,
   :root .exam-countdown-panel .panel-badge {
-    background-color: rgba(30, 58, 138, 0.1);
-    color: #1e3a8a;
+    background-color: hsl(263 70% 50% / 0.1);
+    color: hsl(263 70% 50%);
   }
 
   /* Exam countdown timeline colours – light mode only */
   :root .exam-countdown-panel .panel-timeline-line {
-    background: linear-gradient(to bottom, #1e3a8a, #1e3a8a, rgba(30,58,138,0.3));
+    background: linear-gradient(to bottom, hsl(263 70% 50%), hsl(263 70% 50%), hsl(263 70% 50% / 0.3));
   }
 
   :root .exam-countdown-panel .panel-dot-filled {
-    background-color: #1e3a8a;
+    background-color: hsl(263 70% 50%);
   }
 
   :root .exam-countdown-panel .panel-dot-outline {
-    border: 2px solid #1e3a8a;
+    border: 2px solid hsl(263 70% 50%);
   }
 
   :root .exam-countdown-panel .panel-dot-inner {
-    background-color: #1e3a8a;
+    background-color: hsl(263 70% 50%);
   }
 
   :root .exam-countdown-panel .panel-accent-text {
-    color: #1e3a8a;
+    color: hsl(263 70% 50%);
   }
 
   /* Dark mode – revert to theme primary (orange) */

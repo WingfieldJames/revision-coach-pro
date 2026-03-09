@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ChatHistoryProvider } from "@/contexts/ChatHistoryContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAffiliateTracking } from "./hooks/useAffiliateTracking";
@@ -40,7 +41,10 @@ import { DynamicFreePage } from "./pages/DynamicFreePage";
 import { DynamicPremiumPage } from "./pages/DynamicPremiumPage";
 import { BuildAboutPage } from "./pages/BuildAboutPage";
 import { GCSEComparePage } from "./pages/GCSEComparePage";
-
+import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { FeedbackPage } from "./pages/FeedbackPage";
+import { FeedbackResultsPage } from "./pages/FeedbackResultsPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -52,6 +56,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
     <AuthProvider>
+    <ChatHistoryProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -91,10 +96,15 @@ const App = () => (
             <Route path="/build/about" element={<BuildAboutPage />} />
             <Route path="/s/:slug/free" element={<DynamicFreePage />} />
             <Route path="/s/:slug/premium" element={<DynamicPremiumPage />} />
+            <Route path="/select" element={<SubjectSelectionPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/feedback-results" element={<FeedbackResultsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+    </ChatHistoryProvider>
     </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>

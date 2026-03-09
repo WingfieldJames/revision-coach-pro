@@ -9,13 +9,19 @@ const corsHeaders = {
 // --- Prompt builders ---
 
 function buildClassificationPrompt(): string {
-  return `You are a document classification expert. Analyze this document and determine:
+  return `You are a document classification expert. You handle exam papers from ANY exam board worldwide (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject.
+
+Analyze this document carefully — look at the title page, headers, watermarks, question formatting, and content.
+
+Determine:
 1. Is it a Question Paper (QP) or a Mark Scheme (MS)?
-2. What paper number is it? (e.g. Paper 1, Paper 2, Paper 3)
+   - QP: Contains questions students must answer (may have MCQs, short answer, essay questions, data response, etc.)
+   - MS: Contains answers, mark allocations, level descriptors, examiner guidance, acceptable/reject answers
+2. What paper number is it? (e.g. Paper 1, Paper 2, Paper 3, Component 1, Unit 1, etc.)
+   - Look for codes like "Paper 1", "P1", "Component 01", "Unit 1", "7182/1", "H556/01", "9EC0/01"
+   - If no paper number is evident, default to 1
 
-Look at the title page, headers, and content to determine this.
-
-Return ONLY a JSON object (no markdown):
+Return ONLY a JSON object (no markdown, no code fences):
 {
   "doc_type": "qp" or "ms",
   "paper_number": 1 or 2 or 3 etc,
@@ -24,47 +30,58 @@ Return ONLY a JSON object (no markdown):
 }
 
 function buildQPExtractionPrompt(year: string, subject: string, examBoard: string): string {
-  return `You are an exam paper extraction expert. Extract the COMPLETE structured content of this Question Paper.
+  return `You are a universal exam paper extraction expert. You can handle Question Papers from ANY exam board (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject (Sciences, Maths, Humanities, Languages, etc.).
+
+Different boards structure their papers very differently:
+- Some use numbered sections (Section A, B, C) — detect and preserve these
+- Some use "0 1", "0 2" style numbering (AQA) — normalize to "1", "2" etc.
+- Some have MCQ sections followed by written sections (OCR Physics) — capture both
+- Some embed stimulus material, extracts, data, graphs, or case studies before questions — capture these
+- Some have "answer booklet" style with spaces between questions — ignore the spaces
+- Some use lettered sub-parts (a)(b)(c), others use Roman numerals (i)(ii)(iii), others use both — preserve the original scheme
+- Some have "choose one from" optional questions — note this
 
 CRITICAL RULES:
-- Extract EVERY question in the EXACT order they appear in the paper
-- Include ALL sub-parts (a), (b)(i), (b)(ii), (c), etc. as separate questions
-- Include ALL marks for each question/sub-part
-- Include ANY stimulus material, extracts, figures, data, or context given WITH the question
-- Questions must be numbered EXACTLY as printed (e.g. "1(a)", "1(b)(i)", "2(c)")
-- For papers with sections (Section A, Section B), group questions by section
+- Process the paper PAGE BY PAGE from start to finish. Do not skip any page.
+- Question numbers MUST follow the paper's own numbering scheme exactly
+- Each question's text must be the COMPLETE verbatim wording — never summarize or truncate
+- For MCQs, include the full stem AND all options (A, B, C, D) with exact wording
+- Extract EVERY question and sub-part in the EXACT order they appear
+- Include ALL marks for each question/sub-part (shown in brackets like [4] or [4 marks])
+- Include ANY stimulus material, extracts, data tables, figure descriptions, or context given WITH or BEFORE the question
 - Do NOT skip any questions, even if they seem repetitive or simple
 - Do NOT reorder questions — maintain the original paper order
-- For MCQs, include all options (A, B, C, D) in the question text
+- For questions referencing figures/graphs/diagrams, describe what the figure shows as best you can
 
 SKIP/IGNORE:
-- Cover page instructions, rubric ("Answer ALL questions", "Write in black ink")
-- Blank pages, formula sheets, periodic tables, data booklets
-- Page numbers, headers, footers, copyright notices
+- Cover page boilerplate instructions ("Answer ALL questions", "Write in black ink", candidate details)
+- Blank/lined answer pages, formula sheets, periodic tables, data booklets
+- Page numbers, headers, footers, copyright notices, barcodes
 
-Output the result as a SINGLE JSON object with this exact structure:
+Output as a SINGLE JSON object:
 {
+  "question_count": <total number of individual questions/sub-parts extracted>,
   "papers": [
     {
       "exam_board": "${examBoard}",
-      "qualification": "Detected from paper header or use '${examBoard} ${subject}'",
+      "qualification": "Detected from paper header",
       "series": "June ${year}",
-      "paper_code": "The paper code from the header (e.g. 9EC0/03, 7405/2, H446/01)",
+      "paper_code": "The paper code from the header (e.g. 9EC0/03, 7405/2, H446/01, 7182/1)",
       "paper": "June ${year} Paper [number]",
-      "total_marks": 100,
+      "total_marks": <total marks for the paper>,
       "sections": [
         {
           "name": "Section A",
-          "total_marks": 50,
-          "notes": "Any section-level instructions or notes (e.g. 'Answer ALL questions')",
+          "total_marks": <section marks if stated>,
+          "notes": "Any section-level instructions",
           "context": {
             "figures": ["Description of any figures/diagrams provided for this section"],
-            "extracts": ["Full text or summary of any extracts/data provided for this section"]
+            "extracts": ["Full text of any extracts/data provided for this section"]
           },
           "questions": [
             {
               "number": "1(a)",
-              "question": "The COMPLETE question text exactly as written. Include all context references.",
+              "question": "The COMPLETE question text exactly as written.",
               "marks": 5,
               "year": ${year},
               "paper": "June ${year} Paper [number]",
@@ -81,60 +98,90 @@ Output the result as a SINGLE JSON object with this exact structure:
 IMPORTANT:
 - If the paper has no explicit sections, use a single section with name "Full Paper"
 - Detect the paper code, total marks, and qualification from the paper header
-- For each question, include the FULL question text — do not truncate or summarise
-- Extract descriptions of all figures, tables, and data even if you can't read the exact values
 - Subject: ${subject}, Board: ${examBoard}, Year: ${year}
-
-Be EXHAUSTIVE — every question must be captured with complete text and correct marks.`;
+- Be EXHAUSTIVE — every question must be captured with complete text and correct marks.`;
 }
 
 function buildMSExtractionPrompt(year: string, subject: string, examBoard: string): string {
-  return `You are a mark scheme extraction expert. Extract the COMPLETE mark scheme for every question.
+  return `You are a universal mark scheme extraction expert. You handle Mark Schemes from ANY exam board (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject.
+
+Different boards format mark schemes very differently:
+- AQA uses AO1/AO2/AO3 assessment objective codes with level descriptors
+- OCR uses grouped marking with "Response", "Marks", "Guidance" columns
+- Edexcel uses M1/A1/B1 mark codes with "Accept/Reject" columns
+- CIE uses a simple "Marks" and "Guidance" format
+- Some have indicative content tables, others use bullet points
+- Some have banded level descriptors (Level 1/2/3/4) for extended responses
+- Some mark schemes are in table format, others in flowing text
 
 CRITICAL RULES:
+- Process the mark scheme PAGE BY PAGE from start to finish. Do not skip any page.
+- Question numbers MUST match the question paper's numbering exactly (1(a), 1(b)(i), 01.1, etc.)
 - Extract mark scheme for EVERY question in the EXACT order they appear
-- Include ALL sub-parts matching the question paper numbering (1(a), 1(b)(i), etc.)
-- Include the correct answers and ALL acceptable alternative answers
-- Include mark codes (M1, A1, B1, AO1, AO2, AO3 etc.) and what earns each mark
+- Include the correct answers AND all acceptable alternative answers
+- Include mark codes (M1, A1, B1, AO1, AO2, AO3, etc.) where present
 - Include examiner guidance, "Accept/Reject" clarifications
 - Include required working or method steps
-- For extended response questions, include level descriptors (Level 1, 2, 3 etc.) with mark ranges
-- Include indicative content students should include
+- For extended response questions, include level descriptors with mark ranges AND indicative content
+- Each question's mark scheme must be COMPLETE — never summarize or truncate
 
 SKIP/IGNORE:
 - Cover page, administrative headers, "Mark Scheme" title pages
-- General marking instructions that appear at the start
+- Generic marking instructions at the start ("How to use this mark scheme")
 - Copyright notices, page numbers, blank pages
-- Generic rubric about how to use the mark scheme
 
-Output as a JSON array of objects, one per question:
-[
-  {
-    "question_number": "1(a)",
-    "mark_scheme": "The COMPLETE marking points, acceptable answers, mark codes, level descriptors, and examiner guidance",
-    "total_marks": 6,
-    "topic": "Topic this question covers"
-  }
-]
+Output as a JSON object:
+{
+  "question_count": <total number of individual questions/sub-parts>,
+  "marks": [
+    {
+      "question_number": "1(a)",
+      "mark_scheme": "The COMPLETE marking points, acceptable answers, mark codes, level descriptors, and examiner guidance",
+      "total_marks": 6,
+      "topic": "Topic this question covers"
+    }
+  ]
+}
 
 Subject: ${subject}, Board: ${examBoard}, Year: ${year}
-Be EXHAUSTIVE — capture every question's marking points, level descriptors, and examiner guidance.`;
+Be EXHAUSTIVE — capture every marking point, level descriptor, and examiner guidance.`;
 }
 
 function buildSpecificationPrompt(): string {
-  return `You are a document extraction expert. Extract ALL specification points, topics, and sub-topics from this document.
+  return `You are a universal specification/syllabus extraction expert. You handle specifications from ANY exam board (AQA, OCR, Edexcel/Pearson, CIE/CAIE, WJEC, IB, SQA, etc.) and ANY subject.
 
-Output as a JSON array of objects, each representing one topic or sub-topic:
+Different boards structure specifications very differently:
+- AQA uses numbered sections like "3.1.1 Atomic structure"
+- Edexcel uses "Theme" or "Topic" groupings with sub-points
+- OCR uses component-based organisation
+- CIE uses numbered syllabus content with learning objectives
+- IB uses assessment criteria and topic outlines
+- Some have nested hierarchies (Topic > Sub-topic > Point), others are flat lists
+
+CRITICAL RULES:
+- Extract ONLY testable learning objectives, content points, and syllabus requirements
+- Include topic numbers/codes if present (e.g. "3.1.1", "Theme 1.2.3")
+- Preserve the hierarchical context (e.g. "Mechanics > Forces: Newton's laws")
+- Be EXHAUSTIVE — capture every single testable point
+- Preserve original wording as closely as possible
+
+SKIP/IGNORE:
+- Table of contents, introductions, "about this qualification"
+- Assessment overview, exam structure, command words, mark scheme guidance
+- Administration info, entry codes, grading info, contact details
+- Copyright notices, appendices with formulae/data sheets
+
+Output as a JSON array:
 [
   {
-    "topic": "Topic name",
+    "topic": "Topic name (with number if present)",
     "subtopic": "Sub-topic name or null",
     "content": "Full specification content for this point",
     "content_type": "specification"
   }
 ]
 
-Be exhaustive - capture every single specification point. Include topic numbers/codes if present.`;
+Be exhaustive — every testable learning objective must be captured.`;
 }
 
 function buildGenericPrompt(sectionType: string): string {
@@ -156,6 +203,7 @@ async function callAI(
   base64: string,
   mimeType: string,
   temperature = 0.1,
+  model = "google/gemini-2.5-flash",
 ): Promise<string> {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -164,7 +212,7 @@ async function callAI(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model,
       messages: [
         {
           role: "user",
@@ -197,6 +245,61 @@ function parseJSONObject(raw: string): Record<string, unknown> {
   const match = raw.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("No JSON object found in AI response");
   return JSON.parse(match[0]);
+}
+
+// --- Validation helper ---
+
+interface ValidationResult {
+  valid: boolean;
+  issues: string[];
+  questionCount: number;
+}
+
+function validateExtraction(chunks: Array<Record<string, unknown>>, docType: string): ValidationResult {
+  const issues: string[] = [];
+  const questionCount = chunks.length;
+
+  if (questionCount === 0) {
+    issues.push("No questions were extracted");
+    return { valid: false, issues, questionCount };
+  }
+
+  // Check for suspiciously short question text
+  for (const chunk of chunks) {
+    const text = docType === "qp"
+      ? String(chunk.question_text || "")
+      : String(chunk.mark_scheme || "");
+    const qNum = String(chunk.question_number || "");
+
+    if (text.length < 20 && text.length > 0) {
+      issues.push(`Question ${qNum}: text suspiciously short (${text.length} chars): "${text}"`);
+    }
+    if (!qNum) {
+      issues.push("Found a question with no question number");
+    }
+  }
+
+  // Check sequential numbering (basic check - first character should be roughly sequential)
+  const numbers = chunks.map(c => String(c.question_number || ""));
+  const mainNumbers = numbers.map(n => parseInt(n.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n));
+  if (mainNumbers.length > 1) {
+    let lastMain = mainNumbers[0];
+    for (let i = 1; i < mainNumbers.length; i++) {
+      // Allow same number (sub-parts) or next number, but flag big gaps
+      if (mainNumbers[i] > lastMain + 5) {
+        issues.push(`Possible gap in numbering: jumped from question ~${lastMain} to ~${mainNumbers[i]}`);
+      }
+      if (mainNumbers[i] >= lastMain) {
+        lastMain = mainNumbers[i];
+      }
+    }
+  }
+
+  return {
+    valid: issues.length === 0,
+    issues,
+    questionCount,
+  };
 }
 
 // --- Embedding helper ---
@@ -297,8 +400,9 @@ async function attemptMerge(
       : "Mark scheme not available";
     const totalMarks = (qpChunk.metadata as Record<string, unknown>)?.total_marks ||
       (msChunk?.metadata as Record<string, unknown>)?.total_marks || "unknown";
+    const marksLabel = totalMarks && totalMarks !== "unknown" ? ` [${totalMarks} marks]` : "";
 
-    const combined = `Question ${qNum}: ${qpContent}\n\nMark Scheme: ${msContent}\n\nTotal Marks: ${totalMarks}`;
+    const combined = `Question ${qNum}${marksLabel}: ${qpContent}\n\nMark Scheme: ${msContent}`;
 
     if (msChunk) idsToDelete.push(msChunk.id);
 
@@ -435,13 +539,16 @@ serve(async (req) => {
       await supabase.from("trainer_projects").update({ product_id: productId }).eq("id", project_id);
     }
 
-    // === PAST PAPER FLOW: classify → extract → merge ===
+    // === PAST PAPER FLOW: classify → extract → validate → merge ===
     if (section_type === "past_paper") {
-      // Step 1: Classify the document
+      // Use smarter model for past paper extraction
+      const EXTRACTION_MODEL = "google/gemini-2.5-pro";
+
+      // Step 1: Classify the document (stays on flash — simple task)
       console.log("Step 1: Classifying document...");
       let classification: { doc_type: string; paper_number: number };
       try {
-        const classRaw = await callAI(lovableApiKey, buildClassificationPrompt(), base64, mimeType, 0.05);
+        const classRaw = await callAI(lovableApiKey, buildClassificationPrompt(), base64, mimeType, 0.05, "google/gemini-2.5-flash");
         const parsed = parseJSONObject(classRaw);
         classification = {
           doc_type: String(parsed.doc_type).toLowerCase(),
@@ -466,69 +573,160 @@ serve(async (req) => {
         paper_number: classification.paper_number,
       }).eq("id", upload_id);
 
-      // Step 2: Extract content based on doc_type
-      console.log(`Step 2: Extracting ${classification.doc_type} content...`);
+      // Step 2: Extract content using the PRO model
+      console.log(`Step 2: Extracting ${classification.doc_type} content with ${EXTRACTION_MODEL}...`);
       const extractionPrompt = classification.doc_type === "qp"
         ? buildQPExtractionPrompt(year || "unknown", project.subject || "unknown", project.exam_board || "unknown")
         : buildMSExtractionPrompt(year || "unknown", project.subject || "unknown", project.exam_board || "unknown");
 
       let chunks: Array<Record<string, unknown>>;
-      try {
-        const extractRaw = await callAI(lovableApiKey, extractionPrompt, base64, mimeType);
-        
-        if (classification.doc_type === "qp") {
-          // QP returns structured JSON object — flatten sections[].questions[] into a flat array
-          try {
-            const structured = parseJSONObject(extractRaw);
-            const papers = (structured.papers as any[]) || [structured];
-            const flatQuestions: Array<Record<string, unknown>> = [];
-            for (const paper of papers) {
-              const sections = paper.sections || [{ questions: paper.questions || [] }];
-              for (const section of sections) {
-                const questions = section.questions || [];
-                for (const q of questions) {
-                  flatQuestions.push({
-                    question_number: q.number || q.question_number || "",
-                    question_text: q.question || q.question_text || "",
-                    total_marks: q.marks || q.total_marks || 0,
-                    topic: q.topic || section.name || "",
-                    extract: q.extract || null,
-                    paper_code: paper.paper_code || "",
-                    paper_name: paper.paper || "",
-                  });
+      let extractionAttempt = 0;
+      const MAX_ATTEMPTS = 2;
+
+      while (true) {
+        extractionAttempt++;
+        try {
+          const extractRaw = await callAI(lovableApiKey, extractionPrompt, base64, mimeType, 0.1, EXTRACTION_MODEL);
+          
+          if (classification.doc_type === "qp") {
+            // QP returns structured JSON object — flatten sections[].questions[] into a flat array
+            try {
+              const structured = parseJSONObject(extractRaw);
+              const reportedCount = structured.question_count;
+              const papers = (structured.papers as any[]) || [structured];
+              const flatQuestions: Array<Record<string, unknown>> = [];
+              for (const paper of papers) {
+                const sections = paper.sections || [{ questions: paper.questions || [] }];
+                for (const section of sections) {
+                  const questions = section.questions || [];
+                  for (const q of questions) {
+                    flatQuestions.push({
+                      question_number: q.number || q.question_number || "",
+                      question_text: q.question || q.question_text || "",
+                      total_marks: q.marks || q.total_marks || 0,
+                      topic: q.topic || section.name || "",
+                      extract: q.extract || null,
+                      paper_code: paper.paper_code || "",
+                      paper_name: paper.paper || "",
+                    });
+                  }
                 }
               }
+
+              // Log question count cross-check
+              if (reportedCount) {
+                console.log(`AI reported question_count: ${reportedCount}, actual extracted: ${flatQuestions.length}`);
+                if (Math.abs(Number(reportedCount) - flatQuestions.length) > 2) {
+                  console.warn(`Question count mismatch! Reported ${reportedCount} vs extracted ${flatQuestions.length}`);
+                }
+              }
+
+              chunks = flatQuestions;
+            } catch {
+              // Fallback: try parsing as flat array
+              chunks = parseJSONArray(extractRaw);
             }
-            chunks = flatQuestions;
-          } catch {
-            // Fallback: try parsing as flat array
-            chunks = parseJSONArray(extractRaw);
+          } else {
+            // MS extraction — parse new format
+            try {
+              const structured = parseJSONObject(extractRaw);
+              const marks = (structured.marks as any[]) || [];
+              chunks = marks.map((m: any) => ({
+                question_number: m.question_number || "",
+                mark_scheme: m.mark_scheme || "",
+                total_marks: m.total_marks || 0,
+                topic: m.topic || "",
+              }));
+              const reportedCount = structured.question_count;
+              if (reportedCount) {
+                console.log(`MS AI reported question_count: ${reportedCount}, actual extracted: ${chunks.length}`);
+              }
+            } catch {
+              chunks = parseJSONArray(extractRaw);
+            }
           }
-        } else {
-          chunks = parseJSONArray(extractRaw);
+
+          // Step 2b: Validate extraction
+          const validation = validateExtraction(chunks, classification.doc_type);
+          console.log(`Validation: ${validation.valid ? "PASSED" : "ISSUES FOUND"} — ${validation.questionCount} questions, ${validation.issues.length} issues`);
+
+          if (!validation.valid) {
+            for (const issue of validation.issues) {
+              console.warn(`Validation issue: ${issue}`);
+            }
+          }
+
+          // If validation found issues and this is the first attempt, retry once
+          if (!validation.valid && extractionAttempt < MAX_ATTEMPTS && validation.questionCount > 0) {
+            console.log(`Retrying extraction (attempt ${extractionAttempt + 1}) due to validation issues...`);
+            continue; // retry the while loop
+          }
+
+          break; // extraction succeeded (or second attempt done)
+        } catch (err) {
+          console.error(`Extraction failed (attempt ${extractionAttempt}):`, err);
+          if (String(err).includes("AI_ERROR:429")) {
+            await supabase.from("trainer_uploads").update({ processing_status: "error" }).eq("id", upload_id);
+            return new Response(JSON.stringify({ error: "Rate limited. Please try again in a minute." }), {
+              status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+          if (extractionAttempt >= MAX_ATTEMPTS) {
+            await supabase.from("trainer_uploads").update({ processing_status: "error" }).eq("id", upload_id);
+            return new Response(JSON.stringify({ error: "Failed to extract content" }), {
+              status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+          // Try again
+          continue;
         }
-      } catch (err) {
-        console.error("Extraction failed:", err);
-        if (String(err).includes("AI_ERROR:429")) {
-          await supabase.from("trainer_uploads").update({ processing_status: "error" }).eq("id", upload_id);
-          return new Response(JSON.stringify({ error: "Rate limited. Please try again in a minute." }), {
-            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        await supabase.from("trainer_uploads").update({ processing_status: "error" }).eq("id", upload_id);
-        return new Response(JSON.stringify({ error: "Failed to extract content" }), {
-          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
       }
 
-      // Step 3: Insert individual chunks with upload_id in metadata
+      // Step 3: Sort chunks by question number for consistent ordering
+      // Parse question numbers like "1", "1a", "1(a)", "1(a)(i)", "1(b)(ii)", "01.1", "2.3"
+      function parseQuestionNumber(qn: string): number[] {
+        const parts: number[] = [];
+        // Normalize: remove spaces, lowercase
+        const s = qn.trim().toLowerCase();
+        // Match segments: digits, letters, roman numerals in parens
+        const tokens = s.match(/(\d+)|([a-z])|(\((?:i{1,3}|iv|v|vi{0,3})\))/g) || [];
+        for (const tok of tokens) {
+          if (/^\d+$/.test(tok)) {
+            parts.push(parseInt(tok, 10));
+          } else if (/^[a-z]$/.test(tok)) {
+            parts.push(tok.charCodeAt(0) - 96); // a=1, b=2, ...
+          } else {
+            // Roman numeral in parens like (i), (ii), (iii), (iv), (v), (vi)
+            const roman = tok.replace(/[()]/g, "");
+            const romanMap: Record<string, number> = { i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7 };
+            parts.push(romanMap[roman] || 0);
+          }
+        }
+        return parts;
+      }
+
+      chunks.sort((a, b) => {
+        const aParts = parseQuestionNumber(String(a.question_number || ""));
+        const bParts = parseQuestionNumber(String(b.question_number || ""));
+        const len = Math.max(aParts.length, bParts.length);
+        for (let i = 0; i < len; i++) {
+          const aVal = aParts[i] ?? -1;
+          const bVal = bParts[i] ?? -1;
+          if (aVal !== bVal) return aVal - bVal;
+        }
+        return 0;
+      });
+
+      // Insert individual chunks with upload_id in metadata
       let chunksCreated = 0;
       for (const chunk of chunks) {
         const qNum = chunk.question_number || "";
+        const marks = chunk.total_marks || 0;
+        const marksLabel = marks ? ` [${marks} marks]` : "";
         const extractInfo = chunk.extract ? `\nContext: ${chunk.extract}` : "";
         const content = classification.doc_type === "qp"
-          ? `Question ${qNum}: ${chunk.question_text || ""}${extractInfo}`
-          : `Mark Scheme Q${qNum}: ${chunk.mark_scheme || ""}`;
+          ? `Question ${qNum}${marksLabel}: ${chunk.question_text || ""}${extractInfo}`
+          : `Mark Scheme Q${qNum}${marksLabel}: ${chunk.mark_scheme || ""}`;
 
         const embedding = await generateEmbedding(lovableApiKey, content);
 

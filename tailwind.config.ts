@@ -74,9 +74,10 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
-			fontFamily: {
-				sans: ['Inter', 'sans-serif'],
-			},
+		fontFamily: {
+			sans: ['DM Sans', 'Inter', 'sans-serif'],
+			display: ['DM Sans', 'Inter', 'sans-serif'],
+		},
 			backgroundImage: {
 				'gradient-brand': 'var(--gradient-brand)',
 			},

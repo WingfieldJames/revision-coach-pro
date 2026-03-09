@@ -68,3 +68,12 @@ verify_jwt = false
 
 [functions.erase-training-data]
 verify_jwt = false
+
+[functions.get-analytics]
+verify_jwt = false
+
+[functions.send-feedback-emails]
+verify_jwt = false
+
+[functions.get-feedback]
+verify_jwt = false
