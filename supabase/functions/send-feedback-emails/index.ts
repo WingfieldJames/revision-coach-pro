@@ -130,6 +130,27 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Test mode: send a test email to a specific address
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (body.test_email) {
+      const type = body.type || "free";
+      const feedbackUrl = `${BASE_URL}/feedback?type=${type}`;
+      const html = type === "deluxe" 
+        ? getDeluxeUserEmailHtml(feedbackUrl) 
+        : getFreeUserEmailHtml(feedbackUrl);
+      const subject = type === "deluxe" 
+        ? "How's Deluxe treating you? ⭐" 
+        : "How's your A* AI experience? 📚";
+      
+      const success = await sendEmail(body.test_email, subject, html);
+      return new Response(JSON.stringify({ success, test: true, to: body.test_email }), {
+        status: success ? 200 : 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+  } catch (_) {}
+
   logStep("Starting feedback email job");
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
