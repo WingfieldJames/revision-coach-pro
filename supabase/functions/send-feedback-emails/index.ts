@@ -1,0 +1,298 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+const BASE_URL = "https://astarai.lovable.app";
+const FROM_EMAIL = "A* AI <feedback@astarai.co.uk>"; // Update this after verifying domain in Resend
+
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[FEEDBACK-EMAILS] ${step}${detailsStr}`);
+};
+
+async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
+  if (!RESEND_API_KEY) {
+    logStep("ERROR: RESEND_API_KEY not configured");
+    return false;
+  }
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+
+    if (!res.ok) {
+      const error = await res.text();
+      logStep("ERROR: Failed to send email", { to, error });
+      return false;
+    }
+
+    logStep("Email sent successfully", { to });
+    return true;
+  } catch (error) {
+    logStep("ERROR: Exception sending email", { to, error: error.message });
+    return false;
+  }
+}
+
+function getFreeUserEmailHtml(feedbackUrl: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #1a1a1a; margin-bottom: 10px;">How's your A* AI experience?</h1>
+  </div>
+  
+  <p>Hey there! 👋</p>
+  
+  <p>You've been using A* AI for 2 weeks now, and we'd love to hear how it's going!</p>
+  
+  <p>Your feedback helps us make A* AI even better for students like you. It only takes 30 seconds:</p>
+  
+  <div style="text-align: center; margin: 30px 0;">
+    <a href="${feedbackUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px;">Share Your Feedback</a>
+  </div>
+  
+  <p>Whether it's a quick thought or detailed suggestions, we read every response.</p>
+  
+  <p>Thanks for being part of the A* AI community! 🎓</p>
+  
+  <p style="color: #666; font-size: 14px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+    The A* AI Team<br>
+    <a href="https://astarai.lovable.app" style="color: #667eea;">astarai.lovable.app</a>
+  </p>
+</body>
+</html>
+  `.trim();
+}
+
+function getDeluxeUserEmailHtml(feedbackUrl: string): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #1a1a1a; margin-bottom: 10px;">How's Deluxe treating you? ⭐</h1>
+  </div>
+  
+  <p>Hey there! 👋</p>
+  
+  <p>You've been a Deluxe member for 2 weeks now — thank you for your support!</p>
+  
+  <p>We'd love to hear how the premium features are working for you. Your feedback directly shapes what we build next:</p>
+  
+  <div style="text-align: center; margin: 30px 0;">
+    <a href="${feedbackUrl}" style="display: inline-block; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px;">Share Your Deluxe Feedback</a>
+  </div>
+  
+  <p>Is there a feature you wish we had? Something that could work better? We're all ears!</p>
+  
+  <p>Thanks for helping us build the best A-Level study tool! 🚀</p>
+  
+  <p style="color: #666; font-size: 14px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+    The A* AI Team<br>
+    <a href="https://astarai.lovable.app" style="color: #f5576c;">astarai.lovable.app</a>
+  </p>
+</body>
+</html>
+  `.trim();
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  logStep("Starting feedback email job");
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false }
+  });
+
+  const now = new Date();
+  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+  const fourteenDaysAgoISO = fourteenDaysAgo.toISOString();
+
+  let freeEmailsSent = 0;
+  let deluxeEmailsSent = 0;
+  let errors = 0;
+
+  try {
+    // ============================================
+    // 1. Send emails to free users (14 days after signup)
+    // ============================================
+    logStep("Querying free users who signed up 14+ days ago");
+
+    // Get users from auth.users who signed up 14+ days ago
+    const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+    
+    if (authError) {
+      logStep("ERROR: Failed to list auth users", { error: authError.message });
+    } else {
+      // Filter users who signed up 14+ days ago
+      const eligibleFreeUsers = authUsers.users.filter(user => {
+        const createdAt = new Date(user.created_at);
+        return createdAt <= fourteenDaysAgo;
+      });
+
+      logStep("Found eligible free users", { count: eligibleFreeUsers.length });
+
+      for (const user of eligibleFreeUsers) {
+        // Check if we already sent this email
+        const { data: existingSend } = await supabase
+          .from('feedback_emails_sent')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('email_type', 'free_14d')
+          .maybeSingle();
+
+        if (existingSend) {
+          continue; // Already sent
+        }
+
+        // Send the email
+        const feedbackUrl = `${BASE_URL}/feedback?type=free`;
+        const success = await sendEmail(
+          user.email!,
+          "How's your A* AI experience? 📚",
+          getFreeUserEmailHtml(feedbackUrl)
+        );
+
+        if (success) {
+          // Record the send
+          const { error: insertError } = await supabase
+            .from('feedback_emails_sent')
+            .insert({
+              user_id: user.id,
+              email_type: 'free_14d'
+            });
+
+          if (insertError) {
+            logStep("ERROR: Failed to record email send", { userId: user.id, error: insertError });
+            errors++;
+          } else {
+            freeEmailsSent++;
+          }
+        } else {
+          errors++;
+        }
+      }
+    }
+
+    // ============================================
+    // 2. Send emails to Deluxe users (14 days after upgrade)
+    // ============================================
+    logStep("Querying Deluxe users who upgraded 14+ days ago");
+
+    const { data: deluxeUsers, error: deluxeError } = await supabase
+      .from('user_subscriptions')
+      .select('user_id, created_at')
+      .eq('tier', 'deluxe')
+      .eq('active', true)
+      .lte('created_at', fourteenDaysAgoISO);
+
+    if (deluxeError) {
+      logStep("ERROR: Failed to query deluxe users", { error: deluxeError.message });
+    } else {
+      logStep("Found eligible Deluxe users", { count: deluxeUsers?.length || 0 });
+
+      for (const sub of deluxeUsers || []) {
+        // Check if we already sent this email
+        const { data: existingSend } = await supabase
+          .from('feedback_emails_sent')
+          .select('id')
+          .eq('user_id', sub.user_id)
+          .eq('email_type', 'deluxe_14d')
+          .maybeSingle();
+
+        if (existingSend) {
+          continue; // Already sent
+        }
+
+        // Get user email from auth
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(sub.user_id);
+        
+        if (userError || !userData.user?.email) {
+          logStep("ERROR: Failed to get user email", { userId: sub.user_id });
+          errors++;
+          continue;
+        }
+
+        // Send the email
+        const feedbackUrl = `${BASE_URL}/feedback?type=deluxe`;
+        const success = await sendEmail(
+          userData.user.email,
+          "How's Deluxe treating you? ⭐",
+          getDeluxeUserEmailHtml(feedbackUrl)
+        );
+
+        if (success) {
+          // Record the send
+          const { error: insertError } = await supabase
+            .from('feedback_emails_sent')
+            .insert({
+              user_id: sub.user_id,
+              email_type: 'deluxe_14d'
+            });
+
+          if (insertError) {
+            logStep("ERROR: Failed to record email send", { userId: sub.user_id, error: insertError });
+            errors++;
+          } else {
+            deluxeEmailsSent++;
+          }
+        } else {
+          errors++;
+        }
+      }
+    }
+
+    const summary = {
+      freeEmailsSent,
+      deluxeEmailsSent,
+      totalSent: freeEmailsSent + deluxeEmailsSent,
+      errors
+    };
+
+    logStep("Feedback email job completed", summary);
+
+    return new Response(JSON.stringify({ success: true, ...summary }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+
+  } catch (error) {
+    logStep("ERROR: Unexpected error in feedback email job", { error: error.message });
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
+});
