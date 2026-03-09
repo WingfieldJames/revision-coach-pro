@@ -71,7 +71,7 @@ function getFreeUserEmailHtml(feedbackUrl: string): string {
           <!-- Logo -->
           <tr>
             <td align="center" style="padding: 32px 32px 16px;">
-              <img src="https://astarai.lovable.app/brand-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
+              <img src="https://astarai.lovable.app/email-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
             </td>
           </tr>
           <!-- Stars decoration -->
@@ -141,7 +141,7 @@ function getDeluxeUserEmailHtml(feedbackUrl: string): string {
           <!-- Logo -->
           <tr>
             <td align="center" style="padding: 32px 32px 16px;">
-              <img src="https://astarai.lovable.app/brand-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
+              <img src="https://astarai.lovable.app/email-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
             </td>
           </tr>
           <!-- Stars decoration -->
