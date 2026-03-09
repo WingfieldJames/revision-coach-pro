@@ -73,7 +73,7 @@ export const FeedbackPage: React.FC = () => {
       <Card className="w-full max-w-md border-border shadow-lg">
         <CardContent className="pt-8 pb-8 px-6 flex flex-col items-center text-center gap-6">
           {/* Logo */}
-          <img src="/brand-logo.png" alt="A* AI" className="h-10 w-auto" />
+          <img src={theme === 'dark' ? logoDark : logo} alt="A* AI" className="h-10 w-auto" />
 
           {submitted ? (
             <>
