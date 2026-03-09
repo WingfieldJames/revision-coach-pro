@@ -1,6 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { Instagram, Youtube, Linkedin } from 'lucide-react';
+import { Instagram } from 'lucide-react';
 import { SEOHead } from '@/components/SEOHead';
 import { useTheme } from '@/contexts/ThemeContext';
 import logo from '@/assets/logo.png';
@@ -69,12 +69,6 @@ const NotFound = () => {
             </a>
             <a href="https://www.tiktok.com/@a.star.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
-            </a>
-            <a href="https://www.youtube.com/@a_star_ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-              <Youtube size={24} />
-            </a>
-            <a href="https://www.linkedin.com/company/astar-ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-              <Linkedin size={24} />
             </a>
             <p className="text-sm text-muted-foreground">
               © 2025 A* AI

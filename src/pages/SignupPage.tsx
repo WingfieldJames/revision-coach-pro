@@ -110,9 +110,18 @@ export const SignupPage = () => {
         canonical="https://astarai.co.uk/signup"
       />
       
-      {/* Subtle Background */}
+      {/* Animated Background */}
       <div className="absolute inset-0 bg-[#f9fafb] dark:bg-background">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent dark:from-primary/10" />
+        <CanvasRevealEffect
+          animationSpeed={10}
+          containerClassName="bg-[#f9fafb] dark:bg-background"
+          colors={canvasColors}
+          opacities={[0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1]}
+          dotSize={3}
+          showGradient={false}
+          direction="edges"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f9fafb] via-[#f9fafb]/80 to-transparent dark:from-background dark:via-background/80" />
       </div>
 
       {/* Content Layer */}

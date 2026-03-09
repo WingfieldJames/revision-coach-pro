@@ -107,18 +107,11 @@ serve(async (req) => {
       const productId = project.product_id;
       if (!productId) throw new Error("Project must be deployed before activating on website");
 
-      // Determine pricing based on qualification type
-      const qualType = project.qualification_type || 'A Level';
-      const isGCSE = qualType === 'GCSE';
-      const activateMonthly = isGCSE ? 599 : 699;
-      const activateLifetime = isGCSE ? 2799 : 2499;
-
-      // Set product as active with appropriate pricing
+      // Set product as active with standard pricing
       await supabase.from("products").update({
         active: true,
-        monthly_price: activateMonthly,
-        lifetime_price: activateLifetime,
-        qualification_type: qualType,
+        monthly_price: 699,
+        lifetime_price: 2499,
       }).eq("id", productId);
 
       // Update project status
@@ -161,11 +154,6 @@ serve(async (req) => {
 
     let productId = project.product_id;
 
-    const qualType = project.qualification_type || 'A Level';
-    const isGCSE = qualType === 'GCSE';
-    const defaultMonthly = isGCSE ? 599 : 499;
-    const defaultLifetime = isGCSE ? 2799 : 1499;
-
     if (!productId) {
       // Create the product
       const slug = `${project.exam_board}-${project.subject}`.toLowerCase().replace(/\s+/g, '-');
@@ -176,11 +164,10 @@ serve(async (req) => {
           slug,
           subject: project.subject.toLowerCase(),
           exam_board: project.exam_board,
-          monthly_price: defaultMonthly,
-          lifetime_price: defaultLifetime,
+          monthly_price: 499,
+          lifetime_price: 1499,
           active: false,
           system_prompt_deluxe: project.system_prompt || null,
-          qualification_type: qualType,
         })
         .select("id")
         .single();
@@ -192,7 +179,6 @@ serve(async (req) => {
       await supabase.from("products").update({
         system_prompt_deluxe: project.system_prompt || null,
         active: true,
-        qualification_type: qualType,
       }).eq("id", productId);
     }
 

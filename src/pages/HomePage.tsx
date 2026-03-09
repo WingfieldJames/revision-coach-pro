@@ -6,13 +6,14 @@ import { SEOHead } from "@/components/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ChevronDown, Instagram, Youtube, Linkedin, Calendar, BookOpen, GraduationCap, Search, FileCheck } from "lucide-react";
+import { ChevronDown, Instagram, Calendar, BookOpen, GraduationCap, Search, FileCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeroBackgroundPaths } from "@/components/ui/hero-background-paths";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { MeetTheFounders } from "@/components/MeetTheFounders";
+import { FoundersCarousel } from "@/components/FoundersCarousel";
+import { MobileFoundersSection } from "@/components/MobileFoundersSection";
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from "@/components/ui/testimonials-columns";
 import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import { SubjectPlanSelector } from "@/components/SubjectPlanSelector";
@@ -83,7 +84,7 @@ const revisionFeatures = [
 ];
 
 /** Shared heading class matching FoundersCarousel / hero style */
-const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight";
+const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2]";
 
 export const HomePage = () => {
   const { user, loading } = useAuth();
@@ -120,118 +121,94 @@ export const HomePage = () => {
   return (
     <div className="min-h-screen bg-background font-sans">
       <SEOHead canonical="https://astarai.co.uk/" />
-      <Header showNavLinks showStartStudyingButton />
+      <Header showNavLinks />
+
+      {/* Mobile Social Proof */}
+      <div className="md:hidden text-center mt-2 mb-0 px-4">
+        <span
+          className={`text-foreground text-xs font-medium whitespace-nowrap ${theme === "light" ? "inline-flex items-center px-4 py-1.5 rounded-full bg-foreground/[0.04] border border-foreground/10" : ""}`}
+        >
+          ⭐ Loved by 2k+ students with a 4.9 star rating
+        </span>
+      </div>
 
       {/* Hero Section */}
       <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4">
         <HeroBackgroundPaths>
-          <div className="px-6 sm:px-8 py-6 sm:py-16 md:py-24 md:max-xl:py-6 max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-              {/* Left side - Text content */}
-              <div className="flex-1 text-center md:text-left">
-                {/* Social Proof Pill */}
-                <div
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm"
-                >
-                  <span className="text-base">⭐</span>
-                  <span className="text-foreground text-xs sm:text-sm font-medium">
-                    Loved by 2k+ students with a 4.9 star rating
-                  </span>
-                </div>
-
-                {/* Meet A* AI heading */}
-                <div className="flex items-center justify-center md:justify-start gap-0 mb-1">
-                  <span className={`text-foreground font-bold text-4xl sm:text-5xl`}>Meet</span>
-                  <img src={currentLogo} alt="A* AI" className={`${theme === "dark" ? "h-28" : "h-20"} -mx-2`} />
-                </div>
-
-                {/* Main Headline */}
-                <h1 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] font-bold mb-4 leading-[1.15] tracking-tight">
-                  <div className="text-foreground">The AI that actually</div>
-                  <div className="whitespace-nowrap">
-                    <span className="text-foreground">understands </span>
-                    <span className="text-primary">A-Level </span>
-                    <span
-                       className="relative inline-block overflow-hidden text-left text-primary"
-                       style={{ width: "5.5em", height: "1.15em", verticalAlign: "bottom" }}
-                     >
-                      <AnimatePresence mode="wait">
-                        <motion.span
-                          key={subjects[currentSubjectIndex]}
-                          className="absolute left-0 bottom-0"
-                          initial={{ y: "100%", opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          exit={{ y: "-100%", opacity: 0 }}
-                          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                          {subjects[currentSubjectIndex]}
-                        </motion.span>
-                      </AnimatePresence>
-                    </span>
-                  </div>
-                </h1>
-
-                {/* Subheadline */}
-                <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed mx-auto md:mx-0">
-                  Built for your exam board, trained by the highest achieving A* students
-                </p>
-
-                {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row items-center md:items-start gap-4">
-                  <button
-                    onClick={handlePickSubject}
-                    className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
-                  >
-                    Pick Your Subject →
-                  </button>
-                  <button
-                    onClick={handleSeeHowItWorks}
-                    className="px-8 py-3.5 rounded-full text-foreground font-semibold text-base sm:text-lg border border-foreground/30 bg-transparent transition-all duration-300 hover:bg-primary hover:border-primary hover:text-primary-foreground"
-                  >
-                    See How It Works
-                  </button>
-                </div>
-
-                <p className="text-xs sm:text-sm text-muted-foreground mt-4">Get started free • No card needed</p>
-              </div>
-
-              {/* Right side - Device mockups */}
-              <div className="hidden md:flex flex-1 justify-center items-end relative min-h-[400px]">
-                <motion.div
-                  className="relative z-10"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                >
-                  <img
-                    src="/lovable-uploads/hero-mobile-phone-transparent.png"
-                    alt="A* AI on mobile"
-                    className="w-[260px] lg:w-[300px] drop-shadow-2xl"
-                  />
-                </motion.div>
-                <motion.div
-                  className="absolute right-0 lg:-right-6 top-4 z-0"
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                >
-                  <div className="w-[260px] lg:w-[300px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated bg-card">
-                    <img
-                      src="/lovable-uploads/hero-ipad-demo.jpg"
-                      alt="A* AI on desktop"
-                      className="w-full h-auto"
-                    />
-                  </div>
-                </motion.div>
-              </div>
+          <div className="px-6 sm:px-8 py-6 sm:py-24 md:py-32 md:max-xl:py-6 text-center max-w-5xl mx-auto">
+            {/* Social Proof Pill - Desktop only */}
+            <div
+              className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-foreground/10 bg-foreground/5 backdrop-blur-sm"
+              style={{ boxShadow: "var(--shadow-glow)" }}
+            >
+              <span className="text-base">⭐</span>
+              <span className="text-foreground text-sm font-medium">
+                Loved by 2k+ students with a 4.9 star rating
+              </span>
             </div>
+
+            {/* Meet A* AI - Mobile only */}
+            <div className="flex md:hidden items-center justify-center gap-0 mb-2 -mt-2">
+              <span className={`text-foreground font-bold ${theme === "dark" ? "text-4xl" : "text-5xl"}`}>Meet</span>
+              <img src={currentLogo} alt="A* AI" className={`${theme === "dark" ? "h-28" : "h-20"} -mx-2`} />
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-[1.25rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-6 leading-[1.2]">
+              <div className="text-foreground whitespace-nowrap">The AI that actually</div>
+              <div className="whitespace-nowrap">
+                <span className="text-foreground">understands </span>
+                <span className="text-gradient-brand">A-Level </span>
+                <span
+                  className="relative inline-block overflow-hidden text-left"
+                  style={{ width: "7.5em", height: "1.15em", verticalAlign: "bottom" }}
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={subjects[currentSubjectIndex]}
+                      className="absolute left-0 bottom-0 text-gradient-brand"
+                      initial={{ y: "100%", opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: "-100%", opacity: 0 }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {subjects[currentSubjectIndex]}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
+              </div>
+            </h1>
+
+            {/* Subheadline - Hidden on mobile */}
+            <p className="hidden md:block text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
+              Built for your exam board, trained by the highest achieving A* students
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={handlePickSubject}
+                className="px-8 py-3.5 rounded-full text-white font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense"
+                style={{ background: "var(--gradient-brand)" }}
+              >
+                Pick Your Subject →
+              </button>
+              <button
+                onClick={handleSeeHowItWorks}
+                className="px-8 py-3.5 rounded-full text-foreground font-semibold text-base sm:text-lg border border-foreground/30 bg-transparent transition-all duration-300 hover:bg-primary hover:border-primary hover:text-primary-foreground"
+              >
+                See How It Works
+              </button>
+            </div>
+
+            <p className="text-xs sm:text-sm text-muted-foreground mt-4">Get started free • No card needed</p>
           </div>
         </HeroBackgroundPaths>
       </section>
 
-      {/* Meet the Founders */}
-      <div data-section="founders">
-        <MeetTheFounders />
+      {/* Trained by A* Students - Desktop */}
+      <div className="hidden md:block" data-section="founders">
+        <FoundersCarousel />
       </div>
 
       {/* See A* AI in action - Demo Video */}
@@ -257,7 +234,7 @@ export const HomePage = () => {
         </ScrollReveal>
       </section>
 
-      
+      <MobileFoundersSection />
 
       {/* Testimonials Section - Desktop */}
       <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden bg-background">
@@ -265,7 +242,7 @@ export const HomePage = () => {
           <ScrollReveal className="text-center mb-12">
             <h2 className={sectionHeadingClass}>
               <span className="text-foreground">What our </span>
-              <span className="text-primary">users</span>
+              <span className="text-gradient-brand">users</span>
               <span className="text-foreground"> say</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mt-4">
@@ -286,7 +263,7 @@ export const HomePage = () => {
           <div className="text-center mb-6">
             <h2 className="text-[1.25rem] font-bold leading-[1.2]">
               <span className="text-foreground">What our </span>
-              <span className="text-primary">users</span>
+              <span className="text-gradient-brand">users</span>
               <span className="text-foreground"> say</span>
             </h2>
             <p className="text-muted-foreground text-xs mt-2">Join 2000+ students and teachers achieving real results</p>
@@ -314,8 +291,8 @@ export const HomePage = () => {
       <section data-section="how-it-works" className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
         <ScrollReveal className="relative z-10 text-center mb-8 md:mb-12">
           <h2 className={`${sectionHeadingClass} text-[1.2rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] whitespace-nowrap md:whitespace-normal`}>
-             <span className="text-foreground">Everything you need to get an </span>
-             <span className="text-primary">A*</span>
+            <span className="text-foreground">Everything you need to get an </span>
+            <span className="text-gradient-brand">A*</span>
           </h2>
           <p className="text-muted-foreground mt-3 text-sm sm:text-base md:text-lg whitespace-nowrap md:whitespace-normal">Tailored to your exam board. Built to get you the grade.</p>
         </ScrollReveal>
@@ -386,8 +363,8 @@ export const HomePage = () => {
           <div className="max-w-4xl mx-auto relative z-10 px-2 md:px-0">
             <ScrollReveal>
               <h2 className={`${sectionHeadingClass} text-center mb-6`}>
-               <span className="text-foreground">Frequently asked </span>
-               <span className="text-primary">questions</span>
+                <span className="text-foreground">Frequently asked </span>
+                <span className="text-gradient-brand">questions</span>
               </h2>
               <p className="text-center text-muted-foreground mb-8 text-lg">
                 Everything you need to know about A* AI and revision.
@@ -487,8 +464,8 @@ export const HomePage = () => {
       <section data-section="pick-subject-bottom" className="py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-8 md:mb-12">
           <h2 className={sectionHeadingClass}>
-             <span className="text-foreground">Choose your </span>
-             <span className="text-primary">subject</span>
+            <span className="text-foreground">Choose your </span>
+            <span className="text-gradient-brand">subject</span>
           </h2>
         </ScrollReveal>
         <SubjectPlanSelector />
@@ -498,29 +475,60 @@ export const HomePage = () => {
       <footer className="py-16 px-8 text-center border-t border-border/30">
 
         <ScrollReveal className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <img src={currentLogo} alt="A* AI" className="h-12 sm:h-14" />
+            <a
+              href="https://www.instagram.com/a.star.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Instagram size={20} />
+            </a>
+            <a
+              href="https://www.tiktok.com/@a.star.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+              </svg>
+            </a>
+          </div>
 
           <p className="text-muted-foreground mb-6">
             A* AI (A Star AI) - Your AI-powered A-Level revision coach for Economics, CS, Physics & more | astarai
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-6 text-muted-foreground">
-            <Link to="/compare" className="text-primary hover:text-primary/80 transition-opacity">
+            <Link to="/compare" className="text-gradient-brand hover:opacity-80 transition-opacity">
               Plans
             </Link>
             <span>•</span>
-            <Link to="/#faq" className="text-primary hover:text-primary/80 transition-opacity">
+            <Link to="/#faq" className="text-gradient-brand hover:opacity-80 transition-opacity">
               FAQs
             </Link>
             <span>•</span>
             <Link
               to="/login"
-              className="text-primary hover:text-primary/80 transition-opacity"
+              className="text-gradient-brand hover:opacity-80 transition-opacity"
               onClick={() => window.scrollTo(0, 0)}
             >
               Sign in
             </Link>
             <span>•</span>
-            <Link to="/contact" className="text-primary hover:text-primary/80 transition-opacity">
+            <Link to="/contact" className="text-gradient-brand hover:opacity-80 transition-opacity">
               Contact
             </Link>
           </div>
@@ -542,23 +550,19 @@ export const HomePage = () => {
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
-            </a>
-            <a
-              href="https://www.youtube.com/@a_star_ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Youtube size={24} />
-            </a>
-            <a
-              href="https://www.linkedin.com/company/astar-ai/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Linkedin size={24} />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+              </svg>
             </a>
             <p className="text-sm text-muted-foreground">© 2025 A* AI</p>
           </div>

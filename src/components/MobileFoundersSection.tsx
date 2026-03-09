@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react';
 import { Award, GraduationCap, BookOpen, Trophy } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import jamesFounder from '@/assets/james-founder.png';
 import tudorFounder from '@/assets/tudor-founder.jpg';
-import { supabase } from '@/integrations/supabase/client';
 
 interface Founder {
   id: string;
@@ -13,18 +11,7 @@ interface Founder {
   achievements: Array<{ icon: typeof Award; text: string }>;
 }
 
-const staticFounders: Founder[] = [
-  {
-    id: 'james',
-    name: 'James',
-    status: 'LSE Student',
-    image: jamesFounder,
-    achievements: [
-      { icon: Award, text: "A* Economics" },
-      { icon: GraduationCap, text: "Straight 9s" },
-      { icon: BookOpen, text: "A*A*A" },
-    ]
-  },
+const founders: Founder[] = [
   {
     id: 'tudor',
     name: 'Tudor',
@@ -36,42 +23,27 @@ const staticFounders: Founder[] = [
       { icon: GraduationCap, text: "Straight 9s" },
     ]
   },
+  {
+    id: 'james',
+    name: 'James',
+    status: 'LSE Student',
+    image: jamesFounder,
+    achievements: [
+      { icon: Award, text: "A* Economics" },
+      { icon: GraduationCap, text: "Straight 9s" },
+      { icon: BookOpen, text: "A*A*A" },
+    ]
+  },
 ];
 
 export function MobileFoundersSection() {
   const { theme } = useTheme();
   const isLight = theme === 'light';
-  const [founders, setFounders] = useState<Founder[]>(staticFounders);
-
-  useEffect(() => {
-    const loadYanImage = async () => {
-      const yanStoragePath = '2f504dd8-a94a-492b-94a4-3e46f8264dd8/trainer_image_1772189725122_tudor profile pic .jpg';
-      const { data } = await supabase.storage
-        .from('trainer-uploads')
-        .createSignedUrl(yanStoragePath, 7200);
-      
-      if (!data?.signedUrl) return;
-
-      const yan: Founder = {
-        id: 'yan',
-        name: 'Yan',
-        status: 'Warwick Student',
-        image: data.signedUrl,
-        achievements: [
-          { icon: Award, text: "5 A*s" },
-          { icon: Trophy, text: "98% in Maths" },
-          { icon: GraduationCap, text: "Warwick" },
-        ]
-      };
-
-      setFounders([yan, ...staticFounders]);
-    };
-    loadYanImage();
-  }, []);
 
   return (
     <section className={`pt-4 pb-12 px-4 md:hidden bg-transparent`}>
       <div className="max-w-md mx-auto">
+        {/* Header: no animation in either mode - loads instantly */}
         <div className="text-center mb-6">
           <h2 className="text-[1.25rem] font-bold leading-[1.2] mb-2">
             <span className="text-foreground">Trained by real </span>
@@ -87,6 +59,7 @@ export function MobileFoundersSection() {
             <div key={founder.id} className={`relative rounded-2xl p-4 overflow-hidden ${isLight ? 'bg-white border border-border/30 shadow-sm' : 'bg-card border border-primary/30 glow-brand'}`}>
               {isLight && <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-2xl pointer-events-none" />}
               <div className="relative z-10 flex items-center gap-4">
+                {/* Photo */}
                 <div className="flex-shrink-0">
                   <div className={`w-16 h-16 rounded-xl overflow-hidden bg-muted ${isLight ? 'border-2 border-border/40' : 'border-2 border-primary/20'}`}>
                     <img 
@@ -96,11 +69,15 @@ export function MobileFoundersSection() {
                     />
                   </div>
                 </div>
+
+                {/* Name, status & badges */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="font-bold text-foreground">{founder.name}</h3>
                     <span className={`text-xs font-medium ${isLight ? 'text-muted-foreground' : 'text-primary'}`}>{founder.status}</span>
                   </div>
+
+                  {/* Achievement badges */}
                   <div className="flex flex-wrap gap-1.5">
                     {founder.achievements.map((achievement, i) => (
                       <div

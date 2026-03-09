@@ -147,22 +147,27 @@ export const ProgressPage = () => {
         <motion.h1
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-2xl sm:text-3xl font-bold text-center mb-4"
+          className="text-2xl sm:text-3xl font-bold text-center mb-8"
         >
-          <span className="text-foreground">Your </span>
-          <span className="text-gradient-brand">Personalised</span>
-          <span className="text-foreground"> Revision Timetable</span>
+          <span className="text-foreground">Your road to an </span>
+          <span className="text-gradient-brand">A*</span>
         </motion.h1>
 
-        {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+        {/* Streak */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="text-center text-muted-foreground max-w-2xl mx-auto mb-10"
+          className="flex items-center justify-center gap-3 mb-10"
         >
-          Tell us your subjects, predicted grades and how important each one is to you. We'll build a schedule around your availability - weighted to where you need it most.
-        </motion.p>
+          <div
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-border shadow-sm bg-[#f9fafb] dark:bg-card"
+          >
+            <Flame className="h-6 w-6 text-orange-500" />
+            <span className="text-3xl font-bold text-foreground">{streak}</span>
+            <span className="text-muted-foreground text-sm">day streak</span>
+          </div>
+        </motion.div>
 
         <RevisionTimetable />
       </div>

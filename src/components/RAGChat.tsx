@@ -16,11 +16,8 @@ import 'katex/dist/katex.min.css';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProductTier } from '@/hooks/useProductTier';
 import { diagrams } from '@/data/diagrams';
 import { csDiagrams } from '@/data/csDiagrams';
-import { useChatHistory } from '@/hooks/useChatHistory';
-import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -117,7 +114,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ dataUrl: string; file: File } | null>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
-  const { tier: effectiveTier } = useProductTier(productId);
+  const [effectiveTier, setEffectiveTier] = useState<'free' | 'deluxe'>('free');
   const [limitReached, setLimitReached] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -129,79 +126,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const animationRef = useRef<number | null>(null);
   const fullContentRef = useRef('');
 
-  // Chat history persistence
-  const chatHistoryCtx = useChatHistoryContext();
-  const { createConversation, saveMessage, loadMessages, fetchConversations } = useChatHistory(productId);
-  const conversationIdRef = useRef<string | null>(null);
-  const loadMessagesRef = useRef(loadMessages);
-  loadMessagesRef.current = loadMessages;
-
-  // Register handlers for sidebar communication (run once)
-  useEffect(() => {
-    if (!chatHistoryCtx) return;
-    chatHistoryCtx.registerHandlers({
-      onNewChat: () => {
-        setMessages([]);
-        conversationIdRef.current = null;
-        chatHistoryCtx.setCurrentConversationId(null);
-        setLimitReached(false);
-      },
-      onLoadConversation: async (id: string) => {
-        const msgs = await loadMessagesRef.current(id);
-        setMessages(msgs.map(m => ({
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-          imageUrl: m.image_url || undefined,
-        })));
-        conversationIdRef.current = id;
-        chatHistoryCtx.setCurrentConversationId(id);
-        setLimitReached(false);
-      },
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatHistoryCtx]);
-
-  // Generate a smart title from user message
-  const generateTitle = (userMsg: string, assistantMsg?: string): string => {
-    // Clean up the message
-    const cleaned = userMsg.replace(/\n/g, ' ').trim();
-    if (cleaned.length <= 50) return cleaned || 'New Chat';
-    // Cut at word boundary around 50 chars
-    const cut = cleaned.slice(0, 60);
-    const lastSpace = cut.lastIndexOf(' ');
-    return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut) + '...';
-  };
-
-  const firstUserMsgRef = useRef<string | null>(null);
-
-  // Helper to persist a message
-  const persistMessage = useCallback(async (role: 'user' | 'assistant', content: string, imageUrl?: string) => {
-    if (!user) return;
-    // Create conversation on first user message
-    if (!conversationIdRef.current && role === 'user') {
-      firstUserMsgRef.current = content;
-      const title = generateTitle(content);
-      const newId = await createConversation(title);
-      if (newId) {
-        conversationIdRef.current = newId;
-        chatHistoryCtx?.setCurrentConversationId(newId);
-      }
-    }
-    if (conversationIdRef.current) {
-      await saveMessage(conversationIdRef.current, role, content, imageUrl);
-      // After first assistant response, update title with AI-aware summary
-      if (role === 'assistant' && firstUserMsgRef.current) {
-        const betterTitle = generateTitle(firstUserMsgRef.current);
-        firstUserMsgRef.current = null; // Only do this once
-        try {
-          await supabase.from('chat_conversations')
-            .update({ title: betterTitle })
-            .eq('id', conversationIdRef.current);
-        } catch {}
-      }
-      chatHistoryCtx?.triggerRefresh();
-    }
-  }, [user, createConversation, saveMessage, chatHistoryCtx]);
   // Fetch user preferences for this product
   useEffect(() => {
     const fetchPreferences = async () => {
@@ -233,7 +157,35 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     fetchPreferences();
   }, [user, productId]);
 
-  // Tier is now provided by useProductTier hook (handles grace periods, payment_type, etc.)
+  // Auto-detect subscription tier
+  useEffect(() => {
+    const detectTier = async () => {
+      if (!user) {
+        setEffectiveTier('free');
+        return;
+      }
+      try {
+        const { data: sub } = await supabase
+          .from('user_subscriptions')
+          .select('tier, subscription_end')
+          .eq('user_id', user.id)
+          .eq('product_id', productId)
+          .eq('active', true)
+          .maybeSingle();
+        
+        if (sub?.tier === 'deluxe') {
+          if (!sub.subscription_end || new Date(sub.subscription_end) > new Date()) {
+            setEffectiveTier('deluxe');
+            return;
+          }
+        }
+        setEffectiveTier('free');
+      } catch {
+        setEffectiveTier('free');
+      }
+    };
+    detectTier();
+  }, [user, productId]);
 
   // Auto-scroll only for user messages (not during AI response)
   useEffect(() => {
@@ -307,8 +259,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   }, [isAnimating, animateNextWord]);
   const handleSendWithMessage = async (messageText: string, imageDataUrl?: string) => {
     if (!messageText.trim() && !imageDataUrl || isLoading) return;
-    // Persist user message
-    persistMessage('user', messageText, imageDataUrl);
 
     // Reset animation state
     bufferRef.current = '';
@@ -422,10 +372,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       if (bufferRef.current.length > 0 && !animationRef.current) {
         setIsAnimating(true);
         animateNextWord();
-      }
-      // Persist assistant response
-      if (fullContentRef.current) {
-        persistMessage('assistant', fullContentRef.current);
       }
     } catch (error) {
       console.error('Chat error:', error);

@@ -17,7 +17,7 @@ interface Mistake {
   completed: boolean;
 }
 
-const INTERVALS = [4, 16, 35, 70];
+const INTERVALS = [4, 16, 35, 70]; // days
 
 interface MyMistakesToolProps {
   productId?: string;
@@ -32,10 +32,7 @@ export const MyMistakesTool: React.FC<MyMistakesToolProps> = ({ productId, onDue
   const [questionImage, setQuestionImage] = useState<string | null>(null);
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
-  const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const isDue = (m: Mistake) => !m.completed && new Date(m.next_review_at) <= new Date();
 
   const loadMistakes = useCallback(async () => {
     if (!user || !productId) return;
@@ -56,10 +53,6 @@ export const MyMistakesTool: React.FC<MyMistakesToolProps> = ({ productId, onDue
 
   useEffect(() => { loadMistakes(); }, [loadMistakes]);
 
-  // Auto-switch to due mistakes view when there are due items
-  const dueMistakes = mistakes.filter(isDue);
-  const nonDueMistakes = mistakes.filter(m => !isDue(m));
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -73,19 +66,31 @@ export const MyMistakesTool: React.FC<MyMistakesToolProps> = ({ productId, onDue
   };
 
   const handleSave = async () => {
-    if (!user || !productId) { toast.error('Please sign in to save mistakes'); return; }
-    if (!questionText.trim() && !questionImage) { toast.error('Add a question (text or image)'); return; }
+    if (!user || !productId) {
+      toast.error('Please sign in to save mistakes');
+      return;
+    }
+    if (!questionText.trim() && !questionImage) {
+      toast.error('Add a question (text or image)');
+      return;
+    }
     setSaving(true);
     const { error } = await supabase.from('user_mistakes' as any).insert({
-      user_id: user.id, product_id: productId,
+      user_id: user.id,
+      product_id: productId,
       question_text: questionText.trim() || null,
       question_image_url: questionImage || null,
       note: note.trim() || null,
     } as any);
     setSaving(false);
-    if (error) { toast.error('Failed to save mistake'); return; }
+    if (error) {
+      toast.error('Failed to save mistake');
+      return;
+    }
     toast.success('Mistake saved!');
-    setQuestionText(''); setQuestionImage(null); setNote('');
+    setQuestionText('');
+    setQuestionImage(null);
+    setNote('');
     loadMistakes();
   };
 
@@ -95,9 +100,15 @@ export const MyMistakesTool: React.FC<MyMistakesToolProps> = ({ productId, onDue
     const nextInterval = isCompleted ? 0 : INTERVALS[nextCount];
     const nextReview = new Date();
     nextReview.setDate(nextReview.getDate() + nextInterval);
-    await supabase.from('user_mistakes' as any).update({
-      review_count: nextCount, completed: isCompleted, next_review_at: nextReview.toISOString(),
-    } as any).eq('id', mistake.id);
+
+    await supabase
+      .from('user_mistakes' as any)
+      .update({
+        review_count: nextCount,
+        completed: isCompleted,
+        next_review_at: nextReview.toISOString(),
+      } as any)
+      .eq('id', mistake.id);
     loadMistakes();
     toast.success(isCompleted ? 'Completed! Well done 🎉' : `Next review in ${nextInterval} days`);
   };
@@ -107,6 +118,8 @@ export const MyMistakesTool: React.FC<MyMistakesToolProps> = ({ productId, onDue
     loadMistakes();
   };
 
+  const isDue = (m: Mistake) => !m.completed && new Date(m.next_review_at) <= new Date();
+
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     const now = new Date();
@@ -115,38 +128,6 @@ export const MyMistakesTool: React.FC<MyMistakesToolProps> = ({ productId, onDue
     if (diffDays === 1) return 'Due tomorrow';
     return `Due in ${diffDays} days`;
   };
-
-  const MistakeCard = ({ m }: { m: Mistake }) => (
-    <div className={`p-3 rounded-lg border ${isDue(m) ? 'border-destructive/50 bg-destructive/5' : m.completed ? 'border-border bg-muted/50 opacity-60' : 'border-border bg-background'}`}>
-      {m.question_image_url && (
-        <img
-          src={m.question_image_url}
-          alt="Question"
-          className="max-h-20 rounded mb-2 border border-border cursor-pointer hover:opacity-80 transition-opacity"
-          onClick={() => setExpandedImage(m.question_image_url)}
-        />
-      )}
-      {m.question_text && <p className="text-sm text-foreground line-clamp-2 mb-1">{m.question_text}</p>}
-      {m.note && <p className="text-xs text-muted-foreground italic mb-2">📝 {m.note}</p>}
-      <div className="flex items-center justify-between">
-        <span className={`text-xs font-medium ${isDue(m) ? 'text-destructive' : m.completed ? 'text-green-600' : 'text-muted-foreground'}`}>
-          {m.completed ? '✅ Completed' : (
-            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{formatDate(m.next_review_at)}</span>
-          )}
-        </span>
-        <div className="flex gap-1">
-          {!m.completed && (
-            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleReview(m)}>
-              <Check className="h-3 w-3 mr-1" />Reviewed
-            </Button>
-          )}
-          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => handleDelete(m.id)}>
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-3">
@@ -160,79 +141,111 @@ export const MyMistakesTool: React.FC<MyMistakesToolProps> = ({ productId, onDue
         </div>
       </div>
 
-      {/* Due mistakes banner — shown at the top before tabs */}
-      {dueMistakes.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-destructive/10 border border-destructive/30">
-            <Clock className="h-4 w-4 text-destructive shrink-0" />
-            <span className="text-sm font-medium text-destructive">
-              {dueMistakes.length} mistake{dueMistakes.length > 1 ? 's' : ''} due for review
-            </span>
-          </div>
-          <div className="space-y-2 max-h-[30vh] overflow-y-auto">
-            {dueMistakes.map(m => <MistakeCard key={m.id} m={m} />)}
-          </div>
-          <div className="border-t border-border" />
-        </div>
-      )}
-
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-muted rounded-lg">
-        <button onClick={() => setTab('add')} className={`flex-1 text-sm py-1.5 px-3 rounded-md transition-colors ${tab === 'add' ? 'bg-background shadow-sm font-medium text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+        <button
+          onClick={() => setTab('add')}
+          className={`flex-1 text-sm py-1.5 px-3 rounded-md transition-colors ${tab === 'add' ? 'bg-background shadow-sm font-medium text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+        >
           <Plus className="inline h-3.5 w-3.5 mr-1" />Add
         </button>
-        <button onClick={() => setTab('view')} className={`flex-1 text-sm py-1.5 px-3 rounded-md transition-colors ${tab === 'view' ? 'bg-background shadow-sm font-medium text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+        <button
+          onClick={() => setTab('view')}
+          className={`flex-1 text-sm py-1.5 px-3 rounded-md transition-colors ${tab === 'view' ? 'bg-background shadow-sm font-medium text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+        >
           View All ({mistakes.length})
         </button>
       </div>
 
       {tab === 'add' ? (
         <div className="space-y-3">
+          {/* Image upload */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Question (image)</label>
             {questionImage ? (
               <div className="relative inline-block">
-                <img src={questionImage} alt="Question" className="max-h-32 rounded-lg border border-border cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setExpandedImage(questionImage)} />
-                <button onClick={() => setQuestionImage(null)} className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full"><X className="h-3 w-3" /></button>
+                <img src={questionImage} alt="Question" className="max-h-32 rounded-lg border border-border" />
+                <button onClick={() => setQuestionImage(null)} className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full">
+                  <X className="h-3 w-3" />
+                </button>
               </div>
             ) : (
-              <button onClick={() => fileInputRef.current?.click()} className="w-full py-4 border-2 border-dashed border-border rounded-lg text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors flex items-center justify-center gap-2 text-sm">
-                <ImagePlus className="h-4 w-4" />Upload question image
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full py-4 border-2 border-dashed border-border rounded-lg text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors flex items-center justify-center gap-2 text-sm"
+              >
+                <ImagePlus className="h-4 w-4" />
+                Upload question image
               </button>
             )}
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
           </div>
+
+          {/* Text input */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Question (text)</label>
-            <Textarea value={questionText} onChange={e => setQuestionText(e.target.value)} placeholder="Type the question here..." className="min-h-[60px] text-sm" />
+            <Textarea
+              value={questionText}
+              onChange={e => setQuestionText(e.target.value)}
+              placeholder="Type the question here..."
+              className="min-h-[60px] text-sm"
+            />
           </div>
+
+          {/* Note */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Note – what did you get wrong?</label>
-            <Textarea value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. Forgot to use the chain rule..." className="min-h-[50px] text-sm" />
+            <Textarea
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="e.g. Forgot to use the chain rule..."
+              className="min-h-[50px] text-sm"
+            />
           </div>
+
           <Button onClick={handleSave} disabled={saving || (!questionText.trim() && !questionImage)} className="w-full" variant="brand">
             {saving ? 'Saving...' : 'Save Mistake'}
           </Button>
         </div>
       ) : (
         <div className="space-y-2 max-h-[50vh] overflow-y-auto">
-          {nonDueMistakes.length === 0 && dueMistakes.length === 0 ? (
+          {mistakes.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">No mistakes logged yet. Start by adding one!</p>
-          ) : nonDueMistakes.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">All other mistakes are up to date!</p>
           ) : (
-            nonDueMistakes.map(m => <MistakeCard key={m.id} m={m} />)
+            mistakes.map(m => (
+              <div key={m.id} className={`p-3 rounded-lg border ${isDue(m) ? 'border-destructive/50 bg-destructive/5' : m.completed ? 'border-border bg-muted/50 opacity-60' : 'border-border bg-background'}`}>
+                {m.question_image_url && (
+                  <img src={m.question_image_url} alt="Question" className="max-h-20 rounded mb-2 border border-border" />
+                )}
+                {m.question_text && (
+                  <p className="text-sm text-foreground line-clamp-2 mb-1">{m.question_text}</p>
+                )}
+                {m.note && (
+                  <p className="text-xs text-muted-foreground italic mb-2">📝 {m.note}</p>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-medium ${isDue(m) ? 'text-destructive' : m.completed ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {m.completed ? '✅ Completed' : (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {formatDate(m.next_review_at)}
+                      </span>
+                    )}
+                  </span>
+                  <div className="flex gap-1">
+                    {!m.completed && (
+                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleReview(m)}>
+                        <Check className="h-3 w-3 mr-1" />Reviewed
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => handleDelete(m.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
-        </div>
-      )}
-
-      {/* Fullscreen image overlay */}
-      {expandedImage && (
-        <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4 cursor-pointer" onClick={() => setExpandedImage(null)}>
-          <button className="absolute top-4 right-4 p-2 bg-background/80 rounded-full text-foreground hover:bg-background transition-colors" onClick={() => setExpandedImage(null)}>
-            <X className="h-5 w-5" />
-          </button>
-          <img src={expandedImage} alt="Question expanded" className="max-w-full max-h-[90vh] rounded-lg object-contain" onClick={e => e.stopPropagation()} />
         </div>
       )}
     </div>

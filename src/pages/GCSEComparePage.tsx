@@ -31,8 +31,10 @@ export const GCSEComparePage = () => {
   const currentLogo = theme === 'dark' ? logo : logoDark;
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const shouldCheckout = searchParams.get('checkout') === 'true';
   const isMobile = useIsMobile();
 
+  // Dynamic GCSE products from database (trainer_projects with qualification_type = 'GCSE')
   const [gcseProducts, setGcseProducts] = useState<DynamicProduct[]>([]);
   const [subject, setSubject] = useState<string>('');
   const [examBoard, setExamBoard] = useState<string>('');
@@ -41,21 +43,36 @@ export const GCSEComparePage = () => {
   const [subscriptionPaymentType, setSubscriptionPaymentType] = useState<string | null>(null);
   const [checkingAccess, setCheckingAccess] = useState(false);
 
-  // Load GCSE products directly from products table
+  // Load GCSE products from deployed trainer_projects where qualification_type = 'GCSE'
   useEffect(() => {
     const loadGCSEProducts = async () => {
-      const { data } = await supabase
-        .from('products')
-        .select('id, slug, subject, exam_board, name, qualification_type')
-        .eq('active', true);
+      // Get GCSE products from trainer_projects that have qualification_type = 'GCSE'
+      const { data: projects } = await supabase
+        .from('trainer_projects')
+        .select('product_id, subject, exam_board')
+        .eq('status', 'deployed') as any;
+      
+      // Filter for GCSE qualification_type client-side until column is added
+      const gcseProjects = (projects || []).filter((p: any) => p.qualification_type === 'GCSE');
 
-      if (data) {
-        const gcse = data.filter((p: any) => (p as any).qualification_type === 'GCSE');
-        setGcseProducts(gcse as DynamicProduct[]);
-        if (gcse.length > 0) {
-          const first = gcse[0];
-          setSubject(first.subject.toLowerCase().replace(/\s+/g, '-'));
-          setExamBoard(first.exam_board.toLowerCase());
+      if (gcseProjects && gcseProjects.length > 0) {
+        const productIds = gcseProjects.filter((p: any) => p.product_id).map((p: any) => p.product_id!);
+        if (productIds.length > 0) {
+          const { data: products } = await supabase
+            .from('products')
+            .select('id, slug, subject, exam_board, name')
+            .eq('active', true)
+            .in('id', productIds);
+
+          if (products) {
+            setGcseProducts(products as DynamicProduct[]);
+            // Auto-select first
+            if (products.length > 0) {
+              const first = products[0];
+              setSubject(first.subject.toLowerCase().replace(/\s+/g, '-'));
+              setExamBoard(first.exam_board.toLowerCase());
+            }
+          }
         }
       }
     };
@@ -90,7 +107,7 @@ export const GCSEComparePage = () => {
       const boardKey = p.exam_board.toLowerCase();
       if (subjectKey === subject && !boards.includes(boardKey)) boards.push(boardKey);
     }
-    return boards;
+    return boards.length > 0 ? boards : [];
   }, [subject, gcseProducts]);
 
   // Get current dynamic product
@@ -218,7 +235,7 @@ export const GCSEComparePage = () => {
             </ScrollReveal>
           ) : (
             <>
-              {/* Subject & Board Selection - exact same design as A-Level compare page */}
+              {/* Subject & Board Selection */}
               <ScrollReveal delay={0.1}>
                 {/* Desktop */}
                 <div className="hidden md:flex items-center justify-center gap-4 mb-12">
@@ -260,12 +277,6 @@ export const GCSEComparePage = () => {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
-
-                  {boardsForSubject.length === 1 && (
-                    <span className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground whitespace-nowrap">
-                      {formatBoard(examBoard)}
-                    </span>
-                  )}
                 </div>
 
                 {/* Mobile */}
@@ -290,7 +301,7 @@ export const GCSEComparePage = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  {boardsForSubject.length > 1 ? (
+                  {boardsForSubject.length > 1 && (
                     <Select value={examBoard} onValueChange={setExamBoard}>
                       <SelectTrigger className="rounded-full px-5 py-2.5 h-auto w-auto text-sm font-semibold border border-border bg-background text-foreground [&>svg]:ml-1">
                         <SelectValue placeholder="Board" />
@@ -301,10 +312,6 @@ export const GCSEComparePage = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                  ) : (
-                    <span className="rounded-full px-5 py-2.5 text-sm font-semibold border border-border bg-background text-foreground">
-                      {formatBoard(examBoard)}
-                    </span>
                   )}
                 </div>
               </ScrollReveal>
@@ -385,7 +392,15 @@ export const GCSEComparePage = () => {
                 <Instagram size={20} />
               </a>
             </div>
-            <p className="text-muted-foreground text-sm">© 2025 A* AI. All rights reserved.</p>
+            <p className="text-muted-foreground mb-6">Your AI-powered GCSE revision coach</p>
+            <div className="flex flex-wrap justify-center gap-4 mb-6 text-muted-foreground">
+              <Link to="/compare" className="text-gradient-brand hover:opacity-80 transition-opacity">A-Level Plans</Link>
+              <span>•</span>
+              <Link to="/login" className="text-gradient-brand hover:opacity-80 transition-opacity">Sign in</Link>
+              <span>•</span>
+              <Link to="/contact" className="text-gradient-brand hover:opacity-80 transition-opacity">Contact</Link>
+            </div>
+            <p className="text-sm text-muted-foreground">© 2025 A* AI</p>
           </ScrollReveal>
         </footer>
       </div>

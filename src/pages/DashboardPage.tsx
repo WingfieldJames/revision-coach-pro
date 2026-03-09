@@ -10,7 +10,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Trash2, ExternalLink, Instagram, Youtube, Linkedin, ChevronDown, AlertCircle } from 'lucide-react';
+import { Trash2, ExternalLink, Instagram, ChevronDown, AlertCircle } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
@@ -692,6 +692,13 @@ export const DashboardPage = () => {
       {/* Footer */}
       <footer className="bg-muted py-16 px-8 text-center">
         <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <img src={logo} alt="A* AI" className="h-12 sm:h-14" />
+            <a href="https://www.instagram.com/a.star.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Instagram size={20} />
+            </a>
+          </div>
+          
           <p className="text-muted-foreground mb-6">
             Your AI-powered A-Level revision coach for Edexcel Economics
           </p>
@@ -716,12 +723,6 @@ export const DashboardPage = () => {
             </a>
             <a href="https://www.tiktok.com/@a.star.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
-            </a>
-            <a href="https://www.youtube.com/@a_star_ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-              <Youtube size={24} />
-            </a>
-            <a href="https://www.linkedin.com/company/astar-ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-              <Linkedin size={24} />
             </a>
             <p className="text-sm text-muted-foreground">
               © 2025 A* AI

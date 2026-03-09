@@ -1,1 +1,0 @@
-ALTER TABLE public.trainer_projects ADD COLUMN IF NOT EXISTS diagram_library jsonb DEFAULT '[]'::jsonb;

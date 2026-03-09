@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
-import { ChatbotSidebar } from '@/components/ChatbotSidebar';
-import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -19,42 +18,65 @@ const CIE_ECONOMICS_PROMPTS = [
 ];
 
 export const CIEPremiumPage = () => {
+  const chatRef = useRef<RAGChatRef>(null);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const chatRef = useRef<RAGChatRef>(null);
-  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
   useEffect(() => {
     const checkAccess = async () => {
       if (loading) return;
-      if (!user) { navigate('/login?redirect=cie-premium'); return; }
+      if (!user) {
+        navigate('/login?redirect=cie-premium');
+        return;
+      }
       const access = await checkProductAccess(user.id, 'cie-economics');
-      if (!access.hasAccess) navigate('/compare');
+      if (!access.hasAccess) {
+        navigate('/compare');
+      }
     };
     checkAccess();
   }, [user, loading, navigate]);
 
-  const sharedProps = {
-    subjectName: "CIE Economics",
-    productId: CIE_PRODUCT_ID,
-    productSlug: "cie-economics",
-    showMyAI: true,
-    showPastPaperFinder: true,
-    showEssayMarker: true,
-    showExamCountdown: true,
-    examDates: CIE_ECONOMICS_EXAMS,
-    examSubjectName: "CIE Economics",
-    onEssayMarkerSubmit: handleEssayMarkerSubmit,
+  const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => {
+    chatRef.current?.submitMessage(message, imageDataUrl);
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SEOHead title="Deluxe A* AI – CIE Economics | Full Past Paper Training" description="Access A* AI Deluxe for CIE/Cambridge Economics." canonical="https://astarai.co.uk/cie-premium" />
+      <SEOHead 
+        title="Deluxe A* AI – CIE Economics | Full Past Paper Training"
+        description="Access A* AI Deluxe for CIE/Cambridge Economics. Full training on past papers, mark schemes, A* technique & unlimited prompts."
+        canonical="https://astarai.co.uk/cie-premium"
+      />
       <RandomChatbotBackground />
-      <ChatbotSidebar {...sharedProps} />
-      <ChatbotToolbar {...sharedProps} />
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
+        <Header
+          showImageTool 
+          showDiagramTool 
+          showEssayMarker
+          showPastPaperFinder
+          showExamCountdown
+          examDates={CIE_ECONOMICS_EXAMS}
+          examSubjectName="CIE Economics"
+          hideUserDetails 
+          productId={CIE_PRODUCT_ID}
+          productSlug="cie-economics"
+          showUpgradeButton
+          onEssayMarkerSubmit={handleEssayMarkerSubmit}
+        />
+      </div>
+      
       <div className="flex-1 relative z-10">
-        <RAGChat productId={CIE_PRODUCT_ID} subjectName="CIE Economics Deluxe" subjectDescription="Your personal A* CIE Economics tutor with full past paper access. Ask me anything!" footerText="Powered by A* AI • Trained on CIE Economics specification" placeholder="Ask any CIE Economics question..." suggestedPrompts={CIE_ECONOMICS_PROMPTS} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
+        <RAGChat 
+          productId={CIE_PRODUCT_ID}
+          subjectName="CIE Economics Deluxe"
+          subjectDescription="Your personal A* CIE Economics tutor with full past paper access. Ask me anything!"
+          footerText="Powered by A* AI • Trained on CIE Economics specification"
+          placeholder="Ask any CIE Economics question..."
+          suggestedPrompts={CIE_ECONOMICS_PROMPTS}
+          enableDiagrams
+          chatRef={chatRef}
+        />
       </div>
     </div>
   );

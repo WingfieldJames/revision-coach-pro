@@ -108,76 +108,6 @@ export type Database = {
         }
         Relationships: []
       }
-      chat_conversations: {
-        Row: {
-          created_at: string
-          id: string
-          product_id: string | null
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          product_id?: string | null
-          title?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          product_id?: string | null
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chat_conversations_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chat_messages: {
-        Row: {
-          content: string
-          conversation_id: string
-          created_at: string
-          id: string
-          image_url: string | null
-          role: string
-        }
-        Insert: {
-          content?: string
-          conversation_id: string
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          role: string
-        }
-        Update: {
-          content?: string
-          conversation_id?: string
-          created_at?: string
-          id?: string
-          image_url?: string | null
-          role?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chat_messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "chat_conversations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       daily_prompt_usage: {
         Row: {
           created_at: string
@@ -251,27 +181,6 @@ export type Database = {
           },
         ]
       }
-      feedback_emails_sent: {
-        Row: {
-          email_type: string
-          id: string
-          sent_at: string
-          user_id: string
-        }
-        Insert: {
-          email_type: string
-          id?: string
-          sent_at?: string
-          user_id: string
-        }
-        Update: {
-          email_type?: string
-          id?: string
-          sent_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       monthly_tool_usage: {
         Row: {
           created_at: string
@@ -324,7 +233,6 @@ export type Database = {
           lifetime_price: number
           monthly_price: number
           name: string
-          qualification_type: string
           slug: string
           stripe_lifetime_price_id: string | null
           stripe_monthly_price_id: string | null
@@ -343,7 +251,6 @@ export type Database = {
           lifetime_price: number
           monthly_price: number
           name: string
-          qualification_type?: string
           slug: string
           stripe_lifetime_price_id?: string | null
           stripe_monthly_price_id?: string | null
@@ -362,7 +269,6 @@ export type Database = {
           lifetime_price?: number
           monthly_price?: number
           name?: string
-          qualification_type?: string
           slug?: string
           stripe_lifetime_price_id?: string | null
           stripe_monthly_price_id?: string | null
@@ -378,7 +284,6 @@ export type Database = {
           created_at: string
           created_by: string | null
           custom_sections: Json | null
-          diagram_library: Json | null
           essay_marker_marks: Json | null
           exam_board: string
           exam_dates: Json | null
@@ -392,7 +297,6 @@ export type Database = {
           staged_specifications: Json | null
           status: string
           subject: string
-          suggested_prompts: Json | null
           system_prompt: string | null
           system_prompt_submitted: boolean
           trainer_achievements: Json | null
@@ -407,7 +311,6 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custom_sections?: Json | null
-          diagram_library?: Json | null
           essay_marker_marks?: Json | null
           exam_board: string
           exam_dates?: Json | null
@@ -421,7 +324,6 @@ export type Database = {
           staged_specifications?: Json | null
           status?: string
           subject: string
-          suggested_prompts?: Json | null
           system_prompt?: string | null
           system_prompt_submitted?: boolean
           trainer_achievements?: Json | null
@@ -436,7 +338,6 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           custom_sections?: Json | null
-          diagram_library?: Json | null
           essay_marker_marks?: Json | null
           exam_board?: string
           exam_dates?: Json | null
@@ -450,7 +351,6 @@ export type Database = {
           staged_specifications?: Json | null
           status?: string
           subject?: string
-          suggested_prompts?: Json | null
           system_prompt?: string | null
           system_prompt_submitted?: boolean
           trainer_achievements?: Json | null
@@ -520,33 +420,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      user_feedback: {
-        Row: {
-          created_at: string
-          feedback_text: string | null
-          feedback_type: string
-          id: string
-          rating: number
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          feedback_text?: string | null
-          feedback_type: string
-          id?: string
-          rating: number
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          feedback_text?: string | null
-          feedback_type?: string
-          id?: string
-          rating?: number
-          user_id?: string
-        }
-        Relationships: []
       }
       user_mistakes: {
         Row: {
