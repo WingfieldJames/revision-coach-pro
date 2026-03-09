@@ -113,7 +113,6 @@ function getFreeUserEmailHtml(feedbackUrl: string): string {
           <tr>
             <td align="center" style="padding: 16px 32px 24px; border-top: 1px solid #e4e4e7;">
               <p style="margin: 0; font-size: 12px; color: #a1a1aa;">The A* AI Team</p>
-              <a href="https://astarai.lovable.app" style="font-size: 12px; color: #667eea; text-decoration: none;">astarai.lovable.app</a>
             </td>
           </tr>
         </table>
@@ -174,7 +173,6 @@ function getDeluxeUserEmailHtml(feedbackUrl: string): string {
           <tr>
             <td align="center" style="padding: 16px 32px 24px; border-top: 1px solid #e4e4e7;">
               <p style="margin: 0; font-size: 12px; color: #a1a1aa;">The A* AI Team</p>
-              <a href="https://astarai.lovable.app" style="font-size: 12px; color: #f5576c; text-decoration: none;">astarai.lovable.app</a>
             </td>
           </tr>
         </table>
