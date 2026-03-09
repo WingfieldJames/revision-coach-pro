@@ -44,6 +44,7 @@ import { GCSEComparePage } from "./pages/GCSEComparePage";
 import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
+import { FeedbackResultsPage } from "./pages/FeedbackResultsPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
