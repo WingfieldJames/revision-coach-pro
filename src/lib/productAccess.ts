@@ -61,6 +61,21 @@ export const checkProductAccess = async (
     };
   }
   
+  // Bundle fallback: check if a parent product grants access
+  const parentSlugs = BUNDLED_SLUGS[productSlug];
+  if (parentSlugs) {
+    for (const parentSlug of parentSlugs) {
+      const parentAccess = await checkProductAccess(userId, parentSlug);
+      if (parentAccess.hasAccess) {
+        return {
+          hasAccess: true,
+          tier: parentAccess.tier,
+          subscription: parentAccess.subscription,
+        };
+      }
+    }
+  }
+  
   // Fallback: Check legacy users table for backwards compatibility (Edexcel only)
   if (productSlug === 'edexcel-economics') {
     const { data: user } = await supabase
