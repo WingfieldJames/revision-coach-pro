@@ -65,14 +65,14 @@ const KNOWN_SUBJECTS: { name: string; type: SubjectType }[] = [
   { name: "Urdu", type: "Language / Memory-Heavy" },
 ];
 
-/* Subject colours — solid, accessible against white text */
+/* Subject colours — purple gradient palette, accessible against white text */
 const SUBJECT_COLORS = [
-  { bg: "#7C3AED", bgLight: "rgba(124,58,237,0.15)", border: "rgba(124,58,237,0.4)" },
-  { bg: "#2563EB", bgLight: "rgba(37,99,235,0.15)", border: "rgba(37,99,235,0.4)" },
-  { bg: "#059669", bgLight: "rgba(5,150,105,0.15)", border: "rgba(5,150,105,0.4)" },
-  { bg: "#D97706", bgLight: "rgba(217,119,6,0.15)", border: "rgba(217,119,6,0.4)" },
-  { bg: "#E11D48", bgLight: "rgba(225,29,72,0.15)", border: "rgba(225,29,72,0.4)" },
-  { bg: "#0891B2", bgLight: "rgba(8,145,178,0.15)", border: "rgba(8,145,178,0.4)" },
+  { bg: "#1e3a8a", bgLight: "rgba(30,58,138,0.12)", border: "rgba(30,58,138,0.35)" },
+  { bg: "#a855f7", bgLight: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.35)" },
+  { bg: "#7c3aed", bgLight: "rgba(124,58,237,0.12)", border: "rgba(124,58,237,0.35)" },
+  { bg: "#4f36b3", bgLight: "rgba(79,54,179,0.12)", border: "rgba(79,54,179,0.35)" },
+  { bg: "#6366f1", bgLight: "rgba(99,102,241,0.12)", border: "rgba(99,102,241,0.35)" },
+  { bg: "#8b5cf6", bgLight: "rgba(139,92,246,0.12)", border: "rgba(139,92,246,0.35)" },
 ];
 
 /* ─── storage keys ─── */
