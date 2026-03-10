@@ -1,5 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Products that grant access to other products (child -> parents that also grant access)
+const BUNDLED_SLUGS: Record<string, string[]> = {
+  'edexcel-mathematics-applied': ['edexcel-mathematics'],
+};
+
 export interface ProductAccess {
   hasAccess: boolean;
   tier: 'free' | 'deluxe';
