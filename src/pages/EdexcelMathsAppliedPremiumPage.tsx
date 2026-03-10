@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
+import { checkProductAccess } from '@/lib/productAccess';
 
 const EDEXCEL_MATHS_APPLIED_SLUG = 'edexcel-mathematics-applied';
 const EDEXCEL_MATHS_APPLIED_PROMPTS = [
@@ -33,11 +34,13 @@ export const EdexcelMathsAppliedPremiumPage = () => {
     const checkAccess = async () => {
       if (!user) { setCheckingAccess(false); return; }
       try {
+        // Get the Applied product ID for content isolation
         const { data: product } = await supabase.from('products').select('id').eq('slug', EDEXCEL_MATHS_APPLIED_SLUG).single();
         if (!product) { setCheckingAccess(false); return; }
         setProductId(product.id);
-        const { data: subscription } = await supabase.from('user_subscriptions').select('*').eq('user_id', user.id).eq('product_id', product.id).eq('active', true).maybeSingle();
-        setHasAccess(!!subscription);
+        // Use centralized access check which includes bundle logic (Pure grants Applied access)
+        const access = await checkProductAccess(user.id, EDEXCEL_MATHS_APPLIED_SLUG);
+        setHasAccess(access.hasAccess);
       } catch (e) { console.error(e); }
       finally { setCheckingAccess(false); }
     };
