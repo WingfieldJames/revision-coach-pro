@@ -1,5 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Products that grant access to other products (child -> parents that also grant access)
+const BUNDLED_SLUGS: Record<string, string[]> = {
+  'edexcel-mathematics-applied': ['edexcel-mathematics'],
+};
+
 export interface ProductAccess {
   hasAccess: boolean;
   tier: 'free' | 'deluxe';
@@ -54,6 +59,21 @@ export const checkProductAccess = async (
       tier: (subscription.tier === 'deluxe' ? 'deluxe' : 'free') as 'deluxe' | 'free',
       subscription 
     };
+  }
+  
+  // Bundle fallback: check if a parent product grants access
+  const parentSlugs = BUNDLED_SLUGS[productSlug];
+  if (parentSlugs) {
+    for (const parentSlug of parentSlugs) {
+      const parentAccess = await checkProductAccess(userId, parentSlug);
+      if (parentAccess.hasAccess) {
+        return {
+          hasAccess: true,
+          tier: parentAccess.tier,
+          subscription: parentAccess.subscription,
+        };
+      }
+    }
   }
   
   // Fallback: Check legacy users table for backwards compatibility (Edexcel only)
