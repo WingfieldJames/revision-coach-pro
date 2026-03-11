@@ -104,9 +104,15 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [open, setOpen] = useState(false); // Start closed
+  const [open, setOpen] = useState(false);
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [showExamCalendar, setShowExamCalendar] = useState(false);
+  const [showRevisionTimetable, setShowRevisionTimetable] = useState(false);
+
+  // Lazy load heavy components
+  const ExamCalendarFeature = React.lazy(() => import('@/components/ExamCalendarFeature').then(m => ({ default: m.ExamCalendarFeature })));
+  const RevisionTimetable = React.lazy(() => import('@/components/RevisionTimetable').then(m => ({ default: m.RevisionTimetable })));
 
   const chatHistoryCtx = useChatHistoryContext();
   const { conversations, loading, deleteConversation, fetchConversations } = useChatHistory(productId);
