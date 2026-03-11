@@ -434,6 +434,52 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Exam Calendar Popup */}
+      {showExamCalendar && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowExamCalendar(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-primary" />
+                Exam Calendar
+              </h2>
+              <button onClick={() => setShowExamCalendar(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <ExamCalendarFeature compact />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
+
+      {/* Revision Timetable Popup */}
+      {showRevisionTimetable && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowRevisionTimetable(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Clock3 className="h-5 w-5 text-primary" />
+                Revision Timetable
+              </h2>
+              <button onClick={() => setShowRevisionTimetable(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <RevisionTimetable />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
     </>
   );
 };
