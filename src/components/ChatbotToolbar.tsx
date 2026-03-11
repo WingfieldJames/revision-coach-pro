@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sparkles, TrendingUp, PenLine, FileSearch, BookOpen,
-  BarChart2, RotateCcw, Timer, Crown,
+  BarChart2, RotateCcw, Timer, Crown, ArrowLeftRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -53,6 +53,10 @@ export interface ChatbotToolbarProps {
   examSubjectName?: string;
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
+  /** Maths mode switcher */
+  showMathsModeSwitcher?: boolean;
+  mathsMode?: 'pure' | 'applied';
+  onMathsModeChange?: (mode: 'pure' | 'applied') => void;
 }
 
 export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
@@ -80,6 +84,9 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   examSubjectName = 'Exams',
   customPastPaperContent,
   customRevisionGuideContent,
+  showMathsModeSwitcher = false,
+  mathsMode = 'pure',
+  onMathsModeChange,
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -133,6 +140,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   };
 
   const toolItems = [
+    { id: 'maths-mode', label: mathsMode === 'pure' ? 'Pure' : 'Applied', icon: <ArrowLeftRight className="h-4 w-4" />, show: showMathsModeSwitcher },
     { id: 'my-ai', label: 'My AI', icon: <Sparkles className="h-4 w-4" />, show: showMyAI },
     { id: 'grade-boundaries', label: 'Grade Boundaries', icon: <TrendingUp className="h-4 w-4" />, show: showGradeBoundaries },
     { id: 'diagrams', label: 'Diagram Generator', icon: <BarChart2 className="h-4 w-4" />, show: showDiagramTool },
@@ -147,6 +155,22 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
 
   const renderToolContent = (id: string) => {
     switch (id) {
+      case 'maths-mode': return (
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-foreground mb-3">Switch Mode</p>
+          {(['pure', 'applied'] as const).map(mode => (
+            <button
+              key={mode}
+              onClick={() => { onMathsModeChange?.(mode); setOpenPopover(null); }}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all ${
+                mathsMode === mode ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground hover:bg-muted'
+              }`}
+            >
+              {mode === 'pure' ? '📐 Pure Mathematics' : '📊 Applied (Stats & Mechanics)'}
+            </button>
+          ))}
+        </div>
+      );
       case 'my-ai': return <MyAIPreferences productId={productId} />;
       case 'grade-boundaries': return <GradeBoundariesTool subject={gradeBoundariesSubject} />;
       case 'past-papers': return customPastPaperContent || <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />;

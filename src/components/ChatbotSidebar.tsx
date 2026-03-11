@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   ArrowLeft, Sparkles, Timer, Crown, ChevronRight,
   GraduationCap, Home, MessageSquare, Plus, Trash2, LogIn,
+  CalendarDays, Clock3, X,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -103,9 +104,15 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [open, setOpen] = useState(false); // Start closed
+  const [open, setOpen] = useState(false);
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [showExamCalendar, setShowExamCalendar] = useState(false);
+  const [showRevisionTimetable, setShowRevisionTimetable] = useState(false);
+
+  // Lazy load heavy components
+  const ExamCalendarFeature = React.lazy(() => import('@/components/ExamCalendarFeature').then(m => ({ default: m.ExamCalendarFeature })));
+  const RevisionTimetable = React.lazy(() => import('@/components/RevisionTimetable').then(m => ({ default: m.RevisionTimetable })));
 
   const chatHistoryCtx = useChatHistoryContext();
   const { conversations, loading, deleteConversation, fetchConversations } = useChatHistory(productId);
@@ -218,6 +225,13 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             </button>
             <button onClick={() => { navigate('/compare'); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="All Subjects">
               <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <Separator className="w-6" />
+            <button onClick={() => setShowExamCalendar(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Exam Calendar">
+              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button onClick={() => setShowRevisionTimetable(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Revision Timetable">
+              <Clock3 className="h-4 w-4 text-muted-foreground" />
             </button>
             {daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
               <>
@@ -344,6 +358,21 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                     <span>All Subjects</span>
                   </button>
                 </div>
+
+                <Separator className="my-2" />
+
+                {/* Tools */}
+                <div className="mb-1">
+                  <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Tools</p>
+                  <button onClick={() => setShowExamCalendar(true)} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
+                    <CalendarDays className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span>Exam Calendar</span>
+                  </button>
+                  <button onClick={() => setShowRevisionTimetable(true)} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
+                    <Clock3 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span>Revision Timetable</span>
+                  </button>
+                </div>
               </div>
             </ScrollArea>
 
@@ -404,6 +433,52 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             </div>
           </DialogContent>
         </Dialog>
+      )}
+
+      {/* Exam Calendar Popup */}
+      {showExamCalendar && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowExamCalendar(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-primary" />
+                Exam Calendar
+              </h2>
+              <button onClick={() => setShowExamCalendar(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <ExamCalendarFeature compact />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
+
+      {/* Revision Timetable Popup */}
+      {showRevisionTimetable && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowRevisionTimetable(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Clock3 className="h-5 w-5 text-primary" />
+                Revision Timetable
+              </h2>
+              <button onClick={() => setShowRevisionTimetable(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <RevisionTimetable />
+            </React.Suspense>
+          </div>
+        </div>
       )}
     </>
   );
