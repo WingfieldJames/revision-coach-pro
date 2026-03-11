@@ -95,6 +95,7 @@ const SearchingSourceItem: React.FC<{
 );
 export const RAGChat: React.FC<RAGChatProps> = ({
   productId,
+  promptProductId,
   subjectName,
   subjectDescription = "Your personal A* tutor. Ask me anything!",
   footerText = "Powered by A* AI",
