@@ -155,6 +155,22 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
 
   const renderToolContent = (id: string) => {
     switch (id) {
+      case 'maths-mode': return (
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-foreground mb-3">Switch Mode</p>
+          {(['pure', 'applied'] as const).map(mode => (
+            <button
+              key={mode}
+              onClick={() => { onMathsModeChange?.(mode); setOpenPopover(null); }}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all ${
+                mathsMode === mode ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground hover:bg-muted'
+              }`}
+            >
+              {mode === 'pure' ? '📐 Pure Mathematics' : '📊 Applied (Stats & Mechanics)'}
+            </button>
+          ))}
+        </div>
+      );
       case 'my-ai': return <MyAIPreferences productId={productId} />;
       case 'grade-boundaries': return <GradeBoundariesTool subject={gradeBoundariesSubject} />;
       case 'past-papers': return customPastPaperContent || <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />;
