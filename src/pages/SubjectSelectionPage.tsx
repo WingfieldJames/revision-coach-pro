@@ -51,28 +51,39 @@ export const SubjectSelectionPage = () => {
 
       // Merge dynamic A-Level products into the static list
       const aLevelProducts = data.filter((p: any) => (p as any).qualification_type !== 'GCSE');
+      // Skip "mathematics-applied" — it's a mode inside the Mathematics bot
+      const filtered = aLevelProducts.filter((p: any) => (p as any).subject.toLowerCase().replace(/\s+/g, '-') !== 'mathematics-applied');
       const existingSlugs = new Set(A_LEVEL_SUBJECTS.map(s => s.slug));
 
+      // Merge extra boards into existing static subjects
+      const boardMerges: Record<string, string[]> = {};
       const dynamicExtras: SubjectOption[] = [];
-      for (const p of aLevelProducts) {
+
+      for (const p of filtered) {
         const subjectSlug = (p as any).subject.toLowerCase().replace(/\s+/g, '-');
-        if (!existingSlugs.has(subjectSlug)) {
+        const board = (p as any).exam_board;
+
+        if (existingSlugs.has(subjectSlug)) {
+          // Merge board into existing subject if not already present
+          if (!boardMerges[subjectSlug]) boardMerges[subjectSlug] = [];
+          if (!boardMerges[subjectSlug].includes(board)) boardMerges[subjectSlug].push(board);
+        } else {
           // Check if we already added this subject
           const existing = dynamicExtras.find(d => d.slug === subjectSlug);
           if (existing) {
-            if (!existing.boards.includes((p as any).exam_board)) {
-              existing.boards.push((p as any).exam_board);
-            }
+            if (!existing.boards.includes(board)) existing.boards.push(board);
           } else {
             dynamicExtras.push({
               label: (p as any).subject.charAt(0).toUpperCase() + (p as any).subject.slice(1),
               slug: subjectSlug,
-              boards: [(p as any).exam_board],
+              boards: [board],
             });
           }
         }
       }
 
+      // Apply board merges to static subjects
+      setBoardMerges(boardMerges);
       setDynamicALevelSubjects(dynamicExtras);
     };
     loadDynamic();
