@@ -166,6 +166,24 @@ export const ProgressPage = () => {
         </motion.p>
 
         <RevisionTimetable />
+
+        {/* Exam Calendar */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mt-16"
+        >
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4">
+            <span className="text-foreground">Your </span>
+            <span className="text-gradient-brand">Exam</span>
+            <span className="text-foreground"> Calendar</span>
+          </h2>
+          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-10">
+            Select your subjects and exam boards to see exactly when your exams are. Add your own events too.
+          </p>
+          <ExamCalendarFeature />
+        </motion.div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 pt-8 pb-20">
