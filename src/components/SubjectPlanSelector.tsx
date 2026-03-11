@@ -204,7 +204,7 @@ export function SubjectPlanSelector() {
               {(subject === 'economics'
                 ? (['edexcel', 'aqa', 'cie'] as ExamBoard[])
                 : subject === 'mathematics'
-                ? (['edexcel'] as ExamBoard[])
+                ? (['edexcel', 'ocr'] as ExamBoard[])
                 : subject === 'chemistry' || subject === 'psychology'
                 ? (['aqa'] as ExamBoard[])
                 : (['ocr'] as ExamBoard[])
