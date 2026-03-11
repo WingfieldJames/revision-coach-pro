@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   ArrowLeft, Sparkles, Timer, Crown, ChevronRight,
   GraduationCap, Home, MessageSquare, Plus, Trash2, LogIn,
+  CalendarDays, Clock3, X,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
