@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
@@ -17,7 +18,15 @@ const EDEXCEL_MATHS_PROMPTS = [
 
 export const EdexcelMathsFreeVersionPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
+
+  const handleModeChange = (mode: 'pure' | 'applied') => {
+    if (mode === 'applied') {
+      navigate(location.pathname.includes('premium') ? '/edexcel-maths-applied-premium' : '/edexcel-maths-applied-free-version');
+    }
+  };
 
   const sharedProps = {
     subjectName: "Edexcel Maths (Pure)",
@@ -36,6 +45,9 @@ export const EdexcelMathsFreeVersionPage = () => {
     examSubjectName: "Edexcel Maths",
     showMyMistakes: true,
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    showMathsModeSwitcher: true,
+    mathsMode: 'pure' as const,
+    onMathsModeChange: handleModeChange,
   };
 
   return (

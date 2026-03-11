@@ -30,15 +30,17 @@ export const EdexcelMathsAppliedPremiumPage = () => {
   const [checkingAccess, setCheckingAccess] = useState(true);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
+  const handleModeChange = (mode: 'pure' | 'applied') => {
+    if (mode === 'pure') navigate('/edexcel-maths-premium');
+  };
+
   useEffect(() => {
     const checkAccess = async () => {
       if (!user) { setCheckingAccess(false); return; }
       try {
-        // Get the Applied product ID for content isolation
         const { data: product } = await supabase.from('products').select('id').eq('slug', EDEXCEL_MATHS_APPLIED_SLUG).single();
         if (!product) { setCheckingAccess(false); return; }
         setProductId(product.id);
-        // Use centralized access check which includes bundle logic (Pure grants Applied access)
         const access = await checkProductAccess(user.id, EDEXCEL_MATHS_APPLIED_SLUG);
         setHasAccess(access.hasAccess);
       } catch (e) { console.error(e); }
@@ -68,6 +70,9 @@ export const EdexcelMathsAppliedPremiumPage = () => {
     examSubjectName: "Edexcel Maths",
     showMyMistakes: true,
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    showMathsModeSwitcher: true,
+    mathsMode: 'applied' as const,
+    onMathsModeChange: handleModeChange,
   };
 
   return (

@@ -29,6 +29,10 @@ export const EdexcelMathsPremiumPage = () => {
   const [checkingAccess, setCheckingAccess] = useState(true);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
+  const handleModeChange = (mode: 'pure' | 'applied') => {
+    if (mode === 'applied') navigate('/edexcel-maths-applied-premium');
+  };
+
   useEffect(() => {
     const checkAccess = async () => {
       if (!user) { setCheckingAccess(false); return; }
@@ -65,6 +69,9 @@ export const EdexcelMathsPremiumPage = () => {
     examSubjectName: "Edexcel Maths",
     showMyMistakes: true,
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    showMathsModeSwitcher: true,
+    mathsMode: 'pure' as const,
+    onMathsModeChange: handleModeChange,
   };
 
   return (
