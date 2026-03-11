@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { Flame, Plus, X } from "lucide-react";
 import { RevisionTimetable } from "@/components/RevisionTimetable";
+import { ExamCalendarFeature } from "@/components/ExamCalendarFeature";
 import { Button } from "@/components/ui/button";
 import {
   LineChart,
