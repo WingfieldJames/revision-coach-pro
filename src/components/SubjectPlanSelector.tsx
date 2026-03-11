@@ -20,7 +20,8 @@ const PRODUCT_IDS: Record<string, string> = {
   'ocr-physics': 'ecd5978d-3bf4-4b9c-993f-30b7f3a0f197',
   'aqa-chemistry': '3e5bf02e-1424-4bb3-88f9-2a9c58798444',
   'aqa-psychology': 'c56bc6d6-5074-4e1f-8bf2-8e900ba928ec',
-  'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+  'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+  'ocr-maths': '7469e99a-c34e-4500-9aee-11a107a4af09'
 };
 
 const subjectLabels: Record<Subject, string> = {
