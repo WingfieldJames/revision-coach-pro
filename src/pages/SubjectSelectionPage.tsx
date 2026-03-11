@@ -90,7 +90,16 @@ export const SubjectSelectionPage = () => {
     loadDynamic();
   }, []);
 
-  const allALevelSubjects = [...A_LEVEL_SUBJECTS, ...dynamicALevelSubjects];
+  const allALevelSubjects = [
+    ...A_LEVEL_SUBJECTS.map(s => {
+      const extra = boardMerges[s.slug];
+      if (!extra) return s;
+      const merged = [...s.boards];
+      for (const b of extra) { if (!merged.includes(b)) merged.push(b); }
+      return { ...s, boards: merged };
+    }),
+    ...dynamicALevelSubjects,
+  ];
 
   const handleGCSE = () => {
     navigate('/gcse');
