@@ -53,6 +53,8 @@ export interface RAGChatRef {
 
 interface RAGChatProps {
   productId: string;
+  /** Product ID used for prompt counting (defaults to productId). Use to share prompt limits across related products. */
+  promptProductId?: string;
   subjectName: string;
   subjectDescription?: string;
   footerText?: string;
