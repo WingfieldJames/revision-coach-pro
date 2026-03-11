@@ -53,6 +53,10 @@ export interface ChatbotToolbarProps {
   examSubjectName?: string;
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
+  /** Maths mode switcher */
+  showMathsModeSwitcher?: boolean;
+  mathsMode?: 'pure' | 'applied';
+  onMathsModeChange?: (mode: 'pure' | 'applied') => void;
 }
 
 export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
