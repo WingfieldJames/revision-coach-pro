@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sparkles, TrendingUp, PenLine, FileSearch, BookOpen,
-  BarChart2, RotateCcw, Timer, Crown,
+  BarChart2, RotateCcw, Timer, Crown, ArrowLeftRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
