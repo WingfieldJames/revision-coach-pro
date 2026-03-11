@@ -358,6 +358,21 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                     <span>All Subjects</span>
                   </button>
                 </div>
+
+                <Separator className="my-2" />
+
+                {/* Tools */}
+                <div className="mb-1">
+                  <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Tools</p>
+                  <button onClick={() => setShowExamCalendar(true)} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
+                    <CalendarDays className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span>Exam Calendar</span>
+                  </button>
+                  <button onClick={() => setShowRevisionTimetable(true)} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
+                    <Clock3 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span>Revision Timetable</span>
+                  </button>
+                </div>
               </div>
             </ScrollArea>
 
