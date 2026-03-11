@@ -38,6 +38,7 @@ export const SubjectSelectionPage = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<SubjectOption[]>([]);
   const [dynamicALevelSubjects, setDynamicALevelSubjects] = useState<SubjectOption[]>([]);
   const [boardMerges, setBoardMerges] = useState<Record<string, string[]>>({});
+  const subjectsRef = useRef<HTMLDivElement>(null);
 
   // Load dynamic A-Level subjects from products table
   useEffect(() => {
