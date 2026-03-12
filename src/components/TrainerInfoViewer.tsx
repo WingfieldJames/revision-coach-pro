@@ -31,7 +31,7 @@ export const TrainerInfoViewer: React.FC<TrainerInfoViewerProps> = ({ productId 
           .maybeSingle();
         
         if (data?.trainer_name) {
-          setTrainer(data);
+          setTrainer({ ...data, trainer_achievements: Array.isArray(data.trainer_achievements) ? data.trainer_achievements : [] } as TrainerData);
           // Resolve image URL
           if (data.trainer_image_url) {
             if (data.trainer_image_url.startsWith('/') || data.trainer_image_url.startsWith('http')) {
