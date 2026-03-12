@@ -76,8 +76,9 @@ export const ExamCalendarFeature: React.FC<ExamCalendarFeatureProps> = ({
   compact = false,
 }) => {
   const allSubjects = useMemo(() => getAllSubjects(), []);
-  const boards = useMemo(() => getAvailableBoards(), []);
   const [subjectSearches, setSubjectSearches] = useState<string[]>(() => Array(3).fill(''));
+
+  const [selections, setSelections] = useState<SubjectSelection[]>(() => {
     const saved = loadSelections();
     if (saved.length > 0) return saved;
     if (initialSubject && initialBoard) return [{ subject: initialSubject, board: initialBoard }];
@@ -105,10 +106,17 @@ export const ExamCalendarFeature: React.FC<ExamCalendarFeatureProps> = ({
 
   const handleUpdateSelection = (index: number, field: 'board' | 'subject', value: string) => {
     const next = [...selections];
-    if (field === 'board') {
-      next[index] = { board: value, subject: '' };
-    } else {
+    if (field === 'subject') {
       next[index] = { ...next[index], subject: value };
+      // Auto-set board if only one board offers this subject
+      const availableBoards = getBoardsForSubject(value);
+      if (availableBoards.length === 1) {
+        next[index].board = availableBoards[0];
+      } else if (!availableBoards.includes(next[index].board)) {
+        next[index].board = '';
+      }
+    } else {
+      next[index] = { ...next[index], board: value };
     }
     setSelections(next);
   };
