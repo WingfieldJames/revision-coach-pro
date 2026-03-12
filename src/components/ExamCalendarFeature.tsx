@@ -234,25 +234,59 @@ export const ExamCalendarFeature: React.FC<ExamCalendarFeatureProps> = ({
             </p>
           </div>
 
-          {selections.map((sel, i) => (
+          {selections.map((sel, i) => {
+            const searchVal = subjectSearches[i] || '';
+            const filteredSubjects = searchVal.length > 0
+              ? allSubjects.filter(s => s.toLowerCase().includes(searchVal.toLowerCase()))
+              : allSubjects;
+            const availableBoards = sel.subject ? getBoardsForSubject(sel.subject) : getAvailableBoards();
+            return (
             <div key={i} className="flex items-center gap-2">
               <div className="flex-1 grid grid-cols-2 gap-2">
+                {/* Subject first - type to search */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={sel.subject || searchVal}
+                    onChange={e => {
+                      const val = e.target.value;
+                      const nextSearches = [...subjectSearches];
+                      nextSearches[i] = val;
+                      setSubjectSearches(nextSearches);
+                      // Check if exact match
+                      const match = allSubjects.find(s => s.toLowerCase() === val.toLowerCase());
+                      if (match) {
+                        handleUpdateSelection(i, 'subject', match);
+                        nextSearches[i] = '';
+                        setSubjectSearches(nextSearches);
+                      } else {
+                        handleUpdateSelection(i, 'subject', '');
+                      }
+                    }}
+                    onFocus={() => {
+                      if (sel.subject) {
+                        const nextSearches = [...subjectSearches];
+                        nextSearches[i] = sel.subject;
+                        setSubjectSearches(nextSearches);
+                        handleUpdateSelection(i, 'subject', '');
+                      }
+                    }}
+                    placeholder="Type subject..."
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                    list={`subject-list-${i}`}
+                  />
+                  <datalist id={`subject-list-${i}`}>
+                    {filteredSubjects.map(s => <option key={s} value={s} />)}
+                  </datalist>
+                </div>
+                {/* Board dropdown */}
                 <select
                   value={sel.board}
                   onChange={e => handleUpdateSelection(i, 'board', e.target.value)}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 >
                   <option value="">Select Board</option>
-                  {boards.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
-                <select
-                  value={sel.subject}
-                  onChange={e => handleUpdateSelection(i, 'subject', e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                  disabled={!sel.board}
-                >
-                  <option value="">Select Subject</option>
-                  {sel.board && getSubjectsForBoard(sel.board).map(s => <option key={s} value={s}>{s}</option>)}
+                  {availableBoards.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
               </div>
               {selections.length > 1 && (
@@ -261,7 +295,8 @@ export const ExamCalendarFeature: React.FC<ExamCalendarFeatureProps> = ({
                 </button>
               )}
             </div>
-          ))}
+            );
+          })}
 
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" onClick={handleAddSubject} className="gap-1.5">
