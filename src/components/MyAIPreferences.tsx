@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Check, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
+import { AStarBrainToggle } from '@/components/AStarBrainToggle';
 
 const GRADES = ['D', 'C', 'B', 'A', 'A*'];
 
