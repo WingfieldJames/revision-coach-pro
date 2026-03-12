@@ -75,9 +75,9 @@ export const ExamCalendarFeature: React.FC<ExamCalendarFeatureProps> = ({
   initialBoard,
   compact = false,
 }) => {
+  const allSubjects = useMemo(() => getAllSubjects(), []);
   const boards = useMemo(() => getAvailableBoards(), []);
-
-  const [selections, setSelections] = useState<SubjectSelection[]>(() => {
+  const [subjectSearches, setSubjectSearches] = useState<string[]>(() => Array(3).fill(''));
     const saved = loadSelections();
     if (saved.length > 0) return saved;
     if (initialSubject && initialBoard) return [{ subject: initialSubject, board: initialBoard }];
