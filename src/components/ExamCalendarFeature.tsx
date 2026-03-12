@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ExamEntry,
   getAvailableBoards,
-  getSubjectsForBoard,
+  getAllSubjects,
+  getBoardsForSubject,
   getExamsForSelections,
 } from '@/data/examTimetable2026';
 
