@@ -397,7 +397,7 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.json();
-    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query } = body;
+    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id } = body;
 
     // search_only mode: keyword search for past paper chunks, return JSON
     if (search_only && product_id) {
@@ -478,9 +478,27 @@ serve(async (req) => {
 
     // Server-side subscription verification - never trust client tier
     // Trainers testing their own product bypass subscription check
+    
+    // Bundled product mapping: child slug -> parent slugs that also grant access
+    const BUNDLED_CHILD_TO_PARENT: Record<string, string[]> = {
+      'edexcel-mathematics-applied': ['edexcel-mathematics'],
+    };
+
+    // Helper: check if a subscription row is valid (active + not expired, with grace period)
+    function isSubValid(sub: { tier: string; subscription_end: string | null }): boolean {
+      if (sub.tier !== 'deluxe') return false;
+      const now = new Date();
+      const endDate = sub.subscription_end ? new Date(sub.subscription_end) : null;
+      if (!endDate || endDate > now) return true;
+      // 7-day grace period for monthly webhook delays
+      const graceMs = 7 * 24 * 60 * 60 * 1000;
+      return now.getTime() - endDate.getTime() <= graceMs;
+    }
+
     let tier: string = isTrainerTest ? 'deluxe' : 'free';
     if (!isTrainerTest && user_id && product_id) {
       try {
+        // 1) Check exact product_id match first
         const { data: sub } = await supabaseAdmin
           .from('user_subscriptions')
           .select('tier, subscription_end')
@@ -489,19 +507,76 @@ serve(async (req) => {
           .eq('active', true)
           .maybeSingle();
         
-        if (sub?.tier === 'deluxe') {
-          const now = new Date();
-          const endDate = sub.subscription_end ? new Date(sub.subscription_end) : null;
-          if (!endDate || endDate > now) {
-            // No end date or still active
-            tier = 'deluxe';
-          } else {
-            // End date passed — allow 7-day grace period for monthly webhook delays
-            const graceMs = 7 * 24 * 60 * 60 * 1000;
-            const withinGrace = now.getTime() - endDate.getTime() <= graceMs;
-            if (withinGrace) {
-              tier = 'deluxe';
-              console.log(`Deluxe tier granted via grace period for user ${user_id} (ended ${sub.subscription_end})`);
+        if (sub && isSubValid(sub)) {
+          tier = 'deluxe';
+          if (sub.subscription_end && new Date(sub.subscription_end) < new Date()) {
+            console.log(`Deluxe tier granted via grace period for user ${user_id} (ended ${sub.subscription_end})`);
+          }
+        }
+
+        // 2) If not deluxe yet, check bundled parent products
+        if (tier === 'free') {
+          // Look up the current product's slug to find parent bundles
+          const { data: currentProduct } = await supabaseAdmin
+            .from('products')
+            .select('slug')
+            .eq('id', product_id)
+            .single();
+          
+          if (currentProduct?.slug) {
+            const parentSlugs = BUNDLED_CHILD_TO_PARENT[currentProduct.slug];
+            if (parentSlugs && parentSlugs.length > 0) {
+              // Find parent product IDs
+              const { data: parentProducts } = await supabaseAdmin
+                .from('products')
+                .select('id')
+                .in('slug', parentSlugs)
+                .eq('active', true);
+              
+              if (parentProducts && parentProducts.length > 0) {
+                const parentIds = parentProducts.map((p: { id: string }) => p.id);
+                const { data: parentSubs } = await supabaseAdmin
+                  .from('user_subscriptions')
+                  .select('tier, subscription_end')
+                  .eq('user_id', user_id)
+                  .in('product_id', parentIds)
+                  .eq('active', true);
+                
+                if (parentSubs) {
+                  for (const ps of parentSubs) {
+                    if (isSubValid(ps)) {
+                      tier = 'deluxe';
+                      console.log(`Deluxe tier granted via bundled parent for user ${user_id}, product ${product_id}`);
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // 3) Legacy fallback: check users table for edexcel-economics backward compatibility
+        if (tier === 'free') {
+          const { data: currentProduct } = await supabaseAdmin
+            .from('products')
+            .select('slug')
+            .eq('id', product_id)
+            .single();
+          
+          if (currentProduct?.slug === 'edexcel-economics') {
+            const { data: legacyUser } = await supabaseAdmin
+              .from('users')
+              .select('is_premium, subscription_end')
+              .eq('id', user_id)
+              .maybeSingle();
+            
+            if (legacyUser?.is_premium) {
+              const endDate = legacyUser.subscription_end ? new Date(legacyUser.subscription_end) : null;
+              if (!endDate || endDate > new Date()) {
+                tier = 'deluxe';
+                console.log(`Deluxe tier granted via legacy users table for user ${user_id}`);
+              }
             }
           }
         }
@@ -513,8 +588,10 @@ serve(async (req) => {
     console.log(`Verified tier for user ${user_id}: ${tier}`);
 
     // Check daily usage limit for FREE tier only (skip for trainer tests)
-    if (tier === 'free' && !isTrainerTest && user_id && product_id) {
-      const usageResult = await checkAndIncrementUsage(supabaseAdmin, user_id, product_id);
+    // Use prompt_product_id if provided (shares quota across related products like Pure/Applied maths)
+    const usageProductId = prompt_product_id || product_id;
+    if (tier === 'free' && !isTrainerTest && user_id && usageProductId) {
+      const usageResult = await checkAndIncrementUsage(supabaseAdmin, user_id, usageProductId);
       
       console.log(`Usage check for ${user_id}: ${usageResult.count}/${usageResult.limit} (allowed: ${usageResult.allowed})`);
       
