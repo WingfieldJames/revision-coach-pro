@@ -333,6 +333,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         body: JSON.stringify({
           message: messageText || '(Please analyse the attached file)',
           product_id: productId,
+          prompt_product_id: promptProductId || productId,
           user_preferences: userPreferences,
           history: messages.slice(-10).map(m => ({
             role: m.role,

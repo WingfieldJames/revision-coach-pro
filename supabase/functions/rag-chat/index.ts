@@ -588,8 +588,10 @@ serve(async (req) => {
     console.log(`Verified tier for user ${user_id}: ${tier}`);
 
     // Check daily usage limit for FREE tier only (skip for trainer tests)
-    if (tier === 'free' && !isTrainerTest && user_id && product_id) {
-      const usageResult = await checkAndIncrementUsage(supabaseAdmin, user_id, product_id);
+    // Use prompt_product_id if provided (shares quota across related products like Pure/Applied maths)
+    const usageProductId = prompt_product_id || product_id;
+    if (tier === 'free' && !isTrainerTest && user_id && usageProductId) {
+      const usageResult = await checkAndIncrementUsage(supabaseAdmin, user_id, usageProductId);
       
       console.log(`Usage check for ${user_id}: ${usageResult.count}/${usageResult.limit} (allowed: ${usageResult.allowed})`);
       
