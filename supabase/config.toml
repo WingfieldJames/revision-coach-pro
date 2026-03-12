@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.get-feedback]
 verify_jwt = false
+
+[functions.update-brain-profile]
+verify_jwt = false
