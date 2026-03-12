@@ -630,8 +630,31 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
     // Fetch the deluxe system prompt from database (unified for all users)
     const basePrompt = await fetchSystemPrompt(supabaseAdmin, product_id);
     
+    // Check if user has A* Brain enabled and fetch their brain profile
+    let brainContext = '';
+    if (tier === 'deluxe' && user_id) {
+      try {
+        const { data: brainProfile } = await supabaseAdmin
+          .from('user_brain_profiles')
+          .select('profile_summary')
+          .eq('user_id', user_id)
+          .maybeSingle();
+        
+        if (brainProfile?.profile_summary) {
+          brainContext = `\n--- A* BRAIN: STUDENT MEMORY ---
+Here is context about this student from their previous sessions: ${brainProfile.profile_summary}
+
+Use this to personalise your responses — reference their weak areas, their exam board, and their progress where relevant. Do not explicitly tell the user you are reading their profile, just use it naturally to give more tailored responses.
+---\n`;
+          console.log(`Brain profile injected for user ${user_id} (${brainProfile.profile_summary.length} chars)`);
+        }
+      } catch (err) {
+        console.error('Error fetching brain profile:', err);
+      }
+    }
+    
     // Add user personalization context (pass message for technique detection)
-    const personalizedPrompt = buildPersonalizedPrompt(basePrompt, user_preferences, message, product_id);
+    const personalizedPrompt = buildPersonalizedPrompt(brainContext + basePrompt, user_preferences, message, product_id);
     
     // Fetch relevant training data from document_chunks (with spec_version filtering for Psychology)
     const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(

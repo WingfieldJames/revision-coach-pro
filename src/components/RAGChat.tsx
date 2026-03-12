@@ -430,6 +430,19 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       // Persist assistant response
       if (fullContentRef.current) {
         persistMessage('assistant', fullContentRef.current);
+        
+        // Trigger A* Brain profile update in background (deluxe only)
+        if (user && effectiveTier === 'deluxe') {
+          const brainEnabled = localStorage.getItem(`astar_brain_enabled_${user.id}`) === 'true';
+          if (brainEnabled) {
+            const conversationForBrain = [...messages, { role: 'user' as const, content: messageText }, { role: 'assistant' as const, content: fullContentRef.current }];
+            fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-brain-profile`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+              body: JSON.stringify({ user_id: user.id, conversation_history: conversationForBrain.slice(-20).map(m => ({ role: m.role, content: m.content })) }),
+            }).catch(err => console.error('Brain profile update failed:', err));
+          }
+        }
       }
     } catch (error) {
       console.error('Chat error:', error);

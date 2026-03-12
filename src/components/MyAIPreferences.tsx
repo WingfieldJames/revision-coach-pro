@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Check, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
+import { AStarBrainToggle } from '@/components/AStarBrainToggle';
 
 const GRADES = ['D', 'C', 'B', 'A', 'A*'];
 
@@ -19,10 +21,11 @@ interface UserPreferences {
 }
 
 interface MyAIPreferencesProps {
-  productId?: string; // Optional - if provided, saves product-specific prefs
+  productId?: string;
+  isDeluxe?: boolean;
 }
 
-export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId }) => {
+export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isDeluxe = false }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -260,6 +263,11 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId }) =
           className="resize-none h-20"
         />
       </div>
+
+      <Separator className="my-4" />
+
+      {/* A* Brain Toggle */}
+      <AStarBrainToggle isDeluxe={isDeluxe} productId={productId} />
     </div>
   );
 };

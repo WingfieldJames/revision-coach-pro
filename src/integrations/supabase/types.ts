@@ -521,6 +521,36 @@ export type Database = {
           },
         ]
       }
+      user_brain_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          profile_summary: string
+          subjects_detected: Json | null
+          updated_at: string
+          user_id: string
+          weak_topics: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_summary?: string
+          subjects_detected?: Json | null
+          updated_at?: string
+          user_id: string
+          weak_topics?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_summary?: string
+          subjects_detected?: Json | null
+          updated_at?: string
+          user_id?: string
+          weak_topics?: Json | null
+        }
+        Relationships: []
+      }
       user_feedback: {
         Row: {
           created_at: string

@@ -206,6 +206,22 @@ export function getAvailableBoards(): string[] {
   return Array.from(boards).sort();
 }
 
+/** Get ALL unique subjects across all boards */
+export function getAllSubjects(): string[] {
+  const subjects = new Set(
+    EXAM_TIMETABLE_2026.filter(e => e.subject !== 'CONTINGENCY DAY').map(e => e.subject)
+  );
+  return Array.from(subjects).sort();
+}
+
+/** Get boards that offer a given subject */
+export function getBoardsForSubject(subject: string): string[] {
+  const boards = new Set(
+    EXAM_TIMETABLE_2026.filter(e => e.subject === subject && e.board !== 'All').map(e => e.board)
+  );
+  return Array.from(boards).sort();
+}
+
 /** Get subjects for a given board */
 export function getSubjectsForBoard(board: string): string[] {
   const subjects = new Set(
