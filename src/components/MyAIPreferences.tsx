@@ -21,7 +21,8 @@ interface UserPreferences {
 }
 
 interface MyAIPreferencesProps {
-  productId?: string; // Optional - if provided, saves product-specific prefs
+  productId?: string;
+  isDeluxe?: boolean;
 }
 
 export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId }) => {
