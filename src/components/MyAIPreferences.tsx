@@ -263,6 +263,11 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isD
           className="resize-none h-20"
         />
       </div>
+
+      <Separator className="my-4" />
+
+      {/* A* Brain Toggle */}
+      <AStarBrainToggle isDeluxe={isDeluxe} productId={productId} />
     </div>
   );
 };
