@@ -25,7 +25,7 @@ interface MyAIPreferencesProps {
   isDeluxe?: boolean;
 }
 
-export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId }) => {
+export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isDeluxe = false }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
