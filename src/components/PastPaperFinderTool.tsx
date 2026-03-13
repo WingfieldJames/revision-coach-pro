@@ -185,7 +185,9 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
         <div className="max-h-[350px] overflow-y-auto space-y-2 pr-1">
           {matchedQuestions.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-sm text-muted-foreground">No questions found for this spec point in 2023–2024 papers.</p>
+              <p className="text-sm text-muted-foreground">
+                No questions found for this spec point{tier === 'free' ? ' in 2023–2024 papers' : ''}.
+              </p>
             </div>
           ) : (
             matchedQuestions.map((q, idx) => (
