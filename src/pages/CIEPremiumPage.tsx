@@ -46,6 +46,7 @@ export const CIEPremiumPage = () => {
     examDates: CIE_ECONOMICS_EXAMS,
     examSubjectName: "CIE Economics",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    customPastPaperContent: <DynamicPastPaperFinder productId={CIE_PRODUCT_ID} subjectName="CIE Economics" tier="deluxe" />,
   };
 
   return (
