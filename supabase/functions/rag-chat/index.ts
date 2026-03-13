@@ -427,7 +427,12 @@ serve(async (req) => {
       // Filter to paper-type chunks only
       const paperChunks = allChunks.filter((c: any) => {
         const ct = String(c.metadata?.content_type || '');
-        return PAPER_CONTENT_TYPES.includes(ct);
+        // Exclude mark schemes and non-paper content
+        if (EXCLUDED_CONTENT_TYPES.includes(ct)) return false;
+        // Exclude chunks that start with "Mark Scheme"
+        if ((c.content || '').trim().startsWith('Mark Scheme')) return false;
+        // Include known paper types, or anything not explicitly excluded
+        return PAPER_CONTENT_TYPES.includes(ct) || (!EXCLUDED_CONTENT_TYPES.includes(ct) && ct.includes('paper'));
       });
 
       // Score by keyword relevance
