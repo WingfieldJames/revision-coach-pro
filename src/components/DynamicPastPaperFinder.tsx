@@ -205,7 +205,7 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
         return isPaper || hasFigure;
       });
 
-      const maxResults = tier === 'free' ? 5 : 10;
+      const maxResults = tier === 'free' ? 5 : 25;
       setResults(paperResults.slice(0, maxResults));
     } catch (err) {
       console.error('Search error:', err);
