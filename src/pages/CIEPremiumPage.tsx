@@ -5,6 +5,7 @@ import { RandomChatbotBackground } from '@/components/ui/random-chatbot-backgrou
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
