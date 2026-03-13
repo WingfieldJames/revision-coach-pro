@@ -407,7 +407,9 @@ serve(async (req) => {
       const PAPER_CONTENT_TYPES = [
         'paper_1', 'paper_2', 'paper_3',
         'past_paper', 'past_paper_qp', 'combined',
+        'question', 'paper',
       ];
+      const EXCLUDED_CONTENT_TYPES = ['past_paper_ms', 'mark_scheme', 'specification', 'system_prompt', 'exam_technique'];
 
       const { data: allChunks, error: chunkError } = await supabaseAdmin
         .from('document_chunks')
@@ -425,7 +427,12 @@ serve(async (req) => {
       // Filter to paper-type chunks only
       const paperChunks = allChunks.filter((c: any) => {
         const ct = String(c.metadata?.content_type || '');
-        return PAPER_CONTENT_TYPES.includes(ct);
+        // Exclude mark schemes and non-paper content
+        if (EXCLUDED_CONTENT_TYPES.includes(ct)) return false;
+        // Exclude chunks that start with "Mark Scheme"
+        if ((c.content || '').trim().startsWith('Mark Scheme')) return false;
+        // Include known paper types, or anything not explicitly excluded
+        return PAPER_CONTENT_TYPES.includes(ct) || (!EXCLUDED_CONTENT_TYPES.includes(ct) && ct.includes('paper'));
       });
 
       // Score by keyword relevance
@@ -440,7 +447,7 @@ serve(async (req) => {
         return { ...c, similarity: score };
       }).filter((c: any) => c.similarity > 0)
         .sort((a: any, b: any) => b.similarity - a.similarity)
-        .slice(0, 15);
+        .slice(0, 30);
 
       console.log(`search_only: ${paperChunks.length} paper chunks, ${scored.length} matched`);
 
