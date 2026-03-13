@@ -5,6 +5,7 @@ import { RandomChatbotBackground } from '@/components/ui/random-chatbot-backgrou
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -45,6 +46,7 @@ export const CIEPremiumPage = () => {
     examDates: CIE_ECONOMICS_EXAMS,
     examSubjectName: "CIE Economics",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    customPastPaperContent: <DynamicPastPaperFinder productId={CIE_PRODUCT_ID} subjectName="CIE Economics" tier="deluxe" />,
   };
 
   return (

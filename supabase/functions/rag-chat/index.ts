@@ -412,7 +412,8 @@ serve(async (req) => {
       const { data: allChunks, error: chunkError } = await supabaseAdmin
         .from('document_chunks')
         .select('id, content, metadata')
-        .eq('product_id', product_id);
+        .eq('product_id', product_id)
+        .limit(5000);
 
       if (chunkError || !allChunks) {
         console.error('search_only chunk fetch error:', chunkError);

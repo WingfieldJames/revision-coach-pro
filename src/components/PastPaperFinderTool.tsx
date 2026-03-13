@@ -100,13 +100,18 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
     }).slice(0, 8);
   }, [searchQuery, specPoints]);
 
-  // Find questions matching selected spec point
+  // Find questions matching selected spec point, filtered by tier
   const matchedQuestions = useMemo(() => {
     if (!selectedSpec) return [];
-    return questions.filter(q =>
+    let filtered = questions.filter(q =>
       q.specCodes.some(code => code === selectedSpec.code)
-    ).sort((a, b) => b.year - a.year || a.number.localeCompare(b.number));
-  }, [selectedSpec, questions]);
+    );
+    // Free users only get 2023-2024; deluxe gets all years
+    if (tier === 'free') {
+      filtered = filtered.filter(q => q.year >= 2023);
+    }
+    return filtered.sort((a, b) => b.year - a.year || a.number.localeCompare(b.number));
+  }, [selectedSpec, questions, tier]);
 
   const handleSearch = () => {
     if (selectedSpec) {
@@ -180,7 +185,9 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
         <div className="max-h-[350px] overflow-y-auto space-y-2 pr-1">
           {matchedQuestions.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-sm text-muted-foreground">No questions found for this spec point in 2023–2024 papers.</p>
+              <p className="text-sm text-muted-foreground">
+                No questions found for this spec point{tier === 'free' ? ' in 2023–2024 papers' : ''}.
+              </p>
             </div>
           ) : (
             matchedQuestions.map((q, idx) => (
