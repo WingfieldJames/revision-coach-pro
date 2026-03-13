@@ -447,7 +447,7 @@ serve(async (req) => {
         return { ...c, similarity: score };
       }).filter((c: any) => c.similarity > 0)
         .sort((a: any, b: any) => b.similarity - a.similarity)
-        .slice(0, 15);
+        .slice(0, 30);
 
       console.log(`search_only: ${paperChunks.length} paper chunks, ${scored.length} matched`);
 
