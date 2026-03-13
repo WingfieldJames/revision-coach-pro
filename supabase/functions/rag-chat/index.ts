@@ -407,7 +407,9 @@ serve(async (req) => {
       const PAPER_CONTENT_TYPES = [
         'paper_1', 'paper_2', 'paper_3',
         'past_paper', 'past_paper_qp', 'combined',
+        'question', 'paper',
       ];
+      const EXCLUDED_CONTENT_TYPES = ['past_paper_ms', 'mark_scheme', 'specification', 'system_prompt', 'exam_technique'];
 
       const { data: allChunks, error: chunkError } = await supabaseAdmin
         .from('document_chunks')
