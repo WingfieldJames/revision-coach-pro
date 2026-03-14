@@ -5,10 +5,11 @@ import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { AQA_CHEMISTRY_EXAMS } from '@/components/ExamCountdown';
+import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 
 const AQA_CHEMISTRY_PRODUCT_ID = "3e5bf02e-1424-4bb3-88f9-2a9c58798444";
 
-const AQA_CHEMISTRY_PROMPTS = [
+const DEFAULT_PROMPTS = [
   { text: "Explain the mechanism of nucleophilic substitution" },
   { text: "What is Le Chatelier's principle?" },
   { text: "How do I approach a 6-mark question?" },
@@ -17,16 +18,34 @@ const AQA_CHEMISTRY_PROMPTS = [
 
 export const AQAChemistryFreeVersionPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
+  const tc = useTrainerConfig(AQA_CHEMISTRY_PRODUCT_ID);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
+
+  const prompts = tc.suggested_prompts.length > 0 ? tc.suggested_prompts : DEFAULT_PROMPTS;
+  const examDates = tc.exam_dates.length > 0 ? tc.exam_dates : AQA_CHEMISTRY_EXAMS;
+
+  const sharedProps = {
+    subjectName: "AQA Chemistry",
+    productId: AQA_CHEMISTRY_PRODUCT_ID,
+    productSlug: "aqa-chemistry",
+    showMyAI: resolveFeature(tc, 'my_ai', true),
+    showEssayMarker: resolveFeature(tc, 'essay_marker', true),
+    showPastPaperFinder: resolveFeature(tc, 'past_papers', true),
+    showExamCountdown: resolveFeature(tc, 'exam_countdown', true),
+    examDates,
+    examSubjectName: "AQA Chemistry",
+    onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead title="Free A* AI – AQA Chemistry A-Level Revision | Try Now" description="Try A* AI free for AQA Chemistry." canonical="https://astarai.co.uk/aqa-chemistry-free-version" />
       <RandomChatbotBackground />
-      <ChatbotSidebar subjectName="AQA Chemistry" productId={AQA_CHEMISTRY_PRODUCT_ID} productSlug="aqa-chemistry" showMyAI showEssayMarker showPastPaperFinder showExamCountdown examDates={AQA_CHEMISTRY_EXAMS} examSubjectName="AQA Chemistry" essayMarkerLabel="6-Marker Analysis" essayMarkerFixedMark={6} onEssayMarkerSubmit={handleEssayMarkerSubmit} />
-      <ChatbotToolbar subjectName="AQA Chemistry" productId={AQA_CHEMISTRY_PRODUCT_ID} productSlug="aqa-chemistry" showMyAI showEssayMarker showPastPaperFinder showExamCountdown examDates={AQA_CHEMISTRY_EXAMS} examSubjectName="AQA Chemistry" essayMarkerLabel="6-Marker Analysis" essayMarkerFixedMark={6} onEssayMarkerSubmit={handleEssayMarkerSubmit} />
+      <ChatbotSidebar {...sharedProps} />
+      <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={AQA_CHEMISTRY_PRODUCT_ID} subjectName="AQA Chemistry" subjectDescription="Your personal A* Chemistry tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Chemistry specification" placeholder="Ask about organic, inorganic, or physical chemistry..." suggestedPrompts={AQA_CHEMISTRY_PROMPTS} chatRef={chatRef} />
+        <RAGChat productId={AQA_CHEMISTRY_PRODUCT_ID} subjectName="AQA Chemistry" subjectDescription="Your personal A* Chemistry tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Chemistry specification" placeholder="Ask about organic, inorganic, or physical chemistry..." suggestedPrompts={prompts} chatRef={chatRef} />
       </div>
     </div>
   );

@@ -5,10 +5,11 @@ import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 
 const AQA_PRODUCT_ID = "17ade690-8c44-4961-83b5-0edf42a9faea";
 
-const AQA_ECONOMICS_FREE_PROMPTS = [
+const DEFAULT_PROMPTS = [
   { text: "Explain Spec Point (4.1.5 Market Structures)" },
   { text: "Find all past exam questions on Economic Growth" },
   { text: "Layout the structure of the exam" },
@@ -17,20 +18,25 @@ const AQA_ECONOMICS_FREE_PROMPTS = [
 
 export const AQAFreeVersionPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
+  const tc = useTrainerConfig(AQA_PRODUCT_ID);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
+
+  const prompts = tc.suggested_prompts.length > 0 ? tc.suggested_prompts : DEFAULT_PROMPTS;
+  const examDates = tc.exam_dates.length > 0 ? tc.exam_dates : AQA_ECONOMICS_EXAMS;
 
   const sharedProps = {
     subjectName: "AQA Economics",
     productId: AQA_PRODUCT_ID,
     productSlug: "aqa-economics",
-    showMyAI: true,
-    showPastPaperFinder: true,
+    showMyAI: resolveFeature(tc, 'my_ai', true),
+    showPastPaperFinder: resolveFeature(tc, 'past_papers', true),
     pastPaperBoard: "aqa" as const,
-    showEssayMarker: true,
-    showExamCountdown: true,
-    examDates: AQA_ECONOMICS_EXAMS,
+    showEssayMarker: resolveFeature(tc, 'essay_marker', true),
+    showExamCountdown: resolveFeature(tc, 'exam_countdown', true),
+    examDates,
     examSubjectName: "AQA Economics",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
   };
 
   return (
@@ -40,7 +46,7 @@ export const AQAFreeVersionPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={AQA_PRODUCT_ID} subjectName="AQA Economics" subjectDescription="Your free AQA Economics revision assistant" footerText="A* AI can make mistakes. Verify important info." placeholder="Ask any AQA Economics question..." suggestedPrompts={AQA_ECONOMICS_FREE_PROMPTS} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
+        <RAGChat productId={AQA_PRODUCT_ID} subjectName="AQA Economics" subjectDescription="Your free AQA Economics revision assistant" footerText="A* AI can make mistakes. Verify important info." placeholder="Ask any AQA Economics question..." suggestedPrompts={prompts} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
       </div>
     </div>
   );

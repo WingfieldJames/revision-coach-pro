@@ -6,10 +6,11 @@ import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
+import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 
 const EDEXCEL_MATHS_APPLIED_PRODUCT_ID = "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d";
 
-const EDEXCEL_MATHS_APPLIED_PROMPTS = [
+const DEFAULT_PROMPTS = [
   { text: "Explain Newton's second law problems" },
   { text: "How do I approach a hypothesis test?" },
   { text: "Help me with projectile motion questions" },
@@ -20,6 +21,7 @@ export const EdexcelMathsAppliedFreeVersionPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const tc = useTrainerConfig(EDEXCEL_MATHS_APPLIED_PRODUCT_ID);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
   const handleModeChange = (mode: 'pure' | 'applied') => {
@@ -28,23 +30,27 @@ export const EdexcelMathsAppliedFreeVersionPage = () => {
     }
   };
 
+  const prompts = tc.suggested_prompts.length > 0 ? tc.suggested_prompts : DEFAULT_PROMPTS;
+  const examDates = tc.exam_dates.length > 0 ? tc.exam_dates : EDEXCEL_MATHS_EXAMS;
+
   const sharedProps = {
     subjectName: "Edexcel Maths (Applied)",
     productId: EDEXCEL_MATHS_APPLIED_PRODUCT_ID,
     productSlug: "edexcel-mathematics-applied",
-    showMyAI: true,
-    showPastPaperFinder: true,
+    showMyAI: resolveFeature(tc, 'my_ai', true),
+    showPastPaperFinder: resolveFeature(tc, 'past_papers', true),
     pastPaperBoard: "edexcel-maths-applied" as const,
-    showRevisionGuide: true,
+    showRevisionGuide: resolveFeature(tc, 'revision_guide', true),
     revisionGuideBoard: "edexcel-maths-applied" as const,
-    showGradeBoundaries: true,
+    showGradeBoundaries: resolveFeature(tc, 'grade_boundaries', true),
     gradeBoundariesSubject: "maths" as const,
-    showEssayMarker: true,
-    showExamCountdown: true,
-    examDates: EDEXCEL_MATHS_EXAMS,
+    showEssayMarker: resolveFeature(tc, 'essay_marker', true),
+    showExamCountdown: resolveFeature(tc, 'exam_countdown', true),
+    examDates,
     examSubjectName: "Edexcel Maths",
-    showMyMistakes: true,
+    showMyMistakes: resolveFeature(tc, 'my_mistakes', true),
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     showMathsModeSwitcher: true,
     mathsMode: 'applied' as const,
     onMathsModeChange: handleModeChange,
@@ -57,7 +63,7 @@ export const EdexcelMathsAppliedFreeVersionPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={EDEXCEL_MATHS_APPLIED_PRODUCT_ID} subjectName="Edexcel Mathematics Applied" subjectDescription="Your personal A* Stats & Mechanics tutor. Ask me anything!" footerText="Powered by A* AI • Edexcel Mathematics Applied (Stats & Mechanics)" placeholder="Ask about statistics, mechanics, hypothesis testing..." suggestedPrompts={EDEXCEL_MATHS_APPLIED_PROMPTS} chatRef={chatRef} />
+        <RAGChat productId={EDEXCEL_MATHS_APPLIED_PRODUCT_ID} subjectName="Edexcel Mathematics Applied" subjectDescription="Your personal A* Stats & Mechanics tutor. Ask me anything!" footerText="Powered by A* AI • Edexcel Mathematics Applied (Stats & Mechanics)" placeholder="Ask about statistics, mechanics, hypothesis testing..." suggestedPrompts={prompts} chatRef={chatRef} />
       </div>
     </div>
   );
