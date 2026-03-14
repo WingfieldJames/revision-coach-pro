@@ -11,9 +11,10 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
+import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 
 const EDEXCEL_MATHS_SLUG = 'edexcel-mathematics';
-const EDEXCEL_MATHS_PROMPTS = [
+const DEFAULT_PROMPTS = [
   { text: "Explain integration by parts" },
   { text: "How do I approach a proof question?" },
   { text: "Find past exam questions on differentiation" },
@@ -27,6 +28,7 @@ export const EdexcelMathsPremiumPage = () => {
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const tc = useTrainerConfig(productId);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
   const handleModeChange = (mode: 'pure' | 'applied') => {
@@ -52,23 +54,27 @@ export const EdexcelMathsPremiumPage = () => {
   if (!user) return (<div className="min-h-screen bg-background flex flex-col"><Header /><div className="flex-1 flex items-center justify-center"><div className="text-center max-w-md px-6"><h1 className="text-2xl font-bold mb-4">Sign In Required</h1><Button variant="brand" onClick={() => navigate('/login')}>Sign In</Button></div></div></div>);
   if (!hasAccess || !productId) return (<div className="min-h-screen bg-background flex flex-col"><Header /><div className="flex-1 flex items-center justify-center"><div className="text-center max-w-md px-6"><h1 className="text-2xl font-bold mb-4">Premium Access Required</h1><div className="flex flex-col gap-3"><Button variant="brand" onClick={() => navigate('/compare')}>View Plans</Button><Button variant="outline" onClick={() => navigate('/edexcel-maths-free-version')}>Try Free Version</Button></div></div></div></div>);
 
+  const prompts = tc.suggested_prompts.length > 0 ? tc.suggested_prompts : DEFAULT_PROMPTS;
+  const examDates = tc.exam_dates.length > 0 ? tc.exam_dates : EDEXCEL_MATHS_EXAMS;
+
   const sharedProps = {
     subjectName: "Edexcel Maths (Pure)",
     productId,
     productSlug: "edexcel-mathematics",
-    showMyAI: true,
-    showPastPaperFinder: true,
+    showMyAI: resolveFeature(tc, 'my_ai', true),
+    showPastPaperFinder: resolveFeature(tc, 'past_papers', true),
     pastPaperBoard: "edexcel-maths" as const,
-    showRevisionGuide: true,
+    showRevisionGuide: resolveFeature(tc, 'revision_guide', true),
     revisionGuideBoard: "edexcel-maths" as const,
-    showGradeBoundaries: true,
+    showGradeBoundaries: resolveFeature(tc, 'grade_boundaries', true),
     gradeBoundariesSubject: "maths" as const,
-    showEssayMarker: true,
-    showExamCountdown: true,
-    examDates: EDEXCEL_MATHS_EXAMS,
+    showEssayMarker: resolveFeature(tc, 'essay_marker', true),
+    showExamCountdown: resolveFeature(tc, 'exam_countdown', true),
+    examDates,
     examSubjectName: "Edexcel Maths",
-    showMyMistakes: true,
+    showMyMistakes: resolveFeature(tc, 'my_mistakes', true),
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     showMathsModeSwitcher: true,
     mathsMode: 'pure' as const,
     onMathsModeChange: handleModeChange,
@@ -81,7 +87,7 @@ export const EdexcelMathsPremiumPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={productId} subjectName="Edexcel Mathematics Deluxe" subjectDescription="Your personal A* Maths tutor. Ask me anything!" footerText="Powered by A* AI • Trained on Edexcel Mathematics past papers & mark schemes" placeholder="Ask me anything about Edexcel A-Level Maths..." suggestedPrompts={EDEXCEL_MATHS_PROMPTS} chatRef={chatRef} />
+        <RAGChat productId={productId} subjectName="Edexcel Mathematics Deluxe" subjectDescription="Your personal A* Maths tutor. Ask me anything!" footerText="Powered by A* AI • Trained on Edexcel Mathematics past papers & mark schemes" placeholder="Ask me anything about Edexcel A-Level Maths..." suggestedPrompts={prompts} chatRef={chatRef} />
       </div>
     </div>
   );

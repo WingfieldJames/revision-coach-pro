@@ -5,10 +5,11 @@ import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
+import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 
 const OCR_PHYSICS_PRODUCT_ID = "ecd5978d-3bf4-4b9c-993f-30b7f3a0f197";
 
-const OCR_PHYSICS_PROMPTS = [
+const DEFAULT_PROMPTS = [
   { text: "Explain Newton's laws of motion" },
   { text: "What is electromagnetic induction?" },
   { text: "How do I approach a 6-mark question?" },
@@ -17,20 +18,25 @@ const OCR_PHYSICS_PROMPTS = [
 
 export const OCRPhysicsFreeVersionPage = () => {
   const chatRef = useRef<RAGChatRef>(null);
+  const tc = useTrainerConfig(OCR_PHYSICS_PRODUCT_ID);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
+
+  const prompts = tc.suggested_prompts.length > 0 ? tc.suggested_prompts : DEFAULT_PROMPTS;
+  const examDates = tc.exam_dates.length > 0 ? tc.exam_dates : OCR_PHYSICS_EXAMS;
 
   const sharedProps = {
     subjectName: "OCR Physics",
     productId: OCR_PHYSICS_PRODUCT_ID,
     productSlug: "ocr-physics",
-    showMyAI: true,
-    showPastPaperFinder: true,
+    showMyAI: resolveFeature(tc, 'my_ai', true),
+    showPastPaperFinder: resolveFeature(tc, 'past_papers', true),
     pastPaperBoard: "ocr-physics" as const,
-    showEssayMarker: true,
-    showExamCountdown: true,
-    examDates: OCR_PHYSICS_EXAMS,
+    showEssayMarker: resolveFeature(tc, 'essay_marker', true),
+    showExamCountdown: resolveFeature(tc, 'exam_countdown', true),
+    examDates,
     examSubjectName: "OCR Physics",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
   };
 
   return (
@@ -40,7 +46,7 @@ export const OCRPhysicsFreeVersionPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={OCR_PHYSICS_PRODUCT_ID} subjectName="OCR Physics" subjectDescription="Your personal A* Physics tutor. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Physics specification" placeholder="Ask about mechanics, waves, electricity..." suggestedPrompts={OCR_PHYSICS_PROMPTS} chatRef={chatRef} />
+        <RAGChat productId={OCR_PHYSICS_PRODUCT_ID} subjectName="OCR Physics" subjectDescription="Your personal A* Physics tutor. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Physics specification" placeholder="Ask about mechanics, waves, electricity..." suggestedPrompts={prompts} chatRef={chatRef} />
       </div>
     </div>
   );

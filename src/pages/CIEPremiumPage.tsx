@@ -9,10 +9,11 @@ import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
+import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 
 const CIE_PRODUCT_ID = "9a710cf9-0523-4c1f-82c6-0e02b19087e5";
 
-const CIE_ECONOMICS_PROMPTS = [
+const DEFAULT_PROMPTS = [
   { text: "Explain the difference between demand-pull and cost-push inflation" },
   { text: "What are the characteristics of perfect competition?" },
   { text: "Help me understand the Phillips Curve" },
@@ -23,6 +24,7 @@ export const CIEPremiumPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const chatRef = useRef<RAGChatRef>(null);
+  const tc = useTrainerConfig(CIE_PRODUCT_ID);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
 
   useEffect(() => {
@@ -35,17 +37,21 @@ export const CIEPremiumPage = () => {
     checkAccess();
   }, [user, loading, navigate]);
 
+  const prompts = tc.suggested_prompts.length > 0 ? tc.suggested_prompts : DEFAULT_PROMPTS;
+  const examDates = tc.exam_dates.length > 0 ? tc.exam_dates : CIE_ECONOMICS_EXAMS;
+
   const sharedProps = {
     subjectName: "CIE Economics",
     productId: CIE_PRODUCT_ID,
     productSlug: "cie-economics",
-    showMyAI: true,
-    showPastPaperFinder: true,
-    showEssayMarker: true,
-    showExamCountdown: true,
-    examDates: CIE_ECONOMICS_EXAMS,
+    showMyAI: resolveFeature(tc, 'my_ai', true),
+    showPastPaperFinder: resolveFeature(tc, 'past_papers', true),
+    showEssayMarker: resolveFeature(tc, 'essay_marker', true),
+    showExamCountdown: resolveFeature(tc, 'exam_countdown', true),
+    examDates,
     examSubjectName: "CIE Economics",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
+    essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customPastPaperContent: <DynamicPastPaperFinder productId={CIE_PRODUCT_ID} subjectName="CIE Economics" tier="deluxe" />,
   };
 
@@ -56,7 +62,7 @@ export const CIEPremiumPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={CIE_PRODUCT_ID} subjectName="CIE Economics Deluxe" subjectDescription="Your personal A* CIE Economics tutor with full past paper access. Ask me anything!" footerText="Powered by A* AI • Trained on CIE Economics specification" placeholder="Ask any CIE Economics question..." suggestedPrompts={CIE_ECONOMICS_PROMPTS} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
+        <RAGChat productId={CIE_PRODUCT_ID} subjectName="CIE Economics Deluxe" subjectDescription="Your personal A* CIE Economics tutor with full past paper access. Ask me anything!" footerText="Powered by A* AI • Trained on CIE Economics specification" placeholder="Ask any CIE Economics question..." suggestedPrompts={prompts} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
       </div>
     </div>
   );
