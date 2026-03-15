@@ -107,7 +107,7 @@ export const HomePage = () => {
     }
   };
 
-  const subjects = ["Economics", "Computing", "Chemistry", "Psychology", "Physics", "Mathematics"];
+  const subjects = ["Economics", "Computing", "Chemistry", "Psychology", "Physics", "Maths"];
   const [currentSubjectIndex, setCurrentSubjectIndex] = React.useState(0);
 
   React.useEffect(() => {

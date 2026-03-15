@@ -84,6 +84,7 @@ const WEBSITE_FEATURES = [
   { id: "past_papers", label: "Past Papers", description: "Searchable past paper archive with mark schemes", icon: FileText },
   { id: "exam_countdown", label: "Exam Countdown", description: "Live countdown timer to upcoming exams", icon: Timer },
   { id: "revision_guide", label: "Revision Guide", description: "AI-generated revision notes by topic", icon: BookMarked },
+  { id: "grade_boundaries", label: "Grade Boundaries", description: "View grade boundary data for the subject", icon: BarChart3 },
   { id: "my_mistakes", label: "My Mistakes", description: "Spaced repetition tracker for questions students got wrong", icon: Clock },
 ] as const;
 

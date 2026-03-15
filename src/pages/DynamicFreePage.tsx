@@ -51,15 +51,23 @@ export const DynamicFreePage = () => {
   const subjectName = `${product.exam_board} ${product.subject}`;
   const examDates: ExamDate[] = (trainer?.exam_dates || []).filter((d: any) => d.name && d.date).map((d: any) => ({ name: d.name, date: new Date(d.date), description: d.description || '' }));
 
+  // Determine diagram subject based on product subject
+  const subjectLower = product.subject.toLowerCase();
+  const diagramSubject: 'economics' | 'cs' = subjectLower.includes('computer') ? 'cs' : 'economics';
+
   const sharedProps = {
     subjectName,
     productId: product.id,
     productSlug: product.slug,
     showMyAI: hasFeature('my_ai'),
+    showDiagramTool: hasFeature('diagram_generator'),
+    diagramSubject,
+    customDiagramData: trainer?.diagram_library || undefined,
     showPastPaperFinder: hasFeature('past_papers'),
     showRevisionGuide: hasFeature('revision_guide'),
     showEssayMarker: hasFeature('essay_marker'),
     showExamCountdown: hasFeature('exam_countdown'),
+    showGradeBoundaries: hasFeature('grade_boundaries'),
     examDates,
     examSubjectName: subjectName,
     showMyMistakes: hasFeature('my_mistakes'),
