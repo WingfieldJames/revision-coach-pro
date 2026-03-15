@@ -258,43 +258,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
           <>
             <ScrollArea className="flex-1">
               <div className="px-3 py-3">
-                {/* Tools Section - FIRST */}
-                <div className="mb-3">
-                  <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Tools</p>
-                  <button onClick={() => setShowBrainViewer(true)} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
-                    <Brain className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span>A* Brain</span>
-                  </button>
-                  <button onClick={() => setShowExamCalendar(true)} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
-                    <CalendarDays className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span>Exam Calendar</span>
-                  </button>
-                  <button onClick={() => setShowRevisionTimetable(true)} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
-                    <Clock3 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span>Revision Timetable</span>
-                  </button>
-                </div>
-
-                <Separator className="my-2" />
-
-                {/* Trainer + Navigation */}
-                <div className="mb-3">
-                  <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Navigation</p>
-                  <button onClick={() => setShowTrainerInfo(true)} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
-                    <User className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span>Your AI Trainer</span>
-                  </button>
-                  <button onClick={() => navigate('/')} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
-                    <Home className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span>Home</span>
-                  </button>
-                  <button onClick={() => navigate('/compare')} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left group">
-                    <GraduationCap className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span>All Subjects</span>
-                  </button>
-                </div>
-
-                <Separator className="my-2" />
+                {/* Chat History - FIRST */}
 
                 {/* Chat History */}
                 <div className="mb-3">

@@ -33,7 +33,7 @@ export const OCRCSFreeVersionPage = () => {
     pastPaperBoard: "ocr-cs" as const,
     showRevisionGuide: resolveFeature(tc, 'revision_guide', true),
     revisionGuideBoard: "ocr-cs" as const,
-    showDiagramTool: resolveFeature(tc, 'diagram_tool', true),
+    showDiagramTool: resolveFeature(tc, 'diagram_generator', true),
     diagramSubject: "cs" as const,
     showEssayMarker: resolveFeature(tc, 'essay_marker', true),
     showExamCountdown: resolveFeature(tc, 'exam_countdown', true),
