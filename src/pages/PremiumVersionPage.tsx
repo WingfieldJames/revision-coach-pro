@@ -11,6 +11,7 @@ import { checkProductAccess } from '@/lib/productAccess';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
