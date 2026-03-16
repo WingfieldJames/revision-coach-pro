@@ -185,11 +185,17 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
       return;
     }
 
-    // For free tier, check usage limit before proceeding
+    // For free tier, check usage limit before proceeding — show toast instead of paywall
     if (tier === 'free' && user) {
       if (monthlyUsage >= FREE_MONTHLY_ESSAY_LIMIT) {
-        setMonthlyUsage(monthlyUsage);
-        toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
+        toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited essay marking.', {
+          description: 'Your free uses reset at the start of each month.',
+          duration: 5000,
+          action: {
+            label: 'Upgrade',
+            onClick: () => handleUpgrade('lifetime'),
+          },
+        });
         return;
       }
     }

@@ -200,9 +200,21 @@ export const SignupPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                   className="w-full backdrop-blur-sm text-foreground bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
                 />
+                {password.length > 0 && passwordErrors.length > 0 && (
+                  <div className="mt-1.5 space-y-0.5">
+                    {passwordErrors.map((err, i) => (
+                      <p key={i} className="text-xs text-destructive flex items-center gap-1">
+                        <span>•</span> {err}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {password.length > 0 && passwordErrors.length === 0 && (
+                  <p className="text-xs text-green-600 mt-1">✓ Strong password</p>
+                )}
               </div>
 
               {/* Confirm Password Input */}
@@ -214,7 +226,7 @@ export const SignupPage = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                   className="w-full backdrop-blur-sm text-foreground bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
                 />
               </div>

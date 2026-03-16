@@ -76,9 +76,9 @@ const SUBJECT_COLORS = [
 ];
 
 /* ─── storage keys ─── */
-const SUBJECTS_KEY = "astar_timetable_subjects_v4";
-const SLOTS_KEY = "astar_timetable_free_slots_v2";
-const GENERATED_KEY = "astar_timetable_generated_v3";
+const SUBJECTS_KEY_PREFIX = "astar_timetable_subjects_v5_";
+const SLOTS_KEY_PREFIX = "astar_timetable_free_slots_v3_";
+const GENERATED_KEY_PREFIX = "astar_timetable_generated_v4_";
 
 /* ─── types ─── */
 interface Subject {
