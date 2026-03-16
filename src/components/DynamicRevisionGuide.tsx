@@ -99,12 +99,12 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
           const specs = chunks
             .filter((c: any) => String(c.metadata?.content_type || '') === 'specification')
             .map((c: any) => {
-              const topic = c.metadata?.topic || '';
-              const specId = c.metadata?.spec_id || '';
-              // Extract code and name from topic like "3.1.1 Atomic Structure"
+              const topic = String(c.metadata?.topic || '');
+              const specId = String(c.metadata?.spec_id || '');
+              // Extract code and name from topic like "3.1.1 Atomic Structure" or "1.1.1 Economics as a social science: ..."
               const codeMatch = topic.match(/^([\d.]+)\s+(.+)/);
-              const code = codeMatch ? codeMatch[1] : specId || topic.slice(0, 10);
-              const name = codeMatch ? codeMatch[2] : topic || c.content.slice(0, 80);
+              const code = codeMatch ? codeMatch[1] : specId || '';
+              const name = codeMatch ? `${codeMatch[1]} ${codeMatch[2]}` : topic || c.content.slice(0, 80);
               // Build keywords from content
               const keywords = (c.content || '').toLowerCase()
                 .split(/[\s,()[\]:;.]+/)

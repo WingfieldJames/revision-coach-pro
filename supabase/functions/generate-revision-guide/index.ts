@@ -30,7 +30,7 @@ serve(async (req) => {
       user_id,
     } = await req.json();
 
-    if (!spec_code || !spec_name || !product_id) {
+    if (!spec_name || !product_id) {
       return new Response(
         JSON.stringify({ error: "spec_code, spec_name, and product_id are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
