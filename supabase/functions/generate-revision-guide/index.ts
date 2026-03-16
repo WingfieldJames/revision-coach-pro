@@ -23,6 +23,7 @@ serve(async (req) => {
       spec_code,
       spec_name,
       board,
+      subject_name = "",
       options = [],
       past_paper_context = "",
       diagram_context = "",
