@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const EDEXCEL_MATHS_SLUG = 'edexcel-mathematics';
 const DEFAULT_PROMPTS = [
