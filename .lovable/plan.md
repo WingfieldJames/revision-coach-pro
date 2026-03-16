@@ -1,38 +1,69 @@
 
 
-## Deploy OCR Economics to Website
+## Root Cause: Edexcel Economics Past Paper Finder Uses Hardcoded Data, Not the Database
 
-### Current State
-The OCR Economics project exists in `trainer_projects` (id: `ec6213b9-...`) with a linked product (id: `5e5045ca-...`, slug: `ocr-economics`), but:
-- Product is **inactive** (`active: false`) -- not visible on the website
-- **231 past paper chunks** are already in `document_chunks` (all past papers processed)
-- **268 specification points** are staged but NOT yet deployed to `document_chunks`
-- **System prompt** (6,021 chars) exists but NOT deployed to `document_chunks`
-- **No exam technique** text has been submitted
+### The Problem
 
-### What it's trained on
-- **Past Papers**: 24 PDFs across 4 years (2021-2024), 3 papers each (Microeconomics P1, Macroeconomics P2, Themes in Economics P3) -- both QPs and mark schemes, totalling 231 combined chunks
-- **Specification**: 268 points (staged, needs embedding + deploying)
-- **System Prompt**: 6,021 character custom prompt
-- **Trainer**: Henry Li, LSE PPE Student
-- **Features enabled**: My AI, Past Papers, Revision Guide, Diagram Generator, Essay Marker, Exam Countdown, My Mistakes, Grade Boundaries
-- **Essay Marker marks**: 3, 4, 8, 12, 25
-- **Exam dates**: Paper 1 (2026-05-11), Paper 2 (2026-05-18), Paper 3 (2026-06-04)
-- **Suggested prompts**: 4 custom prompts configured
+Edexcel Economics is a **legacy subject** with its own dedicated page (`FreeVersionPage.tsx` / `PremiumVersionPage.tsx`). These pages do NOT pass `customPastPaperContent` in their shared props, so the toolbar/sidebar renders the **legacy `PastPaperFinderTool`** component.
 
-### Deployment Plan
+The legacy `PastPaperFinderTool` reads from **hardcoded TypeScript files** (`src/data/edexcelPastPapers.ts`) — it has zero connection to the database. The "Refresh Index" button in the Build portal re-embeds chunks in `document_chunks`, but the legacy component never queries that table.
 
-1. **Call the `deploy-subject` edge function** with the project ID to:
-   - Embed and save the 268 specification points to `document_chunks`
-   - Embed and save the system prompt to `document_chunks`
-   - Set the product `active: true` and update `system_prompt_deluxe`
+### The Two Systems
 
-2. **Verify** the product is active and accessible at `/s/ocr-economics/free` and `/s/ocr-economics/premium`
+```text
+┌─────────────────────────────────────┐
+│  LEGACY subjects (Edexcel Econ,     │
+│  AQA Econ, OCR CS, etc.)           │
+│                                     │
+│  FreeVersionPage / PremiumVersionPage│
+│       ↓                             │
+│  PastPaperFinderTool                │
+│       ↓                             │
+│  src/data/edexcelPastPapers.ts      │  ← HARDCODED arrays
+│  (EDEXCEL_SPEC_POINTS,              │
+│   EDEXCEL_PAST_QUESTIONS)           │
+└─────────────────────────────────────┘
 
-No code changes are needed -- the dynamic route infrastructure (`DynamicFreePage`/`DynamicPremiumPage`) already handles any active product by slug. The deployment is purely a database + edge function operation.
+┌─────────────────────────────────────┐
+│  DYNAMIC subjects (OCR Economics,   │
+│  any new Build-deployed subject)    │
+│                                     │
+│  DynamicFreePage / DynamicPremiumPage│
+│       ↓                             │
+│  customPastPaperContent =           │
+│    <DynamicPastPaperFinder />       │
+│       ↓                             │
+│  rag-chat edge function             │  ← Queries document_chunks DB
+│  (search_only: true)                │
+└─────────────────────────────────────┘
+```
 
-### Technical Details
-- Edge function: `deploy-subject` with `{ project_id: "ec6213b9-b184-41fc-8237-d248025fec28", staged_specifications: [...268 points from trainer_projects], staged_system_prompt: "..." }`
-- Alternatively, call `activate_website: true` to just flip `active` to `true` if specs were already meant to be deployed separately
-- The product will appear on the `/compare` page and be accessible via dynamic routes
+### Why "Refresh Index" Does Nothing for Edexcel Economics
+
+1. You upload past papers in the Build portal → they get processed into `document_chunks` with `product_id = 6dc19d53-...`
+2. You click "Refresh Index" → it re-embeds those chunks (works fine)
+3. Student opens `/free-version` → `FreeVersionPage` renders `PastPaperFinderTool` with `board="edexcel"`
+4. `PastPaperFinderTool` reads from `EDEXCEL_PAST_QUESTIONS` in `src/data/edexcelPastPapers.ts` — **never touches the database**
+
+### The Fix (for all legacy subjects)
+
+For each legacy subject page that has uploaded past papers via Build, pass `customPastPaperContent` with `<DynamicPastPaperFinder />` instead of relying on the hardcoded `PastPaperFinderTool`. This is the same pattern already used by `DynamicFreePage`.
+
+Specifically for Edexcel Economics, add to `FreeVersionPage.tsx` and `PremiumVersionPage.tsx`:
+
+```tsx
+customPastPaperContent: <DynamicPastPaperFinder 
+  productId={EDEXCEL_PRODUCT_ID} 
+  subjectName="Edexcel Economics" 
+  tier="deluxe" 
+/>,
+```
+
+The same change would apply to every other legacy subject (AQA Economics, OCR CS, OCR Physics, AQA Psychology, Edexcel Maths) once their Build-uploaded papers should replace the hardcoded data.
+
+### Summary
+
+- **Error**: Legacy pages use `PastPaperFinderTool` which reads hardcoded `.ts` files, completely disconnected from `document_chunks`
+- **Fix pattern**: Pass `customPastPaperContent={<DynamicPastPaperFinder />}` in shared props for any legacy subject that now has Build-uploaded papers
+- **No edge function or DB changes needed** — just wiring the correct component
 
