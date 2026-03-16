@@ -1,112 +1,102 @@
 
 
-## My Mistakes -- Spaced Repetition Feature
+## Fix DynamicRevisionGuide to Fully Work with Build Data
 
-### Overview
-Add a "My Mistakes" tool to all maths chatbots (Edexcel Pure, Edexcel Applied) and OCR CS, plus make it available in the Build portal for dynamic subjects. Users can log questions they got wrong (image or text), add notes, and get reminded to retry them on a spaced repetition schedule (day 4, 16, 35, 70). A red notification badge shows how many are due for review.
+### Issues Found
 
----
+1. **Wrong board label in AI prompt**: `DynamicRevisionGuide` sends `board: 'dynamic'`, which the edge function maps to `spec_name` as the board label. So the AI gets "studying Aggregate Demand" instead of "studying Edexcel A Level Economics". All 16 pages are affected.
 
-### 1. Database Table
+2. **Past Paper Questions toggle is broken**: The component sends `past_paper_context: ''` (always empty). The edge function only includes past paper questions in the prompt when `past_paper_context` is non-empty (line 244). So the "Past Paper Questions" toggle does nothing.
 
-Create a `user_mistakes` table:
+3. **Edge function queries are not filtered by content_type**: Three "parallel" queries all fetch from `document_chunks` with the same filter (just `product_id`), returning overlapping/duplicate rows instead of targeting spec, technique, and paper chunks separately.
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | PK, default gen_random_uuid() |
-| user_id | uuid | NOT NULL |
-| product_id | uuid | NOT NULL |
-| question_text | text | nullable (user may upload image only) |
-| question_image_url | text | nullable (base64 data URL stored directly) |
-| note | text | nullable |
-| created_at | timestamptz | default now() |
-| next_review_at | timestamptz | default now() + interval '4 days' |
-| review_count | integer | default 0 |
-| completed | boolean | default false |
+### Fix 1: Pass `subject_name` to Edge Function
 
-RLS policies:
-- Users can SELECT, INSERT, UPDATE, DELETE their own rows (`auth.uid() = user_id`)
+**Client (`DynamicRevisionGuide.tsx`)**: Add `subject_name` to the request body instead of relying on `board` for label resolution.
 
-The spaced repetition intervals are: review_count 0 = day 4, 1 = day 16, 2 = day 35, 3 = day 70, 4+ = completed.
-
----
-
-### 2. New Component: `MyMistakesTool.tsx`
-
-Follows the exact same pattern as RevisionGuideTool, ExamCountdown, etc. (header with icon + gradient box, content area).
-
-**Two views:**
-
-**A) Add Mistake View (default)**
-- Upload area for an image (same drag/drop pattern as ImageUploadTool) OR text input for typing the question
-- Text area for a note ("What did I get wrong?")
-- "Save Mistake" button
-
-**B) My Mistakes List View**
-- Toggle between "Add" and "View All" tabs
-- Lists all saved mistakes (newest first), each showing:
-  - Question preview (thumbnail if image, text snippet if text)
-  - Note
-  - Next review date or "Due now" badge
-  - "Mark as Reviewed" button (advances to next interval)
-  - Delete option
-
-**Notification count:** Computed client-side by counting rows where `next_review_at <= now()` and `completed = false`.
-
----
-
-### 3. Header Integration
-
-- Add new props to Header: `showMyMistakes?: boolean`
-- Add state: `myMistakesOpen`
-- Add Popover between Revision Guide and Exam Countdown
-- Icon: `AlertCircle` or `RotateCcw` from lucide-react
-- Button label: "My Mistakes"
-- Red notification badge: small absolute-positioned circle with count, only shown when due count > 0
-- Requires `productId` and user auth to query/insert
-
----
-
-### 4. Pages to Update
-
-Add `showMyMistakes` prop to Header in these pages:
-- `EdexcelMathsFreeVersionPage.tsx`
-- `EdexcelMathsPremiumPage.tsx`
-- `EdexcelMathsAppliedFreeVersionPage.tsx`
-- `EdexcelMathsAppliedPremiumPage.tsx`
-- `OCRCSFreeVersionPage.tsx`
-- `OCRCSPremiumPage.tsx`
-
----
-
-### 5. Build Portal Integration
-
-Add to the `WEBSITE_FEATURES` array in `BuildPage.tsx`:
-```
-{ id: "my_mistakes", label: "My Mistakes", description: "Spaced repetition tracker for questions students got wrong", icon: RotateCcw }
+```typescript
+body: JSON.stringify({
+  product_id: productId,
+  spec_code: selectedSpec.code,
+  spec_name: selectedSpec.name,
+  board: 'dynamic',
+  subject_name: subjectName, // NEW — "Edexcel Economics", "OCR Computer Science", etc.
+  options: enabledOptions.map(o => o.id),
+  ...
+})
 ```
 
-Add to `DynamicFreePage.tsx` and `DynamicPremiumPage.tsx`:
+**Edge function**: Accept `subject_name` and use it for the `dynamic` board label:
+```typescript
+board === "dynamic" ? (subject_name || spec_name) :
 ```
-showMyMistakes={hasFeature('my_mistakes')}
+
+### Fix 2: Server-Side Past Paper Retrieval
+
+Instead of requiring the client to send past paper context (which only legacy `RevisionGuideTool` could do with hardcoded data), make the edge function auto-fetch relevant past paper chunks when `past_papers` is in options.
+
+In `generate-revision-guide/index.ts`, after the existing chunk fetching, add a dedicated past paper query:
+
+```typescript
+let pastPaperContext = past_paper_context; // Use client-provided if available (legacy)
+
+// If client didn't provide past paper context but option is enabled, fetch from DB
+if (!pastPaperContext && options.includes("past_papers")) {
+  const { data: paperChunks } = await supabaseAdmin
+    .from("document_chunks")
+    .select("content, metadata")
+    .eq("product_id", product_id)
+    .limit(200);
+  
+  // Filter for past paper chunks matching the topic
+  const matchedPapers = (paperChunks || []).filter(chunk => {
+    const ct = String(chunk.metadata?.content_type || "");
+    if (!ct.includes("paper") && !ct.includes("combined") && !ct.includes("question")) return false;
+    const content = chunk.content.toLowerCase();
+    return specKeywords.filter(kw => content.includes(kw)).length >= 2;
+  }).slice(0, 8);
+  
+  if (matchedPapers.length > 0) {
+    pastPaperContext = matchedPapers.map(p => {
+      const qNum = p.metadata?.question_number || "";
+      const marks = p.metadata?.total_marks || "";
+      const year = p.metadata?.year || "";
+      const paper = p.metadata?.paper_number ? `Paper ${p.metadata.paper_number}` : "";
+      return `- **${year} ${paper} Q${qNum}** (${marks} marks): ${p.content.slice(0, 200)}`;
+    }).join('\n');
+  }
+}
 ```
 
----
+Then use `pastPaperContext` instead of `past_paper_context` in the prompt condition on line 244.
 
-### 6. Files Changed
+### Fix 3: Filter Parallel Queries by Content Type
 
-| File | Change |
-|------|--------|
-| New migration | Create `user_mistakes` table + RLS |
-| `src/components/MyMistakesTool.tsx` | **New file** -- full component |
-| `src/components/Header.tsx` | Add `showMyMistakes` prop, popover, notification badge |
-| `src/pages/EdexcelMathsFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/BuildPage.tsx` | Add to WEBSITE_FEATURES |
-| `src/pages/DynamicFreePage.tsx` | Wire up `showMyMistakes` |
-| `src/pages/DynamicPremiumPage.tsx` | Wire up `showMyMistakes` |
+Replace the three identical queries with properly filtered ones:
+
+```typescript
+const [specResult, techniqueResult, paperResult] = await Promise.all([
+  supabaseAdmin.from("document_chunks").select("content, metadata")
+    .eq("product_id", product_id)
+    .eq("metadata->>content_type", "specification")
+    .limit(50),
+  supabaseAdmin.from("document_chunks").select("content, metadata")
+    .eq("product_id", product_id)
+    .eq("metadata->>content_type", "exam_technique")
+    .limit(20),
+  supabaseAdmin.from("document_chunks").select("content, metadata")
+    .eq("product_id", product_id)
+    .not("metadata->>content_type", "in", "(specification,exam_technique)")
+    .limit(100),
+]);
+```
+
+### Files to Edit
+
+1. **`src/components/DynamicRevisionGuide.tsx`** — Add `subject_name` to request body (1 line)
+2. **`supabase/functions/generate-revision-guide/index.ts`** — Accept `subject_name`, fix board label, add server-side past paper fetch, fix content_type filtering on parallel queries
+
+### No Design Changes
+
+The UI stays exactly the same. These are all backend data-flow fixes to ensure the revision guide produces correct, contextual output using Build-uploaded training data.
 
