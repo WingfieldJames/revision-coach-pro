@@ -43,6 +43,7 @@ export const OCRCSPremiumPage = () => {
     showMyMistakes: resolveFeature(tc, 'my_mistakes', true),
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: <DynamicRevisionGuide productId={OCR_CS_PRODUCT_ID} subjectName="OCR Computer Science" tier="deluxe" />,
   };
 
   return (
