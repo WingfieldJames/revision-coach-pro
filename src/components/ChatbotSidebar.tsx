@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
-  ArrowLeft, Sparkles, Timer, Crown, ChevronRight,
+  ArrowLeft, Sparkles, Timer, Crown, ChevronRight, ChevronDown,
   GraduationCap, Home, MessageSquare, Plus, Trash2, LogIn,
   CalendarDays, Clock3, X, Brain, User,
 } from 'lucide-react';
@@ -16,6 +16,9 @@ import { useChatHistory, ChatConversation } from '@/hooks/useChatHistory';
 import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
 import { ExamDate } from '@/components/ExamCountdown';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,

@@ -1786,7 +1786,7 @@ export function BuildPage() {
                       </div>
                     )}
                     <RefreshIndexButton
-                      productId={product?.product_id || null}
+                      productId={currentProject?.product_id || null}
                       onComplete={() => loadChunkStats()}
                     />
                     {!hasSpec && (
