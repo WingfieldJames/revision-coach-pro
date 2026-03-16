@@ -121,10 +121,10 @@ serve(async (req) => {
 
     // Fetch relevant document chunks for context — targeted queries by content_type
     let trainingContext = "";
+    const specCodeLower = spec_code.toLowerCase();
+    const specNameLower = spec_name.toLowerCase();
+    const specKeywords = specNameLower.split(/[\s,()]+/).filter((w: string) => w.length > 2);
     try {
-      const specCodeLower = spec_code.toLowerCase();
-      const specNameLower = spec_name.toLowerCase();
-      const specKeywords = specNameLower.split(/[\s,()]+/).filter((w: string) => w.length > 2);
 
       // Run parallel queries for different content types
       const [specResult, techniqueResult, paperResult] = await Promise.all([
