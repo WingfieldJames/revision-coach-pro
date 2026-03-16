@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { fileDialogOpen } from '@/lib/fileDialogState';
 import { useNavigate } from 'react-router-dom';
 const DEFAULT_MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
-const FREE_MONTHLY_ESSAY_LIMIT = 1;
+const FREE_MONTHLY_ESSAY_LIMIT = 2;
 
 interface ToolUsageResponse {
   count: number;
