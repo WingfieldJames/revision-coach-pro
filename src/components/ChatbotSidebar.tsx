@@ -25,16 +25,58 @@ import {
 } from '@/components/ui/dialog';
 import { Check } from 'lucide-react';
 
-const SUBJECTS = [
-  { name: 'Edexcel Economics', freePath: '/free-version', premiumPath: '/premium', slug: 'edexcel-economics' },
-  { name: 'AQA Economics', freePath: '/aqa-free-version', premiumPath: '/aqa-premium', slug: 'aqa-economics' },
-  { name: 'CIE Economics', freePath: '/cie-free-version', premiumPath: '/cie-premium', slug: 'cie-economics' },
-  { name: 'OCR Computer Science', freePath: '/ocr-cs-free-version', premiumPath: '/ocr-cs-premium', slug: 'ocr-cs' },
-  { name: 'OCR Physics', freePath: '/ocr-physics-free-version', premiumPath: '/ocr-physics-premium', slug: 'ocr-physics' },
-  { name: 'AQA Chemistry', freePath: '/aqa-chemistry-free-version', premiumPath: '/aqa-chemistry-premium', slug: 'aqa-chemistry' },
-  { name: 'AQA Psychology', freePath: '/aqa-psychology-free-version', premiumPath: '/aqa-psychology-premium', slug: 'aqa-psychology' },
-  { name: 'Edexcel Maths (Pure)', freePath: '/edexcel-maths-free-version', premiumPath: '/edexcel-maths-premium', slug: 'edexcel-maths' },
-  { name: 'Edexcel Maths (Applied)', freePath: '/edexcel-maths-applied-free-version', premiumPath: '/edexcel-maths-applied-premium', slug: 'edexcel-maths-applied' },
+interface SubjectBoard {
+  name: string;
+  freePath: string;
+  premiumPath: string;
+  slug: string;
+}
+
+interface SubjectGroup {
+  subject: string;
+  boards: SubjectBoard[];
+}
+
+const SUBJECT_TREE: SubjectGroup[] = [
+  {
+    subject: 'Economics',
+    boards: [
+      { name: 'Edexcel', freePath: '/free-version', premiumPath: '/premium', slug: 'edexcel-economics' },
+      { name: 'AQA', freePath: '/aqa-free-version', premiumPath: '/aqa-premium', slug: 'aqa-economics' },
+      { name: 'CIE', freePath: '/cie-free-version', premiumPath: '/cie-premium', slug: 'cie-economics' },
+    ],
+  },
+  {
+    subject: 'Computer Science',
+    boards: [
+      { name: 'OCR', freePath: '/ocr-cs-free-version', premiumPath: '/ocr-cs-premium', slug: 'ocr-cs' },
+    ],
+  },
+  {
+    subject: 'Physics',
+    boards: [
+      { name: 'OCR', freePath: '/ocr-physics-free-version', premiumPath: '/ocr-physics-premium', slug: 'ocr-physics' },
+    ],
+  },
+  {
+    subject: 'Chemistry',
+    boards: [
+      { name: 'AQA', freePath: '/aqa-chemistry-free-version', premiumPath: '/aqa-chemistry-premium', slug: 'aqa-chemistry' },
+    ],
+  },
+  {
+    subject: 'Psychology',
+    boards: [
+      { name: 'AQA', freePath: '/aqa-psychology-free-version', premiumPath: '/aqa-psychology-premium', slug: 'aqa-psychology' },
+    ],
+  },
+  {
+    subject: 'Maths',
+    boards: [
+      { name: 'Edexcel (Pure)', freePath: '/edexcel-maths-free-version', premiumPath: '/edexcel-maths-premium', slug: 'edexcel-maths' },
+      { name: 'Edexcel (Applied)', freePath: '/edexcel-maths-applied-free-version', premiumPath: '/edexcel-maths-applied-premium', slug: 'edexcel-maths-applied' },
+    ],
+  },
 ];
 
 export interface ChatbotSidebarProps {
