@@ -51,6 +51,7 @@ const SUBJECT_CONFIGS: Record<GradeBoundarySubject, SubjectConfig> = {
       { year: "2025", "A*": 86.0, A: 71.3, B: 59.3 },
       { year: "2026 (Predicted)", "A*": 88.4, A: 74.3, B: 62.6 },
     ],
+    predictedDotIndices: [1],
     yDomain: [45, 95],
   },
 };
