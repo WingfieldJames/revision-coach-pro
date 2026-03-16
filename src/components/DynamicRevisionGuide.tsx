@@ -216,6 +216,7 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
           spec_code: selectedSpec.code,
           spec_name: selectedSpec.name,
           board: 'dynamic',
+          subject_name: subjectName || 'A Level',
           options: enabledOptions.map(o => o.id),
           past_paper_context: '',
           diagram_context: diagramContext,

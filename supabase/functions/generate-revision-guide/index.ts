@@ -245,8 +245,41 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
 - How to structure responses for maximum marks`;
     }
 
-    if (options.includes("past_papers") && past_paper_context) {
-      prompt += `\n\nInclude a section titled "Real Past Paper Questions" (as a ## heading). List the following real past paper questions:\n\n${past_paper_context}\n\nFor each question, note what the examiner is looking for and key points needed for full marks.`;
+    // Server-side past paper retrieval if client didn't provide context
+    let pastPaperContext = past_paper_context;
+    if (!pastPaperContext && options.includes("past_papers")) {
+      try {
+        const { data: paperChunks } = await supabaseAdmin
+          .from("document_chunks")
+          .select("content, metadata")
+          .eq("product_id", product_id)
+          .not("metadata->>content_type", "in", '("specification","exam_technique")')
+          .limit(200);
+
+        const matchedPapers = (paperChunks || []).filter((chunk: any) => {
+          const ct = String(chunk.metadata?.content_type || "");
+          if (!ct.includes("paper") && !ct.includes("combined") && !ct.includes("question")) return false;
+          const content = chunk.content.toLowerCase();
+          return specKeywords.filter((kw: string) => content.includes(kw)).length >= 2;
+        }).slice(0, 8);
+
+        if (matchedPapers.length > 0) {
+          pastPaperContext = matchedPapers.map((p: any) => {
+            const qNum = p.metadata?.question_number || "";
+            const marks = p.metadata?.total_marks || "";
+            const year = p.metadata?.year || "";
+            const paper = p.metadata?.paper_number ? `Paper ${p.metadata.paper_number}` : "";
+            return `- **${year} ${paper} Q${qNum}** (${marks} marks): ${p.content.slice(0, 300)}`;
+          }).join('\n');
+        }
+        console.log(`Past paper context: ${matchedPapers.length} matched chunks`);
+      } catch (err) {
+        console.error("Error fetching past paper context:", err);
+      }
+    }
+
+    if (options.includes("past_papers") && pastPaperContext) {
+      prompt += `\n\nInclude a section titled "Real Past Paper Questions" (as a ## heading). List the following real past paper questions:\n\n${pastPaperContext}\n\nFor each question, note what the examiner is looking for and key points needed for full marks.`;
     }
 
     prompt += `\n\nCRITICAL FORMATTING RULES:
