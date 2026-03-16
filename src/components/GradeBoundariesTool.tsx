@@ -18,7 +18,6 @@ interface SubjectConfig {
   maxUms: number;
   actualData: Record<string, string | number>[];
   predictedData: Record<string, string | number>[];
-  predictedDotIndices: number[];
   yDomain: [number, number];
 }
 
