@@ -156,6 +156,8 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const [showRevisionTimetable, setShowRevisionTimetable] = useState(false);
   const [showBrainViewer, setShowBrainViewer] = useState(false);
   const [showTrainerInfo, setShowTrainerInfo] = useState(false);
+  const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
+  const [subjectsOpen, setSubjectsOpen] = useState(false);
 
   // Lazy load heavy components
   const ExamCalendarFeature = React.lazy(() => import('@/components/ExamCalendarFeature').then(m => ({ default: m.ExamCalendarFeature })));
