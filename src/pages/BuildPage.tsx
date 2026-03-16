@@ -809,7 +809,7 @@ export function BuildPage() {
     }
   };
 
-  // Direct text entry — submit text straight into document_chunks (per year)
+  // Direct text entry — submit text straight into document_chunks AND create a trainer_upload record so it appears in the UI
   const handleAddText = async (title: string, content: string, year: string) => {
     const product = projects.find(p => p.id === selectedProjectId);
     if (!product?.product_id) {
@@ -827,12 +827,37 @@ export function BuildPage() {
         },
       });
       if (error) throw error;
+
+      // Create a trainer_upload record so the text entry appears alongside AI-processed files
+      if (projectId) {
+        const { error: insertErr } = await supabase
+          .from("trainer_uploads")
+          .insert({
+            project_id: projectId,
+            section_type: "past_paper",
+            year,
+            file_name: title,
+            file_url: `direct_text_${Date.now()}`,
+            processing_status: "done",
+            doc_type: "text",
+            chunks_created: 1,
+          });
+        if (insertErr) console.error("Failed to create upload record:", insertErr);
+
+        // Refresh uploads list so the new entry appears immediately
+        const { data: updatedUploads } = await supabase
+          .from("trainer_uploads")
+          .select("*")
+          .eq("project_id", projectId);
+        setUploads((updatedUploads as TrainerUpload[]) || []);
+      }
+
       markUnsaved();
-      toast({ title: "Text added ✓", description: `"${title}" added to training data.` });
+      toast({ title: "Text added ✓", description: `"${title}" added to training data and will appear in the file list.` });
     } catch (err) {
       console.error("Text entry failed:", err);
       toast({ title: "Failed to add text", description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
-      throw err; // re-throw so the card knows it failed
+      throw err;
     }
   };
 
