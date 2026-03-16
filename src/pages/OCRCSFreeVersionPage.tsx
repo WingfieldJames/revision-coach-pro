@@ -6,6 +6,7 @@ import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { OCR_CS_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const OCR_CS_PRODUCT_ID = "5d05830b-de7b-4206-8f49-6d3695324eb6";
 
