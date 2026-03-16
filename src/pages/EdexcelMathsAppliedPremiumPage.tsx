@@ -13,6 +13,7 @@ import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
 import { checkProductAccess } from '@/lib/productAccess';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const EDEXCEL_MATHS_APPLIED_SLUG = 'edexcel-mathematics-applied';
 const DEFAULT_PROMPTS = [
@@ -76,6 +77,7 @@ export const EdexcelMathsAppliedPremiumPage = () => {
     showMyMistakes: resolveFeature(tc, 'my_mistakes', true),
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: productId ? <DynamicRevisionGuide productId={productId} subjectName="Edexcel Maths (Applied)" tier="deluxe" /> : undefined,
     showMathsModeSwitcher: true,
     mathsMode: 'applied' as const,
     onMathsModeChange: handleModeChange,

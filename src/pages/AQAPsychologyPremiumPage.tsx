@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { AQA_PSYCHOLOGY_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const AQA_PSYCHOLOGY_SLUG = 'aqa-psychology';
 const DEFAULT_PROMPTS = [
@@ -70,6 +71,7 @@ export const AQAPsychologyPremiumPage = () => {
     examSubjectName: "AQA Psychology",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: productId ? <DynamicRevisionGuide productId={productId} subjectName="AQA Psychology" tier="deluxe" /> : undefined,
   };
 
   return (

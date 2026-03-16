@@ -6,6 +6,7 @@ import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { useAuth } from '@/contexts/AuthContext';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,7 @@ export const AQAChemistryPremiumPage = () => {
     examSubjectName: "AQA Chemistry",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: productId ? <DynamicRevisionGuide productId={productId} subjectName="AQA Chemistry" tier="deluxe" /> : undefined,
   };
 
   return (

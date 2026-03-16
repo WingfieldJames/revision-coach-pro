@@ -6,6 +6,7 @@ import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { AQA_CHEMISTRY_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const AQA_CHEMISTRY_PRODUCT_ID = "3e5bf02e-1424-4bb3-88f9-2a9c58798444";
 
@@ -39,6 +40,7 @@ export const AQAChemistryFreeVersionPage = () => {
     examSubjectName: "AQA Chemistry",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: <DynamicRevisionGuide productId={AQA_CHEMISTRY_PRODUCT_ID} subjectName="AQA Chemistry" tier="free" />,
   };
 
   return (

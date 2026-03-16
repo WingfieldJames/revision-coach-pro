@@ -6,6 +6,7 @@ import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { AQA_PSYCHOLOGY_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const AQA_PSYCHOLOGY_PRODUCT_ID = "c56bc6d6-5074-4e1f-8bf2-8e900ba928ec";
 
@@ -41,6 +42,7 @@ export const AQAPsychologyFreeVersionPage = () => {
     examSubjectName: "AQA Psychology",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: <DynamicRevisionGuide productId={AQA_PSYCHOLOGY_PRODUCT_ID} subjectName="AQA Psychology" tier="free" />,
   };
 
   return (

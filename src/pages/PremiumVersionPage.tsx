@@ -11,6 +11,7 @@ import { checkProductAccess } from '@/lib/productAccess';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const EDEXCEL_PRODUCT_ID = "6dc19d53-8a88-4741-9528-f25af97afb21";
 
@@ -75,6 +76,7 @@ export const PremiumVersionPage = () => {
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customPastPaperContent: <DynamicPastPaperFinder productId={EDEXCEL_PRODUCT_ID} subjectName="Edexcel Economics" tier="deluxe" />,
+    customRevisionGuideContent: <DynamicRevisionGuide productId={EDEXCEL_PRODUCT_ID} subjectName="Edexcel Economics" tier="deluxe" />,
   };
 
   return (

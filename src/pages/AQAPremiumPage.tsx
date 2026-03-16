@@ -10,6 +10,7 @@ import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { checkProductAccess } from '@/lib/productAccess';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const AQA_PRODUCT_ID = "17ade690-8c44-4961-83b5-0edf42a9faea";
 
@@ -72,6 +73,7 @@ export const AQAPremiumPage = () => {
     examSubjectName: "AQA Economics",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: <DynamicRevisionGuide productId={AQA_PRODUCT_ID} subjectName="AQA Economics" tier="deluxe" />,
   };
 
   return (

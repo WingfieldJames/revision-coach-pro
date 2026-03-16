@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const EDEXCEL_MATHS_SLUG = 'edexcel-mathematics';
 const DEFAULT_PROMPTS = [
@@ -75,6 +76,7 @@ export const EdexcelMathsPremiumPage = () => {
     showMyMistakes: resolveFeature(tc, 'my_mistakes', true),
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: productId ? <DynamicRevisionGuide productId={productId} subjectName="Edexcel Maths (Pure)" tier="deluxe" /> : undefined,
     showMathsModeSwitcher: true,
     mathsMode: 'pure' as const,
     onMathsModeChange: handleModeChange,
