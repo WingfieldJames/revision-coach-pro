@@ -220,7 +220,15 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
         {/* Collapsed state: icon strip */}
         {!open && (
           <div className="flex flex-col items-center gap-3 py-4">
-            {/* Tools first */}
+            {/* Chat first */}
+            <button onClick={() => setOpen(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Chat History">
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button onClick={handleNewChat} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-primary/10 transition-colors" title="New Chat">
+              <Plus className="h-4 w-4 text-primary" />
+            </button>
+            <Separator className="w-6" />
+            {/* Tools */}
             <button onClick={() => { setOpen(true); setShowBrainViewer(true); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="A* Brain">
               <Brain className="h-4 w-4 text-muted-foreground" />
             </button>
@@ -229,13 +237,6 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             </button>
             <button onClick={() => setShowRevisionTimetable(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Revision Timetable">
               <Clock3 className="h-4 w-4 text-muted-foreground" />
-            </button>
-            <Separator className="w-6" />
-            <button onClick={() => setOpen(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Chat History">
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </button>
-            <button onClick={handleNewChat} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-primary/10 transition-colors" title="New Chat">
-              <Plus className="h-4 w-4 text-primary" />
             </button>
             <Separator className="w-6" />
             <button onClick={() => { navigate('/'); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Home">
