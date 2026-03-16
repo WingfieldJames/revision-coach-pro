@@ -394,15 +394,22 @@ async function attemptMerge(
     idsToDelete.push(qpChunk.id);
 
     // Build combined content
-    const qpContent = qpChunk.content;
-    const msContent = msChunk
+    // Use raw content — strip any legacy prefix that may already be baked in
+    let qpContent = qpChunk.content;
+    qpContent = qpContent.replace(/^\s*Question\s+\S+\s*(\[\d+\s*marks?\])?\s*:\s*/i, '').trim();
+    qpContent = qpContent.replace(/^\s*\[\d+\s*marks?\]\s*:?\s*/gi, '').trim();
+
+    let msContent = msChunk
       ? (msChunk.metadata as Record<string, unknown>)?.mark_scheme_text as string || msChunk.content
       : "Mark scheme not available";
+    msContent = msContent.replace(/^\s*Mark Scheme\s+Q?\S*\s*(\[\d+\s*marks?\])?\s*:\s*/i, '').trim();
+    msContent = msContent.replace(/^\s*\[\d+\s*marks?\]\s*:?\s*/gi, '').trim();
+
     const totalMarks = (qpChunk.metadata as Record<string, unknown>)?.total_marks ||
       (msChunk?.metadata as Record<string, unknown>)?.total_marks || "unknown";
-    const marksLabel = totalMarks && totalMarks !== "unknown" ? ` [${totalMarks} marks]` : "";
 
-    const combined = `Question ${qNum}${marksLabel}: ${qpContent}\n\nMark Scheme: ${msContent}`;
+    // Store clean combined content — metadata carries question_number and total_marks
+    const combined = `${qpContent}\n\nMark Scheme: ${msContent}`;
 
     if (msChunk) idsToDelete.push(msChunk.id);
 
