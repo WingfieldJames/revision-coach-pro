@@ -331,27 +331,82 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
                 <Separator className="my-2" />
 
-                {/* Subject Navigator */}
-                <div className="mb-1">
-                  <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Switch Subject</p>
+                {/* Additional Features */}
+                <div className="mb-3">
+                  <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Features</p>
                   <div className="space-y-0.5">
-                    {SUBJECTS.map(s => {
-                      const active = isCurrentSubject(s.freePath, s.premiumPath);
-                      return (
-                        <button
-                          key={s.freePath}
-                          onClick={() => navigateToSubject(s.freePath, s.premiumPath, s.slug)}
-                          className={cn(
-                            "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left",
-                            active ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"
-                          )}
-                        >
-                          <span className="truncate">{s.name}</span>
-                          {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
-                        </button>
-                      );
-                    })}
+                    <button
+                      onClick={() => { setShowBrainViewer(true); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                    >
+                      <Brain className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <span className="block text-sm">Your A* Brain</span>
+                        <span className="block text-[10px] text-muted-foreground leading-tight">Builds your personal profile from every conversation</span>
+                      </div>
+                    </button>
+                    {daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
+                      <button
+                        onClick={() => setShowExamCalendar(true)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      >
+                        <Timer className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span>{daysUntilFirstExam} Days</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowRevisionTimetable(true)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                    >
+                      <Clock3 className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span>Revision Timetable</span>
+                    </button>
                   </div>
+                </div>
+
+                <Separator className="my-2" />
+
+                {/* Subject Dropdown */}
+                <div className="mb-1">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted transition-all">
+                        <div className="flex items-center gap-2">
+                          <GraduationCap className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span>{subjectName}</span>
+                        </div>
+                        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-[260px]">
+                      {SUBJECTS.map(s => {
+                        const active = isCurrentSubject(s.freePath, s.premiumPath);
+                        return (
+                          <DropdownMenuItem
+                            key={s.freePath}
+                            onClick={() => navigateToSubject(s.freePath, s.premiumPath, s.slug)}
+                            className={cn("cursor-pointer", active && "font-semibold text-primary")}
+                          >
+                            {s.name}
+                            {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <Separator className="my-2" />
+
+                {/* Navigation */}
+                <div className="space-y-0.5 mb-1">
+                  <button
+                    onClick={() => navigate('/')}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted transition-all text-left"
+                  >
+                    <Home className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span>Home</span>
+                  </button>
                 </div>
               </div>
             </ScrollArea>
