@@ -74,6 +74,7 @@ export const PremiumVersionPage = () => {
     examSubjectName: "Edexcel Economics",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customPastPaperContent: <DynamicPastPaperFinder productId={EDEXCEL_PRODUCT_ID} subjectName="Edexcel Economics" tier="deluxe" />,
   };
 
   return (
