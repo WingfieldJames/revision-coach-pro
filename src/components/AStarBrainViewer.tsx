@@ -57,10 +57,9 @@ export const AStarBrainViewer: React.FC<AStarBrainViewerProps> = ({ isDeluxe }) 
   if (!isDeluxe) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Brain className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold text-lg text-foreground">Your A* Brain</h3>
-        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Every conversation builds your personal profile over time — so your AI tutor always knows your weak spots, your subjects, and exactly where you left off.
+        </p>
         <div className="relative">
           <div className="blur-sm select-none pointer-events-none space-y-2 text-sm text-foreground/70 leading-relaxed">
             <p>Subjects: Economics (Edexcel), Mathematics (Edexcel), Chemistry (AQA)</p>
