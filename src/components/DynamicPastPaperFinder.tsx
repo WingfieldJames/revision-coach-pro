@@ -64,10 +64,16 @@ function parseChunkDisplay(chunk: SearchResult) {
     }
   }
 
-  const prefixMatch = questionText.match(/^Question\s+\d+[a-z]?\s*(\([a-z]+\))?\s*:?\s*/i);
+  // Strip leading "[X marks]:" patterns
+  questionText = questionText.replace(/^\s*\[\d+\s*marks?\]\s*:?\s*/gi, '');
+
+  const prefixMatch = questionText.match(/^Question\s+\d+[a-z]?\s*(\([a-z]+\))?\s*(\([a-z]+\))?\s*:?\s*/i);
   if (prefixMatch) {
     questionText = questionText.slice(prefixMatch[0].length);
   }
+
+  // Strip any remaining "[X marks]:" after question prefix
+  questionText = questionText.replace(/^\s*\[\d+\s*marks?\]\s*:?\s*/gi, '');
 
   // Extract figure/context/extract section and preserve it prominently
   let extract = '';
