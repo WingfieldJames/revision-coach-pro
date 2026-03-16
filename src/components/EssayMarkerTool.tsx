@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { fileDialogOpen } from '@/lib/fileDialogState';
 import { useNavigate } from 'react-router-dom';
 const DEFAULT_MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
-const FREE_MONTHLY_ESSAY_LIMIT = 1;
+const FREE_MONTHLY_ESSAY_LIMIT = 2;
 
 interface ToolUsageResponse {
   count: number;
@@ -147,67 +147,6 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   const hasExceededLimit = tier === 'free' && monthlyUsage >= FREE_MONTHLY_ESSAY_LIMIT;
   const remainingUses = FREE_MONTHLY_ESSAY_LIMIT - monthlyUsage;
 
-  // Show upgrade prompt when limit exceeded for free tier
-  if (tier === 'free' && hasExceededLimit && !isLoadingUsage) {
-    return (
-      <div className="space-y-4">
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-full bg-gradient-brand flex items-center justify-center mx-auto mb-3">
-            <PenLine className="w-6 h-6 text-white" />
-          </div>
-          <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
-          <p className="text-muted-foreground text-sm">
-            You've used your {FREE_MONTHLY_ESSAY_LIMIT} free essay marking this month. Upgrade for unlimited access!
-          </p>
-        </div>
-        
-        <div className="bg-muted/50 rounded-xl p-4">
-          <p className="font-semibold text-sm mb-3">Upgrade to unlock:</p>
-          <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Unlimited essay marking</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Unlimited diagram searches</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Unlimited daily prompts</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
-              <span>Image upload & OCR analysis</span>
-            </li>
-          </ul>
-        </div>
-        
-        <div className="space-y-2">
-          <Button 
-            className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold"
-            onClick={() => handleUpgrade('lifetime')}
-            disabled={isCheckingOut}
-          >
-            {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £39.99'}
-          </Button>
-          <Button 
-            variant="outline"
-            className="w-full"
-            onClick={() => handleUpgrade('monthly')}
-            disabled={isCheckingOut}
-          >
-            Monthly – £8.99/mo
-          </Button>
-        </div>
-        
-        <p className="text-xs text-center text-muted-foreground">
-          Your free uses reset at the start of each month
-        </p>
-      </div>
-    );
-  }
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     filePickerOpen.current = false;
     fileDialogOpen.current = false;
@@ -246,11 +185,17 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
       return;
     }
 
-    // For free tier, check usage limit before proceeding
+    // For free tier, check usage limit before proceeding — show toast instead of paywall
     if (tier === 'free' && user) {
       if (monthlyUsage >= FREE_MONTHLY_ESSAY_LIMIT) {
-        setMonthlyUsage(monthlyUsage);
-        toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited access.');
+        toast.error('Monthly limit reached. Upgrade to Deluxe for unlimited essay marking.', {
+          description: 'Your free uses reset at the start of each month.',
+          duration: 5000,
+          action: {
+            label: 'Upgrade',
+            onClick: () => handleUpgrade('lifetime'),
+          },
+        });
         return;
       }
     }

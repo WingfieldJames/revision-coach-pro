@@ -14,6 +14,7 @@ import { getLegacyConfig } from "@/lib/legacyLiveConfig";
 import { diagrams } from "@/data/diagrams";
 import { csDiagrams } from "@/data/csDiagrams";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
+import { RefreshIndexButton } from "@/components/RefreshIndexButton";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -178,6 +179,7 @@ export function BuildPage() {
   const [examDates, setExamDates] = useState<Array<{ name: string; date: string }>>([]);
   const [essayMarkerMarks, setEssayMarkerMarks] = useState<string>("");
   const [suggestedPrompts, setSuggestedPrompts] = useState<Array<{ text: string; usesPersonalization?: boolean }>>([]);
+  const [gradeBoundaries, setGradeBoundaries] = useState<Record<string, { aStar: string; a: string; b: string }>>({});
   const [diagramLibrary, setDiagramLibrary] = useState<Array<{ id: string; title: string; imagePath: string }>>([]);
   const [uploadingDiagram, setUploadingDiagram] = useState(false);
   const diagramImageInputRef = useRef<HTMLInputElement>(null);
@@ -809,7 +811,7 @@ export function BuildPage() {
     }
   };
 
-  // Direct text entry — submit text straight into document_chunks (per year)
+  // Direct text entry — submit text straight into document_chunks AND create a trainer_upload record so it appears in the UI
   const handleAddText = async (title: string, content: string, year: string) => {
     const product = projects.find(p => p.id === selectedProjectId);
     if (!product?.product_id) {
@@ -827,12 +829,37 @@ export function BuildPage() {
         },
       });
       if (error) throw error;
+
+      // Create a trainer_upload record so the text entry appears alongside AI-processed files
+      if (projectId) {
+        const { error: insertErr } = await supabase
+          .from("trainer_uploads")
+          .insert({
+            project_id: projectId,
+            section_type: "past_paper",
+            year,
+            file_name: title,
+            file_url: `direct_text_${Date.now()}`,
+            processing_status: "done",
+            doc_type: "text",
+            chunks_created: 1,
+          });
+        if (insertErr) console.error("Failed to create upload record:", insertErr);
+
+        // Refresh uploads list so the new entry appears immediately
+        const { data: updatedUploads } = await supabase
+          .from("trainer_uploads")
+          .select("*")
+          .eq("project_id", projectId);
+        setUploads((updatedUploads as TrainerUpload[]) || []);
+      }
+
       markUnsaved();
-      toast({ title: "Text added ✓", description: `"${title}" added to training data.` });
+      toast({ title: "Text added ✓", description: `"${title}" added to training data and will appear in the file list.` });
     } catch (err) {
       console.error("Text entry failed:", err);
       toast({ title: "Failed to add text", description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
-      throw err; // re-throw so the card knows it failed
+      throw err;
     }
   };
 
@@ -1758,14 +1785,10 @@ export function BuildPage() {
                         </div>
                       </div>
                     )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full text-xs"
-                      onClick={loadChunkStats}
-                    >
-                      <RefreshCw className="h-3 w-3 mr-1" /> Refresh Index Stats
-                    </Button>
+                    <RefreshIndexButton
+                      productId={currentProject?.product_id || null}
+                      onComplete={() => loadChunkStats()}
+                    />
                     {!hasSpec && (
                       <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 rounded p-2">
                         ⚠️ Upload a specification in the "Specification" section above to enable spec-to-question mapping.

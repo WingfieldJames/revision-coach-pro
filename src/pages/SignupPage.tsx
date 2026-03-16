@@ -35,9 +35,27 @@ export const SignupPage = () => {
     ? 'linear-gradient(135deg, #FFC83D 0%, #FF9A2E 30%, #FF6A3D 60%, #FF4D8D 100%)'
     : 'linear-gradient(135deg, #9333EA 0%, #7C3AED 30%, #6D28D9 60%, #A855F7 100%)';
 
+  // Password validation
+  const passwordErrors: string[] = [];
+  if (password.length > 0) {
+    if (password.length < 8) passwordErrors.push('At least 8 characters');
+    if (!/[A-Z]/.test(password)) passwordErrors.push('One uppercase letter');
+    if (!/[0-9]/.test(password)) passwordErrors.push('One number');
+  }
+  const isPasswordValid = password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!isPasswordValid) {
+      toast({
+        title: "Password too weak",
+        description: "Password must be at least 8 characters with one uppercase letter and one number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast({
         title: "Error",
@@ -52,14 +70,13 @@ export const SignupPage = () => {
     try {
       await signUp(email, password);
       toast({
-        title: "Success",
-        description: "Account created successfully! Please check your email to verify your account.",
+        title: "Check your email ✉️",
+        description: "We've sent you a verification link. Please verify your email to complete signup.",
       });
 
       if (redirect === 'stripe') {
         navigate('/compare?checkout=true');
       } else if (redirect) {
-        // Redirect to the original path the user was trying to access
         navigate(`/${redirect}`);
       } else {
         navigate('/compare');
@@ -100,7 +117,7 @@ export const SignupPage = () => {
     document.body.scrollTop = 0;
   }, []);
 
-  const isFormValid = email && password && confirmPassword && password === confirmPassword;
+  const isFormValid = email && isPasswordValid && confirmPassword && password === confirmPassword;
 
   return (
     <div className="min-h-screen w-full bg-[#f9fafb] dark:bg-background relative overflow-hidden">
@@ -183,9 +200,21 @@ export const SignupPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                   className="w-full backdrop-blur-sm text-foreground bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
                 />
+                {password.length > 0 && passwordErrors.length > 0 && (
+                  <div className="mt-1.5 space-y-0.5">
+                    {passwordErrors.map((err, i) => (
+                      <p key={i} className="text-xs text-destructive flex items-center gap-1">
+                        <span>•</span> {err}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {password.length > 0 && passwordErrors.length === 0 && (
+                  <p className="text-xs text-green-600 mt-1">✓ Strong password</p>
+                )}
               </div>
 
               {/* Confirm Password Input */}
@@ -197,7 +226,7 @@ export const SignupPage = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                   className="w-full backdrop-blur-sm text-foreground bg-foreground/5 border border-foreground/10 rounded-full py-3 px-4 focus:outline-none focus:border-foreground/30 placeholder:text-muted-foreground"
                 />
               </div>
