@@ -418,34 +418,72 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
                 <Separator className="my-2" />
 
-                {/* Subject Dropdown */}
+                {/* Subject Tree */}
                 <div className="mb-1">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted transition-all">
-                        <div className="flex items-center gap-2">
-                          <GraduationCap className="h-4 w-4 text-muted-foreground shrink-0" />
-                          <span>{subjectName}</span>
-                        </div>
-                        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[260px]">
-                      {SUBJECTS.map(s => {
-                        const active = isCurrentSubject(s.freePath, s.premiumPath);
+                  <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Subjects</p>
+                  <button
+                    onClick={() => setSubjectsOpen(!subjectsOpen)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted transition-all"
+                  >
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span>{subjectName}</span>
+                    </div>
+                    <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform", subjectsOpen && "rotate-180")} />
+                  </button>
+                  {subjectsOpen && (
+                    <div className="ml-3 mt-1 space-y-0.5 border-l border-border pl-2">
+                      {SUBJECT_TREE.map(group => {
+                        const isExpanded = expandedSubject === group.subject;
+                        const hasActiveBoard = group.boards.some(b => isCurrentSubject(b.freePath, b.premiumPath));
                         return (
-                          <DropdownMenuItem
-                            key={s.freePath}
-                            onClick={() => navigateToSubject(s.freePath, s.premiumPath, s.slug)}
-                            className={cn("cursor-pointer", active && "font-semibold text-primary")}
-                          >
-                            {s.name}
-                            {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
-                          </DropdownMenuItem>
+                          <div key={group.subject}>
+                            <button
+                              onClick={() => setExpandedSubject(isExpanded ? null : group.subject)}
+                              className={cn(
+                                "w-full flex items-center justify-between px-2 py-1.5 rounded-md text-sm hover:bg-muted transition-all",
+                                hasActiveBoard && "text-primary font-medium"
+                              )}
+                            >
+                              <span>{group.subject}</span>
+                              <ChevronRight className={cn("h-3 w-3 text-muted-foreground transition-transform", isExpanded && "rotate-90")} />
+                            </button>
+                            {isExpanded && (
+                              <div className="ml-3 mt-0.5 space-y-0.5 border-l border-border/50 pl-2">
+                                {group.boards.map(board => {
+                                  const active = isCurrentSubject(board.freePath, board.premiumPath);
+                                  return (
+                                    <button
+                                      key={board.slug}
+                                      onClick={() => navigateToSubject(board.freePath, board.premiumPath, board.slug)}
+                                      className={cn(
+                                        "w-full text-left px-2 py-1.5 rounded-md text-sm hover:bg-muted transition-all flex items-center gap-2",
+                                        active && "font-semibold text-primary bg-primary/5"
+                                      )}
+                                    >
+                                      <span>{board.name}</span>
+                                      {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </div>
+                  )}
+                  {/* Meet Your Trainer */}
+                  <button
+                    onClick={() => setShowTrainerInfo(true)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted mt-1"
+                  >
+                    <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="min-w-0">
+                      <span className="block text-sm">Meet Your Trainer</span>
+                      <span className="block text-[10px] text-muted-foreground leading-tight">See who trained your AI tutor</span>
+                    </div>
+                  </button>
                 </div>
 
                 <Separator className="my-2" />
