@@ -133,19 +133,22 @@ serve(async (req) => {
           .from("document_chunks")
           .select("content, metadata")
           .eq("product_id", product_id)
-          .limit(30),
+          .filter("metadata->>content_type", "eq", "specification")
+          .limit(50),
         // Exam technique chunks  
         supabaseAdmin
           .from("document_chunks")
           .select("content, metadata")
           .eq("product_id", product_id)
+          .filter("metadata->>content_type", "eq", "exam_technique")
           .limit(20),
-        // Past paper chunks
+        // Past paper / combined chunks
         supabaseAdmin
           .from("document_chunks")
           .select("content, metadata")
           .eq("product_id", product_id)
-          .limit(50),
+          .not("metadata->>content_type", "in", '("specification","exam_technique")')
+          .limit(100),
       ]);
 
       const allChunks = [
