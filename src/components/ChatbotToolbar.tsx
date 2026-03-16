@@ -213,8 +213,8 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
                 size="sm"
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative"
               >
-                {tool.icon}
-                <span className="hidden sm:inline">{tool.label}</span>
+                {tool.id !== 'exam-countdown' && tool.icon}
+                {tool.id !== 'exam-countdown' && <span className="hidden sm:inline">{tool.label}</span>}
                 {tool.id === 'my-mistakes' && mistakesDueCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 flex items-center justify-center bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full">
                     {mistakesDueCount}
@@ -222,8 +222,8 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
                 )}
                 {tool.id === 'exam-countdown' && daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
                   <>
-                    <span className="hidden sm:inline text-muted-foreground">{daysUntilFirstExam} days</span>
-                    <span className="sm:hidden text-muted-foreground">{daysUntilFirstExam}d</span>
+                    <span className="hidden sm:inline text-foreground font-medium">{daysUntilFirstExam} Days</span>
+                    <span className="sm:hidden text-foreground font-medium">{daysUntilFirstExam}d</span>
                   </>
                 )}
               </Button>
