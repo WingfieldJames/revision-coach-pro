@@ -721,12 +721,11 @@ serve(async (req) => {
       let chunksCreated = 0;
       for (const chunk of chunks) {
         const qNum = chunk.question_number || "";
-        const marks = chunk.total_marks || 0;
-        const marksLabel = marks ? ` [${marks} marks]` : "";
         const extractInfo = chunk.extract ? `\nContext: ${chunk.extract}` : "";
+        // Store raw text only — question_number and total_marks live in metadata
         const content = classification.doc_type === "qp"
-          ? `Question ${qNum}${marksLabel}: ${chunk.question_text || ""}${extractInfo}`
-          : `Mark Scheme Q${qNum}${marksLabel}: ${chunk.mark_scheme || ""}`;
+          ? `${chunk.question_text || ""}${extractInfo}`.trim()
+          : String(chunk.mark_scheme || "").trim();
 
         const embedding = await generateEmbedding(lovableApiKey, content);
 
