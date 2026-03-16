@@ -134,10 +134,14 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subjec
                 stroke={COLORS[grade]}
                 strokeWidth={2.5}
                 strokeDasharray="6 4"
-                dot={{ r: 4, fill: COLORS[grade], strokeDasharray: '' }}
+                dot={({ cx, cy, index }: any) => {
+                  if (index === 0) return <circle key={index} cx={cx} cy={cy} r={0} />;
+                  return <circle key={index} cx={cx} cy={cy} r={4} fill={COLORS[grade]} stroke="none" />;
+                }}
                 activeDot={{ r: 6 }}
                 legendType="none"
                 name={` `}
+                tooltipType="none"
               />
             ))}
           </LineChart>
