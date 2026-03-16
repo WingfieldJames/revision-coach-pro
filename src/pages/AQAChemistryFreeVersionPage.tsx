@@ -40,6 +40,7 @@ export const AQAChemistryFreeVersionPage = () => {
     examSubjectName: "AQA Chemistry",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: <DynamicRevisionGuide productId={AQA_CHEMISTRY_PRODUCT_ID} subjectName="AQA Chemistry" tier="free" />,
   };
 
   return (

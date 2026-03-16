@@ -70,6 +70,7 @@ export const OCRPhysicsPremiumPage = () => {
     examSubjectName: "OCR Physics",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
+    customRevisionGuideContent: productId ? <DynamicRevisionGuide productId={productId} subjectName="OCR Physics" tier="deluxe" /> : undefined,
   };
 
   return (
