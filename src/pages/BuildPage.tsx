@@ -1783,14 +1783,10 @@ export function BuildPage() {
                         </div>
                       </div>
                     )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full text-xs"
-                      onClick={loadChunkStats}
-                    >
-                      <RefreshCw className="h-3 w-3 mr-1" /> Refresh Index Stats
-                    </Button>
+                    <RefreshIndexButton
+                      productId={product?.product_id || null}
+                      onComplete={() => loadChunkStats()}
+                    />
                     {!hasSpec && (
                       <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-500/10 rounded p-2">
                         ⚠️ Upload a specification in the "Specification" section above to enable spec-to-question mapping.
