@@ -442,6 +442,22 @@ const SubjectCard: React.FC<{
    Main component
    ────────────────────────────────────────────── */
 export const RevisionTimetable: React.FC = () => {
+  // Get user ID for per-user storage
+  const userId = (() => {
+    try {
+      const raw = localStorage.getItem('sb-xoipyycgycmpflfnrlty-auth-token');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return parsed?.user?.id || 'anon';
+      }
+    } catch {}
+    return 'anon';
+  })();
+  
+  const SUBJECTS_KEY = `${SUBJECTS_KEY_PREFIX}${userId}`;
+  const SLOTS_KEY = `${SLOTS_KEY_PREFIX}${userId}`;
+  const GENERATED_KEY = `${GENERATED_KEY_PREFIX}${userId}`;
+
   const [subjects, setSubjects] = useState<Subject[]>(() => loadJSON(SUBJECTS_KEY, defaultSubjects()));
   const [freeSlots, setFreeSlots] = useState<SlotMap>(() => loadJSON(SLOTS_KEY, defaultSlots()));
   const [generated, setGenerated] = useState<GeneratedMap | null>(() => loadJSON(GENERATED_KEY, null));
