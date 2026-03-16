@@ -18,7 +18,6 @@ interface SubjectConfig {
   maxUms: number;
   actualData: Record<string, string | number>[];
   predictedData: Record<string, string | number>[];
-  predictedDotIndices: number[];
   yDomain: [number, number];
 }
 
@@ -33,10 +32,8 @@ const SUBJECT_CONFIGS: Record<GradeBoundarySubject, SubjectConfig> = {
       { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
     ],
     predictedData: [
-      { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
       { year: "2026 (Predicted)", "A*": 87.8, A: 80.8, B: 70.2 },
     ],
-    predictedDotIndices: [1],
     yDomain: [55, 95],
   },
   maths: {
@@ -49,10 +46,8 @@ const SUBJECT_CONFIGS: Record<GradeBoundarySubject, SubjectConfig> = {
       { year: "2025", "A*": 86.0, A: 71.3, B: 59.3 },
     ],
     predictedData: [
-      { year: "2025", "A*": 86.0, A: 71.3, B: 59.3 },
       { year: "2026 (Predicted)", "A*": 88.4, A: 74.3, B: 62.6 },
     ],
-    predictedDotIndices: [1],
     yDomain: [45, 95],
   },
 };
@@ -137,10 +132,7 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subjec
                 stroke={COLORS[grade]}
                 strokeWidth={2.5}
                 strokeDasharray="6 4"
-                dot={({ cx, cy, index }: any) => {
-                  if (!config.predictedDotIndices.includes(index)) return <circle key={index} cx={cx} cy={cy} r={0} />;
-                  return <circle key={index} cx={cx} cy={cy} r={4} fill={COLORS[grade]} stroke="none" />;
-                }}
+                dot={{ r: 4, fill: COLORS[grade], strokeDasharray: '' }}
                 activeDot={{ r: 6 }}
                 legendType="none"
                 name={` `}
