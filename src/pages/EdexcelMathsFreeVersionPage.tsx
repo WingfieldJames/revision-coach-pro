@@ -7,6 +7,7 @@ import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
 const EDEXCEL_MATHS_PRODUCT_ID = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
 
