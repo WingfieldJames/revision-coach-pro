@@ -340,6 +340,26 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                   <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Features</p>
                   <div className="space-y-0.5">
                     <button
+                      onClick={() => setShowRevisionTimetable(true)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                    >
+                      <Clock3 className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <span className="block text-sm">Revision Timetable</span>
+                        <span className="block text-[10px] text-muted-foreground leading-tight">Optimally allocates revision time based on your predicted grades</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setShowExamCalendar(true)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                    >
+                      <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <span className="block text-sm">Exam Calendar</span>
+                        <span className="block text-[10px] text-muted-foreground leading-tight">View all your upcoming exam dates in one place</span>
+                      </div>
+                    </button>
+                    <button
                       onClick={() => { setShowBrainViewer(true); }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
                     >
@@ -348,22 +368,6 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                         <span className="block text-sm">Your A* Brain</span>
                         <span className="block text-[10px] text-muted-foreground leading-tight">Builds your personal profile from every conversation</span>
                       </div>
-                    </button>
-                    {daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
-                      <button
-                        onClick={() => setShowExamCalendar(true)}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
-                      >
-                        <Timer className="h-4 w-4 text-muted-foreground shrink-0" />
-                        <span>{daysUntilFirstExam} Days</span>
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setShowRevisionTimetable(true)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
-                    >
-                      <Clock3 className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <span>Revision Timetable</span>
                     </button>
                   </div>
                 </div>
