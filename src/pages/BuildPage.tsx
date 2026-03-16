@@ -14,6 +14,7 @@ import { getLegacyConfig } from "@/lib/legacyLiveConfig";
 import { diagrams } from "@/data/diagrams";
 import { csDiagrams } from "@/data/csDiagrams";
 import { PastPaperYearCard } from "@/components/PastPaperYearCard";
+import { RefreshIndexButton } from "@/components/RefreshIndexButton";
 import { SpecificationUploader } from "@/components/SpecificationUploader";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
