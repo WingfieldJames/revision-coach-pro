@@ -16,9 +16,6 @@ import { useChatHistory, ChatConversation } from '@/hooks/useChatHistory';
 import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
 import { ExamDate } from '@/components/ExamCountdown';
 import { cn } from '@/lib/utils';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
