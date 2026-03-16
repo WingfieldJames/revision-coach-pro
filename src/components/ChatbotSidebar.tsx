@@ -567,7 +567,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
-                A* Brain
+                Your A* Brain
               </h2>
               <button onClick={() => setShowBrainViewer(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
                 <X className="h-5 w-5 text-muted-foreground" />
