@@ -229,14 +229,14 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             </button>
             <Separator className="w-6" />
             {/* Tools */}
-            <button onClick={() => { setOpen(true); setShowBrainViewer(true); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="A* Brain">
-              <Brain className="h-4 w-4 text-muted-foreground" />
+            <button onClick={() => setShowRevisionTimetable(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Revision Timetable">
+              <Clock3 className="h-4 w-4 text-muted-foreground" />
             </button>
             <button onClick={() => setShowExamCalendar(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Exam Calendar">
               <CalendarDays className="h-4 w-4 text-muted-foreground" />
             </button>
-            <button onClick={() => setShowRevisionTimetable(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Revision Timetable">
-              <Clock3 className="h-4 w-4 text-muted-foreground" />
+            <button onClick={() => { setOpen(true); setShowBrainViewer(true); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="A* Brain">
+              <Brain className="h-4 w-4 text-muted-foreground" />
             </button>
             <Separator className="w-6" />
             <button onClick={() => { navigate('/'); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Home">
