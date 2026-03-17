@@ -80,12 +80,7 @@ export const ComparePage = () => {
     if (saved && LEGACY_SUBJECTS.includes(saved)) return saved;
     return 'economics';
   });
-  const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
-    const savedSubject = localStorage.getItem('preferred-subject');
-    const saved = localStorage.getItem('preferred-exam-board');
-    if (savedSubject && LEGACY_DEFAULT_BOARD[savedSubject]) return LEGACY_DEFAULT_BOARD[savedSubject];
-    return saved || 'edexcel';
-  });
+  const [examBoard, setExamBoard] = useState<ExamBoard>('');
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [hasProductAccess, setHasProductAccess] = useState(false);
   const [subscriptionPaymentType, setSubscriptionPaymentType] = useState<string | null>(null);
