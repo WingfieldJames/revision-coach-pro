@@ -655,11 +655,16 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
                   {message.imageUrl && (
-                    <img
-                      src={message.imageUrl}
-                      alt="Attached image"
-                      className="max-w-[240px] max-h-[200px] object-contain rounded-lg border border-border mb-2 block"
-                    />
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {(Array.isArray(message.imageUrl) ? message.imageUrl : [message.imageUrl]).map((url, imgIdx) => (
+                        <img
+                          key={imgIdx}
+                          src={url}
+                          alt={`Attached image ${imgIdx + 1}`}
+                          className="max-w-[240px] max-h-[200px] object-contain rounded-lg border border-border block"
+                        />
+                      ))}
+                    </div>
                   )}
                   <ReactMarkdown
                     remarkPlugins={[remarkMath, remarkGfm]}
