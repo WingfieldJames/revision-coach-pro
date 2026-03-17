@@ -25,7 +25,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   displayedContent?: string;
-  imageUrl?: string; // base64 data URL for user-uploaded images
+  imageUrl?: string | string[]; // base64 data URL(s) for user-uploaded images
 }
 interface UserPreferences {
   year: string;
@@ -479,11 +479,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       (chatRef as React.MutableRefObject<RAGChatRef>).current = {
         submitMessage: (messageText: string, imageDataUrl?: string | string[]) => {
           if ((!messageText.trim() && !imageDataUrl) || isLoading) return;
-          const firstImage = Array.isArray(imageDataUrl) ? imageDataUrl[0] : imageDataUrl;
           const userMessage: Message = {
             role: 'user',
             content: messageText,
-            ...(firstImage ? { imageUrl: firstImage } : {})
+            ...(imageDataUrl ? { imageUrl: imageDataUrl } : {})
           };
           setMessages(prev => [...prev, userMessage]);
           handleSendWithMessage(messageText, imageDataUrl);
@@ -656,11 +655,16 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
                   {message.imageUrl && (
-                    <img
-                      src={message.imageUrl}
-                      alt="Attached image"
-                      className="max-w-[240px] max-h-[200px] object-contain rounded-lg border border-border mb-2 block"
-                    />
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {(Array.isArray(message.imageUrl) ? message.imageUrl : [message.imageUrl]).map((url, imgIdx) => (
+                        <img
+                          key={imgIdx}
+                          src={url}
+                          alt={`Attached image ${imgIdx + 1}`}
+                          className="max-w-[240px] max-h-[200px] object-contain rounded-lg border border-border block"
+                        />
+                      ))}
+                    </div>
                   )}
                   <ReactMarkdown
                     remarkPlugins={[remarkMath, remarkGfm]}
