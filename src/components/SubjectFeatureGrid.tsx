@@ -1,3 +1,6 @@
+import { ChevronDown, Check } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 interface SubjectFeatureGridProps {
   subject: string;
   subjectLabel: string;
@@ -6,6 +9,8 @@ interface SubjectFeatureGridProps {
   hasAccess: boolean;
   subscriptionPaymentType: string | null;
   onCtaClick: () => void;
+  boards?: string[];
+  onBoardChange?: (board: string) => void;
 }
 
 interface Feature {
@@ -111,9 +116,18 @@ export function SubjectFeatureGrid({
   hasAccess,
   subscriptionPaymentType,
   onCtaClick,
+  boards,
+  onBoardChange,
 }: SubjectFeatureGridProps) {
   const features = getFeatures(subject, formattedBoard);
-  const emoji = getSubjectEmoji(subject);
+
+  const formatBoard = (b: string) => {
+    if (b === 'cie') return 'CIE';
+    if (b === 'aqa') return 'AQA';
+    if (b === 'ocr') return 'OCR';
+    if (b === 'edexcel') return 'Edexcel';
+    return b.toUpperCase();
+  };
 
   return (
     <div className="max-w-6xl mx-auto mb-12">
@@ -121,14 +135,32 @@ export function SubjectFeatureGrid({
         {/* Subject header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div>
-              <div className="text-xl sm:text-[22px] font-black tracking-tight text-foreground">
-                {subjectLabel}
-              </div>
+            <div className="text-xl sm:text-[22px] font-black tracking-tight text-foreground">
+              {subjectLabel}
+            </div>
+            {boards && boards.length > 0 && onBoardChange && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="rounded-full px-4 py-1.5 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    {formattedBoard || 'Select board'}
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+                  {boards.map(b => (
+                    <DropdownMenuItem key={b} className="cursor-pointer flex items-center gap-2" onClick={() => onBoardChange(b)}>
+                      {examBoard === b ? <Check className="h-3.5 w-3.5" /> : <span className="w-3.5" />}
+                      {formatBoard(b)}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {!boards && formattedBoard && (
               <div className="text-xs text-muted-foreground mt-0.5">
                 {formattedBoard} A-Level · Full spec coverage
               </div>
-            </div>
+            )}
           </div>
           <button
             onClick={onCtaClick}
