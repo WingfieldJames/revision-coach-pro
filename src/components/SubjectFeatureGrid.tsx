@@ -1,3 +1,6 @@
+import { ChevronDown, Check } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 interface SubjectFeatureGridProps {
   subject: string;
   subjectLabel: string;
@@ -6,6 +9,8 @@ interface SubjectFeatureGridProps {
   hasAccess: boolean;
   subscriptionPaymentType: string | null;
   onCtaClick: () => void;
+  boards?: string[];
+  onBoardChange?: (board: string) => void;
 }
 
 interface Feature {
