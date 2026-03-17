@@ -389,12 +389,7 @@ export const ComparePage = () => {
                   {allSubjects.map(s => (
                     <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                       setSubject(s);
-                      const defaultBoard = LEGACY_DEFAULT_BOARD[s];
-                      if (defaultBoard) setExamBoard(defaultBoard);
-                      else {
-                        const dp = dynamicProducts.find(p => p.subject.toLowerCase().replace(/\s+/g, '-') === s);
-                        if (dp) setExamBoard(dp.exam_board.toLowerCase());
-                      }
+                      setExamBoard('');
                     }}>
                       {subjectLabels[s] || s}
                     </DropdownMenuItem>
