@@ -80,12 +80,7 @@ export const ComparePage = () => {
     if (saved && LEGACY_SUBJECTS.includes(saved)) return saved;
     return 'economics';
   });
-  const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
-    const savedSubject = localStorage.getItem('preferred-subject');
-    const saved = localStorage.getItem('preferred-exam-board');
-    if (savedSubject && LEGACY_DEFAULT_BOARD[savedSubject]) return LEGACY_DEFAULT_BOARD[savedSubject];
-    return saved || 'edexcel';
-  });
+  const [examBoard, setExamBoard] = useState<ExamBoard>('');
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [hasProductAccess, setHasProductAccess] = useState(false);
   const [subscriptionPaymentType, setSubscriptionPaymentType] = useState<string | null>(null);
@@ -338,32 +333,19 @@ export const ComparePage = () => {
         <Header showNavLinks />
         
 
-        <main className="pt-0 pb-8 px-4 sm:px-8 max-w-5xl mx-auto text-center relative z-10">
-          <ScrollReveal>
-            <h1 className="text-2xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-0 md:gap-0 flex-nowrap">
-              <span className="self-center">Choose Your</span>
-              <img src={currentLogo} alt="A* AI" className={`h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3 ${theme === 'dark' ? '-translate-y-1 md:-translate-y-1.5' : ''}`} />
-              <span className="self-center">Subject</span>
-            </h1>
-          </ScrollReveal>
+        <main className="pt-0 pb-8 px-4 sm:px-8 lg:px-10 max-w-6xl mx-auto text-center relative z-10">
 
           {/* Subject & Board Selection */}
           <ScrollReveal delay={0.1}>
             {/* Desktop: Connected toggle group + board dropdown on same line */}
-            <div className="hidden md:flex items-center justify-center gap-4 mb-12">
+            <div className="hidden md:flex flex-col items-center gap-3 mb-12">
               <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
                 {allSubjects.map((s) => (
                   <button
                     key={s}
                     onClick={() => {
                       setSubject(s);
-                      const defaultBoard = LEGACY_DEFAULT_BOARD[s];
-                      if (defaultBoard) setExamBoard(defaultBoard);
-                      else {
-                        // Dynamic: pick first available board
-                        const dp = dynamicProducts.find(p => p.subject.toLowerCase().replace(/\s+/g, '-') === s);
-                        if (dp) setExamBoard(dp.exam_board.toLowerCase());
-                      }
+                      setExamBoard('');
                     }}
                     className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                       subject === s
@@ -379,7 +361,7 @@ export const ComparePage = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 whitespace-nowrap">
-                    {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : 'Exam Board'}
+                    {examBoard ? (examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()) : 'Select board'}
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                 </DropdownMenuTrigger>
@@ -407,12 +389,7 @@ export const ComparePage = () => {
                   {allSubjects.map(s => (
                     <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                       setSubject(s);
-                      const defaultBoard = LEGACY_DEFAULT_BOARD[s];
-                      if (defaultBoard) setExamBoard(defaultBoard);
-                      else {
-                        const dp = dynamicProducts.find(p => p.subject.toLowerCase().replace(/\s+/g, '-') === s);
-                        if (dp) setExamBoard(dp.exam_board.toLowerCase());
-                      }
+                      setExamBoard('');
                     }}>
                       {subjectLabels[s] || s}
                     </DropdownMenuItem>
@@ -420,9 +397,9 @@ export const ComparePage = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
+              <Select value={examBoard || undefined} onValueChange={(val) => setExamBoard(val)}>
                 <SelectTrigger className="rounded-full px-5 py-2.5 h-auto w-auto text-sm font-semibold border border-border bg-background text-foreground hover:bg-muted [&>svg]:ml-1">
-                  <SelectValue placeholder="Select Exam Board" />
+                  <SelectValue placeholder="Select board" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
                   {boardsForSubject.map(b => (
@@ -443,7 +420,7 @@ export const ComparePage = () => {
                 subject={subject}
                 subjectLabel={subjectLabels[subject] || subject}
                 examBoard={examBoard}
-                formattedBoard={examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()}
+                formattedBoard={!examBoard ? '' : examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()}
                 hasAccess={hasProductAccess}
                 subscriptionPaymentType={subscriptionPaymentType}
                 onCtaClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
