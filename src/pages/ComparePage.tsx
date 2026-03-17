@@ -397,9 +397,9 @@ export const ComparePage = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Select value={examBoard} onValueChange={(val) => setExamBoard(val)}>
+              <Select value={examBoard || undefined} onValueChange={(val) => setExamBoard(val)}>
                 <SelectTrigger className="rounded-full px-5 py-2.5 h-auto w-auto text-sm font-semibold border border-border bg-background text-foreground hover:bg-muted [&>svg]:ml-1">
-                  <SelectValue placeholder="Select Exam Board" />
+                  <SelectValue placeholder="Select board" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
                   {boardsForSubject.map(b => (
