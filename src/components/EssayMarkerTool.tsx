@@ -62,6 +62,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
   const [attachedFiles, setAttachedFiles] = useState<{ file: File; preview: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const actionRef = useRef<HTMLDivElement>(null);
   const filePickerOpen = useRef(false);
 
   // Load current month's usage for free tier
@@ -104,6 +105,12 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
   }, []);
+
+  useEffect(() => {
+    if (attachedFiles.length > 0 && actionRef.current) {
+      actionRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [attachedFiles]);
   const handleUpgrade = async (paymentType: 'monthly' | 'lifetime' = 'lifetime') => {
     if (!user) {
       navigate('/login');
@@ -403,7 +410,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-2">
+        <div ref={actionRef} className="flex gap-2">
           {(essayText || attachedFiles.length > 0) && (
             <Button
               variant="outline"
