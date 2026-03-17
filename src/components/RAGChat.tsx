@@ -25,7 +25,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   displayedContent?: string;
-  imageUrl?: string; // base64 data URL for user-uploaded images
+  imageUrl?: string | string[]; // base64 data URL(s) for user-uploaded images
 }
 interface UserPreferences {
   year: string;
