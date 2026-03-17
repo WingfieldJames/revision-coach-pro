@@ -7,6 +7,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronDown, Check, Instagram } from 'lucide-react';
+import { SubjectFeatureGrid } from '@/components/SubjectFeatureGrid';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 import { useAuth } from '@/contexts/AuthContext';
