@@ -344,6 +344,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           enable_diagrams: enableDiagrams,
           diagram_subject: diagramSubject,
           image_data: imageDataUrl || null,
+          multi_image: Array.isArray(imageDataUrl),
         })
       });
       if (!response.ok) {
