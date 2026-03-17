@@ -407,6 +407,8 @@ export const ComparePage = () => {
                 hasAccess={hasProductAccess}
                 subscriptionPaymentType={subscriptionPaymentType}
                 onCtaClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
+                boards={boardsForSubject}
+                onBoardChange={setExamBoard}
               />
             </div>
           </ScrollReveal>
