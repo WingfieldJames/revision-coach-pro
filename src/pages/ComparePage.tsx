@@ -338,14 +338,7 @@ export const ComparePage = () => {
         <Header showNavLinks />
         
 
-        <main className="pt-0 pb-8 px-4 sm:px-8 max-w-5xl mx-auto text-center relative z-10">
-          <ScrollReveal>
-            <h1 className="text-2xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-0 md:gap-0 flex-nowrap">
-              <span className="self-center">Choose Your</span>
-              <img src={currentLogo} alt="A* AI" className={`h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3 ${theme === 'dark' ? '-translate-y-1 md:-translate-y-1.5' : ''}`} />
-              <span className="self-center">Subject</span>
-            </h1>
-          </ScrollReveal>
+        <main className="pt-0 pb-8 px-4 sm:px-8 lg:px-10 max-w-6xl mx-auto text-center relative z-10">
 
           {/* Subject & Board Selection */}
           <ScrollReveal delay={0.1}>
