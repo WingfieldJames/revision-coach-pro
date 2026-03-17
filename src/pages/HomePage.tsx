@@ -12,12 +12,39 @@ import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeroBackgroundPaths } from "@/components/ui/hero-background-paths";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { MeetTheFounders } from "@/components/MeetTheFounders";
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from "@/components/ui/testimonials-columns";
 import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import { SubjectPlanSelector } from "@/components/SubjectPlanSelector";
 import logo from "@/assets/logo.png";
 import logoDark from "@/assets/logo-dark.png";
+import jamesFounder from "@/assets/james-founder.png";
+import tanujKakumani from "@/assets/tanuj-kakumani.jpg";
+import henryLi from "@/assets/henry-li.jpg";
+import tudorFounder from "@/assets/tudor-founder.jpg";
+import naman from "@/assets/naman-founder.png";
+
+/* ---------- trainers data ---------- */
+const trainers = [
+  { name: "James", subject: "Economics", initials: "J", image: jamesFounder, stats: ["A* Economics (90%)", "Straight 9s", "A*A*A"] },
+  { name: "Tanuj", subject: "Maths", initials: "T", image: tanujKakumani, stats: ["A*A*A*A", "7 Grade 9s", "Imperial EFDS"] },
+  { name: "Naman", subject: "Computer Science", initials: "N", image: naman, stats: ["A*A*A*A*", "8.9 TMUA", "Straight 9s"] },
+  { name: "Tudor", subject: "Physics", initials: "T", image: tudorFounder, stats: ["A*A*A*A*", "200/200 Physics", "Straight 9s"] },
+  { name: "Henry", subject: "Economics", initials: "H", image: henryLi, stats: ["A*A*A*A*", "11 Grade 9s", "LSE PPE"] },
+];
+
+/* ---------- subject cards data ---------- */
+const subjectCards = [
+  { level: "A-LEVEL", subject: "Economics", boards: ["Edexcel", "AQA", "CIE", "OCR"] },
+  { level: "A-LEVEL", subject: "Maths", boards: ["Edexcel", "OCR"] },
+  { level: "A-LEVEL", subject: "Chemistry", boards: ["AQA"] },
+  { level: "A-LEVEL", subject: "Physics", boards: ["OCR"] },
+  { level: "A-LEVEL", subject: "Psychology", boards: ["AQA"] },
+  { level: "A-LEVEL", subject: "Computer Science", boards: ["OCR"] },
+  { level: "GCSE", subject: "Geography", boards: ["AQA", "Edexcel"] },
+  { level: "GCSE", subject: "Biology", boards: ["coming soon"] },
+  { level: "GCSE", subject: "Chemistry", boards: ["coming soon"] },
+  { level: "A-LEVEL", subject: "Biology", boards: ["coming soon"] },
+];
 
 const revisionFeatures = [
   {
