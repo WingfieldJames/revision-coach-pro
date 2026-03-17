@@ -172,13 +172,13 @@ export const HomePage = () => {
               </div>
 
               {/* Right side - Device mockup */}
-              <div className="hidden md:flex flex-1 justify-center items-center relative">
+              <div className="hidden md:flex flex-1 justify-start items-center relative -ml-4">
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.3 }}
                 >
-                  <div className="w-[420px] lg:w-[500px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
+                  <div className="w-[460px] lg:w-[540px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
                     <img
                       src={appScreenshot}
                       alt="A* AI essay marker demo"
