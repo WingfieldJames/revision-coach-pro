@@ -213,44 +213,8 @@ export const HomePage = () => {
         </HeroBackgroundPaths>
       </section>
 
-      {/* Subject Cards Marquee */}
-      <section className="py-10 md:py-14 px-4 md:px-8 bg-muted overflow-hidden">
-        <div className="max-w-5xl mx-auto">
-          <ScrollReveal className="text-center mb-8">
-            <h2 className={sectionHeadingClass}>
-              <span className="text-foreground">Your subject. Your board. </span>
-              <span className="text-primary">Your AI.</span>
-            </h2>
-          </ScrollReveal>
-
-          {/* Marquee */}
-          <div className="relative [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-            <div className="flex gap-3 w-max animate-[marquee_40s_linear_infinite] hover:[animation-play-state:paused]">
-              {[...subjectCards, ...subjectCards].map((card, i) => (
-                <div
-                  key={i}
-                  className="bg-card border border-border rounded-2xl p-5 w-[200px] shrink-0 transition-colors hover:border-primary text-left"
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">{card.level}</span>
-                    <span className="text-sm font-bold text-foreground">{card.subject}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {card.boards.map((b) => (
-                      <span key={b} className={`text-[11px] font-semibold px-2 py-0.5 rounded ${b === "coming soon" ? "text-muted-foreground bg-muted" : "text-primary bg-primary/10 border border-primary/20"}`}>{b}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <p className="text-center text-muted-foreground text-xs sm:text-sm mt-6">Available for A-Levels and GCSEs · More subjects added regularly</p>
-        </div>
-      </section>
-
       {/* Trainers Section */}
-      <section className="py-12 md:py-16 px-4 md:px-8 bg-background overflow-hidden">
+      <section className="py-12 md:py-16 px-4 md:px-8 bg-muted overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <ScrollReveal className="text-center mb-10">
             <h2 className={sectionHeadingClass}>
