@@ -217,13 +217,11 @@ export const HomePage = () => {
       <section className="py-12 md:py-16 px-4 md:px-8 bg-muted overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <ScrollReveal className="text-center mb-10">
+            <p className="text-muted-foreground text-sm md:text-base mb-3 font-medium">Meet your trainers</p>
             <h2 className={sectionHeadingClass}>
-              <span className="text-foreground">Meet your </span>
-              <span className="text-primary">trainers</span>
+              <span className="text-foreground">The A* students </span>
+              <span className="text-primary">behind the AI</span>
             </h2>
-            <p className="text-muted-foreground text-sm md:text-base mt-3 max-w-xl mx-auto">
-              The A* students behind the AI — every subject is taught by a real student who aced it.
-            </p>
           </ScrollReveal>
 
           {/* Trainer cards marquee */}
