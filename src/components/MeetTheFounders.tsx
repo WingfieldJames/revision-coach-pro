@@ -41,9 +41,10 @@ export function MeetTheFounders() {
     <section className="pt-8 pb-16 md:pt-12 md:pb-20 px-8 bg-muted">
       <div className="max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-12 md:mb-16">
-          <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-4 leading-[1.2] tracking-tight">
-            <span className="text-foreground">Meet the </span>
-            <span className="text-primary">founders</span>
+          <p className="text-sm sm:text-base font-medium text-muted-foreground mb-2">Meet your trainers</p>
+          <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
+            <span className="text-foreground">The A* students </span>
+            <span className="text-primary">behind the AI</span>
           </h2>
         </ScrollReveal>
 
