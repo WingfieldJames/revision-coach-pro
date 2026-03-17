@@ -410,7 +410,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-2">
+        <div ref={actionRef} className="flex gap-2">
           {(essayText || attachedFiles.length > 0) && (
             <Button
               variant="outline"
