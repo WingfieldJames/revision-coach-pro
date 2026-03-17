@@ -172,8 +172,8 @@ export const HomePage = () => {
               </div>
 
               {/* Right side - Device mockup */}
-              <div className="hidden md:flex flex-1 justify-end items-center relative -mr-16 xl:-mr-28 2xl:-mr-40">
-                <div className="w-full max-w-[680px] xl:max-w-[850px] 2xl:max-w-[1000px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
+              <div className="hidden md:flex flex-1 justify-end items-center relative -mr-16 xl:-mr-32 2xl:-mr-52">
+                <div className="w-full max-w-[680px] xl:max-w-[900px] 2xl:max-w-[1100px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
                   <img
                     src={appScreenshot}
                     alt="A* AI essay marker demo"
