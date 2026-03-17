@@ -267,74 +267,15 @@ export const HomePage = () => {
       </section>
 
 
-      {/* How A* AI helps you revise smarter */}
-      <section data-section="how-it-works" className="py-8 md:py-16 px-4 md:px-8 max-w-7xl mx-auto">
-        <ScrollReveal className="relative z-10 text-center mb-8 md:mb-12">
-          <h2 className={`${sectionHeadingClass} text-[1.2rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] whitespace-nowrap md:whitespace-normal`}>
-             <span className="text-foreground">Everything you need to get an </span>
-             <span className="text-primary">A*</span>
+      {/* Subject + Plan Selection */}
+      <section data-section="pick-subject-bottom" className="py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
+        <ScrollReveal className="text-center mb-8 md:mb-12">
+          <h2 className={sectionHeadingClass}>
+             <span className="text-foreground">Choose your </span>
+             <span className="text-primary">subject</span>
           </h2>
-          <p className="text-muted-foreground mt-3 text-sm sm:text-base md:text-lg whitespace-nowrap md:whitespace-normal">Tailored to your exam board. Built to get you the grade.</p>
         </ScrollReveal>
-
-        {/* Desktop/tablet: always-open cards */}
-        <StaggerContainer className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {revisionFeatures.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <StaggerItem key={feature.id}>
-                <div className="bg-muted rounded-xl overflow-hidden p-5 md:p-6 h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <strong className="text-base md:text-lg font-semibold text-left">
-                      {feature.title}
-                    </strong>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.content}</p>
-                </div>
-              </StaggerItem>);
-
-          })}
-        </StaggerContainer>
-
-        {/* Mobile: collapsible accordion */}
-        <div className="md:hidden">
-          <StaggerContainer className="grid grid-cols-1 gap-4">
-            {revisionFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <StaggerItem key={feature.id}>
-                  <Accordion type="single" collapsible>
-                    <AccordionItem
-                      value={`feature-${feature.id}`}
-                      className="border-0 bg-muted rounded-xl overflow-hidden">
-                      
-                      <AccordionTrigger
-                        hideIcon
-                        className="p-5 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180">
-                        
-                        <div className="flex items-center gap-3 w-full">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <Icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <strong className="text-base font-semibold text-left flex-1">
-                            {feature.title}
-                          </strong>
-                          <ChevronDown className="chevron h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-5 pb-5 pt-0">
-                        <p className="text-sm text-muted-foreground leading-relaxed">{feature.content}</p>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </StaggerItem>);
-
-            })}
-          </StaggerContainer>
-        </div>
+        <SubjectPlanSelector />
       </section>
 
       {/* FAQ Section */}
@@ -438,17 +379,6 @@ export const HomePage = () => {
             </ScrollReveal>
           </div>
         </HeroBackgroundPaths>
-      </section>
-
-      {/* Subject + Plan Selection (bottom CTA copy) */}
-      <section data-section="pick-subject-bottom" className="py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
-        <ScrollReveal className="text-center mb-8 md:mb-12">
-          <h2 className={sectionHeadingClass}>
-             <span className="text-foreground">Choose your </span>
-             <span className="text-primary">subject</span>
-          </h2>
-        </ScrollReveal>
-        <SubjectPlanSelector />
       </section>
 
       {/* Footer */}
