@@ -31,6 +31,7 @@ import { ScreenshotTestimonials } from '@/components/ui/screenshot-testimonials'
 import { LatestFeaturesSection } from '@/components/LatestFeaturesSection';
 import { FlowFieldBackground } from '@/components/ui/flow-field-background';
 import { SubjectPlanSelector } from '@/components/SubjectPlanSelector';
+import { SubjectFeatureGrid } from '@/components/SubjectFeatureGrid';
 
 type Subject = string;
 type ExamBoard = string;
