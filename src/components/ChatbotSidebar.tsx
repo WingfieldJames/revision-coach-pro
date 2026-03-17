@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
-  ArrowLeft, Sparkles, Timer, Crown, ChevronRight, ChevronDown,
+  ArrowLeft, Sparkles, Timer, Crown, ChevronRight, ChevronDown, ChevronUp,
   GraduationCap, Home, MessageSquare, Plus, Trash2, LogIn,
   CalendarDays, Clock3, X, Brain, User, BookOpen,
 } from 'lucide-react';
