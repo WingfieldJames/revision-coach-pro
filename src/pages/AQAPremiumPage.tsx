@@ -11,6 +11,7 @@ import { checkProductAccess } from '@/lib/productAccess';
 import { AQA_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const AQA_PRODUCT_ID = "17ade690-8c44-4961-83b5-0edf42a9faea";
 
