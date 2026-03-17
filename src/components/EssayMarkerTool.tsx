@@ -33,7 +33,7 @@ const markPrompts: Record<number, string> = {
 interface EssayMarkerToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
-  onSubmitToChat?: (message: string, imageDataUrl?: string) => void;
+  onSubmitToChat?: (message: string, imageDataUrl?: string | string[]) => void;
   onClose?: () => void;
   fixedMark?: number;
   toolLabel?: string;
