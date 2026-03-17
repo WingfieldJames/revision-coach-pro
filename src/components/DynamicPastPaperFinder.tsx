@@ -340,7 +340,7 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
           }}
           onKeyDown={(e) => e.key === 'Enter' && (selectedSpecPoint || searchQuery.trim()) && handleSearch()}
           placeholder={`Enter a topic from ${subjectName}...`}
-          className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
       </div>
 
