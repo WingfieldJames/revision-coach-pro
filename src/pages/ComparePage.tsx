@@ -420,7 +420,7 @@ export const ComparePage = () => {
                 subject={subject}
                 subjectLabel={subjectLabels[subject] || subject}
                 examBoard={examBoard}
-                formattedBoard={examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()}
+                formattedBoard={!examBoard ? '' : examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()}
                 hasAccess={hasProductAccess}
                 subscriptionPaymentType={subscriptionPaymentType}
                 onCtaClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
