@@ -339,39 +339,68 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                       <p className="text-sm text-muted-foreground">No conversations yet</p>
                       <p className="text-xs text-muted-foreground/70 mt-1">Start chatting to see your history here</p>
                     </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {grouped.map(group => (
-                        <div key={group.label}>
-                          <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">{group.label}</p>
-                          <div className="space-y-0.5">
-                            {group.items.map(convo => {
-                              const isActive = chatHistoryCtx?.currentConversationId === convo.id;
-                              return (
-                                <button
-                                  key={convo.id}
-                                  onClick={() => handleLoadConversation(convo.id)}
-                                  className={cn(
-                                    "w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all text-left group",
-                                    isActive ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"
-                                  )}
-                                >
-                                  <MessageSquare className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                  <span className="flex-1 truncate text-xs">{convo.title}</span>
-                                  <span className="text-[10px] text-muted-foreground/60 shrink-0">{formatRelativeTime(convo.updated_at)}</span>
-                                  <button
-                                    onClick={(e) => handleDeleteConversation(e, convo.id)}
-                                    className="h-5 w-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all shrink-0"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </button>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  ) : (() => {
+                    const MAX_VISIBLE = 5;
+                    const totalCount = grouped.reduce((sum, g) => sum + g.items.length, 0);
+                    let remaining = showAllChats ? Infinity : MAX_VISIBLE;
+                    return (
+                      <div className="space-y-2">
+                        {grouped.map(group => {
+                          if (remaining <= 0) return null;
+                          const visibleItems = group.items.slice(0, remaining);
+                          remaining -= visibleItems.length;
+                          return (
+                            <div key={group.label}>
+                              <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">{group.label}</p>
+                              <div className="space-y-0.5">
+                                {visibleItems.map(convo => {
+                                  const isActive = chatHistoryCtx?.currentConversationId === convo.id;
+                                  return (
+                                    <button
+                                      key={convo.id}
+                                      onClick={() => handleLoadConversation(convo.id)}
+                                      className={cn(
+                                        "w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all text-left group",
+                                        isActive ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"
+                                      )}
+                                    >
+                                      <MessageSquare className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                      <span className="flex-1 truncate text-xs">{convo.title}</span>
+                                      <span className="text-[10px] text-muted-foreground/60 shrink-0">{formatRelativeTime(convo.updated_at)}</span>
+                                      <button
+                                        onClick={(e) => handleDeleteConversation(e, convo.id)}
+                                        className="h-5 w-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all shrink-0"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </button>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {!showAllChats && totalCount > MAX_VISIBLE && (
+                          <button
+                            onClick={() => setShowAllChats(true)}
+                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                          >
+                            <ChevronDown className="h-3 w-3" />
+                            View {totalCount - MAX_VISIBLE} more
+                          </button>
+                        )}
+                        {showAllChats && totalCount > MAX_VISIBLE && (
+                          <button
+                            onClick={() => setShowAllChats(false)}
+                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                          >
+                            <ChevronUp className="h-3 w-3" />
+                            Show less
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()
                   )}
                 </div>
 
