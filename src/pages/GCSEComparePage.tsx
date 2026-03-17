@@ -310,49 +310,18 @@ export const GCSEComparePage = () => {
                 </div>
               </ScrollReveal>
 
-              {/* Plan Card */}
+              {/* Subject Feature Grid */}
               <ScrollReveal delay={0.2}>
-                <div id="pricing" className="max-w-3xl mx-auto mb-12">
-                  <div className="bg-muted/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-border/50 shadow-elevated text-left">
-                    <div className="flex-1">
-                      <h2 className="text-2xl sm:text-3xl font-bold mb-1">{hasProductAccess ? "You're Deluxe!" : "The Plan"}</h2>
-                      <p className="text-muted-foreground mb-6 text-sm">
-                        {hasProductAccess ? "You have access to:" : `Everything you need to ace your GCSE ${subjectLabels[subject] || ''} exam`}
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-500 shrink-0" />
-                          <span>AI trained on all past papers & mark schemes</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-500 shrink-0" />
-                          <span>Full exam technique + model answers</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-500 shrink-0" />
-                          <span>Covers entire {formatBoard(examBoard)} specification</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-500 shrink-0" />
-                          <span>Personalised revision plans</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-6">
-                      <button
-                        onClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
-                        className="w-full sm:w-auto px-10 py-3.5 rounded-full text-white font-semibold text-base transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense bg-gradient-brand"
-                      >
-                        {hasProductAccess ? "Go to your chat →" : "Get Started →"}
-                      </button>
-                      <p className="text-xs text-muted-foreground mt-3">
-                        {hasProductAccess
-                          ? (subscriptionPaymentType === 'lifetime' ? 'Exam season pass active' : 'Monthly pass active')
-                          : 'Free to start • No credit card required'}
-                      </p>
-                    </div>
-                  </div>
+                <div id="pricing">
+                  <SubjectFeatureGrid
+                    subject={subject}
+                    subjectLabel={subjectLabels[subject] || subject}
+                    examBoard={examBoard}
+                    formattedBoard={formatBoard(examBoard)}
+                    hasAccess={hasProductAccess}
+                    subscriptionPaymentType={subscriptionPaymentType}
+                    onCtaClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
+                  />
                 </div>
               </ScrollReveal>
             </>
