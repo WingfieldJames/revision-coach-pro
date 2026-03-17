@@ -195,30 +195,17 @@ export const HomePage = () => {
                 <p className="text-xs sm:text-sm text-muted-foreground mt-4">Get started free • No card needed</p>
               </div>
 
-              {/* Right side - Device mockups */}
-              <div className="hidden md:flex flex-1 justify-center items-end relative min-h-[400px]">
+              {/* Right side - Device mockup */}
+              <div className="hidden md:flex flex-1 justify-center items-center relative">
                 <motion.div
-                  className="relative z-10"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
                 >
-                  <img
-                    src="/lovable-uploads/hero-mobile-phone-transparent.png"
-                    alt="A* AI on mobile"
-                    className="w-[260px] lg:w-[300px] drop-shadow-2xl"
-                  />
-                </motion.div>
-                <motion.div
-                  className="absolute right-0 lg:-right-6 top-4 z-0"
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                >
-                  <div className="w-[260px] lg:w-[300px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated bg-card">
+                  <div className="w-[420px] lg:w-[500px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
                     <img
-                      src="/lovable-uploads/hero-ipad-demo.jpg"
-                      alt="A* AI on desktop"
+                      src={appScreenshot}
+                      alt="A* AI essay marker demo"
                       className="w-full h-auto"
                     />
                   </div>
