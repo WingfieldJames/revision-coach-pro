@@ -14,6 +14,7 @@ import { Header } from '@/components/Header';
 import { checkProductAccess } from '@/lib/productAccess';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const EDEXCEL_MATHS_APPLIED_SLUG = 'edexcel-mathematics-applied';
 const DEFAULT_PROMPTS = [
