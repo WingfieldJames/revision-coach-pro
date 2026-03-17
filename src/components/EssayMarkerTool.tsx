@@ -33,7 +33,7 @@ const markPrompts: Record<number, string> = {
 interface EssayMarkerToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
-  onSubmitToChat?: (message: string, imageDataUrl?: string) => void;
+  onSubmitToChat?: (message: string, imageDataUrl?: string | string[]) => void;
   onClose?: () => void;
   fixedMark?: number;
   toolLabel?: string;
@@ -217,14 +217,23 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     if (onSubmitToChat) {
       setIsSubmitting(true);
       
-      // Convert first attached image to base64 for vision analysis
-      let imageDataUrl: string | undefined;
-      if (attachedFiles.length > 0 && attachedFiles[0].file.type.startsWith('image/')) {
+      // Convert ALL attached images to base64 for vision analysis
+      let imageDataUrl: string | string[] | undefined;
+      const imageFiles = attachedFiles.filter(af => af.file.type.startsWith('image/'));
+      if (imageFiles.length === 1) {
         imageDataUrl = await new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(attachedFiles[0].file);
+          reader.readAsDataURL(imageFiles[0].file);
         });
+      } else if (imageFiles.length > 1) {
+        imageDataUrl = await Promise.all(
+          imageFiles.map(af => new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(af.file);
+          }))
+        );
       }
       
       onSubmitToChat(prompt, imageDataUrl);

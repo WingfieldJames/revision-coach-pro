@@ -48,7 +48,7 @@ interface DiagramData {
 }
 
 export interface RAGChatRef {
-  submitMessage: (message: string, imageDataUrl?: string) => void;
+  submitMessage: (message: string, imageDataUrl?: string | string[]) => void;
 }
 
 interface RAGChatProps {
@@ -308,10 +308,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       animateNextWord();
     }
   }, [isAnimating, animateNextWord]);
-  const handleSendWithMessage = async (messageText: string, imageDataUrl?: string) => {
+  const handleSendWithMessage = async (messageText: string, imageDataUrl?: string | string[]) => {
     if (!messageText.trim() && !imageDataUrl || isLoading) return;
     // Persist user message
-    persistMessage('user', messageText, imageDataUrl);
+    persistMessage('user', messageText, Array.isArray(imageDataUrl) ? imageDataUrl[0] : imageDataUrl);
 
     // Reset animation state
     bufferRef.current = '';
@@ -344,6 +344,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           enable_diagrams: enableDiagrams,
           diagram_subject: diagramSubject,
           image_data: imageDataUrl || null,
+          multi_image: Array.isArray(imageDataUrl),
         })
       });
       if (!response.ok) {
@@ -476,12 +477,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   useEffect(() => {
     if (chatRef) {
       (chatRef as React.MutableRefObject<RAGChatRef>).current = {
-        submitMessage: (messageText: string, imageDataUrl?: string) => {
+        submitMessage: (messageText: string, imageDataUrl?: string | string[]) => {
           if ((!messageText.trim() && !imageDataUrl) || isLoading) return;
+          const firstImage = Array.isArray(imageDataUrl) ? imageDataUrl[0] : imageDataUrl;
           const userMessage: Message = {
             role: 'user',
             content: messageText,
-            ...(imageDataUrl ? { imageUrl: imageDataUrl } : {})
+            ...(firstImage ? { imageUrl: firstImage } : {})
           };
           setMessages(prev => [...prev, userMessage]);
           handleSendWithMessage(messageText, imageDataUrl);

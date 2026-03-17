@@ -708,11 +708,13 @@ When a student asks you to mark their essay, answer, or response:
       console.log(`Diagram included: ${relevantDiagram.id}`);
     }
     // Build the user message content — support vision (image) when image_data provided
+    // image_data can be a single string or an array of strings for multiple images
     let userMessageContent: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
     if (image_data) {
+      const images = Array.isArray(image_data) ? image_data : [image_data];
       userMessageContent = [
         { type: "text", text: message || "Please analyse the attached file." },
-        { type: "image_url", image_url: { url: image_data } },
+        ...images.map((img: string) => ({ type: "image_url", image_url: { url: img } })),
       ];
     } else {
       userMessageContent = message;
