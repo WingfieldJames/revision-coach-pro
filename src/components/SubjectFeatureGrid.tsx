@@ -117,7 +117,7 @@ export function SubjectFeatureGrid({
 
   return (
     <div className="max-w-3xl mx-auto mb-12">
-      <div className="bg-muted/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-border/50 shadow-elevated text-left">
+      <div className="text-left">
         {/* Subject header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
