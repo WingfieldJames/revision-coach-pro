@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { AQA_CHEMISTRY_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const AQA_CHEMISTRY_SLUG = 'aqa-chemistry';
 const DEFAULT_PROMPTS = [
