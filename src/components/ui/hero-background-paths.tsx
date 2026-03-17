@@ -2,6 +2,77 @@
 
 import { motion } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
+import React, { useMemo } from "react";
+
+const ACHIEVEMENT_STATS = [
+  "4 A*s", "Straight 9s", "99 UMS", "Top 1%",
+  "A*A*A*A*", "200/200", "Full marks", "8.9 TMUA",
+];
+
+function FloatingAchievements() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const items = useMemo(() => {
+    const result: Array<{
+      label: string;
+      x: number;
+      duration: number;
+      delay: number;
+      fontSize: number;
+    }> = [];
+
+    ACHIEVEMENT_STATS.forEach((label, i) => {
+      const side = i % 2 === 0 ? "left" : "right";
+      const x = side === "left"
+        ? 1 + (i * 3.7) % 10
+        : 89 + (i * 2.9) % 10;
+      result.push({
+        label,
+        x,
+        duration: 16 + (i * 3.7) % 8,
+        delay: (i * 2.3) % 12,
+        fontSize: 12 + (i % 3),
+      });
+    });
+
+    return result;
+  }, []);
+
+  const color = isDark
+    ? "rgba(168, 85, 247, 0.12)"
+    : "rgba(79, 54, 179, 0.13)";
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden hidden lg:block">
+      {items.map((item, i) => (
+        <motion.span
+          key={i}
+          className="absolute font-semibold select-none whitespace-nowrap"
+          style={{
+            left: `${item.x}%`,
+            color,
+            fontSize: `${item.fontSize}px`,
+          }}
+          initial={{ bottom: "-5%", opacity: 0 }}
+          animate={{
+            bottom: ["-5%", "110%"],
+            opacity: [0, 1, 1, 0],
+          }}
+          transition={{
+            duration: item.duration,
+            delay: item.delay,
+            repeat: Infinity,
+            ease: "linear",
+            times: [0, 0.05, 0.9, 1],
+          }}
+        >
+          {item.label}
+        </motion.span>
+      ))}
+    </div>
+  );
+}
 
 function HeroFloatingPaths({ position, mobileOnly = false }: { position: number; mobileOnly?: boolean }) {
     const { theme } = useTheme();
@@ -71,12 +142,11 @@ function HeroFloatingPaths({ position, mobileOnly = false }: { position: number;
 export function HeroBackgroundPaths({ children }: { children?: React.ReactNode }) {
     return (
         <div className="relative w-screen overflow-visible" style={{ marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)' }}>
-            {/* Desktop paths */}
             <HeroFloatingPaths position={1} />
             <HeroFloatingPaths position={-1} />
-            {/* Mobile paths */}
             <HeroFloatingPaths position={1} mobileOnly />
             <HeroFloatingPaths position={-1} mobileOnly />
+            <FloatingAchievements />
             <div className="relative z-10 max-w-7xl mx-auto">
                 {children}
             </div>
