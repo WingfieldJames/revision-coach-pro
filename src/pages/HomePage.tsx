@@ -152,114 +152,146 @@ export const HomePage = () => {
       {/* Hero Section */}
       <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4">
         <HeroBackgroundPaths>
-          <div className="px-6 sm:px-8 py-6 sm:py-16 md:py-24 md:max-xl:py-6 max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-              {/* Left side - Text content */}
-              <div className="flex-1 text-center md:text-left">
-                {/* Social Proof Pill */}
-                <div
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm"
-                >
-                  <span className="text-base">⭐</span>
-                  <span className="text-foreground text-xs sm:text-sm font-medium">
-                    Loved by 2k+ students with a 4.9 star rating
-                  </span>
-                </div>
-
-                {/* Meet A* AI heading */}
-                <div className="flex items-center justify-center md:justify-start gap-0 mb-1">
-                  <span className={`text-foreground font-bold text-4xl sm:text-5xl`}>Meet</span>
-                  <img src={currentLogo} alt="A* AI" className={`${theme === "dark" ? "h-28" : "h-20"} -mx-2`} />
-                </div>
-
-                {/* Main Headline */}
-                <h1 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] font-bold mb-4 leading-[1.15] tracking-tight">
-                  <div className="text-foreground">The AI that actually</div>
-                  <div className="whitespace-nowrap">
-                    <span className="text-foreground">understands </span>
-                    <span className="text-primary">A-Level </span>
-                    <span
-                       className="relative inline-block overflow-hidden text-left text-primary"
-                       style={{ width: "5.5em", height: "1.15em", verticalAlign: "bottom" }}
-                     >
-                      <AnimatePresence mode="wait">
-                        <motion.span
-                          key={subjects[currentSubjectIndex]}
-                          className="absolute left-0 bottom-0"
-                          initial={{ y: "100%", opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          exit={{ y: "-100%", opacity: 0 }}
-                          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                          {subjects[currentSubjectIndex]}
-                        </motion.span>
-                      </AnimatePresence>
-                    </span>
-                  </div>
-                </h1>
-
-                {/* Subheadline */}
-                <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed mx-auto md:mx-0">
-                  Built for your exam board, trained by the highest achieving A* students
-                </p>
-
-                {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row items-center md:items-start gap-4">
-                  <button
-                    onClick={handlePickSubject}
-                    className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
-                  >
-                    Pick Your Subject →
-                  </button>
-                  <button
-                    onClick={handleSeeHowItWorks}
-                    className="px-8 py-3.5 rounded-full text-foreground font-semibold text-base sm:text-lg border border-foreground/30 bg-transparent transition-all duration-300 hover:bg-primary hover:border-primary hover:text-primary-foreground"
-                  >
-                    See How It Works
-                  </button>
-                </div>
-
-                <p className="text-xs sm:text-sm text-muted-foreground mt-4">Get started free • No card needed</p>
-              </div>
-
-              {/* Right side - Device mockups */}
-              <div className="hidden md:flex flex-1 justify-center items-end relative min-h-[400px]">
-                <motion.div
-                  className="relative z-10"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                >
-                  <img
-                    src="/lovable-uploads/hero-mobile-phone-transparent.png"
-                    alt="A* AI on mobile"
-                    className="w-[260px] lg:w-[300px] drop-shadow-2xl"
-                  />
-                </motion.div>
-                <motion.div
-                  className="absolute right-0 lg:-right-6 top-4 z-0"
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                >
-                  <div className="w-[260px] lg:w-[300px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated bg-card">
-                    <img
-                      src="/lovable-uploads/hero-ipad-demo.jpg"
-                      alt="A* AI on desktop"
-                      className="w-full h-auto"
-                    />
-                  </div>
-                </motion.div>
-              </div>
+          <div className="px-6 sm:px-8 py-10 sm:py-16 md:py-24 md:max-xl:py-10 max-w-5xl mx-auto flex flex-col items-center text-center">
+            {/* Social Proof Pill */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7 border border-border bg-background/80 backdrop-blur-sm">
+              <span className="text-base">⭐</span>
+              <span className="text-foreground text-xs sm:text-sm font-medium">
+                Loved by 2k+ students with a 4.9 star rating
+              </span>
             </div>
+
+            {/* Headline */}
+            <h1 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] font-bold mb-4 leading-[1.15] tracking-tight">
+              <div className="text-foreground">The AI that actually</div>
+              <div className="whitespace-nowrap">
+                <span className="text-foreground">understands </span>
+                <span className="text-primary">A-Level </span>
+                <span
+                  className="relative inline-block overflow-hidden text-left text-primary"
+                  style={{ width: "5.5em", height: "1.15em", verticalAlign: "bottom" }}
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={subjects[currentSubjectIndex]}
+                      className="absolute left-0 bottom-0"
+                      initial={{ y: "100%", opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: "-100%", opacity: 0 }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {subjects[currentSubjectIndex]}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
+              </div>
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-[580px] mb-8 leading-relaxed">
+              We extracted everything from the UK's top A* students — their technique, question approaches, and mark scheme instincts.
+              <strong className="block mt-1 text-foreground">Built into one AI, for your exact board.</strong>
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <button
+                onClick={handlePickSubject}
+                className="px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-bold text-base sm:text-lg transition-all duration-200 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
+              >
+                Pick your subject →
+              </button>
+              <button
+                onClick={handleSeeHowItWorks}
+                className="px-8 py-3.5 rounded-xl text-foreground font-semibold text-base sm:text-lg border-[1.5px] border-border bg-transparent transition-all duration-200 hover:border-muted-foreground hover:-translate-y-0.5"
+              >
+                See how it works
+              </button>
+            </div>
+
+            <p className="text-xs sm:text-sm text-muted-foreground mt-4">Get started free <span className="opacity-40 mx-1">•</span> No card needed</p>
           </div>
         </HeroBackgroundPaths>
       </section>
 
-      {/* Meet the Founders */}
-      <div data-section="founders">
-        <MeetTheFounders />
-      </div>
+      {/* Subject Cards Marquee */}
+      <section className="py-10 md:py-14 px-4 md:px-8 bg-muted overflow-hidden">
+        <div className="max-w-5xl mx-auto">
+          <ScrollReveal className="text-center mb-8">
+            <h2 className={sectionHeadingClass}>
+              <span className="text-foreground">Your subject. Your board. </span>
+              <span className="text-primary">Your AI.</span>
+            </h2>
+          </ScrollReveal>
+
+          {/* Marquee */}
+          <div className="relative [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+            <div className="flex gap-3 w-max animate-[marquee_40s_linear_infinite] hover:[animation-play-state:paused]">
+              {[...subjectCards, ...subjectCards].map((card, i) => (
+                <div
+                  key={i}
+                  className="bg-card border border-border rounded-2xl p-5 w-[200px] shrink-0 transition-colors hover:border-primary text-left"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">{card.level}</span>
+                    <span className="text-sm font-bold text-foreground">{card.subject}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {card.boards.map((b) => (
+                      <span key={b} className={`text-[11px] font-semibold px-2 py-0.5 rounded ${b === "coming soon" ? "text-muted-foreground bg-muted" : "text-primary bg-primary/10 border border-primary/20"}`}>{b}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-center text-muted-foreground text-xs sm:text-sm mt-6">Available for A-Levels and GCSEs · More subjects added regularly</p>
+        </div>
+      </section>
+
+      {/* Trainers Section */}
+      <section className="py-12 md:py-16 px-4 md:px-8 bg-background overflow-hidden">
+        <div className="max-w-5xl mx-auto">
+          <ScrollReveal className="text-center mb-10">
+            <h2 className={sectionHeadingClass}>
+              <span className="text-foreground">Meet your </span>
+              <span className="text-primary">trainers</span>
+            </h2>
+            <p className="text-muted-foreground text-sm md:text-base mt-3 max-w-xl mx-auto">
+              The A* students behind the AI — every subject is taught by a real student who aced it.
+            </p>
+          </ScrollReveal>
+
+          {/* Trainer cards marquee */}
+          <div className="relative [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+            <div className="flex gap-4 w-max animate-[marquee_35s_linear_infinite] hover:[animation-play-state:paused]">
+              {[...trainers, ...trainers].map((t, i) => (
+                <div
+                  key={i}
+                  className="bg-card border border-border rounded-2xl p-6 w-[260px] shrink-0 transition-colors hover:border-primary text-left"
+                >
+                  <div className="w-[52px] h-[52px] rounded-full overflow-hidden bg-primary/10 mb-4">
+                    <img src={t.image} alt={t.name} className="w-full h-full object-cover object-[center_20%]" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">{t.name}</h3>
+                  <p className="text-xs text-muted-foreground mb-3">{t.subject}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {t.stats.map((stat, j) => (
+                      <span
+                        key={j}
+                        className={`text-[11px] font-bold px-2.5 py-1 rounded-md ${j === 0 ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400" : "bg-primary/10 border border-primary/20 text-primary"}`}
+                      >
+                        {stat}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* See A* AI in action - Demo Video */}
       <section data-section="demo-video" className="hidden md:block py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
