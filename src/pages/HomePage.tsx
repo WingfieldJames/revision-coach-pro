@@ -21,67 +21,67 @@ import logoDark from "@/assets/logo-dark.png";
 import appScreenshot from "@/assets/app-screenshot.png";
 
 const revisionFeatures = [
-  {
-    id: 1,
-    title: "Planning",
-    date: "Step 1",
-    content:
-      "Never miss a deadline. AI-powered exam countdown tracks every paper and builds your personalized revision schedule based on your target grade.",
-    category: "Planning",
-    icon: Calendar,
-    relatedIds: [2],
-    status: "completed" as const,
-    energy: 100,
-  },
-  {
-    id: 2,
-    title: "Content Learning",
-    date: "Step 2",
-    content:
-      "Tailored to you. Trained on your exact specification and adapted to your learning style - visual, detailed, or concise explanations on demand.",
-    category: "Learning",
-    icon: BookOpen,
-    relatedIds: [1, 3],
-    status: "completed" as const,
-    energy: 90,
-  },
-  {
-    id: 3,
-    title: "Exam Technique",
-    date: "Step 3",
-    content:
-      "Learn from 4 A* students. Master the proven techniques that got real students into Oxbridge/Imperial/LSE & more - from essay structure to top-band evaluation.",
-    category: "Technique",
-    icon: GraduationCap,
-    relatedIds: [2, 4],
-    status: "in-progress" as const,
-    energy: 80,
-  },
-  {
-    id: 4,
-    title: "Past Paper Finder",
-    date: "Step 4",
-    content:
-      "2,000+ questions searchable instantly. Find any question by topic or keyword, with official mark schemes included.",
-    category: "Practice",
-    icon: Search,
-    relatedIds: [3, 5],
-    status: "pending" as const,
-    energy: 60,
-  },
-  {
-    id: 5,
-    title: "Essay Marker",
-    date: "Step 5",
-    content:
-      "90% teacher accuracy. Upload your essay, get instant breakdown of every AO, see exactly where you gained and lost marks.",
-    category: "Feedback",
-    icon: FileCheck,
-    relatedIds: [4],
-    status: "pending" as const,
-    energy: 40,
-  },
-];
+{
+  id: 1,
+  title: "Planning",
+  date: "Step 1",
+  content:
+  "Never miss a deadline. AI-powered exam countdown tracks every paper and builds your personalized revision schedule based on your target grade.",
+  category: "Planning",
+  icon: Calendar,
+  relatedIds: [2],
+  status: "completed" as const,
+  energy: 100
+},
+{
+  id: 2,
+  title: "Content Learning",
+  date: "Step 2",
+  content:
+  "Tailored to you. Trained on your exact specification and adapted to your learning style - visual, detailed, or concise explanations on demand.",
+  category: "Learning",
+  icon: BookOpen,
+  relatedIds: [1, 3],
+  status: "completed" as const,
+  energy: 90
+},
+{
+  id: 3,
+  title: "Exam Technique",
+  date: "Step 3",
+  content:
+  "Learn from 4 A* students. Master the proven techniques that got real students into Oxbridge/Imperial/LSE & more - from essay structure to top-band evaluation.",
+  category: "Technique",
+  icon: GraduationCap,
+  relatedIds: [2, 4],
+  status: "in-progress" as const,
+  energy: 80
+},
+{
+  id: 4,
+  title: "Past Paper Finder",
+  date: "Step 4",
+  content:
+  "2,000+ questions searchable instantly. Find any question by topic or keyword, with official mark schemes included.",
+  category: "Practice",
+  icon: Search,
+  relatedIds: [3, 5],
+  status: "pending" as const,
+  energy: 60
+},
+{
+  id: 5,
+  title: "Essay Marker",
+  date: "Step 5",
+  content:
+  "90% teacher accuracy. Upload your essay, get instant breakdown of every AO, see exactly where you gained and lost marks.",
+  category: "Feedback",
+  icon: FileCheck,
+  relatedIds: [4],
+  status: "pending" as const,
+  energy: 40
+}];
+
 
 /** Shared heading class matching FoundersCarousel / hero style */
 const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight";
@@ -132,11 +132,11 @@ export const HomePage = () => {
               <div className="flex-1 text-center md:text-left md:max-w-[45%]">
                 {/* Social Proof Pill */}
                 <div
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm"
-                >
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm">
+                  
                   <span className="text-base">⭐</span>
                   <span className="text-foreground text-xs sm:text-sm font-medium">
-                    Loved by 2k+ students with a 4.9 star rating
+                    Loved by 5k+ students with a 4.9 star rating
                   </span>
                 </div>
 
@@ -156,14 +156,14 @@ export const HomePage = () => {
                 <div className="flex flex-col sm:flex-row items-center md:items-start gap-4">
                   <button
                     onClick={handlePickSubject}
-                    className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
-                  >
+                    className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90">
+                    
                     Pick Your Subject →
                   </button>
                   <button
                     onClick={handleSeeHowItWorks}
-                    className="px-8 py-3.5 rounded-full text-foreground font-semibold text-base sm:text-lg border border-foreground/30 bg-transparent transition-all duration-300 hover:bg-primary hover:border-primary hover:text-primary-foreground"
-                  >
+                    className="px-8 py-3.5 rounded-full text-foreground font-semibold text-base sm:text-lg border border-foreground/30 bg-transparent transition-all duration-300 hover:bg-primary hover:border-primary hover:text-primary-foreground">
+                    
                     See How It Works
                   </button>
                 </div>
@@ -177,8 +177,8 @@ export const HomePage = () => {
                   <img
                     src={appScreenshot}
                     alt="A* AI essay marker demo"
-                    className="w-full h-auto"
-                  />
+                    className="w-full h-auto" />
+                  
                 </div>
               </div>
             </div>
@@ -208,8 +208,8 @@ export const HomePage = () => {
               allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
               style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-              title="A* AI Demo"
-            />
+              title="A* AI Demo" />
+            
           </div>
         </ScrollReveal>
       </section>
@@ -249,8 +249,8 @@ export const HomePage = () => {
             <p className="text-muted-foreground text-xs mt-2">Join 2000+ students and teachers achieving real results</p>
           </div>
           <div className="space-y-3">
-            {[firstColumn[0], firstColumn[2], firstColumn[6]].map((t, i) => (
-              <div key={i} className="relative bg-card rounded-3xl p-5 shadow-card border border-border/30 overflow-hidden">
+            {[firstColumn[0], firstColumn[2], firstColumn[6]].map((t, i) =>
+            <div key={i} className="relative bg-card rounded-3xl p-5 shadow-card border border-border/30 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 dark:hidden rounded-3xl pointer-events-none" />
                 <p className="text-foreground leading-relaxed text-base">{t.text}</p>
                 <div className="flex items-center gap-3 mt-4">
@@ -261,7 +261,7 @@ export const HomePage = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -294,8 +294,8 @@ export const HomePage = () => {
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">{feature.content}</p>
                 </div>
-              </StaggerItem>
-            );
+              </StaggerItem>);
+
           })}
         </StaggerContainer>
 
@@ -309,12 +309,12 @@ export const HomePage = () => {
                   <Accordion type="single" collapsible>
                     <AccordionItem
                       value={`feature-${feature.id}`}
-                      className="border-0 bg-muted rounded-xl overflow-hidden"
-                    >
+                      className="border-0 bg-muted rounded-xl overflow-hidden">
+                      
                       <AccordionTrigger
                         hideIcon
-                        className="p-5 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180"
-                      >
+                        className="p-5 hover:no-underline w-full [&[data-state=open]_.chevron]:rotate-180">
+                        
                         <div className="flex items-center gap-3 w-full">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                             <Icon className="w-5 h-5 text-primary" />
@@ -330,8 +330,8 @@ export const HomePage = () => {
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
-                </StaggerItem>
-              );
+                </StaggerItem>);
+
             })}
           </StaggerContainer>
         </div>
@@ -356,8 +356,8 @@ export const HomePage = () => {
                 <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
                   <AccordionTrigger
                     hideIcon
-                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg"
-                  >
+                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
+                    
                     <span>Why is this better than ChatGPT or a normal AI?</span>
                     <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
                   </AccordionTrigger>
@@ -381,8 +381,8 @@ export const HomePage = () => {
                 <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
                   <AccordionTrigger
                     hideIcon
-                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg"
-                  >
+                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
+                    
                     <span>How does it work?</span>
                     <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
                   </AccordionTrigger>
@@ -402,8 +402,8 @@ export const HomePage = () => {
                 <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
                   <AccordionTrigger
                     hideIcon
-                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg"
-                  >
+                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
+                    
                     <span>What subjects do you cover?</span>
                     <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
                   </AccordionTrigger>
@@ -419,8 +419,8 @@ export const HomePage = () => {
                 <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
                   <AccordionTrigger
                     hideIcon
-                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg"
-                  >
+                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
+                    
                     <span>Is it really free?</span>
                     <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
                   </AccordionTrigger>
@@ -472,8 +472,8 @@ export const HomePage = () => {
             <Link
               to="/login"
               className="text-primary hover:text-primary/80 transition-opacity"
-              onClick={() => window.scrollTo(0, 0)}
-            >
+              onClick={() => window.scrollTo(0, 0)}>
+              
               Sign in
             </Link>
             <span>•</span>
@@ -489,39 +489,39 @@ export const HomePage = () => {
               href="https://www.instagram.com/a.star.ai/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
+              className="text-muted-foreground hover:text-foreground transition-colors">
+              
               <Instagram size={24} />
             </a>
             <a
               href="https://www.tiktok.com/@a.star.ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
+              className="text-muted-foreground hover:text-foreground transition-colors">
+              
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
             </a>
             <a
               href="https://www.youtube.com/@a_star_ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
+              className="text-muted-foreground hover:text-foreground transition-colors">
+              
               <Youtube size={24} />
             </a>
             <a
               href="https://www.linkedin.com/company/astar-ai/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
+              className="text-muted-foreground hover:text-foreground transition-colors">
+              
               <Linkedin size={24} />
             </a>
             <p className="text-sm text-muted-foreground">© 2025 A* AI</p>
           </div>
 
-          {!user && (
-            <div className="flex gap-4 justify-center">
+          {!user &&
+          <div className="flex gap-4 justify-center">
               <Button variant="outline" asChild>
                 <Link to="/login">Login</Link>
               </Button>
@@ -529,9 +529,9 @@ export const HomePage = () => {
                 <Link to="/signup">Sign Up</Link>
               </Button>
             </div>
-          )}
+          }
         </ScrollReveal>
       </footer>
-    </div>
-  );
+    </div>);
+
 };
