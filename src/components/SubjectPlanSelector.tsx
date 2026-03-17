@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { checkProductAccess } from '@/lib/productAccess';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
+import { SubjectFeatureGrid } from '@/components/SubjectFeatureGrid';
 
 type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'psychology' | 'mathematics';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
@@ -33,6 +34,15 @@ const subjectLabels: Record<Subject, string> = {
   'mathematics': 'Mathematics'
 };
 
+const BOARDS_MAP: Record<Subject, ExamBoard[]> = {
+  'economics': ['edexcel', 'aqa', 'cie'],
+  'computer-science': ['ocr'],
+  'physics': ['ocr'],
+  'chemistry': ['aqa'],
+  'psychology': ['aqa'],
+  'mathematics': ['edexcel', 'ocr'],
+};
+
 export function SubjectPlanSelector() {
   const { user, profile, loading } = useAuth();
   const { theme } = useTheme();
@@ -42,20 +52,14 @@ export function SubjectPlanSelector() {
     const saved = localStorage.getItem('preferred-subject');
     return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' || saved === 'psychology' || saved === 'mathematics' ? saved as Subject : 'economics';
   });
-  const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
-    const savedSubject = localStorage.getItem('preferred-subject');
-    const saved = localStorage.getItem('preferred-exam-board');
-    if (savedSubject === 'computer-science' || savedSubject === 'physics') return 'ocr';
-    if (savedSubject === 'chemistry' || savedSubject === 'psychology') return 'aqa';
-    if (savedSubject === 'mathematics') return 'edexcel';
-    return saved === 'edexcel' || saved === 'aqa' || saved === 'cie' ? saved as ExamBoard : 'edexcel';
-  });
+  const [examBoard, setExamBoard] = useState<ExamBoard | ''>('');
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [hasProductAccess, setHasProductAccess] = useState(false);
   const [subscriptionPaymentType, setSubscriptionPaymentType] = useState<string | null>(null);
   const [checkingAccess, setCheckingAccess] = useState(false);
 
   const getCurrentProductSlug = () => {
+    if (!examBoard) return null;
     if (subject === 'economics') {
       if (examBoard === 'aqa') return 'aqa-economics';
       if (examBoard === 'cie') return 'cie-economics';
@@ -70,11 +74,12 @@ export function SubjectPlanSelector() {
     return null;
   };
 
-  const getBoardLabel = () => {
-    if (examBoard === 'cie') return 'CIE';
-    if (examBoard === 'aqa') return 'AQA';
-    if (examBoard === 'ocr') return 'OCR';
-    return 'Edexcel';
+  const formatBoard = (b: string) => {
+    if (b === 'cie') return 'CIE';
+    if (b === 'aqa') return 'AQA';
+    if (b === 'ocr') return 'OCR';
+    if (b === 'edexcel') return 'Edexcel';
+    return b.toUpperCase();
   };
 
   useEffect(() => {
@@ -100,7 +105,7 @@ export function SubjectPlanSelector() {
 
   useEffect(() => {
     localStorage.setItem('preferred-subject', subject);
-    localStorage.setItem('preferred-exam-board', examBoard);
+    if (examBoard) localStorage.setItem('preferred-exam-board', examBoard);
   }, [subject, examBoard]);
 
   const handleFreeClick = async () => {
@@ -167,59 +172,34 @@ export function SubjectPlanSelector() {
     }
   };
 
+  const boardsForSubject = BOARDS_MAP[subject] || [];
+
   return (
     <div className="text-center">
-      {/* Subject & Board Selection */}
+      {/* Subject Tabs */}
       <ScrollReveal delay={0.1}>
-        {/* Desktop: Connected toggle group + board dropdown on same line */}
-        <div className="hidden md:flex items-center justify-center gap-4 mb-12">
+        <div className="hidden md:flex flex-col items-center gap-3 mb-12">
           <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
             {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map((s) => (
               <button
                 key={s}
                 onClick={() => {
                   setSubject(s);
-                  if (s === 'economics' || s === 'mathematics') setExamBoard('edexcel');
-                  else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
-                  else setExamBoard('ocr');
+                  setExamBoard('');
                 }}
                 className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                   subject === s
                     ? 'bg-gradient-brand text-white'
-                    : 'text-foreground hover:bg-muted'
+                    : 'text-foreground'
                 }`}
               >
                 {subjectLabels[s]}
               </button>
             ))}
           </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 hover:bg-muted whitespace-nowrap">
-                {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : 'Exam Board'}
-                <ChevronDown className="h-3.5 w-3.5" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-              {(subject === 'economics'
-                ? (['edexcel', 'aqa', 'cie'] as ExamBoard[])
-                : subject === 'mathematics'
-                ? (['edexcel', 'ocr'] as ExamBoard[])
-                : subject === 'chemistry' || subject === 'psychology'
-                ? (['aqa'] as ExamBoard[])
-                : (['ocr'] as ExamBoard[])
-              ).map(b => (
-                <DropdownMenuItem key={b} className="cursor-pointer hover:bg-muted flex items-center gap-2" onClick={() => setExamBoard(b)}>
-                  {examBoard === b ? <Check className="h-3.5 w-3.5" /> : <span className="w-3.5" />}
-                  {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : 'Edexcel'}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
-        {/* Mobile: Two dropdown buttons matching /compare page style */}
+        {/* Mobile */}
         <div className="md:hidden flex items-center justify-center gap-3 mb-8">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -232,111 +212,29 @@ export function SubjectPlanSelector() {
               {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
                 <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                   setSubject(s);
-                  if (s === 'economics') setExamBoard('edexcel');
-                  else if (s === 'chemistry' || s === 'psychology') setExamBoard('aqa');
-                  else if (s === 'mathematics') setExamBoard('edexcel');
-                  else setExamBoard('ocr');
+                  setExamBoard('');
                 }}>
                   {subjectLabels[s]}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="rounded-full px-5 py-2.5 text-sm font-semibold border border-border bg-background text-foreground flex items-center gap-2">
-                {getBoardLabel()}
-                <ChevronDown className="h-3.5 w-3.5" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-              {(subject === 'economics'
-                ? (['edexcel', 'aqa', 'cie'] as ExamBoard[])
-                : subject === 'mathematics'
-                ? (['edexcel', 'ocr'] as ExamBoard[])
-                : subject === 'chemistry' || subject === 'psychology'
-                ? (['aqa'] as ExamBoard[])
-                : (['ocr'] as ExamBoard[])
-              ).map(b => (
-                <DropdownMenuItem key={b} className="cursor-pointer hover:bg-muted flex items-center gap-2" onClick={() => setExamBoard(b)}>
-                  {examBoard === b ? <Check className="h-3.5 w-3.5" /> : <span className="w-3.5" />}
-                  {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : 'Edexcel'}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </ScrollReveal>
 
-      {/* Single Horizontal Plan Card - "The Plan" */}
+      {/* Feature Grid */}
       <ScrollReveal delay={0.2}>
-        <div id="pricing" className="max-w-3xl mx-auto mb-8">
-          <div className="bg-muted/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-border/50 shadow-elevated text-left">
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-              <div className="flex-1">
-                <h3 className="text-2xl sm:text-3xl font-bold mb-1">{hasProductAccess ? "You're Deluxe!" : "The Plan"}</h3>
-                <p className="text-muted-foreground mb-6 text-sm">
-                  {hasProductAccess ? "You have access to:" : `Everything you need to ace your ${subjectLabels[subject]} exam`}
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    <span>AI trained on all past papers & mark schemes</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    <span>Full A* exam technique + essay structures</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    <span>Essay Marker with instant feedback</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    <span>Diagram Generator</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    <span>Past Paper Finder (2,000+ questions)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    <span>Image upload & {getBoardLabel()} analysis</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    <span>Covers entire {getBoardLabel()} specification</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                    <span>Personalised revision plans</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <button
-                onClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
-                className="w-full sm:w-auto px-10 py-3.5 rounded-full text-white font-semibold text-base transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense bg-gradient-brand"
-              >
-                {hasProductAccess ? "Go to your chat →" : "Get Started →"}
-              </button>
-              <p className="text-xs text-muted-foreground mt-3">
-                {hasProductAccess
-                  ? (subscriptionPaymentType === 'lifetime' ? 'Exam season pass active' : 'Monthly pass active')
-                  : 'Free to start • No credit card required'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </ScrollReveal>
-
-      <ScrollReveal delay={0.3}>
-        <p className="text-xs md:text-sm text-muted-foreground mt-2 whitespace-nowrap">
-          Secure checkout via Stripe • Your chats stay private
-        </p>
+        <SubjectFeatureGrid
+          subject={subject}
+          subjectLabel={subjectLabels[subject]}
+          examBoard={examBoard}
+          formattedBoard={examBoard ? formatBoard(examBoard) : ''}
+          hasAccess={hasProductAccess}
+          subscriptionPaymentType={subscriptionPaymentType}
+          onCtaClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
+          boards={boardsForSubject}
+          onBoardChange={(b) => setExamBoard(b as ExamBoard)}
+        />
       </ScrollReveal>
     </div>
   );
