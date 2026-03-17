@@ -48,7 +48,7 @@ export interface ChatbotToolbarProps {
   essayMarkerLabel?: string;
   essayMarkerFixedMark?: number;
   essayMarkerCustomMarks?: number[];
-  onEssayMarkerSubmit?: (message: string, imageDataUrl?: string) => void;
+  onEssayMarkerSubmit?: (message: string, imageDataUrl?: string | string[]) => void;
   examDates?: ExamDate[];
   examSubjectName?: string;
   customPastPaperContent?: React.ReactNode;
