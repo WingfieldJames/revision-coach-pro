@@ -126,10 +126,10 @@ export const HomePage = () => {
       {/* Hero Section */}
       <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4">
         <HeroBackgroundPaths>
-          <div className="px-6 sm:px-8 py-6 sm:py-16 md:py-24 md:max-xl:py-6 max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+          <div className="px-6 sm:px-8 py-6 sm:py-16 md:py-24 md:max-xl:py-6 max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
               {/* Left side - Text content */}
-              <div className="flex-1 text-center md:text-left">
+              <div className="flex-1 text-center md:text-left md:max-w-[45%]">
                 {/* Social Proof Pill */}
                 <div
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm"
@@ -141,14 +141,14 @@ export const HomePage = () => {
                 </div>
 
                 {/* Main Headline */}
-                <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-4 leading-[1.1] tracking-tight">
+                <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.25rem] lg:text-[4rem] xl:text-[4.5rem] font-bold mb-4 leading-[1.1] tracking-tight">
                   <div className="text-foreground">The AI tutor</div>
                   <div className="text-foreground">built to get</div>
                   <div className="text-foreground">you an <span className="text-primary">A*</span>.</div>
                 </h1>
 
                 {/* Subheadline */}
-                <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed mx-auto md:mx-0">
+                <p className="text-sm sm:text-base md:text-lg xl:text-xl text-muted-foreground max-w-lg mb-8 leading-relaxed mx-auto md:mx-0">
                   Built for your exam board, trained by the highest achieving A* students
                 </p>
 
@@ -172,13 +172,14 @@ export const HomePage = () => {
               </div>
 
               {/* Right side - Device mockup */}
-              <div className="hidden md:flex flex-1 justify-start items-center relative -ml-4">
+              <div className="hidden md:flex flex-1 justify-start items-center relative">
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.3 }}
+                  className="w-full"
                 >
-                  <div className="w-[460px] lg:w-[540px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
+                  <div className="w-full max-w-[600px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
                     <img
                       src={appScreenshot}
                       alt="A* AI essay marker demo"
