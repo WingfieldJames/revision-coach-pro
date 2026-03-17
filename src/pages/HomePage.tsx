@@ -166,21 +166,20 @@ export const HomePage = () => {
               <div className="text-foreground">The AI that actually</div>
               <div className="whitespace-nowrap">
                 <span className="text-foreground">understands </span>
-                <span className="text-primary">A-Level </span>
                 <span
                   className="relative inline-block overflow-hidden text-left text-primary"
-                  style={{ width: "5.5em", height: "1.15em", verticalAlign: "bottom" }}
+                  style={{ width: "4.5em", height: "1.15em", verticalAlign: "bottom" }}
                 >
                   <AnimatePresence mode="wait">
                     <motion.span
-                      key={subjects[currentSubjectIndex]}
+                      key={boards[currentBoardIndex]}
                       className="absolute left-0 bottom-0"
                       initial={{ y: "100%", opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       exit={{ y: "-100%", opacity: 0 }}
                       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                     >
-                      {subjects[currentSubjectIndex]}
+                      {boards[currentBoardIndex]}
                     </motion.span>
                   </AnimatePresence>
                 </span>
