@@ -140,36 +140,11 @@ export const HomePage = () => {
                   </span>
                 </div>
 
-                {/* Meet A* AI heading */}
-                <div className="flex items-center justify-center md:justify-start gap-0 mb-1">
-                  <span className={`text-foreground font-bold text-4xl sm:text-5xl`}>Meet</span>
-                  <img src={currentLogo} alt="A* AI" className={`${theme === "dark" ? "h-28" : "h-20"} -mx-2`} />
-                </div>
-
                 {/* Main Headline */}
-                <h1 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] font-bold mb-4 leading-[1.15] tracking-tight">
-                  <div className="text-foreground">The AI that actually</div>
-                  <div className="whitespace-nowrap">
-                    <span className="text-foreground">understands </span>
-                    <span className="text-primary">A-Level </span>
-                    <span
-                       className="relative inline-block overflow-hidden text-left text-primary"
-                       style={{ width: "5.5em", height: "1.15em", verticalAlign: "bottom" }}
-                     >
-                      <AnimatePresence mode="wait">
-                        <motion.span
-                          key={subjects[currentSubjectIndex]}
-                          className="absolute left-0 bottom-0"
-                          initial={{ y: "100%", opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          exit={{ y: "-100%", opacity: 0 }}
-                          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                          {subjects[currentSubjectIndex]}
-                        </motion.span>
-                      </AnimatePresence>
-                    </span>
-                  </div>
+                <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.25rem] lg:text-[4rem] font-bold mb-4 leading-[1.1] tracking-tight">
+                  <div className="text-foreground">The AI tutor</div>
+                  <div className="text-foreground">built to get</div>
+                  <div className="text-foreground">you an <span className="text-primary">A*</span>.</div>
                 </h1>
 
                 {/* Subheadline */}
@@ -197,13 +172,13 @@ export const HomePage = () => {
               </div>
 
               {/* Right side - Device mockup */}
-              <div className="hidden md:flex flex-1 justify-center items-center relative">
+              <div className="hidden md:flex flex-1 justify-start items-center relative -ml-4">
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.3 }}
                 >
-                  <div className="w-[420px] lg:w-[500px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
+                  <div className="w-[460px] lg:w-[540px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
                     <img
                       src={appScreenshot}
                       alt="A* AI essay marker demo"
