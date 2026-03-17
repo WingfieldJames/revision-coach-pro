@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const OCR_PHYSICS_SLUG = 'ocr-physics';
 const DEFAULT_PROMPTS = [
