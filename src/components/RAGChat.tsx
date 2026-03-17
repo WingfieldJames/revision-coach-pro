@@ -48,7 +48,7 @@ interface DiagramData {
 }
 
 export interface RAGChatRef {
-  submitMessage: (message: string, imageDataUrl?: string) => void;
+  submitMessage: (message: string, imageDataUrl?: string | string[]) => void;
 }
 
 interface RAGChatProps {
