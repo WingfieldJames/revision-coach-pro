@@ -343,20 +343,14 @@ export const ComparePage = () => {
           {/* Subject & Board Selection */}
           <ScrollReveal delay={0.1}>
             {/* Desktop: Connected toggle group + board dropdown on same line */}
-            <div className="hidden md:flex items-center justify-center gap-4 mb-12">
+            <div className="hidden md:flex flex-col items-center gap-3 mb-12">
               <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
                 {allSubjects.map((s) => (
                   <button
                     key={s}
                     onClick={() => {
                       setSubject(s);
-                      const defaultBoard = LEGACY_DEFAULT_BOARD[s];
-                      if (defaultBoard) setExamBoard(defaultBoard);
-                      else {
-                        // Dynamic: pick first available board
-                        const dp = dynamicProducts.find(p => p.subject.toLowerCase().replace(/\s+/g, '-') === s);
-                        if (dp) setExamBoard(dp.exam_board.toLowerCase());
-                      }
+                      setExamBoard('');
                     }}
                     className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                       subject === s
@@ -372,7 +366,7 @@ export const ComparePage = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 whitespace-nowrap">
-                    {examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : 'Exam Board'}
+                    {examBoard ? (examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()) : 'Select board'}
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
                 </DropdownMenuTrigger>

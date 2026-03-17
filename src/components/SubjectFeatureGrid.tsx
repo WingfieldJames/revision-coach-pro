@@ -116,7 +116,7 @@ export function SubjectFeatureGrid({
   const emoji = getSubjectEmoji(subject);
 
   return (
-    <div className="max-w-3xl mx-auto mb-12">
+    <div className="max-w-6xl mx-auto mb-12">
       <div className="text-left">
         {/* Subject header */}
         <div className="flex items-center justify-between mb-6">
