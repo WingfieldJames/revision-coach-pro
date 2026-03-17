@@ -14,34 +14,24 @@ function FloatingAchievements() {
   const isDark = theme === "dark";
 
   const items = useMemo(() => {
-    const result: Array<{
-      label: string;
-      x: number;
-      duration: number;
-      delay: number;
-      fontSize: number;
-    }> = [];
-
-    ACHIEVEMENT_STATS.forEach((label, i) => {
-      const side = i % 2 === 0 ? "left" : "right";
-      const x = side === "left"
-        ? 1 + (i * 3.7) % 10
-        : 89 + (i * 2.9) % 10;
-      result.push({
-        label,
-        x,
-        duration: 16 + (i * 3.7) % 8,
-        delay: (i * 2.3) % 12,
-        fontSize: 12 + (i % 3),
-      });
-    });
-
-    return result;
+    const positions = [
+      { x: 6, y: 18 }, { x: 82, y: 14 },
+      { x: 12, y: 52 }, { x: 88, y: 48 },
+      { x: 4, y: 78 }, { x: 78, y: 82 },
+      { x: 18, y: 36 }, { x: 92, y: 62 },
+    ];
+    return ACHIEVEMENT_STATS.map((label, i) => ({
+      label,
+      x: positions[i].x,
+      y: positions[i].y,
+      delay: (i * 1.7) % 6,
+      fontSize: 12 + (i % 3),
+    }));
   }, []);
 
   const color = isDark
-    ? "rgba(168, 85, 247, 0.12)"
-    : "rgba(79, 54, 179, 0.13)";
+    ? "rgba(168, 85, 247, 0.18)"
+    : "rgba(79, 54, 179, 0.18)";
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden hidden lg:block">
@@ -51,20 +41,16 @@ function FloatingAchievements() {
           className="absolute font-semibold select-none whitespace-nowrap"
           style={{
             left: `${item.x}%`,
+            top: `${item.y}%`,
             color,
             fontSize: `${item.fontSize}px`,
           }}
-          initial={{ bottom: "-5%", opacity: 0 }}
-          animate={{
-            bottom: ["-5%", "110%"],
-            opacity: [0, 1, 1, 0],
-          }}
+          animate={{ opacity: [0.15, 0.6, 0.15] }}
           transition={{
-            duration: item.duration,
+            duration: 4 + (i % 3),
             delay: item.delay,
             repeat: Infinity,
-            ease: "linear",
-            times: [0, 0.05, 0.9, 1],
+            ease: "easeInOut",
           }}
         >
           {item.label}
