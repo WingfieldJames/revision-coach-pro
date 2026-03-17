@@ -7,6 +7,7 @@ import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { AQA_PSYCHOLOGY_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const AQA_PSYCHOLOGY_PRODUCT_ID = "c56bc6d6-5074-4e1f-8bf2-8e900ba928ec";
 
