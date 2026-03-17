@@ -243,7 +243,7 @@ export const HomePage = () => {
                     {t.stats.map((stat, j) => (
                       <span
                         key={j}
-                        className={`text-[11px] font-bold px-2.5 py-1 rounded-md ${j === 0 ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400" : "bg-primary/10 border border-primary/20 text-primary"}`}
+                        className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-[hsl(222,75%,31%)]/10 border border-[hsl(222,75%,31%)]/20 text-[hsl(222,75%,31%)] dark:bg-[hsl(222,75%,31%)]/20 dark:text-[hsl(222,75%,55%)] dark:border-[hsl(222,75%,31%)]/30"
                       >
                         {stat}
                       </span>
