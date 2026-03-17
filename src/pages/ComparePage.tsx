@@ -413,11 +413,6 @@ export const ComparePage = () => {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={0.3}>
-            <p className="text-xs md:text-sm text-muted-foreground mt-2 whitespace-nowrap">
-              Secure checkout via Stripe • Your chats stay private
-            </p>
-          </ScrollReveal>
         </main>
 
         {/* Mobile: Founder Section first, then stacked testimonials */}

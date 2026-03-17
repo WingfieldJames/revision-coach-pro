@@ -175,7 +175,7 @@ export function SubjectFeatureGrid({
           {features.map((f) => (
             <div
               key={f.title}
-              className="bg-background border border-border/50 hover:border-primary/30 rounded-xl p-4 transition-colors"
+              className="bg-muted border border-border/50 hover:border-primary/30 rounded-xl p-4 transition-colors"
             >
               <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-sm mb-3">
                 {f.icon}
