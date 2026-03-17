@@ -105,6 +105,12 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
   }, []);
+
+  useEffect(() => {
+    if (attachedFiles.length > 0 && actionRef.current) {
+      actionRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [attachedFiles]);
   const handleUpgrade = async (paymentType: 'monthly' | 'lifetime' = 'lifetime') => {
     if (!user) {
       navigate('/login');
