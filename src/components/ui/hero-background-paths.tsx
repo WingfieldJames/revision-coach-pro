@@ -30,8 +30,8 @@ function FloatingAchievements() {
   }, []);
 
   const color = isDark
-    ? "rgba(168, 85, 247, 0.18)"
-    : "rgba(79, 54, 179, 0.18)";
+    ? "rgba(168, 85, 247, 0.55)"
+    : "rgba(79, 54, 179, 0.35)";
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden hidden lg:block">
@@ -45,7 +45,7 @@ function FloatingAchievements() {
             color,
             fontSize: `${item.fontSize}px`,
           }}
-          animate={{ opacity: [0.15, 0.6, 0.15] }}
+          animate={{ opacity: [0.3, 0.8, 0.3] }}
           transition={{
             duration: 4 + (i % 3),
             delay: item.delay,
