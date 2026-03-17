@@ -308,7 +308,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       animateNextWord();
     }
   }, [isAnimating, animateNextWord]);
-  const handleSendWithMessage = async (messageText: string, imageDataUrl?: string) => {
+  const handleSendWithMessage = async (messageText: string, imageDataUrl?: string | string[]) => {
     if (!messageText.trim() && !imageDataUrl || isLoading) return;
     // Persist user message
     persistMessage('user', messageText, imageDataUrl);
