@@ -54,6 +54,7 @@ export const EdexcelMathsFreeVersionPage = () => {
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customRevisionGuideContent: <DynamicRevisionGuide productId={EDEXCEL_MATHS_PRODUCT_ID} subjectName="Edexcel Maths (Pure)" tier="free" />,
+    customPastPaperContent: <DynamicPastPaperFinder productId={EDEXCEL_MATHS_PRODUCT_ID} subjectName="Edexcel Maths (Pure)" tier="free" />,
     showMathsModeSwitcher: true,
     mathsMode: 'pure' as const,
     onMathsModeChange: handleModeChange,

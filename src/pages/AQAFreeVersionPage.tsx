@@ -46,6 +46,7 @@ export const AQAFreeVersionPage = () => {
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customRevisionGuideContent: <DynamicRevisionGuide productId={AQA_PRODUCT_ID} subjectName="AQA Economics" tier="free" />,
+    customPastPaperContent: <DynamicPastPaperFinder productId={AQA_PRODUCT_ID} subjectName="AQA Economics" tier="free" />,
   };
 
   return (

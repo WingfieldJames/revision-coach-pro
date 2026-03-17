@@ -59,6 +59,7 @@ export const CIEPremiumPage = () => {
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customPastPaperContent: <DynamicPastPaperFinder productId={CIE_PRODUCT_ID} subjectName="CIE Economics" tier="deluxe" />,
+    customRevisionGuideContent: <DynamicRevisionGuide productId={CIE_PRODUCT_ID} subjectName="CIE Economics" tier="deluxe" />,
   };
 
   return (

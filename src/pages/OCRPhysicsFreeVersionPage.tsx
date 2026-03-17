@@ -43,6 +43,7 @@ export const OCRPhysicsFreeVersionPage = () => {
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customRevisionGuideContent: <DynamicRevisionGuide productId={OCR_PHYSICS_PRODUCT_ID} subjectName="OCR Physics" tier="free" />,
+    customPastPaperContent: <DynamicPastPaperFinder productId={OCR_PHYSICS_PRODUCT_ID} subjectName="OCR Physics" tier="free" />,
   };
 
   return (

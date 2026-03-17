@@ -44,6 +44,7 @@ export const AQAPsychologyFreeVersionPage = () => {
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customRevisionGuideContent: <DynamicRevisionGuide productId={AQA_PSYCHOLOGY_PRODUCT_ID} subjectName="AQA Psychology" tier="free" />,
+    customPastPaperContent: <DynamicPastPaperFinder productId={AQA_PSYCHOLOGY_PRODUCT_ID} subjectName="AQA Psychology" tier="free" />,
   };
 
   return (

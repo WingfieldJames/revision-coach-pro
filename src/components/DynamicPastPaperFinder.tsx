@@ -119,15 +119,12 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
           .from('document_chunks')
           .select('id, content, metadata')
           .eq('product_id', productId)
-          .limit(200);
+          .eq('metadata->>content_type', 'specification')
+          .limit(1000);
 
         if (error || !data) { setLoadingSpecs(false); return; }
 
         const specs = data
-          .filter((c: any) => {
-            const ct = String(c.metadata?.content_type || '');
-            return ct === 'specification';
-          })
           .map((c: any) => ({
             id: c.id,
             content: c.content,
