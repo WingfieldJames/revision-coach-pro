@@ -62,6 +62,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
   const [attachedFiles, setAttachedFiles] = useState<{ file: File; preview: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const actionRef = useRef<HTMLDivElement>(null);
   const filePickerOpen = useRef(false);
 
   // Load current month's usage for free tier
