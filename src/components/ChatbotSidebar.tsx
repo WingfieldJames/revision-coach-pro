@@ -400,8 +400,8 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                         )}
                       </div>
                     );
-                  })()
-                  )}
+                  })()}
+
                 </div>
 
                 <Separator className="my-2" />
