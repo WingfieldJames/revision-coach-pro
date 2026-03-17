@@ -13,6 +13,7 @@ import { AQA_PSYCHOLOGY_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const AQA_PSYCHOLOGY_SLUG = 'aqa-psychology';
 const DEFAULT_PROMPTS = [
