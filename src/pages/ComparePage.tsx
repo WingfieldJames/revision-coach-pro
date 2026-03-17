@@ -357,23 +357,6 @@ export const ComparePage = () => {
                   </button>
                 ))}
               </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 whitespace-nowrap">
-                    {examBoard ? (examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()) : 'Select board'}
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-                  {boardsForSubject.map(b => (
-                    <DropdownMenuItem key={b} className="cursor-pointer flex items-center gap-2" onClick={() => setExamBoard(b)}>
-                      {examBoard === b ? <Check className="h-3.5 w-3.5" /> : <span className="w-3.5" />}
-                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
 
             {/* Mobile: Two dropdown buttons */}
