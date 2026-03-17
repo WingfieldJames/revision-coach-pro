@@ -173,20 +173,13 @@ export const HomePage = () => {
 
               {/* Right side - Device mockup */}
               <div className="hidden md:flex flex-1 justify-start items-center relative">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.3 }}
-                  className="w-full"
-                >
-                  <div className="w-full max-w-[600px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
-                    <img
-                      src={appScreenshot}
-                      alt="A* AI essay marker demo"
-                      className="w-full h-auto"
-                    />
-                  </div>
-                </motion.div>
+                <div className="w-full max-w-[600px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
+                  <img
+                    src={appScreenshot}
+                    alt="A* AI essay marker demo"
+                    className="w-full h-auto"
+                  />
+                </div>
               </div>
             </div>
           </div>
