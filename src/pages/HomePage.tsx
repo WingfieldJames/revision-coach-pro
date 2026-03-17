@@ -134,12 +134,12 @@ export const HomePage = () => {
     }
   };
 
-  const subjects = ["Economics", "Computing", "Chemistry", "Psychology", "Physics", "Maths"];
-  const [currentSubjectIndex, setCurrentSubjectIndex] = React.useState(0);
+  const boards = ["Edexcel", "AQA", "OCR", "CIE"];
+  const [currentBoardIndex, setCurrentBoardIndex] = React.useState(0);
 
   React.useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSubjectIndex((prev) => (prev + 1) % subjects.length);
+      setCurrentBoardIndex((prev) => (prev + 1) % boards.length);
     }, 2500);
     return () => clearInterval(interval);
   }, []);
