@@ -18,6 +18,7 @@ import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
 import { SubjectPlanSelector } from "@/components/SubjectPlanSelector";
 import logo from "@/assets/logo.png";
 import logoDark from "@/assets/logo-dark.png";
+import appScreenshot from "@/assets/app-screenshot.png";
 
 const revisionFeatures = [
   {
