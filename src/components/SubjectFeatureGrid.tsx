@@ -121,9 +121,6 @@ export function SubjectFeatureGrid({
         {/* Subject header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-primary/10 rounded-xl flex items-center justify-center text-xl">
-              {emoji}
-            </div>
             <div>
               <div className="text-xl sm:text-[22px] font-black tracking-tight text-foreground">
                 {subjectLabel}
