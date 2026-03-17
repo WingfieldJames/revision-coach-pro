@@ -14,6 +14,7 @@ import { Header } from '@/components/Header';
 import { checkProductAccess } from '@/lib/productAccess';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const EDEXCEL_MATHS_APPLIED_SLUG = 'edexcel-mathematics-applied';
 const DEFAULT_PROMPTS = [
@@ -78,6 +79,7 @@ export const EdexcelMathsAppliedPremiumPage = () => {
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customRevisionGuideContent: productId ? <DynamicRevisionGuide productId={productId} subjectName="Edexcel Maths (Applied)" tier="deluxe" /> : undefined,
+    customPastPaperContent: productId ? <DynamicPastPaperFinder productId={productId} subjectName="Edexcel Maths (Applied)" tier="deluxe" /> : undefined,
     showMathsModeSwitcher: true,
     mathsMode: 'applied' as const,
     onMathsModeChange: handleModeChange,

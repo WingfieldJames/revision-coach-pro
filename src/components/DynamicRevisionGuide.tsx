@@ -93,11 +93,11 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
           .from('document_chunks')
           .select('id, content, metadata')
           .eq('product_id', productId)
-          .limit(300);
+          .eq('metadata->>content_type', 'specification')
+          .limit(1000);
 
         if (chunks) {
           const specs = chunks
-            .filter((c: any) => String(c.metadata?.content_type || '') === 'specification')
             .map((c: any) => {
               const topic = String(c.metadata?.topic || '');
               const specId = String(c.metadata?.spec_id || '');

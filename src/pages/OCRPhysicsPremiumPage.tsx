@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const OCR_PHYSICS_SLUG = 'ocr-physics';
 const DEFAULT_PROMPTS = [
@@ -71,6 +72,7 @@ export const OCRPhysicsPremiumPage = () => {
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customRevisionGuideContent: productId ? <DynamicRevisionGuide productId={productId} subjectName="OCR Physics" tier="deluxe" /> : undefined,
+    customPastPaperContent: productId ? <DynamicPastPaperFinder productId={productId} subjectName="OCR Physics" tier="deluxe" /> : undefined,
   };
 
   return (

@@ -7,6 +7,7 @@ import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { OCR_PHYSICS_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const OCR_PHYSICS_PRODUCT_ID = "ecd5978d-3bf4-4b9c-993f-30b7f3a0f197";
 
@@ -42,6 +43,7 @@ export const OCRPhysicsFreeVersionPage = () => {
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customRevisionGuideContent: <DynamicRevisionGuide productId={OCR_PHYSICS_PRODUCT_ID} subjectName="OCR Physics" tier="free" />,
+    customPastPaperContent: <DynamicPastPaperFinder productId={OCR_PHYSICS_PRODUCT_ID} subjectName="OCR Physics" tier="free" />,
   };
 
   return (
