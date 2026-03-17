@@ -188,8 +188,7 @@ export const HomePage = () => {
 
             {/* Subheadline */}
             <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-[720px] mb-8 leading-relaxed">
-              We extracted everything from the UK's top A* students — their technique, question approaches, and mark scheme instincts.
-              <strong className="block mt-1 text-foreground">Built into one AI, for your exact board.</strong>
+              We extracted everything from the UK's top A* students — their technique, question approaches, and mark scheme instincts. <strong className="text-foreground">Built into one AI, for your exact board.</strong>
             </p>
 
             {/* CTA Buttons */}
