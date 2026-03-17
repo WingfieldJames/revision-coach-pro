@@ -148,6 +148,23 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subjec
         </ResponsiveContainer>
       </div>
 
+      {/* 2026 Predicted Summary */}
+      <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
+        <p className="text-xs font-semibold text-foreground">2026 Predicted Boundaries</p>
+        <div className="grid grid-cols-3 gap-2">
+          {(["A*", "A", "B"] as const).map((grade) => {
+            const predicted = config.predictedData.find(d => String(d.year).includes('2026'));
+            const value = predicted ? predicted[grade] : '—';
+            return (
+              <div key={grade} className="text-center rounded-md bg-background border border-border py-2">
+                <p className="text-xs text-muted-foreground">{grade}</p>
+                <p className="text-sm font-bold text-foreground">{value}%</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       <p className="text-[10px] text-muted-foreground text-center italic">
         2026 values are predicted (dotted line) using linear trend analysis from 2023–2025 data
       </p>
