@@ -1,112 +1,66 @@
 
 
-## My Mistakes -- Spaced Repetition Feature
+## Problem Analysis
 
-### Overview
-Add a "My Mistakes" tool to all maths chatbots (Edexcel Pure, Edexcel Applied) and OCR CS, plus make it available in the Build portal for dynamic subjects. Users can log questions they got wrong (image or text), add notes, and get reminded to retry them on a spaced repetition schedule (day 4, 16, 35, 70). A red notification badge shows how many are due for review.
+There are **two root causes** for spec points not coming through properly:
 
----
+### Issue 1: Database query fetches ALL chunk types, then filters client-side with a low limit
 
-### 1. Database Table
+In `DynamicPastPaperFinder.tsx` (line 118-123) and `DynamicRevisionGuide.tsx` (line 92-96), the query fetches **all** `document_chunks` for a product with `limit(200)` / `limit(300)`, then filters client-side for `content_type === 'specification'`. If a subject has 500+ total chunks (past papers, mark schemes, etc.), the 200-row limit means most specification chunks never get fetched.
 
-Create a `user_mistakes` table:
-
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | PK, default gen_random_uuid() |
-| user_id | uuid | NOT NULL |
-| product_id | uuid | NOT NULL |
-| question_text | text | nullable (user may upload image only) |
-| question_image_url | text | nullable (base64 data URL stored directly) |
-| note | text | nullable |
-| created_at | timestamptz | default now() |
-| next_review_at | timestamptz | default now() + interval '4 days' |
-| review_count | integer | default 0 |
-| completed | boolean | default false |
-
-RLS policies:
-- Users can SELECT, INSERT, UPDATE, DELETE their own rows (`auth.uid() = user_id`)
-
-The spaced repetition intervals are: review_count 0 = day 4, 1 = day 16, 2 = day 35, 3 = day 70, 4+ = completed.
-
----
-
-### 2. New Component: `MyMistakesTool.tsx`
-
-Follows the exact same pattern as RevisionGuideTool, ExamCountdown, etc. (header with icon + gradient box, content area).
-
-**Two views:**
-
-**A) Add Mistake View (default)**
-- Upload area for an image (same drag/drop pattern as ImageUploadTool) OR text input for typing the question
-- Text area for a note ("What did I get wrong?")
-- "Save Mistake" button
-
-**B) My Mistakes List View**
-- Toggle between "Add" and "View All" tabs
-- Lists all saved mistakes (newest first), each showing:
-  - Question preview (thumbnail if image, text snippet if text)
-  - Note
-  - Next review date or "Due now" badge
-  - "Mark as Reviewed" button (advances to next interval)
-  - Delete option
-
-**Notification count:** Computed client-side by counting rows where `next_review_at <= now()` and `completed = false`.
-
----
-
-### 3. Header Integration
-
-- Add new props to Header: `showMyMistakes?: boolean`
-- Add state: `myMistakesOpen`
-- Add Popover between Revision Guide and Exam Countdown
-- Icon: `AlertCircle` or `RotateCcw` from lucide-react
-- Button label: "My Mistakes"
-- Red notification badge: small absolute-positioned circle with count, only shown when due count > 0
-- Requires `productId` and user auth to query/insert
-
----
-
-### 4. Pages to Update
-
-Add `showMyMistakes` prop to Header in these pages:
-- `EdexcelMathsFreeVersionPage.tsx`
-- `EdexcelMathsPremiumPage.tsx`
-- `EdexcelMathsAppliedFreeVersionPage.tsx`
-- `EdexcelMathsAppliedPremiumPage.tsx`
-- `OCRCSFreeVersionPage.tsx`
-- `OCRCSPremiumPage.tsx`
-
----
-
-### 5. Build Portal Integration
-
-Add to the `WEBSITE_FEATURES` array in `BuildPage.tsx`:
 ```
-{ id: "my_mistakes", label: "My Mistakes", description: "Spaced repetition tracker for questions students got wrong", icon: RotateCcw }
+// Current (broken for subjects with many chunks):
+.eq('product_id', productId)
+.limit(200)
+// then: .filter(c => c.metadata.content_type === 'specification')
 ```
 
-Add to `DynamicFreePage.tsx` and `DynamicPremiumPage.tsx`:
-```
-showMyMistakes={hasFeature('my_mistakes')}
-```
+### Issue 2: Several legacy pages still fall back to hardcoded spec data
+
+When no `customPastPaperContent` is passed, the toolbar/sidebar renders `PastPaperFinderTool` which loads from hardcoded TypeScript files (`edexcelPastPapers.ts`, etc.) — completely disconnected from the Build portal database.
+
+Pages missing `customPastPaperContent` (using hardcoded past paper finder):
+- AQA Economics (Free + Premium)
+- AQA Chemistry (Free + Premium)
+- AQA Psychology (Free + Premium)
+- OCR CS (Free + Premium)
+- OCR Physics (Free + Premium)
+- Edexcel Maths Pure (Free + Premium)
+- Edexcel Maths Applied (Free + Premium)
+
+Pages missing `customRevisionGuideContent` (using hardcoded revision guide):
+- CIE Economics (Free + Premium)
 
 ---
 
-### 6. Files Changed
+## Plan
 
-| File | Change |
-|------|--------|
-| New migration | Create `user_mistakes` table + RLS |
-| `src/components/MyMistakesTool.tsx` | **New file** -- full component |
-| `src/components/Header.tsx` | Add `showMyMistakes` prop, popover, notification badge |
-| `src/pages/EdexcelMathsFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/BuildPage.tsx` | Add to WEBSITE_FEATURES |
-| `src/pages/DynamicFreePage.tsx` | Wire up `showMyMistakes` |
-| `src/pages/DynamicPremiumPage.tsx` | Wire up `showMyMistakes` |
+### 1. Fix the database query in DynamicPastPaperFinder
+
+Change the spec-loading query to filter by `content_type = 'specification'` server-side and increase the limit to 1000:
+
+```ts
+const { data, error } = await supabase
+  .from('document_chunks')
+  .select('id, content, metadata')
+  .eq('product_id', productId)
+  .eq('metadata->>content_type', 'specification')
+  .limit(1000);
+```
+
+Remove the client-side `.filter()` since it's now done in the query.
+
+### 2. Fix the same query in DynamicRevisionGuide
+
+Apply the identical fix — filter by `content_type = 'specification'` server-side with `limit(1000)`.
+
+### 3. Migrate all legacy pages to use DynamicPastPaperFinder
+
+For every page that currently lacks `customPastPaperContent`, add it pointing to `DynamicPastPaperFinder` with the correct `productId` and `subjectName`. This affects ~14 page files.
+
+### 4. Migrate remaining legacy pages to use DynamicRevisionGuide
+
+For CIE pages missing `customRevisionGuideContent`, add it.
+
+This ensures all subjects pull spec points from the Build portal database rather than hardcoded TypeScript files. No design changes — only the data source for spec point suggestions.
 
