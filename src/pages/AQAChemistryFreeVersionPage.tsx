@@ -7,6 +7,7 @@ import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { AQA_CHEMISTRY_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
+import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 
 const AQA_CHEMISTRY_PRODUCT_ID = "3e5bf02e-1424-4bb3-88f9-2a9c58798444";
 
