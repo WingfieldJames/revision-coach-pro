@@ -479,11 +479,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       (chatRef as React.MutableRefObject<RAGChatRef>).current = {
         submitMessage: (messageText: string, imageDataUrl?: string | string[]) => {
           if ((!messageText.trim() && !imageDataUrl) || isLoading) return;
-          const firstImage = Array.isArray(imageDataUrl) ? imageDataUrl[0] : imageDataUrl;
           const userMessage: Message = {
             role: 'user',
             content: messageText,
-            ...(firstImage ? { imageUrl: firstImage } : {})
+            ...(imageDataUrl ? { imageUrl: imageDataUrl } : {})
           };
           setMessages(prev => [...prev, userMessage]);
           handleSendWithMessage(messageText, imageDataUrl);
