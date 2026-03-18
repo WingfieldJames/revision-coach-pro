@@ -148,18 +148,8 @@ export const SubjectSelectionPage = () => {
               <p className="text-xs text-muted-foreground mt-1">Years 10–11</p>
             </button>
             <button
-              onClick={() => {
-                const newLevel = selectedLevel === 'alevel' ? null : 'alevel';
-                setSelectedLevel(newLevel);
-                if (newLevel === 'alevel') {
-                  setTimeout(() => subjectsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
-                }
-              }}
-              className={`rounded-xl border-2 p-6 text-center transition-all ${
-                selectedLevel === 'alevel'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
-              }`}
+              onClick={() => navigate('/dashboard')}
+              className="rounded-xl border-2 p-6 text-center transition-all border-border hover:border-primary/50"
             >
               <p className="text-xl font-bold">A-Level</p>
               <p className="text-xs text-muted-foreground mt-1">Years 12–13</p>
