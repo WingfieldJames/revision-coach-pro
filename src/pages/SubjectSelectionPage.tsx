@@ -102,6 +102,7 @@ export const SubjectSelectionPage = () => {
   ];
 
   const handleGCSE = () => {
+    localStorage.setItem('qualification_level', 'gcse');
     navigate('/gcse');
   };
 
