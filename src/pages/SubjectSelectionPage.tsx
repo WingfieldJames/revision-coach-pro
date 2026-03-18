@@ -8,7 +8,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
-import { FlowFieldBackground } from '@/components/ui/flow-field-background';
+
 import { supabase } from '@/lib/supabase';
 
 interface SubjectOption {
