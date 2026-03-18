@@ -449,7 +449,7 @@ export const Header: React.FC<HeaderProps> = ({
         {showStartStudyingButton ? (
           <div className="hidden sm:flex items-center">
             <Button 
-              onClick={() => navigate(user ? '/select' : '/login')} 
+              onClick={() => navigate('/select')} 
               className="bg-primary text-primary-foreground rounded-full px-6 py-2 font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
             >
               Start Studying
