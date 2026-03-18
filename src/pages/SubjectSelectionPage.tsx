@@ -40,7 +40,14 @@ export const SubjectSelectionPage = () => {
   const [boardMerges, setBoardMerges] = useState<Record<string, string[]>>({});
   const subjectsRef = useRef<HTMLDivElement>(null);
 
-  // Load dynamic A-Level subjects from products table
+  // Auto-redirect if user already chose a qualification level
+  useEffect(() => {
+    const saved = localStorage.getItem('qualification_level');
+    if (saved === 'alevel') { navigate('/compare'); return; }
+    if (saved === 'gcse') { navigate('/gcse'); return; }
+  }, [navigate]);
+
+
   useEffect(() => {
     const loadDynamic = async () => {
       const { data } = await supabase
