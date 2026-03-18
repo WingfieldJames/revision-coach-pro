@@ -52,7 +52,13 @@ export function SubjectPlanSelector() {
     const saved = localStorage.getItem('preferred-subject');
     return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' || saved === 'psychology' || saved === 'mathematics' ? saved as Subject : 'economics';
   });
-  const [examBoard, setExamBoard] = useState<ExamBoard | ''>('');
+  const [examBoard, setExamBoard] = useState<ExamBoard | ''>(() => {
+    const saved = localStorage.getItem('preferred-exam-board');
+    const savedSubject = localStorage.getItem('preferred-subject') as Subject | null;
+    const validSubject = savedSubject && BOARDS_MAP[savedSubject] ? savedSubject : 'economics';
+    if (saved && BOARDS_MAP[validSubject]?.includes(saved as ExamBoard)) return saved as ExamBoard;
+    return '';
+  });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [hasProductAccess, setHasProductAccess] = useState(false);
   const [subscriptionPaymentType, setSubscriptionPaymentType] = useState<string | null>(null);
