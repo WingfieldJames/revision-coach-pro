@@ -338,7 +338,8 @@ export const ComparePage = () => {
           {/* Subject & Board Selection */}
           <ScrollReveal delay={0.1}>
             {/* Desktop: Connected toggle group + board dropdown on same line */}
-            <div className="hidden md:flex flex-col items-center gap-3 mb-12">
+            <div className="hidden md:flex flex-col items-center gap-6 mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">What are you studying?</h1>
               <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
                 {allSubjects.map((s) => (
                   <button
