@@ -127,7 +127,7 @@ export const SubjectSelectionPage = () => {
         description="Pick your qualification level and subject to start revising with A* AI."
         canonical="https://astarai.co.uk/select"
       />
-      <FlowFieldBackground />
+      
       <Header />
 
       <div className="flex-1 relative z-10 flex items-center justify-center px-4 py-16">
