@@ -8,7 +8,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
-import { FlowFieldBackground } from '@/components/ui/flow-field-background';
+
 import { supabase } from '@/lib/supabase';
 
 interface SubjectOption {
@@ -40,7 +40,14 @@ export const SubjectSelectionPage = () => {
   const [boardMerges, setBoardMerges] = useState<Record<string, string[]>>({});
   const subjectsRef = useRef<HTMLDivElement>(null);
 
-  // Load dynamic A-Level subjects from products table
+  // Auto-redirect if user already chose a qualification level
+  useEffect(() => {
+    const saved = localStorage.getItem('qualification_level');
+    if (saved === 'alevel') { navigate('/compare'); return; }
+    if (saved === 'gcse') { navigate('/gcse'); return; }
+  }, [navigate]);
+
+
   useEffect(() => {
     const loadDynamic = async () => {
       const { data } = await supabase
@@ -102,6 +109,7 @@ export const SubjectSelectionPage = () => {
   ];
 
   const handleGCSE = () => {
+    localStorage.setItem('qualification_level', 'gcse');
     navigate('/gcse');
   };
 
@@ -126,7 +134,7 @@ export const SubjectSelectionPage = () => {
         description="Pick your qualification level and subject to start revising with A* AI."
         canonical="https://astarai.co.uk/select"
       />
-      <FlowFieldBackground />
+      
       <Header />
 
       <div className="flex-1 relative z-10 flex items-center justify-center px-4 py-16">
@@ -134,7 +142,7 @@ export const SubjectSelectionPage = () => {
           {/* Logo */}
           <div className="text-center">
             <img src={currentLogo} alt="A* AI" className="h-10 mx-auto mb-4" />
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Pick your subject</h1>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">What are you studying?</h1>
             <p className="text-muted-foreground mt-2">Choose your qualification level to get started</p>
           </div>
 
@@ -148,7 +156,7 @@ export const SubjectSelectionPage = () => {
               <p className="text-xs text-muted-foreground mt-1">Years 10–11</p>
             </button>
             <button
-              onClick={() => navigate('/compare')}
+              onClick={() => { localStorage.setItem('qualification_level', 'alevel'); navigate('/compare'); }}
               className="rounded-xl border-2 p-6 text-center transition-all border-border hover:border-primary/50"
             >
               <p className="text-xl font-bold">A-Level</p>
