@@ -137,30 +137,32 @@ export const SubjectSelectionPage = () => {
       
       <Header />
 
-      <div className="flex-1 relative z-10 flex items-center justify-center px-4 py-16">
-        <div className="max-w-2xl w-full space-y-8">
-          {/* Logo */}
-          <div className="text-center">
-            <img src={currentLogo} alt="A* AI" className="h-10 mx-auto mb-4" />
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">What are you studying?</h1>
-            <p className="text-muted-foreground mt-2">Choose your qualification level to get started</p>
+      <div className="flex-1 relative z-10 flex items-center justify-center px-4">
+        <div className="max-w-3xl w-full space-y-10 -mt-16">
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <span className="inline-block rounded-full bg-primary/10 text-primary px-4 py-1.5 text-sm font-medium">
+              Let's get you set up
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">What are you studying?</h1>
+            <p className="text-muted-foreground text-lg mt-2">GCSE or A-Level — we'll take it from there.</p>
           </div>
 
           {/* Level Selection */}
-          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+          <div className="grid grid-cols-2 gap-6 max-w-xl mx-auto">
             <button
               onClick={handleGCSE}
-              className={`rounded-xl border-2 p-6 text-center transition-all hover:border-primary/50 border-border`}
+              className="rounded-2xl border-2 p-8 text-center transition-all hover:border-primary/50 hover:bg-primary/5 border-border"
             >
-              <p className="text-xl font-bold">GCSE</p>
-              <p className="text-xs text-muted-foreground mt-1">Years 10–11</p>
+              <p className="text-2xl font-bold">GCSE</p>
+              <p className="text-sm text-muted-foreground mt-2">Years 10–11</p>
             </button>
             <button
               onClick={() => { localStorage.setItem('qualification_level', 'alevel'); navigate('/compare'); }}
-              className="rounded-xl border-2 p-6 text-center transition-all border-border hover:border-primary/50"
+              className="rounded-2xl border-2 p-8 text-center transition-all border-border hover:border-primary/50 hover:bg-primary/5"
             >
-              <p className="text-xl font-bold">A-Level</p>
-              <p className="text-xs text-muted-foreground mt-1">Years 12–13</p>
+              <p className="text-2xl font-bold">A-Level</p>
+              <p className="text-sm text-muted-foreground mt-2">Years 12–13</p>
             </button>
           </div>
 
