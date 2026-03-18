@@ -135,7 +135,7 @@ export const SubjectSelectionPage = () => {
           {/* Logo */}
           <div className="text-center">
             <img src={currentLogo} alt="A* AI" className="h-10 mx-auto mb-4" />
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Pick your subject</h1>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">What are you studying?</h1>
             <p className="text-muted-foreground mt-2">Choose your qualification level to get started</p>
           </div>
 
