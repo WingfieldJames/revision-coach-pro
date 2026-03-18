@@ -149,7 +149,7 @@ export const SubjectSelectionPage = () => {
               <p className="text-xs text-muted-foreground mt-1">Years 10–11</p>
             </button>
             <button
-              onClick={() => navigate('/compare')}
+              onClick={() => { localStorage.setItem('qualification_level', 'alevel'); navigate('/compare'); }}
               className="rounded-xl border-2 p-6 text-center transition-all border-border hover:border-primary/50"
             >
               <p className="text-xl font-bold">A-Level</p>
