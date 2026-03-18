@@ -141,7 +141,11 @@ export const SubjectSelectionPage = () => {
         <div className="max-w-3xl w-full space-y-10 -mt-16">
           {/* Header */}
           <div className="text-center space-y-4">
-            <span className="inline-block rounded-full bg-primary/10 text-primary px-4 py-1.5 text-sm font-medium">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-1.5 text-sm font-medium">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
               Let's get you set up
             </span>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">What are you studying?</h1>
