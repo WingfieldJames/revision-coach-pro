@@ -84,7 +84,8 @@ export function MeetTheFounders() {
   const isDark = theme === 'dark';
   const [trainers, setTrainers] = useState<Trainer[]>(trainersData);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(3); // James in center
+  const [activeIndex, setActiveIndex] = useState(3);
+  const isResetting = useRef(false);
 
   useEffect(() => {
     const loadImages = async () => {
@@ -109,28 +110,40 @@ export function MeetTheFounders() {
     loadImages();
   }, []);
 
-  // Scroll to center James on mount
+  const total = trainers.length;
+  // We render 3 copies: [set0][set1-middle][set2]
+  const tripled = [...trainers, ...trainers, ...trainers];
+
+  // Scroll to the middle set's James (index total + 3) on mount
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const timer = setTimeout(() => {
       const cards = el.children;
-      if (cards.length > 3) {
-        const target = cards[3] as HTMLElement; // James
+      const midJames = total + 3; // James in middle set
+      if (cards[midJames]) {
+        const target = cards[midJames] as HTMLElement;
         const scrollLeft = target.offsetLeft - el.offsetWidth / 2 + target.offsetWidth / 2;
         el.scrollTo({ left: scrollLeft, behavior: 'instant' });
       }
     }, 50);
     return () => clearTimeout(timer);
-  }, []);
+  }, [total]);
 
-  // Track active index based on scroll position
+  // Infinite loop: when scrolling into first or last set, snap to middle set
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+
     const onScroll = () => {
+      if (isResetting.current) return;
+
       const cards = Array.from(el.children) as HTMLElement[];
+      if (cards.length === 0) return;
+
       const center = el.scrollLeft + el.offsetWidth / 2;
+
+      // Find closest card to center
       let closest = 0;
       let minDist = Infinity;
       cards.forEach((card, i) => {
@@ -141,18 +154,41 @@ export function MeetTheFounders() {
           closest = i;
         }
       });
-      setActiveIndex(closest);
+
+      // Map to real index
+      setActiveIndex(closest % total);
+
+      // If we've scrolled into the first or last copy, snap to middle
+      const firstSetEnd = cards[total - 1];
+      const lastSetStart = cards[total * 2];
+
+      const firstSetEndRight = firstSetEnd.offsetLeft + firstSetEnd.offsetWidth;
+      const lastSetStartLeft = lastSetStart.offsetLeft;
+
+      if (center < firstSetEndRight || center > lastSetStartLeft + lastSetStart.offsetWidth) {
+        isResetting.current = true;
+        // Find equivalent card in middle set
+        const realIndex = closest % total;
+        const midTarget = cards[total + realIndex] as HTMLElement;
+        const newScroll = midTarget.offsetLeft - el.offsetWidth / 2 + midTarget.offsetWidth / 2;
+        el.scrollTo({ left: newScroll, behavior: 'instant' });
+        requestAnimationFrame(() => {
+          isResetting.current = false;
+        });
+      }
     };
+
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [total]);
 
   const scrollToIndex = (index: number) => {
     const el = scrollRef.current;
     if (!el) return;
     const cards = el.children;
-    if (cards[index]) {
-      const target = cards[index] as HTMLElement;
+    const midIndex = total + index;
+    if (cards[midIndex]) {
+      const target = cards[midIndex] as HTMLElement;
       const scrollLeft = target.offsetLeft - el.offsetWidth / 2 + target.offsetWidth / 2;
       el.scrollTo({ left: scrollLeft, behavior: 'smooth' });
     }
@@ -171,15 +207,14 @@ export function MeetTheFounders() {
       </div>
 
       <div className="relative">
-        {/* Scrollable track */}
         <div
           ref={scrollRef}
           className="flex gap-10 md:gap-16 py-4 px-[calc(50vw-5rem)] overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
-          {trainers.map((trainer) => (
+          {tripled.map((trainer, i) => (
             <div
-              key={trainer.id}
+              key={`${trainer.id}-${i}`}
               className="flex flex-col items-center text-center flex-shrink-0 w-32 sm:w-36 md:w-44"
             >
               <motion.div
