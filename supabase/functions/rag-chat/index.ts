@@ -29,6 +29,21 @@ const CONTENT_TYPES = {
   CASE_STUDY: 'case_study',
 } as const;
 
+// All past-paper-related content types treated as a single pool
+const PAST_PAPER_TYPES = ['paper_1', 'paper_2', 'paper_3', 'past_paper', 'past_paper_qp', 'past_paper_ms'];
+
+// Year-based recency bonus for past paper scoring
+function getRecencyBonus(metadata: Record<string, unknown>): number {
+  const year = String(metadata?.year || '');
+  const yearNum = parseInt(year, 10);
+  if (isNaN(yearNum)) return 0;
+  if (yearNum >= 2024) return 20;
+  if (yearNum >= 2023) return 15;
+  if (yearNum >= 2022) return 10;
+  if (yearNum >= 2021) return 5;
+  return 0;
+}
+
 // Economics Diagrams for inline rendering
 const ECONOMICS_DIAGRAMS = [
   { id: 'ppf', title: 'Production Possibility Frontier (PPF)', keywords: ['ppf', 'production possibility frontier', 'ppc', 'opportunity cost', 'trade-off', 'scarcity'], imagePath: '/diagrams/ppf.jpg' },
@@ -202,8 +217,7 @@ function detectContentTypePriorities(userMessage: string): string[] {
       lowerMessage.includes('find me') || lowerMessage.includes('give me') ||
       lowerMessage.includes('show me') || lowerMessage.includes('test me') ||
       lowerMessage.includes('quiz me') || lowerMessage.includes('past exam')) {
-    priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3,
-      'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined');
+    priorities.push(...PAST_PAPER_TYPES);
   }
   
   // Definition / concept keywords
@@ -307,38 +321,94 @@ async function fetchRelevantContext(
     const MAX_CHUNKS = 50;
     const selectedChunks: Array<{ content: string; metadata: Record<string, unknown> }> = [];
     
-    // Allocate slots: prioritized types first, then remaining types equally
-    const prioritizedTypes = effectiveContentTypes.filter(t => chunksByType.has(t));
-    const remainingTypes = Array.from(chunksByType.keys()).filter(t => !prioritizedTypes.includes(t));
+    // Check if this is a past paper search (any past paper type in priorities)
+    const isPastPaperSearch = effectiveContentTypes.some(t => PAST_PAPER_TYPES.includes(t));
     
-    // Give prioritized types ~60% of slots, remaining types ~40%
-    const prioritySlots = prioritizedTypes.length > 0 
-      ? Math.floor(MAX_CHUNKS * 0.6 / prioritizedTypes.length) 
-      : 0;
-    const remainingSlots = remainingTypes.length > 0 
-      ? Math.floor(MAX_CHUNKS * 0.4 / remainingTypes.length) 
-      : Math.floor(MAX_CHUNKS / Math.max(prioritizedTypes.length, 1));
-    
-    // Add prioritized chunks (sorted by relevance, so top-scoring come first)
-    for (const ct of prioritizedTypes) {
-      const chunks = chunksByType.get(ct)!;
-      const limit = Math.min(chunks.length, prioritySlots || Math.floor(MAX_CHUNKS / chunksByType.size));
-      selectedChunks.push(...chunks.slice(0, limit));
-    }
-    
-    // Add remaining type chunks (also sorted by relevance)
-    for (const ct of remainingTypes) {
-      const chunks = chunksByType.get(ct)!;
-      const limit = Math.min(chunks.length, remainingSlots);
-      selectedChunks.push(...chunks.slice(0, limit));
+    if (isPastPaperSearch) {
+      // === PAST PAPER POOLING: merge all paper types into one pool ===
+      const PAPER_SLOTS = Math.floor(MAX_CHUNKS * 0.75); // ~37 slots for papers
+      const OTHER_SLOTS = MAX_CHUNKS - PAPER_SLOTS;       // ~13 slots for spec/other
+      
+      // Collect all past-paper chunks into one pool with recency boost
+      const paperPool: Array<{ content: string; metadata: Record<string, unknown>; _relevance: number; _paperNum: string }> = [];
+      for (const [ct, chunks] of chunksByType) {
+        if (PAST_PAPER_TYPES.includes(ct)) {
+          for (const chunk of chunks) {
+            const recencyBonus = getRecencyBonus(chunk.metadata);
+            // Determine paper number from metadata or content_type
+            const paperNum = String(chunk.metadata?.paper_number || ct.replace('paper_', '').replace('past_paper_qp', 'qp').replace('past_paper_ms', 'ms').replace('past_paper', 'general'));
+            paperPool.push({ ...chunk, _relevance: chunk._relevance + recencyBonus, _paperNum: paperNum });
+          }
+        }
+      }
+      
+      // Group by paper number for equal distribution
+      const paperGroups = new Map<string, typeof paperPool>();
+      for (const chunk of paperPool) {
+        const key = chunk._paperNum;
+        if (!paperGroups.has(key)) paperGroups.set(key, []);
+        paperGroups.get(key)!.push(chunk);
+      }
+      
+      // Sort each group by relevance + recency (highest first)
+      for (const [, group] of paperGroups) {
+        group.sort((a, b) => b._relevance - a._relevance);
+      }
+      
+      const numPaperGroups = paperGroups.size || 1;
+      const slotsPerPaper = Math.floor(PAPER_SLOTS / numPaperGroups);
+      const extraSlots = PAPER_SLOTS - (slotsPerPaper * numPaperGroups);
+      
+      console.log(`Past paper pooling: ${paperPool.length} chunks across ${numPaperGroups} paper groups, ${slotsPerPaper} slots each`);
+      
+      // Take top N from each paper group (equal distribution)
+      let groupIndex = 0;
+      for (const [paperNum, group] of paperGroups) {
+        const bonus = groupIndex < extraSlots ? 1 : 0; // distribute remainder
+        const limit = Math.min(group.length, slotsPerPaper + bonus);
+        selectedChunks.push(...group.slice(0, limit));
+        console.log(`  Paper ${paperNum}: selected ${limit} of ${group.length}`);
+        groupIndex++;
+      }
+      
+      // Fill remaining slots with non-past-paper types (spec, exam technique, etc.)
+      const nonPaperTypes = Array.from(chunksByType.keys()).filter(t => !PAST_PAPER_TYPES.includes(t));
+      const slotsPerOther = nonPaperTypes.length > 0 ? Math.floor(OTHER_SLOTS / nonPaperTypes.length) : 0;
+      for (const ct of nonPaperTypes) {
+        const chunks = chunksByType.get(ct)!;
+        const limit = Math.min(chunks.length, slotsPerOther || OTHER_SLOTS);
+        selectedChunks.push(...chunks.slice(0, limit));
+      }
+    } else {
+      // === STANDARD BALANCED ALLOCATION (non-past-paper searches) ===
+      const prioritizedTypes = effectiveContentTypes.filter(t => chunksByType.has(t));
+      const remainingTypes = Array.from(chunksByType.keys()).filter(t => !prioritizedTypes.includes(t));
+      
+      const prioritySlots = prioritizedTypes.length > 0 
+        ? Math.floor(MAX_CHUNKS * 0.6 / prioritizedTypes.length) 
+        : 0;
+      const remainingSlots = remainingTypes.length > 0 
+        ? Math.floor(MAX_CHUNKS * 0.4 / remainingTypes.length) 
+        : Math.floor(MAX_CHUNKS / Math.max(prioritizedTypes.length, 1));
+      
+      for (const ct of prioritizedTypes) {
+        const chunks = chunksByType.get(ct)!;
+        const limit = Math.min(chunks.length, prioritySlots || Math.floor(MAX_CHUNKS / chunksByType.size));
+        selectedChunks.push(...chunks.slice(0, limit));
+      }
+      
+      for (const ct of remainingTypes) {
+        const chunks = chunksByType.get(ct)!;
+        const limit = Math.min(chunks.length, remainingSlots);
+        selectedChunks.push(...chunks.slice(0, limit));
+      }
     }
     
     // If still under MAX_CHUNKS, fill with highest-relevance remaining chunks
     if (selectedChunks.length < MAX_CHUNKS) {
       const selectedSet = new Set(selectedChunks);
-      // Gather all unselected chunks, sort by relevance
       const remaining = filteredChunks
-        .map(c => ({ ...c, _relevance: scoreChunk(c) }))
+        .map(c => ({ ...c, _relevance: scoreChunk(c) + getRecencyBonus(c.metadata as Record<string, unknown>) }))
         .filter(c => !selectedSet.has(c))
         .sort((a, b) => b._relevance - a._relevance);
       for (const chunk of remaining) {
