@@ -1,112 +1,46 @@
 
 
-## My Mistakes -- Spaced Repetition Feature
+## Problem
 
-### Overview
-Add a "My Mistakes" tool to all maths chatbots (Edexcel Pure, Edexcel Applied) and OCR CS, plus make it available in the Build portal for dynamic subjects. Users can log questions they got wrong (image or text), add notes, and get reminded to retry them on a spaced repetition schedule (day 4, 16, 35, 70). A red notification badge shows how many are due for review.
+When users ask for past paper questions on a topic, the retrieval spreads 30 priority slots across 7 individual content types (`paper_1`, `paper_2`, `paper_3`, `past_paper`, `past_paper_qp`, `past_paper_ms`, `combined`), giving each only ~4 chunks. This causes patchy coverage — some papers appear, others are missed entirely. There is also no recency bias, so older papers compete equally with recent ones.
 
----
+## Solution
 
-### 1. Database Table
+Refactor the chunk selection logic in `supabase/functions/rag-chat/index.ts` to:
 
-Create a `user_mistakes` table:
+1. **Pool all past-paper types into one group** — instead of allocating slots per sub-type, merge them into a single "past papers" pool
+2. **Add year-based recency boost** — chunks from 2024 get a score bonus over 2023, which gets a bonus over 2022, etc.
+3. **Enforce equal paper distribution** — within the pool, distribute slots equally across paper numbers (paper 1, paper 2, paper 3, etc.) so no single paper dominates
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | PK, default gen_random_uuid() |
-| user_id | uuid | NOT NULL |
-| product_id | uuid | NOT NULL |
-| question_text | text | nullable (user may upload image only) |
-| question_image_url | text | nullable (base64 data URL stored directly) |
-| note | text | nullable |
-| created_at | timestamptz | default now() |
-| next_review_at | timestamptz | default now() + interval '4 days' |
-| review_count | integer | default 0 |
-| completed | boolean | default false |
+## Changes (single file)
 
-RLS policies:
-- Users can SELECT, INSERT, UPDATE, DELETE their own rows (`auth.uid() = user_id`)
+**`supabase/functions/rag-chat/index.ts`**
 
-The spaced repetition intervals are: review_count 0 = day 4, 1 = day 16, 2 = day 35, 3 = day 70, 4+ = completed.
-
----
-
-### 2. New Component: `MyMistakesTool.tsx`
-
-Follows the exact same pattern as RevisionGuideTool, ExamCountdown, etc. (header with icon + gradient box, content area).
-
-**Two views:**
-
-**A) Add Mistake View (default)**
-- Upload area for an image (same drag/drop pattern as ImageUploadTool) OR text input for typing the question
-- Text area for a note ("What did I get wrong?")
-- "Save Mistake" button
-
-**B) My Mistakes List View**
-- Toggle between "Add" and "View All" tabs
-- Lists all saved mistakes (newest first), each showing:
-  - Question preview (thumbnail if image, text snippet if text)
-  - Note
-  - Next review date or "Due now" badge
-  - "Mark as Reviewed" button (advances to next interval)
-  - Delete option
-
-**Notification count:** Computed client-side by counting rows where `next_review_at <= now()` and `completed = false`.
-
----
-
-### 3. Header Integration
-
-- Add new props to Header: `showMyMistakes?: boolean`
-- Add state: `myMistakesOpen`
-- Add Popover between Revision Guide and Exam Countdown
-- Icon: `AlertCircle` or `RotateCcw` from lucide-react
-- Button label: "My Mistakes"
-- Red notification badge: small absolute-positioned circle with count, only shown when due count > 0
-- Requires `productId` and user auth to query/insert
-
----
-
-### 4. Pages to Update
-
-Add `showMyMistakes` prop to Header in these pages:
-- `EdexcelMathsFreeVersionPage.tsx`
-- `EdexcelMathsPremiumPage.tsx`
-- `EdexcelMathsAppliedFreeVersionPage.tsx`
-- `EdexcelMathsAppliedPremiumPage.tsx`
-- `OCRCSFreeVersionPage.tsx`
-- `OCRCSPremiumPage.tsx`
-
----
-
-### 5. Build Portal Integration
-
-Add to the `WEBSITE_FEATURES` array in `BuildPage.tsx`:
-```
-{ id: "my_mistakes", label: "My Mistakes", description: "Spaced repetition tracker for questions students got wrong", icon: RotateCcw }
+### 1. Define past paper type group constant (~line 30)
+```typescript
+const PAST_PAPER_TYPES = ['paper_1', 'paper_2', 'paper_3', 'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined'];
 ```
 
-Add to `DynamicFreePage.tsx` and `DynamicPremiumPage.tsx`:
-```
-showMyMistakes={hasFeature('my_mistakes')}
-```
+### 2. Add recency scoring helper
+Extract year from chunk metadata (`metadata.year`) and add a bonus: 2024 = +20, 2023 = +15, 2022 = +10, 2021 = +5, older = 0. This is added on top of the existing keyword relevance score.
 
----
+### 3. Refactor the allocation block (~lines 307-348)
 
-### 6. Files Changed
+When past paper types are detected in priorities:
 
-| File | Change |
-|------|--------|
-| New migration | Create `user_mistakes` table + RLS |
-| `src/components/MyMistakesTool.tsx` | **New file** -- full component |
-| `src/components/Header.tsx` | Add `showMyMistakes` prop, popover, notification badge |
-| `src/pages/EdexcelMathsFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/EdexcelMathsAppliedPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSFreeVersionPage.tsx` | Add `showMyMistakes` |
-| `src/pages/OCRCSPremiumPage.tsx` | Add `showMyMistakes` |
-| `src/pages/BuildPage.tsx` | Add to WEBSITE_FEATURES |
-| `src/pages/DynamicFreePage.tsx` | Wire up `showMyMistakes` |
-| `src/pages/DynamicPremiumPage.tsx` | Wire up `showMyMistakes` |
+- Remove individual past paper types from the per-type allocation loop
+- Collect all chunks matching any `PAST_PAPER_TYPES` into one merged pool
+- Score each with keyword relevance + recency boost
+- Determine how many distinct paper numbers exist in the data (e.g., 2 for maths, 3 for economics)
+- Allocate ~75% of MAX_CHUNKS (≈37 slots) to this pool, split equally per paper number
+- Within each paper-number bucket, sort by score (relevance + recency) and take the top N
+- Give remaining ~25% (≈13 slots) to non-past-paper types (specification, exam technique, etc.)
+
+When no past paper search is detected, keep the existing balanced allocation logic unchanged.
+
+### 4. Remove `'combined'` from `detectContentTypePriorities` (~line 206)
+This content type does not exist in the data and wastes a slot.
+
+## Deployment
+Edge function auto-deploys on save. No database or migration changes needed.
 
