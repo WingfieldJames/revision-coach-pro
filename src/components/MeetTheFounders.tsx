@@ -36,7 +36,7 @@ const trainersData: Trainer[] = [
     id: 'zoya',
     name: 'Zoya Siddiqui',
     university: 'UCL Medicine ',
-    stats: 'A-Level: A*A*AA · Straight 9s at GCSE',
+    stats: 'A-Level: A*A*AA · GCSE: 11 9s',
     image: null,
     storageKey: 'zoya',
   },
