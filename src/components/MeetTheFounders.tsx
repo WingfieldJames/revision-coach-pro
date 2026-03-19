@@ -215,7 +215,7 @@ export function MeetTheFounders() {
           {tripled.map((trainer, i) => (
             <div
               key={`${trainer.id}-${i}`}
-              className="flex flex-col items-center text-center flex-shrink-0 w-32 sm:w-36 md:w-44"
+              className="flex flex-col items-center text-center flex-shrink-0 w-36 sm:w-40 md:w-48"
             >
               <motion.div
                 className={`w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-lg bg-muted border-4 ${
