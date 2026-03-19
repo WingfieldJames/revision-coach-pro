@@ -198,7 +198,10 @@ function detectContentTypePriorities(userMessage: string): string[] {
   
   // Past paper / practice question keywords
   if (lowerMessage.includes('practice') || lowerMessage.includes('question') ||
-      lowerMessage.includes('past paper') || lowerMessage.includes('example')) {
+      lowerMessage.includes('past paper') || lowerMessage.includes('example') ||
+      lowerMessage.includes('find me') || lowerMessage.includes('give me') ||
+      lowerMessage.includes('show me') || lowerMessage.includes('test me') ||
+      lowerMessage.includes('quiz me') || lowerMessage.includes('past exam')) {
     priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3,
       'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined');
   }
@@ -271,18 +274,37 @@ async function fetchRelevantContext(
       console.log(`Filtered from ${allChunks.length} to ${filteredChunks.length} chunks after spec_version filtering`);
     }
     
+    // Extract keywords from user message for relevance scoring
+    const messageKeywords = userMessage.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+    
+    // Score a chunk by keyword relevance to the user's message
+    function scoreChunk(chunk: { content: string; metadata: Record<string, unknown> }): number {
+      const text = (chunk.content + ' ' + JSON.stringify(chunk.metadata || {})).toLowerCase();
+      let score = 0;
+      for (const kw of messageKeywords) {
+        const matches = text.split(kw).length - 1;
+        score += matches;
+      }
+      return score;
+    }
+    
     // Group chunks by content_type
-    const chunksByType = new Map<string, Array<{ content: string; metadata: Record<string, unknown> }>>();
+    const chunksByType = new Map<string, Array<{ content: string; metadata: Record<string, unknown>; _relevance: number }>>();
     for (const chunk of filteredChunks) {
       const ct = (chunk.metadata as Record<string, unknown>)?.content_type as string || 'general';
       if (!chunksByType.has(ct)) chunksByType.set(ct, []);
-      chunksByType.get(ct)!.push(chunk);
+      chunksByType.get(ct)!.push({ ...chunk, _relevance: scoreChunk(chunk) });
+    }
+    
+    // Sort each type's chunks by relevance (highest first)
+    for (const [, chunks] of chunksByType) {
+      chunks.sort((a, b) => b._relevance - a._relevance);
     }
     
     console.log(`Content types available: ${Array.from(chunksByType.entries()).map(([k, v]) => `${k}(${v.length})`).join(', ')}`);
     
     // Build balanced selection: prioritized types get more slots
-    const MAX_CHUNKS = 40;
+    const MAX_CHUNKS = 50;
     const selectedChunks: Array<{ content: string; metadata: Record<string, unknown> }> = [];
     
     // Allocate slots: prioritized types first, then remaining types equally
@@ -297,29 +319,31 @@ async function fetchRelevantContext(
       ? Math.floor(MAX_CHUNKS * 0.4 / remainingTypes.length) 
       : Math.floor(MAX_CHUNKS / Math.max(prioritizedTypes.length, 1));
     
-    // Add prioritized chunks
+    // Add prioritized chunks (sorted by relevance, so top-scoring come first)
     for (const ct of prioritizedTypes) {
       const chunks = chunksByType.get(ct)!;
       const limit = Math.min(chunks.length, prioritySlots || Math.floor(MAX_CHUNKS / chunksByType.size));
       selectedChunks.push(...chunks.slice(0, limit));
     }
     
-    // Add remaining type chunks
+    // Add remaining type chunks (also sorted by relevance)
     for (const ct of remainingTypes) {
       const chunks = chunksByType.get(ct)!;
       const limit = Math.min(chunks.length, remainingSlots);
       selectedChunks.push(...chunks.slice(0, limit));
     }
     
-    // If still under MAX_CHUNKS, fill with any remaining chunks
+    // If still under MAX_CHUNKS, fill with highest-relevance remaining chunks
     if (selectedChunks.length < MAX_CHUNKS) {
       const selectedSet = new Set(selectedChunks);
-      for (const chunk of filteredChunks) {
+      // Gather all unselected chunks, sort by relevance
+      const remaining = filteredChunks
+        .map(c => ({ ...c, _relevance: scoreChunk(c) }))
+        .filter(c => !selectedSet.has(c))
+        .sort((a, b) => b._relevance - a._relevance);
+      for (const chunk of remaining) {
         if (selectedChunks.length >= MAX_CHUNKS) break;
-        if (!selectedSet.has(chunk)) {
-          selectedChunks.push(chunk);
-          selectedSet.add(chunk);
-        }
+        selectedChunks.push(chunk);
       }
     }
     
