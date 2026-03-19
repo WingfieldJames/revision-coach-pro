@@ -65,7 +65,7 @@ const trainersData: Trainer[] = [
     id: 'yan',
     name: 'Yan Beletskiy',
     university: 'Warwick Discrete Maths ',
-    stats: 'A-Level: 5 A*s · A* Maths (98%)',
+    stats: 'A-Level: A*A*A*A*A* · GCSE: 10 9s',
     image: null,
     storageKey: 'yan',
   },
