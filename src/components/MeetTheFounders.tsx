@@ -73,7 +73,7 @@ const trainersData: Trainer[] = [
     id: 'tudor',
     name: 'Tudor Cranciun',
     university: 'Imperial Offer Holder',
-    stats: 'A-Level: A*A*A*A* · 200/200 Physics · Straight 9s',
+    stats: 'A-Level: A*A*A*A* · GCSES: Straight 9s',
     image: null,
     storageKey: 'tudor',
   },
