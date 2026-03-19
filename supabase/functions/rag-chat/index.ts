@@ -217,8 +217,7 @@ function detectContentTypePriorities(userMessage: string): string[] {
       lowerMessage.includes('find me') || lowerMessage.includes('give me') ||
       lowerMessage.includes('show me') || lowerMessage.includes('test me') ||
       lowerMessage.includes('quiz me') || lowerMessage.includes('past exam')) {
-    priorities.push(CONTENT_TYPES.PAPER_1, CONTENT_TYPES.PAPER_2, CONTENT_TYPES.PAPER_3,
-      'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined');
+    priorities.push(...PAST_PAPER_TYPES);
   }
   
   // Definition / concept keywords
