@@ -29,6 +29,21 @@ const CONTENT_TYPES = {
   CASE_STUDY: 'case_study',
 } as const;
 
+// All past-paper-related content types treated as a single pool
+const PAST_PAPER_TYPES = ['paper_1', 'paper_2', 'paper_3', 'past_paper', 'past_paper_qp', 'past_paper_ms'];
+
+// Year-based recency bonus for past paper scoring
+function getRecencyBonus(metadata: Record<string, unknown>): number {
+  const year = String(metadata?.year || '');
+  const yearNum = parseInt(year, 10);
+  if (isNaN(yearNum)) return 0;
+  if (yearNum >= 2024) return 20;
+  if (yearNum >= 2023) return 15;
+  if (yearNum >= 2022) return 10;
+  if (yearNum >= 2021) return 5;
+  return 0;
+}
+
 // Economics Diagrams for inline rendering
 const ECONOMICS_DIAGRAMS = [
   { id: 'ppf', title: 'Production Possibility Frontier (PPF)', keywords: ['ppf', 'production possibility frontier', 'ppc', 'opportunity cost', 'trade-off', 'scarcity'], imagePath: '/diagrams/ppf.jpg' },
