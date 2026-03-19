@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,7 +13,7 @@ interface Trainer {
   university: string;
   stats: string;
   image: string | null;
-  storageKey?: string; // supabase storage path
+  storageKey?: string;
 }
 
 const STORAGE_PATHS: Record<string, string> = {
@@ -84,10 +83,9 @@ export function MeetTheFounders() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [trainers, setTrainers] = useState<Trainer[]>(trainersData);
-  // Start with Henry (index 2) in the center
-  const [centerIndex, setCenterIndex] = useState(2);
+  // Start centered so Henry/James/Tanuj (indices 2,3,4) are the middle 3
+  const [centerIndex, setCenterIndex] = useState(3);
 
-  // Load storage images
   useEffect(() => {
     const loadImages = async () => {
       const entries = Object.entries(STORAGE_PATHS);
@@ -100,7 +98,6 @@ export function MeetTheFounders() {
         })
       );
       const urlMap = Object.fromEntries(results.filter(([, url]) => url));
-
       setTrainers((prev) =>
         prev.map((t) =>
           t.storageKey && urlMap[t.storageKey]
@@ -119,22 +116,12 @@ export function MeetTheFounders() {
     [centerIndex, total]
   );
 
-  const goLeft = () => setCenterIndex((prev) => ((prev - 1) % total + total) % total);
-  const goRight = () => setCenterIndex((prev) => (prev + 1) % total);
-
-  // Positions: -2, -1, 0, +1, +2 from center
+  // Show 3 on mobile, 5 on desktop
   const visibleOffsets = [-2, -1, 0, 1, 2];
 
   const getOpacity = (offset: number) => {
-    if (offset === 0) return 1;
-    if (Math.abs(offset) === 1) return 0.45;
-    return 0.2;
-  };
-
-  const getScale = (offset: number) => {
-    if (offset === 0) return 1;
-    if (Math.abs(offset) === 1) return 0.88;
-    return 0.75;
+    if (Math.abs(offset) <= 1) return 1;
+    return 0.4;
   };
 
   return (
@@ -149,28 +136,11 @@ export function MeetTheFounders() {
         </ScrollReveal>
 
         <div className="relative">
-          {/* Navigation arrows */}
-          <button
-            onClick={goLeft}
-            className="absolute left-0 md:left-2 top-1/2 -translate-y-1/2 -translate-x-2 z-20 w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center shadow-card hover:shadow-elevated transition-shadow"
-            aria-label="Previous trainer"
-          >
-            <ChevronLeft className="w-5 h-5 text-foreground" />
-          </button>
-          <button
-            onClick={goRight}
-            className="absolute right-0 md:right-2 top-1/2 -translate-y-1/2 translate-x-2 z-20 w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center shadow-card hover:shadow-elevated transition-shadow"
-            aria-label="Next trainer"
-          >
-            <ChevronRight className="w-5 h-5 text-foreground" />
-          </button>
-
           {/* Carousel track */}
           <div className="flex items-center justify-center gap-6 md:gap-10 py-4">
             {visibleOffsets.map((offset) => {
               const idx = getWrappedIndex(offset);
               const trainer = trainers[idx];
-              const isCenter = offset === 0;
 
               return (
                 <motion.div
@@ -180,18 +150,17 @@ export function MeetTheFounders() {
                   }`}
                   animate={{
                     opacity: getOpacity(offset),
-                    scale: getScale(offset),
                   }}
                   transition={{ duration: 0.4, ease: 'easeInOut' }}
                   onClick={() => {
-                    if (offset < 0) goLeft();
-                    if (offset > 0) goRight();
+                    if (offset < 0) setCenterIndex((prev) => ((prev - 1) % total + total) % total);
+                    if (offset > 0) setCenterIndex((prev) => (prev + 1) % total);
                   }}
                 >
                   <motion.div
                     className={`w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-lg bg-muted border-4 ${
                       isDark ? 'border-primary/20' : 'border-border'
-                    } ${isCenter ? 'ring-2 ring-primary/30' : ''}`}
+                    }`}
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
