@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -83,8 +83,8 @@ export function MeetTheFounders() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [trainers, setTrainers] = useState<Trainer[]>(trainersData);
-  // Start centered so Henry/James/Tanuj (indices 2,3,4) are the middle 3
-  const [centerIndex, setCenterIndex] = useState(3);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(3); // James in center
 
   useEffect(() => {
     const loadImages = async () => {
@@ -109,24 +109,58 @@ export function MeetTheFounders() {
     loadImages();
   }, []);
 
-  const total = trainers.length;
+  // Scroll to center James on mount
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const timer = setTimeout(() => {
+      const cards = el.children;
+      if (cards.length > 3) {
+        const target = cards[3] as HTMLElement; // James
+        const scrollLeft = target.offsetLeft - el.offsetWidth / 2 + target.offsetWidth / 2;
+        el.scrollTo({ left: scrollLeft, behavior: 'instant' });
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const getWrappedIndex = useCallback(
-    (offset: number) => ((centerIndex + offset) % total + total) % total,
-    [centerIndex, total]
-  );
+  // Track active index based on scroll position
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const cards = Array.from(el.children) as HTMLElement[];
+      const center = el.scrollLeft + el.offsetWidth / 2;
+      let closest = 0;
+      let minDist = Infinity;
+      cards.forEach((card, i) => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(center - cardCenter);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = i;
+        }
+      });
+      setActiveIndex(closest);
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
 
-  // Show 3 on mobile, 5 on desktop
-  const visibleOffsets = [-2, -1, 0, 1, 2];
-
-  const getOpacity = (offset: number) => {
-    if (Math.abs(offset) <= 1) return 1;
-    return 0.4;
+  const scrollToIndex = (index: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cards = el.children;
+    if (cards[index]) {
+      const target = cards[index] as HTMLElement;
+      const scrollLeft = target.offsetLeft - el.offsetWidth / 2 + target.offsetWidth / 2;
+      el.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    }
   };
 
   return (
-    <section className="pt-8 pb-16 md:pt-12 md:pb-20 px-8 bg-muted overflow-hidden">
-      <div className="max-w-5xl mx-auto">
+    <section className="pt-8 pb-16 md:pt-12 md:pb-20 bg-muted overflow-hidden">
+      <div className="max-w-6xl mx-auto px-8">
         <ScrollReveal className="text-center mb-12 md:mb-16">
           <p className="text-sm sm:text-base font-medium text-muted-foreground mb-2">Meet your trainers</p>
           <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
@@ -134,79 +168,68 @@ export function MeetTheFounders() {
             <span className="text-primary">behind the AI</span>
           </h2>
         </ScrollReveal>
+      </div>
 
-        <div className="relative">
-          {/* Carousel track */}
-          <div className="flex items-center justify-center gap-6 md:gap-10 py-4">
-            {visibleOffsets.map((offset) => {
-              const idx = getWrappedIndex(offset);
-              const trainer = trainers[idx];
-
-              return (
-                <motion.div
-                  key={`${trainer.id}-${offset}`}
-                  className={`flex flex-col items-center text-center flex-shrink-0 cursor-pointer ${
-                    Math.abs(offset) === 2 ? 'hidden md:flex' : ''
-                  }`}
-                  animate={{
-                    opacity: getOpacity(offset),
-                  }}
-                  transition={{ duration: 0.4, ease: 'easeInOut' }}
-                  onClick={() => {
-                    if (offset < 0) setCenterIndex((prev) => ((prev - 1) % total + total) % total);
-                    if (offset > 0) setCenterIndex((prev) => (prev + 1) % total);
-                  }}
-                >
-                  <motion.div
-                    className={`w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-lg bg-muted border-4 ${
-                      isDark ? 'border-primary/20' : 'border-border'
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {trainer.image ? (
-                      <img
-                        src={trainer.image}
-                        alt={trainer.name}
-                        className="w-full h-full object-cover object-top"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl font-bold">
-                        {trainer.name.charAt(0)}
-                      </div>
-                    )}
-                  </motion.div>
-                  <h3 className="mt-4 text-sm sm:text-base md:text-lg font-bold text-foreground">
-                    {trainer.name}
-                  </h3>
-                  <p className={`text-xs sm:text-sm font-medium ${isDark ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {trainer.university}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                    {trainer.stats}
-                  </p>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Dot indicators */}
-          <div className="flex justify-center gap-2 mt-6">
-            {trainers.map((trainer, index) => (
-              <button
-                key={trainer.id}
-                onClick={() => setCenterIndex(index)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  index === centerIndex
-                    ? isDark
-                      ? 'bg-primary scale-125'
-                      : 'bg-foreground scale-125'
-                    : 'bg-border hover:bg-muted-foreground/50'
+      <div className="relative">
+        {/* Scrollable track */}
+        <div
+          ref={scrollRef}
+          className="flex gap-10 md:gap-16 py-4 px-[calc(50vw-5rem)] overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+        >
+          {trainers.map((trainer) => (
+            <div
+              key={trainer.id}
+              className="flex flex-col items-center text-center flex-shrink-0 w-32 sm:w-36 md:w-44"
+            >
+              <motion.div
+                className={`w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-lg bg-muted border-4 ${
+                  isDark ? 'border-primary/20' : 'border-border'
                 }`}
-                aria-label={`Go to ${trainer.name}`}
-              />
-            ))}
-          </div>
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3 }}
+              >
+                {trainer.image ? (
+                  <img
+                    src={trainer.image}
+                    alt={trainer.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl font-bold">
+                    {trainer.name.charAt(0)}
+                  </div>
+                )}
+              </motion.div>
+              <h3 className="mt-4 text-sm sm:text-base md:text-lg font-bold text-foreground">
+                {trainer.name}
+              </h3>
+              <p className={`text-xs sm:text-sm font-medium ${isDark ? 'text-primary' : 'text-muted-foreground'}`}>
+                {trainer.university}
+              </p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                {trainer.stats}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Dot indicators */}
+        <div className="flex justify-center gap-2 mt-6">
+          {trainers.map((trainer, index) => (
+            <button
+              key={trainer.id}
+              onClick={() => scrollToIndex(index)}
+              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                index === activeIndex
+                  ? isDark
+                    ? 'bg-primary scale-125'
+                    : 'bg-foreground scale-125'
+                  : 'bg-border hover:bg-muted-foreground/50'
+              }`}
+              aria-label={`Go to ${trainer.name}`}
+            />
+          ))}
         </div>
       </div>
     </section>
