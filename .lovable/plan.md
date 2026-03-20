@@ -1,38 +1,45 @@
 
 
-## Problem
+## Replace free-text subject input with predefined dropdown
 
-The database has many duplicate `trainer_projects` entries (e.g., 5 "AQA Physics", 7 "Edexcel Physics"). The deduplication logic added in the recent build changes keeps the **earliest created** project, but that's usually an empty draft with no `product_id`. The deployed project with actual data gets filtered out. This means:
+### What changes
 
-1. Users see a blank project instead of their real one
-2. Saves go to the wrong (empty) project
-3. Everything appears broken
+**File: `src/pages/BuildPage.tsx`**
 
-Additionally, the `TrainerProject` interface is missing `qualification_type`, forcing `(p as any)` casts everywhere.
+#### 1. Add a constant list of subjects currently on the website (~line 42)
 
-## Solution (single file: `src/pages/BuildPage.tsx`)
-
-### 1. Fix deduplication to keep the best project, not the first
-
-Change the dedup logic (~lines 271-276) to prefer:
-- **Deployed** projects over drafts
-- Projects **with a product_id** over those without
-- If tied, keep the most recently updated one
-
-```
-For each group of duplicates (same qual+board+subject):
-  Pick the one that is deployed, or has a product_id, or was updated most recently
+```typescript
+const AVAILABLE_SUBJECTS = [
+  "Economics", "Computer Science", "Physics",
+  "Chemistry", "Psychology", "Mathematics",
+  "Biology"
+];
 ```
 
-### 2. Add `qualification_type` to the `TrainerProject` interface
+These are the subjects currently live on the platform.
 
-Add `qualification_type: string;` to the interface (line 48 area) so all the `(p as any).qualification_type` casts become proper typed access.
+#### 2. Add "+ Add New Subject" option to the Subject cascading dropdown (~line 1197)
 
-### 3. Clean up all `(p as any).qualification_type` references
+In the Subject `<Select>` (the second dropdown in the cascading selector), add an extra item at the bottom: `"+ Add New Subject"`. When selected, it opens a small inline input (or a mini dialog) where the trainer types a brand new subject name. This new subject gets created as a `trainer_project` and also becomes available in the create dialog going forward.
 
-Replace every `(p as any).qualification_type || 'A Level'` with `p.qualification_type` since the DB column has a default of `'A Level'` and is non-nullable — the value will always be present.
+#### 3. Replace `<Input>` with `<Select>` in the Create Dialog (~lines 1303-1309)
 
-## Why this fixes the save issue
+Swap the free-text input for a `<Select>` dropdown. The options will be:
+- All subjects from `AVAILABLE_SUBJECTS`
+- Plus any unique subject names from existing `trainer_projects` that aren't already in the constant list
 
-Currently: dedup keeps project `80675002` (AQA Biology, no product_id, empty draft) and drops `5716aa05` (AQA Biology, has product_id, has data). User sees empty form, saves to wrong project. With the fix, the deployed/data-having project wins, so edits and saves target the correct record.
+This means if someone previously added "Sociology" via the Subject dropdown, it appears here too.
+
+#### 4. Flow summary
+
+```text
+Want to create "AQA Biology" (Biology already exists on site)?
+  → Click "New Subject" button → Pick "Biology" from dropdown → Pick "AQA" → Done
+
+Want to create a brand new subject like "Sociology"?
+  → Go to Subject dropdown → Click "+ Add New Subject" → Type "Sociology"
+  → This creates the project AND adds "Sociology" to future create dialog options
+```
+
+No database or migration changes needed. The `newSubjectName` state variable stays the same — it just gets set via `onValueChange` instead of `onChange`.
 
