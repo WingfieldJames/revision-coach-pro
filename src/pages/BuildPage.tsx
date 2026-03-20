@@ -1169,7 +1169,7 @@ export function BuildPage() {
                   <Select
                     value={selectedQualType}
                     onValueChange={(val) => {
-                      const first = projects.find(p => ((p as any).qualification_type || 'A Level') === val);
+                      const first = projects.find(p => p.qualification_type === val);
                       if (first) setSelectedProjectId(first.id);
                     }}
                   >
