@@ -1207,6 +1207,9 @@ export function BuildPage() {
                       {subjects.map(sub => (
                         <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                       ))}
+                      <SelectItem value="__add_new__" className="text-primary font-medium border-t mt-1 pt-1">
+                        + Add New Subject
+                      </SelectItem>
                     </SelectContent>
                   </Select>
 
