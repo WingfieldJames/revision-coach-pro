@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, ChevronDown, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle, RefreshCw } from "lucide-react";
+import { Upload, CheckCircle2, Circle, Clock, Plus, Trash2, Send, Loader2, Rocket, BookOpen, User, ImagePlus, Globe, Bot, PenTool, FileText, Timer, BookMarked, BarChart3, Save, AlertTriangle, HelpCircle, RefreshCw } from "lucide-react";
 import { normalizeSpecifications } from "@/lib/specNormalization";
 import { getLegacyConfig } from "@/lib/legacyLiveConfig";
 import { diagrams } from "@/data/diagrams";
@@ -26,13 +26,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1127,44 +1120,107 @@ export function BuildPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold">Build Portal</h1>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2 min-w-[200px] justify-between">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    <span>{currentLabel}</span>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px]">
-                {projects.map(proj => (
-                  <DropdownMenuItem
-                    key={proj.id}
-                    onClick={() => setSelectedProjectId(proj.id)}
-                    className="flex items-center justify-between gap-2 cursor-pointer"
+            {/* Cascading subject selector */}
+            {(() => {
+              // Derive unique qualification types from projects
+              const qualTypes = Array.from(new Set(projects.map(p => (p as any).qualification_type || 'A Level'))).sort();
+              const selectedQualType = currentProject ? ((currentProject as any).qualification_type || 'A Level') : (qualTypes[0] || 'A Level');
+
+              // Filter projects by selected qualification type
+              const filteredByQual = projects.filter(p => ((p as any).qualification_type || 'A Level') === selectedQualType);
+
+              // Derive unique subjects for the selected qualification type
+              const subjects = Array.from(new Set(filteredByQual.map(p => p.subject))).sort();
+              const selectedSubject = currentProject && ((currentProject as any).qualification_type || 'A Level') === selectedQualType
+                ? currentProject.subject
+                : (subjects[0] || '');
+
+              // Filter projects by subject to get available boards
+              const filteredBySubject = filteredByQual.filter(p => p.subject === selectedSubject);
+              const boards = filteredBySubject.map(p => p.exam_board).sort();
+
+              return (
+                <div className="flex items-center gap-2">
+                  {/* 1. Qualification Type */}
+                  <Select
+                    value={selectedQualType}
+                    onValueChange={(val) => {
+                      const first = projects.find(p => ((p as any).qualification_type || 'A Level') === val);
+                      if (first) setSelectedProjectId(first.id);
+                    }}
                   >
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-normal shrink-0">
-                        {(proj as any).qualification_type || 'A Level'}
-                      </Badge>
-                      <span className="font-medium">{proj.exam_board} {proj.subject}</span>
-                    </div>
-                    <span className={`h-2 w-2 rounded-full shrink-0 ${
-                      proj.status === "deployed" ? "bg-green-500" : "bg-muted-foreground/40"
-                    }`} />
-                  </DropdownMenuItem>
-                ))}
-                {projects.length > 0 && <DropdownMenuSeparator />}
-                <DropdownMenuItem
-                  onClick={() => setShowNewSubjectDialog(true)}
-                  className="cursor-pointer"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  <span>Create New Subject</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <SelectTrigger className="w-[110px] h-9 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {qualTypes.map(qt => (
+                        <SelectItem key={qt} value={qt}>{qt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* 2. Subject */}
+                  <Select
+                    value={selectedSubject}
+                    onValueChange={(val) => {
+                      const match = filteredByQual.find(p => p.subject === val);
+                      if (match) setSelectedProjectId(match.id);
+                    }}
+                  >
+                    <SelectTrigger className="w-[160px] h-9 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subjects.map(sub => (
+                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* 3. Board */}
+                  <Select
+                    value={currentProject?.exam_board || boards[0] || ''}
+                    onValueChange={(val) => {
+                      const match = filteredBySubject.find(p => p.exam_board === val) 
+                        || filteredByQual.find(p => p.subject === selectedSubject && p.exam_board === val);
+                      if (match) setSelectedProjectId(match.id);
+                    }}
+                  >
+                    <SelectTrigger className="w-[120px] h-9 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {boards.map(board => {
+                        const proj = filteredBySubject.find(p => p.exam_board === board);
+                        return (
+                          <SelectItem key={board} value={board}>
+                            <div className="flex items-center justify-between gap-2 w-full">
+                              <span>{board}</span>
+                              {proj && (
+                                <span className={`h-2 w-2 rounded-full shrink-0 ${
+                                  proj.status === "deployed" ? "bg-green-500" : "bg-muted-foreground/40"
+                                }`} />
+                              )}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+
+                  {/* 4. Create New Subject */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 gap-1.5"
+                    onClick={() => setShowNewSubjectDialog(true)}
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">New Subject</span>
+                  </Button>
+                </div>
+              );
+            })()}
           </div>
           <div className="flex items-center gap-3">
             <Button
