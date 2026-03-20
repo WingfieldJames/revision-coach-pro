@@ -58,34 +58,61 @@ export function BuildAboutPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
         <Card>
-          <CardHeader><CardTitle>How the Training Portal Works</CardTitle></CardHeader>
+          <CardHeader><CardTitle>🎯 The Goal</CardTitle></CardHeader>
           <CardContent className="prose prose-sm dark:prose-invert max-w-none space-y-4">
-            <p>The Build Portal follows a strict <strong>Edit → Save → Deploy</strong> lifecycle.</p>
+            <p>Your mission is to <strong>clone everything you know about getting an A* into the AI</strong>. Think of it as creating a digital copy of your brain — except it's supercharged by the ability to instantly access every past paper, mark scheme, and specification point at rapid speed.</p>
+            <p>Fill out the page section by section, deploy it, and your subject goes live on the website.</p>
+          </CardContent>
+        </Card>
 
+        <Card>
+          <CardHeader><CardTitle>🧠 The System Prompt — Your Brain</CardTitle></CardHeader>
+          <CardContent className="prose prose-sm dark:prose-invert max-w-none space-y-4">
+            <p>The system prompt is the <strong>first thing the AI reads before answering any question</strong>. It shapes how the AI thinks, reasons, and responds to students. This is the most important section.</p>
+            <p>Start with the basics — exam board, qualification code, subject overview. Then teach the AI how to handle different types of student questions. Consider as many scenarios as you can:</p>
+            <ul>
+              <li><strong>"Explain this topic"</strong> → The AI should find the relevant specification point and provide a precise, tailored explanation.</li>
+              <li><strong>"Give me exam technique"</strong> → The AI should supply your exam technique guidance for that question type.</li>
+              <li><strong>"Find me past paper questions on X"</strong> → The AI should search through all uploaded past papers — Paper 1 for Paper 1 topics, Paper 2 for Paper 2 topics, etc.</li>
+            </ul>
+            <p>The more detail you provide, the smarter the AI becomes. Think about how <em>you</em> would coach a student, then write that into the prompt.</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>📝 Custom Sections — Teach It More</CardTitle></CardHeader>
+          <CardContent className="prose prose-sm dark:prose-invert max-w-none space-y-4">
+            <p>Beyond the system prompt, you can create <strong>separate sections</strong> to help the AI think more deeply about specific areas — exam technique breakdowns, common mistakes, topic-specific strategies, or anything else you'd normally teach a student.</p>
+            <p>You can also enable additional student-facing features (Essay Marker, Diagram Finder, Exam Countdown, etc.). Most features require only a small amount of data entry, and much of it can be done quickly with AI assistance. Many features work automatically once enabled.</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>📄 Past Papers — Priority Focus</CardTitle></CardHeader>
+          <CardContent className="prose prose-sm dark:prose-invert max-w-none space-y-4">
+            <p>Upload past paper PDFs (question papers and mark schemes) and they'll be automatically processed by AI into structured, searchable chunks. Matching QP + MS pairs for the same year and paper number are merged together.</p>
+            <p><strong>To get started, prioritise papers from 2024–2020.</strong> You can always add older papers later. The AI will weight recent papers more heavily when students ask for practice questions.</p>
+            <p>Processing happens in the background — you'll see status indicators (pending → processing → done).</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>🔄 Edit → Save → Deploy</CardTitle></CardHeader>
+          <CardContent className="prose prose-sm dark:prose-invert max-w-none space-y-4">
             <h3>1. Edit</h3>
-            <p>Make changes to any section — System Prompt, Exam Technique, Specification, Meet the Brain, Past Papers, Custom Sections, or Website Deployment settings. An <em>"unsaved changes"</em> banner will appear when your current form differs from the database.</p>
+            <p>Make changes to any section. An <em>"unsaved changes"</em> banner will appear when your form differs from the database.</p>
 
             <h3>2. Save</h3>
-            <p>Click <strong>Save Changes</strong> to persist all your edits to the database. This does <em>not</em> push changes live — students won't see anything different yet. Saving simply stores your work so you can return to it later.</p>
+            <p>Click <strong>Save Changes</strong> to persist your edits. This does <em>not</em> push changes live — students won't see anything different yet.</p>
 
             <h3>3. Deploy</h3>
-            <p>Click <strong>Deploy to Website</strong> (or <strong>Deploy Changes</strong> for existing subjects) to push your saved content live. Deployment:</p>
-            <ul>
-              <li>Creates/updates the product entry</li>
-              <li>Embeds your System Prompt, Exam Technique, and Specification into the knowledge base</li>
-              <li>Processes custom sections into searchable chunks</li>
-              <li>Associates past paper training data with the live product</li>
-            </ul>
+            <p>Click <strong>Deploy to Website</strong> to push your saved content live. Deployment embeds your system prompt, exam technique, specification, custom sections, and past paper data into the AI's knowledge base.</p>
+          </CardContent>
+        </Card>
 
-            <h3>File Uploads &amp; PDF Processing</h3>
-            <p>When you upload a PDF file (past paper or specification), it is automatically processed by AI:</p>
-            <ul>
-              <li><strong>Specifications:</strong> Extracted into structured JSON spec points. You can review, edit, and remove individual points before submitting.</li>
-              <li><strong>Past Papers:</strong> Classified as QP or MS with paper number detection. Matching QP+MS pairs for the same year/paper are automatically merged into combined chunks.</li>
-            </ul>
-            <p>Processing happens in the background — you'll see status indicators (pending → processing → done).</p>
-
-            <h3>Accepted Specification JSON Formats</h3>
+        <Card>
+          <CardHeader><CardTitle>Accepted Specification JSON Formats</CardTitle></CardHeader>
+          <CardContent className="prose prose-sm dark:prose-invert max-w-none space-y-4">
             <p>The JSON editor accepts multiple formats:</p>
             <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">{`// Simple array of strings (recommended)
 ["Point 1", "Point 2", "Point 3"]
@@ -101,8 +128,12 @@ export function BuildAboutPage() {
   { "topic": "Algebra", "subtopics": ["Quadratics", "Inequalities"] },
   { "topic": "Calculus", "children": [{ "content": "Differentiation" }] }
 ]`}</pre>
+          </CardContent>
+        </Card>
 
-            <h3>Troubleshooting</h3>
+        <Card>
+          <CardHeader><CardTitle>Troubleshooting</CardTitle></CardHeader>
+          <CardContent className="prose prose-sm dark:prose-invert max-w-none space-y-4">
             <table className="w-full text-sm">
               <thead>
                 <tr><th className="text-left p-2 border-b">Problem</th><th className="text-left p-2 border-b">Solution</th></tr>
