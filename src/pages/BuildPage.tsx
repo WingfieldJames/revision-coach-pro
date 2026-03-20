@@ -1196,6 +1196,10 @@ export function BuildPage() {
                   <Select
                     value={selectedSubject}
                     onValueChange={(val) => {
+                      if (val === '__add_new__') {
+                        setShowAddSubjectDialog(true);
+                        return;
+                      }
                       const match = filteredByQual.find(p => p.subject === val);
                       if (match) setSelectedProjectId(match.id);
                     }}
