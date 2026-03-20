@@ -1310,12 +1310,21 @@ export function BuildPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Subject Name</Label>
-              <Input
-                placeholder="e.g. Biology, Mathematics, History..."
-                value={newSubjectName}
-                onChange={e => setNewSubjectName(e.target.value)}
-              />
+              <Label>Subject</Label>
+              <Select value={newSubjectName} onValueChange={setNewSubjectName}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select subject..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {(() => {
+                    const existingSubjects = projects.map(p => p.subject);
+                    const allSubjects = Array.from(new Set([...AVAILABLE_SUBJECTS, ...existingSubjects])).sort();
+                    return allSubjects.map(s => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ));
+                  })()}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Exam Board</Label>
