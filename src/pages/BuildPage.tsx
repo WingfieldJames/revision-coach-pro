@@ -40,6 +40,11 @@ import {
 
 const EXAM_BOARDS = ["AQA", "OCR", "Edexcel", "CIE", "WJEC", "SQA"];
 const QUALIFICATION_TYPES = ["A Level", "GCSE"];
+const AVAILABLE_SUBJECTS = [
+  "Economics", "Computer Science", "Physics",
+  "Chemistry", "Psychology", "Mathematics",
+  "Biology"
+];
 
 interface TrainerProject {
   id: string;
