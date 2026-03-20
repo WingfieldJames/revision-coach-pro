@@ -2,45 +2,37 @@
 
 ## Problem
 
-When users ask for past paper questions on a topic, the retrieval spreads 30 priority slots across 7 individual content types (`paper_1`, `paper_2`, `paper_3`, `past_paper`, `past_paper_qp`, `past_paper_ms`, `combined`), giving each only ~4 chunks. This causes patchy coverage — some papers appear, others are missed entirely. There is also no recency bias, so older papers compete equally with recent ones.
+The database has many duplicate `trainer_projects` entries (e.g., 5 "AQA Physics", 7 "Edexcel Physics"). The deduplication logic added in the recent build changes keeps the **earliest created** project, but that's usually an empty draft with no `product_id`. The deployed project with actual data gets filtered out. This means:
 
-## Solution
+1. Users see a blank project instead of their real one
+2. Saves go to the wrong (empty) project
+3. Everything appears broken
 
-Refactor the chunk selection logic in `supabase/functions/rag-chat/index.ts` to:
+Additionally, the `TrainerProject` interface is missing `qualification_type`, forcing `(p as any)` casts everywhere.
 
-1. **Pool all past-paper types into one group** — instead of allocating slots per sub-type, merge them into a single "past papers" pool
-2. **Add year-based recency boost** — chunks from 2024 get a score bonus over 2023, which gets a bonus over 2022, etc.
-3. **Enforce equal paper distribution** — within the pool, distribute slots equally across paper numbers (paper 1, paper 2, paper 3, etc.) so no single paper dominates
+## Solution (single file: `src/pages/BuildPage.tsx`)
 
-## Changes (single file)
+### 1. Fix deduplication to keep the best project, not the first
 
-**`supabase/functions/rag-chat/index.ts`**
+Change the dedup logic (~lines 271-276) to prefer:
+- **Deployed** projects over drafts
+- Projects **with a product_id** over those without
+- If tied, keep the most recently updated one
 
-### 1. Define past paper type group constant (~line 30)
-```typescript
-const PAST_PAPER_TYPES = ['paper_1', 'paper_2', 'paper_3', 'past_paper', 'past_paper_qp', 'past_paper_ms', 'combined'];
+```
+For each group of duplicates (same qual+board+subject):
+  Pick the one that is deployed, or has a product_id, or was updated most recently
 ```
 
-### 2. Add recency scoring helper
-Extract year from chunk metadata (`metadata.year`) and add a bonus: 2024 = +20, 2023 = +15, 2022 = +10, 2021 = +5, older = 0. This is added on top of the existing keyword relevance score.
+### 2. Add `qualification_type` to the `TrainerProject` interface
 
-### 3. Refactor the allocation block (~lines 307-348)
+Add `qualification_type: string;` to the interface (line 48 area) so all the `(p as any).qualification_type` casts become proper typed access.
 
-When past paper types are detected in priorities:
+### 3. Clean up all `(p as any).qualification_type` references
 
-- Remove individual past paper types from the per-type allocation loop
-- Collect all chunks matching any `PAST_PAPER_TYPES` into one merged pool
-- Score each with keyword relevance + recency boost
-- Determine how many distinct paper numbers exist in the data (e.g., 2 for maths, 3 for economics)
-- Allocate ~75% of MAX_CHUNKS (≈37 slots) to this pool, split equally per paper number
-- Within each paper-number bucket, sort by score (relevance + recency) and take the top N
-- Give remaining ~25% (≈13 slots) to non-past-paper types (specification, exam technique, etc.)
+Replace every `(p as any).qualification_type || 'A Level'` with `p.qualification_type` since the DB column has a default of `'A Level'` and is non-nullable — the value will always be present.
 
-When no past paper search is detected, keep the existing balanced allocation logic unchanged.
+## Why this fixes the save issue
 
-### 4. Remove `'combined'` from `detectContentTypePriorities` (~line 206)
-This content type does not exist in the data and wastes a slot.
-
-## Deployment
-Edge function auto-deploys on save. No database or migration changes needed.
+Currently: dedup keeps project `80675002` (AQA Biology, no product_id, empty draft) and drops `5716aa05` (AQA Biology, has product_id, has data). User sees empty form, saves to wrong project. With the fix, the deployed/data-having project wins, so edits and saves target the correct record.
 
