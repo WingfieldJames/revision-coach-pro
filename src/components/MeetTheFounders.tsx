@@ -88,26 +88,18 @@ export function MeetTheFounders() {
   const isResetting = useRef(false);
 
   useEffect(() => {
-    const loadImages = async () => {
-      const entries = Object.entries(STORAGE_PATHS);
-      const results = await Promise.all(
-        entries.map(async ([key, path]) => {
-          const { data } = await supabase.storage
-            .from('trainer-uploads')
-            .createSignedUrl(path, 7200);
-          return [key, data?.signedUrl || null] as const;
-        })
-      );
-      const urlMap = Object.fromEntries(results.filter(([, url]) => url));
-      setTrainers((prev) =>
-        prev.map((t) =>
-          t.storageKey && urlMap[t.storageKey]
-            ? { ...t, image: urlMap[t.storageKey] }
-            : t
-        )
-      );
-    };
-    loadImages();
+    const SUPABASE_URL = 'https://xoipyycgycmpflfnrlty.supabase.co';
+    const urlMap: Record<string, string> = {};
+    for (const [key, path] of Object.entries(STORAGE_PATHS)) {
+      urlMap[key] = `${SUPABASE_URL}/storage/v1/object/public/trainer-uploads/${encodeURI(path)}`;
+    }
+    setTrainers((prev) =>
+      prev.map((t) =>
+        t.storageKey && urlMap[t.storageKey]
+          ? { ...t, image: urlMap[t.storageKey] }
+          : t
+      )
+    );
   }, []);
 
   const total = trainers.length;
