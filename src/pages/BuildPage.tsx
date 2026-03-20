@@ -275,9 +275,13 @@ export function BuildPage() {
       }
       const typed = Array.from(seen.values());
       setProjects(typed);
-      // Auto-select first project if none selected
-      if (!selectedProjectId && typed.length > 0) {
-        setSelectedProjectId(typed[0].id);
+      // Auto-select: use stored preference if valid, otherwise first project
+      if (typed.length > 0) {
+        const stored = localStorage.getItem('build_selected_project_id');
+        const storedExists = stored && typed.some(p => p.id === stored);
+        if (!selectedProjectId || !typed.some(p => p.id === selectedProjectId)) {
+          setSelectedProjectId(storedExists ? stored : typed[0].id);
+        }
       }
     };
     loadProjects();
