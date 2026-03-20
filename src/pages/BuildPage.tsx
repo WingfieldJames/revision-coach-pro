@@ -1135,7 +1135,7 @@ export function BuildPage() {
   }
 
   const currentProject = projects.find(p => p.id === selectedProjectId);
-  const currentLabel = currentProject ? `${(currentProject as any).qualification_type || 'A Level'} · ${currentProject.exam_board} ${currentProject.subject}` : "Select Subject";
+  const currentLabel = currentProject ? `${currentProject.qualification_type} · ${currentProject.exam_board} ${currentProject.subject}` : "Select Subject";
 
   return (
     <div className="min-h-screen bg-background">
