@@ -1147,15 +1147,15 @@ export function BuildPage() {
             {/* Cascading subject selector */}
             {(() => {
               // Derive unique qualification types from projects
-              const qualTypes = Array.from(new Set(projects.map(p => (p as any).qualification_type || 'A Level'))).sort();
-              const selectedQualType = currentProject ? ((currentProject as any).qualification_type || 'A Level') : (qualTypes[0] || 'A Level');
+              const qualTypes = Array.from(new Set(projects.map(p => p.qualification_type))).sort();
+              const selectedQualType = currentProject ? currentProject.qualification_type : (qualTypes[0] || 'A Level');
 
               // Filter projects by selected qualification type
-              const filteredByQual = projects.filter(p => ((p as any).qualification_type || 'A Level') === selectedQualType);
+              const filteredByQual = projects.filter(p => p.qualification_type === selectedQualType);
 
               // Derive unique subjects for the selected qualification type
               const subjects = Array.from(new Set(filteredByQual.map(p => p.subject))).sort();
-              const selectedSubject = currentProject && ((currentProject as any).qualification_type || 'A Level') === selectedQualType
+              const selectedSubject = currentProject && currentProject.qualification_type === selectedQualType
                 ? currentProject.subject
                 : (subjects[0] || '');
 
