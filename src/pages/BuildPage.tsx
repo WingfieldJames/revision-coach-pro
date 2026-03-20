@@ -148,6 +148,10 @@ export function BuildPage() {
   const [newQualificationType, setNewQualificationType] = useState("A Level");
   const [newSubjectName, setNewSubjectName] = useState("");
   const [newExamBoard, setNewExamBoard] = useState("");
+  
+  // Add New Subject (custom subject name flow)
+  const [showAddSubjectDialog, setShowAddSubjectDialog] = useState(false);
+  const [customSubjectName, setCustomSubjectName] = useState("");
 
   // Content fields
   const [systemPrompt, setSystemPrompt] = useState("");
