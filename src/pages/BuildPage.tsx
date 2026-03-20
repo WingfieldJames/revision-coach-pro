@@ -551,7 +551,8 @@ export function BuildPage() {
     // Prevent duplicates: check if board+subject already exists
     const duplicate = projects.find(
       p => p.exam_board.toLowerCase() === newExamBoard.trim().toLowerCase() &&
-           p.subject.toLowerCase() === newSubjectName.trim().toLowerCase()
+           p.subject.toLowerCase() === newSubjectName.trim().toLowerCase() &&
+           (p as any).qualification_type?.toLowerCase() === newQualificationType.toLowerCase()
     );
     if (duplicate) {
       toast({ title: "Subject already exists", description: `${duplicate.exam_board} ${duplicate.subject} is already in your list.`, variant: "destructive" });
