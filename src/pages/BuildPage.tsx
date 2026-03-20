@@ -45,6 +45,7 @@ interface TrainerProject {
   id: string;
   subject: string;
   exam_board: string;
+  qualification_type: string;
   status: string;
   created_at: string;
   created_by: string | null;
@@ -267,14 +268,24 @@ export function BuildPage() {
         .order("created_at", { ascending: true });
       if (error) { console.error("Failed to load projects:", error); return; }
       const all = (data || []) as unknown as TrainerProject[];
-      // Deduplicate by board+subject (keep earliest created)
-      const seen = new Map<string, TrainerProject>();
+      // Deduplicate by qual+board+subject — keep the BEST project (deployed > has product_id > most recently updated)
+      const grouped = new Map<string, TrainerProject[]>();
       for (const p of all) {
-        const qualType = (p as any).qualification_type?.toLowerCase() || 'a level';
-        const key = `${qualType}::${p.exam_board.toLowerCase()}::${p.subject.toLowerCase()}`;
-        if (!seen.has(key)) seen.set(key, p);
+        const key = `${p.qualification_type.toLowerCase()}::${p.exam_board.toLowerCase()}::${p.subject.toLowerCase()}`;
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key)!.push(p);
       }
-      const typed = Array.from(seen.values());
+      const typed: TrainerProject[] = [];
+      for (const group of grouped.values()) {
+        group.sort((a, b) => {
+          if (a.status === 'deployed' && b.status !== 'deployed') return -1;
+          if (b.status === 'deployed' && a.status !== 'deployed') return 1;
+          if (a.product_id && !b.product_id) return -1;
+          if (b.product_id && !a.product_id) return 1;
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        });
+        typed.push(group[0]);
+      }
       setProjects(typed);
       // Auto-select: use stored preference if valid, otherwise first project
       if (typed.length > 0) {
@@ -553,7 +564,7 @@ export function BuildPage() {
     const duplicate = projects.find(
       p => p.exam_board.toLowerCase() === newExamBoard.trim().toLowerCase() &&
            p.subject.toLowerCase() === newSubjectName.trim().toLowerCase() &&
-           (p as any).qualification_type?.toLowerCase() === newQualificationType.toLowerCase()
+           p.qualification_type.toLowerCase() === newQualificationType.toLowerCase()
     );
     if (duplicate) {
       toast({ title: "Subject already exists", description: `${duplicate.exam_board} ${duplicate.subject} is already in your list.`, variant: "destructive" });
@@ -1124,7 +1135,7 @@ export function BuildPage() {
   }
 
   const currentProject = projects.find(p => p.id === selectedProjectId);
-  const currentLabel = currentProject ? `${(currentProject as any).qualification_type || 'A Level'} · ${currentProject.exam_board} ${currentProject.subject}` : "Select Subject";
+  const currentLabel = currentProject ? `${currentProject.qualification_type} · ${currentProject.exam_board} ${currentProject.subject}` : "Select Subject";
 
   return (
     <div className="min-h-screen bg-background">
@@ -1136,15 +1147,15 @@ export function BuildPage() {
             {/* Cascading subject selector */}
             {(() => {
               // Derive unique qualification types from projects
-              const qualTypes = Array.from(new Set(projects.map(p => (p as any).qualification_type || 'A Level'))).sort();
-              const selectedQualType = currentProject ? ((currentProject as any).qualification_type || 'A Level') : (qualTypes[0] || 'A Level');
+              const qualTypes = Array.from(new Set(projects.map(p => p.qualification_type))).sort();
+              const selectedQualType = currentProject ? currentProject.qualification_type : (qualTypes[0] || 'A Level');
 
               // Filter projects by selected qualification type
-              const filteredByQual = projects.filter(p => ((p as any).qualification_type || 'A Level') === selectedQualType);
+              const filteredByQual = projects.filter(p => p.qualification_type === selectedQualType);
 
               // Derive unique subjects for the selected qualification type
               const subjects = Array.from(new Set(filteredByQual.map(p => p.subject))).sort();
-              const selectedSubject = currentProject && ((currentProject as any).qualification_type || 'A Level') === selectedQualType
+              const selectedSubject = currentProject && currentProject.qualification_type === selectedQualType
                 ? currentProject.subject
                 : (subjects[0] || '');
 
@@ -1158,7 +1169,7 @@ export function BuildPage() {
                   <Select
                     value={selectedQualType}
                     onValueChange={(val) => {
-                      const first = projects.find(p => ((p as any).qualification_type || 'A Level') === val);
+                      const first = projects.find(p => p.qualification_type === val);
                       if (first) setSelectedProjectId(first.id);
                     }}
                   >
