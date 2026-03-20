@@ -45,6 +45,7 @@ interface TrainerProject {
   id: string;
   subject: string;
   exam_board: string;
+  qualification_type: string;
   status: string;
   created_at: string;
   created_by: string | null;
