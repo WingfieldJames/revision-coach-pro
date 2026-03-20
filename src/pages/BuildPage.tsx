@@ -1356,7 +1356,41 @@ export function BuildPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Empty state — no projects yet */}
+      {/* Add New Subject (custom name) Dialog */}
+      <Dialog open={showAddSubjectDialog} onOpenChange={setShowAddSubjectDialog}>
+        <DialogContent className="sm:max-w-[360px]">
+          <DialogHeader>
+            <DialogTitle>Add New Subject</DialogTitle>
+            <DialogDescription>Enter a subject name not currently on the platform.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Subject Name</Label>
+              <Input
+                placeholder="e.g. Sociology, Art History..."
+                value={customSubjectName}
+                onChange={e => setCustomSubjectName(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowAddSubjectDialog(false); setCustomSubjectName(""); }}>Cancel</Button>
+            <Button
+              disabled={!customSubjectName.trim()}
+              onClick={() => {
+                const name = customSubjectName.trim();
+                setShowAddSubjectDialog(false);
+                setCustomSubjectName("");
+                setNewSubjectName(name);
+                setShowNewSubjectDialog(true);
+              }}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {projects.length === 0 && (
         <div className="max-w-md mx-auto mt-24 text-center space-y-4">
           <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
