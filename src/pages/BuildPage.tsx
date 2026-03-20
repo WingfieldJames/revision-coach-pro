@@ -270,7 +270,8 @@ export function BuildPage() {
       // Deduplicate by board+subject (keep earliest created)
       const seen = new Map<string, TrainerProject>();
       for (const p of all) {
-        const key = `${p.exam_board.toLowerCase()}::${p.subject.toLowerCase()}`;
+        const qualType = (p as any).qualification_type?.toLowerCase() || 'a level';
+        const key = `${qualType}::${p.exam_board.toLowerCase()}::${p.subject.toLowerCase()}`;
         if (!seen.has(key)) seen.set(key, p);
       }
       const typed = Array.from(seen.values());
