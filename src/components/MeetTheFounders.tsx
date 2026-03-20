@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { useTheme } from '@/contexts/ThemeContext';
-import { supabase } from '@/integrations/supabase/client';
+
 import henryLi from '@/assets/henry-li.jpg';
 import jamesFounder from '@/assets/james-founder.png';
 import tanujKakumani from '@/assets/tanuj-kakumani.jpg';
