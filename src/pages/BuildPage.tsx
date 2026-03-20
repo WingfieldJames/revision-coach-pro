@@ -40,6 +40,11 @@ import {
 
 const EXAM_BOARDS = ["AQA", "OCR", "Edexcel", "CIE", "WJEC", "SQA"];
 const QUALIFICATION_TYPES = ["A Level", "GCSE"];
+const AVAILABLE_SUBJECTS = [
+  "Economics", "Computer Science", "Physics",
+  "Chemistry", "Psychology", "Mathematics",
+  "Biology"
+];
 
 interface TrainerProject {
   id: string;
@@ -143,6 +148,10 @@ export function BuildPage() {
   const [newQualificationType, setNewQualificationType] = useState("A Level");
   const [newSubjectName, setNewSubjectName] = useState("");
   const [newExamBoard, setNewExamBoard] = useState("");
+  
+  // Add New Subject (custom subject name flow)
+  const [showAddSubjectDialog, setShowAddSubjectDialog] = useState(false);
+  const [customSubjectName, setCustomSubjectName] = useState("");
 
   // Content fields
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -1187,6 +1196,10 @@ export function BuildPage() {
                   <Select
                     value={selectedSubject}
                     onValueChange={(val) => {
+                      if (val === '__add_new__') {
+                        setShowAddSubjectDialog(true);
+                        return;
+                      }
                       const match = filteredByQual.find(p => p.subject === val);
                       if (match) setSelectedProjectId(match.id);
                     }}
@@ -1198,6 +1211,9 @@ export function BuildPage() {
                       {subjects.map(sub => (
                         <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                       ))}
+                      <SelectItem value="__add_new__" className="text-primary font-medium border-t mt-1 pt-1">
+                        + Add New Subject
+                      </SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -1301,12 +1317,21 @@ export function BuildPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Subject Name</Label>
-              <Input
-                placeholder="e.g. Biology, Mathematics, History..."
-                value={newSubjectName}
-                onChange={e => setNewSubjectName(e.target.value)}
-              />
+              <Label>Subject</Label>
+              <Select value={newSubjectName} onValueChange={setNewSubjectName}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select subject..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {(() => {
+                    const existingSubjects = projects.map(p => p.subject);
+                    const allSubjects = Array.from(new Set([...AVAILABLE_SUBJECTS, ...existingSubjects])).sort();
+                    return allSubjects.map(s => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ));
+                  })()}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Exam Board</Label>
@@ -1331,7 +1356,41 @@ export function BuildPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Empty state — no projects yet */}
+      {/* Add New Subject (custom name) Dialog */}
+      <Dialog open={showAddSubjectDialog} onOpenChange={setShowAddSubjectDialog}>
+        <DialogContent className="sm:max-w-[360px]">
+          <DialogHeader>
+            <DialogTitle>Add New Subject</DialogTitle>
+            <DialogDescription>Enter a subject name not currently on the platform.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Subject Name</Label>
+              <Input
+                placeholder="e.g. Sociology, Art History..."
+                value={customSubjectName}
+                onChange={e => setCustomSubjectName(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowAddSubjectDialog(false); setCustomSubjectName(""); }}>Cancel</Button>
+            <Button
+              disabled={!customSubjectName.trim()}
+              onClick={() => {
+                const name = customSubjectName.trim();
+                setShowAddSubjectDialog(false);
+                setCustomSubjectName("");
+                setNewSubjectName(name);
+                setShowNewSubjectDialog(true);
+              }}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {projects.length === 0 && (
         <div className="max-w-md mx-auto mt-24 text-center space-y-4">
           <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
