@@ -268,14 +268,24 @@ export function BuildPage() {
         .order("created_at", { ascending: true });
       if (error) { console.error("Failed to load projects:", error); return; }
       const all = (data || []) as unknown as TrainerProject[];
-      // Deduplicate by board+subject (keep earliest created)
-      const seen = new Map<string, TrainerProject>();
+      // Deduplicate by qual+board+subject — keep the BEST project (deployed > has product_id > most recently updated)
+      const grouped = new Map<string, TrainerProject[]>();
       for (const p of all) {
-        const qualType = (p as any).qualification_type?.toLowerCase() || 'a level';
-        const key = `${qualType}::${p.exam_board.toLowerCase()}::${p.subject.toLowerCase()}`;
-        if (!seen.has(key)) seen.set(key, p);
+        const key = `${p.qualification_type.toLowerCase()}::${p.exam_board.toLowerCase()}::${p.subject.toLowerCase()}`;
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key)!.push(p);
       }
-      const typed = Array.from(seen.values());
+      const typed: TrainerProject[] = [];
+      for (const group of grouped.values()) {
+        group.sort((a, b) => {
+          if (a.status === 'deployed' && b.status !== 'deployed') return -1;
+          if (b.status === 'deployed' && a.status !== 'deployed') return 1;
+          if (a.product_id && !b.product_id) return -1;
+          if (b.product_id && !a.product_id) return 1;
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        });
+        typed.push(group[0]);
+      }
       setProjects(typed);
       // Auto-select: use stored preference if valid, otherwise first project
       if (typed.length > 0) {
