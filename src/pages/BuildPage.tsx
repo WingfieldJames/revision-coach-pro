@@ -126,7 +126,14 @@ export function BuildPage() {
   const { user, loading: authLoading } = useAuth();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [projects, setProjects] = useState<TrainerProject[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectIdRaw] = useState<string | null>(() => {
+    return localStorage.getItem('build_selected_project_id') || null;
+  });
+  const setSelectedProjectId = (id: string | null) => {
+    setSelectedProjectIdRaw(id);
+    if (id) localStorage.setItem('build_selected_project_id', id);
+    else localStorage.removeItem('build_selected_project_id');
+  };
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectStatus, setProjectStatus] = useState("draft");
 
