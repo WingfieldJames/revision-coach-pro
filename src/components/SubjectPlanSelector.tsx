@@ -230,7 +230,10 @@ export function SubjectPlanSelector() {
               {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
                 <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                   setSubject(s);
-                  setExamBoard('');
+                  try {
+                    const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+                    setExamBoard((map[s] || '') as ExamBoard);
+                  } catch { setExamBoard(''); }
                 }}>
                   {subjectLabels[s]}
                 </DropdownMenuItem>
