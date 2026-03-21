@@ -170,8 +170,8 @@ export const ProgressPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[740px]">
           {complianceItems.map((c) => (
             <div key={c.title} className="flex items-start gap-3.5 bg-secondary rounded-xl p-5 border border-border">
-              <div className="w-[22px] h-[22px] rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+              <div className="w-[22px] h-[22px] rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <CheckCircle className="w-3 h-3 text-primary" />
               </div>
               <div>
                 <h4 className="text-sm font-bold mb-1">{c.title}</h4>
