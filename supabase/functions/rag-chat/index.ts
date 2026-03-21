@@ -3,8 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+// Maximum characters of training data context to include in the prompt
+const MAX_CONTEXT_CHARS = 40000;
 
 // User preferences interface
 interface UserPreferences {
@@ -240,14 +243,83 @@ function detectContentTypePriorities(userMessage: string): string[] {
   return priorities;
 }
 
+// Use AI to generate focused search queries for better retrieval
+async function generateSearchQueries(
+  lovableApiKey: string,
+  userMessage: string,
+  history: Array<{ role: string; content: string }>,
+): Promise<string[]> {
+  try {
+    const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+    const response = await fetch(aiUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${lovableApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `You generate search queries for an A-Level revision knowledge base. Given a student's question, output exactly 3 short keyword-based search queries (2-5 words each) that would find the most relevant training data chunks. Output as a JSON array of strings. Focus on subject-specific terminology, topic names, and exam concepts. Consider the conversation context when generating queries.`,
+          },
+          // Include last 2 messages of history for context
+          ...history.slice(-2),
+          { role: "user", content: userMessage },
+        ],
+        max_tokens: 150,
+        temperature: 0.3,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`Query planning failed (${response.status}), falling back to keyword search`);
+      return [];
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    
+    // Parse JSON array from response (handle markdown code blocks)
+    const jsonMatch = content.match(/\[[\s\S]*?\]/);
+    if (jsonMatch) {
+      const queries = JSON.parse(jsonMatch[0]) as string[];
+      console.log(`AI-generated search queries: ${JSON.stringify(queries)}`);
+      return queries.slice(0, 3);
+    }
+    
+    console.warn('Could not parse search queries from AI response, falling back');
+    return [];
+  } catch (err) {
+    console.error('Error generating search queries:', err);
+    return [];
+  }
+}
+
+// Score a chunk by keyword relevance
+function scoreChunkByKeywords(
+  chunk: { content: string; metadata: Record<string, unknown> },
+  keywords: string[]
+): number {
+  const text = (chunk.content + ' ' + JSON.stringify(chunk.metadata || {})).toLowerCase();
+  let score = 0;
+  for (const kw of keywords) {
+    const matches = text.split(kw).length - 1;
+    score += matches;
+  }
+  return score;
+}
+
 // Query relevant document chunks from the training data
-// Fetches a balanced mix across content types so no single type dominates
+// Uses AI-generated search queries for targeted retrieval with context cap
 async function fetchRelevantContext(
   supabase: ReturnType<typeof createClient>,
   productId: string,
   userMessage: string,
-  contentTypes?: string[],
-  userPreferences?: UserPreferences | null
+  contentTypes: string[] | undefined,
+  userPreferences: UserPreferences | null | undefined,
+  searchQueries: string[],
 ): Promise<FetchContextResult> {
   try {
     // Detect content type priorities based on user message
@@ -288,164 +360,223 @@ async function fetchRelevantContext(
       console.log(`Filtered from ${allChunks.length} to ${filteredChunks.length} chunks after spec_version filtering`);
     }
     
-    // Extract keywords from user message for relevance scoring
-    const messageKeywords = userMessage.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
-    
-    // Score a chunk by keyword relevance to the user's message
-    function scoreChunk(chunk: { content: string; metadata: Record<string, unknown> }): number {
-      const text = (chunk.content + ' ' + JSON.stringify(chunk.metadata || {})).toLowerCase();
-      let score = 0;
-      for (const kw of messageKeywords) {
-        const matches = text.split(kw).length - 1;
-        score += matches;
-      }
-      return score;
+    // === TWO-STEP RETRIEVAL: Use AI-generated queries if available ===
+    if (searchQueries.length > 0) {
+      return retrieveWithAIQueries(filteredChunks, searchQueries, userMessage, effectiveContentTypes);
     }
     
-    // Group chunks by content_type
-    const chunksByType = new Map<string, Array<{ content: string; metadata: Record<string, unknown>; _relevance: number }>>();
-    for (const chunk of filteredChunks) {
-      const ct = (chunk.metadata as Record<string, unknown>)?.content_type as string || 'general';
-      if (!chunksByType.has(ct)) chunksByType.set(ct, []);
-      chunksByType.get(ct)!.push({ ...chunk, _relevance: scoreChunk(chunk) });
-    }
-    
-    // Sort each type's chunks by relevance (highest first)
-    for (const [, chunks] of chunksByType) {
-      chunks.sort((a, b) => b._relevance - a._relevance);
-    }
-    
-    console.log(`Content types available: ${Array.from(chunksByType.entries()).map(([k, v]) => `${k}(${v.length})`).join(', ')}`);
-    
-    // Build balanced selection: prioritized types get more slots
-    const MAX_CHUNKS = 50;
-    const selectedChunks: Array<{ content: string; metadata: Record<string, unknown> }> = [];
-    
-    // Check if this is a past paper search (any past paper type in priorities)
-    const isPastPaperSearch = effectiveContentTypes.some(t => PAST_PAPER_TYPES.includes(t));
-    
-    if (isPastPaperSearch) {
-      // === PAST PAPER POOLING: merge all paper types into one pool ===
-      const PAPER_SLOTS = Math.floor(MAX_CHUNKS * 0.75); // ~37 slots for papers
-      const OTHER_SLOTS = MAX_CHUNKS - PAPER_SLOTS;       // ~13 slots for spec/other
-      
-      // Collect all past-paper chunks into one pool with recency boost
-      const paperPool: Array<{ content: string; metadata: Record<string, unknown>; _relevance: number; _paperNum: string }> = [];
-      for (const [ct, chunks] of chunksByType) {
-        if (PAST_PAPER_TYPES.includes(ct)) {
-          for (const chunk of chunks) {
-            const recencyBonus = getRecencyBonus(chunk.metadata);
-            // Determine paper number from metadata or content_type
-            const paperNum = String(chunk.metadata?.paper_number || ct.replace('paper_', '').replace('past_paper_qp', 'qp').replace('past_paper_ms', 'ms').replace('past_paper', 'general'));
-            paperPool.push({ ...chunk, _relevance: chunk._relevance + recencyBonus, _paperNum: paperNum });
-          }
-        }
-      }
-      
-      // Group by paper number for equal distribution
-      const paperGroups = new Map<string, typeof paperPool>();
-      for (const chunk of paperPool) {
-        const key = chunk._paperNum;
-        if (!paperGroups.has(key)) paperGroups.set(key, []);
-        paperGroups.get(key)!.push(chunk);
-      }
-      
-      // Sort each group by relevance + recency (highest first)
-      for (const [, group] of paperGroups) {
-        group.sort((a, b) => b._relevance - a._relevance);
-      }
-      
-      const numPaperGroups = paperGroups.size || 1;
-      const slotsPerPaper = Math.floor(PAPER_SLOTS / numPaperGroups);
-      const extraSlots = PAPER_SLOTS - (slotsPerPaper * numPaperGroups);
-      
-      console.log(`Past paper pooling: ${paperPool.length} chunks across ${numPaperGroups} paper groups, ${slotsPerPaper} slots each`);
-      
-      // Take top N from each paper group (equal distribution)
-      let groupIndex = 0;
-      for (const [paperNum, group] of paperGroups) {
-        const bonus = groupIndex < extraSlots ? 1 : 0; // distribute remainder
-        const limit = Math.min(group.length, slotsPerPaper + bonus);
-        selectedChunks.push(...group.slice(0, limit));
-        console.log(`  Paper ${paperNum}: selected ${limit} of ${group.length}`);
-        groupIndex++;
-      }
-      
-      // Fill remaining slots with non-past-paper types (spec, exam technique, etc.)
-      const nonPaperTypes = Array.from(chunksByType.keys()).filter(t => !PAST_PAPER_TYPES.includes(t));
-      const slotsPerOther = nonPaperTypes.length > 0 ? Math.floor(OTHER_SLOTS / nonPaperTypes.length) : 0;
-      for (const ct of nonPaperTypes) {
-        const chunks = chunksByType.get(ct)!;
-        const limit = Math.min(chunks.length, slotsPerOther || OTHER_SLOTS);
-        selectedChunks.push(...chunks.slice(0, limit));
-      }
-    } else {
-      // === STANDARD BALANCED ALLOCATION (non-past-paper searches) ===
-      const prioritizedTypes = effectiveContentTypes.filter(t => chunksByType.has(t));
-      const remainingTypes = Array.from(chunksByType.keys()).filter(t => !prioritizedTypes.includes(t));
-      
-      const prioritySlots = prioritizedTypes.length > 0 
-        ? Math.floor(MAX_CHUNKS * 0.6 / prioritizedTypes.length) 
-        : 0;
-      const remainingSlots = remainingTypes.length > 0 
-        ? Math.floor(MAX_CHUNKS * 0.4 / remainingTypes.length) 
-        : Math.floor(MAX_CHUNKS / Math.max(prioritizedTypes.length, 1));
-      
-      for (const ct of prioritizedTypes) {
-        const chunks = chunksByType.get(ct)!;
-        const limit = Math.min(chunks.length, prioritySlots || Math.floor(MAX_CHUNKS / chunksByType.size));
-        selectedChunks.push(...chunks.slice(0, limit));
-      }
-      
-      for (const ct of remainingTypes) {
-        const chunks = chunksByType.get(ct)!;
-        const limit = Math.min(chunks.length, remainingSlots);
-        selectedChunks.push(...chunks.slice(0, limit));
-      }
-    }
-    
-    // If still under MAX_CHUNKS, fill with highest-relevance remaining chunks
-    if (selectedChunks.length < MAX_CHUNKS) {
-      const selectedSet = new Set(selectedChunks);
-      const remaining = filteredChunks
-        .map(c => ({ ...c, _relevance: scoreChunk(c) + getRecencyBonus(c.metadata as Record<string, unknown>) }))
-        .filter(c => !selectedSet.has(c))
-        .sort((a, b) => b._relevance - a._relevance);
-      for (const chunk of remaining) {
-        if (selectedChunks.length >= MAX_CHUNKS) break;
-        selectedChunks.push(chunk);
-      }
-    }
-    
-    console.log(`Selected ${selectedChunks.length} balanced chunks from ${filteredChunks.length} total`);
-    
-    // Track unique sources searched
-    const sourcesMap = new Map<string, { type: string; topic: string }>();
-    
-    // Format chunks as context
-    const contextParts = selectedChunks.map((chunk) => {
-      const contentType = chunk.metadata?.content_type || 'general';
-      const topic = chunk.metadata?.topic || '';
-      const header = topic 
-        ? `[${String(contentType).toUpperCase()} - ${topic}]` 
-        : `[${String(contentType).toUpperCase()}]`;
-      
-      const sourceKey = `${contentType}-${topic}`;
-      if (!sourcesMap.has(sourceKey)) {
-        sourcesMap.set(sourceKey, { type: String(contentType), topic: String(topic) });
-      }
-      
-      return `${header}\n${chunk.content}`;
-    });
-    
-    return {
-      context: contextParts.join('\n\n---\n\n'),
-      sourcesSearched: Array.from(sourcesMap.values()),
-    };
+    // === FALLBACK: Original keyword-based retrieval (capped) ===
+    return retrieveWithKeywords(filteredChunks, userMessage, effectiveContentTypes);
   } catch (err) {
     console.error('Error in fetchRelevantContext:', err);
     return { context: '', sourcesSearched: [] };
   }
+}
+
+// Targeted retrieval using AI-generated search queries
+function retrieveWithAIQueries(
+  chunks: Array<{ content: string; metadata: Record<string, unknown> }>,
+  searchQueries: string[],
+  userMessage: string,
+  effectiveContentTypes: string[],
+): FetchContextResult {
+  const CHUNKS_PER_QUERY = 5;
+  const selectedSet = new Set<number>(); // track by index to deduplicate
+  const selectedChunks: Array<{ content: string; metadata: Record<string, unknown>; _relevance: number }> = [];
+  
+  // For each AI-generated query, find top chunks
+  for (const query of searchQueries) {
+    const queryKeywords = query.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+    
+    const scored = chunks.map((chunk, idx) => ({
+      chunk,
+      idx,
+      score: scoreChunkByKeywords(chunk, queryKeywords) + getRecencyBonus(chunk.metadata as Record<string, unknown>),
+    }))
+    .filter(c => c.score > 0 && !selectedSet.has(c.idx))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, CHUNKS_PER_QUERY);
+    
+    for (const item of scored) {
+      selectedSet.add(item.idx);
+      selectedChunks.push({ ...item.chunk, _relevance: item.score });
+    }
+  }
+  
+  // Also add a few from the original user message keywords to cover edge cases
+  const userKeywords = userMessage.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+  const userScored = chunks.map((chunk, idx) => ({
+    chunk,
+    idx,
+    score: scoreChunkByKeywords(chunk, userKeywords) + getRecencyBonus(chunk.metadata as Record<string, unknown>),
+  }))
+  .filter(c => c.score > 0 && !selectedSet.has(c.idx))
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 5);
+  
+  for (const item of userScored) {
+    selectedSet.add(item.idx);
+    selectedChunks.push({ ...item.chunk, _relevance: item.score });
+  }
+  
+  // Sort all selected by relevance (highest first)
+  selectedChunks.sort((a, b) => b._relevance - a._relevance);
+  
+  console.log(`AI-query retrieval: ${selectedChunks.length} chunks selected (${searchQueries.length} queries)`);
+  
+  // Build context with character cap
+  return buildCappedContext(selectedChunks);
+}
+
+// Original keyword-based retrieval with character cap
+function retrieveWithKeywords(
+  filteredChunks: Array<{ content: string; metadata: Record<string, unknown> }>,
+  userMessage: string,
+  effectiveContentTypes: string[],
+): FetchContextResult {
+  const messageKeywords = userMessage.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+  
+  // Score all chunks
+  const scoredChunks = filteredChunks.map(chunk => ({
+    ...chunk,
+    _relevance: scoreChunkByKeywords(chunk, messageKeywords) + getRecencyBonus(chunk.metadata as Record<string, unknown>),
+  }));
+  
+  // Group by content_type
+  const chunksByType = new Map<string, typeof scoredChunks>();
+  for (const chunk of scoredChunks) {
+    const ct = (chunk.metadata as Record<string, unknown>)?.content_type as string || 'general';
+    if (!chunksByType.has(ct)) chunksByType.set(ct, []);
+    chunksByType.get(ct)!.push(chunk);
+  }
+  
+  // Sort each type's chunks by relevance
+  for (const [, chunks] of chunksByType) {
+    chunks.sort((a, b) => b._relevance - a._relevance);
+  }
+  
+  console.log(`Content types available: ${Array.from(chunksByType.entries()).map(([k, v]) => `${k}(${v.length})`).join(', ')}`);
+  
+  // Build balanced selection (max 50, but will be capped by chars later)
+  const MAX_CHUNKS = 50;
+  const selectedChunks: Array<{ content: string; metadata: Record<string, unknown>; _relevance: number }> = [];
+  
+  const isPastPaperSearch = effectiveContentTypes.some(t => PAST_PAPER_TYPES.includes(t));
+  
+  if (isPastPaperSearch) {
+    const PAPER_SLOTS = Math.floor(MAX_CHUNKS * 0.75);
+    const OTHER_SLOTS = MAX_CHUNKS - PAPER_SLOTS;
+    
+    const paperPool: Array<{ content: string; metadata: Record<string, unknown>; _relevance: number; _paperNum: string }> = [];
+    for (const [ct, chunks] of chunksByType) {
+      if (PAST_PAPER_TYPES.includes(ct)) {
+        for (const chunk of chunks) {
+          const paperNum = String(chunk.metadata?.paper_number || ct.replace('paper_', '').replace('past_paper_qp', 'qp').replace('past_paper_ms', 'ms').replace('past_paper', 'general'));
+          paperPool.push({ ...chunk, _paperNum: paperNum });
+        }
+      }
+    }
+    
+    const paperGroups = new Map<string, typeof paperPool>();
+    for (const chunk of paperPool) {
+      if (!paperGroups.has(chunk._paperNum)) paperGroups.set(chunk._paperNum, []);
+      paperGroups.get(chunk._paperNum)!.push(chunk);
+    }
+    
+    for (const [, group] of paperGroups) {
+      group.sort((a, b) => b._relevance - a._relevance);
+    }
+    
+    const numPaperGroups = paperGroups.size || 1;
+    const slotsPerPaper = Math.floor(PAPER_SLOTS / numPaperGroups);
+    const extraSlots = PAPER_SLOTS - (slotsPerPaper * numPaperGroups);
+    
+    let groupIndex = 0;
+    for (const [, group] of paperGroups) {
+      const bonus = groupIndex < extraSlots ? 1 : 0;
+      const limit = Math.min(group.length, slotsPerPaper + bonus);
+      selectedChunks.push(...group.slice(0, limit));
+      groupIndex++;
+    }
+    
+    const nonPaperTypes = Array.from(chunksByType.keys()).filter(t => !PAST_PAPER_TYPES.includes(t));
+    const slotsPerOther = nonPaperTypes.length > 0 ? Math.floor(OTHER_SLOTS / nonPaperTypes.length) : 0;
+    for (const ct of nonPaperTypes) {
+      const chunks = chunksByType.get(ct)!;
+      const limit = Math.min(chunks.length, slotsPerOther || OTHER_SLOTS);
+      selectedChunks.push(...chunks.slice(0, limit));
+    }
+  } else {
+    const prioritizedTypes = effectiveContentTypes.filter(t => chunksByType.has(t));
+    const remainingTypes = Array.from(chunksByType.keys()).filter(t => !prioritizedTypes.includes(t));
+    
+    const prioritySlots = prioritizedTypes.length > 0 
+      ? Math.floor(MAX_CHUNKS * 0.6 / prioritizedTypes.length) 
+      : 0;
+    const remainingSlots = remainingTypes.length > 0 
+      ? Math.floor(MAX_CHUNKS * 0.4 / remainingTypes.length) 
+      : Math.floor(MAX_CHUNKS / Math.max(prioritizedTypes.length, 1));
+    
+    for (const ct of prioritizedTypes) {
+      const chunks = chunksByType.get(ct)!;
+      const limit = Math.min(chunks.length, prioritySlots || Math.floor(MAX_CHUNKS / chunksByType.size));
+      selectedChunks.push(...chunks.slice(0, limit));
+    }
+    
+    for (const ct of remainingTypes) {
+      const chunks = chunksByType.get(ct)!;
+      const limit = Math.min(chunks.length, remainingSlots);
+      selectedChunks.push(...chunks.slice(0, limit));
+    }
+  }
+  
+  // Sort by relevance for capping (highest relevance first)
+  selectedChunks.sort((a, b) => b._relevance - a._relevance);
+  
+  console.log(`Selected ${selectedChunks.length} balanced chunks from ${filteredChunks.length} total`);
+  
+  return buildCappedContext(selectedChunks);
+}
+
+// Build context string with MAX_CONTEXT_CHARS cap
+function buildCappedContext(
+  selectedChunks: Array<{ content: string; metadata: Record<string, unknown> }>,
+): FetchContextResult {
+  const sourcesMap = new Map<string, { type: string; topic: string }>();
+  const contextParts: string[] = [];
+  let totalChars = 0;
+  let includedCount = 0;
+  
+  for (const chunk of selectedChunks) {
+    const contentType = chunk.metadata?.content_type || 'general';
+    const topic = chunk.metadata?.topic || '';
+    const header = topic 
+      ? `[${String(contentType).toUpperCase()} - ${topic}]` 
+      : `[${String(contentType).toUpperCase()}]`;
+    
+    const part = `${header}\n${chunk.content}`;
+    
+    // Check if adding this chunk would exceed the cap
+    if (totalChars + part.length > MAX_CONTEXT_CHARS && contextParts.length > 0) {
+      break; // Stop adding chunks
+    }
+    
+    contextParts.push(part);
+    totalChars += part.length;
+    includedCount++;
+    
+    const sourceKey = `${contentType}-${topic}`;
+    if (!sourcesMap.has(sourceKey)) {
+      sourcesMap.set(sourceKey, { type: String(contentType), topic: String(topic) });
+    }
+  }
+  
+  console.log(`Context capped: ${includedCount} chunks, ${totalChars} chars (max ${MAX_CONTEXT_CHARS})`);
+  
+  return {
+    context: contextParts.join('\n\n---\n\n'),
+    sourcesSearched: Array.from(sourcesMap.values()),
+  };
 }
 
 // Check and increment daily usage for free tier users
@@ -463,7 +594,6 @@ async function checkAndIncrementUsage(
 
     if (error) {
       console.error('Error checking usage:', error);
-      // Allow on error to prevent blocking legitimate users
       return { allowed: true, count: 0, limit: FREE_TIER_DAILY_LIMIT };
     }
 
@@ -518,18 +648,13 @@ serve(async (req) => {
         });
       }
 
-      // Filter to paper-type chunks only
       const paperChunks = allChunks.filter((c: any) => {
         const ct = String(c.metadata?.content_type || '');
-        // Exclude mark schemes and non-paper content
         if (EXCLUDED_CONTENT_TYPES.includes(ct)) return false;
-        // Exclude chunks that start with "Mark Scheme"
         if ((c.content || '').trim().startsWith('Mark Scheme')) return false;
-        // Include known paper types, or anything not explicitly excluded
         return PAPER_CONTENT_TYPES.includes(ct) || (!EXCLUDED_CONTENT_TYPES.includes(ct) && ct.includes('paper'));
       });
 
-      // Score by keyword relevance
       const keywords = searchQuery.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
       const scored = paperChunks.map((c: any) => {
         const text = (c.content + ' ' + JSON.stringify(c.metadata || {})).toLowerCase();
@@ -578,21 +703,16 @@ serve(async (req) => {
       }
     }
 
-    // Server-side subscription verification - never trust client tier
-    // Trainers testing their own product bypass subscription check
-    
-    // Bundled product mapping: child slug -> parent slugs that also grant access
+    // Server-side subscription verification
     const BUNDLED_CHILD_TO_PARENT: Record<string, string[]> = {
       'edexcel-mathematics-applied': ['edexcel-mathematics'],
     };
 
-    // Helper: check if a subscription row is valid (active + not expired, with grace period)
     function isSubValid(sub: { tier: string; subscription_end: string | null }): boolean {
       if (sub.tier !== 'deluxe') return false;
       const now = new Date();
       const endDate = sub.subscription_end ? new Date(sub.subscription_end) : null;
       if (!endDate || endDate > now) return true;
-      // 7-day grace period for monthly webhook delays
       const graceMs = 7 * 24 * 60 * 60 * 1000;
       return now.getTime() - endDate.getTime() <= graceMs;
     }
@@ -600,7 +720,6 @@ serve(async (req) => {
     let tier: string = isTrainerTest ? 'deluxe' : 'free';
     if (!isTrainerTest && user_id && product_id) {
       try {
-        // 1) Check exact product_id match first
         const { data: sub } = await supabaseAdmin
           .from('user_subscriptions')
           .select('tier, subscription_end')
@@ -616,9 +735,7 @@ serve(async (req) => {
           }
         }
 
-        // 2) If not deluxe yet, check bundled parent products
         if (tier === 'free') {
-          // Look up the current product's slug to find parent bundles
           const { data: currentProduct } = await supabaseAdmin
             .from('products')
             .select('slug')
@@ -628,7 +745,6 @@ serve(async (req) => {
           if (currentProduct?.slug) {
             const parentSlugs = BUNDLED_CHILD_TO_PARENT[currentProduct.slug];
             if (parentSlugs && parentSlugs.length > 0) {
-              // Find parent product IDs
               const { data: parentProducts } = await supabaseAdmin
                 .from('products')
                 .select('id')
@@ -658,7 +774,6 @@ serve(async (req) => {
           }
         }
 
-        // 3) Legacy fallback: check users table for edexcel-economics backward compatibility
         if (tier === 'free') {
           const { data: currentProduct } = await supabaseAdmin
             .from('products')
@@ -689,8 +804,7 @@ serve(async (req) => {
     
     console.log(`Verified tier for user ${user_id}: ${tier}`);
 
-    // Check daily usage limit for FREE tier only (skip for trainer tests)
-    // Use prompt_product_id if provided (shares quota across related products like Pure/Applied maths)
+    // Check daily usage limit for FREE tier only
     const usageProductId = prompt_product_id || product_id;
     if (tier === 'free' && !isTrainerTest && user_id && usageProductId) {
       const usageResult = await checkAndIncrementUsage(supabaseAdmin, user_id, usageProductId);
@@ -698,7 +812,6 @@ serve(async (req) => {
       console.log(`Usage check for ${user_id}: ${usageResult.count}/${usageResult.limit} (allowed: ${usageResult.allowed})`);
       
       if (!usageResult.allowed) {
-        // Return a special response for limit exceeded
         const limitMessage = `🔒 **You've used all ${usageResult.limit} free prompts for today!**
 
 To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
@@ -729,6 +842,9 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       }
     }
 
+    // Step 1: Generate AI search queries (fast, ~0.5s)
+    const searchQueries = await generateSearchQueries(lovableApiKey, message, history);
+
     // Fetch the deluxe system prompt from database (unified for all users)
     const basePrompt = await fetchSystemPrompt(supabaseAdmin, product_id);
     
@@ -755,19 +871,20 @@ Use this to personalise your responses — reference their weak areas, their exa
       }
     }
     
-    // Add user personalization context (pass message for technique detection)
+    // Add user personalization context
     const personalizedPrompt = buildPersonalizedPrompt(brainContext + basePrompt, user_preferences, message, product_id);
     
-    // Fetch relevant training data from document_chunks (with spec_version filtering for Psychology)
+    // Step 2: Fetch relevant training data using AI queries
     const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(
       supabaseAdmin, 
       product_id, 
       message,
       undefined,
-      user_preferences
+      user_preferences,
+      searchQueries,
     );
     
-    // Always try to find a relevant diagram based on message content
+    // Always try to find a relevant diagram
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
     const diagramSubject = enable_diagrams ? diagram_subject : 'economics';
     relevantDiagram = findRelevantDiagram(message, diagramSubject);
@@ -801,8 +918,8 @@ When a student asks you to mark their essay, answer, or response:
     if (relevantDiagram) {
       console.log(`Diagram included: ${relevantDiagram.id}`);
     }
+    
     // Build the user message content — support vision (image) when image_data provided
-    // image_data can be a single string or an array of strings for multiple images
     let userMessageContent: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
     if (image_data) {
       const images = Array.isArray(image_data) ? image_data : [image_data];
@@ -814,7 +931,7 @@ When a student asks you to mark their essay, answer, or response:
       userMessageContent = message;
     }
 
-    // Call AI gateway for response (streaming)
+    // Step 3: Call AI gateway for response (streaming)
     const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
     const aiModel = "google/gemini-2.5-flash";
 
@@ -838,7 +955,7 @@ When a student asks you to mark their essay, answer, or response:
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+          JSON.stringify({ error: "I'm a bit busy right now — please try again in a moment!" }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -848,8 +965,13 @@ When a student asks you to mark their essay, answer, or response:
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const error = await response.text();
-      throw new Error(`AI API error: ${error}`);
+      const errorText = await response.text();
+      console.error(`AI API error (${response.status}): ${errorText}`);
+      // Return user-friendly error instead of raw gateway error
+      return new Response(
+        JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Create a custom stream that prepends sources metadata and diagram info
@@ -885,7 +1007,7 @@ When a student asks you to mark their essay, answer, or response:
   } catch (error) {
     console.error("RAG chat error:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Something went wrong. Please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
