@@ -281,11 +281,11 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
               <Brain className="h-4 w-4 text-muted-foreground" />
             </button>
             <Separator className="w-6" />
-            <button onClick={() => { navigate('/'); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Home">
-              <Home className="h-4 w-4 text-muted-foreground" />
-            </button>
-            <button onClick={() => { navigate('/compare'); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="All Subjects">
+            <button onClick={() => setOpen(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title={subjectName}>
               <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button onClick={() => setShowTrainerInfo(true)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors" title="Meet Your Trainer">
+              <User className="h-4 w-4 text-muted-foreground" />
             </button>
             {daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
               <>
