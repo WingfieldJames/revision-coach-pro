@@ -84,7 +84,7 @@ export const ProgressPage = () => {
           </div>
 
           {/* Right mockup */}
-          <div className="md:w-1/2 flex items-end justify-end self-end mb-[-80px] z-10">
+          <div className="md:w-1/2 flex items-end justify-end self-end z-0">
             <img
               src={schoolsMockup}
               alt="A*AI Schools dashboard showing student activity, feature usage and licence overview"
