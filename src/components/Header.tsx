@@ -445,7 +445,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right side: Upgrade Now / Deluxe badge on chatbot pages OR Start Studying on home */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {showStartStudyingButton ? (
+        {customRightContent ? customRightContent : showStartStudyingButton ? (
           <div className="hidden sm:flex items-center">
             <Button 
               onClick={() => navigate('/select')} 
