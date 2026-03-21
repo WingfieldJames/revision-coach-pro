@@ -53,10 +53,13 @@ export function SubjectPlanSelector() {
     return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' || saved === 'psychology' || saved === 'mathematics' ? saved as Subject : 'economics';
   });
   const [examBoard, setExamBoard] = useState<ExamBoard | ''>(() => {
-    const saved = localStorage.getItem('preferred-exam-board');
-    const savedSubject = localStorage.getItem('preferred-subject') as Subject | null;
-    const validSubject = savedSubject && BOARDS_MAP[savedSubject] ? savedSubject : 'economics';
-    if (saved && BOARDS_MAP[validSubject]?.includes(saved as ExamBoard)) return saved as ExamBoard;
+    try {
+      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+      const savedSubject = localStorage.getItem('preferred-subject') as Subject | null;
+      const validSubject = savedSubject && BOARDS_MAP[savedSubject] ? savedSubject : 'economics';
+      const saved = map[validSubject];
+      if (saved && BOARDS_MAP[validSubject]?.includes(saved as ExamBoard)) return saved as ExamBoard;
+    } catch {}
     return '';
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
