@@ -124,30 +124,32 @@ export const ProgressPage = () => {
 
       {/* THE PROBLEM */}
       <section className="py-16 sm:py-[72px] px-6 sm:px-16">
-        <div className="mb-12">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 leading-tight">
-            Your students are already using AI.<br />
-            <span className="text-primary">Just not the right one.</span>
-          </h2>
-          <p className="text-[17px] text-muted-foreground max-w-[540px] leading-relaxed">
-            ChatGPT doesn't know your mark scheme. It can't tell a student why their 25-marker would drop a level band, or what an Edexcel examiner actually wants to see. It gives answers — not the thinking behind them.
-          </p>
-          <p className="text-[17px] text-muted-foreground max-w-[540px] leading-relaxed mt-4">
-            A*AI is built differently. Every response is grounded in past papers, mark schemes, and examiner reports — so students learn to think like examiners, not just get answers from one.
-          </p>
-        </div>
+        <div className="flex flex-col md:flex-row gap-12 md:gap-16 items-start">
+          <div className="md:w-1/2 flex-shrink-0">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 leading-tight">
+              Your students are already using AI.<br />
+              <span className="text-primary">Just not the right one.</span>
+            </h2>
+            <p className="text-[17px] text-muted-foreground max-w-[540px] leading-relaxed">
+              ChatGPT doesn't know your mark scheme. It can't tell a student why their 25-marker would drop a level band, or what an Edexcel examiner actually wants to see. It gives answers — not the thinking behind them.
+            </p>
+            <p className="text-[17px] text-muted-foreground max-w-[540px] leading-relaxed mt-4">
+              A*AI is built differently. Every response is grounded in past papers, mark schemes, and examiner reports — so students learn to think like examiners, not just get answers from one.
+            </p>
+          </div>
 
-        <div className="flex flex-col gap-4 max-w-2xl">
-          {comparisonItems.map((item) => (
-            <Card key={item.name} className={`${item.highlight ? "border-primary border-2 shadow-elevated" : ""}`}>
-              <CardContent className="p-5 flex gap-4 items-start">
-                <span className={`text-sm font-bold whitespace-nowrap ${item.highlight ? "text-primary" : "text-muted-foreground"}`}>
-                  {item.name}
-                </span>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-              </CardContent>
-            </Card>
-          ))}
+          <div className="md:w-1/2 flex flex-col gap-4">
+            {comparisonItems.map((item) => (
+              <Card key={item.name} className={`${item.highlight ? "border-primary border-2 shadow-elevated" : ""}`}>
+                <CardContent className="p-5 flex gap-4 items-start">
+                  <span className={`text-sm font-bold whitespace-nowrap ${item.highlight ? "text-primary" : "text-muted-foreground"}`}>
+                    {item.name}
+                  </span>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
