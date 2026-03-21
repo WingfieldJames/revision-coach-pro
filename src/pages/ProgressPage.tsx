@@ -1,4 +1,5 @@
 import React from "react";
+import schoolsMockup from "@/assets/schools-dashboard-mockup.png";
 import { Header } from "@/components/Header";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
@@ -54,29 +55,43 @@ export const ProgressPage = () => {
       <Header showNavLinks />
 
       {/* HERO */}
-      <section className="pt-28 pb-16 px-6 sm:px-16 max-w-[800px]">
-        <Badge variant="secondary" className="mb-7 text-primary font-semibold bg-primary/10 border-0 rounded-full px-4 py-1.5 text-[13px]">
-          <School className="w-3.5 h-3.5 mr-1.5" />
-          For schools &amp; sixth forms
-        </Badge>
-        <h1 className="text-4xl sm:text-[50px] font-extrabold leading-[1.1] tracking-tight mb-5">
-          The A-Level AI tutor{" "}
-          <span className="text-gradient-brand">built for your school.</span>
-        </h1>
-        <p className="text-lg text-muted-foreground leading-relaxed mb-9 max-w-[560px]">
-          Give every sixth form student a tutor that knows their exam board, their mark scheme, and exactly what examiners want to see.
-        </p>
-        <div className="flex flex-wrap gap-3.5 items-center">
-          <Button variant="brand" size="xl" className="rounded-full">
-            Book a demo →
-          </Button>
-          <Button variant="outline" size="xl" className="rounded-full">
-            Download info pack
-          </Button>
+      <section className="relative pt-28 pb-32 sm:pb-40 px-6 sm:px-16">
+        <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-16">
+          {/* Left text */}
+          <div className="max-w-[520px] flex-shrink-0">
+            <Badge variant="secondary" className="mb-7 text-primary font-semibold bg-primary/10 border-0 rounded-full px-4 py-1.5 text-[13px]">
+              <School className="w-3.5 h-3.5 mr-1.5" />
+              For schools &amp; sixth forms
+            </Badge>
+            <h1 className="text-4xl sm:text-[50px] font-extrabold leading-[1.1] tracking-tight mb-5">
+              The A-Level AI tutor{" "}
+              <span className="text-gradient-brand">built for your school.</span>
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed mb-9 max-w-[560px]">
+              Give every sixth form student a tutor that knows their exam board, their mark scheme, and exactly what examiners want to see.
+            </p>
+            <div className="flex flex-wrap gap-3.5 items-center">
+              <Button variant="brand" size="xl" className="rounded-full">
+                Book a demo →
+              </Button>
+              <Button variant="outline" size="xl" className="rounded-full">
+                Download info pack
+              </Button>
+            </div>
+            <p className="mt-4 text-[13px] text-muted-foreground/60">
+              No commitment required · GDPR compliant · UK data hosting
+            </p>
+          </div>
+
+          {/* Right mockup – overlaps into trust bar */}
+          <div className="relative lg:absolute lg:right-8 xl:right-16 lg:top-20 w-full max-w-[380px] lg:max-w-[420px] xl:max-w-[460px] z-10">
+            <img
+              src={schoolsMockup}
+              alt="A*AI Schools dashboard showing student activity, feature usage and licence overview"
+              className="w-full h-auto drop-shadow-2xl rounded-2xl"
+            />
+          </div>
         </div>
-        <p className="mt-4 text-[13px] text-muted-foreground/60">
-          No commitment required · GDPR compliant · UK data hosting
-        </p>
       </section>
 
       {/* TRUST BAR */}
