@@ -227,7 +227,7 @@ export const ComparePage = () => {
 
   useEffect(() => {
     localStorage.setItem('preferred-subject', subject);
-    localStorage.setItem('preferred-exam-board', examBoard);
+    if (examBoard) localStorage.setItem('preferred-exam-board', examBoard);
   }, [subject, examBoard]);
 
   useEffect(() => {
