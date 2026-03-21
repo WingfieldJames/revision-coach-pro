@@ -83,9 +83,11 @@ export const ProgressPage = () => {
               Give every sixth form student a tutor that knows their exam board, their mark scheme, and exactly what examiners want to see.
             </p>
             <div className="flex flex-wrap gap-3.5 items-center">
-              <a href="https://calendly.com/jrrwingfield0/30min" target="_blank" rel="noopener noreferrer"><Button variant="brand" size="xl" className="rounded-full">
-                Book a demo →
-              </Button>
+              <a href="https://calendly.com/jrrwingfield0/30min" target="_blank" rel="noopener noreferrer">
+                <Button variant="brand" size="xl" className="rounded-full">
+                  Book a demo →
+                </Button>
+              </a>
               <Button variant="outline" size="xl" className="rounded-full">
                 Download info pack
               </Button>
