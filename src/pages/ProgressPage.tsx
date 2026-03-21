@@ -55,7 +55,7 @@ export const ProgressPage = () => {
       <Header showNavLinks />
 
       {/* HERO */}
-      <section className="relative pt-28 pb-32 sm:pb-40 px-6 sm:px-16">
+      <section className="relative pt-28 pb-8 px-6 sm:px-16">
         <div className="flex flex-col md:flex-row items-start gap-12 md:gap-8">
           {/* Left text */}
           <div className="max-w-[520px] flex-shrink-0 md:w-1/2">
