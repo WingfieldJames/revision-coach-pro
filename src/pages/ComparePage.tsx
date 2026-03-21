@@ -391,7 +391,10 @@ export const ComparePage = () => {
                   {allSubjects.map(s => (
                     <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                       setSubject(s);
-                      setExamBoard('');
+                      try {
+                        const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+                        setExamBoard(map[s] || '');
+                      } catch { setExamBoard(''); }
                     }}>
                       {subjectLabels[s] || s}
                     </DropdownMenuItem>
