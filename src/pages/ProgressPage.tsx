@@ -94,15 +94,19 @@ export const ProgressPage = () => {
         </div>
       </section>
 
-      {/* TRUST BAR */}
-      <div className="bg-secondary border-y border-border px-6 sm:px-16 py-4 flex flex-wrap items-center gap-5 sm:gap-8">
-        {trustItems.map((item) => (
-          <div key={item} className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground whitespace-nowrap">
-            <span className="w-[7px] h-[7px] rounded-full bg-primary flex-shrink-0" />
-            {item}
-          </div>
-        ))}
-      </div>
+      {/* STATS */}
+      <section className="py-14 px-6 sm:px-16 bg-secondary border-y border-border">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          {stats.map((s) => (
+            <Card key={s.label} className="border">
+              <CardContent className="p-7">
+                <div className="text-3xl sm:text-[34px] font-extrabold text-primary tracking-tight mb-1.5">{s.number}</div>
+                <div className="text-[13px] text-muted-foreground leading-snug">{s.label}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
 
       {/* THE PROBLEM */}
       <section className="py-16 sm:py-[72px] px-6 sm:px-16">
