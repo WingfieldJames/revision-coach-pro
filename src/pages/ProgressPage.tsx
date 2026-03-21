@@ -52,7 +52,19 @@ export const ProgressPage = () => {
         description="Give every sixth form student an AI tutor that knows their exam board, mark scheme, and exactly what examiners want to see."
         canonical="https://astarai.co.uk/progress"
       />
-      <Header showNavLinks />
+      <Header
+        showNavLinks
+        customRightContent={
+          <div className="hidden sm:flex items-center gap-3">
+            <Button variant="outline" className="rounded-full px-5 font-semibold text-sm" onClick={() => window.open('/login', '_self')}>
+              Log into your school account
+            </Button>
+            <Button variant="brand" className="rounded-full px-5 font-semibold text-sm" onClick={() => window.open('https://calendly.com/jrrwingfield0/30min', '_blank')}>
+              Book a demo
+            </Button>
+          </div>
+        }
+      />
 
       {/* HERO */}
       <section className="relative pt-20 pb-0 px-6 sm:px-16">
@@ -71,9 +83,11 @@ export const ProgressPage = () => {
               Give every sixth form student a tutor that knows their exam board, their mark scheme, and exactly what examiners want to see.
             </p>
             <div className="flex flex-wrap gap-3.5 items-center">
-              <Button variant="brand" size="xl" className="rounded-full">
-                Book a demo →
-              </Button>
+              <a href="https://calendly.com/jrrwingfield0/30min" target="_blank" rel="noopener noreferrer">
+                <Button variant="brand" size="xl" className="rounded-full">
+                  Book a demo →
+                </Button>
+              </a>
               <Button variant="outline" size="xl" className="rounded-full">
                 Download info pack
               </Button>
@@ -259,9 +273,11 @@ export const ProgressPage = () => {
           Book a 20-minute demo. We'll show you exactly how it works for your exam boards and subjects.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
-          <Button variant="brand" size="xl" className="rounded-full">
-            Book a demo →
-          </Button>
+          <a href="https://calendly.com/jrrwingfield0/30min" target="_blank" rel="noopener noreferrer">
+            <Button variant="brand" size="xl" className="rounded-full">
+              Book a demo →
+            </Button>
+          </a>
           <Button variant="outline" size="xl" className="rounded-full">
             Email us instead
           </Button>

@@ -109,6 +109,7 @@ interface HeaderProps {
   customRevisionGuideContent?: React.ReactNode;
   showMyMistakes?: boolean;
   showStartStudyingButton?: boolean;
+  customRightContent?: React.ReactNode;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -142,6 +143,7 @@ export const Header: React.FC<HeaderProps> = ({
   customRevisionGuideContent,
   showMyMistakes = false,
   showStartStudyingButton = false,
+  customRightContent,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -443,7 +445,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right side: Upgrade Now / Deluxe badge on chatbot pages OR Start Studying on home */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {showStartStudyingButton ? (
+        {customRightContent ? customRightContent : showStartStudyingButton ? (
           <div className="hidden sm:flex items-center">
             <Button 
               onClick={() => navigate('/select')} 
