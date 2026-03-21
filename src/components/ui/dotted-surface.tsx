@@ -167,7 +167,7 @@ export function DottedSurface({ className, speed = 0.1, ...props }: DottedSurfac
         }
       }
     };
-  }, [isDark]);
+  }, [isDark, speed]);
 
   return (
     <div
