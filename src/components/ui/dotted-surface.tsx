@@ -4,9 +4,11 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useTheme } from '@/contexts/ThemeContext';
 
-type DottedSurfaceProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'ref'>;
+type DottedSurfaceProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'ref'> & {
+  speed?: number;
+};
 
-export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
+export function DottedSurface({ className, speed = 0.1, ...props }: DottedSurfaceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
