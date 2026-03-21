@@ -143,6 +143,7 @@ export const Header: React.FC<HeaderProps> = ({
   customRevisionGuideContent,
   showMyMistakes = false,
   showStartStudyingButton = false,
+  customRightContent,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
