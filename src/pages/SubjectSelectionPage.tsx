@@ -135,7 +135,7 @@ export const SubjectSelectionPage = () => {
         description="Pick your qualification level and subject to start revising with A* AI."
         canonical="https://astarai.co.uk/select"
       />
-      <DottedSurface />
+      <DottedSurface speed={0.03} />
       
       <Header />
 
