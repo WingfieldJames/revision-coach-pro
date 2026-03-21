@@ -228,11 +228,8 @@ export const Header: React.FC<HeaderProps> = ({
       navigate('/compare');
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } else if (value === "profile") {
-      if (user) {
-        navigate('/progress');
-      } else {
-        navigate('/login');
-      }
+      navigate('/progress');
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     }
   };
