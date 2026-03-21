@@ -75,11 +75,6 @@ export const TrainerInfoViewer: React.FC<TrainerInfoViewerProps> = ({ productId 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-1">
-        <GraduationCap className="h-5 w-5 text-primary" />
-        <h3 className="font-semibold text-lg text-foreground">Meet Your AI Trainer</h3>
-      </div>
-
       <div className="flex items-start gap-4">
         {imageUrl && (
           <img
@@ -93,6 +88,18 @@ export const TrainerInfoViewer: React.FC<TrainerInfoViewerProps> = ({ productId 
           {trainer.trainer_status && (
             <p className="text-xs text-muted-foreground">{trainer.trainer_status}</p>
           )}
+          {achievements.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {achievements.slice(0, 3).map((a: any, i: number) => (
+                <span
+                  key={i}
+                  className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20"
+                >
+                  {a.text}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -101,20 +108,6 @@ export const TrainerInfoViewer: React.FC<TrainerInfoViewerProps> = ({ productId 
           <p className="text-sm text-foreground/80 italic leading-relaxed">
             "{trainer.trainer_description}"
           </p>
-        </div>
-      )}
-
-      {achievements.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {achievements.map((a: any, i: number) => (
-            <span
-              key={i}
-              className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20"
-            >
-              <Award className="h-3 w-3" />
-              {a.text}
-            </span>
-          ))}
         </div>
       )}
     </div>
