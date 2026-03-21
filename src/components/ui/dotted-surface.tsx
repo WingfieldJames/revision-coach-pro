@@ -120,7 +120,7 @@ export function DottedSurface({ className, speed = 0.1, ...props }: DottedSurfac
 
       positionAttribute.needsUpdate = true;
       renderer.render(scene, camera);
-      count += 0.1;
+      count += speed;
     };
 
     const handleResize = () => {
