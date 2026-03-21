@@ -55,7 +55,7 @@ export const ProgressPage = () => {
       <Header showNavLinks />
 
       {/* HERO */}
-      <section className="relative pt-28 pb-8 px-6 sm:px-16">
+      <section className="relative pt-20 pb-0 px-6 sm:px-16">
         <div className="flex flex-col md:flex-row items-start gap-12 md:gap-8">
           {/* Left text */}
           <div className="max-w-[520px] flex-shrink-0 md:w-1/2">
@@ -84,7 +84,7 @@ export const ProgressPage = () => {
           </div>
 
           {/* Right mockup */}
-          <div className="md:w-1/2 flex items-end justify-end self-end z-0">
+          <div className="md:w-1/2 flex items-start justify-end md:-mt-12 z-0">
             <img
               src={schoolsMockup}
               alt="A*AI Schools dashboard showing student activity, feature usage and licence overview"
@@ -95,7 +95,7 @@ export const ProgressPage = () => {
       </section>
 
       {/* STATS */}
-      <section className="relative z-20 -mt-16 py-14 px-6 sm:px-16 bg-secondary border-y border-border">
+      <section className="relative z-20 -mt-32 py-14 px-6 sm:px-16 bg-secondary border-y border-border">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           {stats.map((s) => (
             <Card key={s.label} className="border">
