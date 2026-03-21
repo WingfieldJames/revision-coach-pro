@@ -65,7 +65,7 @@ export const ProgressPage = () => {
             </Badge>
             <h1 className="text-4xl sm:text-[50px] font-extrabold leading-[1.1] tracking-tight mb-5">
               The A-Level AI tutor{" "}
-              <span className="text-gradient-brand">built for your school.</span>
+              <span className="text-primary">built for your school.</span>
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed mb-9 max-w-[560px]">
               Give every sixth form student a tutor that knows their exam board, their mark scheme, and exactly what examiners want to see.
@@ -113,7 +113,7 @@ export const ProgressPage = () => {
         <div className="mb-12">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 leading-tight">
             Your students are already using AI.<br />
-            <span className="text-gradient-brand">Just not the right one.</span>
+            <span className="text-primary">Just not the right one.</span>
           </h2>
           <p className="text-[17px] text-muted-foreground max-w-[540px] leading-relaxed">
             ChatGPT doesn't know your mark scheme. It can't tell a student why their 25-marker would drop a level band, or what an Edexcel examiner actually wants to see. It gives answers — not the thinking behind them.
@@ -142,7 +142,7 @@ export const ProgressPage = () => {
         <div className="mb-12">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 leading-tight">
             Everything your sixth form needs.{" "}
-            <span className="text-gradient-brand">In one platform.</span>
+            <span className="text-primary">In one platform.</span>
           </h2>
           <p className="text-[17px] text-muted-foreground max-w-[500px]">
             Not a generic AI. An AI trained on past papers, mark schemes, and examiner reports — for your exact exam board.
@@ -176,7 +176,7 @@ export const ProgressPage = () => {
         <div className="mb-10">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 leading-tight">
             Built for schools.{" "}
-            <span className="text-gradient-brand">Compliant by design.</span>
+            <span className="text-primary">Compliant by design.</span>
           </h2>
           <p className="text-[17px] text-muted-foreground max-w-[500px]">
             We handle the compliance so your IT Director, DSL, and Bursar can say yes with confidence.
@@ -253,7 +253,7 @@ export const ProgressPage = () => {
       <section className="py-20 sm:py-[88px] px-6 sm:px-16 text-center">
         <h2 className="text-3xl sm:text-[40px] font-extrabold tracking-tight mb-3.5 leading-tight">
           Ready to bring A*AI<br />
-          <span className="text-gradient-brand">to your sixth form?</span>
+          <span className="text-primary">to your sixth form?</span>
         </h2>
         <p className="text-lg text-muted-foreground mb-9">
           Book a 20-minute demo. We'll show you exactly how it works for your exam boards and subjects.
