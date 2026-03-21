@@ -505,7 +505,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                     onClick={() => setShowTrainerInfo(true)}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted mt-1"
                   >
-                    <GraduationCap className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <User className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div className="min-w-0">
                       <span className="block text-sm">Meet Your Trainer</span>
                       <span className="block text-[10px] text-muted-foreground leading-tight">See who trained your AI tutor</span>
