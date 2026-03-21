@@ -197,7 +197,11 @@ export const DashboardPage = () => {
 
   // Save preference whenever it changes
   useEffect(() => {
-    localStorage.setItem('preferred-exam-board', productType);
+    try {
+      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+      map[subject] = productType;
+      localStorage.setItem('preferred-exam-boards', JSON.stringify(map));
+    } catch {}
     localStorage.setItem('preferred-subject', subject);
   }, [productType, subject]);
 
