@@ -130,7 +130,7 @@ export const SubjectSelectionPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SEOHead
+      <DottedSurface />
         title="Choose Your Subject | A* AI"
         description="Pick your qualification level and subject to start revising with A* AI."
         canonical="https://astarai.co.uk/select"
