@@ -517,7 +517,7 @@ export const Header: React.FC<HeaderProps> = ({
           )
         ) : null}
 
-        {user && !hideUserDetails && !showStartStudyingButton && (
+        {user && !hideUserDetails && !showStartStudyingButton && !customRightContent && (
           <div className="hidden sm:flex items-center">
             <Button variant="outline" size="sm" onClick={handleSignOut} className="text-xs sm:text-sm px-2 sm:px-3">
               Sign Out
