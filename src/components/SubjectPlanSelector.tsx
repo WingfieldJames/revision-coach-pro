@@ -114,7 +114,13 @@ export function SubjectPlanSelector() {
 
   useEffect(() => {
     localStorage.setItem('preferred-subject', subject);
-    if (examBoard) localStorage.setItem('preferred-exam-board', examBoard);
+    if (examBoard) {
+      try {
+        const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+        map[subject] = examBoard;
+        localStorage.setItem('preferred-exam-boards', JSON.stringify(map));
+      } catch {}
+    }
   }, [subject, examBoard]);
 
   const handleFreeClick = async () => {
