@@ -81,10 +81,13 @@ export const ComparePage = () => {
     return 'economics';
   });
   const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
-    const saved = localStorage.getItem('preferred-exam-board');
-    const savedSubject = localStorage.getItem('preferred-subject') || 'economics';
-    const boards = LEGACY_BOARDS_MAP[savedSubject];
-    if (saved && boards?.includes(saved)) return saved;
+    try {
+      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+      const savedSubject = localStorage.getItem('preferred-subject') || 'economics';
+      const saved = map[savedSubject];
+      const boards = LEGACY_BOARDS_MAP[savedSubject];
+      if (saved && boards?.includes(saved)) return saved;
+    } catch {}
     return '';
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
