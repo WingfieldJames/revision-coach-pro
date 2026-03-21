@@ -28,19 +28,17 @@ export const DashboardPage = () => {
     return (saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' || saved === 'psychology' || saved === 'mathematics') ? saved as Subject : 'economics';
   });
   const [productType, setProductType] = useState<ExamBoard>(() => {
-    const savedSubject = localStorage.getItem('preferred-subject');
-    const saved = localStorage.getItem('preferred-exam-board');
-    // Only use saved exam board if it matches the subject
-    if (savedSubject === 'computer-science' || savedSubject === 'physics') {
-      return 'ocr';
-    }
-    if (savedSubject === 'chemistry' || savedSubject === 'psychology') {
-      return 'aqa';
-    }
-    if (savedSubject === 'mathematics') {
-      return 'edexcel';
-    }
-    return (saved === 'edexcel' || saved === 'aqa' || saved === 'cie') ? saved as ExamBoard : 'edexcel';
+    const savedSubject = localStorage.getItem('preferred-subject') || 'economics';
+    try {
+      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+      const saved = map[savedSubject];
+      if (saved) return saved as ExamBoard;
+    } catch {}
+    // Fallback defaults
+    if (savedSubject === 'computer-science' || savedSubject === 'physics') return 'ocr';
+    if (savedSubject === 'chemistry' || savedSubject === 'psychology') return 'aqa';
+    if (savedSubject === 'mathematics') return 'edexcel';
+    return 'edexcel';
   });
   
   // Track product-specific access for each exam board
@@ -68,8 +66,12 @@ export const DashboardPage = () => {
 
   // Save exam board preference when it changes
   useEffect(() => {
-    localStorage.setItem('preferred-exam-board', productType);
-  }, [productType]);
+    try {
+      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+      map[subject] = productType;
+      localStorage.setItem('preferred-exam-boards', JSON.stringify(map));
+    } catch {}
+  }, [productType, subject]);
 
   // Check product access for all exam boards when user loads
   useEffect(() => {
@@ -195,7 +197,11 @@ export const DashboardPage = () => {
 
   // Save preference whenever it changes
   useEffect(() => {
-    localStorage.setItem('preferred-exam-board', productType);
+    try {
+      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+      map[subject] = productType;
+      localStorage.setItem('preferred-exam-boards', JSON.stringify(map));
+    } catch {}
     localStorage.setItem('preferred-subject', subject);
   }, [productType, subject]);
 

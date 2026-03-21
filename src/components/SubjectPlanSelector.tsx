@@ -53,10 +53,13 @@ export function SubjectPlanSelector() {
     return saved === 'economics' || saved === 'computer-science' || saved === 'physics' || saved === 'chemistry' || saved === 'psychology' || saved === 'mathematics' ? saved as Subject : 'economics';
   });
   const [examBoard, setExamBoard] = useState<ExamBoard | ''>(() => {
-    const saved = localStorage.getItem('preferred-exam-board');
-    const savedSubject = localStorage.getItem('preferred-subject') as Subject | null;
-    const validSubject = savedSubject && BOARDS_MAP[savedSubject] ? savedSubject : 'economics';
-    if (saved && BOARDS_MAP[validSubject]?.includes(saved as ExamBoard)) return saved as ExamBoard;
+    try {
+      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+      const savedSubject = localStorage.getItem('preferred-subject') as Subject | null;
+      const validSubject = savedSubject && BOARDS_MAP[savedSubject] ? savedSubject : 'economics';
+      const saved = map[validSubject];
+      if (saved && BOARDS_MAP[validSubject]?.includes(saved as ExamBoard)) return saved as ExamBoard;
+    } catch {}
     return '';
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
@@ -111,7 +114,13 @@ export function SubjectPlanSelector() {
 
   useEffect(() => {
     localStorage.setItem('preferred-subject', subject);
-    if (examBoard) localStorage.setItem('preferred-exam-board', examBoard);
+    if (examBoard) {
+      try {
+        const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+        map[subject] = examBoard;
+        localStorage.setItem('preferred-exam-boards', JSON.stringify(map));
+      } catch {}
+    }
   }, [subject, examBoard]);
 
   const handleFreeClick = async () => {
@@ -191,7 +200,10 @@ export function SubjectPlanSelector() {
                 key={s}
                 onClick={() => {
                   setSubject(s);
-                  setExamBoard('');
+                  try {
+                    const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+                    setExamBoard((map[s] || '') as ExamBoard);
+                  } catch { setExamBoard(''); }
                 }}
                 className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                   subject === s
@@ -218,7 +230,10 @@ export function SubjectPlanSelector() {
               {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
                 <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                   setSubject(s);
-                  setExamBoard('');
+                  try {
+                    const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+                    setExamBoard((map[s] || '') as ExamBoard);
+                  } catch { setExamBoard(''); }
                 }}>
                   {subjectLabels[s]}
                 </DropdownMenuItem>

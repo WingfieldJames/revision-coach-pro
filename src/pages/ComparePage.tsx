@@ -81,10 +81,13 @@ export const ComparePage = () => {
     return 'economics';
   });
   const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
-    const saved = localStorage.getItem('preferred-exam-board');
-    const savedSubject = localStorage.getItem('preferred-subject') || 'economics';
-    const boards = LEGACY_BOARDS_MAP[savedSubject];
-    if (saved && boards?.includes(saved)) return saved;
+    try {
+      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+      const savedSubject = localStorage.getItem('preferred-subject') || 'economics';
+      const saved = map[savedSubject];
+      const boards = LEGACY_BOARDS_MAP[savedSubject];
+      if (saved && boards?.includes(saved)) return saved;
+    } catch {}
     return '';
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
@@ -227,7 +230,13 @@ export const ComparePage = () => {
 
   useEffect(() => {
     localStorage.setItem('preferred-subject', subject);
-    if (examBoard) localStorage.setItem('preferred-exam-board', examBoard);
+    if (examBoard) {
+      try {
+        const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+        map[subject] = examBoard;
+        localStorage.setItem('preferred-exam-boards', JSON.stringify(map));
+      } catch {}
+    }
   }, [subject, examBoard]);
 
   useEffect(() => {
@@ -352,7 +361,10 @@ export const ComparePage = () => {
                     key={s}
                     onClick={() => {
                       setSubject(s);
-                      setExamBoard('');
+                      try {
+                        const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+                        setExamBoard(map[s] || '');
+                      } catch { setExamBoard(''); }
                     }}
                     className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                       subject === s
@@ -379,7 +391,10 @@ export const ComparePage = () => {
                   {allSubjects.map(s => (
                     <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                       setSubject(s);
-                      setExamBoard('');
+                      try {
+                        const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+                        setExamBoard(map[s] || '');
+                      } catch { setExamBoard(''); }
                     }}>
                       {subjectLabels[s] || s}
                     </DropdownMenuItem>
