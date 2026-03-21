@@ -448,10 +448,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       }
     } catch (error) {
       console.error('Chat error:', error);
+      const friendlyMessage = (error instanceof Error && error.message.includes('try again'))
+        ? error.message
+        : 'Something went wrong. Please try again.';
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
-        displayedContent: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`
+        content: `⚠️ ${friendlyMessage}`,
+        displayedContent: `⚠️ ${friendlyMessage}`
       }]);
     } finally {
       setIsLoading(false);
