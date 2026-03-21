@@ -620,7 +620,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
-                Your AI Trainer
+                Meet the brain behind {subjectName}
               </h2>
               <button onClick={() => setShowTrainerInfo(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
                 <X className="h-5 w-5 text-muted-foreground" />
