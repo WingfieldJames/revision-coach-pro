@@ -84,7 +84,7 @@ export const ProgressPage = () => {
           </div>
 
           {/* Right mockup */}
-          <div className="md:w-1/2 flex items-end justify-end self-end mb-[-80px] z-10">
+          <div className="md:w-1/2 flex items-end justify-end self-end z-0">
             <img
               src={schoolsMockup}
               alt="A*AI Schools dashboard showing student activity, feature usage and licence overview"
@@ -95,7 +95,7 @@ export const ProgressPage = () => {
       </section>
 
       {/* STATS */}
-      <section className="py-14 px-6 sm:px-16 bg-secondary border-y border-border">
+      <section className="relative z-20 -mt-24 py-14 px-6 sm:px-16 bg-secondary border-y border-border">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           {stats.map((s) => (
             <Card key={s.label} className="border">
