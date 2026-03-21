@@ -200,7 +200,10 @@ export function SubjectPlanSelector() {
                 key={s}
                 onClick={() => {
                   setSubject(s);
-                  setExamBoard('');
+                  try {
+                    const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+                    setExamBoard((map[s] || '') as ExamBoard);
+                  } catch { setExamBoard(''); }
                 }}
                 className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                   subject === s
