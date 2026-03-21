@@ -273,9 +273,11 @@ export const ProgressPage = () => {
           Book a 20-minute demo. We'll show you exactly how it works for your exam boards and subjects.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
-          <a href="https://calendly.com/jrrwingfield0/30min" target="_blank" rel="noopener noreferrer"><Button variant="brand" size="xl" className="rounded-full">
-            Book a demo →
-          </Button>
+          <a href="https://calendly.com/jrrwingfield0/30min" target="_blank" rel="noopener noreferrer">
+            <Button variant="brand" size="xl" className="rounded-full">
+              Book a demo →
+            </Button>
+          </a>
           <Button variant="outline" size="xl" className="rounded-full">
             Email us instead
           </Button>
