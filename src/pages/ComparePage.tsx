@@ -80,7 +80,13 @@ export const ComparePage = () => {
     if (saved && LEGACY_SUBJECTS.includes(saved)) return saved;
     return 'economics';
   });
-  const [examBoard, setExamBoard] = useState<ExamBoard>('');
+  const [examBoard, setExamBoard] = useState<ExamBoard>(() => {
+    const saved = localStorage.getItem('preferred-exam-board');
+    const savedSubject = localStorage.getItem('preferred-subject') || 'economics';
+    const boards = LEGACY_BOARDS_MAP[savedSubject];
+    if (saved && boards?.includes(saved)) return saved;
+    return '';
+  });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
   const [hasProductAccess, setHasProductAccess] = useState(false);
   const [subscriptionPaymentType, setSubscriptionPaymentType] = useState<string | null>(null);
@@ -221,7 +227,7 @@ export const ComparePage = () => {
 
   useEffect(() => {
     localStorage.setItem('preferred-subject', subject);
-    localStorage.setItem('preferred-exam-board', examBoard);
+    if (examBoard) localStorage.setItem('preferred-exam-board', examBoard);
   }, [subject, examBoard]);
 
   useEffect(() => {
