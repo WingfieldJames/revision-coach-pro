@@ -52,7 +52,7 @@ const LEGACY_BOARDS_MAP: Record<string, string[]> = {
   'physics': ['ocr'],
   'chemistry': ['aqa'],
   'psychology': ['aqa'],
-  'mathematics': ['edexcel', 'ocr'],
+  'mathematics': ['edexcel', 'ocr']
 };
 const LEGACY_DEFAULT_BOARD: Record<string, string> = {
   'economics': 'edexcel',
@@ -60,7 +60,7 @@ const LEGACY_DEFAULT_BOARD: Record<string, string> = {
   'physics': 'ocr',
   'chemistry': 'aqa',
   'psychology': 'aqa',
-  'mathematics': 'edexcel',
+  'mathematics': 'edexcel'
 };
 
 export const ComparePage = () => {
@@ -98,10 +98,10 @@ export const ComparePage = () => {
   // Load dynamic products
   useEffect(() => {
     const loadDynamic = async () => {
-      const { data } = await supabase
-        .from('products')
-        .select('id, slug, subject, exam_board, name, qualification_type')
-        .eq('active', true);
+      const { data } = await supabase.
+      from('products').
+      select('id, slug, subject, exam_board, name, qualification_type').
+      eq('active', true);
       if (data) {
         // Filter out legacy products (already hardcoded) and GCSE products
         const legacySlugs = new Set(Object.keys(PRODUCT_IDS));
@@ -120,7 +120,7 @@ export const ComparePage = () => {
     'ocr-physics': 'ecd5978d-3bf4-4b9c-993f-30b7f3a0f197',
     'aqa-chemistry': '3e5bf02e-1424-4bb3-88f9-2a9c58798444',
     'aqa-psychology': 'c56bc6d6-5074-4e1f-8bf2-8e900ba928ec',
-    'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
   };
 
   // Build combined subjects list (legacy + dynamic)
@@ -143,7 +143,7 @@ export const ComparePage = () => {
       'physics': 'Physics',
       'chemistry': 'Chemistry',
       'psychology': 'Psychology',
-      'mathematics': 'Mathematics',
+      'mathematics': 'Mathematics'
     };
     for (const dp of dynamicProducts) {
       const key = dp.subject.toLowerCase().replace(/\s+/g, '-');
@@ -176,7 +176,7 @@ export const ComparePage = () => {
 
   // Check if current selection is a dynamic product
   const getDynamicProduct = React.useCallback(() => {
-    return dynamicProducts.find(dp => {
+    return dynamicProducts.find((dp) => {
       const subjectKey = dp.subject.toLowerCase().replace(/\s+/g, '-');
       const boardKey = dp.exam_board.toLowerCase();
       return subjectKey === subject && boardKey === examBoard;
@@ -295,9 +295,9 @@ export const ComparePage = () => {
     if (hasProductAccess) {
       // Check dynamic product first
       const dp = getDynamicProduct();
-      if (dp) { window.location.href = `/s/${dp.slug}/premium`; return; }
+      if (dp) {window.location.href = `/s/${dp.slug}/premium`;return;}
 
-      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : (subject === 'mathematics' && examBoard === 'ocr') ? '/s/ocr-maths/premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
+      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : subject === 'mathematics' && examBoard === 'ocr' ? '/s/ocr-maths/premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
@@ -312,7 +312,7 @@ export const ComparePage = () => {
       }
       // Look up product ID: check legacy first, then dynamic
       const dp = getDynamicProduct();
-      const productId = productSlug ? (PRODUCT_IDS[productSlug] || dp?.id || null) : null;
+      const productId = productSlug ? PRODUCT_IDS[productSlug] || dp?.id || null : null;
       const affiliateCode = getValidAffiliateCode();
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
@@ -354,27 +354,27 @@ export const ComparePage = () => {
           <ScrollReveal delay={0.1}>
             {/* Desktop: Connected toggle group + board dropdown on same line */}
             <div className="hidden md:flex flex-col items-center gap-6 mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">What are you studying?</h1>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Let's get you an A* </h1>
               <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
-                {allSubjects.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => {
-                      setSubject(s);
-                      try {
-                        const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
-                        setExamBoard(map[s] || '');
-                      } catch { setExamBoard(''); }
-                    }}
-                    className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
-                      subject === s
-                        ? 'bg-gradient-brand text-white'
-                        : 'text-foreground'
-                    }`}
-                  >
+                {allSubjects.map((s) =>
+                <button
+                  key={s}
+                  onClick={() => {
+                    setSubject(s);
+                    try {
+                      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+                      setExamBoard(map[s] || '');
+                    } catch {setExamBoard('');}
+                  }}
+                  className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
+                  subject === s ?
+                  'bg-gradient-brand text-white' :
+                  'text-foreground'}`
+                  }>
+                  
                     {subjectLabels[s] || s}
                   </button>
-                ))}
+                )}
               </div>
             </div>
 
@@ -388,17 +388,17 @@ export const ComparePage = () => {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-                  {allSubjects.map(s => (
-                    <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
-                      setSubject(s);
-                      try {
-                        const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
-                        setExamBoard(map[s] || '');
-                      } catch { setExamBoard(''); }
-                    }}>
+                  {allSubjects.map((s) =>
+                  <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
+                    setSubject(s);
+                    try {
+                      const map = JSON.parse(localStorage.getItem('preferred-exam-boards') || '{}');
+                      setExamBoard(map[s] || '');
+                    } catch {setExamBoard('');}
+                  }}>
                       {subjectLabels[s] || s}
                     </DropdownMenuItem>
-                  ))}
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -407,11 +407,11 @@ export const ComparePage = () => {
                   <SelectValue placeholder="Select board" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-                  {boardsForSubject.map(b => (
-                    <SelectItem key={b} value={b}>
+                  {boardsForSubject.map((b) =>
+                  <SelectItem key={b} value={b}>
                       {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -430,8 +430,8 @@ export const ComparePage = () => {
                 subscriptionPaymentType={subscriptionPaymentType}
                 onCtaClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
                 boards={boardsForSubject}
-                onBoardChange={setExamBoard}
-              />
+                onBoardChange={setExamBoard} />
+              
             </div>
           </ScrollReveal>
 
@@ -535,8 +535,8 @@ export const ComparePage = () => {
 
 
 
-        {!user && (
-          <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12 relative">
+        {!user &&
+        <ScrollReveal className="px-8 max-w-4xl mx-auto mt-12 mb-12 relative">
             <div className="p-6 bg-secondary rounded-lg">
               <p className="text-muted-foreground mb-4 text-center">
                 New to A* AI? Create an account to get started.
@@ -551,7 +551,7 @@ export const ComparePage = () => {
               </div>
             </div>
           </ScrollReveal>
-        )}
+        }
 
         {/* Footer */}
         <footer className="py-16 px-8 text-center border-t border-border/30 relative">
@@ -595,6 +595,6 @@ export const ComparePage = () => {
           </ScrollReveal>
         </footer>
       </div>
-    </div>
-  );
+    </div>);
+
 };
