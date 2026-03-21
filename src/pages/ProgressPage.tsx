@@ -1,4 +1,5 @@
 import React from "react";
+import schoolsMockup from "@/assets/schools-dashboard-mockup.png";
 import { Header } from "@/components/Header";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
