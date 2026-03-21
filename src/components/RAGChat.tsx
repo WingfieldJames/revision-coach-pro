@@ -355,7 +355,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           setIsSearching(false);
           return;
         }
-        throw new Error(errorData.error || 'Failed to get response');
+        // Show user-friendly error instead of raw gateway messages
+        throw new Error(errorData.error || 'Something went wrong. Please try again.');
       }
       if (!response.body) throw new Error('No response body');
       const reader = response.body.getReader();
