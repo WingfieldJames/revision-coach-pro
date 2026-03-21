@@ -88,7 +88,7 @@ export const ProgressPage = () => {
             <img
               src={schoolsMockup}
               alt="A*AI Schools dashboard showing student activity, feature usage and licence overview"
-              className="w-full max-w-[420px] xl:max-w-[460px] h-auto drop-shadow-2xl rounded-2xl"
+              className="w-full max-w-[420px] xl:max-w-[460px] h-auto"
             />
           </div>
         </div>
