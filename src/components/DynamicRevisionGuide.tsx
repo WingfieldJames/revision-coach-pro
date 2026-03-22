@@ -201,7 +201,11 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
       setMatchedDiagrams(matched);
 
       const diagramContext = matched.length > 0
-        ? matched.map(d => `- ${d.title} (available as diagram image)`).join('\n')
+        ? matched.map(d => {
+            const dl = diagramList.find(dl => dl.title === d.title);
+            const kw = dl?.keywords?.length ? ` (keywords: ${dl.keywords.join(', ')})` : '';
+            return `- ${d.title}${kw}`;
+          }).join('\n')
         : '';
 
       const { data: sessionData } = await supabase.auth.getSession();

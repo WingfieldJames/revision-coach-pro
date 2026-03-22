@@ -1,9 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const MAX_CONTEXT_CHARS = 40000;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -15,7 +17,6 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     const {
@@ -32,14 +33,14 @@ serve(async (req) => {
 
     if (!spec_name || !product_id) {
       return new Response(
-        JSON.stringify({ error: "spec_code, spec_name, and product_id are required" }),
+        JSON.stringify({ error: "spec_name and product_id are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     console.log(`Revision guide for ${board} spec ${spec_code}: ${spec_name}`);
 
-    // Server-side subscription check
+    // --- Subscription check ---
     let tier = "free";
     if (user_id && product_id) {
       try {
@@ -57,7 +58,6 @@ serve(async (req) => {
           }
         }
 
-        // Fallback: check legacy users table for Edexcel backwards compatibility
         if (tier === "free") {
           const { data: prod } = await supabaseAdmin
             .from("products")
@@ -86,7 +86,7 @@ serve(async (req) => {
 
     console.log(`User ${user_id} tier: ${tier}`);
 
-    // Tool usage limit for free users (2 per month) - check BEFORE action
+    // --- Free usage limit ---
     if (tier === "free" && user_id) {
       const { data: usageData, error: usageError } = await supabaseAdmin.rpc("get_tool_usage", {
         p_user_id: user_id,
@@ -106,7 +106,7 @@ serve(async (req) => {
       }
     }
 
-    // Fetch system prompt from DB
+    // --- Fetch system prompt ---
     let systemPromptBase = "";
     try {
       const { data: product } = await supabaseAdmin
@@ -119,30 +119,26 @@ serve(async (req) => {
       console.error("Error fetching system prompt:", err);
     }
 
-    // Fetch relevant document chunks for context — targeted queries by content_type
+    // --- Fetch training data with context cap ---
     let trainingContext = "";
-    const specCodeLower = spec_code.toLowerCase();
+    const specCodeLower = (spec_code || "").toLowerCase();
     const specNameLower = spec_name.toLowerCase();
     const specKeywords = specNameLower.split(/[\s,()]+/).filter((w: string) => w.length > 2);
-    try {
 
-      // Run parallel queries for different content types
+    try {
       const [specResult, techniqueResult, paperResult] = await Promise.all([
-        // Specification chunks
         supabaseAdmin
           .from("document_chunks")
           .select("content, metadata")
           .eq("product_id", product_id)
           .filter("metadata->>content_type", "eq", "specification")
           .limit(50),
-        // Exam technique chunks  
         supabaseAdmin
           .from("document_chunks")
           .select("content, metadata")
           .eq("product_id", product_id)
           .filter("metadata->>content_type", "eq", "exam_technique")
           .limit(20),
-        // Past paper / combined chunks
         supabaseAdmin
           .from("document_chunks")
           .select("content, metadata")
@@ -157,7 +153,7 @@ serve(async (req) => {
         ...(paperResult.data || []),
       ];
 
-      // Deduplicate by content
+      // Deduplicate
       const seen = new Set<string>();
       const uniqueChunks = allChunks.filter((c: any) => {
         const key = c.content.slice(0, 100);
@@ -166,22 +162,19 @@ serve(async (req) => {
         return true;
       });
 
-      // Filter and score relevance
+      // Filter relevant
       const relevantChunks = uniqueChunks.filter((chunk: { content: string; metadata: Record<string, unknown> }) => {
         const content = chunk.content.toLowerCase();
         const contentType = String(chunk.metadata?.content_type || "");
 
-        // Always include exam technique chunks
         if (options.includes("exam_technique") && contentType === "exam_technique") return true;
 
-        // Include specification chunks matching topic
         if (contentType === "specification") {
-          if (content.includes(specCodeLower)) return true;
+          if (specCodeLower && content.includes(specCodeLower)) return true;
           const matchCount = specKeywords.filter((kw: string) => content.includes(kw)).length;
           if (matchCount >= 2) return true;
         }
 
-        // Include paper/combined chunks matching topic
         if (contentType.startsWith("paper_") || contentType === "combined" || contentType.includes("question") || contentType.includes("mark_scheme")) {
           const matchCount = specKeywords.filter((kw: string) => content.includes(kw)).length;
           if (matchCount >= 2) return true;
@@ -190,23 +183,56 @@ serve(async (req) => {
         return false;
       });
 
+      // Build context with cap
       if (relevantChunks.length > 0) {
-        trainingContext = relevantChunks
-          .slice(0, 30) // Cap at 30 to avoid token overflow
-          .map((c: { content: string; metadata: Record<string, unknown> }) => {
-            const type = String(c.metadata?.content_type || "general").toUpperCase();
-            const topic = c.metadata?.topic || "";
-            return `[${type}${topic ? ` - ${topic}` : ""}]\n${c.content}`;
-          })
-          .join("\n\n---\n\n");
+        const parts: string[] = [];
+        let totalChars = 0;
+        for (const c of relevantChunks) {
+          const type = String((c as any).metadata?.content_type || "general").toUpperCase();
+          const topic = (c as any).metadata?.topic || "";
+          const part = `[${type}${topic ? ` - ${topic}` : ""}]\n${c.content}`;
+          if (totalChars + part.length > MAX_CONTEXT_CHARS && parts.length > 0) break;
+          parts.push(part);
+          totalChars += part.length;
+        }
+        trainingContext = parts.join("\n\n---\n\n");
       }
 
-      console.log(`Found ${relevantChunks.length}/${uniqueChunks.length} relevant chunks`);
+      console.log(`Found ${relevantChunks.length} relevant chunks, context: ${trainingContext.length} chars (cap: ${MAX_CONTEXT_CHARS})`);
     } catch (err) {
       console.error("Error fetching training data:", err);
     }
 
-    // Build the comprehensive prompt
+    // --- Server-side diagram fallback ---
+    let finalDiagramContext = diagram_context || "";
+    if (options.includes("diagrams") && !finalDiagramContext) {
+      try {
+        const { data: trainerData } = await supabaseAdmin
+          .from("trainer_projects")
+          .select("diagram_library")
+          .eq("product_id", product_id)
+          .limit(1);
+
+        if (trainerData?.[0]?.diagram_library) {
+          const diagrams = (trainerData[0].diagram_library as any[]).filter(
+            (d: any) => (d.title || d.name) && (d.imagePath || d.image_path || d.url)
+          );
+          if (diagrams.length > 0) {
+            finalDiagramContext = diagrams.map((d: any) => {
+              const title = d.title || d.name;
+              const kw = Array.isArray(d.keywords) && d.keywords.length > 0
+                ? ` (keywords: ${d.keywords.join(", ")})`
+                : "";
+              return `- ${title}${kw}`;
+            }).join("\n");
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching diagram library:", err);
+      }
+    }
+
+    // --- Build prompt ---
     const boardLabel =
       board === "ocr-cs" ? "OCR A Level Computer Science (H446)" :
       board === "aqa" ? "AQA A Level Economics" :
@@ -230,7 +256,7 @@ For each sub-topic:
 - Include examples where helpful
 - Use indented bullet points for detail
 
-${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them INLINE within your explanation where they are relevant - do NOT put them in a separate section. Reference them naturally as you explain concepts. If a diagram helps illustrate a point, mention it right there. Only use diagrams that genuinely help explain the content - if none are relevant, don't force them in.\n\nAvailable diagrams:\n${diagram_context}\n\nWhen referencing a diagram, write: [DIAGRAM: exact diagram title here]\n` : ""}`;
+${finalDiagramContext ? `DIAGRAMS: The following diagrams are available. Insert them INLINE within your explanation where they are relevant - do NOT put them in a separate section. Reference them naturally as you explain concepts. If a diagram helps illustrate a point, mention it right there. Only use diagrams that genuinely help explain the content - if none are relevant, don't force them in.\n\nAvailable diagrams:\n${finalDiagramContext}\n\nWhen referencing a diagram, write: [DIAGRAM: exact diagram title here]\n` : ""}`;
 
     if (options.includes("application")) {
       prompt += `\n\nAfter the spec point explanation, include a section titled "Real-World Application" (as a ## heading). Provide real-world examples and case studies that demonstrate these concepts in practice.`;
@@ -238,14 +264,14 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
 
     if (options.includes("exam_technique")) {
       prompt += `\n\nInclude a section titled "Exam Technique" (as a ## heading). Provide specific exam technique advice:
-- Command words: what each relevant command word means and how to structure answers (e.g., 'Describe' = what happens step by step, 'Explain' = what + why, 'Evaluate/Discuss' = both sides + conclusion)
+- Command words: what each relevant command word means and how to structure answers
 - Timing guidance: how long to spend on different mark questions
 - Key phrases examiners look for in mark schemes
 - Common mistakes students make on this topic
 - How to structure responses for maximum marks`;
     }
 
-    // Server-side past paper retrieval if client didn't provide context
+    // Server-side past paper retrieval
     let pastPaperContext = past_paper_context;
     if (!pastPaperContext && options.includes("past_papers")) {
       try {
@@ -301,7 +327,7 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
 
     console.log(`Prompt length: ${prompt.length}, System prompt length: ${systemPrompt.length}`);
 
-    // Call Lovable AI gateway (non-streaming)
+    // --- AI call ---
     const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
     const aiModel = "google/gemini-2.5-flash";
 
@@ -357,7 +383,7 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
 
     console.log(`Generated guide: ${content.length} chars`);
 
-    // Increment usage AFTER successful generation
+    // Increment usage
     if (tier === "free" && user_id) {
       await supabaseAdmin.rpc("increment_tool_usage", {
         p_user_id: user_id,
@@ -374,7 +400,7 @@ ${diagram_context ? `DIAGRAMS: The following diagrams are available. Insert them
   } catch (e) {
     console.error("Revision guide error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "Something went wrong generating your revision guide. Please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
