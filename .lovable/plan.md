@@ -1,59 +1,56 @@
 
 
-# Fix Chatbot Crashes: Context Cap + Smarter Retrieval
+# Revision Guide: Full Build Integration + Diagram Support + Stability
 
-## The Problem
+## Current State
 
-The `rag-chat` function fetches up to 50 chunks via keyword matching, producing system prompts of 120K+ characters. This exceeds AI model limits and causes timeouts/crashes.
+The revision guide is **mostly wired up** to the Build portal already — it fetches spec points and training data from `document_chunks`, and loads diagrams from `trainer_projects.diagram_library`. However, there are gaps:
 
-## The Fix (Two Parts)
+1. **Context overflow** — Same bug as rag-chat: the edge function concatenates up to 170 chunks with no character cap, causing gateway timeouts
+2. **CORS headers missing** — Same missing `x-supabase-client-*` headers
+3. **Diagram matching is weak** — The client-side keyword matching only checks diagram `keywords` array, but most diagrams in the Build portal don't have keywords set. Title words should also be used for matching
+4. **Diagram context sent to AI is too sparse** — Only sends `"- Title (available as diagram image)"` — the AI doesn't know what the diagram actually shows, so it can't intelligently decide when to reference it
+5. **No context cap** — Training context can exceed 100K chars, causing the same crashes as rag-chat
 
-### Part 1: Immediate Crash Fix — Cap Context Size
+## Plan
 
-**File: `supabase/functions/rag-chat/index.ts`**
-
+### 1. Edge Function: Add context cap + fix CORS (`generate-revision-guide/index.ts`)
 - Add `MAX_CONTEXT_CHARS = 40000` constant
-- In the chunk selection loop (lines 326-418), stop adding chunks once total character count exceeds the cap
-- The system prompt from the `products` table (already defined in Build) stays untouched — we only cap the training data context that gets appended
-- Update CORS headers (line 6) to include missing `x-supabase-client-*` headers
-- Improve error responses for 500/timeout — return user-friendly messages instead of raw gateway errors
+- Cap training context concatenation to stay within limit
+- Update CORS headers to include `x-supabase-client-*` headers
 
-### Part 2: Smarter Retrieval — AI-Generated Search Queries
+### 2. Edge Function: Fetch diagrams server-side (`generate-revision-guide/index.ts`)
+- When `diagrams` option is enabled and client sends diagram_context, use it
+- Additionally, fetch `trainer_projects.diagram_library` server-side as a fallback so the AI always has access to available diagrams
+- Include diagram titles AND any keywords/descriptions in the context so the AI can make informed decisions about which diagrams to reference
 
-Instead of naive keyword matching against 50 chunks, use a fast AI call to generate better search terms. The system prompt is already in the DB from Build — this step only generates search queries, not the final response.
+### 3. Client: Improve diagram keyword matching (`DynamicRevisionGuide.tsx`)
+- When matching diagrams to a spec point, also split diagram titles into words and use those as match terms (not just the `keywords` array)
+- This ensures diagrams uploaded in Build without explicit keywords still get matched
 
+### 4. Client: Send richer diagram context to edge function (`DynamicRevisionGuide.tsx`)
+- Instead of just `"- Title (available as diagram image)"`, include the diagram's keywords so the AI knows what the diagram covers
+
+## Technical Details
+
+**Context cap logic (edge function):**
 ```text
-Current:
-  User message → keyword split → match 50 chunks → 120K context → crash
-
-Proposed:
-  User message → AI generates 3 search queries (fast, ~0.5s) 
-  → fetch top 5 chunks per query (15 total, ~20K chars)
-  → build final prompt with system_prompt_deluxe + capped context
-  → reliable response
+After filtering relevant chunks, iterate and concatenate
+Stop when total chars > MAX_CONTEXT_CHARS (40,000)
+Prioritize exam_technique + specification chunks first
 ```
 
-**How it works in `rag-chat/index.ts`:**
-
-1. **Query Planning** — A tiny AI call (~200 tokens) takes the user's message and outputs 3 focused search queries as JSON. Example: "explain fiscal policy effects on unemployment" becomes `["fiscal policy government spending", "unemployment multiplier effect", "AD AS diagram inflation"]`
-
-2. **Targeted Retrieval** — For each AI-generated query, run the existing keyword scoring against chunks. Take top 5 per query, deduplicate. ~15 high-relevance chunks instead of 50 random ones.
-
-3. **Final Response** — Build the system prompt exactly as now: `system_prompt_deluxe` (from Build) + personalization + brain profile + capped training context. Send to AI for the real response.
-
-The system prompt defined in Build is NOT involved in Step 1 — that step only generates search queries. The full system prompt is used in Step 3 as it already is today.
-
-### Part 3: Client-Side Error Handling
-
-**File: `src/components/RAGChat.tsx`**
-
-- Catch gateway errors gracefully — show "Something went wrong, please try again" instead of raw error strings
-- Add a retry button on failed messages
+**Diagram matching improvement (client):**
+```text
+Current: only match on d.keywords array
+Fixed: also split d.title into words and use as match terms
+Example: diagram "Supply and Demand Curve" matches spec about "demand"
+```
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `supabase/functions/rag-chat/index.ts` | Context cap, two-step retrieval, CORS fix, better error responses |
-| `src/components/RAGChat.tsx` | Graceful error messages, retry button |
+| `supabase/functions/generate-revision-guide/index.ts` | Context cap, CORS fix, server-side diagram fallback |
+| `src/components/DynamicRevisionGuide.tsx` | Better diagram matching, richer diagram context |
 
