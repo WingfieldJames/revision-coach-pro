@@ -658,14 +658,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           {messages.length === 0 && (
             productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
               <div className="text-center py-16">
-                <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-4" />
-                <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-2 leading-[1.1] tracking-tight text-primary">
+                <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-1" />
+                <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight text-primary">
                   {daysToFirstExam} days to go. Let's get you that <span className="text-primary">A*</span>.
                 </h2>
                 <p className="text-muted-foreground text-sm sm:text-base">Your Edexcel Economics revision, sorted</p>
                 
                 {/* Social proof badges */}
-                <div className="flex items-center justify-center gap-2.5 flex-wrap mt-5">
+                <div className="flex items-center justify-center gap-2.5 flex-wrap mt-3">
                   <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
                     <div className="flex">
                       <div className="w-5 h-5 rounded-full bg-primary/20 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary z-[3]">JT</div>
