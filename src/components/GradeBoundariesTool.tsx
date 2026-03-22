@@ -102,7 +102,12 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subjec
                 fontSize: '12px',
                 color: 'hsl(var(--foreground))',
               }}
-              formatter={(value: number) => [`${value}%`, undefined]}
+              formatter={(value: number, name: string) => {
+                // Hide duplicate predicted line entries (they have name=" ")
+                if (name === ' ') return [null, null];
+                return [`${value}%`, undefined];
+              }}
+              itemSorter={() => 0}
             />
             <Legend
               wrapperStyle={{ fontSize: '12px' }}
