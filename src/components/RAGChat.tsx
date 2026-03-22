@@ -716,18 +716,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     }}
                   >
                     {(() => {
-                      // Embed diagram inline after first paragraph for the last assistant message
+                      // If diagram should be embedded, only render first paragraph in this block
                       const shouldEmbedDiagram = isLastAssistant && currentDiagram && !isLoading && !isAnimating && resolvedDiagramUrl;
                       if (shouldEmbedDiagram && displayContent) {
                         const splitIndex = displayContent.indexOf('\n\n');
                         if (splitIndex > 0) {
-                          const firstPart = displayContent.slice(0, splitIndex);
-                          const restPart = displayContent.slice(splitIndex + 2);
-                          return (
-                            <>
-                              {firstPart}
-                            </>
-                          );
+                          return displayContent.slice(0, splitIndex);
                         }
                       }
                       return displayContent;
@@ -736,9 +730,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   {showCursor && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
 
                   {isLastAssistant && currentDiagram && !isLoading && !isAnimating && resolvedDiagramUrl && (() => {
-                    const splitIndex = (msg.displayedContent || msg.content).indexOf('\n\n');
+                    const splitIndex = displayContent.indexOf('\n\n');
                     const hasSecondPart = splitIndex > 0;
-                    const restContent = hasSecondPart ? (msg.displayedContent || msg.content).slice(splitIndex + 2) : null;
+                    const restContent = hasSecondPart ? displayContent.slice(splitIndex + 2) : null;
                     
                     return (
                       <>
