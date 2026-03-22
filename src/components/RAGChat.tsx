@@ -650,11 +650,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           {messages.length === 0 && (
             productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
               <div className="text-center py-16">
-                <img src={currentLogo} alt="A* AI" className="h-16 mx-auto mb-6" />
-                <h2 className="text-2xl font-bold mb-2 text-foreground">
-                  The AI tutor built to get you an A*.
+                <img src={currentLogo} alt="A* AI" className="h-32 mx-auto mb-8" />
+                <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-3 leading-[1.1] tracking-tight text-primary">
+                  The AI tutor built to get you an <span className="text-primary">A*</span>.
                 </h2>
-                <p className="text-muted-foreground">Ask anything about A-Level Economics — diagrams, essays, spec points, exam technique</p>
+                <p className="text-muted-foreground text-sm sm:text-base">Ask anything about A-Level Economics — diagrams, essays, spec points, exam technique</p>
               </div>
             ) : (
               <div className="text-center py-16">
