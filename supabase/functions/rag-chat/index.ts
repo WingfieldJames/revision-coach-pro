@@ -1016,7 +1016,7 @@ Use this to personalise your responses — reference their weak areas, their exa
     // Always try to find a relevant diagram (custom Build diagrams take priority)
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
     const diagramSubject = enable_diagrams ? diagram_subject : 'economics';
-    relevantDiagram = findRelevantDiagram(message, diagramSubject, customDiagrams);
+    relevantDiagram = await findRelevantDiagram(message, diagramSubject, customDiagrams, lovableApiKey);
     if (relevantDiagram) {
       console.log(`Found relevant diagram: ${relevantDiagram.title}`);
     }
