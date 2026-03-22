@@ -1,46 +1,56 @@
 
 
-# Fix Past Paper Finder: Stop-Word Filtering + Clean Query
+# Funnel Analytics Visualization + Leakage Analysis
 
-## Problem
+## What We'll Build
 
-The Past Paper Finder always returns the same first questions regardless of topic. Root cause is two-fold:
+A new "Funnel Analysis" section on the `/analytics` page with three visualizations:
 
-1. **Client sends polluted query**: `"Find past paper questions about: externalities"` — the words "find", "past", "paper", "questions", "about" all become search keywords and match EVERY paper chunk equally, drowning out the actual topic.
+### 1. Conversion Funnel Bar Chart (horizontal)
+A stepped funnel showing:
+- Signed Up: 2,479
+- Used Chatbot: 1,483 (60%)
+- Returned 2+ Days: 438 (18%)
+- Engaged 4+ Days: 125 (5%)
+- Paid: 149 (6%)
 
-2. **No stop-word filtering in edge function**: The scoring splits on whitespace and counts raw keyword frequency. Common words dominate, so the first chunks in the array always win.
+Each bar shows the count and % drop-off from the previous step.
 
-## Changes
+### 2. Subject Breakdown Table
+Shows per-product: total users, prompt count, subscribers, and conversion rate. Already exists but we'll add it to the funnel context.
 
-### 1. Client: Send clean query (`src/components/DynamicPastPaperFinder.tsx`)
+### 3. Engagement → Conversion Heatmap/Bar
+A grouped bar chart showing engagement buckets (1 day, 2-3 days, 4-7 days, etc.) with two bars per bucket: total users and converted users. This shows exactly where the drop-off happens.
 
-- Remove the `"Find past paper questions about: "` prefix — send only the raw topic text
-- When a spec point is selected, also send the spec point's `content` field as a `spec_content` parameter so the edge function has richer keywords to match against
+### 4. Days-to-Purchase Distribution
+A bar chart showing how many days it takes from signup to purchase (most buy same day).
 
-### 2. Edge Function: Add stop-word filtering + spec_content support (`supabase/functions/rag-chat/index.ts`)
+### 5. Funnel Insights Cards
+Auto-calculated insight cards highlighting:
+- "40% of users never send a prompt"
+- "71% of active users only use it for 1 day"
+- "Users who return for 2+ days convert at 8%"
 
-In the `search_only` block (~line 627-676):
+## Implementation
 
-- Add a stop-word set: `"the", "and", "for", "about", "find", "past", "paper", "questions", "with", "how", "what", "does", "this", "that", "are", "was", "were", "been", "have", "has", "from", "will", "can", "not", "but", "all", "its", "use", "using", "which", "their", "there", "than", "into", "also", "such", "each", "other", "these", "those", "them", "they", "would", "could", "should", "may", "might", "must"`
-- Filter keywords through stop-word list before scoring
-- Accept optional `spec_content` field from request body — extract additional keywords from it
-- Give bonus weight to matches in metadata fields (`topic`, `question_number`, `section`) vs just content body — metadata matches indicate stronger relevance (2x weight)
+### Edge Function (`get-analytics/index.ts`)
+Add new queries to compute:
+- `funnelSteps`: array of {label, count, pct} for the funnel
+- `engagementBuckets`: array of {bucket, users, converted, conversionRate}
+- `daysToPurchase`: distribution of days from signup to first purchase
+- `subjectBreakdown`: users/prompts/conversions per product
 
-**Scoring change:**
-```text
-Current:  "Find past paper questions about externalities"
-Keywords: ["find", "past", "paper", "questions", "about", "externalities"]
-Result:   Every paper chunk scores high on "past", "paper" → first chunks always win
-
-Fixed:    query = "externalities"
-Keywords: ["externalities"] (after stop-word removal)
-Result:   Only chunks mentioning externalities score > 0
-```
+### Frontend (`AnalyticsPage.tsx`)
+Add a new "Funnel Analysis" section between User Growth and Product Analytics with:
+- Horizontal funnel bar chart (Recharts BarChart)
+- Engagement vs conversion grouped bar chart
+- Days-to-purchase histogram
+- Insight cards with key metrics
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `supabase/functions/rag-chat/index.ts` | Stop-word filtering, spec_content keyword extraction, metadata bonus in search_only block |
-| `src/components/DynamicPastPaperFinder.tsx` | Remove "Find past paper questions about:" prefix, send spec_content field |
+| `supabase/functions/get-analytics/index.ts` | Add funnel, engagement bucket, and days-to-purchase queries |
+| `src/pages/AnalyticsPage.tsx` | Add Funnel Analysis section with 3 charts + insight cards |
 
