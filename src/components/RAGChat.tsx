@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2 } from 'lucide-react';
@@ -111,6 +112,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   } = useAuth();
   const { theme } = useTheme();
   const currentLogo = theme === 'dark' ? logo : logoDark;
+  const daysToFirstExam = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const sorted = [...EDEXCEL_ECONOMICS_EXAMS].sort((a, b) => a.date.getTime() - b.date.getTime());
+    const first = sorted[0];
+    return Math.ceil((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  }, []);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -652,7 +660,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               <div className="text-center py-16">
                 <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-4" />
                 <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-2 leading-[1.1] tracking-tight text-primary">
-                  The AI tutor built to get you an <span className="text-primary">A*</span>.
+                  {daysToFirstExam} days to go. Let's get you that <span className="text-primary">A*</span>.
                 </h2>
                 <p className="text-muted-foreground text-sm sm:text-base">Your Edexcel Economics revision, sorted</p>
                 
