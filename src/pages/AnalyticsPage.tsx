@@ -34,6 +34,9 @@ import {
   Crown,
   Calendar,
   Shield,
+  Filter,
+  AlertTriangle,
+  Lightbulb,
 } from "lucide-react";
 
 const CHART_COLORS = [
