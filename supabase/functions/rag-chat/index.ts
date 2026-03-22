@@ -1043,12 +1043,13 @@ When a student asks you to mark their essay, answer, or response:
     // Add diagram instruction if relevant
     if (relevantDiagram) {
       finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---
-A diagram titled "${relevantDiagram.title}" will be displayed as an image within your response automatically.
+A diagram titled "${relevantDiagram.title}" will be displayed as an image within your response automatically by the system.
 CRITICAL RULES:
-1. Do NOT draw, create, or describe your own version of this diagram using text, ASCII art, tables, or markdown. Never use characters to draw shapes.
-2. Reference the diagram naturally at the most relevant point in your explanation using phrases like "As shown in the diagram below..." or "The ${relevantDiagram.title} diagram illustrates this..."
-3. Place your diagram reference where it best supports the explanation — not just at the start.
-4. The image appears automatically where you reference it — you do not need to reproduce it.`;
+1. Do NOT draw, create, or describe your own version of this diagram using text, ASCII art, tables, or markdown.
+2. Do NOT write placeholder text like "[Insert diagram here]" or "[See diagram]" or any bracketed instructions — the system handles image insertion automatically.
+3. Simply reference the diagram conversationally, e.g. "As shown in the diagram below..." or "The diagram illustrates this..."
+4. Place your reference where it best supports the explanation.
+5. Never use square brackets to indicate where a diagram should go.`;
     }
     
     console.log(`System prompt length: ${finalSystemPrompt.length} chars (context: ${relevantContext.length} chars)`);
