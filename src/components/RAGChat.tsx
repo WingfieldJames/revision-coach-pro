@@ -117,6 +117,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [searchedSources, setSearchedSources] = useState<SearchedSource[]>([]);
   const [currentDiagram, setCurrentDiagram] = useState<DiagramData | null>(null);
+  const [resolvedDiagramUrl, setResolvedDiagramUrl] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ dataUrl: string; file: File } | null>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
