@@ -301,11 +301,19 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
             </button>
           </div>
           <div className="rounded-lg border border-border overflow-hidden bg-white">
-            <img
-              src={getImageSrc(matchedDiagram)}
-              alt={matchedDiagram.title}
-              className="w-full h-auto object-contain"
-            />
+            {imageError ? (
+              <div className="p-6 text-center text-muted-foreground">
+                <p className="text-sm">Unable to load diagram image.</p>
+                <p className="text-xs mt-1">Try searching again or check your connection.</p>
+              </div>
+            ) : (
+              <img
+                src={getImageSrc(matchedDiagram)}
+                alt={matchedDiagram.title}
+                className="w-full h-auto object-contain"
+                onError={() => setImageError(true)}
+              />
+            )}
           </div>
           <Button variant="outline" size="sm" onClick={reset} className="w-full">
             Search for Another Diagram
