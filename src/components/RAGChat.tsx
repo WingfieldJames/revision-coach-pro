@@ -128,6 +128,23 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Resolve signed URL for diagram images from storage
+  useEffect(() => {
+    if (!currentDiagram) { setResolvedDiagramUrl(null); return; }
+    const path = currentDiagram.imagePath;
+    if (path.startsWith('/') || path.startsWith('http')) {
+      setResolvedDiagramUrl(path);
+      return;
+    }
+    const resolve = async () => {
+      const { data } = await supabase.storage
+        .from('trainer-uploads')
+        .createSignedUrl(path, 3600);
+      if (data?.signedUrl) setResolvedDiagramUrl(data.signedUrl);
+    };
+    resolve();
+  }, [currentDiagram]);
+
   // Animation refs
   const bufferRef = useRef('');
   const animationRef = useRef<number | null>(null);
