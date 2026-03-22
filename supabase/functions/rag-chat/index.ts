@@ -96,13 +96,39 @@ const CS_DIAGRAMS = [
 ];
 
 // Find relevant diagram based on message content
-function findRelevantDiagram(message: string, subject: string): { id: string; title: string; imagePath: string } | null {
+// Accepts optional custom diagrams from Build portal (merged with fallbacks)
+function findRelevantDiagram(
+  message: string, 
+  subject: string,
+  customDiagrams?: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }>
+): { id: string; title: string; imagePath: string } | null {
   const lowerMessage = message.toLowerCase();
-  const diagramSet = subject === 'cs' ? CS_DIAGRAMS : ECONOMICS_DIAGRAMS;
   
-  for (const diagram of diagramSet) {
+  // Build merged diagram set: custom (Build) diagrams first, then fallbacks
+  const fallbackSet = subject === 'cs' ? CS_DIAGRAMS : ECONOMICS_DIAGRAMS;
+  const mergedDiagrams: Array<{ id: string; title: string; imagePath: string; keywords: string[] }> = [];
+  
+  // Add custom diagrams from Build portal (priority)
+  if (customDiagrams && customDiagrams.length > 0) {
+    for (const d of customDiagrams) {
+      // Generate keywords from title if none provided
+      const titleWords = d.title.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      const kws = d.keywords && d.keywords.length > 0 ? d.keywords : titleWords;
+      mergedDiagrams.push({ id: d.id, title: d.title, imagePath: d.imagePath, keywords: kws });
+    }
+  }
+  
+  // Add fallback diagrams (skip if a custom diagram has the same id)
+  const customIds = new Set(mergedDiagrams.map(d => d.id));
+  for (const d of fallbackSet) {
+    if (!customIds.has(d.id)) {
+      mergedDiagrams.push(d);
+    }
+  }
+  
+  for (const diagram of mergedDiagrams) {
     for (const keyword of diagram.keywords) {
-      if (lowerMessage.includes(keyword)) {
+      if (lowerMessage.includes(keyword.toLowerCase())) {
         return { id: diagram.id, title: diagram.title, imagePath: diagram.imagePath };
       }
     }
@@ -920,10 +946,28 @@ Use this to personalise your responses — reference their weak areas, their exa
       searchQueries,
     );
     
-    // Always try to find a relevant diagram
+    // Fetch custom diagrams from Build portal
+    let customDiagrams: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }> = [];
+    try {
+      const { data: trainerProject } = await supabaseAdmin
+        .from('trainer_projects')
+        .select('diagram_library')
+        .eq('product_id', product_id)
+        .eq('status', 'deployed')
+        .maybeSingle();
+      
+      if (trainerProject?.diagram_library && Array.isArray(trainerProject.diagram_library)) {
+        customDiagrams = trainerProject.diagram_library as typeof customDiagrams;
+        console.log(`Loaded ${customDiagrams.length} custom diagrams from Build portal`);
+      }
+    } catch (err) {
+      console.error('Error fetching custom diagrams:', err);
+    }
+    
+    // Always try to find a relevant diagram (custom Build diagrams take priority)
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
     const diagramSubject = enable_diagrams ? diagram_subject : 'economics';
-    relevantDiagram = findRelevantDiagram(message, diagramSubject);
+    relevantDiagram = findRelevantDiagram(message, diagramSubject, customDiagrams);
     if (relevantDiagram) {
       console.log(`Found relevant diagram: ${relevantDiagram.title}`);
     }
@@ -944,9 +988,16 @@ When a student asks you to mark their essay, answer, or response:
       finalSystemPrompt += `\n\n--- TRAINING DATA CONTEXT ---\nUse the following information to inform your responses:\n\n${relevantContext}`;
     }
     
+    // Add general no-ASCII-diagrams rule
+    finalSystemPrompt += `\n\nIMPORTANT: Never create ASCII art, text-based diagrams, or attempt to draw diagrams using characters, unicode, or markdown formatting. If no diagram image is available from the system, simply describe what the diagram would show in words.`;
+    
     // Add diagram instruction if relevant
     if (relevantDiagram) {
-      finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---\nA relevant diagram is available for this topic: "${relevantDiagram.title}". The system will display this diagram automatically alongside your response. Reference it naturally in your explanation where appropriate.`;
+      finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---
+A diagram titled "${relevantDiagram.title}" will be displayed as an image within your response automatically.
+IMPORTANT: Do NOT draw, create, or describe your own version of this diagram using text, ASCII art, tables, or markdown.
+Simply reference it naturally in your explanation, e.g. "As shown in the diagram below..." or "The ${relevantDiagram.title} diagram illustrates..."
+The image will appear automatically — you do not need to reproduce it in any way.`;
     }
     
     console.log(`System prompt length: ${finalSystemPrompt.length} chars (context: ${relevantContext.length} chars)`);

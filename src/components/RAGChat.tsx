@@ -715,26 +715,52 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                       td: ({ children }) => <td className="px-3 py-2 border border-border">{children}</td>,
                     }}
                   >
-                    {displayContent}
+                    {(() => {
+                      // If diagram should be embedded, only render first paragraph in this block
+                      const shouldEmbedDiagram = isLastAssistant && currentDiagram && !isLoading && !isAnimating && resolvedDiagramUrl;
+                      if (shouldEmbedDiagram && displayContent) {
+                        const splitIndex = displayContent.indexOf('\n\n');
+                        if (splitIndex > 0) {
+                          return displayContent.slice(0, splitIndex);
+                        }
+                      }
+                      return displayContent;
+                    })()}
                   </ReactMarkdown>
                   {showCursor && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
 
-                  {isLastAssistant && currentDiagram && !isLoading && !isAnimating && resolvedDiagramUrl && (
-                    <div className="mt-4 p-3 rounded-lg border border-border bg-background">
-                      <div className="flex items-center gap-2 mb-2">
-                        <BarChart2 className="w-4 h-4 text-primary" />
-                        <span className="text-sm font-medium">{currentDiagram.title}</span>
-                      </div>
-                      <div className="rounded-lg overflow-hidden bg-white">
-                        <img
-                          src={resolvedDiagramUrl}
-                          alt={currentDiagram.title}
-                          className="w-full max-w-md h-auto object-contain rounded-lg border border-border"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                  {isLastAssistant && currentDiagram && !isLoading && !isAnimating && resolvedDiagramUrl && (() => {
+                    const splitIndex = displayContent.indexOf('\n\n');
+                    const hasSecondPart = splitIndex > 0;
+                    const restContent = hasSecondPart ? displayContent.slice(splitIndex + 2) : null;
+                    
+                    return (
+                      <>
+                        <div className="my-4 p-3 rounded-lg border border-border bg-background">
+                          <div className="flex items-center gap-2 mb-2">
+                            <BarChart2 className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium">{currentDiagram.title}</span>
+                          </div>
+                          <div className="rounded-lg overflow-hidden bg-white">
+                            <img
+                              src={resolvedDiagramUrl}
+                              alt={currentDiagram.title}
+                              className="w-full max-w-md h-auto object-contain rounded-lg border border-border"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                          </div>
+                        </div>
+                        {restContent && (
+                          <ReactMarkdown
+                            remarkPlugins={[remarkMath, remarkGfm]}
+                            rehypePlugins={[rehypeKatex]}
+                          >
+                            {restContent}
+                          </ReactMarkdown>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             );
