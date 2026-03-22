@@ -120,6 +120,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [resolvedDiagramUrl, setResolvedDiagramUrl] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ dataUrl: string; file: File } | null>(null);
+  const [diagramFullscreen, setDiagramFullscreen] = useState(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
   const { tier: effectiveTier } = useProductTier(productId);
   const [limitReached, setLimitReached] = useState(false);
