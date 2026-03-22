@@ -659,8 +659,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
               <div className="text-center py-16">
                 <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-1" />
-                <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight text-primary">
-                  {daysToFirstExam} days to go. Let's get you that <span className="text-primary">A*</span>.
+                <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
+                  <span className="text-foreground">{daysToFirstExam} days to go.</span> <span className="text-primary">Let's get you that A*.</span>
                 </h2>
                 <p className="text-muted-foreground text-sm sm:text-base">Your Edexcel Economics revision, sorted</p>
                 
