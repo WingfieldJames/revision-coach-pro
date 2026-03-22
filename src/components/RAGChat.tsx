@@ -112,6 +112,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   } = useAuth();
   const { theme } = useTheme();
   const currentLogo = theme === 'dark' ? logo : logoDark;
+  const daysToFirstExam = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const sorted = [...EDEXCEL_ECONOMICS_EXAMS].sort((a, b) => a.date.getTime() - b.date.getTime());
+    const first = sorted[0];
+    return Math.ceil((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  }, []);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
