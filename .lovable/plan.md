@@ -1,56 +1,52 @@
 
 
-# Funnel Analytics Visualization + Leakage Analysis
+# Fix Diagram Integration: Use Build Diagrams + Embed in Response
 
-## What We'll Build
+## Problem
 
-A new "Funnel Analysis" section on the `/analytics` page with three visualizations:
+Two issues:
+1. **AI draws its own diagrams** (ASCII art) instead of only referencing the real image from Build
+2. **Build diagrams only appear at the bottom** of the response, not embedded within the explanation
+3. **Edge function uses hardcoded diagram arrays** instead of fetching from `trainer_projects.diagram_library` (Build portal)
 
-### 1. Conversion Funnel Bar Chart (horizontal)
-A stepped funnel showing:
-- Signed Up: 2,479
-- Used Chatbot: 1,483 (60%)
-- Returned 2+ Days: 438 (18%)
-- Engaged 4+ Days: 125 (5%)
-- Paid: 149 (6%)
+## Changes
 
-Each bar shows the count and % drop-off from the previous step.
+### 1. Edge Function: Fetch Build diagrams + stronger AI instructions (`rag-chat/index.ts`)
 
-### 2. Subject Breakdown Table
-Shows per-product: total users, prompt count, subscribers, and conversion rate. Already exists but we'll add it to the funnel context.
+**Fetch custom diagrams from Build:**
+- After finding the product_id, query `trainer_projects.diagram_library` for that product
+- Merge Build diagrams with the hardcoded fallback arrays (Build takes priority)
+- Pass merged set to `findRelevantDiagram()`
 
-### 3. Engagement → Conversion Heatmap/Bar
-A grouped bar chart showing engagement buckets (1 day, 2-3 days, 4-7 days, etc.) with two bars per bucket: total users and converted users. This shows exactly where the drop-off happens.
+**Stronger diagram prompt (line ~948):**
+Replace the current `--- DIAGRAM AVAILABLE ---` block with explicit instructions:
+```
+--- DIAGRAM AVAILABLE ---
+A diagram titled "{title}" will be displayed as an image below your response.
+IMPORTANT: Do NOT draw, create, or describe your own version of this diagram using text, ASCII art, or markdown.
+Simply reference it naturally: e.g. "As shown in the diagram below..." or "The {title} diagram illustrates..."
+The image will appear automatically — you do not need to reproduce it.
+```
 
-### 4. Days-to-Purchase Distribution
-A bar chart showing how many days it takes from signup to purchase (most buy same day).
+### 2. Client: Move diagram inline within response (`RAGChat.tsx`)
 
-### 5. Funnel Insights Cards
-Auto-calculated insight cards highlighting:
-- "40% of users never send a prompt"
-- "71% of active users only use it for 1 day"
-- "Users who return for 2+ days convert at 8%"
+Currently the diagram renders after the entire message (line 722). Instead:
+- When the AI response contains a natural reference point (e.g., after a paragraph mentioning the diagram), insert the diagram image at that point
+- Simpler approach: render the diagram **immediately after the first paragraph** of the AI response rather than at the very end, making it feel embedded in the explanation
+- This is done by splitting `displayContent` at the first double-newline and injecting the diagram component between the two halves
 
-## Implementation
+### 3. Edge Function: Also add general "no ASCII diagrams" rule
 
-### Edge Function (`get-analytics/index.ts`)
-Add new queries to compute:
-- `funnelSteps`: array of {label, count, pct} for the funnel
-- `engagementBuckets`: array of {bucket, users, converted, conversionRate}
-- `daysToPurchase`: distribution of days from signup to first purchase
-- `subjectBreakdown`: users/prompts/conversions per product
-
-### Frontend (`AnalyticsPage.tsx`)
-Add a new "Funnel Analysis" section between User Growth and Product Analytics with:
-- Horizontal funnel bar chart (Recharts BarChart)
-- Engagement vs conversion grouped bar chart
-- Days-to-purchase histogram
-- Insight cards with key metrics
+Add to the essay marking / general instructions section:
+```
+IMPORTANT: Never create ASCII art, text-based diagrams, or attempt to draw diagrams using characters.
+If no diagram image is available from the system, simply describe what the diagram would show in words.
+```
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `supabase/functions/get-analytics/index.ts` | Add funnel, engagement bucket, and days-to-purchase queries |
-| `src/pages/AnalyticsPage.tsx` | Add Funnel Analysis section with 3 charts + insight cards |
+| `supabase/functions/rag-chat/index.ts` | Fetch Build diagrams, merge with fallbacks, stronger "don't draw" prompt |
+| `src/components/RAGChat.tsx` | Render diagram inline after first paragraph instead of at bottom |
 
