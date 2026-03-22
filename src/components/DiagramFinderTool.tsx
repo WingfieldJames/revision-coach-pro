@@ -233,8 +233,6 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
 
   const subjectLabel = hasCustomDiagrams ? 'your subject' : subject === 'cs' ? 'Computer Science' : 'Economics';
 
-  const [imageError, setImageError] = useState(false);
-
   // Get the image path based on diagram type
   const getImageSrc = (diagram: Diagram | CSDiagram | CustomDiagram) => {
     if ('imagePath' in diagram) return resolvedImageUrl || diagram.imagePath;
