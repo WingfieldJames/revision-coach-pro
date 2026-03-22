@@ -146,7 +146,6 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subjec
                 activeDot={{ r: 6 }}
                 legendType="none"
                 name={` `}
-                tooltipType="none"
               />
             ))}
           </LineChart>
