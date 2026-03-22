@@ -1,56 +1,46 @@
 
 
-# Revision Guide: Full Build Integration + Diagram Support + Stability
+# Fix Past Paper Finder: Stop-Word Filtering + Clean Query
 
-## Current State
+## Problem
 
-The revision guide is **mostly wired up** to the Build portal already — it fetches spec points and training data from `document_chunks`, and loads diagrams from `trainer_projects.diagram_library`. However, there are gaps:
+The Past Paper Finder always returns the same first questions regardless of topic. Root cause is two-fold:
 
-1. **Context overflow** — Same bug as rag-chat: the edge function concatenates up to 170 chunks with no character cap, causing gateway timeouts
-2. **CORS headers missing** — Same missing `x-supabase-client-*` headers
-3. **Diagram matching is weak** — The client-side keyword matching only checks diagram `keywords` array, but most diagrams in the Build portal don't have keywords set. Title words should also be used for matching
-4. **Diagram context sent to AI is too sparse** — Only sends `"- Title (available as diagram image)"` — the AI doesn't know what the diagram actually shows, so it can't intelligently decide when to reference it
-5. **No context cap** — Training context can exceed 100K chars, causing the same crashes as rag-chat
+1. **Client sends polluted query**: `"Find past paper questions about: externalities"` — the words "find", "past", "paper", "questions", "about" all become search keywords and match EVERY paper chunk equally, drowning out the actual topic.
 
-## Plan
+2. **No stop-word filtering in edge function**: The scoring splits on whitespace and counts raw keyword frequency. Common words dominate, so the first chunks in the array always win.
 
-### 1. Edge Function: Add context cap + fix CORS (`generate-revision-guide/index.ts`)
-- Add `MAX_CONTEXT_CHARS = 40000` constant
-- Cap training context concatenation to stay within limit
-- Update CORS headers to include `x-supabase-client-*` headers
+## Changes
 
-### 2. Edge Function: Fetch diagrams server-side (`generate-revision-guide/index.ts`)
-- When `diagrams` option is enabled and client sends diagram_context, use it
-- Additionally, fetch `trainer_projects.diagram_library` server-side as a fallback so the AI always has access to available diagrams
-- Include diagram titles AND any keywords/descriptions in the context so the AI can make informed decisions about which diagrams to reference
+### 1. Client: Send clean query (`src/components/DynamicPastPaperFinder.tsx`)
 
-### 3. Client: Improve diagram keyword matching (`DynamicRevisionGuide.tsx`)
-- When matching diagrams to a spec point, also split diagram titles into words and use those as match terms (not just the `keywords` array)
-- This ensures diagrams uploaded in Build without explicit keywords still get matched
+- Remove the `"Find past paper questions about: "` prefix — send only the raw topic text
+- When a spec point is selected, also send the spec point's `content` field as a `spec_content` parameter so the edge function has richer keywords to match against
 
-### 4. Client: Send richer diagram context to edge function (`DynamicRevisionGuide.tsx`)
-- Instead of just `"- Title (available as diagram image)"`, include the diagram's keywords so the AI knows what the diagram covers
+### 2. Edge Function: Add stop-word filtering + spec_content support (`supabase/functions/rag-chat/index.ts`)
 
-## Technical Details
+In the `search_only` block (~line 627-676):
 
-**Context cap logic (edge function):**
+- Add a stop-word set: `"the", "and", "for", "about", "find", "past", "paper", "questions", "with", "how", "what", "does", "this", "that", "are", "was", "were", "been", "have", "has", "from", "will", "can", "not", "but", "all", "its", "use", "using", "which", "their", "there", "than", "into", "also", "such", "each", "other", "these", "those", "them", "they", "would", "could", "should", "may", "might", "must"`
+- Filter keywords through stop-word list before scoring
+- Accept optional `spec_content` field from request body — extract additional keywords from it
+- Give bonus weight to matches in metadata fields (`topic`, `question_number`, `section`) vs just content body — metadata matches indicate stronger relevance (2x weight)
+
+**Scoring change:**
 ```text
-After filtering relevant chunks, iterate and concatenate
-Stop when total chars > MAX_CONTEXT_CHARS (40,000)
-Prioritize exam_technique + specification chunks first
-```
+Current:  "Find past paper questions about externalities"
+Keywords: ["find", "past", "paper", "questions", "about", "externalities"]
+Result:   Every paper chunk scores high on "past", "paper" → first chunks always win
 
-**Diagram matching improvement (client):**
-```text
-Current: only match on d.keywords array
-Fixed: also split d.title into words and use as match terms
-Example: diagram "Supply and Demand Curve" matches spec about "demand"
+Fixed:    query = "externalities"
+Keywords: ["externalities"] (after stop-word removal)
+Result:   Only chunks mentioning externalities score > 0
 ```
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `supabase/functions/generate-revision-guide/index.ts` | Context cap, CORS fix, server-side diagram fallback |
-| `src/components/DynamicRevisionGuide.tsx` | Better diagram matching, richer diagram context |
+| `supabase/functions/rag-chat/index.ts` | Stop-word filtering, spec_content keyword extraction, metadata bonus in search_only block |
+| `src/components/DynamicPastPaperFinder.tsx` | Remove "Find past paper questions about:" prefix, send spec_content field |
 
