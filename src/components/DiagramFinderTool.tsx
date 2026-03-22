@@ -50,6 +50,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
   const [monthlyUsage, setMonthlyUsage] = useState<number>(0);
   const [resolvedImageUrl, setResolvedImageUrl] = useState<string | null>(null);
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   const hasCustomDiagrams = customDiagrams && customDiagrams.length > 0;
 
