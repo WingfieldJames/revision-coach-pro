@@ -655,6 +655,31 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   The AI tutor built to get you an <span className="text-primary">A*</span>.
                 </h2>
                 <p className="text-muted-foreground text-sm sm:text-base">Ask anything about A-Level Economics — diagrams, essays, spec points, exam technique</p>
+                
+                {/* Social proof badges */}
+                <div className="flex items-center justify-center gap-3 flex-wrap mt-4">
+                  {/* Avatars + user count */}
+                  <div className="flex items-center gap-2 bg-primary/10 rounded-full py-1.5 px-3.5">
+                    <div className="flex">
+                      <div className="w-[22px] h-[22px] rounded-full bg-primary/40 border-2 border-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary z-[3]">JT</div>
+                      <div className="w-[22px] h-[22px] rounded-full bg-primary/50 border-2 border-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary -ml-1.5 z-[2]">SC</div>
+                      <div className="w-[22px] h-[22px] rounded-full bg-primary/60 border-2 border-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary-foreground -ml-1.5 z-[1]">MR</div>
+                    </div>
+                    <span className="text-[13px] font-medium text-primary">4,000+ students</span>
+                  </div>
+
+                  {/* Star rating */}
+                  <div className="flex items-center gap-1.5 bg-primary/10 rounded-full py-1.5 px-3.5">
+                    <span className="text-[13px] tracking-wider text-yellow-500">★★★★★</span>
+                    <span className="text-[13px] font-medium text-primary">4.9 / 5</span>
+                  </div>
+
+                  {/* Growth stat */}
+                  <div className="flex items-center gap-1.5 bg-primary/10 rounded-full py-1.5 px-3.5">
+                    <span className="text-sm text-primary">↑</span>
+                    <span className="text-[13px] font-medium text-primary">620% growth this term</span>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="text-center py-16">
