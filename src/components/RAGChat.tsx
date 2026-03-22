@@ -912,7 +912,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         {/* Suggested prompts — hidden when an image is pending */}
         {messages.length === 0 && suggestedPrompts.length > 0 && !pendingImage && (
           productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
-            <div className="grid grid-cols-2 gap-2 max-w-[580px] mx-auto mb-5 px-4">
+            <div className="grid grid-cols-2 gap-3 max-w-3xl w-full mx-auto mb-5 px-4">
               {suggestedPrompts.map((prompt, idx) => {
                 const labels = ['Diagram', 'Spec point', 'Exam technique', 'Application'];
                 return (
@@ -920,12 +920,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     key={idx}
                     onClick={() => handleSuggestedPrompt(prompt)}
                     disabled={isLoading}
-                    className="bg-secondary dark:bg-accent border border-border rounded-xl px-3.5 py-3 text-left flex flex-col gap-1 transition-colors hover:border-primary/40 hover:bg-[hsl(263_70%_50%/0.06)] dark:hover:bg-primary/10 disabled:opacity-50"
+                    className="bg-secondary dark:bg-accent border border-border rounded-xl px-4 py-4 text-left flex flex-col gap-1.5 transition-colors hover:border-primary/40 hover:bg-[hsl(263_70%_50%/0.06)] dark:hover:bg-primary/10 disabled:opacity-50"
                   >
-                    <span className="text-[11px] font-medium uppercase tracking-wide text-primary">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-primary font-sans">
                       {labels[idx] || ''}
                     </span>
-                    <span className="text-[13px] text-foreground leading-snug">
+                    <span className="text-sm text-foreground leading-snug font-sans">
                       {prompt.text}
                     </span>
                   </button>
