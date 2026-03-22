@@ -988,9 +988,16 @@ When a student asks you to mark their essay, answer, or response:
       finalSystemPrompt += `\n\n--- TRAINING DATA CONTEXT ---\nUse the following information to inform your responses:\n\n${relevantContext}`;
     }
     
+    // Add general no-ASCII-diagrams rule
+    finalSystemPrompt += `\n\nIMPORTANT: Never create ASCII art, text-based diagrams, or attempt to draw diagrams using characters, unicode, or markdown formatting. If no diagram image is available from the system, simply describe what the diagram would show in words.`;
+    
     // Add diagram instruction if relevant
     if (relevantDiagram) {
-      finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---\nA relevant diagram is available for this topic: "${relevantDiagram.title}". The system will display this diagram automatically alongside your response. Reference it naturally in your explanation where appropriate.`;
+      finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---
+A diagram titled "${relevantDiagram.title}" will be displayed as an image within your response automatically.
+IMPORTANT: Do NOT draw, create, or describe your own version of this diagram using text, ASCII art, tables, or markdown.
+Simply reference it naturally in your explanation, e.g. "As shown in the diagram below..." or "The ${relevantDiagram.title} diagram illustrates..."
+The image will appear automatically — you do not need to reproduce it in any way.`;
     }
     
     console.log(`System prompt length: ${finalSystemPrompt.length} chars (context: ${relevantContext.length} chars)`);
