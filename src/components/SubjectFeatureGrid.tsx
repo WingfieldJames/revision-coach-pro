@@ -1,4 +1,4 @@
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, Bot, PenLine, FileText, BarChart3, Brain, BookOpen, LucideIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface SubjectFeatureGridProps {
@@ -14,7 +14,7 @@ interface SubjectFeatureGridProps {
 }
 
 interface Feature {
-  icon: string;
+  icon: LucideIcon;
   title: string;
   desc: string;
 }
