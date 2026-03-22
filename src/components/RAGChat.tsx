@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown } from 'lucide-react';
+import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2 } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
@@ -120,6 +120,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [resolvedDiagramUrl, setResolvedDiagramUrl] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ dataUrl: string; file: File } | null>(null);
+  const [diagramFullscreen, setDiagramFullscreen] = useState(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
   const { tier: effectiveTier } = useProductTier(productId);
   const [limitReached, setLimitReached] = useState(false);
@@ -783,8 +784,18 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                           <div className="flex items-center gap-2 mb-2">
                             <BarChart2 className="w-4 h-4 text-primary" />
                             <span className="text-sm font-medium">{currentDiagram.title}</span>
+                            <button
+                              onClick={() => setDiagramFullscreen(true)}
+                              className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <Maximize2 className="w-3 h-3" />
+                              (click to expand)
+                            </button>
                           </div>
-                          <div className="rounded-lg overflow-hidden bg-white">
+                          <div
+                            className="rounded-lg overflow-hidden bg-white cursor-pointer"
+                            onClick={() => setDiagramFullscreen(true)}
+                          >
                             <img
                               src={resolvedDiagramUrl}
                               alt={currentDiagram.title}
@@ -979,6 +990,36 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           <p className="text-center text-xs text-muted-foreground mt-2">{footerText}</p>
         </div>
       </div>
+
+      {/* Fullscreen diagram overlay */}
+      {diagramFullscreen && currentDiagram && resolvedDiagramUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setDiagramFullscreen(false)}
+        >
+          <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between w-full mb-3">
+              <div className="flex items-center gap-2 text-white">
+                <BarChart2 className="w-5 h-5" />
+                <span className="font-medium">{currentDiagram.title}</span>
+              </div>
+              <button
+                onClick={() => setDiagramFullscreen(false)}
+                className="text-white/70 hover:text-white transition-colors p-1"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="bg-white rounded-xl overflow-hidden w-full">
+              <img
+                src={resolvedDiagramUrl}
+                alt={currentDiagram.title}
+                className="w-full h-auto object-contain max-h-[80vh]"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
