@@ -649,35 +649,32 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
             productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
-              <div className="text-center py-8">
-                
+              <div className="text-center py-16">
+                <img src={currentLogo} alt="A* AI" className="h-14 mx-auto mb-4" />
                 <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-2 leading-[1.1] tracking-tight text-primary">
                   The AI tutor built to get you an <span className="text-primary">A*</span>.
                 </h2>
                 <p className="text-muted-foreground text-sm sm:text-base">Ask anything about A-Level Economics — diagrams, essays, spec points, exam technique</p>
                 
                 {/* Social proof badges */}
-                <div className="flex items-center justify-center gap-3 flex-wrap mt-4">
-                  {/* Avatars + user count */}
-                  <div className="flex items-center gap-2 bg-primary/10 rounded-full py-1.5 px-3.5">
+                <div className="flex items-center justify-center gap-2.5 flex-wrap mt-5">
+                  <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
                     <div className="flex">
-                      <div className="w-[22px] h-[22px] rounded-full bg-primary/40 border-2 border-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary z-[3]">JT</div>
-                      <div className="w-[22px] h-[22px] rounded-full bg-primary/50 border-2 border-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary -ml-1.5 z-[2]">SC</div>
-                      <div className="w-[22px] h-[22px] rounded-full bg-primary/60 border-2 border-primary/10 flex items-center justify-center text-[9px] font-semibold text-primary-foreground -ml-1.5 z-[1]">MR</div>
+                      <div className="w-5 h-5 rounded-full bg-primary/20 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary z-[3]">JT</div>
+                      <div className="w-5 h-5 rounded-full bg-primary/30 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary -ml-1.5 z-[2]">SC</div>
+                      <div className="w-5 h-5 rounded-full bg-primary/50 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary-foreground -ml-1.5 z-[1]">MR</div>
                     </div>
-                    <span className="text-[13px] font-medium text-primary">4,000+ students</span>
+                    <span className="text-xs font-medium text-foreground">4,000+ students</span>
                   </div>
 
-                  {/* Star rating */}
-                  <div className="flex items-center gap-1.5 bg-primary/10 rounded-full py-1.5 px-3.5">
-                    <span className="text-[13px] tracking-wider text-amber-500 dark:text-amber-400">★★★★★</span>
-                    <span className="text-[13px] font-medium text-primary">4.9 / 5</span>
+                  <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
+                    <span className="text-xs tracking-wider text-amber-500 dark:text-amber-400">★★★★★</span>
+                    <span className="text-xs font-medium text-foreground">4.9 / 5</span>
                   </div>
 
-                  {/* Growth stat */}
-                  <div className="flex items-center gap-1.5 bg-primary/10 rounded-full py-1.5 px-3.5">
-                    <span className="text-sm text-primary">↑</span>
-                    <span className="text-[13px] font-medium text-primary">620% growth this term</span>
+                  <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
+                    <span className="text-xs text-primary font-bold">↑</span>
+                    <span className="text-xs font-medium text-foreground">620% growth this term</span>
                   </div>
                 </div>
               </div>
