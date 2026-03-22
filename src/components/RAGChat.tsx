@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown } from 'lucide-react';
+import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2 } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
