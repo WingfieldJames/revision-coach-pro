@@ -102,12 +102,36 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subjec
                 fontSize: '12px',
                 color: 'hsl(var(--foreground))',
               }}
-              formatter={(value: number, name: string) => {
-                // Hide duplicate predicted line entries (they have name=" ")
-                if (name === ' ') return [null, null];
-                return [`${value}%`, undefined];
+              content={({ active, payload, label }: any) => {
+                if (!active || !payload?.length) return null;
+                // Deduplicate: for year "2025" we get both actual + predicted lines
+                const seen = new Set<string>();
+                const items: { grade: string; value: number; color: string }[] = [];
+                for (const entry of payload) {
+                  const grade = entry.name === ' ' ? entry.dataKey : entry.name;
+                  if (grade && !seen.has(grade) && entry.value != null) {
+                    seen.add(grade);
+                    items.push({ grade, value: entry.value, color: entry.stroke || entry.color });
+                  }
+                }
+                return (
+                  <div style={{
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    fontSize: '12px',
+                    color: 'hsl(var(--foreground))',
+                  }}>
+                    <p style={{ margin: '0 0 4px', fontWeight: 600 }}>{label}</p>
+                    {items.map((item) => (
+                      <p key={item.grade} style={{ margin: '2px 0', color: item.color }}>
+                        {item.grade}: {item.value}%
+                      </p>
+                    ))}
+                  </div>
+                );
               }}
-              itemSorter={() => 0}
             />
             <Legend
               wrapperStyle={{ fontSize: '12px' }}
