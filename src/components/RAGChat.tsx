@@ -784,8 +784,18 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                           <div className="flex items-center gap-2 mb-2">
                             <BarChart2 className="w-4 h-4 text-primary" />
                             <span className="text-sm font-medium">{currentDiagram.title}</span>
+                            <button
+                              onClick={() => setDiagramFullscreen(true)}
+                              className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <Maximize2 className="w-3 h-3" />
+                              (click to expand)
+                            </button>
                           </div>
-                          <div className="rounded-lg overflow-hidden bg-white">
+                          <div
+                            className="rounded-lg overflow-hidden bg-white cursor-pointer"
+                            onClick={() => setDiagramFullscreen(true)}
+                          >
                             <img
                               src={resolvedDiagramUrl}
                               alt={currentDiagram.title}
