@@ -651,8 +651,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
               <div className="text-center py-16">
                 <img src={currentLogo} alt="A* AI" className="h-16 mx-auto mb-6" />
-                <h2 className="text-2xl font-bold mb-2 dark:text-foreground light-gradient-subject">
-                  Edexcel Economics
+                <h2 className="text-2xl font-bold mb-2 text-foreground">
+                  The AI tutor built to get you an A*.
                 </h2>
                 <p className="text-muted-foreground">Ask anything about A-Level Economics — diagrams, essays, spec points, exam technique</p>
               </div>
