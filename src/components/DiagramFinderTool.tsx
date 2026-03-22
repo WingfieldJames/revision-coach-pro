@@ -50,6 +50,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
   const [monthlyUsage, setMonthlyUsage] = useState<number>(0);
   const [resolvedImageUrl, setResolvedImageUrl] = useState<string | null>(null);
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   const hasCustomDiagrams = customDiagrams && customDiagrams.length > 0;
 
@@ -227,6 +228,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
     setInputText('');
     setMatchedDiagram(null);
     setNoMatch(false);
+    setImageError(false);
   };
 
   const subjectLabel = hasCustomDiagrams ? 'your subject' : subject === 'cs' ? 'Computer Science' : 'Economics';
@@ -298,11 +300,19 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
             </button>
           </div>
           <div className="rounded-lg border border-border overflow-hidden bg-white">
-            <img
-              src={getImageSrc(matchedDiagram)}
-              alt={matchedDiagram.title}
-              className="w-full h-auto object-contain"
-            />
+            {imageError ? (
+              <div className="p-6 text-center text-muted-foreground">
+                <p className="text-sm">Unable to load diagram image.</p>
+                <p className="text-xs mt-1">Try searching again or check your connection.</p>
+              </div>
+            ) : (
+              <img
+                src={getImageSrc(matchedDiagram)}
+                alt={matchedDiagram.title}
+                className="w-full h-auto object-contain"
+                onError={() => setImageError(true)}
+              />
+            )}
           </div>
           <Button variant="outline" size="sm" onClick={reset} className="w-full">
             Search for Another Diagram
