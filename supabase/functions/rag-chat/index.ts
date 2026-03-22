@@ -946,10 +946,28 @@ Use this to personalise your responses — reference their weak areas, their exa
       searchQueries,
     );
     
-    // Always try to find a relevant diagram
+    // Fetch custom diagrams from Build portal
+    let customDiagrams: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }> = [];
+    try {
+      const { data: trainerProject } = await supabaseAdmin
+        .from('trainer_projects')
+        .select('diagram_library')
+        .eq('product_id', product_id)
+        .eq('status', 'deployed')
+        .maybeSingle();
+      
+      if (trainerProject?.diagram_library && Array.isArray(trainerProject.diagram_library)) {
+        customDiagrams = trainerProject.diagram_library as typeof customDiagrams;
+        console.log(`Loaded ${customDiagrams.length} custom diagrams from Build portal`);
+      }
+    } catch (err) {
+      console.error('Error fetching custom diagrams:', err);
+    }
+    
+    // Always try to find a relevant diagram (custom Build diagrams take priority)
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
     const diagramSubject = enable_diagrams ? diagram_subject : 'economics';
-    relevantDiagram = findRelevantDiagram(message, diagramSubject);
+    relevantDiagram = findRelevantDiagram(message, diagramSubject, customDiagrams);
     if (relevantDiagram) {
       console.log(`Found relevant diagram: ${relevantDiagram.title}`);
     }
