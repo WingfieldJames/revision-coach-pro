@@ -621,12 +621,28 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.json();
-    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id } = body;
+    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id, spec_content } = body;
 
     // search_only mode: keyword search for past paper chunks, return JSON
     if (search_only && product_id) {
       const searchQuery = query || message || '';
       console.log(`search_only mode for product ${product_id}: "${searchQuery.substring(0, 80)}"`);
+
+      // Stop words to filter out common terms that pollute search results
+      const STOP_WORDS = new Set([
+        'the', 'and', 'for', 'about', 'find', 'past', 'paper', 'questions', 'question',
+        'with', 'how', 'what', 'does', 'this', 'that', 'are', 'was', 'were', 'been',
+        'have', 'has', 'from', 'will', 'can', 'not', 'but', 'all', 'its', 'use',
+        'using', 'which', 'their', 'there', 'than', 'into', 'also', 'such', 'each',
+        'other', 'these', 'those', 'them', 'they', 'would', 'could', 'should', 'may',
+        'might', 'must', 'when', 'where', 'why', 'who', 'whom', 'then', 'only',
+        'very', 'just', 'more', 'most', 'some', 'any', 'both', 'same', 'been',
+        'being', 'between', 'before', 'after', 'above', 'below', 'under', 'over',
+        'again', 'further', 'here', 'once', 'during', 'while', 'through',
+        'explain', 'describe', 'discuss', 'analyse', 'analyze', 'evaluate', 'assess',
+        'outline', 'state', 'give', 'define', 'identify', 'suggest', 'consider',
+        'marks', 'mark', 'exam', 'answer', 'level', 'grade', 'topic', 'topics',
+      ]);
 
       const PAPER_CONTENT_TYPES = [
         'paper_1', 'paper_2', 'paper_3',
@@ -655,13 +671,33 @@ serve(async (req) => {
         return PAPER_CONTENT_TYPES.includes(ct) || (!EXCLUDED_CONTENT_TYPES.includes(ct) && ct.includes('paper'));
       });
 
-      const keywords = searchQuery.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+      // Extract keywords from query + optional spec_content, filtering stop words
+      const rawWords = searchQuery.toLowerCase().split(/\s+/);
+      const specWords = spec_content ? String(spec_content).toLowerCase().split(/\s+/) : [];
+      const allWords = [...rawWords, ...specWords];
+      const keywords = [...new Set(allWords.filter((w: string) => w.length > 2 && !STOP_WORDS.has(w)))];
+
+      console.log(`search_only keywords after stop-word filter: [${keywords.slice(0, 10).join(', ')}] (${keywords.length} total)`);
+
+      if (keywords.length === 0) {
+        console.log('search_only: no meaningful keywords after filtering');
+        return new Response(JSON.stringify({ results: [] }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const scored = paperChunks.map((c: any) => {
-        const text = (c.content + ' ' + JSON.stringify(c.metadata || {})).toLowerCase();
+        const contentText = (c.content || '').toLowerCase();
+        const metaTopic = String(c.metadata?.topic || '').toLowerCase();
+        const metaSection = String(c.metadata?.section || '').toLowerCase();
         let score = 0;
         for (const kw of keywords) {
-          const matches = text.split(kw).length - 1;
-          score += matches;
+          // Content body matches (1x weight)
+          const contentMatches = contentText.split(kw).length - 1;
+          score += contentMatches;
+          // Metadata matches get 2x bonus (topic/section are more targeted)
+          if (metaTopic.includes(kw)) score += 2;
+          if (metaSection.includes(kw)) score += 2;
         }
         return { ...c, similarity: score };
       }).filter((c: any) => c.similarity > 0)

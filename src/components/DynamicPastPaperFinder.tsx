@@ -171,14 +171,20 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
         headers['Authorization'] = `Bearer ${sessionData.session.access_token}`;
       }
 
+      // Send clean query without polluting prefix, plus spec content for richer matching
+      const searchPayload: Record<string, any> = {
+        product_id: productId,
+        query: query,
+        search_only: true,
+      };
+      if (selectedSpecPoint?.content) {
+        searchPayload.spec_content = selectedSpecPoint.content;
+      }
+
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          product_id: productId,
-          query: `Find past paper questions about: ${query}`,
-          search_only: true,
-        }),
+        body: JSON.stringify(searchPayload),
       });
 
       if (!resp.ok) {
