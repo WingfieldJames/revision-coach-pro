@@ -177,8 +177,8 @@ export function SubjectFeatureGrid({
               key={f.title}
               className="bg-muted border border-border/50 hover:border-primary/30 rounded-xl p-4 transition-colors"
             >
-              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-sm mb-3">
-                {f.icon}
+              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
+                <f.icon className="w-4 h-4 text-primary" />
               </div>
               <div className="text-[13px] font-semibold text-foreground mb-1">
                 {f.title}
