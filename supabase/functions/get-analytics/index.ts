@@ -205,6 +205,87 @@ Deno.serve(async (req) => {
     // 11. Estimated MRR
     const estimatedMRR = monthlyCount * 8; // Rough avg monthly price
 
+    // 12. Funnel Analysis
+    let allPromptUsers: any[] = [];
+    let pFrom = 0;
+    while (true) {
+      const { data: page } = await adminClient
+        .from("daily_prompt_usage")
+        .select("user_id, usage_date")
+        .range(pFrom, pFrom + PAGE_SIZE - 1);
+      if (!page || page.length === 0) break;
+      allPromptUsers = allPromptUsers.concat(page);
+      if (page.length < PAGE_SIZE) break;
+      pFrom += PAGE_SIZE;
+    }
+
+    const userDaysMap: Record<string, Set<string>> = {};
+    allPromptUsers.forEach((r: any) => {
+      if (!userDaysMap[r.user_id]) userDaysMap[r.user_id] = new Set();
+      userDaysMap[r.user_id].add(r.usage_date);
+    });
+
+    const usedChatbot = Object.keys(userDaysMap).length;
+    const returned2Plus = Object.entries(userDaysMap).filter(([_, days]) => days.size >= 2).length;
+    const engaged4Plus = Object.entries(userDaysMap).filter(([_, days]) => days.size >= 4).length;
+
+    const funnelSteps = [
+      { label: "Signed Up", count: totalUsers || 0, pct: 100 },
+      { label: "Used Chatbot", count: usedChatbot, pct: totalUsers ? Math.round((usedChatbot / totalUsers) * 100) : 0 },
+      { label: "Returned 2+ Days", count: returned2Plus, pct: totalUsers ? Math.round((returned2Plus / totalUsers!) * 100) : 0 },
+      { label: "Engaged 4+ Days", count: engaged4Plus, pct: totalUsers ? Math.round((engaged4Plus / totalUsers!) * 100) : 0 },
+      { label: "Paid", count: totalPaying, pct: totalUsers ? Math.round((totalPaying / totalUsers!) * 100) : 0 },
+    ];
+
+    const paidUserIds = new Set(activeSubs.map((s: any) => s.user_id));
+    const bucketDefs = [
+      { label: "1 day", min: 1, max: 1 },
+      { label: "2-3 days", min: 2, max: 3 },
+      { label: "4-7 days", min: 4, max: 7 },
+      { label: "8-14 days", min: 8, max: 14 },
+      { label: "15+ days", min: 15, max: 9999 },
+    ];
+    const engagementBuckets = bucketDefs.map((b) => {
+      const usersInBucket = Object.entries(userDaysMap).filter(
+        ([_, days]) => days.size >= b.min && days.size <= b.max
+      );
+      const converted = usersInBucket.filter(([uid]) => paidUserIds.has(uid)).length;
+      return {
+        bucket: b.label,
+        users: usersInBucket.length,
+        converted,
+        conversionRate: usersInBucket.length > 0 ? Math.round((converted / usersInBucket.length) * 100) : 0,
+      };
+    });
+
+    // Days to purchase distribution
+    const daysToPurchaseDist: Record<string, number> = { "Same day": 0, "1-3 days": 0, "4-7 days": 0, "8-30 days": 0, "30+ days": 0 };
+    const subUserIds = [...new Set(activeSubs.map((s: any) => s.user_id))];
+    for (let i = 0; i < subUserIds.length; i += PAGE_SIZE) {
+      const batch = subUserIds.slice(i, i + PAGE_SIZE);
+      const { data: subUsers } = await adminClient
+        .from("users")
+        .select("id, created_at")
+        .in("id", batch);
+      if (subUsers) {
+        subUsers.forEach((u: any) => {
+          const userSubs = activeSubs.filter((s: any) => s.user_id === u.id);
+          if (userSubs.length > 0) {
+            const earliest = userSubs.reduce((a: any, b: any) =>
+              new Date(a.created_at) < new Date(b.created_at) ? a : b
+            );
+            const diffDays = Math.floor((new Date(earliest.created_at).getTime() - new Date(u.created_at).getTime()) / 86400000);
+            if (diffDays <= 0) daysToPurchaseDist["Same day"]++;
+            else if (diffDays <= 3) daysToPurchaseDist["1-3 days"]++;
+            else if (diffDays <= 7) daysToPurchaseDist["4-7 days"]++;
+            else if (diffDays <= 30) daysToPurchaseDist["8-30 days"]++;
+            else daysToPurchaseDist["30+ days"]++;
+          }
+        });
+      }
+    }
+    const daysToPurchase = Object.entries(daysToPurchaseDist).map(([label, count]) => ({ label, count }));
+
     const response = {
       overview: {
         totalUsers: totalUsers || 0,
@@ -231,6 +312,7 @@ Deno.serve(async (req) => {
       })),
       recentSubscriptions: recentSubs,
       products: (products || []).map((p: any) => ({ id: p.id, name: p.name })),
+      funnel: { funnelSteps, engagementBuckets, daysToPurchase },
     };
 
     return new Response(JSON.stringify(response), {
