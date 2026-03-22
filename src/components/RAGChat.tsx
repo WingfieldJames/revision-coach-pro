@@ -716,12 +716,37 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     }}
                   >
                     {(() => {
-                      // If diagram should be embedded, only render first paragraph in this block
-                      const shouldEmbedDiagram = isLastAssistant && currentDiagram && !isLoading && !isAnimating && resolvedDiagramUrl;
+                      // If diagram should be embedded, find the best insertion point
+                      const shouldEmbedDiagram = isLastAssistant && currentDiagram && resolvedDiagramUrl;
                       if (shouldEmbedDiagram && displayContent) {
-                        const splitIndex = displayContent.indexOf('\n\n');
-                        if (splitIndex > 0) {
-                          return displayContent.slice(0, splitIndex);
+                        // Find where the AI references the diagram naturally
+                        const diagramRefPatterns = [
+                          /(?:as\s+(?:shown|illustrated|seen)\s+(?:in|by)\s+the\s+diagram)/i,
+                          /(?:the\s+(?:diagram|figure|chart)\s+(?:below|above|here))/i,
+                          /(?:(?:see|refer\s+to)\s+the\s+(?:diagram|figure))/i,
+                          /(?:diagram\s+(?:illustrates|shows|demonstrates))/i,
+                        ];
+                        
+                        let splitAt = -1;
+                        for (const pattern of diagramRefPatterns) {
+                          const match = displayContent.match(pattern);
+                          if (match && match.index !== undefined) {
+                            // Find the end of the paragraph containing this reference
+                            const afterMatch = displayContent.indexOf('\n\n', match.index);
+                            if (afterMatch > 0) {
+                              splitAt = afterMatch;
+                              break;
+                            }
+                          }
+                        }
+                        
+                        // Fallback: split after first paragraph
+                        if (splitAt < 0) {
+                          splitAt = displayContent.indexOf('\n\n');
+                        }
+                        
+                        if (splitAt > 0) {
+                          return displayContent.slice(0, splitAt);
                         }
                       }
                       return displayContent;
@@ -729,10 +754,26 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   </ReactMarkdown>
                   {showCursor && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
 
-                  {isLastAssistant && currentDiagram && !isLoading && !isAnimating && resolvedDiagramUrl && (() => {
-                    const splitIndex = displayContent.indexOf('\n\n');
-                    const hasSecondPart = splitIndex > 0;
-                    const restContent = hasSecondPart ? displayContent.slice(splitIndex + 2) : null;
+                  {isLastAssistant && currentDiagram && resolvedDiagramUrl && (() => {
+                    // Find the same split point as above for the rest content
+                    const diagramRefPatterns = [
+                      /(?:as\s+(?:shown|illustrated|seen)\s+(?:in|by)\s+the\s+diagram)/i,
+                      /(?:the\s+(?:diagram|figure|chart)\s+(?:below|above|here))/i,
+                      /(?:(?:see|refer\s+to)\s+the\s+(?:diagram|figure))/i,
+                      /(?:diagram\s+(?:illustrates|shows|demonstrates))/i,
+                    ];
+                    
+                    let splitAt = -1;
+                    for (const pattern of diagramRefPatterns) {
+                      const match = displayContent.match(pattern);
+                      if (match && match.index !== undefined) {
+                        const afterMatch = displayContent.indexOf('\n\n', match.index);
+                        if (afterMatch > 0) { splitAt = afterMatch; break; }
+                      }
+                    }
+                    if (splitAt < 0) splitAt = displayContent.indexOf('\n\n');
+                    
+                    const restContent = splitAt > 0 ? displayContent.slice(splitAt + 2) : null;
                     
                     return (
                       <>
