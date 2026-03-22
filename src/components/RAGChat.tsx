@@ -657,7 +657,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           )}
 
           {messages.map((message, index) => {
-            const displayContent = getDisplayContent(message, index);
+            const rawDisplayContent = getDisplayContent(message, index);
+            // Strip any "[Insert ... Here]" or "[See ... diagram]" placeholder text the AI might generate
+            const displayContent = rawDisplayContent.replace(/\[(?:Insert|See|View|Show)[\s\S]*?(?:Here|Diagram|diagram|Figure|figure)\]/gi, '').replace(/\n{3,}/g, '\n\n');
             const isLastAssistant = index === messages.length - 1 && message.role === 'assistant';
             const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
             return (
