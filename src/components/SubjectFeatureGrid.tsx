@@ -171,19 +171,17 @@ export function SubjectFeatureGrid({
         </div>
 
         {/* Feature cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((f) => (
             <div
               key={f.title}
-              className="bg-muted border border-border/50 hover:border-primary/30 rounded-xl p-4 transition-colors"
+              className="bg-secondary border-0 rounded-xl p-7"
             >
-              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
-                <f.icon className="w-4 h-4 text-primary" />
-              </div>
-              <div className="text-[13px] font-semibold text-foreground mb-1">
+              <f.icon className="w-6 h-6 text-primary mb-3.5" />
+              <div className="text-base font-bold text-foreground mb-2">
                 {f.title}
               </div>
-              <div className="text-xs text-muted-foreground leading-relaxed">
+              <div className="text-sm text-muted-foreground leading-relaxed">
                 {f.desc}
               </div>
             </div>
