@@ -660,7 +660,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               <div className="text-center py-16">
                 <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-4" />
                 <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-2 leading-[1.1] tracking-tight text-primary">
-                  The AI tutor built to get you an <span className="text-primary">A*</span>.
+                  {daysToFirstExam} days to go. Let's get you that <span className="text-primary">A*</span>.
                 </h2>
                 <p className="text-muted-foreground text-sm sm:text-base">Your Edexcel Economics revision, sorted</p>
                 
