@@ -227,6 +227,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
     setInputText('');
     setMatchedDiagram(null);
     setNoMatch(false);
+    setImageError(false);
   };
 
   const subjectLabel = hasCustomDiagrams ? 'your subject' : subject === 'cs' ? 'Computer Science' : 'Economics';
