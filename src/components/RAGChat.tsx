@@ -651,15 +651,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
               <div className="text-center py-16">
                 <img src={currentLogo} alt="A* AI" className="h-16 mx-auto mb-6" />
-                <div className="w-12 h-12 rounded-xl bg-[hsl(263_70%_50%/0.1)] dark:bg-[hsl(var(--primary)/0.1)] flex items-center justify-center mx-auto mb-3.5">
-                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-                    <circle cx="13" cy="13" r="10" className="stroke-primary" strokeWidth="1.5"/>
-                    <path d="M9 13C9 10.8 10.8 9 13 9s4 1.8 4 4-1.8 4-4 4" className="stroke-primary" strokeWidth="1.5" strokeLinecap="round"/>
-                    <circle cx="13" cy="13" r="1.5" className="fill-primary"/>
-                  </svg>
-                </div>
-                <h1 className="text-[22px] font-medium text-[hsl(263_60%_38%)] dark:text-foreground mb-1.5">Edexcel Economics Tutor</h1>
-                <p className="text-sm text-muted-foreground">Ask anything about A-Level Economics — diagrams, essays, spec points, exam technique</p>
+                <h2 className="text-2xl font-bold mb-2 dark:text-foreground light-gradient-subject">
+                  Edexcel Economics
+                </h2>
+                <p className="text-muted-foreground">Ask anything about A-Level Economics — diagrams, essays, spec points, exam technique</p>
               </div>
             ) : (
               <div className="text-center py-16">
@@ -917,7 +912,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         {/* Suggested prompts — hidden when an image is pending */}
         {messages.length === 0 && suggestedPrompts.length > 0 && !pendingImage && (
           productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
-            <div className="grid grid-cols-2 gap-2 max-w-[580px] mx-auto mb-5 px-4">
+            <div className="grid grid-cols-2 gap-3 max-w-3xl w-full mx-auto mb-5 px-4">
               {suggestedPrompts.map((prompt, idx) => {
                 const labels = ['Diagram', 'Spec point', 'Exam technique', 'Application'];
                 return (
@@ -925,12 +920,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     key={idx}
                     onClick={() => handleSuggestedPrompt(prompt)}
                     disabled={isLoading}
-                    className="bg-secondary dark:bg-accent border border-border rounded-xl px-3.5 py-3 text-left flex flex-col gap-1 transition-colors hover:border-primary/40 hover:bg-[hsl(263_70%_50%/0.06)] dark:hover:bg-primary/10 disabled:opacity-50"
+                    className="bg-secondary dark:bg-accent border border-border rounded-xl px-4 py-4 text-left flex flex-col gap-1.5 transition-colors hover:border-primary/40 hover:bg-[hsl(263_70%_50%/0.06)] dark:hover:bg-primary/10 disabled:opacity-50"
                   >
-                    <span className="text-[11px] font-medium uppercase tracking-wide text-primary">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-primary font-sans">
                       {labels[idx] || ''}
                     </span>
-                    <span className="text-[13px] text-foreground leading-snug">
+                    <span className="text-sm text-foreground leading-snug font-sans">
                       {prompt.text}
                     </span>
                   </button>
