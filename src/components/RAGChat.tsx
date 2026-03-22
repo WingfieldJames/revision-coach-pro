@@ -990,6 +990,36 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           <p className="text-center text-xs text-muted-foreground mt-2">{footerText}</p>
         </div>
       </div>
+
+      {/* Fullscreen diagram overlay */}
+      {diagramFullscreen && currentDiagram && resolvedDiagramUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setDiagramFullscreen(false)}
+        >
+          <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between w-full mb-3">
+              <div className="flex items-center gap-2 text-white">
+                <BarChart2 className="w-5 h-5" />
+                <span className="font-medium">{currentDiagram.title}</span>
+              </div>
+              <button
+                onClick={() => setDiagramFullscreen(false)}
+                className="text-white/70 hover:text-white transition-colors p-1"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="bg-white rounded-xl overflow-hidden w-full">
+              <img
+                src={resolvedDiagramUrl}
+                alt={currentDiagram.title}
+                className="w-full h-auto object-contain max-h-[80vh]"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
