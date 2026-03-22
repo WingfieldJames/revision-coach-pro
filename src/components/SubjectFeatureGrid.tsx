@@ -34,7 +34,7 @@ const getSubjectEmoji = (subject: string) => {
 const getFeatures = (subject: string, formattedBoard: string): Feature[] => {
   const base: Feature[] = [
     {
-      icon: '🤖',
+      icon: Bot,
       title: 'AI tutor',
       desc: `Trained on every past paper and mark scheme. Answers like an examiner thinks.`,
     },
@@ -45,65 +45,65 @@ const getFeatures = (subject: string, formattedBoard: string): Feature[] => {
     case 'economics':
       return [
         ...base,
-        { icon: '✍️', title: 'Essay marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
-        { icon: '📄', title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
-        { icon: '📊', title: 'Diagram generator', desc: 'Auto-generate labelled Economics diagrams from any prompt.' },
-        { icon: '🧠', title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
-        { icon: '📚', title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
+        { icon: PenLine, title: 'Essay marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
+        { icon: FileText, title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
+        { icon: BarChart3, title: 'Diagram generator', desc: 'Auto-generate labelled Economics diagrams from any prompt.' },
+        { icon: Brain, title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
+        { icon: BookOpen, title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
       ];
     case 'computer-science':
       return [
         ...base,
-        { icon: '✍️', title: 'Long answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
-        { icon: '📄', title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
-        { icon: '📊', title: 'Diagram generator', desc: 'Auto-generate data structures, logic gates, and network diagrams from any prompt.' },
-        { icon: '🧠', title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
-        { icon: '📚', title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
+        { icon: PenLine, title: 'Long answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
+        { icon: FileText, title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
+        { icon: BarChart3, title: 'Diagram generator', desc: 'Auto-generate data structures, logic gates, and network diagrams from any prompt.' },
+        { icon: Brain, title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
+        { icon: BookOpen, title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
       ];
     case 'physics':
       return [
         ...base,
-        { icon: '✍️', title: 'Answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
-        { icon: '📄', title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
-        { icon: '📊', title: 'Diagram generator', desc: 'Auto-generate labelled Physics diagrams from any prompt.' },
-        { icon: '🧠', title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
-        { icon: '📚', title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
+        { icon: PenLine, title: 'Answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
+        { icon: FileText, title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
+        { icon: BarChart3, title: 'Diagram generator', desc: 'Auto-generate labelled Physics diagrams from any prompt.' },
+        { icon: Brain, title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
+        { icon: BookOpen, title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
       ];
     case 'chemistry':
       return [
         ...base,
-        { icon: '✍️', title: 'Answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
-        { icon: '📄', title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
-        { icon: '📊', title: 'Diagram generator', desc: 'Auto-generate labelled Chemistry diagrams from any prompt.' },
-        { icon: '🧠', title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
-        { icon: '📚', title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
+        { icon: PenLine, title: 'Answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
+        { icon: FileText, title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
+        { icon: BarChart3, title: 'Diagram generator', desc: 'Auto-generate labelled Chemistry diagrams from any prompt.' },
+        { icon: Brain, title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
+        { icon: BookOpen, title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
       ];
     case 'psychology':
       return [
         ...base,
-        { icon: '✍️', title: 'Essay marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
-        { icon: '📄', title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
-        { icon: '📊', title: 'Diagram generator', desc: 'Auto-generate labelled Psychology diagrams from any prompt.' },
-        { icon: '🧠', title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
-        { icon: '📚', title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
+        { icon: PenLine, title: 'Essay marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
+        { icon: FileText, title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
+        { icon: BarChart3, title: 'Diagram generator', desc: 'Auto-generate labelled Psychology diagrams from any prompt.' },
+        { icon: Brain, title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
+        { icon: BookOpen, title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
       ];
     case 'mathematics':
       return [
         ...base,
-        { icon: '✍️', title: 'Answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
-        { icon: '📄', title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
-        { icon: '📊', title: 'Graph plotter', desc: 'Auto-generate labelled graphs and diagrams from any prompt.' },
-        { icon: '🧠', title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
-        { icon: '📚', title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
+        { icon: PenLine, title: 'Answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
+        { icon: FileText, title: 'Past paper finder', desc: '2,000+ questions searchable by topic, year and difficulty.' },
+        { icon: BarChart3, title: 'Graph plotter', desc: 'Auto-generate labelled graphs and diagrams from any prompt.' },
+        { icon: Brain, title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
+        { icon: BookOpen, title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
       ];
     default:
       return [
         ...base,
-        { icon: '✍️', title: 'Answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
-        { icon: '📄', title: 'Past paper finder', desc: 'Questions searchable by topic, year and difficulty.' },
-        { icon: '📊', title: 'Diagram generator', desc: 'Auto-generate labelled diagrams from any prompt.' },
-        { icon: '🧠', title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
-        { icon: '📚', title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
+        { icon: PenLine, title: 'Answer marker', desc: `Instant feedback using exact ${formattedBoard} marking criteria. Upload a photo or type it in.` },
+        { icon: FileText, title: 'Past paper finder', desc: 'Questions searchable by topic, year and difficulty.' },
+        { icon: BarChart3, title: 'Diagram generator', desc: 'Auto-generate labelled diagrams from any prompt.' },
+        { icon: Brain, title: 'A* memory', desc: 'Remembers your weak spots across every session and drills them until they stick.' },
+        { icon: BookOpen, title: 'Revision guide', desc: 'Spec-aligned notes for every topic. Written the way examiners want to see it.' },
       ];
   }
 };
