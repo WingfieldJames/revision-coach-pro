@@ -171,16 +171,21 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
 
   const enabledOptions = contentOptions.filter(o => o.enabled && !o.locked);
 
-  // Match diagrams to selected spec
+  // Match diagrams to selected spec — uses both keywords AND title words
   const getMatchedDiagrams = (spec: SpecPoint) => {
     if (diagramList.length === 0) return [];
     const searchTerms = [...spec.keywords, ...spec.name.toLowerCase().split(/[\s,()]+/)].filter(w => w.length > 2);
-    return diagramList.filter(d =>
-      d.keywords.some(dk => {
+    return diagramList.filter(d => {
+      // Check explicit keywords
+      const keywordMatch = d.keywords.some(dk => {
         const dkLower = dk.toLowerCase();
         return searchTerms.some(st => dkLower.includes(st) || st.includes(dkLower));
-      })
-    );
+      });
+      if (keywordMatch) return true;
+      // Also check title words as fallback
+      const titleWords = d.title.toLowerCase().split(/[\s,()_\-]+/).filter(w => w.length > 2);
+      return titleWords.some(tw => searchTerms.some(st => tw.includes(st) || st.includes(tw)));
+    });
   };
 
   const handleGenerate = async () => {
