@@ -34,6 +34,9 @@ import {
   Crown,
   Calendar,
   Shield,
+  Filter,
+  AlertTriangle,
+  Lightbulb,
 } from "lucide-react";
 
 const CHART_COLORS = [
@@ -92,6 +95,11 @@ interface AnalyticsData {
     subscription_end: string;
   }[];
   products: { id: string; name: string }[];
+  funnel?: {
+    funnelSteps: { label: string; count: number; pct: number }[];
+    engagementBuckets: { bucket: string; users: number; converted: number; conversionRate: number }[];
+    daysToPurchase: { label: string; count: number }[];
+  };
 }
 
 export const AnalyticsPage = () => {
@@ -301,6 +309,139 @@ export const AnalyticsPage = () => {
             </Card>
           </div>
         </div>
+
+        {/* ============ SECTION 2.5: FUNNEL ANALYSIS ============ */}
+        {data.funnel && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <Filter className="h-5 w-5 text-primary" />
+              Funnel Analysis
+            </h2>
+
+            {/* Insight cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {(() => {
+                const f = data.funnel.funnelSteps;
+                const neverUsed = f[0].count - f[1].count;
+                const neverUsedPct = f[0].count > 0 ? Math.round((neverUsed / f[0].count) * 100) : 0;
+                const oneDay = data.funnel.engagementBuckets.find(b => b.bucket === "1 day");
+                const oneDayPct = f[1].count > 0 && oneDay ? Math.round((oneDay.users / f[1].count) * 100) : 0;
+                const r2 = data.funnel.engagementBuckets.filter(b => b.bucket !== "1 day");
+                const r2Users = r2.reduce((s, b) => s + b.users, 0);
+                const r2Conv = r2.reduce((s, b) => s + b.converted, 0);
+                const r2Rate = r2Users > 0 ? Math.round((r2Conv / r2Users) * 100) : 0;
+                return (
+                  <>
+                    <Card className="border-destructive/30 bg-destructive/5">
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <AlertTriangle className="h-4 w-4 text-destructive" />
+                          <span className="text-xs text-muted-foreground">Biggest Leak</span>
+                        </div>
+                        <p className="text-2xl font-bold text-destructive">{neverUsedPct}%</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{neverUsed.toLocaleString()} users never sent a prompt</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-orange-500/30 bg-orange-500/5">
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <AlertTriangle className="h-4 w-4 text-orange-500" />
+                          <span className="text-xs text-muted-foreground">Retention Drop</span>
+                        </div>
+                        <p className="text-2xl font-bold text-orange-500">{oneDayPct}%</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">of active users only used it for 1 day</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-green-500/30 bg-green-500/5">
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Lightbulb className="h-4 w-4 text-green-500" />
+                          <span className="text-xs text-muted-foreground">Return = Convert</span>
+                        </div>
+                        <p className="text-2xl font-bold text-green-500">{r2Rate}%</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">conversion rate for users who return 2+ days</p>
+                      </CardContent>
+                    </Card>
+                  </>
+                );
+              })()}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Conversion funnel */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Conversion Funnel</CardTitle>
+                  <CardDescription>From signup to payment</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={data.funnel.funnelSteps} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis type="number" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} />
+                        <YAxis type="category" dataKey="label" width={120} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                        <Tooltip
+                          contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                          formatter={(value: number, _: string, entry: any) => [`${value.toLocaleString()} (${entry.payload.pct}%)`, "Users"]}
+                        />
+                        <Bar dataKey="count" radius={[0, 4, 4, 0]} name="Users">
+                          {data.funnel.funnelSteps.map((_, i) => (
+                            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Engagement vs Conversion */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Engagement → Conversion</CardTitle>
+                  <CardDescription>Days active vs conversion rate</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={data.funnel.engagementBuckets}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="bucket" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                        <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} />
+                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                        <Bar dataKey="users" fill="hsl(211, 90%, 50%)" radius={[4, 4, 0, 0]} name="Total Users" />
+                        <Bar dataKey="converted" fill="hsl(150, 60%, 45%)" radius={[4, 4, 0, 0]} name="Converted" />
+                        <Legend />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Days to purchase */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Days from Signup to Purchase</CardTitle>
+                <CardDescription>How long do users take to convert?</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data.funnel.daysToPurchase}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                      <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 10 }} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                      <Bar dataKey="count" fill="hsl(271, 81%, 56%)" radius={[4, 4, 0, 0]} name="Users" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* ============ SECTION 3: PRODUCT ANALYTICS ============ */}
         <div className="space-y-4">
