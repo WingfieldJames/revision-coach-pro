@@ -719,13 +719,20 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   </ReactMarkdown>
                   {showCursor && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
 
-                  {isLastAssistant && currentDiagram && !isLoading && !isAnimating && (
+                  {isLastAssistant && currentDiagram && !isLoading && !isAnimating && resolvedDiagramUrl && (
                     <div className="mt-4 p-3 rounded-lg border border-border bg-background">
                       <div className="flex items-center gap-2 mb-2">
                         <BarChart2 className="w-4 h-4 text-primary" />
                         <span className="text-sm font-medium">{currentDiagram.title}</span>
                       </div>
-                      <img src={currentDiagram.imagePath} alt={currentDiagram.title} className="w-full max-w-md rounded-lg border border-border" />
+                      <div className="rounded-lg overflow-hidden bg-white">
+                        <img
+                          src={resolvedDiagramUrl}
+                          alt={currentDiagram.title}
+                          className="w-full max-w-md h-auto object-contain rounded-lg border border-border"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
