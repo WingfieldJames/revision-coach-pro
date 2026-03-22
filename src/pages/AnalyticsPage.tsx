@@ -95,6 +95,11 @@ interface AnalyticsData {
     subscription_end: string;
   }[];
   products: { id: string; name: string }[];
+  funnel?: {
+    funnelSteps: { label: string; count: number; pct: number }[];
+    engagementBuckets: { bucket: string; users: number; converted: number; conversionRate: number }[];
+    daysToPurchase: { label: string; count: number }[];
+  };
 }
 
 export const AnalyticsPage = () => {
