@@ -96,13 +96,39 @@ const CS_DIAGRAMS = [
 ];
 
 // Find relevant diagram based on message content
-function findRelevantDiagram(message: string, subject: string): { id: string; title: string; imagePath: string } | null {
+// Accepts optional custom diagrams from Build portal (merged with fallbacks)
+function findRelevantDiagram(
+  message: string, 
+  subject: string,
+  customDiagrams?: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }>
+): { id: string; title: string; imagePath: string } | null {
   const lowerMessage = message.toLowerCase();
-  const diagramSet = subject === 'cs' ? CS_DIAGRAMS : ECONOMICS_DIAGRAMS;
   
-  for (const diagram of diagramSet) {
+  // Build merged diagram set: custom (Build) diagrams first, then fallbacks
+  const fallbackSet = subject === 'cs' ? CS_DIAGRAMS : ECONOMICS_DIAGRAMS;
+  const mergedDiagrams: Array<{ id: string; title: string; imagePath: string; keywords: string[] }> = [];
+  
+  // Add custom diagrams from Build portal (priority)
+  if (customDiagrams && customDiagrams.length > 0) {
+    for (const d of customDiagrams) {
+      // Generate keywords from title if none provided
+      const titleWords = d.title.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      const kws = d.keywords && d.keywords.length > 0 ? d.keywords : titleWords;
+      mergedDiagrams.push({ id: d.id, title: d.title, imagePath: d.imagePath, keywords: kws });
+    }
+  }
+  
+  // Add fallback diagrams (skip if a custom diagram has the same id)
+  const customIds = new Set(mergedDiagrams.map(d => d.id));
+  for (const d of fallbackSet) {
+    if (!customIds.has(d.id)) {
+      mergedDiagrams.push(d);
+    }
+  }
+  
+  for (const diagram of mergedDiagrams) {
     for (const keyword of diagram.keywords) {
-      if (lowerMessage.includes(keyword)) {
+      if (lowerMessage.includes(keyword.toLowerCase())) {
         return { id: diagram.id, title: diagram.title, imagePath: diagram.imagePath };
       }
     }
