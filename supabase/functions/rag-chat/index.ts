@@ -95,13 +95,14 @@ const CS_DIAGRAMS = [
   { id: 'post-order-traversal', title: 'Post Order Traversal', keywords: ['post order', 'postorder', 'tree traversal', 'traversal', 'left right root'], imagePath: '/diagrams/cs/post-order-traversal.jpg' },
 ];
 
-// Find relevant diagram based on message content
+// Find relevant diagram based on message content using AI-powered matching
 // Accepts optional custom diagrams from Build portal (merged with fallbacks)
-function findRelevantDiagram(
+async function findRelevantDiagram(
   message: string, 
   subject: string,
-  customDiagrams?: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }>
-): { id: string; title: string; imagePath: string } | null {
+  customDiagrams?: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }>,
+  lovableApiKey?: string
+): Promise<{ id: string; title: string; imagePath: string } | null> {
   const lowerMessage = message.toLowerCase();
   
   // Build merged diagram set: custom (Build) diagrams first, then fallbacks
@@ -111,7 +112,6 @@ function findRelevantDiagram(
   // Add custom diagrams from Build portal (priority)
   if (customDiagrams && customDiagrams.length > 0) {
     for (const d of customDiagrams) {
-      // Generate keywords from title if none provided
       const titleWords = d.title.toLowerCase().split(/\s+/).filter(w => w.length > 2);
       const kws = d.keywords && d.keywords.length > 0 ? d.keywords : titleWords;
       mergedDiagrams.push({ id: d.id, title: d.title, imagePath: d.imagePath, keywords: kws });
@@ -125,7 +125,56 @@ function findRelevantDiagram(
       mergedDiagrams.push(d);
     }
   }
+
+  // Use AI-powered matching for better accuracy
+  if (lovableApiKey && mergedDiagrams.length > 0) {
+    try {
+      const diagramList = mergedDiagrams.map(d => 
+        `- ID: "${d.id}" | Title: "${d.title}" | Keywords: ${d.keywords.join(', ')}`
+      ).join('\n');
+
+      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${lovableApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: `You are a diagram matcher. Given a student's question, determine which single diagram best illustrates the economic/CS concept being discussed. Return ONLY a JSON object. Be generous — if the topic relates to any diagram, match it. If genuinely no diagram fits, return null.
+
+Available diagrams:
+${diagramList}
+
+Response format (JSON only, no explanation):
+{"diagramId": "diagram-id-here"} or {"diagramId": null}` },
+            { role: 'user', content: message }
+          ],
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        const jsonMatch = content?.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.diagramId) {
+            const matched = mergedDiagrams.find(d => d.id === parsed.diagramId);
+            if (matched) {
+              console.log(`AI matched diagram: ${matched.title}`);
+              return { id: matched.id, title: matched.title, imagePath: matched.imagePath };
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('AI diagram matching failed, falling back to keyword:', err);
+    }
+  }
   
+  // Fallback: keyword-based matching
   for (const diagram of mergedDiagrams) {
     for (const keyword of diagram.keywords) {
       if (lowerMessage.includes(keyword.toLowerCase())) {
@@ -967,7 +1016,7 @@ Use this to personalise your responses — reference their weak areas, their exa
     // Always try to find a relevant diagram (custom Build diagrams take priority)
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
     const diagramSubject = enable_diagrams ? diagram_subject : 'economics';
-    relevantDiagram = findRelevantDiagram(message, diagramSubject, customDiagrams);
+    relevantDiagram = await findRelevantDiagram(message, diagramSubject, customDiagrams, lovableApiKey);
     if (relevantDiagram) {
       console.log(`Found relevant diagram: ${relevantDiagram.title}`);
     }
@@ -995,9 +1044,11 @@ When a student asks you to mark their essay, answer, or response:
     if (relevantDiagram) {
       finalSystemPrompt += `\n\n--- DIAGRAM AVAILABLE ---
 A diagram titled "${relevantDiagram.title}" will be displayed as an image within your response automatically.
-IMPORTANT: Do NOT draw, create, or describe your own version of this diagram using text, ASCII art, tables, or markdown.
-Simply reference it naturally in your explanation, e.g. "As shown in the diagram below..." or "The ${relevantDiagram.title} diagram illustrates..."
-The image will appear automatically — you do not need to reproduce it in any way.`;
+CRITICAL RULES:
+1. Do NOT draw, create, or describe your own version of this diagram using text, ASCII art, tables, or markdown. Never use characters to draw shapes.
+2. Reference the diagram naturally at the most relevant point in your explanation using phrases like "As shown in the diagram below..." or "The ${relevantDiagram.title} diagram illustrates this..."
+3. Place your diagram reference where it best supports the explanation — not just at the start.
+4. The image appears automatically where you reference it — you do not need to reproduce it.`;
     }
     
     console.log(`System prompt length: ${finalSystemPrompt.length} chars (context: ${relevantContext.length} chars)`);
