@@ -670,7 +670,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
                   {/* Star rating */}
                   <div className="flex items-center gap-1.5 bg-primary/10 rounded-full py-1.5 px-3.5">
-                    <span className="text-[13px] tracking-wider text-yellow-500">★★★★★</span>
+                    <span className="text-[13px] tracking-wider text-amber-500 dark:text-amber-400">★★★★★</span>
                     <span className="text-[13px] font-medium text-primary">4.9 / 5</span>
                   </div>
 
