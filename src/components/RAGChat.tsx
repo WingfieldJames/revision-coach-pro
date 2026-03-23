@@ -124,8 +124,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   }, []);
 
   // Fetch real user count and animate it
-  const [displayedUserCount, setDisplayedUserCount] = useState(2000);
-  const [targetUserCount, setTargetUserCount] = useState(2000);
+  const [displayedUserCount, setDisplayedUserCount] = useState(1000);
+  const [targetUserCount, setTargetUserCount] = useState(1000);
+  const [animationDone, setAnimationDone] = useState(false);
 
   useEffect(() => {
     const fetchUserCount = async () => {
@@ -134,7 +135,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           .from('users')
           .select('*', { count: 'exact', head: true });
         if (!error && count !== null) {
-          setTargetUserCount(count + 2000);
+          setTargetUserCount(count + 1000);
         }
       } catch (e) {
         console.error('Error fetching user count:', e);
@@ -143,15 +144,28 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     fetchUserCount();
   }, []);
 
+  // Count-up animation on load, then subtle last-digit tick
   useEffect(() => {
-    if (displayedUserCount >= targetUserCount) return;
+    if (displayedUserCount >= targetUserCount) {
+      if (!animationDone) setAnimationDone(true);
+      return;
+    }
     const diff = targetUserCount - displayedUserCount;
     const step = Math.max(1, Math.floor(diff / 40));
     const timer = setTimeout(() => {
       setDisplayedUserCount(prev => Math.min(prev + step, targetUserCount));
     }, 30);
     return () => clearTimeout(timer);
-  }, [displayedUserCount, targetUserCount]);
+  }, [displayedUserCount, targetUserCount, animationDone]);
+
+  // After initial animation, do a subtle +1 tick every few seconds
+  useEffect(() => {
+    if (!animationDone) return;
+    const interval = setInterval(() => {
+      setDisplayedUserCount(prev => prev + 1);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [animationDone]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -705,7 +719,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                       <img src={jamesImage} alt="James" className="w-5 h-5 rounded-full object-cover border-2 border-card -ml-1.5 z-[2]" />
                       <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-card -ml-1.5 z-[1]" />
                     </div>
-                    <span className="text-xs font-medium text-foreground">{displayedUserCount.toLocaleString()}+ students</span>
+                    <span className="text-xs font-medium text-foreground">{displayedUserCount.toLocaleString()} students</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
