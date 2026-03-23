@@ -122,6 +122,36 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     const first = sorted[0];
     return Math.ceil((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }, []);
+
+  // Fetch real user count and animate it
+  const [displayedUserCount, setDisplayedUserCount] = useState(2000);
+  const [targetUserCount, setTargetUserCount] = useState(2000);
+
+  useEffect(() => {
+    const fetchUserCount = async () => {
+      try {
+        const { count, error } = await (supabase as any)
+          .from('users')
+          .select('*', { count: 'exact', head: true });
+        if (!error && count !== null) {
+          setTargetUserCount(count + 2000);
+        }
+      } catch (e) {
+        console.error('Error fetching user count:', e);
+      }
+    };
+    fetchUserCount();
+  }, []);
+
+  useEffect(() => {
+    if (displayedUserCount >= targetUserCount) return;
+    const diff = targetUserCount - displayedUserCount;
+    const step = Math.max(1, Math.floor(diff / 40));
+    const timer = setTimeout(() => {
+      setDisplayedUserCount(prev => Math.min(prev + step, targetUserCount));
+    }, 30);
+    return () => clearTimeout(timer);
+  }, [displayedUserCount, targetUserCount]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
