@@ -194,8 +194,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   };
 
   return (
-    <div className="sticky top-0 z-50 text-foreground bg-background/95 backdrop-blur-sm">
-      <div className="flex justify-between items-center px-3 sm:px-6 pt-4 sm:pt-6 pb-0">
+    <div className="sticky top-0 z-50 flex justify-between items-center px-3 sm:px-6 pt-4 sm:pt-6 pb-2 text-foreground bg-background/95 backdrop-blur-sm">
       {/* Left: Logo + Tools */}
       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 overflow-x-auto scrollbar-hide">
         <Link to="/" className="flex items-center flex-shrink-0">
@@ -300,9 +299,6 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
           </DialogContent>
         </Dialog>
       )}
-      </div>
-      {/* Divider line starting at My AI */}
-      <div className="h-[1px] mx-12 sm:mx-16 mt-2 bg-gradient-to-r from-transparent via-border to-transparent" />
     </div>
   );
 };
