@@ -719,7 +719,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                       <img src={jamesImage} alt="James" className="w-5 h-5 rounded-full object-cover border-2 border-card -ml-1.5 z-[2]" />
                       <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-card -ml-1.5 z-[1]" />
                     </div>
-                    <span className="text-xs font-medium text-foreground">{displayedUserCount.toLocaleString()}+ students</span>
+                    <span className="text-xs font-medium text-foreground">{displayedUserCount.toLocaleString()} students</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
