@@ -302,7 +302,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
       )}
       </div>
       {/* Divider line starting at My AI */}
-      <div className="h-[1px] ml-[90px] sm:ml-[120px] bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="h-[1px] mx-12 sm:mx-16 mt-2 bg-gradient-to-r from-transparent via-border to-transparent" />
     </div>
   );
 };
