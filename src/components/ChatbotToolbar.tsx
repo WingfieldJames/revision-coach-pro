@@ -211,7 +211,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative shadow-[0_0_8px_hsl(var(--primary)/0.3)]"
+                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative"
               >
                 {tool.id !== 'exam-countdown' && tool.icon}
                 {tool.id !== 'exam-countdown' && <span className="hidden sm:inline">{tool.label}</span>}
