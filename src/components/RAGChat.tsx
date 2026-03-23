@@ -7,6 +7,9 @@ import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
+import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
+import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
+import matanImage from '@/assets/matan-g.png';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/contexts/ThemeContext';
 import ReactMarkdown from 'react-markdown';
@@ -119,6 +122,36 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     const first = sorted[0];
     return Math.ceil((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }, []);
+
+  // Fetch real user count and animate it
+  const [displayedUserCount, setDisplayedUserCount] = useState(2000);
+  const [targetUserCount, setTargetUserCount] = useState(2000);
+
+  useEffect(() => {
+    const fetchUserCount = async () => {
+      try {
+        const { count, error } = await (supabase as any)
+          .from('users')
+          .select('*', { count: 'exact', head: true });
+        if (!error && count !== null) {
+          setTargetUserCount(count + 2000);
+        }
+      } catch (e) {
+        console.error('Error fetching user count:', e);
+      }
+    };
+    fetchUserCount();
+  }, []);
+
+  useEffect(() => {
+    if (displayedUserCount >= targetUserCount) return;
+    const diff = targetUserCount - displayedUserCount;
+    const step = Math.max(1, Math.floor(diff / 40));
+    const timer = setTimeout(() => {
+      setDisplayedUserCount(prev => Math.min(prev + step, targetUserCount));
+    }, 30);
+    return () => clearTimeout(timer);
+  }, [displayedUserCount, targetUserCount]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -668,11 +701,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 <div className="flex items-center justify-center gap-2.5 flex-wrap mt-3">
                   <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
                     <div className="flex">
-                      <div className="w-5 h-5 rounded-full bg-primary/20 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary z-[3]">JT</div>
-                      <div className="w-5 h-5 rounded-full bg-primary/30 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary -ml-1.5 z-[2]">SC</div>
-                      <div className="w-5 h-5 rounded-full bg-primary/50 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary-foreground -ml-1.5 z-[1]">MR</div>
+                      <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-card z-[3]" />
+                      <img src={jamesImage} alt="James" className="w-5 h-5 rounded-full object-cover border-2 border-card -ml-1.5 z-[2]" />
+                      <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-card -ml-1.5 z-[1]" />
                     </div>
-                    <span className="text-xs font-medium text-foreground">4,000+ students</span>
+                    <span className="text-xs font-medium text-foreground">{displayedUserCount.toLocaleString()}+ students</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
