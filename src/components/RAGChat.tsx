@@ -701,11 +701,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 <div className="flex items-center justify-center gap-2.5 flex-wrap mt-3">
                   <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
                     <div className="flex">
-                      <div className="w-5 h-5 rounded-full bg-primary/20 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary z-[3]">JT</div>
-                      <div className="w-5 h-5 rounded-full bg-primary/30 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary -ml-1.5 z-[2]">SC</div>
-                      <div className="w-5 h-5 rounded-full bg-primary/50 border-2 border-card flex items-center justify-center text-[8px] font-semibold text-primary-foreground -ml-1.5 z-[1]">MR</div>
+                      <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-card z-[3]" />
+                      <img src={jamesImage} alt="James" className="w-5 h-5 rounded-full object-cover border-2 border-card -ml-1.5 z-[2]" />
+                      <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-card -ml-1.5 z-[1]" />
                     </div>
-                    <span className="text-xs font-medium text-foreground">4,000+ students</span>
+                    <span className="text-xs font-medium text-foreground">{displayedUserCount.toLocaleString()}+ students</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
