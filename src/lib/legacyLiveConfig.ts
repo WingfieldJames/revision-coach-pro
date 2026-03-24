@@ -224,7 +224,9 @@ export const LEGACY_LIVE_CONFIGS: Record<string, LegacySubjectConfig> = {
  * Look up legacy config for a given board+subject pair.
  * Returns undefined for subjects not in the legacy map (i.e. dynamic/new subjects).
  */
-export function getLegacyConfig(examBoard: string, subject: string): LegacySubjectConfig | undefined {
+export function getLegacyConfig(examBoard: string, subject: string, qualificationType?: string): LegacySubjectConfig | undefined {
+  // Legacy configs only apply to A Level subjects — skip for GCSE/other qualification types
+  if (qualificationType && qualificationType.toLowerCase() !== 'a level') return undefined;
   const key = `${examBoard.toLowerCase()}::${subject.toLowerCase()}`;
   return LEGACY_LIVE_CONFIGS[key];
 }
