@@ -9,6 +9,7 @@
   :root {
     /* Light theme as default */
     --background: 0 0% 100%;
+    --chat-background: 250 100% 99%;
     --foreground: 240 10% 10%;
 
     --card: 0 0% 100%;
