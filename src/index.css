@@ -298,14 +298,3 @@
     color: hsl(var(--primary));
   }
 }
-
-/* Edexcel Economics chatbot custom background */
-.edexcel-chat-bg {
-  background-color: #f8f7ff;
-}
-.edexcel-chat-bg .bg-background\/95 {
-  background-color: rgba(248, 247, 255, 0.95);
-}
-.edexcel-chat-bg .bg-background {
-  background-color: #f8f7ff;
-}
