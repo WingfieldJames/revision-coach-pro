@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2 } from 'lucide-react';
+import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2 } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
