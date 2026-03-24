@@ -997,7 +997,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     key={idx}
                     onClick={() => handleSuggestedPrompt(prompt)}
                     disabled={isLoading}
-                    className="bg-secondary dark:bg-accent border border-border rounded-xl px-4 py-4 text-left flex flex-col gap-1.5 transition-colors hover:border-primary/40 hover:bg-[hsl(263_70%_50%/0.06)] dark:hover:bg-primary/10 disabled:opacity-50"
+                    className="bg-background border border-border rounded-xl px-4 py-4 text-left flex flex-col gap-1.5 transition-colors hover:border-primary/40 hover:bg-[hsl(263_70%_50%/0.06)] dark:hover:bg-primary/10 disabled:opacity-50"
                   >
                     <span className="text-xs font-semibold uppercase tracking-wide text-primary font-sans">
                       {labels[idx] || ''}
