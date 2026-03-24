@@ -135,7 +135,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           .from('users')
           .select('*', { count: 'exact', head: true });
         if (!error && count !== null) {
-          setTargetUserCount(count + 1000);
+          setTargetUserCount(count + 3000);
         }
       } catch (e) {
         console.error('Error fetching user count:', e);
