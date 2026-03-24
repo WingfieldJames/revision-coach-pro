@@ -92,7 +92,6 @@ export const DynamicFreePage = () => {
           examDates={examDates}
           suggestedPrompts={(() => { const filtered = (trainer?.suggested_prompts || []).filter(p => p.text?.trim()); return filtered.length > 0 ? filtered : [{ text: `What topics are in the ${product.exam_board} ${product.subject} spec?` }, { text: "How do I structure a long answer question?" }, { text: "Find past exam questions" }, { text: "Create me a full revision plan", usesPersonalization: true }]; })()}
         />
-        />
       </div>
     </div>
   );
