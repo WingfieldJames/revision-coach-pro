@@ -1028,7 +1028,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
         <div className="max-w-5xl mx-auto px-4">
           {/* Pill container */}
-          <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
+          <div className="border border-border/60 rounded-2xl overflow-hidden bg-background shadow-[0_0_15px_rgba(var(--primary),0.08),0_0_30px_rgba(var(--primary),0.04)]">
 
             {/* Pending image preview strip */}
             {pendingImage && (
