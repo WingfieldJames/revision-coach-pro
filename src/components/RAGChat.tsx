@@ -110,7 +110,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   suggestedPrompts = [],
   enableDiagrams = false,
   diagramSubject = 'economics',
-  chatRef
+  chatRef,
+  examDates: examDatesProp,
+  promptLabels,
 }) => {
   const {
     user
@@ -118,12 +120,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const { theme } = useTheme();
   const currentLogo = theme === 'dark' ? logo : logoDark;
   const daysToFirstExam = useMemo(() => {
+    if (!examDatesProp || examDatesProp.length === 0) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const sorted = [...EDEXCEL_ECONOMICS_EXAMS].sort((a, b) => a.date.getTime() - b.date.getTime());
+    const sorted = [...examDatesProp].sort((a, b) => a.date.getTime() - b.date.getTime());
     const first = sorted[0];
     return Math.ceil((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  }, []);
+  }, [examDatesProp]);
 
   // Fetch real user count and animate it
   const [displayedUserCount, setDisplayedUserCount] = useState(1000);
