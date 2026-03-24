@@ -383,7 +383,7 @@ export function BuildPage() {
     const initialCustomSections = (existing.custom_sections as unknown as CustomSection[]) || [];
 
     // Legacy config fallback for features/dates/marks/bio/image
-    const legacy = getLegacyConfig(existing.exam_board, existing.subject);
+    const legacy = getLegacyConfig(existing.exam_board, existing.subject, existing.qualification_type);
 
     const initialTrainerImageUrl = existing.trainer_image_url || legacy?.trainerImageAsset || null;
 
