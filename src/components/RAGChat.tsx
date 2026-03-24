@@ -994,10 +994,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent pt-4 pb-4 z-50">
         {/* Suggested prompts — hidden when an image is pending */}
         {messages.length === 0 && suggestedPrompts.length > 0 && !pendingImage && (
-          productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
-            <div className="grid grid-cols-2 gap-3 max-w-3xl w-full mx-auto mb-5 px-4">
+          <div className="grid grid-cols-2 gap-3 max-w-3xl w-full mx-auto mb-5 px-4">
               {suggestedPrompts.map((prompt, idx) => {
-                const labels = ['Diagram', 'Spec point', 'Exam technique', 'Application'];
+                const defaultLabels = ['Topic', 'Key concept', 'Exam technique', 'Study plan'];
+                const labels = promptLabels || defaultLabels;
                 return (
                   <button
                     key={idx}
@@ -1015,21 +1015,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 );
               })}
             </div>
-          ) : (
-            <div className="flex justify-center gap-2 mb-3 w-full overflow-x-auto scrollbar-thin pb-1 px-4">
-              {suggestedPrompts.map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSuggestedPrompt(prompt)}
-                  disabled={isLoading}
-                  className={`px-4 py-2 rounded-full border border-border text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 disabled:opacity-50 ${theme === 'dark' ? 'bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground' : 'text-white hover:opacity-90'}`}
-                  style={theme === 'dark' ? undefined : { background: 'var(--gradient-brand)' }}
-                >
-                  {prompt.text}
-                </button>
-              ))}
-            </div>
-          )
         )}
 
         <div className="max-w-5xl mx-auto px-4">
