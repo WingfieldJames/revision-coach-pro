@@ -47,7 +47,7 @@ export const OCRPhysicsFreeVersionPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-chat-background flex flex-col">
       <SEOHead title="Free A* AI – OCR Physics A-Level Revision | Try Now" description="Try A* AI free for OCR Physics." canonical="https://astarai.co.uk/ocr-physics-free-version" />
       <RandomChatbotBackground />
       <ChatbotSidebar {...sharedProps} />
