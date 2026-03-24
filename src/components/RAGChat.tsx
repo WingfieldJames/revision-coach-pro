@@ -1091,7 +1091,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 size="icon"
                 className="h-9 w-9 rounded-full bg-gradient-brand hover:opacity-90 glow-brand"
               >
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-4 h-4" />}
               </Button>
             </div>
           </div>
