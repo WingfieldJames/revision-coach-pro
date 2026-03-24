@@ -168,7 +168,8 @@ serve(async (req) => {
 
     if (!productId) {
       // Create the product
-      const slug = `${project.exam_board}-${project.subject}`.toLowerCase().replace(/\s+/g, '-');
+      const slugBase = `${project.exam_board}-${project.subject}`.toLowerCase().replace(/\s+/g, '-');
+      const slug = isGCSE ? `gcse-${slugBase}` : slugBase;
       const { data: newProduct, error: prodError } = await supabase
         .from("products")
         .insert({
