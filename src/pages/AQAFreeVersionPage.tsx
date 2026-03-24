@@ -56,7 +56,7 @@ export const AQAFreeVersionPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={AQA_PRODUCT_ID} subjectName="AQA Economics" subjectDescription="Your free AQA Economics revision assistant" footerText="A* AI can make mistakes. Verify important info." placeholder="Ask any AQA Economics question..." suggestedPrompts={prompts} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
+        <RAGChat productId={AQA_PRODUCT_ID} subjectName="AQA Economics" subjectDescription="Your free AQA Economics revision assistant" footerText="A* AI can make mistakes. Verify important info." placeholder="Ask any AQA Economics question..." suggestedPrompts={prompts} enableDiagrams diagramSubject="economics" chatRef={chatRef} examDates={examDates} promptLabels={['Spec point', 'Past papers', 'Exam structure', 'Revision']} />
       </div>
     </div>
   );

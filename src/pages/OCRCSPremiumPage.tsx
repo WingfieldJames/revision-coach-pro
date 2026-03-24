@@ -55,7 +55,7 @@ export const OCRCSPremiumPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={OCR_CS_PRODUCT_ID} subjectName="OCR Computer Science Deluxe" subjectDescription="Your personal A* Computer Science tutor with full diagram access. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Computer Science specification (2017-2025)" placeholder="Ask about algorithms, data structures, programming..." suggestedPrompts={prompts} enableDiagrams diagramSubject="cs" chatRef={chatRef} />
+        <RAGChat productId={OCR_CS_PRODUCT_ID} subjectName="OCR Computer Science" subjectDescription="Your personal A* Computer Science tutor with full diagram access. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Computer Science specification (2017-2025)" placeholder="Ask about algorithms, data structures, programming..." suggestedPrompts={prompts} enableDiagrams diagramSubject="cs" chatRef={chatRef} examDates={examDates} promptLabels={['Algorithm', 'Data types', 'Exam technique', 'Revision']} />
       </div>
     </div>
   );

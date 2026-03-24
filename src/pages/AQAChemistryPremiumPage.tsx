@@ -81,7 +81,7 @@ export const AQAChemistryPremiumPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={productId} subjectName="AQA Chemistry Deluxe" subjectDescription="Your personal A* Chemistry tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Chemistry past papers & mark schemes" placeholder="Ask me anything about AQA Chemistry A-Level..." suggestedPrompts={prompts} chatRef={chatRef} />
+        <RAGChat productId={productId} subjectName="AQA Chemistry" subjectDescription="Your personal A* Chemistry tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Chemistry past papers & mark schemes" placeholder="Ask me anything about AQA Chemistry A-Level..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Mechanism', 'Concept', 'Exam technique', 'Revision']} />
       </div>
     </div>
   );

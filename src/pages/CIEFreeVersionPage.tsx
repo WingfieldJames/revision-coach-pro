@@ -54,7 +54,7 @@ export const CIEFreeVersionPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={CIE_PRODUCT_ID} subjectName="CIE Economics" subjectDescription="Your free CIE Economics revision assistant" footerText="A* AI can make mistakes. Verify important info." placeholder="Ask any CIE Economics question..." suggestedPrompts={prompts} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
+        <RAGChat productId={CIE_PRODUCT_ID} subjectName="CIE Economics" subjectDescription="Your free CIE Economics revision assistant" footerText="A* AI can make mistakes. Verify important info." placeholder="Ask any CIE Economics question..." suggestedPrompts={prompts} enableDiagrams diagramSubject="economics" chatRef={chatRef} examDates={examDates} promptLabels={['Inflation', 'Market structure', 'Theory', 'Revision']} />
       </div>
     </div>
   );
