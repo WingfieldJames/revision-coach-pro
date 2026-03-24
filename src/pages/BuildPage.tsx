@@ -38,7 +38,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-const EXAM_BOARDS = ["AQA", "OCR", "Edexcel", "CIE", "WJEC", "SQA"];
+const EXAM_BOARDS = ["AQA", "OCR", "OCR MEI (B)", "Edexcel", "CIE", "WJEC", "SQA"];
 const QUALIFICATION_TYPES = ["A Level", "GCSE"];
 const AVAILABLE_SUBJECTS = [
   "Economics", "Computer Science", "Physics",
