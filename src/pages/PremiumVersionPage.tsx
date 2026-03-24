@@ -80,7 +80,7 @@ export const PremiumVersionPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f8f7ff' }}>
       <SEOHead title="Deluxe A* AI – Edexcel Economics | Full Past Paper Training" description="Access A* AI Deluxe for Edexcel Economics." canonical="https://astarai.co.uk/premium" />
       <RandomChatbotBackground />
       <ChatbotSidebar {...sharedProps} />
