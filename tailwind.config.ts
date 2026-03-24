@@ -23,7 +23,6 @@ export default {
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
-				'chat-background': 'hsl(var(--chat-background))',
 				foreground: 'hsl(var(--foreground))',
 				"gray-200": "var(--ds-gray-200)",
 				"gray-900": "var(--ds-gray-900)",
