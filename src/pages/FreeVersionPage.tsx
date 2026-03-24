@@ -50,7 +50,7 @@ export const FreeVersionPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f8f7ff' }}>
+    <div className="min-h-screen flex flex-col edexcel-chat-bg">
       <SEOHead 
         title="Free A* AI – Edexcel Economics A-Level Revision | Try Now"
         description="Try A* AI free – AI trained on Edexcel Economics past papers. Get spec-aligned responses and quick practice. Upgrade to Deluxe for full mark scheme feedback."
