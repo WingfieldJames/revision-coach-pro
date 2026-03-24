@@ -85,7 +85,7 @@ export const AQAPremiumPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={AQA_PRODUCT_ID} subjectName="AQA Economics" subjectDescription="Your personal A* Economics tutor. Ask me anything about AQA A-Level Economics!" footerText="Powered by A* AI • Trained on AQA Economics specification" placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..." suggestedPrompts={prompts} enableDiagrams diagramSubject="economics" chatRef={chatRef} />
+        <RAGChat productId={AQA_PRODUCT_ID} subjectName="AQA Economics" subjectDescription="Your personal A* Economics tutor. Ask me anything about AQA A-Level Economics!" footerText="Powered by A* AI • Trained on AQA Economics specification" placeholder="Ask about microeconomics, macroeconomics, diagrams, exam technique..." suggestedPrompts={prompts} enableDiagrams diagramSubject="economics" chatRef={chatRef} examDates={examDates} promptLabels={['Spec point', 'Past papers', 'Exam structure', 'Revision']} />
       </div>
     </div>
   );

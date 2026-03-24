@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
+import type { ExamDate } from '@/components/ExamCountdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2 } from 'lucide-react';
@@ -68,6 +68,8 @@ interface RAGChatProps {
   enableDiagrams?: boolean;
   diagramSubject?: 'economics' | 'cs';
   chatRef?: React.RefObject<RAGChatRef>;
+  examDates?: ExamDate[];
+  promptLabels?: string[];
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
@@ -108,7 +110,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   suggestedPrompts = [],
   enableDiagrams = false,
   diagramSubject = 'economics',
-  chatRef
+  chatRef,
+  examDates: examDatesProp,
+  promptLabels,
 }) => {
   const {
     user
@@ -116,12 +120,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const { theme } = useTheme();
   const currentLogo = theme === 'dark' ? logo : logoDark;
   const daysToFirstExam = useMemo(() => {
+    if (!examDatesProp || examDatesProp.length === 0) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const sorted = [...EDEXCEL_ECONOMICS_EXAMS].sort((a, b) => a.date.getTime() - b.date.getTime());
+    const sorted = [...examDatesProp].sort((a, b) => a.date.getTime() - b.date.getTime());
     const first = sorted[0];
     return Math.ceil((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  }, []);
+  }, [examDatesProp]);
 
   // Fetch real user count and animate it
   const [displayedUserCount, setDisplayedUserCount] = useState(1000);
@@ -703,13 +708,23 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
-            productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
               <div className="text-center py-16">
                 <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-1" />
-                <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
-                  <span className="text-foreground">{daysToFirstExam} days to go.</span> <span className="text-primary">Let's get you that A*.</span>
-                </h2>
-                <p className="text-muted-foreground text-sm sm:text-base">Your Edexcel Economics revision, sorted</p>
+                {daysToFirstExam !== null ? (
+                  <>
+                    <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
+                      <span className="text-foreground">{daysToFirstExam} days to go.</span> <span className="text-primary">Let's get you that A*.</span>
+                    </h2>
+                    <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
+                      <span className="text-primary">Let's get you that A*.</span>
+                    </h2>
+                    <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
+                  </>
+                )}
                 
                 {/* Social proof badges */}
                 <div className="flex items-center justify-center gap-2.5 flex-wrap mt-3">
@@ -733,15 +748,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-16">
-                <img src={currentLogo} alt="A* AI" className="h-16 mx-auto mb-6" />
-                <h2 className="text-2xl font-bold mb-2 dark:text-foreground light-gradient-subject">
-                  {subjectName}
-                </h2>
-                <p className="text-muted-foreground">{subjectDescription}</p>
-              </div>
-            )
           )}
 
           {messages.map((message, index) => {
@@ -988,10 +994,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent pt-4 pb-4 z-50">
         {/* Suggested prompts — hidden when an image is pending */}
         {messages.length === 0 && suggestedPrompts.length > 0 && !pendingImage && (
-          productId === "6dc19d53-8a88-4741-9528-f25af97afb21" ? (
-            <div className="grid grid-cols-2 gap-3 max-w-3xl w-full mx-auto mb-5 px-4">
+          <div className="grid grid-cols-2 gap-3 max-w-3xl w-full mx-auto mb-5 px-4">
               {suggestedPrompts.map((prompt, idx) => {
-                const labels = ['Diagram', 'Spec point', 'Exam technique', 'Application'];
+                const defaultLabels = ['Topic', 'Key concept', 'Exam technique', 'Study plan'];
+                const labels = promptLabels || defaultLabels;
                 return (
                   <button
                     key={idx}
@@ -1009,21 +1015,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 );
               })}
             </div>
-          ) : (
-            <div className="flex justify-center gap-2 mb-3 w-full overflow-x-auto scrollbar-thin pb-1 px-4">
-              {suggestedPrompts.map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSuggestedPrompt(prompt)}
-                  disabled={isLoading}
-                  className={`px-4 py-2 rounded-full border border-border text-xs sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 disabled:opacity-50 ${theme === 'dark' ? 'bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground' : 'text-white hover:opacity-90'}`}
-                  style={theme === 'dark' ? undefined : { background: 'var(--gradient-brand)' }}
-                >
-                  {prompt.text}
-                </button>
-              ))}
-            </div>
-          )
         )}
 
         <div className="max-w-5xl mx-auto px-4">

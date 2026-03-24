@@ -67,7 +67,7 @@ export const EdexcelMathsFreeVersionPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={EDEXCEL_MATHS_PRODUCT_ID} subjectName="Edexcel Mathematics" subjectDescription="Your personal A* Maths tutor. Ask me anything!" footerText="Powered by A* AI • Trained on Edexcel Mathematics specification" placeholder="Ask about calculus, algebra, statistics..." suggestedPrompts={prompts} chatRef={chatRef} />
+        <RAGChat productId={EDEXCEL_MATHS_PRODUCT_ID} subjectName="Edexcel Mathematics" subjectDescription="Your personal A* Maths tutor. Ask me anything!" footerText="Powered by A* AI • Trained on Edexcel Mathematics specification" placeholder="Ask about calculus, algebra, statistics..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Method', 'Proof', 'Past papers', 'Revision']} />
       </div>
     </div>
   );

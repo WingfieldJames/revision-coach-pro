@@ -91,11 +91,12 @@ export const DynamicPremiumPage = () => {
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
         <RAGChat
-          productId={product.id} subjectName={`${subjectName} Deluxe`}
+          productId={product.id} subjectName={subjectName}
           subjectDescription={`Your personal A* ${qualType} ${product.subject} tutor with full access. Ask me anything!`}
           footerText={`Powered by A* AI • Trained on ${subjectName} ${qualType} specification`}
           placeholder={`Ask about ${product.subject}...`}
-          suggestedPrompts={(() => { const filtered = (trainer?.suggested_prompts || []).filter(p => p.text?.trim()); return filtered.length > 0 ? filtered : [{ text: `What topics are in the ${product.exam_board} ${product.subject} spec?` }, { text: "How do I structure a long answer question?" }, { text: "Create me a full revision plan", usesPersonalization: true }]; })()}
+          examDates={examDates}
+          suggestedPrompts={(() => { const filtered = (trainer?.suggested_prompts || []).filter(p => p.text?.trim()); return filtered.length > 0 ? filtered : [{ text: `What topics are in the ${product.exam_board} ${product.subject} spec?` }, { text: "How do I structure a long answer question?" }, { text: "Find past exam questions" }, { text: "Create me a full revision plan", usesPersonalization: true }]; })()}
         />
       </div>
     </div>

@@ -92,7 +92,7 @@ export const EdexcelMathsAppliedPremiumPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={productId} subjectName="Edexcel Mathematics Applied Deluxe" subjectDescription="Your personal A* Stats & Mechanics tutor. Ask me anything!" footerText="Powered by A* AI • Edexcel Mathematics Applied (Stats & Mechanics)" placeholder="Ask me anything about Stats & Mechanics..." suggestedPrompts={prompts} chatRef={chatRef} />
+        <RAGChat productId={productId} subjectName="Edexcel Mathematics Applied" subjectDescription="Your personal A* Stats & Mechanics tutor. Ask me anything!" footerText="Powered by A* AI • Edexcel Mathematics Applied (Stats & Mechanics)" placeholder="Ask me anything about Stats & Mechanics..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Mechanics', 'Statistics', 'Past papers', 'Revision']} />
       </div>
     </div>
   );

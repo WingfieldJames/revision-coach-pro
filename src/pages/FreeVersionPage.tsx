@@ -71,6 +71,8 @@ export const FreeVersionPage = () => {
           enableDiagrams
           diagramSubject="economics"
           chatRef={chatRef}
+          examDates={examDates}
+          promptLabels={['Diagram', 'Spec point', 'Exam technique', 'Application']}
         />
       </div>
     </div>

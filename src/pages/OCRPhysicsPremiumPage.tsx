@@ -82,7 +82,7 @@ export const OCRPhysicsPremiumPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={productId} subjectName="OCR Physics Deluxe" subjectDescription="Your personal A* Physics tutor. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Physics past papers & mark schemes" placeholder="Ask me anything about OCR Physics A-Level..." suggestedPrompts={prompts} chatRef={chatRef} />
+        <RAGChat productId={productId} subjectName="OCR Physics" subjectDescription="Your personal A* Physics tutor. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Physics past papers & mark schemes" placeholder="Ask me anything about OCR Physics A-Level..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Topic', 'Concept', 'Exam technique', 'Revision']} />
       </div>
     </div>
   );
