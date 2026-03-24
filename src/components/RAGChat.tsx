@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2 } from 'lucide-react';
+import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2 } from 'lucide-react';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
@@ -1028,7 +1028,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
         <div className="max-w-5xl mx-auto px-4">
           {/* Pill container */}
-          <div className="border-2 border-border rounded-2xl overflow-hidden bg-background">
+          <div className="border border-border/60 rounded-2xl overflow-hidden bg-background shadow-[0_0_15px_rgba(var(--primary),0.08),0_0_30px_rgba(var(--primary),0.04)]">
 
             {/* Pending image preview strip */}
             {pendingImage && (
@@ -1091,7 +1091,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 size="icon"
                 className="h-9 w-9 rounded-full bg-gradient-brand hover:opacity-90 glow-brand"
               >
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-4 h-4" />}
               </Button>
             </div>
           </div>
