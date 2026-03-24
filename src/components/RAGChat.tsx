@@ -68,6 +68,8 @@ interface RAGChatProps {
   enableDiagrams?: boolean;
   diagramSubject?: 'economics' | 'cs';
   chatRef?: React.RefObject<RAGChatRef>;
+  examDates?: ExamDate[];
+  promptLabels?: string[];
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
