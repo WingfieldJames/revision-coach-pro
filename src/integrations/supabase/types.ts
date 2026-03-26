@@ -817,6 +817,7 @@ export type Database = {
         Args: { p_product_id: string; p_tool_type: string; p_user_id: string }
         Returns: Json
       }
+      get_user_count: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
