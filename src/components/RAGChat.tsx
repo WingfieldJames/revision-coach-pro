@@ -128,10 +128,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     return Math.ceil((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }, [examDatesProp]);
 
-  // Fetch real user count and animate it
-  const [displayedUserCount, setDisplayedUserCount] = useState(1000);
-  const [targetUserCount, setTargetUserCount] = useState(1000);
-  const [animationDone, setAnimationDone] = useState(false);
+  // Fetch real user count (actual signups + 2000) — updates on each page load
+  const [displayedUserCount, setDisplayedUserCount] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchUserCount = async () => {
@@ -140,7 +138,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           .from('users')
           .select('*', { count: 'exact', head: true });
         if (!error && count !== null) {
-          setTargetUserCount(count + 3000);
+          setDisplayedUserCount(count + 2000);
         }
       } catch (e) {
         console.error('Error fetching user count:', e);
@@ -148,22 +146,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     };
     fetchUserCount();
   }, []);
-
-  // Count-up animation on page load only — completes within 1 second
-  useEffect(() => {
-    if (animationDone) return;
-    if (displayedUserCount >= targetUserCount) {
-      setAnimationDone(true);
-      return;
-    }
-    const totalSteps = 30;
-    const diff = targetUserCount - displayedUserCount;
-    const step = Math.max(1, Math.ceil(diff / totalSteps));
-    const timer = setTimeout(() => {
-      setDisplayedUserCount(prev => Math.min(prev + step, targetUserCount));
-    }, 33); // ~30 steps × 33ms ≈ 1 second
-    return () => clearTimeout(timer);
-  }, [displayedUserCount, targetUserCount, animationDone]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
