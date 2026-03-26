@@ -134,11 +134,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   useEffect(() => {
     const fetchUserCount = async () => {
       try {
-        const { count, error } = await (supabase as any)
-          .from('users')
-          .select('*', { count: 'exact', head: true });
-        if (!error && count !== null) {
-          setDisplayedUserCount(count + 2000);
+        const { data, error } = await supabase.rpc('get_user_count');
+        if (!error && data !== null) {
+          setDisplayedUserCount((data as number) + 2000);
         }
       } catch (e) {
         console.error('Error fetching user count:', e);
