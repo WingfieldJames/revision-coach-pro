@@ -149,28 +149,21 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     fetchUserCount();
   }, []);
 
-  // Count-up animation on load, then subtle last-digit tick
+  // Count-up animation on page load only — completes within 1 second
   useEffect(() => {
+    if (animationDone) return;
     if (displayedUserCount >= targetUserCount) {
-      if (!animationDone) setAnimationDone(true);
+      setAnimationDone(true);
       return;
     }
+    const totalSteps = 30;
     const diff = targetUserCount - displayedUserCount;
-    const step = Math.max(1, Math.floor(diff / 40));
+    const step = Math.max(1, Math.ceil(diff / totalSteps));
     const timer = setTimeout(() => {
       setDisplayedUserCount(prev => Math.min(prev + step, targetUserCount));
-    }, 30);
+    }, 33); // ~30 steps × 33ms ≈ 1 second
     return () => clearTimeout(timer);
   }, [displayedUserCount, targetUserCount, animationDone]);
-
-  // After initial animation, do a subtle +1 tick every few seconds
-  useEffect(() => {
-    if (!animationDone) return;
-    const interval = setInterval(() => {
-      setDisplayedUserCount(prev => prev + 1);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [animationDone]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
