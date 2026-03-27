@@ -239,6 +239,13 @@ export const ComparePage = () => {
     }
   }, [subject, examBoard]);
 
+  // Auto-select first board if none is set
+  useEffect(() => {
+    if (!examBoard && boardsForSubject.length > 0) {
+      setExamBoard(boardsForSubject[0] as ExamBoard);
+    }
+  }, [examBoard, boardsForSubject]);
+
   useEffect(() => {
     if (window.location.hash === '#testimonials') {
       setTimeout(() => {
@@ -379,7 +386,7 @@ export const ComparePage = () => {
             </div>
 
             {/* Mobile: Two dropdown buttons */}
-            <div className="md:hidden sticky top-[72px] z-40 bg-background/95 backdrop-blur-sm py-3 -mx-4 px-4 flex items-center justify-center gap-3 mb-8">
+            <div className="md:hidden sticky top-[72px] z-40 bg-background/95 backdrop-blur-sm py-3 -mx-4 px-4 flex items-start mb-8">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="rounded-full px-5 py-2.5 text-sm font-semibold bg-gradient-brand text-white flex items-center gap-2 glow-brand">
@@ -401,19 +408,6 @@ export const ComparePage = () => {
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              <Select value={examBoard || undefined} onValueChange={(val) => setExamBoard(val)}>
-                <SelectTrigger className="rounded-full px-5 py-2.5 h-auto w-auto text-sm font-semibold border border-border bg-background text-foreground hover:bg-muted [&>svg]:ml-1">
-                  <SelectValue placeholder="Select board" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-                  {boardsForSubject.map((b) =>
-                  <SelectItem key={b} value={b}>
-                      {b === 'cie' ? 'CIE' : b === 'aqa' ? 'AQA' : b === 'ocr' ? 'OCR' : b === 'edexcel' ? 'Edexcel' : b.toUpperCase()}
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
             </div>
           </ScrollReveal>
 
