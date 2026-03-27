@@ -1,4 +1,4 @@
-import { ChevronDown, Check, Bot, PenLine, FileText, BarChart3, Brain, BookOpen, LucideIcon } from 'lucide-react';
+import { ChevronDown, Check, Bot, PenLine, FileText, BarChart3, Brain, BookOpen, ArrowRight, LucideIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface SubjectFeatureGridProps {
@@ -167,6 +167,13 @@ export function SubjectFeatureGrid({
             className="hidden sm:inline-flex px-5 py-2.5 rounded-xl text-white font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 glow-brand hover:glow-brand-intense bg-gradient-brand"
           >
             {hasAccess ? 'Go to chat →' : 'Start studying →'}
+          </button>
+          <button
+            onClick={onCtaClick}
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full bg-gradient-brand text-white shadow-md active:scale-95 transition-transform"
+            aria-label="Open chatbot"
+          >
+            <ArrowRight className="h-5 w-5" />
           </button>
         </div>
 
