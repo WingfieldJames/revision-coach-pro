@@ -161,7 +161,7 @@ export const HomePage = () => {
                 </h1>
 
                 {/* Subheadline */}
-                <p className="text-sm sm:text-base md:text-lg xl:text-xl text-muted-foreground max-w-lg mb-8 leading-relaxed mx-auto md:mx-0">
+                <p className="text-sm sm:text-base md:text-lg xl:text-xl text-muted-foreground max-w-lg mb-8 leading-relaxed">
                   Built for your exam board, trained by the highest achieving A* students
                 </p>
 
