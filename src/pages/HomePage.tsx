@@ -142,9 +142,17 @@ export const HomePage = () => {
 
                 {/* Main Headline */}
                 <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.25rem] lg:text-[4rem] xl:text-[4.5rem] font-bold mb-4 leading-[1.1] tracking-tight">
-                  <div className="text-foreground">The AI tutor</div>
-                  <div className="text-foreground">built to get</div>
-                  <div className="text-foreground">you an <span className="text-primary">A*</span>.</div>
+                  {/* Mobile: 2 lines */}
+                  <div className="md:hidden">
+                    <div className="text-foreground">The AI tutor built</div>
+                    <div className="text-foreground">to get you an <span className="text-primary">A*</span>.</div>
+                  </div>
+                  {/* Desktop: 3 lines */}
+                  <div className="hidden md:block">
+                    <div className="text-foreground">The AI tutor</div>
+                    <div className="text-foreground">built to get</div>
+                    <div className="text-foreground">you an <span className="text-primary">A*</span>.</div>
+                  </div>
                 </h1>
 
                 {/* Subheadline */}
