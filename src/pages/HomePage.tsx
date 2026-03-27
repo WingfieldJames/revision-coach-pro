@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeroBackgroundPaths } from "@/components/ui/hero-background-paths";
+import { ChatbotFullscreenPaths } from "@/components/ui/chatbot-fullscreen-paths";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { MeetTheFounders } from "@/components/MeetTheFounders";
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from "@/components/ui/testimonials-columns";
