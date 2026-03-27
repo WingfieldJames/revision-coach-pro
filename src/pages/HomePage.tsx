@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeroBackgroundPaths } from "@/components/ui/hero-background-paths";
+import { ChatbotFullscreenPaths } from "@/components/ui/chatbot-fullscreen-paths";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
 import { MeetTheFounders } from "@/components/MeetTheFounders";
 import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from "@/components/ui/testimonials-columns";
@@ -124,7 +125,11 @@ export const HomePage = () => {
       <Header showNavLinks showStartStudyingButton />
 
       {/* Hero Section */}
-      <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4">
+      <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4 relative">
+        {/* Mobile-only purple animated paths behind hero */}
+        <div className="md:hidden absolute inset-0 z-0 overflow-hidden">
+          <ChatbotFullscreenPaths />
+        </div>
         <HeroBackgroundPaths>
           <div className="px-6 sm:px-8 py-6 sm:py-16 md:py-24 xl:py-16 2xl:py-12 md:max-xl:py-6 max-w-7xl mx-auto md:max-w-none md:pr-0" style={{ paddingLeft: 'max(2rem, calc((100vw - 80rem) / 2))' }}>
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
@@ -142,9 +147,17 @@ export const HomePage = () => {
 
                 {/* Main Headline */}
                 <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.25rem] lg:text-[4rem] xl:text-[4.5rem] font-bold mb-4 leading-[1.1] tracking-tight">
-                  <div className="text-foreground">The AI tutor</div>
-                  <div className="text-foreground">built to get</div>
-                  <div className="text-foreground">you an <span className="text-primary">A*</span>.</div>
+                  {/* Mobile: 2 lines */}
+                  <div className="md:hidden">
+                    <div className="text-foreground">The AI tutor built</div>
+                    <div className="text-foreground">to get you an <span className="text-primary">A*</span>.</div>
+                  </div>
+                  {/* Desktop: 3 lines */}
+                  <div className="hidden md:block">
+                    <div className="text-foreground">The AI tutor</div>
+                    <div className="text-foreground">built to get</div>
+                    <div className="text-foreground">you an <span className="text-primary">A*</span>.</div>
+                  </div>
                 </h1>
 
                 {/* Subheadline */}
