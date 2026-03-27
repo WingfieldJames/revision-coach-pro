@@ -168,6 +168,13 @@ export function SubjectFeatureGrid({
           >
             {hasAccess ? 'Go to chat →' : 'Start studying →'}
           </button>
+          <button
+            onClick={onCtaClick}
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full bg-gradient-brand text-white shadow-md active:scale-95 transition-transform"
+            aria-label="Open chatbot"
+          >
+            <ArrowRight className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Feature cards */}
