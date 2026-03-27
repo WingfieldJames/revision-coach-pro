@@ -132,9 +132,9 @@ export const HomePage = () => {
         </div>
         <HeroBackgroundPaths>
           <div className="px-6 sm:px-8 py-6 sm:py-16 md:py-24 xl:py-16 2xl:py-12 md:max-xl:py-6 max-w-7xl mx-auto md:max-w-none md:pr-0" style={{ paddingLeft: 'max(2rem, calc((100vw - 80rem) / 2))' }}>
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-16">
               {/* Left side - Text content */}
-              <div className="flex-1 text-center md:text-left md:max-w-[500px] xl:max-w-[520px] 2xl:max-w-[560px] md:flex-shrink-0">
+              <div className="flex-1 text-left md:max-w-[500px] xl:max-w-[520px] 2xl:max-w-[560px] md:flex-shrink-0">
                 {/* Social Proof Pill */}
                 <div
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm">
@@ -161,12 +161,12 @@ export const HomePage = () => {
                 </h1>
 
                 {/* Subheadline */}
-                <p className="text-sm sm:text-base md:text-lg xl:text-xl text-muted-foreground max-w-lg mb-8 leading-relaxed mx-auto md:mx-0">
+                <p className="text-sm sm:text-base md:text-lg xl:text-xl text-muted-foreground max-w-lg mb-8 leading-relaxed">
                   Built for your exam board, trained by the highest achieving A* students
                 </p>
 
                 {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row items-center md:items-start gap-4">
+                <div className="flex flex-col sm:flex-row items-start gap-4">
                   <button
                     onClick={handlePickSubject}
                     className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90">
