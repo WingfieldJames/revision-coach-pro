@@ -189,9 +189,16 @@ export function MeetTheFounders() {
   return (
     <section className="pt-8 pb-16 md:pt-12 md:pb-20 bg-muted overflow-hidden">
       <div className="max-w-6xl mx-auto px-8">
-        <ScrollReveal className="text-center mb-12 md:mb-16">
+        <div className="text-center mb-12 md:mb-16 md:hidden">
           <p className="text-sm sm:text-base font-medium text-muted-foreground mb-2">Meet your trainers</p>
-          <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
+          <h2 className="text-[1.5rem] sm:text-[2.5rem] font-bold leading-[1.2] tracking-tight">
+            <span className="text-foreground">The A* students </span>
+            <span className="text-primary">behind the AI</span>
+          </h2>
+        </div>
+        <ScrollReveal className="text-center mb-12 md:mb-16 hidden md:block">
+          <p className="text-sm sm:text-base font-medium text-muted-foreground mb-2">Meet your trainers</p>
+          <h2 className="text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
             <span className="text-foreground">The A* students </span>
             <span className="text-primary">behind the AI</span>
           </h2>
