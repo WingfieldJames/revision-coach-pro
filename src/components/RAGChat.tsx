@@ -681,7 +681,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
-              <div className="text-center py-16">
+              <div className="text-center py-6 sm:py-8 md:py-16">
                 <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-1" />
                 {daysToFirstExam !== null ? (
                   <>
