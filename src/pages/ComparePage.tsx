@@ -239,6 +239,13 @@ export const ComparePage = () => {
     }
   }, [subject, examBoard]);
 
+  // Auto-select first board if none is set
+  useEffect(() => {
+    if (!examBoard && boardsForSubject.length > 0) {
+      setExamBoard(boardsForSubject[0] as ExamBoard);
+    }
+  }, [examBoard, boardsForSubject]);
+
   useEffect(() => {
     if (window.location.hash === '#testimonials') {
       setTimeout(() => {
