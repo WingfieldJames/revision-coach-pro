@@ -47,11 +47,17 @@ export const TestimonialsColumn = ({
               >
                 <p className="text-foreground leading-relaxed text-base">{text}</p>
                 <div className="flex items-center gap-3 mt-4">
-                  <img
-                    src={image}
-                    alt={name}
-                    className="w-10 h-10 rounded-full object-cover object-[center_20%]"
-                  />
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={name}
+                      className="w-10 h-10 rounded-full object-cover object-[center_20%]"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
+                      {name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                  )}
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground text-sm truncate">{name}</p>
                     <p className="text-sm text-muted-foreground truncate">{role}</p>
