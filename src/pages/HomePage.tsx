@@ -393,7 +393,6 @@ export const HomePage = () => {
               </Accordion>
             </ScrollReveal>
           </div>
-        </div>
       </section>
 
       {/* Footer */}
