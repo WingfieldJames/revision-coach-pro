@@ -86,6 +86,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   examSubjectName = 'Exams',
   customPastPaperContent,
   customRevisionGuideContent,
+  showGraphSketcher = false,
   showMathsModeSwitcher = false,
   mathsMode = 'pure',
   onMathsModeChange,
