@@ -5,6 +5,7 @@ import matanImage from '@/assets/matan-g.png';
 import kathyImage from '@/assets/kathy-kou.png';
 import ryanImage from '@/assets/ryan-davies.png';
 import alexandruImage from '@/assets/alexandru-leoca.png';
+import louisImage from '@/assets/louis-yung.png';
 
 interface Testimonial {
   text: string;
@@ -104,6 +105,12 @@ export const firstColumn: Testimonial[] = [
     role: "Year 12",
   },
   {
+    text: "After using A* AI and reflecting on it with my teachers, we all agreed it was really accurate in terms of marking. The feedback was more detailed than any standard examiner marking. My teacher recommended it to my classmates and said he found it really interesting and valuable!",
+    image: louisImage,
+    name: "Louis Yung",
+    role: "Year 12",
+  },
+  {
     text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
     image: alexandruImage,
     name: "Alexandru Leoca",
@@ -149,6 +156,12 @@ export const secondColumn: Testimonial[] = [
     role: "BA Economics, Cambridge",
   },
   {
+    text: "After using A* AI and reflecting on it with my teachers, we all agreed it was really accurate in terms of marking. The feedback was more detailed than any standard examiner marking. My teacher recommended it to my classmates and said he found it really interesting and valuable!",
+    image: louisImage,
+    name: "Louis Yung",
+    role: "Year 12",
+  },
+  {
     text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
     image: alexandruImage,
     name: "Alexandru Leoca",
@@ -192,6 +205,12 @@ export const thirdColumn: Testimonial[] = [
     image: matanImage,
     name: "Matan G",
     role: "Year 13 Student",
+  },
+  {
+    text: "After using A* AI and reflecting on it with my teachers, we all agreed it was really accurate in terms of marking. The feedback was more detailed than any standard examiner marking. My teacher recommended it to my classmates and said he found it really interesting and valuable!",
+    image: louisImage,
+    name: "Louis Yung",
+    role: "Year 12",
   },
   {
     text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
