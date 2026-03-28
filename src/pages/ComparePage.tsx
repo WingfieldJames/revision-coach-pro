@@ -498,19 +498,10 @@ export const ComparePage = () => {
           </div>
 
           <div className="relative">
-            <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" testimonials={[{
-              author: { name: "Lucy W", handle: "Year 12", avatar: lucyImage },
-              text: "\"I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩\""
-            }, {
-              author: { name: "James W", handle: "LSE", avatar: jamesImage },
-              text: "\"A* AI actually got me that A* in the end - helping me get 90% overall in all three papers. The live application feature is sick\""
-            }, {
-              author: { name: "Matan G", handle: "Year 13", avatar: matanImage },
-              text: "\"A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.\""
-            }, {
-              author: { name: "Amira", handle: "LSE Offer Holder", avatar: amiraImage },
-              text: "\"I used A* AI the month before exams and smashed both Paper 1 and 2. It's way more helpful than YouTube — everything's structured and instant.\""
-            }]} />
+            <TestimonialsSection title="Loved by sixth formers across the UK ⬇️" testimonials={homeTestimonials.map(t => ({
+              author: { name: t.name, handle: t.role, avatar: t.image },
+              text: `"${t.text}"`
+            }))} />
           </div>
         </div>
 
