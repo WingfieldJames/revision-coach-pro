@@ -8,6 +8,7 @@ import alexandruImage from '@/assets/alexandru-leoca.png';
 import louisImage from '@/assets/louis-yung.png';
 import oliverImage from '@/assets/oliver-mobolaji.png';
 import freddieImage from '@/assets/freddie-jones.png';
+import mikelImage from '@/assets/mikel-donkor.png';
 
 interface Testimonial {
   text: string;
