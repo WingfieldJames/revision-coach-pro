@@ -202,6 +202,18 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
         </Link>
 
         {visibleTools.map(tool => (
+          tool.id === 'maths-mode' ? (
+            <Button
+              key={tool.id}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0"
+              onClick={() => onMathsModeChange?.(mathsMode === 'pure' ? 'applied' : 'pure')}
+            >
+              {tool.icon}
+              <span className="hidden sm:inline">{tool.label}</span>
+            </Button>
+          ) : (
           <Popover
             key={tool.id}
             open={openPopover === tool.id}
@@ -241,6 +253,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               </ScrollArea>
             </PopoverContent>
           </Popover>
+          )
         ))}
       </div>
 
