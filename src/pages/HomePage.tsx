@@ -293,8 +293,10 @@ export const HomePage = () => {
 
       {/* FAQ Section */}
       <section className="py-16 px-4 md:px-8 bg-background relative overflow-hidden">
-        <HeroBackgroundPaths>
-          <div className="max-w-4xl mx-auto relative z-10 px-2 md:px-0">
+        <div className="absolute inset-0 z-0">
+          <ChatbotFullscreenPaths />
+        </div>
+        <div className="max-w-4xl mx-auto relative z-10 px-2 md:px-0">
             <ScrollReveal>
               <h2 className={`${sectionHeadingClass} text-center mb-6`}>
                <span className="text-foreground">Frequently asked </span>
