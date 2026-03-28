@@ -68,7 +68,7 @@ export const TestimonialsColumn = ({
                   )}
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground text-sm truncate">{name}</p>
-                    <p className="text-sm text-muted-foreground truncate">{role}</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-line">{role}</p>
                   </div>
                 </div>
               </div>
