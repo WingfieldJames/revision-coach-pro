@@ -9,6 +9,7 @@ import louisImage from '@/assets/louis-yung.png';
 import oliverImage from '@/assets/oliver-mobolaji.png';
 import freddieImage from '@/assets/freddie-jones.png';
 import mikelImage from '@/assets/mikel-donkor.png';
+import dlyetImage from '@/assets/dlyet-tewolde.png';
 
 interface Testimonial {
   text: string;
@@ -153,6 +154,12 @@ export const firstColumn: Testimonial[] = [
     name: "Mikel Donkor",
     role: "Year 12",
   },
+  {
+    text: "This tool is insane. I like how I can put in my target and predicted subjects, and the essay marker too. I'm gonna let my econ teacher know to stop using ChatGPT",
+    image: dlyetImage,
+    name: "Dlyet Tewolde",
+    role: "Year 12",
+  },
 ];
 
 export const secondColumn: Testimonial[] = [
@@ -228,6 +235,12 @@ export const secondColumn: Testimonial[] = [
     name: "Mikel Donkor",
     role: "Year 12",
   },
+  {
+    text: "This tool is insane. I like how I can put in my target and predicted subjects, and the essay marker too. I'm gonna let my econ teacher know to stop using ChatGPT",
+    image: dlyetImage,
+    name: "Dlyet Tewolde",
+    role: "Year 12",
+  },
 ];
 
 export const thirdColumn: Testimonial[] = [
@@ -301,6 +314,12 @@ export const thirdColumn: Testimonial[] = [
     text: "On the home page, you can see a profile on all the people who built the models on the website. AI often has a conception of being inhumane, kind of robotic and such — that addition adds a more humane feel to it.\n\nThere are also so many different components to this website, and overall it's really great!",
     image: mikelImage,
     name: "Mikel Donkor",
+    role: "Year 12",
+  },
+  {
+    text: "This tool is insane. I like how I can put in my target and predicted subjects, and the essay marker too. I'm gonna let my econ teacher know to stop using ChatGPT",
+    image: dlyetImage,
+    name: "Dlyet Tewolde",
     role: "Year 12",
   },
 ];
