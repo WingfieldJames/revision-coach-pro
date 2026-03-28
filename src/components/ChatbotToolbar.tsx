@@ -140,7 +140,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   };
 
   const toolItems = [
-    { id: 'maths-mode', label: mathsMode === 'pure' ? 'Pure' : 'Applied', icon: <ArrowLeftRight className="h-4 w-4" />, show: showMathsModeSwitcher },
+    { id: 'maths-mode', label: mathsMode === 'pure' ? 'Pure' : 'Applied (Statistics and Mechanics)', icon: <ArrowLeftRight className="h-4 w-4" />, show: showMathsModeSwitcher },
     { id: 'my-ai', label: 'My AI', icon: <Sparkles className="h-4 w-4" />, show: showMyAI },
     { id: 'grade-boundaries', label: 'Grade Boundaries', icon: <TrendingUp className="h-4 w-4" />, show: showGradeBoundaries },
     { id: 'diagrams', label: 'Diagram Generator', icon: <BarChart2 className="h-4 w-4" />, show: showDiagramTool },
