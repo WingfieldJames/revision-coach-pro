@@ -46,7 +46,11 @@ export const TestimonialsColumn = ({
                 key={`${index}-${i}`}
                 className="relative bg-muted rounded-3xl p-5 shadow-card border border-border/30 overflow-hidden"
               >
-                <p className="text-foreground leading-relaxed text-base">{text}</p>
+                <div className="text-foreground leading-relaxed text-base space-y-2">
+                  {text.split('\n\n').map((paragraph, pi) => (
+                    <p key={pi}>{paragraph}</p>
+                  ))}
+                </div>
                 <div className="flex items-center gap-3 mt-4">
                   {image ? (
                     <img
