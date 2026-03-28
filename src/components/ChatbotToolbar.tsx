@@ -177,6 +177,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
       );
       case 'my-ai': return <MyAIPreferences productId={productId} isDeluxe={isDeluxe} />;
       case 'grade-boundaries': return <GradeBoundariesTool subject={gradeBoundariesSubject} />;
+      case 'graph-sketcher': return <GraphSketcherTool />;
       case 'past-papers': return customPastPaperContent || <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />;
       case 'revision-guide': return customRevisionGuideContent || <RevisionGuideTool board={revisionGuideBoard} tier={tier} productId={productId} />;
       case 'essay-marker': return (
