@@ -6,6 +6,7 @@ import kathyImage from '@/assets/kathy-kou.png';
 import ryanImage from '@/assets/ryan-davies.png';
 import alexandruImage from '@/assets/alexandru-leoca.png';
 import louisImage from '@/assets/louis-yung.png';
+import oliverImage from '@/assets/oliver-mobolaji.png';
 
 interface Testimonial {
   text: string;
@@ -45,7 +46,11 @@ export const TestimonialsColumn = ({
                 key={`${index}-${i}`}
                 className="relative bg-muted rounded-3xl p-5 shadow-card border border-border/30 overflow-hidden"
               >
-                <p className="text-foreground leading-relaxed text-base">{text}</p>
+                <div className="text-foreground leading-relaxed text-base space-y-2">
+                  {text.split('\n\n').map((paragraph, pi) => (
+                    <p key={pi}>{paragraph}</p>
+                  ))}
+                </div>
                 <div className="flex items-center gap-3 mt-4">
                   {image ? (
                     <img
@@ -128,6 +133,12 @@ export const firstColumn: Testimonial[] = [
     name: "Alexandru Leoca",
     role: "Year 12",
   },
+  {
+    text: "Bro... I wish I found this sooner. It's perfect.\n\nI've tested the AI chatbot and revision guide maker so far, and they're both highly detailed. They give you what you haven't even thought of asking for, with tailored information.\n\nI'll defo be using this regularly from now on. It's also really clear to use and I think that would help me begin revising econ with an actual structure",
+    image: oliverImage,
+    name: "Oliver Mobolaji",
+    role: "Year 13",
+  },
 ];
 
 export const secondColumn: Testimonial[] = [
@@ -185,6 +196,12 @@ export const secondColumn: Testimonial[] = [
     name: "Alexandru Leoca",
     role: "Year 12",
   },
+  {
+    text: "Bro... I wish I found this sooner. It's perfect.\n\nI've tested the AI chatbot and revision guide maker so far, and they're both highly detailed. They give you what you haven't even thought of asking for, with tailored information.\n\nI'll defo be using this regularly from now on. It's also really clear to use and I think that would help me begin revising econ with an actual structure",
+    image: oliverImage,
+    name: "Oliver Mobolaji",
+    role: "Year 13",
+  },
 ];
 
 export const thirdColumn: Testimonial[] = [
@@ -241,5 +258,11 @@ export const thirdColumn: Testimonial[] = [
     image: alexandruImage,
     name: "Alexandru Leoca",
     role: "Year 12",
+  },
+  {
+    text: "Bro... I wish I found this sooner. It's perfect.\n\nI've tested the AI chatbot and revision guide maker so far, and they're both highly detailed. They give you what you haven't even thought of asking for, with tailored information.\n\nI'll defo be using this regularly from now on. It's also really clear to use and I think that would help me begin revising econ with an actual structure",
+    image: oliverImage,
+    name: "Oliver Mobolaji",
+    role: "Year 13",
   },
 ];
