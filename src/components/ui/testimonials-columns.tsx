@@ -111,6 +111,12 @@ export const firstColumn: Testimonial[] = [
     role: "Year 12",
   },
   {
+    text: "Diagrams generated instantly, essay feedback I could actually use. This tool will be very useful for achieving a high grade in CS and Maths!",
+    image: "",
+    name: "Natas Bubelis",
+    role: "Year 13",
+  },
+  {
     text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
     image: alexandruImage,
     name: "Alexandru Leoca",
