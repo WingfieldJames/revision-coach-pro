@@ -166,7 +166,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
                 mathsMode === mode ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground hover:bg-muted'
               }`}
             >
-              {mode === 'pure' ? '📐 Pure Mathematics' : '📊 Applied (Stats & Mechanics)'}
+              {mode === 'pure' ? '📐 Pure Mathematics' : '📊 Applied (Statistics and Mechanics)'}
             </button>
           ))}
         </div>
