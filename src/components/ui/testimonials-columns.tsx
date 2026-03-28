@@ -156,6 +156,12 @@ export const secondColumn: Testimonial[] = [
     role: "BA Economics, Cambridge",
   },
   {
+    text: "After using A* AI and reflecting on it with my teachers, we all agreed it was really accurate in terms of marking. The feedback was more detailed than any standard examiner marking. My teacher recommended it to my classmates and said he found it really interesting and valuable!",
+    image: louisImage,
+    name: "Louis Yung",
+    role: "Year 12",
+  },
+  {
     text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
     image: alexandruImage,
     name: "Alexandru Leoca",
