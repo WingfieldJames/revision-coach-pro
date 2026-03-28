@@ -278,4 +278,10 @@ export const thirdColumn: Testimonial[] = [
     name: "Oliver Mobolaji",
     role: "Year 13",
   },
+  {
+    text: "I actually have an 'Examiner AI' (Tutor2u) subscription but I find the feedback is pretty useless. A*AI actually provides useful and specific feedback for the students.",
+    image: freddieImage,
+    name: "Freddie Jones",
+    role: "Economics Teacher @ KCS Wimbledon",
+  },
 ];
