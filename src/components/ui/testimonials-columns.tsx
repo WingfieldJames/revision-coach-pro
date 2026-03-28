@@ -80,8 +80,8 @@ export const TestimonialsColumn = ({
   );
 };
 
-// Real testimonials from students
-export const firstColumn: Testimonial[] = [
+// Master list of all testimonials
+const allTestimonials: Testimonial[] = [
   {
     text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
     image: matanImage,
@@ -162,164 +162,12 @@ export const firstColumn: Testimonial[] = [
   },
 ];
 
-export const secondColumn: Testimonial[] = [
-  {
-    text: "Having been in the EdTech space for 3+ years this might be one of the most exciting projects I've seen.",
-    image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
-    name: "Mahmudur Rahman",
-    role: "15m views & 1.5m+ likes",
-  },
-  {
-    text: "The 25-marker banded marking gave my essay 23/25 - exactly what my teacher gave it. The improvement tips were detailed and helpful. A* AI massively exceeded my expectations",
-    image: ryanImage,
-    name: "Ryan Davies",
-    role: "Year 13",
-  },
-  {
-    text: "I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩",
-    image: "/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png",
-    name: "Lucy W",
-    role: "Year 12",
-  },
-  {
-    text: "Got my first ever 12/12 on a 12 marker and then 10/10 today with A*AI's help",
-    image: kathyImage,
-    name: "Kathy Kou",
-    role: "Year 12",
-  },
-  {
-    text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
-    image: matanImage,
-    name: "Matan G",
-    role: "Year 13 Student",
-  },
-  {
-    text: "I used an early version of A* AI before its official launch. In those final weeks before the exam it was a lifesaver helping me match my knowledge to exact mark schemes helping me achieve A*s in Econ, Maths and Politics.",
-    image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
-    name: "Sina Naderi",
-    role: "BA Economics, Cambridge",
-  },
-  {
-    text: "After using A* AI and reflecting on it with my teachers, we all agreed it was really accurate in terms of marking. The feedback was more detailed than any standard examiner marking. My teacher recommended it to my classmates and said he found it really interesting and valuable!",
-    image: louisImage,
-    name: "Louis Yung",
-    role: "Year 12",
-  },
-  {
-    text: "Diagrams generated instantly, essay feedback I could actually use. This tool will be very useful for achieving a high grade in CS and Maths!",
-    image: "",
-    name: "Natas Bubelis",
-    role: "Year 13",
-  },
-  {
-    text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
-    image: alexandruImage,
-    name: "Alexandru Leoca",
-    role: "Year 12",
-  },
-  {
-    text: "Bro... I wish I found this sooner. It's perfect.\n\nI've tested the AI chatbot and revision guide maker so far, and they're both highly detailed. They give you what you haven't even thought of asking for, with tailored information.\n\nI'll defo be using this regularly from now on. It's also really clear to use and I think that would help me begin revising econ with an actual structure",
-    image: oliverImage,
-    name: "Oliver Mobolaji",
-    role: "Year 13",
-  },
-  {
-    text: "I actually have an 'Examiner AI' (Tutor2u) subscription but I find the feedback is pretty useless. A*AI actually provides useful and specific feedback for the students.",
-    image: freddieImage,
-    name: "Freddie Jones",
-    role: "Economics Teacher @ KCS Wimbledon",
-  },
-  {
-    text: "On the home page, you can see a profile on all the people who built the models on the website. AI often has a conception of being inhumane, kind of robotic and such — that addition adds a more humane feel to it.\n\nThere are also so many different components to this website, and overall it's really great!",
-    image: mikelImage,
-    name: "Mikel Donkor",
-    role: "Year 12",
-  },
-  {
-    text: "This tool is insane. I like how I can put in my target and predicted subjects, and the essay marker too. I'm gonna let my econ teacher know to stop using ChatGPT",
-    image: dlyetImage,
-    name: "Dlyet Tewolde",
-    role: "Year 12",
-  },
-];
+// Each column picks testimonials at staggered offsets so the same person
+// never appears at the same vertical position across columns.
+// With 13 items, offsets of 0, 5, 9 guarantee max spacing.
+const pickAtOffset = (offset: number) =>
+  allTestimonials.map((_, i) => allTestimonials[(i + offset) % allTestimonials.length]);
 
-export const thirdColumn: Testimonial[] = [
-  {
-    text: "I used an early version of A* AI before its official launch. In those final weeks before the exam it was a lifesaver helping me match my knowledge to exact mark schemes helping me achieve A*s in Econ, Maths and Politics.",
-    image: "/lovable-uploads/8e3350f3-3dd2-4e1f-b88a-c678f461e79d.png",
-    name: "Sina Naderi",
-    role: "BA Economics, Cambridge",
-  },
-  {
-    text: "Got my first ever 12/12 on a 12 marker and then 10/10 today with A*AI's help",
-    image: kathyImage,
-    name: "Kathy Kou",
-    role: "Year 12",
-  },
-  {
-    text: "The 25-marker banded marking gave my essay 23/25 - exactly what my teacher gave it. The improvement tips were detailed and helpful. A* AI massively exceeded my expectations",
-    image: ryanImage,
-    name: "Ryan Davies",
-    role: "Year 13",
-  },
-  {
-    text: "Having been in the EdTech space for 3+ years this might be one of the most exciting projects I've seen.",
-    image: "/lovable-uploads/40af8c72-163c-49dd-8917-b57f78ed92a9.png",
-    name: "Mahmudur Rahman",
-    role: "15m views & 1.5m+ likes",
-  },
-  {
-    text: "I only started using A* AI a month ago when I started the course but it has already done levels for my econ. Explanation tailored to the spec is super helpful🤩",
-    image: "/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png",
-    name: "Lucy W",
-    role: "Year 12",
-  },
-  {
-    text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
-    image: matanImage,
-    name: "Matan G",
-    role: "Year 13 Student",
-  },
-  {
-    text: "After using A* AI and reflecting on it with my teachers, we all agreed it was really accurate in terms of marking. The feedback was more detailed than any standard examiner marking. My teacher recommended it to my classmates and said he found it really interesting and valuable!",
-    image: louisImage,
-    name: "Louis Yung",
-    role: "Year 12",
-  },
-  {
-    text: "Diagrams generated instantly, essay feedback I could actually use. This tool will be very useful for achieving a high grade in CS and Maths!",
-    image: "",
-    name: "Natas Bubelis",
-    role: "Year 13",
-  },
-  {
-    text: "Convinced my econ teacher to buy it and use it in our lessons🫡 Showed it to him and he was shocked",
-    image: alexandruImage,
-    name: "Alexandru Leoca",
-    role: "Year 12",
-  },
-  {
-    text: "Bro... I wish I found this sooner. It's perfect.\n\nI've tested the AI chatbot and revision guide maker so far, and they're both highly detailed. They give you what you haven't even thought of asking for, with tailored information.\n\nI'll defo be using this regularly from now on. It's also really clear to use and I think that would help me begin revising econ with an actual structure",
-    image: oliverImage,
-    name: "Oliver Mobolaji",
-    role: "Year 13",
-  },
-  {
-    text: "I actually have an 'Examiner AI' (Tutor2u) subscription but I find the feedback is pretty useless. A*AI actually provides useful and specific feedback for the students.",
-    image: freddieImage,
-    name: "Freddie Jones",
-    role: "Economics Teacher @ KCS Wimbledon",
-  },
-  {
-    text: "On the home page, you can see a profile on all the people who built the models on the website. AI often has a conception of being inhumane, kind of robotic and such — that addition adds a more humane feel to it.\n\nThere are also so many different components to this website, and overall it's really great!",
-    image: mikelImage,
-    name: "Mikel Donkor",
-    role: "Year 12",
-  },
-  {
-    text: "This tool is insane. I like how I can put in my target and predicted subjects, and the essay marker too. I'm gonna let my econ teacher know to stop using ChatGPT",
-    image: dlyetImage,
-    name: "Dlyet Tewolde",
-    role: "Year 12",
-  },
-];
+export const firstColumn: Testimonial[] = pickAtOffset(0);
+export const secondColumn: Testimonial[] = pickAtOffset(5);
+export const thirdColumn: Testimonial[] = pickAtOffset(9);
