@@ -235,6 +235,12 @@ export const secondColumn: Testimonial[] = [
     name: "Mikel Donkor",
     role: "Year 12",
   },
+  {
+    text: "This tool is insane. I like how I can put in my target and predicted subjects, and the essay marker too. I'm gonna let my econ teacher know to stop using ChatGPT",
+    image: dlyetImage,
+    name: "Dlyet Tewolde",
+    role: "Year 12",
+  },
 ];
 
 export const thirdColumn: Testimonial[] = [
