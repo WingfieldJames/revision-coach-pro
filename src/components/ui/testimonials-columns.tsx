@@ -8,6 +8,7 @@ import alexandruImage from '@/assets/alexandru-leoca.png';
 import louisImage from '@/assets/louis-yung.png';
 import oliverImage from '@/assets/oliver-mobolaji.png';
 import freddieImage from '@/assets/freddie-jones.png';
+import mikelImage from '@/assets/mikel-donkor.png';
 
 interface Testimonial {
   text: string;
@@ -146,6 +147,12 @@ export const firstColumn: Testimonial[] = [
     name: "Freddie Jones",
     role: "Economics Teacher @ KCS Wimbledon",
   },
+  {
+    text: "On the home page, you can see a profile on all the people who built the models on the website. AI often has a conception of being inhumane, kind of robotic and such — that addition adds a more humane feel to it.\n\nThere are also so many different components to this website, and overall it's really great!",
+    image: mikelImage,
+    name: "Mikel Donkor",
+    role: "Year 12",
+  },
 ];
 
 export const secondColumn: Testimonial[] = [
@@ -215,6 +222,12 @@ export const secondColumn: Testimonial[] = [
     name: "Freddie Jones",
     role: "Economics Teacher @ KCS Wimbledon",
   },
+  {
+    text: "On the home page, you can see a profile on all the people who built the models on the website. AI often has a conception of being inhumane, kind of robotic and such — that addition adds a more humane feel to it.\n\nThere are also so many different components to this website, and overall it's really great!",
+    image: mikelImage,
+    name: "Mikel Donkor",
+    role: "Year 12",
+  },
 ];
 
 export const thirdColumn: Testimonial[] = [
@@ -283,5 +296,11 @@ export const thirdColumn: Testimonial[] = [
     image: freddieImage,
     name: "Freddie Jones",
     role: "Economics Teacher @ KCS Wimbledon",
+  },
+  {
+    text: "On the home page, you can see a profile on all the people who built the models on the website. AI often has a conception of being inhumane, kind of robotic and such — that addition adds a more humane feel to it.\n\nThere are also so many different components to this website, and overall it's really great!",
+    image: mikelImage,
+    name: "Mikel Donkor",
+    role: "Year 12",
   },
 ];
