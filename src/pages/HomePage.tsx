@@ -293,8 +293,10 @@ export const HomePage = () => {
 
       {/* FAQ Section */}
       <section className="py-16 px-4 md:px-8 bg-background relative overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden [&_.fixed]:!absolute">
-          <ChatbotFullscreenPaths />
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" style={{isolation: 'isolate'}}>
+          <div className="absolute inset-0" style={{position: 'relative'}}>
+            <ChatbotFullscreenPaths />
+          </div>
         </div>
         <div className="max-w-4xl mx-auto relative z-10 px-2 md:px-0">
             <ScrollReveal>
