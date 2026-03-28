@@ -54,6 +54,7 @@ export interface ChatbotToolbarProps {
   examSubjectName?: string;
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
+  showGraphSketcher?: boolean;
   /** Maths mode switcher */
   showMathsModeSwitcher?: boolean;
   mathsMode?: 'pure' | 'applied';
