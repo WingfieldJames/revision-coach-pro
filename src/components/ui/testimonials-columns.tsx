@@ -196,6 +196,12 @@ export const secondColumn: Testimonial[] = [
     name: "Alexandru Leoca",
     role: "Year 12",
   },
+  {
+    text: "Bro... I wish I found this sooner. It's perfect.\n\nI've tested the AI chatbot and revision guide maker so far, and they're both highly detailed. They give you what you haven't even thought of asking for, with tailored information.\n\nI'll defo be using this regularly from now on. It's also really clear to use and I think that would help me begin revising econ with an actual structure",
+    image: oliverImage,
+    name: "Oliver Mobolaji",
+    role: "Year 13",
+  },
 ];
 
 export const thirdColumn: Testimonial[] = [
