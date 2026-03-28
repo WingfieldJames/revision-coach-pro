@@ -7,6 +7,7 @@ import ryanImage from '@/assets/ryan-davies.png';
 import alexandruImage from '@/assets/alexandru-leoca.png';
 import louisImage from '@/assets/louis-yung.png';
 import oliverImage from '@/assets/oliver-mobolaji.png';
+import freddieImage from '@/assets/freddie-jones.png';
 
 interface Testimonial {
   text: string;
@@ -139,6 +140,12 @@ export const firstColumn: Testimonial[] = [
     name: "Oliver Mobolaji",
     role: "Year 13",
   },
+  {
+    text: "I actually have an 'Examiner AI' (Tutor2u) subscription but I find the feedback is pretty useless. A*AI actually provides useful and specific feedback for the students.",
+    image: freddieImage,
+    name: "Freddie Jones",
+    role: "Economics Teacher @ KCS Wimbledon",
+  },
 ];
 
 export const secondColumn: Testimonial[] = [
@@ -202,6 +209,12 @@ export const secondColumn: Testimonial[] = [
     name: "Oliver Mobolaji",
     role: "Year 13",
   },
+  {
+    text: "I actually have an 'Examiner AI' (Tutor2u) subscription but I find the feedback is pretty useless. A*AI actually provides useful and specific feedback for the students.",
+    image: freddieImage,
+    name: "Freddie Jones",
+    role: "Economics Teacher @ KCS Wimbledon",
+  },
 ];
 
 export const thirdColumn: Testimonial[] = [
@@ -264,5 +277,11 @@ export const thirdColumn: Testimonial[] = [
     image: oliverImage,
     name: "Oliver Mobolaji",
     role: "Year 13",
+  },
+  {
+    text: "I actually have an 'Examiner AI' (Tutor2u) subscription but I find the feedback is pretty useless. A*AI actually provides useful and specific feedback for the students.",
+    image: freddieImage,
+    name: "Freddie Jones",
+    role: "Economics Teacher @ KCS Wimbledon",
   },
 ];
