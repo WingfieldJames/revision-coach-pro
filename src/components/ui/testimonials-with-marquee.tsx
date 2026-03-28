@@ -34,7 +34,7 @@ export function TestimonialsSection({
 
         <div className="relative flex w-full overflow-hidden">
           <div
-            className="flex [--gap:1.5rem] [gap:var(--gap)] [--duration:120s] animate-marquee"
+            className="flex [--gap:1.5rem] [gap:var(--gap)] [--duration:300s] animate-marquee"
           >
             {/* First set */}
             {[...Array(6)].map((_, setIndex) => (
