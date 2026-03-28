@@ -298,3 +298,7 @@
     color: hsl(var(--primary));
   }
 }
+
+.faq-paths-container > div {
+  position: absolute !important;
+}
