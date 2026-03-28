@@ -505,19 +505,15 @@ export const ComparePage = () => {
           </div>
         </div>
 
-        {/* Latest Features Section */}
-        <section className="py-8 md:py-16 px-4 md:px-8 relative">
-          <ScrollReveal>
-            <h2 className="text-xl md:text-3xl font-bold text-center mb-6 md:mb-12">
-              <div className="flex flex-nowrap items-center justify-center gap-1 md:gap-2">
-                <span>Check out our</span>
-                <span className="text-gradient-brand">latest</span>
-                <span>features</span>
-              </div>
-            </h2>
-          </ScrollReveal>
-          {LEGACY_SUBJECTS.includes(subject) && <LatestFeaturesSection subject={subject as any} />}
-        </section>
+        {/* CTA Button */}
+        <div className="py-12 md:py-16 px-4 md:px-8 flex justify-center">
+          <button
+            onClick={handleFreeClick}
+            className="px-10 py-5 rounded-2xl text-white font-bold text-lg md:text-xl bg-gradient-brand glow-brand hover:opacity-90 transition-opacity"
+          >
+            Let's get you started on {!examBoard ? '' : examBoard === 'cie' ? 'CIE' : examBoard === 'aqa' ? 'AQA' : examBoard === 'ocr' ? 'OCR' : examBoard === 'edexcel' ? 'Edexcel' : examBoard.toUpperCase()} {subjectLabels[subject] || subject} →
+          </button>
+        </div>
 
 
 
