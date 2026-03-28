@@ -6,6 +6,7 @@ import kathyImage from '@/assets/kathy-kou.png';
 import ryanImage from '@/assets/ryan-davies.png';
 import alexandruImage from '@/assets/alexandru-leoca.png';
 import louisImage from '@/assets/louis-yung.png';
+import oliverImage from '@/assets/oliver-mobolaji.png';
 
 interface Testimonial {
   text: string;
