@@ -24,6 +24,7 @@ import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TestimonialsSection } from '@/components/ui/testimonials-with-marquee';
+import { firstColumn as homeTestimonials } from '@/components/ui/testimonials-columns';
 import { FounderSection } from '@/components/ui/founder-section';
 import { DynamicFounderSection } from '@/components/DynamicFounderSection';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ui/scroll-reveal';
