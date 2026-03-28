@@ -81,7 +81,7 @@ export const TestimonialsColumn = ({
 };
 
 // Master list of all testimonials
-const allTestimonials: Testimonial[] = [
+export const allTestimonials: Testimonial[] = [
   {
     text: "A*AI helped me go from a C in my summer mocks to getting predicted an A in November. I used it to get instant feedback on every essay and the diagram generator made a big difference.",
     image: matanImage,
