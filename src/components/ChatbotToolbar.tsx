@@ -25,6 +25,7 @@ import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { MyMistakesTool } from '@/components/MyMistakesTool';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
 import { GraphSketcherTool } from '@/components/GraphSketcherTool';
+import { StatisticalDistributionTool } from '@/components/StatisticalDistributionTool';
 
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
@@ -55,6 +56,7 @@ export interface ChatbotToolbarProps {
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
   showGraphSketcher?: boolean;
+  showStatDistribution?: boolean;
   /** Maths mode switcher */
   showMathsModeSwitcher?: boolean;
   mathsMode?: 'pure' | 'applied';
@@ -87,6 +89,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   customPastPaperContent,
   customRevisionGuideContent,
   showGraphSketcher = false,
+  showStatDistribution = false,
   showMathsModeSwitcher = false,
   mathsMode = 'pure',
   onMathsModeChange,
@@ -147,6 +150,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
     { id: 'my-ai', label: 'My AI', icon: <Sparkles className="h-4 w-4" />, show: showMyAI },
     { id: 'grade-boundaries', label: 'Grade Boundaries', icon: <TrendingUp className="h-4 w-4" />, show: showGradeBoundaries },
     { id: 'graph-sketcher', label: 'Graph Sketcher', icon: <BarChart2 className="h-4 w-4" />, show: showGraphSketcher },
+    { id: 'stat-distribution', label: 'Distributions', icon: <TrendingUp className="h-4 w-4" />, show: showStatDistribution },
     { id: 'diagrams', label: 'Diagram Generator', icon: <BarChart2 className="h-4 w-4" />, show: showDiagramTool },
     { id: 'essay-marker', label: essayMarkerLabel, icon: <PenLine className="h-4 w-4" />, show: showEssayMarker },
     { id: 'past-papers', label: 'Past Papers', icon: <FileSearch className="h-4 w-4" />, show: showPastPaperFinder },
@@ -178,6 +182,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
       case 'my-ai': return <MyAIPreferences productId={productId} isDeluxe={isDeluxe} />;
       case 'grade-boundaries': return <GradeBoundariesTool subject={gradeBoundariesSubject} />;
       case 'graph-sketcher': return <GraphSketcherTool />;
+      case 'stat-distribution': return <StatisticalDistributionTool />;
       case 'past-papers': return customPastPaperContent || <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />;
       case 'revision-guide': return customRevisionGuideContent || <RevisionGuideTool board={revisionGuideBoard} tier={tier} productId={productId} />;
       case 'essay-marker': return (

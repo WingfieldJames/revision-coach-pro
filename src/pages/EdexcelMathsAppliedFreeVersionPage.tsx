@@ -46,6 +46,7 @@ export const EdexcelMathsAppliedFreeVersionPage = () => {
     revisionGuideBoard: "edexcel-maths-applied" as const,
     showGradeBoundaries: resolveFeature(tc, 'grade_boundaries', true),
     showGraphSketcher: true,
+    showStatDistribution: true,
     gradeBoundariesSubject: "maths" as const,
     showEssayMarker: resolveFeature(tc, 'essay_marker', true),
     showExamCountdown: resolveFeature(tc, 'exam_countdown', true),
