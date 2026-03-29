@@ -150,6 +150,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
     { id: 'my-ai', label: 'My AI', icon: <Sparkles className="h-4 w-4" />, show: showMyAI },
     { id: 'grade-boundaries', label: 'Grade Boundaries', icon: <TrendingUp className="h-4 w-4" />, show: showGradeBoundaries },
     { id: 'graph-sketcher', label: 'Graph Sketcher', icon: <BarChart2 className="h-4 w-4" />, show: showGraphSketcher },
+    { id: 'stat-distribution', label: 'Distributions', icon: <TrendingUp className="h-4 w-4" />, show: showStatDistribution },
     { id: 'diagrams', label: 'Diagram Generator', icon: <BarChart2 className="h-4 w-4" />, show: showDiagramTool },
     { id: 'essay-marker', label: essayMarkerLabel, icon: <PenLine className="h-4 w-4" />, show: showEssayMarker },
     { id: 'past-papers', label: 'Past Papers', icon: <FileSearch className="h-4 w-4" />, show: showPastPaperFinder },
