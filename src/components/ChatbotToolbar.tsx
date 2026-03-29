@@ -89,6 +89,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   customPastPaperContent,
   customRevisionGuideContent,
   showGraphSketcher = false,
+  showStatDistribution = false,
   showMathsModeSwitcher = false,
   mathsMode = 'pure',
   onMathsModeChange,
