@@ -25,6 +25,7 @@ import { DiagramFinderTool } from '@/components/DiagramFinderTool';
 import { MyMistakesTool } from '@/components/MyMistakesTool';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
 import { GraphSketcherTool } from '@/components/GraphSketcherTool';
+import { StatisticalDistributionTool } from '@/components/StatisticalDistributionTool';
 
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
