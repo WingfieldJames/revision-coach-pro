@@ -60,6 +60,7 @@ export const DynamicPremiumPage = () => {
 
   const subjectLower = product.subject.toLowerCase();
   const diagramSubject: 'economics' | 'cs' = subjectLower.includes('computer') ? 'cs' : 'economics';
+  const isMathsSubject = subjectLower.includes('math');
 
   const sharedProps = {
     subjectName,
@@ -74,6 +75,8 @@ export const DynamicPremiumPage = () => {
     showEssayMarker: hasFeature('essay_marker'),
     showExamCountdown: hasFeature('exam_countdown'),
     showGradeBoundaries: hasFeature('grade_boundaries'),
+    showGraphSketcher: isMathsSubject,
+    showStatDistribution: isMathsSubject,
     examDates,
     examSubjectName: subjectName,
     showMyMistakes: hasFeature('my_mistakes'),
