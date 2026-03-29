@@ -294,26 +294,29 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
         <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">Upgrade to Deluxe</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-center">Upgrade to Premium</DialogTitle>
             </DialogHeader>
-            <div className="grid gap-4 sm:grid-cols-2 mt-2">
-              <div className="p-6 rounded-xl border-2 border-primary bg-primary/5">
-                <h3 className="font-bold text-lg mb-1">Monthly</h3>
-                <p className="text-2xl font-bold mb-3">£8.99<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
-                <ul className="space-y-2 text-sm mb-4">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Unlimited prompts</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All tools unlocked</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Cancel anytime</li>
+            <div className="space-y-4 mt-4">
+              <div className="p-6 rounded-xl border-2 border-primary bg-muted relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-4 py-1 rounded-full">BEST VALUE</div>
+                <h3 className="text-xl font-bold mb-1">💎 Monthly</h3>
+                <p className="text-3xl font-bold mb-1">£8.99<span className="text-base font-normal">/mo</span></p>
+                <p className="text-sm text-muted-foreground mb-4">Cancel anytime</p>
+                <ul className="space-y-2 mb-4 text-sm">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All past papers & mark schemes</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Full A* exam technique training</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Essay Marker + Diagram Generator</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Past Paper Finder</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Priority support</li>
                 </ul>
                 <Button variant="brand" size="lg" className="w-full" onClick={() => { setUpgradeDialogOpen(false); handleUpgradeClick('monthly'); }}>Get Monthly</Button>
               </div>
               <div className="p-6 rounded-xl border border-border bg-muted">
-                <h3 className="font-bold text-lg mb-1">Exam Season Pass</h3>
-                <p className="text-2xl font-bold mb-3">£39.99</p>
-                <ul className="space-y-2 text-sm mb-4">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Everything in Monthly</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Valid until June 2026</li>
+                <h3 className="text-xl font-bold mb-1">💎 Exam Season Pass</h3>
+                <p className="text-3xl font-bold mb-1">£39.99</p>
+                <p className="text-sm text-muted-foreground mb-4">One-time payment • Expires 30th June 2026</p>
+                <ul className="space-y-2 mb-4 text-sm">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All premium features included</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Flexible one-time payment</li>
                 </ul>
                 <Button variant="outline" size="lg" className="w-full" onClick={() => { setUpgradeDialogOpen(false); handleUpgradeClick('lifetime'); }}>Get Season Pass</Button>
