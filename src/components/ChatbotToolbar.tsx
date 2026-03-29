@@ -56,6 +56,7 @@ export interface ChatbotToolbarProps {
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
   showGraphSketcher?: boolean;
+  showStatDistribution?: boolean;
   /** Maths mode switcher */
   showMathsModeSwitcher?: boolean;
   mathsMode?: 'pure' | 'applied';
