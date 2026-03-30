@@ -117,6 +117,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   chatRef,
   examDates: examDatesProp,
   promptLabels,
+  trainerAvatarUrl,
+  trainerName,
 }) => {
   const {
     user
