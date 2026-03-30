@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatHistoryProvider } from "@/contexts/ChatHistoryContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 import { useAffiliateTracking } from "./hooks/useAffiliateTracking";
 import { HomePage } from "./pages/HomePage";
 import { ComparePage } from "./pages/ComparePage";
@@ -62,7 +62,6 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AppContent />
-          <ThemeToggle />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/compare" element={<ComparePage />} />
