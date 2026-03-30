@@ -62,7 +62,6 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AppContent />
-          <ThemeToggle />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/compare" element={<ComparePage />} />
