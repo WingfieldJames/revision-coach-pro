@@ -765,7 +765,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               )}
 
               {/* Main hero content */}
-              <div className="text-center flex-1 min-w-0">
+              <div className="text-center">
                 <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-1" />
                 {daysToFirstExam !== null ? (
                   <>
