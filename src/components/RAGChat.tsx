@@ -132,6 +132,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   promptLabels,
   trainerAvatarUrl,
   trainerName,
+  trainerDescription,
+  trainerStatus,
+  trainerAchievements,
+  useEmojiStars = false,
 }) => {
   const {
     user
