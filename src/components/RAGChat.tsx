@@ -810,7 +810,6 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 </div>
               </div>
             </div>
-              </div>
           )}
 
           {messages.map((message, index) => {
