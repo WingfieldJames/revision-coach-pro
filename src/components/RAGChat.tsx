@@ -70,6 +70,10 @@ interface RAGChatProps {
   chatRef?: React.RefObject<RAGChatRef>;
   examDates?: ExamDate[];
   promptLabels?: string[];
+  /** Custom trainer avatar URL to replace the A* AI icon in responses */
+  trainerAvatarUrl?: string;
+  /** Custom trainer name shown bold above responses */
+  trainerName?: string;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
