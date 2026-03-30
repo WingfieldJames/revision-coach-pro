@@ -73,6 +73,8 @@ export const FreeVersionPage = () => {
           chatRef={chatRef}
           examDates={examDates}
           promptLabels={['Diagram', 'Spec point', 'Exam technique', 'Application']}
+          trainerAvatarUrl="/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png"
+          trainerName="James"
         />
       </div>
     </div>

@@ -70,6 +70,10 @@ interface RAGChatProps {
   chatRef?: React.RefObject<RAGChatRef>;
   examDates?: ExamDate[];
   promptLabels?: string[];
+  /** Custom trainer avatar URL to replace the A* AI icon in responses */
+  trainerAvatarUrl?: string;
+  /** Custom trainer name shown bold above responses */
+  trainerName?: string;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
@@ -113,6 +117,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   chatRef,
   examDates: examDatesProp,
   promptLabels,
+  trainerAvatarUrl,
+  trainerName,
 }) => {
   const {
     user
@@ -741,10 +747,17 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               >
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
-                    <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
+                    {trainerAvatarUrl ? (
+                      <img src={trainerAvatarUrl} alt={trainerName || 'Trainer'} className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
+                    )}
                   </div>
                 )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
+                  {message.role === 'assistant' && trainerName && (
+                    <p className="font-bold text-foreground mt-0 mb-1 not-prose text-sm">{trainerName}</p>
+                  )}
                   {message.imageUrl && (
                     <div className="flex flex-wrap gap-2 mb-2">
                       {(Array.isArray(message.imageUrl) ? message.imageUrl : [message.imageUrl]).map((url, imgIdx) => (
@@ -919,7 +932,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
             <div className="flex gap-3 p-4 rounded-xl bg-muted mr-auto max-w-[85%]">
-              <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
+              {trainerAvatarUrl ? (
+                <img src={trainerAvatarUrl} alt={trainerName || 'Trainer'} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+              ) : (
+                <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain flex-shrink-0" />
+              )}
               <div className="flex-1 flex flex-col gap-2">
                 {isSearching ? (
                   <>
