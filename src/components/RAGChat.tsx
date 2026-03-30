@@ -700,11 +700,72 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         </div>
       )}
 
+      {/* Theme toggle — only on chatbot pages */}
+      <ThemeToggle />
+
       {/* Messages area - scrollable */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
-              <div className="text-center py-16 max-[767px]:py-2 max-[767px]:-mt-14 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:py-0 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:-mt-28">
+            <div className="flex gap-6 items-start justify-center py-16 max-[767px]:py-2 max-[767px]:-mt-14 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:py-0 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:-mt-28">
+              
+              {/* Meet Your Tutor column — desktop only, only when trainer data exists */}
+              {trainerName && trainerAvatarUrl && (
+                <div className="hidden lg:flex flex-col items-center w-56 shrink-0 animate-in fade-in slide-in-from-left-4 duration-700">
+                  <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-5 w-full shadow-lg">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4 text-center">Meet Your Tutor</p>
+                    
+                    {/* Avatar with online indicator */}
+                    <div className="relative mx-auto w-20 h-20 mb-3">
+                      <img 
+                        src={trainerAvatarUrl} 
+                        alt={trainerName} 
+                        className="w-20 h-20 rounded-full object-cover border-2 border-primary/30 shadow-md"
+                      />
+                      <span className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-card" />
+                    </div>
+
+                    <h3 className="text-base font-bold text-foreground text-center">{trainerName}</h3>
+                    {trainerStatus && (
+                      <p className="text-[11px] text-muted-foreground text-center mt-0.5">{trainerStatus}</p>
+                    )}
+
+                    {/* Achievement badges */}
+                    {trainerAchievements && trainerAchievements.length > 0 && (
+                      <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+                        {trainerAchievements.slice(0, 3).map((a, i) => (
+                          <span
+                            key={i}
+                            className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20"
+                          >
+                            {a.text}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Quote */}
+                    {trainerDescription && (
+                      <div className="mt-3 rounded-lg bg-muted/50 border border-border p-2.5">
+                        <Quote className="w-3 h-3 text-primary/40 mb-1" />
+                        <p className="text-[11px] text-foreground/70 italic leading-relaxed">
+                          {trainerDescription}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <p className="text-[10px] text-center text-muted-foreground">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1 align-middle" />
+                        Online now · Ready to help
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Main hero content */}
+              <div className="text-center flex-1 min-w-0">
                 <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-1" />
                 {daysToFirstExam !== null ? (
                   <>
@@ -734,7 +795,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   </div>
 
                   <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
-                    <span className="text-xs tracking-wider text-amber-500 dark:text-amber-400">★★★★★</span>
+                    {useEmojiStars ? (
+                      <span className="text-xs">⭐⭐⭐⭐⭐</span>
+                    ) : (
+                      <span className="text-xs tracking-wider text-amber-500 dark:text-amber-400">★★★★★</span>
+                    )}
                     <span className="text-xs font-medium text-foreground">4.9 / 5</span>
                   </div>
 
@@ -743,6 +808,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     <span className="text-xs font-medium text-foreground">620% growth this term</span>
                   </div>
                 </div>
+              </div>
+            </div>
               </div>
           )}
 
