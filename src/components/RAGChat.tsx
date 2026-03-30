@@ -56,6 +56,10 @@ export interface RAGChatRef {
   submitMessage: (message: string, imageDataUrl?: string | string[]) => void;
 }
 
+interface TrainerAchievement {
+  text: string;
+}
+
 interface RAGChatProps {
   productId: string;
   /** Product ID used for prompt counting (defaults to productId). Use to share prompt limits across related products. */
@@ -75,6 +79,14 @@ interface RAGChatProps {
   trainerAvatarUrl?: string;
   /** Custom trainer name shown bold above responses */
   trainerName?: string;
+  /** Trainer description quote for Meet Your Tutor column */
+  trainerDescription?: string;
+  /** Trainer status line (e.g. "Imperial Economics Graduate") */
+  trainerStatus?: string;
+  /** Trainer achievements badges */
+  trainerAchievements?: TrainerAchievement[];
+  /** Use emoji stars instead of text stars in social proof */
+  useEmojiStars?: boolean;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
