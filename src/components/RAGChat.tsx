@@ -747,10 +747,17 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               >
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
-                    <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
+                    {trainerAvatarUrl ? (
+                      <img src={trainerAvatarUrl} alt={trainerName || 'Trainer'} className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
+                    )}
                   </div>
                 )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
+                  {message.role === 'assistant' && trainerName && (
+                    <p className="font-bold text-foreground mt-0 mb-1 not-prose text-sm">{trainerName}</p>
+                  )}
                   {message.imageUrl && (
                     <div className="flex flex-wrap gap-2 mb-2">
                       {(Array.isArray(message.imageUrl) ? message.imageUrl : [message.imageUrl]).map((url, imgIdx) => (
