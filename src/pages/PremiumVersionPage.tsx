@@ -100,6 +100,10 @@ export const PremiumVersionPage = () => {
           promptLabels={['Diagram', 'Spec point', 'Exam technique', 'Application']}
           trainerAvatarUrl="/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png"
           trainerName="James"
+          trainerStatus="Economics Graduate"
+          trainerAchievements={[{ text: "A* Economics" }, { text: "A* Maths" }, { text: "500+ students helped" }]}
+          trainerDescription="I've been where you are — stressing about exam technique, time pressure, and getting those evaluation marks. I'm here to help you nail it."
+          useEmojiStars
         />
       </div>
     </div>
