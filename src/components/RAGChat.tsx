@@ -288,6 +288,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     const fetchPreferences = async () => {
       if (!user) {
         setUserPreferences(null);
+        setHasPreferencesSet(true);
         return;
       }
       try {
@@ -306,6 +307,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         if (error) throw error;
         if (data) {
           setUserPreferences(data);
+          setHasPreferencesSet(true);
+        } else {
+          setHasPreferencesSet(false);
         }
       } catch (error) {
         console.error('Error fetching user preferences:', error);
@@ -313,6 +317,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     };
     fetchPreferences();
   }, [user, productId]);
+
+  // Auto-trigger profile popup on first prompt if no preferences set
+  useEffect(() => {
+    if (messages.length >= 2 && !hasPreferencesSet && !profilePopupOpen && trainerAvatarUrl) {
+      const timer = setTimeout(() => setProfilePopupOpen(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length, hasPreferencesSet, profilePopupOpen, trainerAvatarUrl]);
 
   // Tier is now provided by useProductTier hook (handles grace periods, payment_type, etc.)
 
