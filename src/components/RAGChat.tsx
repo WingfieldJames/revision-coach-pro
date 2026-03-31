@@ -711,7 +711,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               
               {/* Meet Your Tutor column — desktop only, only when trainer data exists */}
               {trainerName && trainerAvatarUrl && (
-                <div className="hidden lg:flex flex-col items-center w-56 shrink-0 animate-in fade-in slide-in-from-left-4 duration-700 absolute right-[calc(100%+1.5rem)] top-16">
+                <div className="hidden lg:flex flex-col items-center w-64 shrink-0 animate-in fade-in slide-in-from-left-4 duration-700 absolute right-[calc(100%+1.5rem)] top-4">
                   <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-5 w-full shadow-lg">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4 text-center">Meet Your Tutor</p>
                     
