@@ -8,6 +8,11 @@ interface TrainerConfig {
   essay_marker_marks: number[];
   exam_dates: ExamDate[];
   diagram_library: Array<{ id: string; title: string; imagePath: string }>;
+  trainer_name: string | null;
+  trainer_status: string | null;
+  trainer_description: string | null;
+  trainer_image_url: string | null;
+  trainer_achievements: Array<{ text: string }>;
   loaded: boolean;
 }
 
