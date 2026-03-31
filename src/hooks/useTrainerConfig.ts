@@ -62,12 +62,32 @@ export function useTrainerConfig(productId: string | null | undefined): TrainerC
             ? (data.diagram_library as Array<{ id: string; title: string; imagePath: string }>)
             : [];
 
+          // Parse trainer achievements - handle both {text: string} objects and plain strings
+          const rawAchievements = Array.isArray(data.trainer_achievements) ? data.trainer_achievements : [];
+          const achievements: Array<{ text: string }> = rawAchievements
+            .map((a: any) => (typeof a === 'string' ? { text: a } : a))
+            .filter((a: any) => a?.text?.trim());
+
+          // Resolve trainer image URL (handle storage paths)
+          let resolvedImageUrl: string | null = (data.trainer_image_url as string) || null;
+          if (resolvedImageUrl && !resolvedImageUrl.startsWith('http') && !resolvedImageUrl.startsWith('/')) {
+            const { data: signed } = await supabase.storage
+              .from('trainer-uploads')
+              .createSignedUrl(resolvedImageUrl, 3600);
+            resolvedImageUrl = signed?.signedUrl || null;
+          }
+
           setConfig({
             selected_features: features,
             suggested_prompts: prompts,
             essay_marker_marks: marks,
             exam_dates: examDates,
             diagram_library: diagrams,
+            trainer_name: (data.trainer_name as string) || null,
+            trainer_status: (data.trainer_status as string) || null,
+            trainer_description: (data.trainer_description as string) || null,
+            trainer_image_url: resolvedImageUrl,
+            trainer_achievements: achievements,
             loaded: true,
           });
         } else {
