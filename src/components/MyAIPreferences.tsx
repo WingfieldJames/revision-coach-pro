@@ -171,8 +171,11 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isD
     );
   }
 
+  const EDEXCEL_ECON_ID = '6dc19d53-8a88-4741-9528-f25af97afb21';
+  const isEdexcelEcon = productId === EDEXCEL_ECON_ID;
+
   return (
-    <div className="space-y-6 py-2 my-ai-panel">
+    <div className={`space-y-6 py-2 my-ai-panel ${isEdexcelEcon ? 'edexcel-econ-panel' : ''}`}>
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-lg">Personalize Your AI</h3>
         {saving && (
