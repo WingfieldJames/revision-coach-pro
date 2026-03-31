@@ -8,6 +8,11 @@ interface TrainerConfig {
   essay_marker_marks: number[];
   exam_dates: ExamDate[];
   diagram_library: Array<{ id: string; title: string; imagePath: string }>;
+  trainer_name: string | null;
+  trainer_status: string | null;
+  trainer_description: string | null;
+  trainer_image_url: string | null;
+  trainer_achievements: Array<{ text: string }>;
   loaded: boolean;
 }
 
@@ -17,6 +22,11 @@ const defaultConfig: TrainerConfig = {
   essay_marker_marks: [],
   exam_dates: [],
   diagram_library: [],
+  trainer_name: null,
+  trainer_status: null,
+  trainer_description: null,
+  trainer_image_url: null,
+  trainer_achievements: [],
   loaded: false,
 };
 
@@ -35,7 +45,7 @@ export function useTrainerConfig(productId: string | null | undefined): TrainerC
       try {
         const { data } = await supabase
           .from('trainer_projects')
-          .select('selected_features, suggested_prompts, essay_marker_marks, exam_dates, diagram_library')
+          .select('selected_features, suggested_prompts, essay_marker_marks, exam_dates, diagram_library, trainer_name, trainer_status, trainer_description, trainer_image_url, trainer_achievements')
           .eq('product_id', productId)
           .maybeSingle();
 
@@ -52,12 +62,32 @@ export function useTrainerConfig(productId: string | null | undefined): TrainerC
             ? (data.diagram_library as Array<{ id: string; title: string; imagePath: string }>)
             : [];
 
+          // Parse trainer achievements - handle both {text: string} objects and plain strings
+          const rawAchievements = Array.isArray(data.trainer_achievements) ? data.trainer_achievements : [];
+          const achievements: Array<{ text: string }> = rawAchievements
+            .map((a: any) => (typeof a === 'string' ? { text: a } : a))
+            .filter((a: any) => a?.text?.trim());
+
+          // Resolve trainer image URL (handle storage paths)
+          let resolvedImageUrl: string | null = (data.trainer_image_url as string) || null;
+          if (resolvedImageUrl && !resolvedImageUrl.startsWith('http') && !resolvedImageUrl.startsWith('/')) {
+            const { data: signed } = await supabase.storage
+              .from('trainer-uploads')
+              .createSignedUrl(resolvedImageUrl, 3600);
+            resolvedImageUrl = signed?.signedUrl || null;
+          }
+
           setConfig({
             selected_features: features,
             suggested_prompts: prompts,
             essay_marker_marks: marks,
             exam_dates: examDates,
             diagram_library: diagrams,
+            trainer_name: (data.trainer_name as string) || null,
+            trainer_status: (data.trainer_status as string) || null,
+            trainer_description: (data.trainer_description as string) || null,
+            trainer_image_url: resolvedImageUrl,
+            trainer_achievements: achievements,
             loaded: true,
           });
         } else {
