@@ -272,6 +272,28 @@
     color: hsl(263 70% 50%);
   }
 
+  /* Edexcel Econ – deep blue slider & badge overrides (light mode) */
+  :root .edexcel-econ-panel {
+    --primary: 222 75% 31%;
+    --ring: 222 75% 31%;
+  }
+
+  :root .edexcel-econ-panel .panel-badge {
+    background-color: hsl(222 75% 31% / 0.1);
+    color: hsl(222 75% 31%);
+  }
+
+  /* Dark mode – revert to theme primary (orange) */
+  .dark .edexcel-econ-panel {
+    --primary: 24 95% 53%;
+    --ring: 24 95% 53%;
+  }
+
+  .dark .edexcel-econ-panel .panel-badge {
+    background-color: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+  }
+
   /* Dark mode – revert to theme primary (orange) */
   .dark .my-ai-panel .panel-badge {
     background-color: hsl(var(--primary) / 0.1);
