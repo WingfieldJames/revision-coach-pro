@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import type { ExamDate } from '@/components/ExamCountdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2, Quote } from 'lucide-react';
+import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2, Quote, User } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { TutorProfilePopup } from '@/components/TutorProfilePopup';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
@@ -180,6 +181,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
   const { tier: effectiveTier } = useProductTier(productId);
   const [limitReached, setLimitReached] = useState(false);
+  const [profilePopupOpen, setProfilePopupOpen] = useState(false);
+  const [hasPreferencesSet, setHasPreferencesSet] = useState(true); // assume true until checked
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -285,6 +288,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     const fetchPreferences = async () => {
       if (!user) {
         setUserPreferences(null);
+        setHasPreferencesSet(true);
         return;
       }
       try {
@@ -303,6 +307,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         if (error) throw error;
         if (data) {
           setUserPreferences(data);
+          setHasPreferencesSet(true);
+        } else {
+          setHasPreferencesSet(false);
         }
       } catch (error) {
         console.error('Error fetching user preferences:', error);
@@ -310,6 +317,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     };
     fetchPreferences();
   }, [user, productId]);
+
+  // Auto-trigger profile popup on first prompt if no preferences set
+  useEffect(() => {
+    if (messages.length >= 2 && !hasPreferencesSet && !profilePopupOpen && trainerAvatarUrl) {
+      const timer = setTimeout(() => setProfilePopupOpen(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length, hasPreferencesSet, profilePopupOpen, trainerAvatarUrl]);
 
   // Tier is now provided by useProductTier hook (handles grace periods, payment_type, etc.)
 
@@ -702,6 +717,28 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
       {/* Theme toggle — only on chatbot pages */}
       <ThemeToggle />
+
+      {/* Profile button — next to theme toggle, only when trainer data exists */}
+      {trainerAvatarUrl && (
+        <button
+          onClick={() => setProfilePopupOpen(true)}
+          className="fixed bottom-6 right-[4.5rem] z-40 p-2.5 rounded-full bg-card/80 border border-border backdrop-blur-sm shadow-md hover:shadow-lg hover:bg-card transition-all"
+          aria-label="Open profile"
+        >
+          <User className="w-5 h-5 text-foreground" />
+        </button>
+      )}
+
+      {/* Tutor Profile Popup */}
+      {trainerAvatarUrl && (
+        <TutorProfilePopup
+          isOpen={profilePopupOpen}
+          onClose={() => { setProfilePopupOpen(false); setHasPreferencesSet(true); }}
+          productId={productId}
+          trainerAvatarUrl={trainerAvatarUrl}
+          trainerName={trainerName}
+        />
+      )}
 
       {/* Messages area - scrollable */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">

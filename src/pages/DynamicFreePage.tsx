@@ -19,6 +19,8 @@ interface TrainerConfig {
   exam_dates: any[] | null; essay_marker_marks: number[] | null;
   suggested_prompts: Array<{ text: string; usesPersonalization?: boolean }> | null;
   diagram_library: Array<{ id: string; title: string; imagePath: string }> | null;
+  trainer_name: string | null; trainer_status: string | null;
+  trainer_achievements: any[] | null;
 }
 
 export const DynamicFreePage = () => {
@@ -27,6 +29,7 @@ export const DynamicFreePage = () => {
   const chatRef = useRef<RAGChatRef>(null);
   const [product, setProduct] = useState<ProductConfig | null>(null);
   const [trainer, setTrainer] = useState<TrainerConfig | null>(null);
+  const [resolvedImageUrl, setResolvedImageUrl] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,8 +38,19 @@ export const DynamicFreePage = () => {
       const { data: prod } = await supabase.from('products').select('id, name, slug, subject, exam_board, system_prompt_deluxe').eq('slug', slug).eq('active', true).maybeSingle();
       if (!prod) { navigate('/compare'); return; }
       setProduct(prod);
-      const { data: tp } = await supabase.from('trainer_projects').select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts, diagram_library').eq('product_id', prod.id).maybeSingle();
-      setTrainer(tp as unknown as TrainerConfig | null);
+      const { data: tp } = await supabase.from('trainer_projects').select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts, diagram_library, trainer_name, trainer_status, trainer_achievements').eq('product_id', prod.id).maybeSingle();
+      const trainerData = tp as unknown as TrainerConfig | null;
+      setTrainer(trainerData);
+      // Resolve trainer image URL
+      if (trainerData?.trainer_image_url) {
+        const url = trainerData.trainer_image_url;
+        if (url.startsWith('http') || url.startsWith('/')) {
+          setResolvedImageUrl(url);
+        } else {
+          const { data: signed } = await supabase.storage.from('trainer-uploads').createSignedUrl(url, 3600);
+          if (signed?.signedUrl) setResolvedImageUrl(signed.signedUrl);
+        }
+      }
       setLoading(false);
     };
     load();
@@ -51,10 +65,14 @@ export const DynamicFreePage = () => {
   const subjectName = `${product.exam_board} ${product.subject}`;
   const examDates: ExamDate[] = (trainer?.exam_dates || []).filter((d: any) => d.name && d.date).map((d: any) => ({ name: d.name, date: new Date(d.date), description: d.description || '' }));
 
-  // Determine diagram subject based on product subject
   const subjectLower = product.subject.toLowerCase();
   const diagramSubject: 'economics' | 'cs' = subjectLower.includes('computer') ? 'cs' : 'economics';
   const isMathsSubject = subjectLower.includes('math');
+
+  // Parse trainer achievements
+  const achievements = (trainer?.trainer_achievements || [])
+    .map((a: any) => typeof a === 'string' ? { text: a } : a)
+    .filter((a: any) => a?.text?.trim());
 
   const sharedProps = {
     subjectName,
@@ -94,6 +112,12 @@ export const DynamicFreePage = () => {
           placeholder={`Ask about ${product.subject}...`}
           examDates={examDates}
           suggestedPrompts={(() => { const filtered = (trainer?.suggested_prompts || []).filter(p => p.text?.trim()); return filtered.length > 0 ? filtered : [{ text: `What topics are in the ${product.exam_board} ${product.subject} spec?` }, { text: "How do I structure a long answer question?" }, { text: "Find past exam questions" }, { text: "Create me a full revision plan", usesPersonalization: true }]; })()}
+          trainerAvatarUrl={resolvedImageUrl}
+          trainerName={trainer?.trainer_name || undefined}
+          trainerStatus={trainer?.trainer_status || undefined}
+          trainerAchievements={achievements.length > 0 ? achievements : undefined}
+          trainerDescription={trainer?.trainer_description || undefined}
+          useEmojiStars
         />
       </div>
     </div>
