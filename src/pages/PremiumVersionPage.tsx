@@ -98,11 +98,11 @@ export const PremiumVersionPage = () => {
           chatRef={chatRef}
           examDates={examDates}
           promptLabels={['Diagram', 'Spec point', 'Exam technique', 'Application']}
-          trainerAvatarUrl="/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png"
-          trainerName="James"
-          trainerStatus="Economics Graduate"
-          trainerAchievements={[{ text: "A* Economics" }, { text: "A* Maths" }, { text: "500+ students helped" }]}
-          trainerDescription="I've been where you are — stressing about exam technique, time pressure, and getting those evaluation marks. I'm here to help you nail it."
+          trainerAvatarUrl={tc.trainer_image_url || undefined}
+          trainerName={tc.trainer_name || undefined}
+          trainerStatus={tc.trainer_status || undefined}
+          trainerAchievements={tc.trainer_achievements.length > 0 ? tc.trainer_achievements : undefined}
+          trainerDescription={tc.trainer_description || undefined}
           useEmojiStars
         />
       </div>
