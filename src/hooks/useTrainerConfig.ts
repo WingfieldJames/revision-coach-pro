@@ -22,6 +22,11 @@ const defaultConfig: TrainerConfig = {
   essay_marker_marks: [],
   exam_dates: [],
   diagram_library: [],
+  trainer_name: null,
+  trainer_status: null,
+  trainer_description: null,
+  trainer_image_url: null,
+  trainer_achievements: [],
   loaded: false,
 };
 
