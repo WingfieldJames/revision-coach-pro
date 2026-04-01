@@ -47,8 +47,8 @@ export const DynamicFreePage = () => {
         if (url.startsWith('http') || url.startsWith('/')) {
           setResolvedImageUrl(url);
         } else {
-          const { data: signed } = await supabase.storage.from('trainer-uploads').createSignedUrl(url, 3600);
-          if (signed?.signedUrl) setResolvedImageUrl(signed.signedUrl);
+          const { data: publicUrlData } = supabase.storage.from('trainer-uploads').getPublicUrl(url);
+          if (publicUrlData?.publicUrl) setResolvedImageUrl(publicUrlData.publicUrl);
         }
       }
       setLoading(false);
