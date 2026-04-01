@@ -71,10 +71,11 @@ export function useTrainerConfig(productId: string | null | undefined): TrainerC
           // Resolve trainer image URL (handle storage paths)
           let resolvedImageUrl: string | null = (data.trainer_image_url as string) || null;
           if (resolvedImageUrl && !resolvedImageUrl.startsWith('http') && !resolvedImageUrl.startsWith('/')) {
-            const { data: signed } = await supabase.storage
+            // trainer-uploads is a public bucket, use getPublicUrl for reliable access
+            const { data: publicUrlData } = supabase.storage
               .from('trainer-uploads')
-              .createSignedUrl(resolvedImageUrl, 3600);
-            resolvedImageUrl = signed?.signedUrl || null;
+              .getPublicUrl(resolvedImageUrl);
+            resolvedImageUrl = publicUrlData?.publicUrl || null;
           }
 
           setConfig({
