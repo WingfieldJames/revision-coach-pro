@@ -720,8 +720,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
       {/* Profile button — next to theme toggle, always visible */}
       <button
+        type="button"
         onClick={() => setProfilePopupOpen(true)}
-        className="fixed bottom-6 right-[4.5rem] z-40 p-2.5 rounded-full bg-card/80 border border-border backdrop-blur-sm shadow-md hover:shadow-lg hover:bg-card transition-all"
+        className="fixed bottom-6 right-[4.5rem] z-[9999] pointer-events-auto p-2.5 rounded-full bg-card/80 border border-border backdrop-blur-sm shadow-md hover:shadow-lg hover:bg-card transition-all cursor-pointer"
         aria-label="Open profile"
       >
         <User className="w-5 h-5 text-foreground" />
