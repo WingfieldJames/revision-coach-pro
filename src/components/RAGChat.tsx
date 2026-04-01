@@ -141,7 +141,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const {
     user
   } = useAuth();
-  const { theme } = useTheme();
+  const { theme, setIsChatbot } = useTheme();
+
+  // Register this page as a chatbot page for theme scoping
+  useEffect(() => {
+    setIsChatbot(true);
+    return () => setIsChatbot(false);
+  }, [setIsChatbot]);
   const currentLogo = theme === 'dark' ? logo : logoDark;
   const daysToFirstExam = useMemo(() => {
     if (!examDatesProp || examDatesProp.length === 0) return null;
@@ -721,7 +727,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       {/* Profile button — next to theme toggle, always visible */}
       <button
         type="button"
-        onClick={() => setProfilePopupOpen(true)}
+        onClick={() => setProfilePopupOpen(prev => !prev)}
         className="fixed bottom-6 right-[4.5rem] z-[9999] pointer-events-auto p-2.5 rounded-full bg-card/80 border border-border backdrop-blur-sm shadow-md hover:shadow-lg hover:bg-card transition-all cursor-pointer"
         aria-label="Open profile"
       >
