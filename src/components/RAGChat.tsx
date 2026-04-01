@@ -718,27 +718,23 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       {/* Theme toggle — only on chatbot pages */}
       <ThemeToggle />
 
-      {/* Profile button — next to theme toggle, only when trainer data exists */}
-      {trainerAvatarUrl && (
-        <button
-          onClick={() => setProfilePopupOpen(true)}
-          className="fixed bottom-6 right-[4.5rem] z-40 p-2.5 rounded-full bg-card/80 border border-border backdrop-blur-sm shadow-md hover:shadow-lg hover:bg-card transition-all"
-          aria-label="Open profile"
-        >
-          <User className="w-5 h-5 text-foreground" />
-        </button>
-      )}
+      {/* Profile button — next to theme toggle, always visible */}
+      <button
+        onClick={() => setProfilePopupOpen(true)}
+        className="fixed bottom-6 right-[4.5rem] z-40 p-2.5 rounded-full bg-card/80 border border-border backdrop-blur-sm shadow-md hover:shadow-lg hover:bg-card transition-all"
+        aria-label="Open profile"
+      >
+        <User className="w-5 h-5 text-foreground" />
+      </button>
 
       {/* Tutor Profile Popup */}
-      {trainerAvatarUrl && (
-        <TutorProfilePopup
-          isOpen={profilePopupOpen}
-          onClose={() => { setProfilePopupOpen(false); setHasPreferencesSet(true); }}
-          productId={productId}
-          trainerAvatarUrl={trainerAvatarUrl}
-          trainerName={trainerName}
-        />
-      )}
+      <TutorProfilePopup
+        isOpen={profilePopupOpen}
+        onClose={() => { setProfilePopupOpen(false); setHasPreferencesSet(true); }}
+        productId={productId}
+        trainerAvatarUrl={trainerAvatarUrl}
+        trainerName={trainerName}
+      />
 
       {/* Messages area - scrollable */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
