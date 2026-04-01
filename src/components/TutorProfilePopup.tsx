@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { X, Check, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 
-const GRADES = ['D', 'C', 'B', 'A', 'A*'];
+const GRADES = ['A*', 'A', 'B', 'C', 'D', 'E'];
 
 interface TutorProfilePopupProps {
   isOpen: boolean;
@@ -27,18 +24,12 @@ export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
   trainerName,
 }) => {
   const { user } = useAuth();
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [studentName, setStudentName] = useState('');
   const [year, setYear] = useState('Year 13');
   const [predictedGrade, setPredictedGrade] = useState('C');
   const [targetGrade, setTargetGrade] = useState('A');
   const [additionalInfo, setAdditionalInfo] = useState('');
-
-  const getGradeIndex = (grade: string) => {
-    const idx = GRADES.indexOf(grade);
-    return idx >= 0 ? idx : 2;
-  };
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load existing preferences
   useEffect(() => {
@@ -54,7 +45,6 @@ export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
         setYear(data.year);
         setPredictedGrade(data.predicted_grade);
         setTargetGrade(data.target_grade);
-        // Parse name from additional_info if stored
         const info = data.additional_info || '';
         const nameMatch = info.match(/^Name:\s*(.+?)(?:\s*\|\s*|$)/);
         if (nameMatch) {
@@ -68,31 +58,38 @@ export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
     load();
   }, [user, isOpen, productId]);
 
-  const handleSave = useCallback(async () => {
+  // Auto-save with debounce
+  const autoSave = useCallback(() => {
     if (!user) return;
-    setSaving(true);
-    setSaved(false);
-    const combinedInfo = studentName.trim()
-      ? `Name: ${studentName.trim()}${additionalInfo.trim() ? ` | ${additionalInfo.trim()}` : ''}`
-      : additionalInfo.trim() || null;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const combinedInfo = studentName.trim()
+        ? `Name: ${studentName.trim()}${additionalInfo.trim() ? ` | ${additionalInfo.trim()}` : ''}`
+        : additionalInfo.trim() || null;
+      try {
+        await supabase.from('user_preferences').upsert({
+          user_id: user.id,
+          product_id: productId,
+          year,
+          predicted_grade: predictedGrade,
+          target_grade: targetGrade,
+          additional_info: combinedInfo,
+        }, { onConflict: 'user_id,product_id' });
+      } catch (e) {
+        console.error('Error saving preferences:', e);
+      }
+    }, 600);
+  }, [user, productId, studentName, year, predictedGrade, targetGrade, additionalInfo]);
 
-    try {
-      await supabase.from('user_preferences').upsert({
-        user_id: user.id,
-        product_id: productId,
-        year,
-        predicted_grade: predictedGrade,
-        target_grade: targetGrade,
-        additional_info: combinedInfo,
-      }, { onConflict: 'user_id,product_id' });
-      setSaved(true);
-      setTimeout(() => { setSaved(false); onClose(); }, 800);
-    } catch (e) {
-      console.error('Error saving preferences:', e);
-    } finally {
-      setSaving(false);
-    }
-  }, [user, productId, studentName, year, predictedGrade, targetGrade, additionalInfo, onClose]);
+  // Trigger auto-save on any field change
+  useEffect(() => {
+    if (isOpen && user) autoSave();
+  }, [studentName, year, predictedGrade, targetGrade, additionalInfo, isOpen, user, autoSave]);
+
+  // Cleanup timer
+  useEffect(() => {
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -101,51 +98,53 @@ export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
       {/* Backdrop */}
       <div className="fixed inset-0 z-[300] bg-black/20 backdrop-blur-[2px]" onClick={onClose} />
 
-      {/* Popup card */}
-      <div className="fixed bottom-20 right-4 z-[301] w-[340px] max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300 edexcel-econ-panel">
+      {/* Popup card - compact floating */}
+      <div className="fixed bottom-20 right-4 z-[301] w-[320px] rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-[0_8px_40px_-8px_rgba(0,0,0,0.25)] animate-in slide-in-from-bottom-4 fade-in duration-300">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted transition-colors z-10"
+          className="absolute top-2.5 right-2.5 p-1 rounded-full hover:bg-muted transition-colors z-10"
         >
-          <X className="w-4 h-4 text-muted-foreground" />
+          <X className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
 
-        <div className="p-5 space-y-5">
-          {/* Trainer header */}
-          <div className="flex flex-col items-center text-center">
+        <div className="p-4 space-y-3">
+          {/* Trainer header - inline */}
+          <div className="flex items-center gap-3 pr-6">
             {trainerAvatarUrl && (
-              <div className="relative mb-2">
+              <div className="relative flex-shrink-0">
                 <img
                   src={trainerAvatarUrl}
                   alt={trainerName || 'Tutor'}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-primary/30 shadow-lg"
+                  className="w-10 h-10 rounded-full object-cover border-2 border-primary/30 shadow-md"
                 />
-                <span className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-card" />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-card" />
               </div>
             )}
-            <h3 className="text-lg font-bold text-foreground">Fill me in 📝</h3>
-            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              {trainerName ? `Hey! I'm ${trainerName}. Let me get to know you a bit so I can help you better...` : 'Tell me about yourself so I can personalise your experience...'}
-            </p>
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-foreground leading-tight">Fill me in</h3>
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                {trainerName ? `I'm ${trainerName}. Tell me about yourself!` : 'Tell me about yourself so I can help!'}
+              </p>
+            </div>
           </div>
 
           {/* Name */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">What's your name?</Label>
+          <div className="space-y-1">
+            <Label className="text-[11px] font-semibold">Your name</Label>
             <Input
               value={studentName}
               onChange={(e) => setStudentName(e.target.value)}
               placeholder="e.g. Alex"
-              className="h-9 text-sm"
+              className="h-8 text-sm"
             />
           </div>
 
           {/* Year */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">What year are you in?</Label>
+          <div className="space-y-1">
+            <Label className="text-[11px] font-semibold">Year</Label>
             <Select value={year} onValueChange={setYear}>
-              <SelectTrigger className="h-9 text-sm">
+              <SelectTrigger className="h-8 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -155,65 +154,42 @@ export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
             </Select>
           </div>
 
-          {/* Predicted Grade */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold">Predicted Grade</Label>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded panel-badge">{predictedGrade}</span>
+          {/* Grades row - side by side */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-[11px] font-semibold">Predicted</Label>
+              <Select value={predictedGrade} onValueChange={setPredictedGrade}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {GRADES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
-            <Slider
-              value={[getGradeIndex(predictedGrade)]}
-              onValueChange={(v) => setPredictedGrade(GRADES[v[0]])}
-              min={0} max={4} step={1}
-              className="w-full"
-            />
-            <div className="flex justify-between">
-              {GRADES.map(g => <span key={g} className="text-[10px] text-muted-foreground">{g}</span>)}
-            </div>
-          </div>
-
-          {/* Target Grade */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold">Target Grade</Label>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded panel-badge">{targetGrade}</span>
-            </div>
-            <Slider
-              value={[getGradeIndex(targetGrade)]}
-              onValueChange={(v) => setTargetGrade(GRADES[v[0]])}
-              min={0} max={4} step={1}
-              className="w-full"
-            />
-            <div className="flex justify-between">
-              {GRADES.map(g => <span key={g} className="text-[10px] text-muted-foreground">{g}</span>)}
+            <div className="space-y-1">
+              <Label className="text-[11px] font-semibold">Target</Label>
+              <Select value={targetGrade} onValueChange={setTargetGrade}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {GRADES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           {/* Anything else */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">Anything else you want me to know?</Label>
-            <Textarea
+          <div className="space-y-1">
+            <Label className="text-[11px] font-semibold">Anything else?</Label>
+            <Input
               value={additionalInfo}
               onChange={(e) => setAdditionalInfo(e.target.value)}
-              placeholder="Topics you struggle with, learning style, etc."
-              className="resize-none h-16 text-sm"
+              placeholder="Topics you struggle with, etc."
+              className="h-8 text-sm"
             />
           </div>
-
-          {/* Save button */}
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full bg-[hsl(222,75%,31%)] hover:bg-[hsl(222,75%,25%)] text-white font-semibold"
-          >
-            {saving ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
-            ) : saved ? (
-              <><Check className="w-4 h-4 mr-2" />Saved!</>
-            ) : (
-              "Let's go 🚀"
-            )}
-          </Button>
         </div>
       </div>
     </>
