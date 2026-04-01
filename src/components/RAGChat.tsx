@@ -320,7 +320,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
   // Auto-trigger profile popup on first prompt if no preferences set
   useEffect(() => {
-    if (messages.length >= 2 && !hasPreferencesSet && !profilePopupOpen && trainerAvatarUrl) {
+    if (messages.length >= 2 && !hasPreferencesSet && !profilePopupOpen) {
       const timer = setTimeout(() => setProfilePopupOpen(true), 3000);
       return () => clearTimeout(timer);
     }
