@@ -141,7 +141,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const {
     user
   } = useAuth();
-  const { theme } = useTheme();
+  const { theme, setIsChatbot } = useTheme();
+
+  // Register this page as a chatbot page for theme scoping
+  useEffect(() => {
+    setIsChatbot(true);
+    return () => setIsChatbot(false);
+  }, [setIsChatbot]);
   const currentLogo = theme === 'dark' ? logo : logoDark;
   const daysToFirstExam = useMemo(() => {
     if (!examDatesProp || examDatesProp.length === 0) return null;
