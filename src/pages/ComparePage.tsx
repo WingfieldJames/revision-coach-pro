@@ -247,6 +247,42 @@ export const ComparePage = () => {
     }
   }, [examBoard, boardsForSubject]);
 
+  // Helper to get the premium chatbot path for current subject/board
+  const getPremiumPath = React.useCallback(() => {
+    const dp = getDynamicProduct();
+    if (dp) return `/s/${dp.slug}/premium`;
+    if (subject === 'computer-science') return '/ocr-cs-premium';
+    if (subject === 'physics') return '/ocr-physics-premium';
+    if (subject === 'chemistry') return '/aqa-chemistry-premium';
+    if (subject === 'psychology') return '/aqa-psychology-premium';
+    if (subject === 'mathematics' && examBoard === 'ocr') return '/s/ocr-maths/premium';
+    if (subject === 'mathematics') return '/edexcel-maths-premium';
+    if (examBoard === 'aqa') return '/aqa-premium';
+    if (examBoard === 'cie') return '/cie-premium';
+    return '/premium';
+  }, [subject, examBoard, getDynamicProduct]);
+
+  // Handle payment success redirect — verify payment then go to deluxe chatbot
+  useEffect(() => {
+    const paymentSuccess = searchParams.get('payment_success');
+    const sessionId = searchParams.get('session_id');
+    if (paymentSuccess === 'true' && sessionId) {
+      const verify = async () => {
+        try {
+          await supabase.functions.invoke('verify-payment', { body: { sessionId } });
+        } catch (e) {
+          console.error('Payment verification:', e);
+        }
+        // Clean URL and redirect to premium chatbot
+        const premiumPath = getPremiumPath();
+        window.history.replaceState({}, '', '/compare');
+        // Small delay for subscription to propagate
+        setTimeout(() => { window.location.href = premiumPath; }, 1500);
+      };
+      verify();
+    }
+  }, [searchParams, getPremiumPath]);
+
   useEffect(() => {
     if (window.location.hash === '#testimonials') {
       setTimeout(() => {
@@ -255,7 +291,7 @@ export const ComparePage = () => {
           testimonialsSection.scrollIntoView({ behavior: 'smooth' });
         }
       }, 100);
-    } else {
+    } else if (!searchParams.get('payment_success')) {
       window.scrollTo(0, 0);
     }
   }, []);
@@ -301,12 +337,7 @@ export const ComparePage = () => {
     }
 
     if (hasProductAccess) {
-      // Check dynamic product first
-      const dp = getDynamicProduct();
-      if (dp) {window.location.href = `/s/${dp.slug}/premium`;return;}
-
-      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : subject === 'mathematics' && examBoard === 'ocr' ? '/s/ocr-maths/premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
-      window.location.href = premiumPath;
+      window.location.href = getPremiumPath();
       return;
     }
 
