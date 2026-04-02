@@ -86,7 +86,7 @@ const App = () => (
             <Route path="/edexcel-maths-premium" element={<EdexcelMathsPremiumPage />} />
             <Route path="/edexcel-maths-applied-free-version" element={<EdexcelMathsAppliedFreeVersionPage />} />
             <Route path="/edexcel-maths-applied-premium" element={<EdexcelMathsAppliedPremiumPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<ComparePage />} />
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/test-rag" element={<TestRAGChatPage />} />
