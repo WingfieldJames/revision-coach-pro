@@ -57,6 +57,12 @@ function resolveImageUrl(url: string): string | null {
   const filename = url.split('/').pop() || '';
   if (LEGACY_ASSET_MAP[filename]) return LEGACY_ASSET_MAP[filename];
   
+  // If it's a full HTTP URL, use it directly
+  if (url.startsWith('http')) return url;
+  
+  // If it starts with / but not /src/, it's a public path
+  if (url.startsWith('/') && !url.startsWith('/src/')) return url;
+  
   return null;
 }
 
