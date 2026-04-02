@@ -32,7 +32,6 @@ import { EdexcelMathsPremiumPage } from "./pages/EdexcelMathsPremiumPage";
 import { EdexcelMathsAppliedFreeVersionPage } from "./pages/EdexcelMathsAppliedFreeVersionPage";
 import { EdexcelMathsAppliedPremiumPage } from "./pages/EdexcelMathsAppliedPremiumPage";
 import { TestRAGChatPage } from "./pages/TestRAGChatPage";
-import { DashboardPage } from "./pages/DashboardPage";
 import { ProgressPage } from "./pages/ProgressPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
