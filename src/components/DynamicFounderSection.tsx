@@ -108,26 +108,22 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
           );
           if (data.trainer_image_url) {
             const url = data.trainer_image_url as string;
-            
-            // Try resolving from legacy asset map (handles multiple path formats)
             const resolved = resolveImageUrl(url);
             if (resolved) {
               setTrainerImageUrl(resolved);
               setTrainerImageStyle(getImageStyle(url));
-            } else if (url.startsWith('http')) {
-              setTrainerImageUrl(url);
-              setTrainerImageStyle(getImageStyle(url));
-            } else if (url.startsWith('/') && !url.startsWith('/src/')) {
-              setTrainerImageUrl(url);
-              setTrainerImageStyle(getImageStyle(url));
             } else {
               // Storage path — get signed URL
-              const { data: signed } = await supabase.storage
-                .from('trainer-uploads')
-                .createSignedUrl(url, 3600);
-              if (signed?.signedUrl) {
-                setTrainerImageUrl(signed.signedUrl);
-                setTrainerImageStyle(getImageStyle(url));
+              try {
+                const { data: signed } = await supabase.storage
+                  .from('trainer-uploads')
+                  .createSignedUrl(url, 3600);
+                if (signed?.signedUrl) {
+                  setTrainerImageUrl(signed.signedUrl);
+                  setTrainerImageStyle(getImageStyle(url));
+                }
+              } catch (e) {
+                console.error('Failed to get signed URL:', e);
               }
             }
           }

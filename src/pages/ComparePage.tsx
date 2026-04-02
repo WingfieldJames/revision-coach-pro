@@ -337,12 +337,7 @@ export const ComparePage = () => {
     }
 
     if (hasProductAccess) {
-      // Check dynamic product first
-      const dp = getDynamicProduct();
-      if (dp) {window.location.href = `/s/${dp.slug}/premium`;return;}
-
-      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : subject === 'mathematics' && examBoard === 'ocr' ? '/s/ocr-maths/premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
-      window.location.href = premiumPath;
+      window.location.href = getPremiumPath();
       return;
     }
 
