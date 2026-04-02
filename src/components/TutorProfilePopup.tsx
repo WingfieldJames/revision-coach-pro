@@ -122,7 +122,7 @@ export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-foreground leading-tight">Fill me in</h3>
               <p className="text-[11px] text-muted-foreground leading-snug">
-                {trainerName ? `I'm ${trainerName}. Tell me about yourself!` : 'Tell me about yourself so I can help!'}
+                Tell me where you're at - I'll tailor everything to you
               </p>
             </div>
           </div>

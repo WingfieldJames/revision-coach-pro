@@ -158,7 +158,7 @@ serve(async (req) => {
       customer_email: user.email,
       payment_method_types: ['card'],
       allow_promotion_codes: true,
-      success_url: `${req.headers.get("origin")}/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.get("origin")}/compare?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/compare`,
       metadata: {
         user_id: user.id,

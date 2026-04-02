@@ -102,9 +102,9 @@ export const HomePage = () => {
   };
 
   const handleSeeHowItWorks = () => {
-    const section = document.querySelector('[data-section="demo-video"]');
+    const section = document.querySelector('[data-section="founders"]');
     if (section) {
-      const y = section.getBoundingClientRect().top + window.scrollY - 20;
+      const y = section.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
   };
