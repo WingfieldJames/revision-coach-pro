@@ -83,7 +83,7 @@ export const AQAPsychologyPremiumPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={productId} subjectName="AQA Psychology" subjectDescription="Your personal A* Psychology tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Psychology past papers & mark schemes" placeholder="Ask me anything about AQA Psychology A-Level..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Study', 'Concept', 'Exam technique', 'Revision']} />
+        <RAGChat productId={productId} subjectName="AQA Psychology" subjectDescription="Your personal A* Psychology tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Psychology past papers & mark schemes" placeholder="Ask me anything about AQA Psychology A-Level..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Study', 'Concept', 'Exam technique', 'Revision']} trainerAvatarUrl={tc.trainer_image_url || undefined} trainerName={tc.trainer_name || undefined} trainerStatus={tc.trainer_status || undefined} trainerAchievements={tc.trainer_achievements.length > 0 ? tc.trainer_achievements : undefined} trainerDescription={tc.trainer_description || undefined} useEmojiStars />
       </div>
     </div>
   );

@@ -55,7 +55,7 @@ export const OCRCSFreeVersionPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={OCR_CS_PRODUCT_ID} subjectName="OCR Computer Science" subjectDescription="Your personal A* Computer Science tutor. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Computer Science specification" placeholder="Ask about algorithms, data structures, programming..." suggestedPrompts={prompts} enableDiagrams diagramSubject="cs" chatRef={chatRef} examDates={examDates} promptLabels={['Algorithm', 'Data types', 'Exam technique', 'Revision']} />
+        <RAGChat productId={OCR_CS_PRODUCT_ID} subjectName="OCR Computer Science" subjectDescription="Your personal A* Computer Science tutor. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Computer Science specification" placeholder="Ask about algorithms, data structures, programming..." suggestedPrompts={prompts} enableDiagrams diagramSubject="cs" chatRef={chatRef} examDates={examDates} promptLabels={['Algorithm', 'Data types', 'Exam technique', 'Revision']} trainerAvatarUrl={tc.trainer_image_url || undefined} trainerName={tc.trainer_name || undefined} trainerStatus={tc.trainer_status || undefined} trainerAchievements={tc.trainer_achievements.length > 0 ? tc.trainer_achievements : undefined} trainerDescription={tc.trainer_description || undefined} useEmojiStars />
       </div>
     </div>
   );
