@@ -53,7 +53,7 @@ export const OCRPhysicsFreeVersionPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={OCR_PHYSICS_PRODUCT_ID} subjectName="OCR Physics" subjectDescription="Your personal A* Physics tutor. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Physics specification" placeholder="Ask about mechanics, waves, electricity..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Topic', 'Concept', 'Exam technique', 'Revision']} />
+        <RAGChat productId={OCR_PHYSICS_PRODUCT_ID} subjectName="OCR Physics" subjectDescription="Your personal A* Physics tutor. Ask me anything!" footerText="Powered by A* AI • Trained on OCR Physics specification" placeholder="Ask about mechanics, waves, electricity..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Topic', 'Concept', 'Exam technique', 'Revision']} trainerAvatarUrl={tc.trainer_image_url || undefined} trainerName={tc.trainer_name || undefined} trainerStatus={tc.trainer_status || undefined} trainerAchievements={tc.trainer_achievements.length > 0 ? tc.trainer_achievements : undefined} trainerDescription={tc.trainer_description || undefined} useEmojiStars />
       </div>
     </div>
   );
