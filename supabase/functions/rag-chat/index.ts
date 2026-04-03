@@ -47,89 +47,30 @@ function getRecencyBonus(metadata: Record<string, unknown>): number {
   return 0;
 }
 
-// Economics Diagrams for inline rendering
-const ECONOMICS_DIAGRAMS = [
-  { id: 'ppf', title: 'Production Possibility Frontier (PPF)', keywords: ['ppf', 'production possibility frontier', 'ppc', 'opportunity cost', 'trade-off', 'scarcity'], imagePath: '/diagrams/ppf.jpg' },
-  { id: 'ppf-shift', title: 'Shift of PPF', keywords: ['ppf shift', 'economic growth', 'outward shift', 'inward shift', 'productive capacity'], imagePath: '/diagrams/ppf-shift.jpg' },
-  { id: 'supply-demand-equilibrium', title: 'Supply and Demand Equilibrium', keywords: ['supply and demand', 'equilibrium', 'market equilibrium', 'market clearing'], imagePath: '/diagrams/supply-demand-equilibrium.jpg' },
-  { id: 'demand-shift-right', title: 'Demand Shifts Right (Increase in Demand)', keywords: ['demand increase', 'demand shift right', 'rise in demand', 'rightward shift demand'], imagePath: '/diagrams/demand-shift-right.jpg' },
-  { id: 'demand-shift-left', title: 'Demand Shifts Left (Decrease in Demand)', keywords: ['demand decrease', 'demand shift left', 'fall in demand', 'leftward shift demand'], imagePath: '/diagrams/demand-shift-left.jpg' },
-  { id: 'supply-shift-right', title: 'Supply Shifts Right (Increase in Supply)', keywords: ['supply increase', 'supply shift right', 'rise in supply'], imagePath: '/diagrams/supply-shift-right.jpg' },
-  { id: 'supply-shift-left', title: 'Supply Shifts Left (Decrease in Supply)', keywords: ['supply decrease', 'supply shift left', 'fall in supply'], imagePath: '/diagrams/supply-shift-left.jpg' },
-  { id: 'specific-tax', title: 'Specific Tax', keywords: ['specific tax', 'indirect tax', 'per unit tax'], imagePath: '/diagrams/specific-tax.jpg' },
-  { id: 'ad-valorem-tax', title: 'Ad Valorem Tax', keywords: ['ad valorem', 'percentage tax', 'vat'], imagePath: '/diagrams/ad-valorem-tax.jpg' },
-  { id: 'subsidy', title: 'Subsidy', keywords: ['subsidy', 'government subsidy', 'price subsidy'], imagePath: '/diagrams/subsidy.jpg' },
-  { id: 'maximum-price', title: 'Maximum Price (Price Ceiling)', keywords: ['maximum price', 'price ceiling', 'price cap', 'rent control'], imagePath: '/diagrams/maximum-price.jpg' },
-  { id: 'minimum-price', title: 'Minimum Price (Price Floor)', keywords: ['minimum price', 'price floor', 'minimum wage'], imagePath: '/diagrams/minimum-price.jpg' },
-  { id: 'negative-externality-production', title: 'Negative Externality in Production', keywords: ['negative externality', 'external cost', 'market failure', 'msc', 'mpc', 'welfare loss'], imagePath: '/diagrams/negative-externality-production.jpg' },
-  { id: 'positive-externality-consumption', title: 'Positive Externality in Consumption', keywords: ['positive externality', 'external benefit', 'msb', 'mpb', 'merit good'], imagePath: '/diagrams/positive-externality-consumption.jpg' },
-  { id: 'producer-consumer-surplus', title: 'Producer and Consumer Surplus', keywords: ['consumer surplus', 'producer surplus', 'total surplus', 'welfare'], imagePath: '/diagrams/producer-consumer-surplus.jpg' },
-  { id: 'ad-sras', title: 'AD/AS Model', keywords: ['aggregate demand', 'aggregate supply', 'ad/as', 'ad as', 'macroeconomic equilibrium'], imagePath: '/diagrams/ad-as-basic.png' },
-  { id: 'demand-pull-inflation', title: 'Demand-Pull Inflation', keywords: ['demand pull inflation', 'demand pull', 'ad shift right'], imagePath: '/diagrams/demand-pull-inflation.jpg' },
-  { id: 'cost-push-inflation', title: 'Cost-Push Inflation', keywords: ['cost push inflation', 'cost push', 'sras shift left'], imagePath: '/diagrams/cost-push-inflation.jpg' },
-  { id: 'monopoly', title: 'Monopoly Diagram', keywords: ['monopoly', 'monopolist', 'price maker', 'supernormal profit', 'deadweight loss'], imagePath: '/diagrams/monopoly.png' },
-  { id: 'perfect-competition', title: 'Perfect Competition', keywords: ['perfect competition', 'price taker', 'normal profit', 'perfectly competitive'], imagePath: '/diagrams/perfect-competition.png' },
-  { id: 'circular-flow', title: 'Circular Flow of Income', keywords: ['circular flow', 'injections', 'withdrawals', 'leakages', 'national income'], imagePath: '/diagrams/circular-flow-of-income.jpg' },
-  { id: 'phillips-curve', title: 'Phillips Curve', keywords: ['phillips curve', 'inflation unemployment trade-off'], imagePath: '/diagrams/phillips-curve.png' },
-  { id: 'trade-cycle', title: 'Trade/Business Cycle', keywords: ['trade cycle', 'business cycle', 'boom', 'recession', 'recovery', 'slump'], imagePath: '/diagrams/trade-cycle.jpg' },
-  { id: 'profit-maximisation', title: 'Profit Maximisation (MC=MR)', keywords: ['profit maximisation', 'mc=mr', 'profit maximizing', 'marginal cost marginal revenue'], imagePath: '/diagrams/profit-maximisation.jpg' },
-  { id: 'price-discrimination', title: 'Price Discrimination', keywords: ['price discrimination', 'first degree', 'second degree', 'third degree'], imagePath: '/diagrams/price-discrimination.jpg' },
-];
-
-// CS Diagrams for inline rendering
-const CS_DIAGRAMS = [
-  { id: 'von-neumann-architecture', title: 'Von Neumann Architecture', keywords: ['von neumann', 'cpu', 'processor', 'ram', 'memory', 'bus', 'data bus', 'address bus', 'control bus', 'alu', 'control unit', 'registers', 'mar', 'mdr', 'pc', 'program counter', 'cir', 'accumulator', 'fetch decode execute', 'fde'], imagePath: '/diagrams/cs/von-neumann-architecture.jpg' },
-  { id: 'and-gate', title: 'AND Gate', keywords: ['and gate', 'logic gate', 'boolean and', 'truth table and'], imagePath: '/diagrams/cs/and-gate.jpg' },
-  { id: 'or-gate', title: 'OR Gate', keywords: ['or gate', 'logic gate', 'boolean or', 'truth table or'], imagePath: '/diagrams/cs/or-gate.jpg' },
-  { id: 'xor-gate', title: 'XOR Gate', keywords: ['xor gate', 'exclusive or', 'logic gate'], imagePath: '/diagrams/cs/xor-gate.jpg' },
-  { id: 'not-gate', title: 'NOT Gate', keywords: ['not gate', 'inverter', 'logic gate', 'negation'], imagePath: '/diagrams/cs/not-gate.jpg' },
-  { id: 'half-adder', title: 'Half Adder', keywords: ['half adder', 'adder', 'binary addition', 'sum bit', 'carry bit'], imagePath: '/diagrams/cs/half-adder.jpg' },
-  { id: 'full-adder', title: 'Full Adder', keywords: ['full adder', 'adder', 'carry in', 'carry out', 'ripple carry'], imagePath: '/diagrams/cs/full-adder.jpg' },
-  { id: 'd-flip-flop', title: 'D Flip-Flop (Clock)', keywords: ['flip-flop', 'flip flop', 'latch', 'clock', 'd flip-flop', 'register', 'memory element'], imagePath: '/diagrams/cs/d-flip-flop.jpg' },
-  { id: 'array', title: 'Array', keywords: ['array', 'data structure', 'index', 'element', 'contiguous memory'], imagePath: '/diagrams/cs/array.jpg' },
-  { id: 'stack', title: 'Stack', keywords: ['stack', 'push', 'pop', 'lifo', 'last in first out', 'top pointer'], imagePath: '/diagrams/cs/stack.jpg' },
-  { id: 'queue', title: 'Queue', keywords: ['queue', 'enqueue', 'dequeue', 'fifo', 'first in first out', 'front pointer', 'rear pointer'], imagePath: '/diagrams/cs/queue.jpg' },
-  { id: 'graph', title: 'Graph', keywords: ['graph', 'node', 'vertex', 'edge', 'adjacency'], imagePath: '/diagrams/cs/graph.jpg' },
-  { id: 'tree', title: 'Tree', keywords: ['tree', 'root', 'parent', 'child', 'leaf', 'node', 'hierarchical'], imagePath: '/diagrams/cs/tree.jpg' },
-  { id: 'binary-search-tree', title: 'Binary Search Tree', keywords: ['binary search tree', 'bst', 'binary tree', 'ordered tree'], imagePath: '/diagrams/cs/binary-search-tree.jpg' },
-  { id: 'post-order-traversal', title: 'Post Order Traversal', keywords: ['post order', 'postorder', 'tree traversal', 'traversal', 'left right root'], imagePath: '/diagrams/cs/post-order-traversal.jpg' },
-];
-
 // Find relevant diagram based on message content using AI-powered matching
-// Accepts optional custom diagrams from Build portal (merged with fallbacks)
+// ONLY uses custom diagrams from Build portal — no hardcoded fallbacks
 async function findRelevantDiagram(
   message: string, 
-  subject: string,
   customDiagrams?: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }>,
   lovableApiKey?: string
 ): Promise<{ id: string; title: string; imagePath: string } | null> {
-  const lowerMessage = message.toLowerCase();
-  
-  // Build merged diagram set: custom (Build) diagrams first, then fallbacks
-  const fallbackSet = subject === 'cs' ? CS_DIAGRAMS : ECONOMICS_DIAGRAMS;
-  const mergedDiagrams: Array<{ id: string; title: string; imagePath: string; keywords: string[] }> = [];
-  
-  // Add custom diagrams from Build portal (priority)
-  if (customDiagrams && customDiagrams.length > 0) {
-    for (const d of customDiagrams) {
-      const titleWords = d.title.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-      const kws = d.keywords && d.keywords.length > 0 ? d.keywords : titleWords;
-      mergedDiagrams.push({ id: d.id, title: d.title, imagePath: d.imagePath, keywords: kws });
-    }
+  // If no custom diagrams from Build portal, return null immediately
+  if (!customDiagrams || customDiagrams.length === 0) {
+    console.log('No diagrams in Build portal for this product — skipping diagram matching');
+    return null;
   }
   
-  // Add fallback diagrams (skip if a custom diagram has the same id)
-  const customIds = new Set(mergedDiagrams.map(d => d.id));
-  for (const d of fallbackSet) {
-    if (!customIds.has(d.id)) {
-      mergedDiagrams.push(d);
-    }
-  }
+  // Build diagram set from Build portal only
+  const diagrams: Array<{ id: string; title: string; imagePath: string; keywords: string[] }> = customDiagrams.map(d => {
+    const titleWords = d.title.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    const kws = d.keywords && d.keywords.length > 0 ? d.keywords : titleWords;
+    return { id: d.id, title: d.title, imagePath: d.imagePath, keywords: kws };
+  });
 
   // Use AI-powered matching for better accuracy
-  if (lovableApiKey && mergedDiagrams.length > 0) {
+  if (lovableApiKey && diagrams.length > 0) {
     try {
-      const diagramList = mergedDiagrams.map(d => 
+      const diagramList = diagrams.map(d => 
         `- ID: "${d.id}" | Title: "${d.title}" | Keywords: ${d.keywords.join(', ')}`
       ).join('\n');
 
@@ -142,7 +83,14 @@ async function findRelevantDiagram(
         body: JSON.stringify({
           model: 'google/gemini-2.5-flash',
           messages: [
-            { role: 'system', content: `You are a diagram matcher. Given a student's question, determine which single diagram best illustrates the economic/CS concept being discussed. Return ONLY a JSON object. Be generous — if the topic relates to any diagram, match it. If genuinely no diagram fits, return null.
+            { role: 'system', content: `You are a diagram matcher for A-Level subjects. Given a student's question, determine which single diagram best illustrates the concept being discussed. Return ONLY a JSON object. Be generous — if the topic relates to any diagram, match it. If genuinely no diagram fits, return null.
+
+IMPORTANT disambiguation rules:
+- If the question is about a SINGLE MARKET (micro): use individual supply/demand diagrams, NOT AD/SRAS
+- If the question is about the WHOLE ECONOMY (macro): use AD/SRAS diagrams, NOT micro supply/demand
+- "Demand-pull inflation" = AD shifts right (macro), NOT micro demand shift
+- "Cost-push inflation" = SRAS shifts left (macro), NOT micro supply shift
+- Distinguish between firm-level diagrams (profit max, cost curves) and market-level diagrams
 
 Available diagrams:
 ${diagramList}
@@ -161,7 +109,7 @@ Response format (JSON only, no explanation):
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
           if (parsed.diagramId) {
-            const matched = mergedDiagrams.find(d => d.id === parsed.diagramId);
+            const matched = diagrams.find(d => d.id === parsed.diagramId);
             if (matched) {
               console.log(`AI matched diagram: ${matched.title}`);
               return { id: matched.id, title: matched.title, imagePath: matched.imagePath };
@@ -175,7 +123,8 @@ Response format (JSON only, no explanation):
   }
   
   // Fallback: keyword-based matching
-  for (const diagram of mergedDiagrams) {
+  const lowerMessage = message.toLowerCase();
+  for (const diagram of diagrams) {
     for (const keyword of diagram.keywords) {
       if (lowerMessage.includes(keyword.toLowerCase())) {
         return { id: diagram.id, title: diagram.title, imagePath: diagram.imagePath };
@@ -1013,10 +962,9 @@ Use this to personalise your responses — reference their weak areas, their exa
       console.error('Error fetching custom diagrams:', err);
     }
     
-    // Always try to find a relevant diagram (custom Build diagrams take priority)
+    // Find relevant diagram using ONLY Build portal diagrams (no hardcoded fallbacks)
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
-    const diagramSubject = enable_diagrams ? diagram_subject : 'economics';
-    relevantDiagram = await findRelevantDiagram(message, diagramSubject, customDiagrams, lovableApiKey);
+    relevantDiagram = await findRelevantDiagram(message, customDiagrams, lovableApiKey);
     if (relevantDiagram) {
       console.log(`Found relevant diagram: ${relevantDiagram.title}`);
     }
