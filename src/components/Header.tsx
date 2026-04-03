@@ -219,6 +219,7 @@ export const Header: React.FC<HeaderProps> = ({
   const tabs: ITab[] = [
     { title: "Home", value: "home" },
     { title: "Subjects", value: "pricing" },
+    { title: "Merch", value: "merch" },
     { title: "Schools", value: "profile" }
   ];
 
@@ -229,9 +230,10 @@ export const Header: React.FC<HeaderProps> = ({
     } else if (value === "pricing") {
       navigate('/compare');
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+    } else if (value === "merch") {
+      window.open('https://astarai.printify.me', '_blank');
     } else if (value === "profile") {
       navigate('/progress');
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     }
   };
