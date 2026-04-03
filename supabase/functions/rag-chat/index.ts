@@ -962,10 +962,9 @@ Use this to personalise your responses — reference their weak areas, their exa
       console.error('Error fetching custom diagrams:', err);
     }
     
-    // Always try to find a relevant diagram (custom Build diagrams take priority)
+    // Find relevant diagram using ONLY Build portal diagrams (no hardcoded fallbacks)
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
-    const diagramSubject = enable_diagrams ? diagram_subject : 'economics';
-    relevantDiagram = await findRelevantDiagram(message, diagramSubject, customDiagrams, lovableApiKey);
+    relevantDiagram = await findRelevantDiagram(message, customDiagrams, lovableApiKey);
     if (relevantDiagram) {
       console.log(`Found relevant diagram: ${relevantDiagram.title}`);
     }

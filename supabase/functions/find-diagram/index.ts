@@ -6,74 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Economics diagrams
-const economicsDiagrams = [
-  { id: 'ppf', title: 'Production Possibility Frontier (PPF)', keywords: ['PPF', 'production possibility frontier', 'production possibilities curve', 'PPC', 'opportunity cost', 'trade-off', 'scarcity', 'capital goods', 'consumer goods', 'economic efficiency', 'productive efficiency'] },
-  { id: 'ppf-shift', title: 'Shift of PPF', keywords: ['PPF shift', 'production possibility frontier shift', 'economic growth', 'outward shift', 'inward shift', 'increase in productive capacity', 'technological progress', 'capital accumulation'] },
-  { id: 'supply-demand-equilibrium', title: 'Supply and Demand Equilibrium', keywords: ['supply', 'demand', 'equilibrium', 'market equilibrium', 'price equilibrium', 'quantity equilibrium', 'market clearing', 'Pe', 'Qe', 'equilibrium price', 'equilibrium quantity'] },
-  { id: 'demand-shift-right', title: 'Demand Shifts Right (Increase in Demand)', keywords: ['demand increase', 'demand shift right', 'rise in demand', 'demand curve shift right', 'rightward shift demand', 'increase in quantity demanded', 'higher demand', 'D1 to D2'] },
-  { id: 'demand-shift-left', title: 'Demand Shifts Left (Decrease in Demand)', keywords: ['demand decrease', 'demand shift left', 'fall in demand', 'demand curve shift left', 'leftward shift demand', 'decrease in quantity demanded', 'lower demand', 'D2 to D1'] },
-  { id: 'supply-shift-right', title: 'Supply Shifts Right (Increase in Supply)', keywords: ['supply increase', 'supply shift right', 'rise in supply', 'supply curve shift right', 'rightward shift supply', 'increase in quantity supplied', 'higher supply', 'S1 to S2'] },
-  { id: 'supply-shift-left', title: 'Supply Shifts Left (Decrease in Supply)', keywords: ['supply decrease', 'supply shift left', 'fall in supply', 'supply curve shift left', 'leftward shift supply', 'decrease in quantity supplied', 'lower supply', 'S2 to S1'] },
-  { id: 'producer-consumer-surplus', title: 'Producer and Consumer Surplus', keywords: ['producer surplus', 'consumer surplus', 'welfare', 'economic welfare', 'total surplus', 'market surplus', 'surplus triangle', 'deadweight loss', 'allocative efficiency'] },
-  { id: 'specific-tax', title: 'Specific Tax (Per Unit Tax)', keywords: ['specific tax', 'per unit tax', 'indirect tax', 'tax incidence', 'consumer incidence', 'producer incidence', 'tax burden', 'excise tax', 'unit tax'] },
-  { id: 'ad-valorem-tax', title: 'Ad-Valorem Tax', keywords: ['ad valorem tax', 'percentage tax', 'VAT', 'value added tax', 'proportional tax', 'tax on value', 'government revenue', 'pivoting supply curve'] },
-  { id: 'subsidy', title: 'Subsidy', keywords: ['subsidy', 'government subsidy', 'producer benefit', 'consumer benefit', 'cost to government', 'subsidy diagram', 'supply shift subsidy', 'government spending'] },
-  { id: 'minimum-price', title: 'Minimum Price (Price Floor)', keywords: ['minimum price', 'price floor', 'excess supply', 'surplus', 'guaranteed minimum price', 'buffer stock', 'agricultural support', 'Pmin', 'price support'] },
-  { id: 'maximum-price', title: 'Maximum Price (Price Ceiling)', keywords: ['maximum price', 'price ceiling', 'excess demand', 'shortage', 'price cap', 'rent control', 'Pmax', 'price control', 'rationing'] },
-  { id: 'negative-externality-production', title: 'Negative Externality of Production', keywords: ['negative externality', 'externality of production', 'MSC', 'MPC', 'marginal social cost', 'marginal private cost', 'pollution', 'market failure', 'welfare loss', 'overproduction', 'deadweight loss'] },
-  { id: 'positive-externality-consumption', title: 'Positive Externality of Consumption', keywords: ['positive externality', 'externality of consumption', 'MSB', 'MPB', 'marginal social benefit', 'marginal private benefit', 'merit good', 'underconsumption', 'welfare gain', 'education', 'healthcare'] },
-  { id: 'ad-sras-ad-shifts-right', title: 'AD-SRAS (AD Shifts Right)', keywords: ['AD shifts right', 'aggregate demand increase', 'AD increase', 'rightward shift AD', 'expansionary', 'fiscal policy', 'monetary policy', 'consumption increase', 'investment increase', 'government spending increase', 'exports increase', 'AD1 to AD2', 'SRAS AD model'] },
-  { id: 'demand-pull-inflation', title: 'Demand Pull Inflation', keywords: ['demand pull inflation', 'demand-pull', 'inflation caused by demand', 'excess demand', 'AD increase inflation', 'too much money chasing too few goods', 'overheating economy', 'inflationary gap', 'price level increase demand'] },
-  { id: 'ad-sras-ad-shifts-left', title: 'AD-SRAS (AD Shifts Left)', keywords: ['AD shifts left', 'aggregate demand decrease', 'AD decrease', 'leftward shift AD', 'contractionary', 'recession', 'consumption fall', 'investment fall', 'government spending cut', 'exports fall', 'AD2 to AD1', 'deflationary'] },
-  { id: 'ad-sras-sras-shifts-right', title: 'AD-SRAS (SRAS Shifts Right)', keywords: ['SRAS shifts right', 'short run aggregate supply increase', 'SRAS increase', 'rightward shift SRAS', 'lower production costs', 'productivity increase', 'wage decrease', 'raw material cost decrease', 'SRAS1 to SRAS2', 'supply side improvement'] },
-  { id: 'ad-sras-sras-shifts-left', title: 'AD-SRAS (SRAS Shifts Left)', keywords: ['SRAS shifts left', 'short run aggregate supply decrease', 'SRAS decrease', 'leftward shift SRAS', 'higher production costs', 'wage increase', 'raw material cost increase', 'oil price shock', 'supply shock', 'SRAS2 to SRAS1'] },
-  { id: 'cost-push-inflation', title: 'Cost Push Inflation', keywords: ['cost push inflation', 'cost-push', 'inflation caused by supply', 'supply side inflation', 'SRAS decrease inflation', 'wage push inflation', 'oil price inflation', 'raw material costs', 'stagflation', 'price level increase supply'] },
-  { id: 'circular-flow-of-income', title: 'Circular Flow of Income', keywords: ['circular flow', 'circular flow of income', 'households', 'firms', 'factor market', 'goods market', 'injections', 'withdrawals', 'leakages', 'savings', 'taxation', 'imports', 'investment', 'government spending', 'exports', 'national income'] },
-  { id: 'keynesian-lras', title: 'Keynesian Long Run AS', keywords: ['Keynesian', 'Keynesian LRAS', 'Keynesian long run aggregate supply', 'L-shaped AS', 'horizontal AS', 'spare capacity', 'unemployment', 'full employment', 'classical vs keynesian', 'backward bending AS'] },
-  { id: 'classical-positive-output-gap', title: 'Classical Positive Output Gap', keywords: ['positive output gap', 'inflationary gap', 'actual GDP above potential', 'overheating', 'above full employment', 'classical LRAS', 'Y greater than Yfe', 'boom', 'excess demand economy'] },
-  { id: 'classical-negative-output-gap', title: 'Classical Negative Output Gap', keywords: ['negative output gap', 'deflationary gap', 'recessionary gap', 'actual GDP below potential', 'below full employment', 'classical LRAS', 'Y less than Yfe', 'recession', 'spare capacity', 'unemployment gap'] },
-  { id: 'keynesian-negative-output-gap', title: 'Keynesian Negative Output Gap', keywords: ['keynesian negative output gap', 'keynesian deflationary gap', 'keynesian recessionary gap', 'keynesian below full employment', 'spare capacity keynesian', 'Y1 below Yfe keynesian', 'unemployment keynesian model'] },
-  { id: 'keynesian-economic-growth', title: 'Keynesian Economic Growth (LRAS Shifts Right)', keywords: ['keynesian economic growth', 'keynesian LRAS shift right', 'long run growth keynesian', 'potential output increase keynesian', 'productive capacity keynesian', 'LRAS1 to LRAS2 keynesian', 'supply side policies keynesian'] },
-  { id: 'trade-cycle', title: 'Trade Cycle (Business Cycle)', keywords: ['trade cycle', 'business cycle', 'economic cycle', 'boom', 'recession', 'slump', 'recovery', 'expansion', 'contraction', 'peak', 'trough', 'trend growth', 'actual growth', 'GDP fluctuations', 'cyclical fluctuations'] },
-  { id: 'short-run-phillips-curve', title: 'Short Run Phillips Curve', keywords: ['phillips curve', 'short run phillips curve', 'SRPC', 'inflation unemployment trade-off', 'inverse relationship inflation unemployment', 'demand side policies phillips', 'expectations augmented', 'natural rate of unemployment'] },
-  { id: 'profit-maximisation', title: 'Profit Maximisation', keywords: ['profit maximisation', 'profit maximization', 'MC=MR', 'marginal cost equals marginal revenue', 'supernormal profit', 'abnormal profit', 'profit max point', 'AR', 'AC', 'MC', 'MR', 'firm objective', 'monopoly profit'] },
-  { id: 'revenue-maximisation', title: 'Revenue Maximisation', keywords: ['revenue maximisation', 'revenue maximization', 'MR=0', 'marginal revenue equals zero', 'total revenue maximisation', 'Baumol', 'sales revenue', 'firm objective', 'managerial objective'] },
-  { id: 'sales-maximisation', title: 'Sales Maximisation', keywords: ['sales maximisation', 'sales maximization', 'AR=AC', 'average revenue equals average cost', 'normal profit constraint', 'Baumol', 'output maximisation', 'firm objective', 'managerial theories'] },
-  { id: 'mp-ap-diminishing-returns', title: 'MP and AP (Diminishing Returns)', keywords: ['marginal product', 'average product', 'MP', 'AP', 'diminishing returns', 'law of diminishing returns', 'diminishing marginal returns', 'variable factor', 'labour productivity', 'short run production'] },
-  { id: 'ac-avc-mc', title: 'AC, AVC and MC', keywords: ['average cost', 'average variable cost', 'marginal cost', 'AC', 'AVC', 'MC', 'AFC', 'average fixed cost', 'cost curves', 'U-shaped cost curves', 'short run costs', 'diminishing returns cost'] },
-  { id: 'internal-economies-of-scale', title: 'Internal Economies of Scale', keywords: ['internal economies of scale', 'LRAC', 'long run average cost', 'economies of scale', 'falling LRAC', 'minimum efficient scale', 'MES', 'diseconomies of scale', 'technical economies', 'financial economies', 'managerial economies'] },
-  { id: 'external-economies-of-scale', title: 'External Economies of Scale', keywords: ['external economies of scale', 'LRAC shift down', 'long run average cost shift', 'industry growth', 'agglomeration', 'clustering', 'infrastructure', 'skilled labour pool'] },
-  { id: 'short-run-shut-down', title: 'Short Run Shut Down Point', keywords: ['short run shut down', 'shut down point', 'P below AVC', 'price below average variable cost', 'loss minimisation', 'continue or shut down', 'covering variable costs', 'making a loss'] },
-  { id: 'long-run-shut-down', title: 'Long Run Shut Down Point', keywords: ['long run shut down', 'exit point', 'P below AC', 'price below average cost', 'subnormal profit', 'leaving the industry', 'long run losses', 'exit the market'] },
-  { id: 'allocative-efficiency', title: 'Allocative Efficiency', keywords: ['allocative efficiency', 'P=MC', 'AR=MC', 'price equals marginal cost', 'social optimum', 'welfare maximisation', 'consumer welfare', 'pareto efficiency', 'resource allocation'] },
-  { id: 'productive-efficiency', title: 'Productive Efficiency', keywords: ['productive efficiency', 'MC=AC', 'marginal cost equals average cost', 'lowest point AC', 'minimum average cost', 'cost minimisation', 'technical efficiency', 'X-efficiency'] },
-  { id: 'dynamic-efficiency', title: 'Dynamic Efficiency', keywords: ['dynamic efficiency', 'supernormal profit reinvestment', 'innovation', 'R&D', 'research and development', 'long run efficiency', 'technological progress', 'investment in new technology'] },
-  { id: 'perfect-competition-equilibrium', title: 'Perfect Competition Equilibrium', keywords: ['perfect competition', 'perfect competition equilibrium', 'long run equilibrium', 'normal profit', 'AR=MR=D', 'price taker', 'horizontal demand curve', 'perfectly competitive firm'] },
-  { id: 'perfect-competition-entry', title: 'Perfect Competition - Supernormal to Normal Profit (Entry)', keywords: ['perfect competition entry', 'supernormal profit', 'firm entry', 'new firms enter', 'supply increases', 'price falls', 'abnormal profit attracts', 'long run adjustment entry'] },
-  { id: 'perfect-competition-exit', title: 'Perfect Competition - Subnormal to Normal Profit (Exit)', keywords: ['perfect competition exit', 'subnormal profit', 'firm exit', 'firms leave', 'supply decreases', 'price rises', 'losses cause exit', 'long run adjustment exit'] },
-  { id: 'price-discrimination', title: 'Price Discrimination', keywords: ['price discrimination', 'third degree price discrimination', 'different prices different markets', 'inelastic market', 'elastic market', 'market segmentation', 'consumer surplus extraction', 'monopoly pricing'] },
-];
-
-// Computer Science diagrams
-const csDiagrams = [
-  { id: 'von-neumann-architecture', title: 'Von Neumann Architecture', keywords: ['von neumann', 'cpu', 'processor', 'RAM', 'memory', 'bus', 'data bus', 'address bus', 'control bus', 'ALU', 'arithmetic logic unit', 'control unit', 'CU', 'registers', 'MAR', 'MDR', 'PC', 'program counter', 'CIR', 'current instruction register', 'accumulator', 'ACC', 'fetch decode execute', 'FDE cycle', 'stored program concept', 'general purpose registers'] },
-  { id: 'and-gate', title: 'AND Gate', keywords: ['AND gate', 'AND logic gate', 'logic gate', 'boolean AND', 'conjunction', 'A AND B', 'A.B', 'A∧B', 'truth table AND', 'both inputs high', 'logic circuit', 'digital logic', 'binary AND'] },
-  { id: 'or-gate', title: 'OR Gate', keywords: ['OR gate', 'OR logic gate', 'logic gate', 'boolean OR', 'disjunction', 'A OR B', 'A+B', 'A∨B', 'truth table OR', 'either input high', 'logic circuit', 'digital logic', 'binary OR', 'inclusive OR'] },
-  { id: 'xor-gate', title: 'XOR Gate', keywords: ['XOR gate', 'XOR logic gate', 'exclusive OR', 'logic gate', 'boolean XOR', 'A XOR B', 'A⊕B', 'truth table XOR', 'different inputs', 'logic circuit', 'digital logic', 'binary XOR', 'exclusive disjunction'] },
-  { id: 'not-gate', title: 'NOT Gate', keywords: ['NOT gate', 'NOT logic gate', 'inverter', 'logic gate', 'boolean NOT', 'negation', 'A NOT', '¬A', 'Ā', 'truth table NOT', 'invert', 'logic circuit', 'digital logic', 'binary NOT', 'complement'] },
-  { id: 'half-adder', title: 'Half Adder', keywords: ['half adder', 'adder circuit', 'binary addition', 'sum bit', 'carry bit', 'XOR AND combination', 'half-adder', 'logic circuit', 'arithmetic circuit', 'binary arithmetic', 'S and C outputs', 'adding two bits'] },
-  { id: 'full-adder', title: 'Full Adder', keywords: ['full adder', 'adder circuit', 'binary addition', 'sum bit', 'carry in', 'carry out', 'Cin', 'Cout', 'full-adder', 'logic circuit', 'arithmetic circuit', 'binary arithmetic', 'three input adder', 'cascading adders', 'ripple carry'] },
-  { id: 'd-flip-flop', title: 'D Flip-Flop (Clock)', keywords: ['D flip-flop', 'D flip flop', 'flip-flop', 'flip flop', 'latch', 'clock', 'clock signal', 'edge triggered', 'data input', 'Q output', 'not Q', 'memory element', 'sequential circuit', 'register', 'storage element', 'synchronous', 'clock pulse'] },
-  { id: 'array', title: 'Array', keywords: ['array', 'arrays', 'data structure', 'index', 'indexing', 'element', 'first element', 'array length', 'zero indexed', '0 indexed', 'contiguous memory', 'fixed size', 'random access', 'subscript', 'array notation', 'array[0]', 'array elements'] },
-  { id: 'stack', title: 'Stack', keywords: ['stack', 'stacks', 'push', 'pop', 'LIFO', 'last in first out', 'top pointer', 'top counter', 'stack pointer', 'data structure', 'call stack', 'stack overflow', 'stack underflow', 'peek', 'isEmpty', 'isFull'] },
-  { id: 'queue', title: 'Queue', keywords: ['queue', 'queues', 'enqueue', 'dequeue', 'FIFO', 'first in first out', 'front pointer', 'rear pointer', 'head', 'tail', 'data structure', 'circular queue', 'priority queue', 'linear queue', 'isEmpty', 'isFull'] },
-  { id: 'graph', title: 'Graph', keywords: ['graph', 'graphs', 'node', 'nodes', 'vertex', 'vertices', 'edge', 'edges', 'adjacency', 'adjacency list', 'adjacency matrix', 'weighted graph', 'unweighted graph', 'directed graph', 'undirected graph', 'connected', 'path', 'cycle', 'data structure'] },
-  { id: 'tree', title: 'Tree', keywords: ['tree', 'trees', 'root', 'root node', 'parent', 'parent node', 'child', 'child node', 'leaf', 'leaf node', 'branch', 'subtree', 'hierarchical', 'data structure', 'node', 'nodes', 'depth', 'height', 'level'] },
-  { id: 'binary-search-tree', title: 'Binary Search Tree', keywords: ['binary search tree', 'BST', 'binary tree', 'left subtree', 'right subtree', 'root', 'node', 'leaf', 'ordered tree', 'sorted tree', 'search tree', 'balanced tree', 'unbalanced tree', 'insert', 'delete', 'search', 'traversal', 'in-order', 'data structure'] },
-  { id: 'post-order-traversal', title: 'Post Order Traversal', keywords: ['post order', 'post-order', 'postorder', 'tree traversal', 'traversal', 'left right root', 'LRN', 'depth first', 'DFS', 'binary tree traversal', 'visiting nodes', 'recursive traversal', 'in order', 'pre order', 'tree walk'] },
-];
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -100,7 +32,7 @@ serve(async (req) => {
       );
     }
 
-    const { text, subject = 'economics', custom_diagrams } = await req.json();
+    const { text, custom_diagrams } = await req.json();
     
     if (!text || typeof text !== 'string') {
       return new Response(
@@ -109,22 +41,20 @@ serve(async (req) => {
       );
     }
 
-    // Use custom diagrams if provided, otherwise use built-in sets
-    let availableDiagrams: Array<{ id: string; title: string; keywords?: string[] }>;
-    let subjectName: string;
-
-    if (custom_diagrams && Array.isArray(custom_diagrams) && custom_diagrams.length > 0) {
-      // Custom diagrams from Build portal — no keywords, just titles
-      availableDiagrams = custom_diagrams.map((d: any) => ({
-        id: d.id,
-        title: d.title,
-        keywords: [d.title], // Use title as the keyword for matching
-      }));
-      subjectName = 'this subject';
-    } else {
-      availableDiagrams = subject === 'cs' ? csDiagrams : economicsDiagrams;
-      subjectName = subject === 'cs' ? 'Computer Science' : 'Economics';
+    // ONLY use custom diagrams from Build portal — no hardcoded fallbacks
+    if (!custom_diagrams || !Array.isArray(custom_diagrams) || custom_diagrams.length === 0) {
+      console.log('No custom diagrams provided — returning null');
+      return new Response(
+        JSON.stringify({ diagramId: null }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    const availableDiagrams = custom_diagrams.map((d: any) => ({
+      id: d.id,
+      title: d.title,
+      keywords: [d.title],
+    }));
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -134,11 +64,18 @@ serve(async (req) => {
       );
     }
 
-    const diagramList = availableDiagrams.map(d => 
-      `- ID: "${d.id}" | Title: "${d.title}"${d.keywords ? ` | Keywords: ${d.keywords.join(', ')}` : ''}`
+    const diagramList = availableDiagrams.map((d: any) => 
+      `- ID: "${d.id}" | Title: "${d.title}"`
     ).join('\n');
 
-    const systemPrompt = `You are a ${subjectName} diagram matcher. Given a user's question or topic text, determine which diagram would be most appropriate to illustrate the concept.
+    const systemPrompt = `You are a diagram matcher. Given a user's question or topic text, determine which diagram would be most appropriate to illustrate the concept.
+
+IMPORTANT disambiguation rules:
+- If the question is about a SINGLE MARKET (micro): use individual supply/demand diagrams, NOT AD/SRAS
+- If the question is about the WHOLE ECONOMY (macro): use AD/SRAS diagrams, NOT micro supply/demand
+- "Demand-pull inflation" = AD shifts right (macro), NOT micro demand shift
+- "Cost-push inflation" = SRAS shifts left (macro), NOT micro supply shift
+- Distinguish between firm-level diagrams (profit max, cost curves) and market-level diagrams
 
 Available diagrams:
 ${diagramList}
@@ -204,8 +141,8 @@ Response format (JSON only, no explanation):
       console.error('Error parsing AI response:', parseError);
     }
 
-    // Validate that the diagram ID exists
-    if (diagramId && !availableDiagrams.find(d => d.id === diagramId)) {
+    // Validate that the diagram ID exists in the provided custom diagrams
+    if (diagramId && !availableDiagrams.find((d: any) => d.id === diagramId)) {
       console.warn('AI returned invalid diagram ID:', diagramId);
       diagramId = null;
     }
