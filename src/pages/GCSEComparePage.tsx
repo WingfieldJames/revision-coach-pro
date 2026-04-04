@@ -26,6 +26,10 @@ interface DynamicProduct {
   name: string;
 }
 
+const GCSE_SCIENCE_SUBJECTS = new Set(['physics', 'chemistry', 'biology', 'combined-science', 'science']);
+
+const isGcseScienceSubject = (subjectKey: string) => GCSE_SCIENCE_SUBJECTS.has(subjectKey.toLowerCase());
+
 export const GCSEComparePage = () => {
   const { user, profile, loading } = useAuth();
   const { theme } = useTheme();
@@ -183,7 +187,9 @@ export const GCSEComparePage = () => {
     }
   };
 
-  const formatBoard = (b: string) => {
+  const formatBoard = (b: string, subjectKey?: string) => {
+    if (b === 'edexcel igcse') return 'Edexcel IGCSE';
+    if (b === 'edexcel' && subjectKey && isGcseScienceSubject(subjectKey)) return 'Edexcel IGCSE';
     if (b === 'cie') return 'CIE';
     if (b === 'aqa') return 'AQA';
     if (b === 'ocr') return 'OCR';
@@ -247,7 +253,7 @@ export const GCSEComparePage = () => {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground transition-all flex items-center gap-2 whitespace-nowrap">
-                          {formatBoard(examBoard)}
+                          {formatBoard(examBoard, subject)}
                           <ChevronDown className="h-3.5 w-3.5" />
                         </button>
                       </DropdownMenuTrigger>
@@ -255,7 +261,7 @@ export const GCSEComparePage = () => {
                         {boardsForSubject.map(b => (
                           <DropdownMenuItem key={b} className="cursor-pointer flex items-center gap-2" onClick={() => setExamBoard(b)}>
                             {examBoard === b ? <Check className="h-3.5 w-3.5" /> : <span className="w-3.5" />}
-                            {formatBoard(b)}
+                            {formatBoard(b, subject)}
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
@@ -264,7 +270,7 @@ export const GCSEComparePage = () => {
 
                   {boardsForSubject.length === 1 && (
                     <span className="rounded-full px-6 py-2 text-sm font-medium border border-border bg-background text-foreground whitespace-nowrap">
-                      {formatBoard(examBoard)}
+                      {formatBoard(examBoard, subject)}
                     </span>
                   )}
                 </div>
@@ -298,13 +304,13 @@ export const GCSEComparePage = () => {
                       </SelectTrigger>
                       <SelectContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
                         {boardsForSubject.map(b => (
-                          <SelectItem key={b} value={b}>{formatBoard(b)}</SelectItem>
+                          <SelectItem key={b} value={b}>{formatBoard(b, subject)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   ) : (
                     <span className="rounded-full px-5 py-2.5 text-sm font-semibold border border-border bg-background text-foreground">
-                      {formatBoard(examBoard)}
+                      {formatBoard(examBoard, subject)}
                     </span>
                   )}
                 </div>
@@ -317,7 +323,7 @@ export const GCSEComparePage = () => {
                     subject={subject}
                     subjectLabel={subjectLabels[subject] || subject}
                     examBoard={examBoard}
-                    formattedBoard={formatBoard(examBoard)}
+                    formattedBoard={formatBoard(examBoard, subject)}
                     hasAccess={hasProductAccess}
                     subscriptionPaymentType={subscriptionPaymentType}
                     onCtaClick={() => hasProductAccess ? handlePremiumClick() : handleFreeClick()}
