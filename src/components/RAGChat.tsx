@@ -203,10 +203,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       return;
     }
     const resolve = async () => {
-      const { data } = await supabase.storage
+      const { data } = supabase.storage
         .from('trainer-uploads')
-        .createSignedUrl(path, 3600);
-      if (data?.signedUrl) setResolvedDiagramUrl(data.signedUrl);
+        .getPublicUrl(path);
+      setResolvedDiagramUrl(data.publicUrl || null);
     };
     resolve();
   }, [currentDiagram]);

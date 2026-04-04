@@ -66,10 +66,10 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
       return;
     }
     const resolve = async () => {
-      const { data } = await supabase.storage
+      const { data } = supabase.storage
         .from('trainer-uploads')
-        .createSignedUrl(path, 3600);
-      if (data?.signedUrl) setResolvedImageUrl(data.signedUrl);
+        .getPublicUrl(path);
+      setResolvedImageUrl(data.publicUrl || null);
     };
     resolve();
   }, [matchedDiagram]);

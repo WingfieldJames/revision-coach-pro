@@ -393,7 +393,11 @@ export const ComparePage = () => {
           <ScrollReveal delay={0.1}>
             {/* Desktop: Connected toggle group + board dropdown on same line */}
             <div className="hidden md:flex flex-col items-center gap-6 mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Let's get you an A* </h1>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight flex items-center justify-center gap-0 flex-nowrap">
+                <span className="self-center">Choose your</span>
+                <img src={currentLogo} alt="A* AI" className={`h-16 md:h-20 inline-block -mx-2 md:-mx-3 ${theme === 'dark' ? '-translate-y-1 md:-translate-y-1.5' : ''}`} />
+                <span className="self-center">Subject</span>
+              </h1>
               <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
                 {allSubjects.map((s) =>
                 <button
