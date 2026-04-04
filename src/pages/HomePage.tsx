@@ -97,7 +97,14 @@ export const HomePage = () => {
   // No redirect for signed-in users — homepage is accessible to everyone
 
   const handlePickSubject = () => {
-    navigate("/compare");
+    const saved = localStorage.getItem('qualification_level');
+    if (saved === 'alevel') {
+      navigate('/compare');
+    } else if (saved === 'gcse') {
+      navigate('/gcse');
+    } else {
+      navigate('/select');
+    }
     window.scrollTo(0, 0);
   };
 
