@@ -71,7 +71,15 @@ export const ComparePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const shouldCheckout = searchParams.get('checkout') === 'true';
+  const levelParam = searchParams.get('level');
   const isMobile = useIsMobile();
+
+  // Redirect to GCSE page if level=gcse
+  useEffect(() => {
+    if (levelParam === 'gcse') {
+      navigate('/gcse', { replace: true });
+    }
+  }, [levelParam, navigate]);
 
   // Dynamic products from database
   const [dynamicProducts, setDynamicProducts] = useState<DynamicProduct[]>([]);

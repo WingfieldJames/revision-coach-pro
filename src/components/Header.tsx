@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Tabs, ITab } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 import { DiagramFinderTool } from '@/components/DiagramFinderTool';
@@ -216,12 +215,19 @@ export const Header: React.FC<HeaderProps> = ({
     if (newTab !== selectedTab) setSelectedTab(newTab);
   }, [location.pathname]);
 
-  const tabs: ITab[] = [
-    { title: "Home", value: "home" },
-    { title: "Subjects", value: "pricing" },
-    { title: "Merch", value: "merch" },
-    { title: "Schools", value: "profile" }
-  ];
+  const [subjectsDropdownOpen, setSubjectsDropdownOpen] = useState(false);
+  const subjectsDropdownTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openSubjectsDropdown = () => {
+    if (subjectsDropdownTimeout.current) clearTimeout(subjectsDropdownTimeout.current);
+    setSubjectsDropdownOpen(true);
+  };
+  const closeSubjectsDropdown = () => {
+    subjectsDropdownTimeout.current = setTimeout(() => setSubjectsDropdownOpen(false), 150);
+  };
+  const toggleSubjectsDropdown = () => {
+    setSubjectsDropdownOpen(prev => !prev);
+  };
 
   const handleTabChange = (value: string) => {
     if (value === "home") {
@@ -236,6 +242,16 @@ export const Header: React.FC<HeaderProps> = ({
       navigate('/progress');
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     }
+  };
+
+  const handleSubjectLevelClick = (level: 'gcse' | 'alevel') => {
+    setSubjectsDropdownOpen(false);
+    if (level === 'gcse') {
+      navigate('/compare?level=gcse');
+    } else {
+      navigate('/compare?level=alevel');
+    }
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
   };
 
   const handleSignOut = async () => {
@@ -441,7 +457,67 @@ export const Header: React.FC<HeaderProps> = ({
       
       {showNavLinks && (
         <div className="absolute left-1/2 -translate-x-1/2 md:left-1/2 ml-8 md:ml-0">
-          <Tabs selected={selectedTab} setSelected={handleTabChange} tabs={tabs} variant="primary" />
+          <div className="flex gap-6 pb-[1px] border-b border-border">
+            {/* Home */}
+            <div
+              className={`relative text-sm duration-100 cursor-pointer pb-[5px] hover:text-foreground ${selectedTab === 'home' ? 'border-b-2 border-foreground -mb-0.5 text-foreground font-medium' : 'text-muted-foreground'}`}
+              onClick={() => handleTabChange('home')}
+            >
+              Home
+            </div>
+
+            {/* Subjects with dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={openSubjectsDropdown}
+              onMouseLeave={closeSubjectsDropdown}
+            >
+              <div
+                className={`relative text-sm duration-100 cursor-pointer pb-[5px] hover:text-foreground flex items-center gap-1 ${selectedTab === 'pricing' ? 'border-b-2 border-foreground -mb-0.5 text-foreground font-medium' : 'text-muted-foreground'}`}
+                onClick={toggleSubjectsDropdown}
+              >
+                Subjects
+                <ChevronDown className="h-3 w-3" />
+              </div>
+
+              {/* Invisible bridge to prevent flicker */}
+              {subjectsDropdownOpen && <div className="absolute left-0 right-0 h-2 top-full" />}
+
+              {/* Dropdown */}
+              <div
+                className={`absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] w-36 bg-white dark:bg-popover rounded-lg shadow-md border border-border overflow-hidden transition-all duration-150 origin-top z-50 ${subjectsDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}
+              >
+                <div
+                  className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors duration-100"
+                  onClick={() => handleSubjectLevelClick('gcse')}
+                >
+                  GCSE
+                </div>
+                <div
+                  className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors duration-100"
+                  onClick={() => handleSubjectLevelClick('alevel')}
+                >
+                  A-Level
+                </div>
+              </div>
+            </div>
+
+            {/* Merch */}
+            <div
+              className={`relative text-sm duration-100 cursor-pointer pb-[5px] hover:text-foreground ${selectedTab === 'merch' ? 'border-b-2 border-foreground -mb-0.5 text-foreground font-medium' : 'text-muted-foreground'}`}
+              onClick={() => handleTabChange('merch')}
+            >
+              Merch
+            </div>
+
+            {/* Schools */}
+            <div
+              className={`relative text-sm duration-100 cursor-pointer pb-[5px] hover:text-foreground ${selectedTab === 'profile' ? 'border-b-2 border-foreground -mb-0.5 text-foreground font-medium' : 'text-muted-foreground'}`}
+              onClick={() => handleTabChange('profile')}
+            >
+              Schools
+            </div>
+          </div>
         </div>
       )}
 
