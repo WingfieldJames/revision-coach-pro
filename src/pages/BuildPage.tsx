@@ -1341,7 +1341,7 @@ export function BuildPage() {
                   <SelectValue placeholder="Select exam board..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {EXAM_BOARDS.map(board => (
+                {(newQualificationType === 'GCSE' ? EXAM_BOARDS_GCSE : EXAM_BOARDS_ALEVEL).map(board => (
                     <SelectItem key={board} value={board}>{board}</SelectItem>
                   ))}
                 </SelectContent>
