@@ -83,14 +83,21 @@ async function findRelevantDiagram(
         body: JSON.stringify({
           model: 'google/gemini-2.5-flash',
           messages: [
-            { role: 'system', content: `You are a diagram matcher for A-Level subjects. Given a student's question, determine which single diagram best illustrates the concept being discussed. Return ONLY a JSON object. Be generous — if the topic relates to any diagram, match it. If genuinely no diagram fits, return null.
+            { role: 'system', content: `You are a diagram matcher for A-Level subjects. Given a student's question, determine which single diagram best illustrates the concept being discussed. Return ONLY a JSON object.
 
-IMPORTANT disambiguation rules:
-- If the question is about a SINGLE MARKET (micro): use individual supply/demand diagrams, NOT AD/SRAS
-- If the question is about the WHOLE ECONOMY (macro): use AD/SRAS diagrams, NOT micro supply/demand
-- "Demand-pull inflation" = AD shifts right (macro), NOT micro demand shift
-- "Cost-push inflation" = SRAS shifts left (macro), NOT micro supply shift
-- Distinguish between firm-level diagrams (profit max, cost curves) and market-level diagrams
+CRITICAL MATCHING RULES:
+1. Match based on the FULL CONCEPT being discussed, not partial word overlap
+2. "Externalities" or "negative externality" or "positive externality" should match diagrams with those EXACT concepts in the title — NOT "External Cost" or "External Benefit" unless the student specifically asks about costs/benefits
+3. Always prefer a diagram whose FULL TITLE matches the concept over one that shares a partial word
+4. For Economics specifically:
+   - SINGLE MARKET (micro): use individual supply/demand diagrams, NOT AD/SRAS
+   - WHOLE ECONOMY (macro): use AD/SRAS diagrams, NOT micro supply/demand
+   - "Demand-pull inflation" = AD shifts right (macro)
+   - "Cost-push inflation" = SRAS shifts left (macro)
+   - "Externality" topics should match externality diagrams, not "external cost/benefit" diagrams
+   - "Game theory" should match game theory/payoff matrix diagrams
+5. Be generous — if the topic relates to any diagram, match it
+6. If genuinely no diagram fits, return null
 
 Available diagrams:
 ${diagramList}

@@ -70,12 +70,19 @@ serve(async (req) => {
 
     const systemPrompt = `You are a diagram matcher. Given a user's question or topic text, determine which diagram would be most appropriate to illustrate the concept.
 
-IMPORTANT disambiguation rules:
-- If the question is about a SINGLE MARKET (micro): use individual supply/demand diagrams, NOT AD/SRAS
-- If the question is about the WHOLE ECONOMY (macro): use AD/SRAS diagrams, NOT micro supply/demand
-- "Demand-pull inflation" = AD shifts right (macro), NOT micro demand shift
-- "Cost-push inflation" = SRAS shifts left (macro), NOT micro supply shift
-- Distinguish between firm-level diagrams (profit max, cost curves) and market-level diagrams
+CRITICAL MATCHING RULES:
+1. Match based on the FULL CONCEPT being discussed, not partial word overlap
+2. "Externalities" or "negative externality" or "positive externality" should match diagrams with those EXACT concepts in the title — NOT "External Cost" or "External Benefit" unless the student specifically asks about costs/benefits
+3. Always prefer a diagram whose FULL TITLE matches the concept over one that shares a partial word
+4. For Economics specifically:
+   - SINGLE MARKET (micro): use individual supply/demand diagrams, NOT AD/SRAS
+   - WHOLE ECONOMY (macro): use AD/SRAS diagrams, NOT micro supply/demand
+   - "Demand-pull inflation" = AD shifts right (macro)
+   - "Cost-push inflation" = SRAS shifts left (macro)
+   - "Externality" topics should match externality diagrams, not "external cost/benefit" diagrams
+   - "Game theory" should match game theory/payoff matrix diagrams
+5. Be generous — if the topic relates to any diagram, match it
+6. If no diagram matches well, return null for diagramId
 
 Available diagrams:
 ${diagramList}
@@ -83,8 +90,6 @@ ${diagramList}
 Rules:
 1. Analyze the user's text to understand what concept is being discussed
 2. Return ONLY a JSON object with the matching diagram ID
-3. If no diagram matches well, return null for diagramId
-4. Be generous in matching - if the text relates to any of the diagram topics, match it
 
 Response format (JSON only, no explanation):
 {"diagramId": "diagram-id-here"} or {"diagramId": null}`;
