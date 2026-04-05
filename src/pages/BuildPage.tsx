@@ -38,12 +38,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-const EXAM_BOARDS = ["AQA", "OCR", "OCR MEI (B)", "Edexcel", "CIE", "WJEC", "SQA"];
+const EXAM_BOARDS_ALEVEL = ["AQA", "OCR", "OCR MEI (B)", "Edexcel", "CIE", "WJEC", "SQA"];
+const EXAM_BOARDS_GCSE = ["AQA", "OCR", "Edexcel", "Edexcel IGCSE", "CIE", "WJEC", "SQA"];
 const QUALIFICATION_TYPES = ["A Level", "GCSE"];
 const AVAILABLE_SUBJECTS = [
   "Economics", "Computer Science", "Physics",
   "Chemistry", "Psychology", "Mathematics",
-  "Biology"
+  "Biology", "Politics"
 ];
 
 interface TrainerProject {
