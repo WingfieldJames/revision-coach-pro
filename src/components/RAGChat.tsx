@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import type { ExamDate } from '@/components/ExamCountdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2, Quote, User } from 'lucide-react';
+import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2, Quote, User, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TutorProfilePopup } from '@/components/TutorProfilePopup';
 import { ChallengePopup, isChallengeActive } from '@/components/ChallengePopup';
@@ -33,6 +33,7 @@ interface Message {
   content: string;
   displayedContent?: string;
   imageUrl?: string | string[]; // base64 data URL(s) for user-uploaded images
+  messageId?: string; // database ID for feedback tracking
 }
 interface UserPreferences {
   year: string;
@@ -196,6 +197,23 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [hasPreferencesSet, setHasPreferencesSet] = useState(true); // assume true until checked
   const [challengeNotificationDismissed, setChallengeNotificationDismissed] = useState(false);
   const challengeShownOnceRef = useRef(false);
+  // Feedback state: maps messageId -> 'thumbs_up' | 'thumbs_down'
+  const [feedbackMap, setFeedbackMap] = useState<Record<string, 'thumbs_up' | 'thumbs_down'>>({});
+
+  const submitFeedback = useCallback(async (messageId: string, feedbackType: 'thumbs_up' | 'thumbs_down') => {
+    if (!user) return;
+    // Optimistic update
+    setFeedbackMap(prev => ({ ...prev, [messageId]: feedbackType }));
+    try {
+      await supabase.from('message_feedback').upsert({
+        message_id: messageId,
+        user_id: user.id,
+        feedback_type: feedbackType,
+      }, { onConflict: 'message_id,user_id' });
+    } catch (e) {
+      console.error('Failed to save feedback:', e);
+    }
+  }, [user]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -236,6 +254,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     chatHistoryCtx.registerHandlers({
       onNewChat: () => {
         setMessages([]);
+        setFeedbackMap({});
         conversationIdRef.current = null;
         chatHistoryCtx.setCurrentConversationId(null);
         setLimitReached(false);
@@ -246,7 +265,26 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           role: m.role as 'user' | 'assistant',
           content: m.content,
           imageUrl: m.image_url || undefined,
+          messageId: m.id,
         })));
+        // Load existing feedback for these messages
+        if (user) {
+          const assistantMsgIds = msgs.filter(m => m.role === 'assistant').map(m => m.id);
+          if (assistantMsgIds.length > 0) {
+            const { data: feedbackData } = await supabase
+              .from('message_feedback')
+              .select('message_id, feedback_type')
+              .eq('user_id', user.id)
+              .in('message_id', assistantMsgIds);
+            if (feedbackData) {
+              const map: Record<string, 'thumbs_up' | 'thumbs_down'> = {};
+              for (const fb of feedbackData) {
+                map[fb.message_id] = fb.feedback_type as 'thumbs_up' | 'thumbs_down';
+              }
+              setFeedbackMap(map);
+            }
+          }
+        }
         conversationIdRef.current = id;
         chatHistoryCtx.setCurrentConversationId(id);
         setLimitReached(false);
@@ -268,9 +306,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
   const firstUserMsgRef = useRef<string | null>(null);
 
-  // Helper to persist a message
-  const persistMessage = useCallback(async (role: 'user' | 'assistant', content: string, imageUrl?: string) => {
-    if (!user) return;
+  // Helper to persist a message (returns the saved message ID)
+  const persistMessage = useCallback(async (role: 'user' | 'assistant', content: string, imageUrl?: string): Promise<string | null> => {
+    if (!user) return null;
     // Create conversation on first user message
     if (!conversationIdRef.current && role === 'user') {
       firstUserMsgRef.current = content;
@@ -282,7 +320,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       }
     }
     if (conversationIdRef.current) {
-      await saveMessage(conversationIdRef.current, role, content, imageUrl);
+      const msgId = await saveMessage(conversationIdRef.current, role, content, imageUrl);
       // After first assistant response, update title with AI-aware summary
       if (role === 'assistant' && firstUserMsgRef.current) {
         const betterTitle = generateTitle(firstUserMsgRef.current);
@@ -294,7 +332,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         } catch {}
       }
       chatHistoryCtx?.triggerRefresh();
+      return msgId;
     }
+    return null;
   }, [user, createConversation, saveMessage, chatHistoryCtx]);
   // Fetch user preferences for this product
   useEffect(() => {
@@ -560,7 +600,21 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       }
       // Persist assistant response
       if (fullContentRef.current) {
-        persistMessage('assistant', fullContentRef.current);
+        persistMessage('assistant', fullContentRef.current).then(msgId => {
+          if (msgId) {
+            // Store the message ID on the last assistant message for feedback
+            setMessages(prev => {
+              const updated = [...prev];
+              for (let i = updated.length - 1; i >= 0; i--) {
+                if (updated[i].role === 'assistant') {
+                  updated[i] = { ...updated[i], messageId: msgId };
+                  break;
+                }
+              }
+              return updated;
+            });
+          }
+        });
         
         // Trigger A* Brain profile update in background (deluxe only)
         if (user && effectiveTier === 'deluxe') {
@@ -1072,6 +1126,36 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                       </>
                     );
                   })()}
+
+                  {/* Feedback buttons for assistant messages */}
+                  {message.role === 'assistant' && message.messageId && !isLoading && !isAnimating && (
+                    <div className="flex items-center gap-1 mt-2 not-prose">
+                      <button
+                        onClick={() => submitFeedback(message.messageId!, 'thumbs_up')}
+                        className={cn(
+                          "p-1.5 rounded-md transition-colors duration-150",
+                          feedbackMap[message.messageId!] === 'thumbs_up'
+                            ? "text-green-600 bg-green-100 dark:bg-green-900/30"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        )}
+                        title="Good response"
+                      >
+                        <ThumbsUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => submitFeedback(message.messageId!, 'thumbs_down')}
+                        className={cn(
+                          "p-1.5 rounded-md transition-colors duration-150",
+                          feedbackMap[message.messageId!] === 'thumbs_down'
+                            ? "text-red-600 bg-red-100 dark:bg-red-900/30"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        )}
+                        title="Bad response"
+                      >
+                        <ThumbsDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );

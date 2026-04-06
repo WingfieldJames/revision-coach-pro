@@ -88,18 +88,21 @@ export const useChatHistory = (productId?: string) => {
     }
   };
 
-  const saveMessage = async (conversationId: string, role: 'user' | 'assistant', content: string, imageUrl?: string) => {
+  const saveMessage = async (conversationId: string, role: 'user' | 'assistant', content: string, imageUrl?: string): Promise<string | null> => {
     try {
-      await supabase.from('chat_messages').insert({
+      const { data, error } = await supabase.from('chat_messages').insert({
         conversation_id: conversationId,
         role,
         content,
         image_url: imageUrl || null,
-      });
+      }).select('id').single();
+      if (error) throw error;
       // Touch conversation updated_at
       await supabase.from('chat_conversations').update({ updated_at: new Date().toISOString() }).eq('id', conversationId);
+      return data?.id || null;
     } catch (e) {
       console.error('Failed to save message:', e);
+      return null;
     }
   };
 
