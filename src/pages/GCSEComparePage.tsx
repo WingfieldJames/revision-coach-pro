@@ -82,7 +82,10 @@ export const GCSEComparePage = () => {
     const labels: Record<string, string> = {};
     for (const p of gcseProducts) {
       const key = p.subject.toLowerCase().replace(/\s+/g, '-');
-      if (!labels[key]) labels[key] = p.subject;
+      if (!labels[key]) {
+        // Capitalize each word (e.g. "physics" -> "Physics", "combined science" -> "Combined Science")
+        labels[key] = p.subject.replace(/\b\w/g, c => c.toUpperCase());
+      }
     }
     return labels;
   }, [gcseProducts]);
