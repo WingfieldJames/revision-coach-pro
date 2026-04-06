@@ -7,7 +7,13 @@ const corsHeaders = {
 };
 
 // Maximum characters of training data context to include in the prompt
-const MAX_CONTEXT_CHARS = 40000;
+const MAX_CONTEXT_CHARS = 25000;
+
+// Model tiers — use cheaper models for utility tasks, best model for student-facing responses
+const MODELS = {
+  main: "google/gemini-2.5-flash",          // Student-facing chat responses
+  utility: "google/gemini-2.0-flash-lite",   // Search queries, diagram matching
+};
 
 // User preferences interface
 interface UserPreferences {
@@ -81,7 +87,7 @@ async function findRelevantDiagram(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
+          model: MODELS.utility,
           messages: [
             { role: 'system', content: `You are a precise diagram matcher for A-Level Economics and other subjects. Given a student's question, determine which single diagram best illustrates the CORE concept. Return ONLY a JSON object.
 
@@ -311,7 +317,7 @@ async function generateSearchQueries(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: MODELS.utility,
         messages: [
           {
             role: "system",
@@ -1065,7 +1071,7 @@ CRITICAL RULES:
 
     // Step 3: Call AI gateway for response (streaming)
     const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const aiModel = "google/gemini-2.5-flash";
+    const aiModel = MODELS.main;
 
     const response = await fetch(aiUrl, {
       method: "POST",
@@ -1077,7 +1083,7 @@ CRITICAL RULES:
         model: aiModel,
         messages: [
           { role: "system", content: finalSystemPrompt },
-          ...history,
+          ...history.slice(-10),  // Cap history to last 10 messages to reduce token usage
           { role: "user", content: userMessageContent },
         ],
         stream: true,
