@@ -140,6 +140,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   trainerStatus,
   trainerAchievements,
   useEmojiStars = false,
+  productSlug,
 }) => {
   const {
     user
