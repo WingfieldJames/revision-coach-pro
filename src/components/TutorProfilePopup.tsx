@@ -97,7 +97,7 @@ export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
     <>
 
       {/* Popup card - compact floating */}
-      <div className="fixed bottom-20 right-4 z-[301] w-[320px] rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-[0_8px_40px_-8px_rgba(0,0,0,0.25)] animate-in slide-in-from-bottom-4 fade-in duration-300">
+      <div className="fixed bottom-[7.5rem] right-4 z-[301] w-[320px] rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-[0_8px_40px_-8px_rgba(0,0,0,0.25)] animate-in slide-in-from-bottom-4 fade-in duration-300">
         {/* Close button */}
         <button
           onClick={onClose}

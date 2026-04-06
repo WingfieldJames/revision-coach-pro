@@ -54,7 +54,7 @@ export const AQAPsychologyFreeVersionPage = () => {
       <ChatbotSidebar {...sharedProps} />
       <ChatbotToolbar {...sharedProps} />
       <div className="flex-1 relative z-10">
-        <RAGChat productId={AQA_PSYCHOLOGY_PRODUCT_ID} subjectName="AQA Psychology" subjectDescription="Your personal A* Psychology tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Psychology specification" placeholder="Ask about social influence, memory, or attachment..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Study', 'Concept', 'Exam technique', 'Revision']} trainerAvatarUrl={tc.trainer_image_url || undefined} trainerName={tc.trainer_name || undefined} trainerStatus={tc.trainer_status || undefined} trainerAchievements={tc.trainer_achievements.length > 0 ? tc.trainer_achievements : undefined} trainerDescription={tc.trainer_description || undefined} useEmojiStars />
+        <RAGChat productId={AQA_PSYCHOLOGY_PRODUCT_ID} subjectName="AQA Psychology" subjectDescription="Your personal A* Psychology tutor. Ask me anything!" footerText="Powered by A* AI • Trained on AQA Psychology specification" placeholder="Ask about social influence, memory, or attachment..." suggestedPrompts={prompts} chatRef={chatRef} examDates={examDates} promptLabels={['Study', 'Concept', 'Exam technique', 'Revision']} trainerAvatarUrl={tc.trainer_image_url || undefined} trainerName={tc.trainer_name || undefined} trainerStatus={tc.trainer_status || undefined} trainerAchievements={tc.trainer_achievements.length > 0 ? tc.trainer_achievements : undefined} trainerDescription={tc.trainer_description || undefined} useEmojiStars productSlug="aqa-psychology" />
       </div>
     </div>
   );

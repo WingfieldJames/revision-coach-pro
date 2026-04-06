@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2, Quote, User } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TutorProfilePopup } from '@/components/TutorProfilePopup';
+import { ChallengePopup, isChallengeActive } from '@/components/ChallengePopup';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
@@ -88,6 +89,8 @@ interface RAGChatProps {
   trainerAchievements?: TrainerAchievement[];
   /** Use emoji stars instead of text stars in social proof */
   useEmojiStars?: boolean;
+  /** Product slug for challenge popup grade boundaries lookup */
+  productSlug?: string;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
@@ -137,6 +140,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   trainerStatus,
   trainerAchievements,
   useEmojiStars = false,
+  productSlug,
 }) => {
   const {
     user
@@ -188,7 +192,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const { tier: effectiveTier } = useProductTier(productId);
   const [limitReached, setLimitReached] = useState(false);
   const [profilePopupOpen, setProfilePopupOpen] = useState(false);
+  const [challengePopupOpen, setChallengePopupOpen] = useState(false);
   const [hasPreferencesSet, setHasPreferencesSet] = useState(true); // assume true until checked
+  const [challengeNotificationDismissed, setChallengeNotificationDismissed] = useState(false);
+  const challengeShownOnceRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -324,13 +331,39 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     fetchPreferences();
   }, [user, productId]);
 
-  // Auto-trigger profile popup on first prompt if no preferences set
+  // Check if challenge was already shown/dismissed
   useEffect(() => {
-    if (messages.length >= 2 && !hasPreferencesSet && !profilePopupOpen) {
-      const timer = setTimeout(() => setProfilePopupOpen(true), 3000);
-      return () => clearTimeout(timer);
+    if (!user) return;
+    const key = `astar_challenge_shown_${productId}_${user.id}`;
+    const submittedKey = `astar_challenge_submitted_${productId}_${user.id}`;
+    if (localStorage.getItem(key) === 'true' || localStorage.getItem(submittedKey) === 'true') {
+      setChallengeNotificationDismissed(true);
     }
-  }, [messages.length, hasPreferencesSet, profilePopupOpen, trainerAvatarUrl]);
+  }, [user, productId]);
+
+  // Determine which popup to show: challenge (existing users) or fill-me-in (new users)
+  const showChallengeMode = isChallengeActive() && hasPreferencesSet;
+  const hasChallengeNotification = isChallengeActive() && hasPreferencesSet && !challengeNotificationDismissed;
+
+  // Auto-trigger popup on first prompt
+  useEffect(() => {
+    if (messages.length >= 2 && !challengeShownOnceRef.current) {
+      if (!hasPreferencesSet && !profilePopupOpen) {
+        // New user: show fill-me-in
+        const timer = setTimeout(() => setProfilePopupOpen(true), 3000);
+        challengeShownOnceRef.current = true;
+        return () => clearTimeout(timer);
+      } else if (showChallengeMode && !challengePopupOpen && !challengeNotificationDismissed) {
+        // Existing user during challenge period: show challenge
+        const timer = setTimeout(() => {
+          setChallengePopupOpen(true);
+          challengeShownOnceRef.current = true;
+          if (user) localStorage.setItem(`astar_challenge_shown_${productId}_${user.id}`, 'true');
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [messages.length, hasPreferencesSet, profilePopupOpen, showChallengeMode, challengePopupOpen, challengeNotificationDismissed, user, productId]);
 
   // Tier is now provided by useProductTier hook (handles grace periods, payment_type, etc.)
 
@@ -724,21 +757,43 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       {/* Theme toggle — only on chatbot pages */}
       <ThemeToggle />
 
-      {/* Profile button — next to theme toggle, always visible */}
+      {/* Profile/Challenge button — vertically above theme toggle */}
       <button
         type="button"
-        onClick={() => setProfilePopupOpen(prev => !prev)}
-        className="fixed bottom-6 right-[4.5rem] z-[9999] pointer-events-auto p-2.5 rounded-full bg-card/80 border border-border backdrop-blur-sm shadow-md hover:shadow-lg hover:bg-card transition-all cursor-pointer"
+        onClick={() => {
+          if (showChallengeMode && !challengeNotificationDismissed) {
+            setChallengePopupOpen(prev => !prev);
+            setProfilePopupOpen(false);
+          } else {
+            setProfilePopupOpen(prev => !prev);
+            setChallengePopupOpen(false);
+          }
+        }}
+        className="fixed bottom-[4.25rem] right-6 z-[9999] pointer-events-auto w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center shadow-elevated hover:scale-105 transition-all cursor-pointer relative"
         aria-label="Open profile"
       >
-        <User className="w-5 h-5 text-foreground" />
+        <User className="w-4 h-4 text-foreground" />
+        {/* Red notification badge */}
+        {hasChallengeNotification && (
+          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-red-500 border-2 border-card" />
+        )}
       </button>
 
-      {/* Tutor Profile Popup */}
+      {/* Tutor Profile Popup — positioned higher */}
       <TutorProfilePopup
-        isOpen={profilePopupOpen}
+        isOpen={profilePopupOpen && !showChallengeMode}
         onClose={() => { setProfilePopupOpen(false); setHasPreferencesSet(true); }}
         productId={productId}
+        trainerAvatarUrl={trainerAvatarUrl}
+        trainerName={trainerName}
+      />
+
+      {/* Challenge Popup */}
+      <ChallengePopup
+        isOpen={challengePopupOpen}
+        onClose={() => { setChallengePopupOpen(false); setChallengeNotificationDismissed(true); }}
+        productId={productId}
+        productSlug={productSlug}
         trainerAvatarUrl={trainerAvatarUrl}
         trainerName={trainerName}
       />
