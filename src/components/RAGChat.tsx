@@ -331,13 +331,39 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     fetchPreferences();
   }, [user, productId]);
 
-  // Auto-trigger profile popup on first prompt if no preferences set
+  // Check if challenge was already shown/dismissed
   useEffect(() => {
-    if (messages.length >= 2 && !hasPreferencesSet && !profilePopupOpen) {
-      const timer = setTimeout(() => setProfilePopupOpen(true), 3000);
-      return () => clearTimeout(timer);
+    if (!user) return;
+    const key = `astar_challenge_shown_${productId}_${user.id}`;
+    const submittedKey = `astar_challenge_submitted_${productId}_${user.id}`;
+    if (localStorage.getItem(key) === 'true' || localStorage.getItem(submittedKey) === 'true') {
+      setChallengeNotificationDismissed(true);
     }
-  }, [messages.length, hasPreferencesSet, profilePopupOpen, trainerAvatarUrl]);
+  }, [user, productId]);
+
+  // Determine which popup to show: challenge (existing users) or fill-me-in (new users)
+  const showChallengeMode = isChallengeActive() && hasPreferencesSet;
+  const hasChallengeNotification = isChallengeActive() && hasPreferencesSet && !challengeNotificationDismissed;
+
+  // Auto-trigger popup on first prompt
+  useEffect(() => {
+    if (messages.length >= 2 && !challengeShownOnceRef.current) {
+      if (!hasPreferencesSet && !profilePopupOpen) {
+        // New user: show fill-me-in
+        const timer = setTimeout(() => setProfilePopupOpen(true), 3000);
+        challengeShownOnceRef.current = true;
+        return () => clearTimeout(timer);
+      } else if (showChallengeMode && !challengePopupOpen && !challengeNotificationDismissed) {
+        // Existing user during challenge period: show challenge
+        const timer = setTimeout(() => {
+          setChallengePopupOpen(true);
+          challengeShownOnceRef.current = true;
+          if (user) localStorage.setItem(`astar_challenge_shown_${productId}_${user.id}`, 'true');
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [messages.length, hasPreferencesSet, profilePopupOpen, showChallengeMode, challengePopupOpen, challengeNotificationDismissed, user, productId]);
 
   // Tier is now provided by useProductTier hook (handles grace periods, payment_type, etc.)
 
