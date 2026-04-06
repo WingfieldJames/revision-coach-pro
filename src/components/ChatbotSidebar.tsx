@@ -229,7 +229,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
       {/* Sidebar panel */}
       <div
         className={cn(
-          "hidden md:flex fixed left-0 top-[5.5rem] h-[calc(100vh-5.5rem)] z-[35] flex-col bg-background transition-all duration-300 ease-in-out",
+          "hidden md:flex fixed left-0 top-[5.5rem] h-[calc(100vh-5.5rem)] z-[35] flex-col bg-background transition-all duration-300 ease-in-out pt-2",
           "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:bg-gradient-to-b after:from-transparent after:via-border after:to-transparent",
           open ? "w-[300px] sm:w-[340px]" : "w-12"
         )}
