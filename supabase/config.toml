@@ -83,3 +83,21 @@ verify_jwt = false
 
 [functions.analyze-feedback]
 verify_jwt = false
+
+[functions.churn-detection]
+verify_jwt = false
+
+[functions.detect-content-gaps]
+verify_jwt = false
+
+[functions.daily-digest]
+verify_jwt = false
+
+[functions.escalate-bad-responses]
+verify_jwt = false
+
+[functions.conversion-nudges]
+verify_jwt = false
+
+[functions.exam-season-scheduler]
+verify_jwt = false

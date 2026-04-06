@@ -982,8 +982,24 @@ Use this to personalise your responses — reference their weak areas, their exa
       console.error('Error fetching prompt improvements:', err);
     }
 
+    // Fetch seasonal prompt adjustments
+    let seasonalGuidelines = '';
+    try {
+      const { data: seasonal } = await supabaseAdmin
+        .from('seasonal_prompts')
+        .select('guidelines')
+        .eq('product_id', product_id)
+        .maybeSingle();
+      if (seasonal?.guidelines) {
+        seasonalGuidelines = `\n${seasonal.guidelines}\n`;
+        console.log(`Injected seasonal guidelines for product ${product_id}`);
+      }
+    } catch (err) {
+      console.error('Error fetching seasonal prompts:', err);
+    }
+
     // Add user personalization context
-    const personalizedPrompt = buildPersonalizedPrompt(brainContext + feedbackGuidelines + basePrompt, user_preferences, message, product_id);
+    const personalizedPrompt = buildPersonalizedPrompt(brainContext + feedbackGuidelines + seasonalGuidelines + basePrompt, user_preferences, message, product_id);
     
     // Step 2: Fetch relevant training data using AI queries
     const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(
