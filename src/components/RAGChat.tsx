@@ -89,6 +89,8 @@ interface RAGChatProps {
   trainerAchievements?: TrainerAchievement[];
   /** Use emoji stars instead of text stars in social proof */
   useEmojiStars?: boolean;
+  /** Product slug for challenge popup grade boundaries lookup */
+  productSlug?: string;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 30;
