@@ -118,6 +118,7 @@ export const DynamicFreePage = () => {
           trainerAchievements={achievements.length > 0 ? achievements : undefined}
           trainerDescription={trainer?.trainer_description || undefined}
           useEmojiStars
+          productSlug={product.slug}
         />
       </div>
     </div>
