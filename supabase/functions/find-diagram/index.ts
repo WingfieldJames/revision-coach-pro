@@ -68,28 +68,46 @@ serve(async (req) => {
       `- ID: "${d.id}" | Title: "${d.title}"`
     ).join('\n');
 
-    const systemPrompt = `You are a diagram matcher. Given a user's question or topic text, determine which diagram would be most appropriate to illustrate the concept.
+    const systemPrompt = `You are a precise diagram matcher for A-Level Economics and other subjects. Given a student's question or topic text, determine which single diagram best illustrates the CORE concept. Return ONLY a JSON object.
 
-CRITICAL MATCHING RULES:
-1. Match based on the FULL CONCEPT being discussed, not partial word overlap
-2. "Externalities" or "negative externality" or "positive externality" should match diagrams with those EXACT concepts in the title — NOT "External Cost" or "External Benefit" unless the student specifically asks about costs/benefits
-3. Always prefer a diagram whose FULL TITLE matches the concept over one that shares a partial word
-4. For Economics specifically:
-   - SINGLE MARKET (micro): use individual supply/demand diagrams, NOT AD/SRAS
-   - WHOLE ECONOMY (macro): use AD/SRAS diagrams, NOT micro supply/demand
-   - "Demand-pull inflation" = AD shifts right (macro)
-   - "Cost-push inflation" = SRAS shifts left (macro)
-   - "Externality" topics should match externality diagrams, not "external cost/benefit" diagrams
-   - "Game theory" should match game theory/payoff matrix diagrams
-5. Be generous — if the topic relates to any diagram, match it
-6. If no diagram matches well, return null for diagramId
+PRECISION RULES — read carefully:
+1. Match on the COMPLETE CONCEPT, never on partial word overlap.
+2. EXTERNALITIES vs EXTERNAL COSTS/BENEFITS — these are DIFFERENT diagrams:
+   - "Externalities", "negative externality", "positive externality", "market failure due to externalities" → match "Negative Externality of Production" or "Positive Externality of Consumption"
+   - "External cost" or "external benefit" are NOT the same as externality diagrams — only use those if the student literally says "external cost" or "external benefit"
+   - The word "external" appearing in a title does NOT mean it is about externalities
+3. MICRO vs MACRO — never confuse them:
+   - Individual markets, price changes, supply/demand shifts → use Supply and Demand / shift diagrams
+   - Whole economy, national output, price level → use AD/SRAS diagrams
+   - "Demand-pull inflation" → "Demand Pull Inflation" diagram (AD shifts right)
+   - "Cost-push inflation" → "Cost Push Inflation" diagram (SRAS shifts left)
+4. SPECIFIC CONCEPT MATCHING:
+   - "Game theory" / "prisoner's dilemma" / "Nash equilibrium" → "Game Theory Payoff Matrix"
+   - "PPF" / "opportunity cost" / "production possibility" → "Production Possibility Frontier (PPF)" or "Shift of PPF"
+   - "Comparative advantage" / "trade" / "specialisation" → "Comparative Advantage"
+   - "Tax" → distinguish between "Specific Tax (Per Unit Tax)" and "Ad-Valorem Tax" based on context
+   - "Subsidy" → "Subsidy" diagram
+   - "Price floor" / "minimum wage" / "minimum price" → "Minimum Price (Price Floor)"
+   - "Price ceiling" / "rent control" / "maximum price" → "Maximum Price (Price Ceiling)"
+   - "Profit maximisation" / "MC=MR" → "Profit Maximisation"
+   - "Revenue maximisation" / "MR=0" → "Revenue Maximisation"
+   - "Sales maximisation" / "AC=AR" → "Sales Maximisation"
+   - "Economies of scale" → distinguish between "Internal Economies of Scale" and "External Economies of Scale"
+   - "Phillips curve" → "Short Run Phillips Curve"
+   - "Lorenz curve" / "inequality" / "Gini" → "Lorenz Curve"
+   - "Laffer curve" / "tax revenue" → "Laffer Curve"
+   - "Perfect competition" → pick the most relevant perfect competition diagram
+   - "Price discrimination" → "Price Discrimination"
+   - "Tariff" / "import duty" → "Tariff"
+   - "Business cycle" / "trade cycle" / "boom and bust" → "Trade Cycle (Business Cycle)"
+   - "Circular flow" → "Circular Flow of Income"
+   - "Diminishing returns" / "marginal product" → "MP and AP (Diminishing Returns)"
+   - "Shut down" → "Short Run Shut Down Point" or "Long Run Shut Down Point" based on context
+5. Be generous — if the topic relates to any diagram, match it.
+6. If genuinely no diagram fits, return null.
 
 Available diagrams:
 ${diagramList}
-
-Rules:
-1. Analyze the user's text to understand what concept is being discussed
-2. Return ONLY a JSON object with the matching diagram ID
 
 Response format (JSON only, no explanation):
 {"diagramId": "diagram-id-here"} or {"diagramId": null}`;
