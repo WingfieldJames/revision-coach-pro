@@ -205,11 +205,24 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     // Optimistic update
     setFeedbackMap(prev => ({ ...prev, [messageId]: feedbackType }));
     try {
-      await supabase.from('message_feedback').upsert({
+      // Try insert first, update if already exists
+      const { error: insertError } = await supabase.from('message_feedback').insert({
         message_id: messageId,
         user_id: user.id,
         feedback_type: feedbackType,
-      }, { onConflict: 'message_id,user_id' });
+      });
+      if (insertError) {
+        // Unique constraint violation — update instead
+        if (insertError.code === '23505') {
+          const { error: updateError } = await supabase.from('message_feedback')
+            .update({ feedback_type: feedbackType })
+            .eq('message_id', messageId)
+            .eq('user_id', user.id);
+          if (updateError) console.error('Failed to update feedback:', updateError);
+        } else {
+          console.error('Failed to insert feedback:', insertError);
+        }
+      }
     } catch (e) {
       console.error('Failed to save feedback:', e);
     }
