@@ -79,6 +79,7 @@ export const FreeVersionPage = () => {
            trainerAchievements={tc.trainer_achievements.length > 0 ? tc.trainer_achievements : undefined}
            trainerDescription={tc.trainer_description || undefined}
            useEmojiStars
+           productSlug="edexcel-economics"
         />
       </div>
     </div>
