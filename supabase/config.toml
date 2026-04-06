@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.update-brain-profile]
 verify_jwt = false
+
+[functions.analyze-feedback]
+verify_jwt = false

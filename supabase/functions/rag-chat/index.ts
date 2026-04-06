@@ -960,8 +960,24 @@ Use this to personalise your responses — reference their weak areas, their exa
       }
     }
     
+    // Fetch feedback-driven prompt improvements
+    let feedbackGuidelines = '';
+    try {
+      const { data: improvements } = await supabaseAdmin
+        .from('prompt_improvements')
+        .select('guidelines')
+        .eq('product_id', product_id)
+        .maybeSingle();
+      if (improvements?.guidelines) {
+        feedbackGuidelines = `\n--- FEEDBACK-DRIVEN IMPROVEMENTS ---\n${improvements.guidelines}\n---\n`;
+        console.log(`Injected feedback guidelines for product ${product_id}`);
+      }
+    } catch (err) {
+      console.error('Error fetching prompt improvements:', err);
+    }
+
     // Add user personalization context
-    const personalizedPrompt = buildPersonalizedPrompt(brainContext + basePrompt, user_preferences, message, product_id);
+    const personalizedPrompt = buildPersonalizedPrompt(brainContext + feedbackGuidelines + basePrompt, user_preferences, message, product_id);
     
     // Step 2: Fetch relevant training data using AI queries
     const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(
