@@ -125,13 +125,7 @@ const defaultSubjects = (): Subject[] => [
 ];
 
 function defaultSlots(): SlotMap {
-  const slots: SlotMap = {};
-  for (const day of ["Mon", "Tue", "Wed", "Thu", "Fri"]) {
-    for (let h = 6; h <= 13; h++) {
-      slots[slotKey(day, h)] = true;
-    }
-  }
-  return slots;
+  return {};
 }
 
 /* ─── SESSION TYPES per spec ─── */
