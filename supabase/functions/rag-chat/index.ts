@@ -9,10 +9,10 @@ const corsHeaders = {
 // Maximum characters of training data context to include in the prompt
 const MAX_CONTEXT_CHARS = 25000;
 
-// Model tiers — use cheaper models for utility tasks, best model for student-facing responses
+// Model tiers — use cheaper models for simple utility tasks
 const MODELS = {
-  main: "google/gemini-2.5-flash",          // Student-facing chat responses
-  utility: "google/gemini-2.0-flash-lite",   // Search queries, diagram matching
+  main: "google/gemini-2.5-flash",          // Student-facing chat responses + diagram matching
+  utility: "google/gemini-2.0-flash-lite",   // Search query generation only
 };
 
 // User preferences interface
@@ -87,7 +87,7 @@ async function findRelevantDiagram(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: MODELS.utility,
+          model: MODELS.main,
           messages: [
             { role: 'system', content: `You are a precise diagram matcher for A-Level Economics and other subjects. Given a student's question, determine which single diagram best illustrates the CORE concept. Return ONLY a JSON object.
 
