@@ -16,7 +16,7 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminEmail =
-      Deno.env.get("ADMIN_EMAIL") || "admin@revisioncoachpro.com";
+      Deno.env.get("ADMIN_EMAIL") || "astarai.official@gmail.com";
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
