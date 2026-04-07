@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import type { ExamDate } from '@/components/ExamCountdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
