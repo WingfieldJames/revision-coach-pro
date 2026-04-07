@@ -44,6 +44,7 @@ import { GCSEComparePage } from "./pages/GCSEComparePage";
 import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { ProfilePage } from "./pages/ProfilePage";
 import { FeedbackPage } from "./pages/FeedbackPage";
 import { FeedbackResultsPage } from "./pages/FeedbackResultsPage";
 const queryClient = new QueryClient();
@@ -98,6 +99,7 @@ const App = () => (
             <Route path="/s/:slug/free" element={<DynamicFreePage />} />
             <Route path="/s/:slug/premium" element={<DynamicPremiumPage />} />
             <Route path="/select" element={<SubjectSelectionPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/feedback-results" element={<FeedbackResultsPage />} />
