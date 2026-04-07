@@ -836,7 +836,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             setChallengePopupOpen(false);
           }
         }}
-        className="fixed bottom-[7.5rem] right-6 z-[9999] pointer-events-auto w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center shadow-elevated hover:scale-105 transition-all cursor-pointer relative"
+        className="fixed bottom-[10rem] right-6 z-[9999] pointer-events-auto w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center shadow-elevated hover:scale-105 transition-all cursor-pointer relative"
         aria-label="Open profile"
       >
         <User className="w-4 h-4 text-foreground" />
