@@ -92,14 +92,15 @@ async function findRelevantDiagram(
             { role: 'system', content: `You are a precise diagram matcher for A-Level Economics and other subjects. Given a student's question, determine which single diagram best illustrates the CORE concept. Return ONLY a JSON object.
 
 PRECISION RULES — read carefully:
-1. Match on the COMPLETE CONCEPT, never on partial word overlap.
-2. EXTERNALITIES vs EXTERNAL COSTS/BENEFITS — these are DIFFERENT diagrams:
-   - "Externalities", "negative externality", "positive externality", "market failure due to externalities" → match "Negative Externality of Production" or "Positive Externality of Consumption"
-   - "External cost" or "external benefit" are NOT the same as externality diagrams — only use those if the student literally says "external cost" or "external benefit"
-   - The word "external" appearing in a title does NOT mean it is about externalities
+1. Match on the COMPLETE CONCEPT, never on partial word overlap. The word "negative" does NOT mean "negative externality". The word "external" does NOT mean "externality". You must match the FULL economic concept.
+2. EXTERNALITIES — ONLY match externality diagrams when the student explicitly asks about externalities, market failure from externalities, or external costs/benefits:
+   - "Negative externality" / "positive externality" / "externalities" / "market failure due to externalities" → match externality diagrams
+   - "Negative output gap" / "negative growth" / "negative multiplier" → these are NOT about externalities. "Negative" here describes something else entirely.
+   - "External economies of scale" → NOT an externality diagram. Match economies of scale.
 3. MICRO vs MACRO — never confuse them:
    - Individual markets, price changes, supply/demand shifts → use Supply and Demand / shift diagrams
-   - Whole economy, national output, price level → use AD/SRAS diagrams
+   - Whole economy, national output, price level, GDP, recession, output gap → use AD/AS or macro diagrams
+   - "Output gap" / "negative output gap" / "positive output gap" / "spare capacity" / "recession" → use AD/AS diagram showing actual vs potential output, or Trade Cycle diagram. NEVER use an externality diagram.
    - "Demand-pull inflation" → "Demand Pull Inflation" diagram (AD shifts right)
    - "Cost-push inflation" → "Cost Push Inflation" diagram (SRAS shifts left)
 4. SPECIFIC CONCEPT MATCHING:
@@ -120,12 +121,12 @@ PRECISION RULES — read carefully:
    - "Perfect competition" → pick the most relevant perfect competition diagram
    - "Price discrimination" → "Price Discrimination"
    - "Tariff" / "import duty" → "Tariff"
-   - "Business cycle" / "trade cycle" / "boom and bust" → "Trade Cycle (Business Cycle)"
+   - "Business cycle" / "trade cycle" / "boom and bust" / "output gap" → "Trade Cycle (Business Cycle)"
    - "Circular flow" → "Circular Flow of Income"
    - "Diminishing returns" / "marginal product" → "MP and AP (Diminishing Returns)"
    - "Shut down" → "Short Run Shut Down Point" or "Long Run Shut Down Point" based on context
-5. Be generous — if the topic relates to any diagram, match it.
-6. If genuinely no diagram fits, return null.
+5. When in doubt about the match, return null. A wrong diagram is worse than no diagram.
+6. If genuinely no diagram fits the concept, return null.
 
 Available diagrams:
 ${diagramList}
