@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import type { ExamDate } from '@/components/ExamCountdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -821,32 +822,35 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         </div>
       )}
 
-      {/* Theme toggle — only on chatbot pages */}
-      <ThemeToggle />
+      {/* Profile + theme buttons via portal to escape parent clipping */}
+      {createPortal(
+        <>
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => {
+              if (showChallengeMode && !challengeNotificationDismissed) {
+                setChallengePopupOpen(prev => !prev);
+                setProfilePopupOpen(false);
+              } else {
+                setProfilePopupOpen(prev => !prev);
+                setChallengePopupOpen(false);
+              }
+            }}
+            className="fixed bottom-[10.5rem] right-6 z-[9999] pointer-events-auto w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center shadow-elevated hover:scale-105 transition-all cursor-pointer"
+            aria-label="Open profile"
+            style={{ position: 'fixed' }}
+          >
+            <User className="w-4 h-4 text-foreground" />
+            {hasChallengeNotification && (
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-destructive border-2 border-card" />
+            )}
+          </button>
+        </>,
+        document.body
+      )}
 
-      {/* Profile/Challenge button — vertically above theme toggle */}
-      <button
-        type="button"
-        onClick={() => {
-          if (showChallengeMode && !challengeNotificationDismissed) {
-            setChallengePopupOpen(prev => !prev);
-            setProfilePopupOpen(false);
-          } else {
-            setProfilePopupOpen(prev => !prev);
-            setChallengePopupOpen(false);
-          }
-        }}
-        className="fixed bottom-[4.25rem] right-6 z-[9999] pointer-events-auto w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center shadow-elevated hover:scale-105 transition-all cursor-pointer relative"
-        aria-label="Open profile"
-      >
-        <User className="w-4 h-4 text-foreground" />
-        {/* Red notification badge */}
-        {hasChallengeNotification && (
-          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-red-500 border-2 border-card" />
-        )}
-      </button>
-
-      {/* Tutor Profile Popup — positioned higher */}
+      {/* Tutor Profile Popup */}
       <TutorProfilePopup
         isOpen={profilePopupOpen && !showChallengeMode}
         onClose={() => { setProfilePopupOpen(false); setHasPreferencesSet(true); }}
