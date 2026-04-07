@@ -527,7 +527,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right side: Upgrade Now / Deluxe badge on chatbot pages OR Start Studying on home */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {user && (
+        {user && location.pathname !== '/' && (
           <Button variant="outline" size="sm" onClick={() => navigate('/profile')} className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
             <User className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Profile</span>
