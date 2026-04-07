@@ -178,37 +178,84 @@ export type Database = {
           },
         ]
       }
-      message_feedback: {
+      churn_notifications: {
         Row: {
           id: string
-          message_id: string
+          notification_type: string
+          sent_at: string
           user_id: string
-          feedback_type: string
-          feedback_text: string | null
-          created_at: string
         }
         Insert: {
           id?: string
-          message_id: string
+          notification_type?: string
+          sent_at?: string
           user_id: string
-          feedback_type: string
-          feedback_text?: string | null
-          created_at?: string
         }
         Update: {
           id?: string
-          message_id?: string
+          notification_type?: string
+          sent_at?: string
           user_id?: string
-          feedback_type?: string
-          feedback_text?: string | null
-          created_at?: string
+        }
+        Relationships: []
+      }
+      content_gaps: {
+        Row: {
+          analyzed_at: string
+          gaps: Json
+          id: string
+          product_id: string
+        }
+        Insert: {
+          analyzed_at?: string
+          gaps?: Json
+          id?: string
+          product_id: string
+        }
+        Update: {
+          analyzed_at?: string
+          gaps?: Json
+          id?: string
+          product_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "message_feedback_message_id_fkey"
-            columns: ["message_id"]
+            foreignKeyName: "content_gaps_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversion_nudges: {
+        Row: {
+          id: string
+          nudge_type: string
+          product_id: string | null
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          nudge_type?: string
+          product_id?: string | null
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          nudge_type?: string
+          product_id?: string | null
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversion_nudges_product_id_fkey"
+            columns: ["product_id"]
             isOneToOne: false
-            referencedRelation: "chat_messages"
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -306,6 +353,89 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      flagged_responses: {
+        Row: {
+          ai_response: string | null
+          flagged_at: string
+          id: string
+          message_id: string
+          product_id: string | null
+          status: string
+          thumbs_down_count: number
+          user_question: string | null
+        }
+        Insert: {
+          ai_response?: string | null
+          flagged_at?: string
+          id?: string
+          message_id: string
+          product_id?: string | null
+          status?: string
+          thumbs_down_count?: number
+          user_question?: string | null
+        }
+        Update: {
+          ai_response?: string | null
+          flagged_at?: string
+          id?: string
+          message_id?: string
+          product_id?: string | null
+          status?: string
+          thumbs_down_count?: number
+          user_question?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flagged_responses_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: true
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flagged_responses_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_feedback: {
+        Row: {
+          created_at: string
+          feedback_text: string | null
+          feedback_type: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_text?: string | null
+          feedback_type: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback_text?: string | null
+          feedback_type?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_feedback_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       monthly_tool_usage: {
         Row: {
@@ -407,6 +537,70 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      prompt_improvements: {
+        Row: {
+          created_at: string
+          feedback_count: number
+          guidelines: string
+          id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_count?: number
+          guidelines: string
+          id?: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback_count?: number
+          guidelines?: string
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompt_improvements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasonal_prompts: {
+        Row: {
+          guidelines: string
+          id: string
+          product_id: string
+          season: string
+          updated_at: string
+        }
+        Insert: {
+          guidelines: string
+          id?: string
+          product_id: string
+          season: string
+          updated_at?: string
+        }
+        Update: {
+          guidelines?: string
+          id?: string
+          product_id?: string
+          season?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonal_prompts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trainer_projects: {
         Row: {
