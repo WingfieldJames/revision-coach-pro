@@ -15,6 +15,55 @@ const MODELS = {
   utility: "google/gemini-2.0-flash-lite",   // Search query generation only
 };
 
+// Hardcoded economics diagrams fallback (used when Build portal has no diagrams)
+const ECONOMICS_DIAGRAMS_FALLBACK = [
+  { id: 'ppf', title: 'Production Possibility Frontier (PPF)', imagePath: '/diagrams/ppf.jpg', keywords: ['PPF', 'production possibility frontier', 'PPC', 'opportunity cost'] },
+  { id: 'ppf-shift', title: 'Shift of PPF', imagePath: '/diagrams/ppf-shift.jpg', keywords: ['PPF shift', 'economic growth', 'outward shift'] },
+  { id: 'supply-demand-equilibrium', title: 'Supply and Demand Equilibrium', imagePath: '/diagrams/supply-demand-equilibrium.jpg', keywords: ['supply and demand', 'equilibrium', 'market equilibrium'] },
+  { id: 'demand-shift-right', title: 'Demand Shifts Right (Increase in Demand)', imagePath: '/diagrams/demand-shift-right.jpg', keywords: ['increase in demand', 'demand shift right', 'rightward shift demand'] },
+  { id: 'demand-shift-left', title: 'Demand Shifts Left (Decrease in Demand)', imagePath: '/diagrams/demand-shift-left.jpg', keywords: ['decrease in demand', 'demand shift left'] },
+  { id: 'supply-shift-right', title: 'Supply Shifts Right (Increase in Supply)', imagePath: '/diagrams/supply-shift-right.jpg', keywords: ['increase in supply', 'supply shift right'] },
+  { id: 'supply-shift-left', title: 'Supply Shifts Left (Decrease in Supply)', imagePath: '/diagrams/supply-shift-left.jpg', keywords: ['decrease in supply', 'supply shift left'] },
+  { id: 'producer-consumer-surplus', title: 'Producer and Consumer Surplus', imagePath: '/diagrams/producer-consumer-surplus.jpg', keywords: ['consumer surplus', 'producer surplus', 'welfare'] },
+  { id: 'specific-tax', title: 'Specific Tax (Per Unit Tax)', imagePath: '/diagrams/specific-tax.jpg', keywords: ['specific tax', 'per unit tax', 'indirect tax'] },
+  { id: 'ad-valorem-tax', title: 'Ad-Valorem Tax', imagePath: '/diagrams/ad-valorem-tax.jpg', keywords: ['ad valorem', 'percentage tax'] },
+  { id: 'subsidy', title: 'Subsidy', imagePath: '/diagrams/subsidy.jpg', keywords: ['subsidy', 'government subsidy'] },
+  { id: 'minimum-price', title: 'Minimum Price (Price Floor)', imagePath: '/diagrams/minimum-price.jpg', keywords: ['minimum price', 'price floor', 'minimum wage'] },
+  { id: 'maximum-price', title: 'Maximum Price (Price Ceiling)', imagePath: '/diagrams/maximum-price.jpg', keywords: ['maximum price', 'price ceiling', 'rent control'] },
+  { id: 'negative-externality-production', title: 'Negative Externality of Production', imagePath: '/diagrams/negative-externality-production.jpg', keywords: ['negative externality', 'negative externality of production', 'external cost', 'MSC greater than MPC'] },
+  { id: 'positive-externality-consumption', title: 'Positive Externality of Consumption', imagePath: '/diagrams/positive-externality-consumption.jpg', keywords: ['positive externality', 'positive externality of consumption', 'external benefit', 'MSB greater than MPB', 'merit good'] },
+  { id: 'ad-sras-ad-shifts-right', title: 'AD-SRAS (AD Shifts Right)', imagePath: '/diagrams/ad-sras-ad-shifts-right.jpg', keywords: ['AD shift right', 'aggregate demand increase', 'expansionary'] },
+  { id: 'demand-pull-inflation', title: 'Demand Pull Inflation', imagePath: '/diagrams/demand-pull-inflation.jpg', keywords: ['demand pull inflation', 'demand-pull'] },
+  { id: 'ad-sras-ad-shifts-left', title: 'AD-SRAS (AD Shifts Left)', imagePath: '/diagrams/ad-sras-ad-shifts-left.jpg', keywords: ['AD shift left', 'aggregate demand decrease', 'contractionary'] },
+  { id: 'ad-sras-sras-shifts-right', title: 'AD-SRAS (SRAS Shifts Right)', imagePath: '/diagrams/ad-sras-sras-shifts-right.jpg', keywords: ['SRAS shift right', 'supply side improvement'] },
+  { id: 'ad-sras-sras-shifts-left', title: 'AD-SRAS (SRAS Shifts Left)', imagePath: '/diagrams/ad-sras-sras-shifts-left.jpg', keywords: ['SRAS shift left', 'cost push', 'supply shock'] },
+  { id: 'cost-push-inflation', title: 'Cost Push Inflation', imagePath: '/diagrams/cost-push-inflation.jpg', keywords: ['cost push inflation', 'cost-push'] },
+  { id: 'circular-flow-of-income', title: 'Circular Flow of Income', imagePath: '/diagrams/circular-flow-of-income.jpg', keywords: ['circular flow', 'injections', 'withdrawals', 'leakages'] },
+  { id: 'keynesian-lras', title: 'Keynesian Long Run AS', imagePath: '/diagrams/keynesian-lras.jpg', keywords: ['keynesian LRAS', 'keynesian aggregate supply', 'horizontal section'] },
+  { id: 'classical-positive-output-gap', title: 'Classical Positive Output Gap', imagePath: '/diagrams/classical-positive-output-gap.jpg', keywords: ['positive output gap', 'inflationary gap', 'overheating', 'boom'] },
+  { id: 'classical-negative-output-gap', title: 'Classical Negative Output Gap', imagePath: '/diagrams/classical-negative-output-gap.jpg', keywords: ['negative output gap', 'deflationary gap', 'recessionary gap', 'recession', 'spare capacity'] },
+  { id: 'keynesian-negative-output-gap', title: 'Keynesian Negative Output Gap', imagePath: '/diagrams/keynesian-negative-output-gap.jpg', keywords: ['keynesian negative output gap', 'keynesian spare capacity'] },
+  { id: 'keynesian-economic-growth', title: 'Keynesian Economic Growth (LRAS Shifts Right)', imagePath: '/diagrams/keynesian-economic-growth.jpg', keywords: ['keynesian growth', 'LRAS shift right'] },
+  { id: 'trade-cycle', title: 'Trade Cycle (Business Cycle)', imagePath: '/diagrams/trade-cycle.jpg', keywords: ['trade cycle', 'business cycle', 'boom', 'bust', 'recession', 'recovery', 'output gap'] },
+  { id: 'short-run-phillips-curve', title: 'Short Run Phillips Curve', imagePath: '/diagrams/short-run-phillips-curve.jpg', keywords: ['phillips curve', 'inflation unemployment trade-off'] },
+  { id: 'profit-maximisation', title: 'Profit Maximisation', imagePath: '/diagrams/profit-maximisation.jpg', keywords: ['profit maximisation', 'MC=MR', 'supernormal profit'] },
+  { id: 'revenue-maximisation', title: 'Revenue Maximisation', imagePath: '/diagrams/revenue-maximisation.jpg', keywords: ['revenue maximisation', 'MR=0'] },
+  { id: 'sales-maximisation', title: 'Sales Maximisation', imagePath: '/diagrams/sales-maximisation.jpg', keywords: ['sales maximisation', 'AC=AR', 'normal profit'] },
+  { id: 'mp-ap-diminishing-returns', title: 'MP and AP (Diminishing Returns)', imagePath: '/diagrams/mp-ap-diminishing-returns.jpg', keywords: ['diminishing returns', 'marginal product', 'average product'] },
+  { id: 'ac-avc-mc', title: 'AC, AVC and MC', imagePath: '/diagrams/ac-avc-mc.jpg', keywords: ['average cost', 'marginal cost', 'AVC', 'cost curves'] },
+  { id: 'internal-economies-of-scale', title: 'Internal Economies of Scale', imagePath: '/diagrams/internal-economies-of-scale.jpg', keywords: ['internal economies of scale', 'LRAC falling'] },
+  { id: 'external-economies-of-scale', title: 'External Economies of Scale', imagePath: '/diagrams/external-economies-of-scale.jpg', keywords: ['external economies of scale', 'industry growth'] },
+  { id: 'short-run-shut-down', title: 'Short Run Shut Down Point', imagePath: '/diagrams/short-run-shut-down.jpg', keywords: ['shut down point', 'short run shut down', 'P below AVC'] },
+  { id: 'long-run-shut-down', title: 'Long Run Shut Down Point', imagePath: '/diagrams/long-run-shut-down.jpg', keywords: ['long run shut down', 'P below AC'] },
+  { id: 'allocative-efficiency', title: 'Allocative Efficiency', imagePath: '/diagrams/allocative-efficiency.jpg', keywords: ['allocative efficiency', 'P=MC'] },
+  { id: 'productive-efficiency', title: 'Productive Efficiency', imagePath: '/diagrams/productive-efficiency.jpg', keywords: ['productive efficiency', 'minimum AC'] },
+  { id: 'dynamic-efficiency', title: 'Dynamic Efficiency', imagePath: '/diagrams/dynamic-efficiency.jpg', keywords: ['dynamic efficiency', 'innovation', 'R&D'] },
+  { id: 'perfect-competition-equilibrium', title: 'Perfect Competition Equilibrium', imagePath: '/diagrams/perfect-competition-equilibrium.jpg', keywords: ['perfect competition', 'price taker', 'normal profit long run'] },
+  { id: 'perfect-competition-entry', title: 'Perfect Competition - Supernormal to Normal Profit (Entry)', imagePath: '/diagrams/perfect-competition-entry.jpg', keywords: ['perfect competition entry', 'supernormal profit eroded'] },
+  { id: 'perfect-competition-exit', title: 'Perfect Competition - Subnormal to Normal Profit (Exit)', imagePath: '/diagrams/perfect-competition-exit.jpg', keywords: ['perfect competition exit', 'subnormal profit', 'firms leave'] },
+  { id: 'price-discrimination', title: 'Price Discrimination', imagePath: '/diagrams/price-discrimination.jpg', keywords: ['price discrimination', 'different prices different markets'] },
+];
+
 // User preferences interface
 interface UserPreferences {
   year: string;
@@ -60,9 +109,9 @@ async function findRelevantDiagram(
   customDiagrams?: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }>,
   lovableApiKey?: string
 ): Promise<{ id: string; title: string; imagePath: string } | null> {
-  // If no custom diagrams from Build portal, return null immediately
+  // If no diagrams provided at all, return null
   if (!customDiagrams || customDiagrams.length === 0) {
-    console.log('No diagrams in Build portal for this product — skipping diagram matching');
+    console.log('No diagrams available for this product — skipping diagram matching');
     return null;
   }
   
@@ -1030,7 +1079,13 @@ Use this to personalise your responses — reference their weak areas, their exa
       console.error('Error fetching custom diagrams:', err);
     }
     
-    // Find relevant diagram using ONLY Build portal diagrams (no hardcoded fallbacks)
+    // If no custom diagrams from Build portal, fall back to hardcoded economics diagrams
+    if (customDiagrams.length === 0 && (diagram_subject === 'economics' || enable_diagrams)) {
+      customDiagrams = ECONOMICS_DIAGRAMS_FALLBACK;
+      console.log(`Using ${customDiagrams.length} hardcoded fallback diagrams`);
+    }
+
+    // Find relevant diagram
     let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
     relevantDiagram = await findRelevantDiagram(message, customDiagrams, lovableApiKey);
     if (relevantDiagram) {
