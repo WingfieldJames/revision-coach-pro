@@ -496,6 +496,15 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     // Persist user message
     persistMessage('user', messageText, Array.isArray(imageDataUrl) ? imageDataUrl[0] : imageDataUrl);
 
+    // Record streak activity (fire and forget)
+    if (user) {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-streak`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        body: JSON.stringify({ user_id: user.id }),
+      }).catch(() => {});
+    }
+
     // Reset animation state
     bufferRef.current = '';
     fullContentRef.current = '';

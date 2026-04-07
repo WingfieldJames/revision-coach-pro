@@ -11,6 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Trash2, ExternalLink, Instagram, Youtube, Linkedin, ChevronDown, AlertCircle } from 'lucide-react';
+import { StreakDisplay } from '@/components/StreakDisplay';
+import { ReferAFriend } from '@/components/ReferAFriend';
+import { ReviewDashboardSection } from '@/components/ReviewDashboardSection';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
@@ -620,6 +623,15 @@ export const DashboardPage = () => {
         <p className="text-sm text-muted-foreground text-center mt-6">
           One-time payment • Expires 30th June 2026 • Secure checkout via Stripe
         </p>
+
+        {/* Streak, Review & Referral Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+          <StreakDisplay />
+          <ReviewDashboardSection />
+        </div>
+        <div className="mt-4">
+          <ReferAFriend />
+        </div>
 
         {/* Account Info */}
         <Card className="mt-8">

@@ -8,6 +8,7 @@ import { ChatHistoryProvider } from "@/contexts/ChatHistoryContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
 import { useAffiliateTracking } from "./hooks/useAffiliateTracking";
+import { useReferralCapture } from "./hooks/useReferralCapture";
 import { HomePage } from "./pages/HomePage";
 import { ComparePage } from "./pages/ComparePage";
 import { LoginPage } from "./pages/LoginPage";
@@ -48,6 +49,7 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   useAffiliateTracking();
+  useReferralCapture();
   return null;
 };
 

@@ -104,3 +104,9 @@ verify_jwt = false
 
 [functions.metrics-snapshot]
 verify_jwt = false
+
+[functions.process-referral]
+verify_jwt = false
+
+[functions.update-streak]
+verify_jwt = false
