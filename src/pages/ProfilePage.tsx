@@ -6,7 +6,8 @@ import { Header } from '@/components/Header';
 import { SEOHead } from '@/components/SEOHead';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Mail, Shield } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { LogOut, Mail, Shield, AlertTriangle, Gift, Flame, Clock } from 'lucide-react';
 import { StreakDisplay } from '@/components/StreakDisplay';
 import { ReferAFriend } from '@/components/ReferAFriend';
 import { ReviewDashboardSection } from '@/components/ReviewDashboardSection';
@@ -21,6 +22,10 @@ export const ProfilePage = () => {
   const [productAccess, setProductAccess] = React.useState<Record<string, ProductAccess>>({});
   const [subscriptionDetails, setSubscriptionDetails] = React.useState<Record<string, any>>({});
   const [cancellingSubscription, setCancellingSubscription] = React.useState<string | null>(null);
+  const [cancelFlowOpen, setCancelFlowOpen] = React.useState(false);
+  const [cancelFlowStep, setCancelFlowStep] = React.useState(0);
+  const [cancelFlowBoard, setCancelFlowBoard] = React.useState<string | null>(null);
+  const [cancelReason, setCancelReason] = React.useState('');
   const [loadingAccess, setLoadingAccess] = React.useState(true);
 
   React.useEffect(() => {
@@ -71,15 +76,16 @@ export const ProfilePage = () => {
     loadAccess();
   }, [user]);
 
-  const handleCancelSubscription = async (productKey: string) => {
-    const sub = subscriptionDetails[productKey];
-    if (!sub || sub.payment_type !== 'monthly') {
-      toast.error('Only monthly subscriptions can be cancelled');
-      return;
-    }
-    if (!confirm('Are you sure you want to cancel? You\'ll keep access until the end of your billing period.')) return;
+  const startCancelFlow = (productKey: string) => {
+    setCancelFlowBoard(productKey);
+    setCancelFlowStep(0);
+    setCancelReason('');
+    setCancelFlowOpen(true);
+  };
 
-    setCancellingSubscription(productKey);
+  const confirmCancellation = async () => {
+    if (!cancelFlowBoard) return;
+    setCancellingSubscription(cancelFlowBoard);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) { toast.error('Please log in again'); return; }
@@ -88,7 +94,8 @@ export const ProfilePage = () => {
         body: { cancelAtPeriodEnd: true },
       });
       if (error) throw error;
-      toast.success(data.message || 'Subscription cancelled');
+      toast.success(data.message || 'Subscription cancelled — you keep access until the end of your billing period.');
+      setCancelFlowOpen(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to cancel');
     } finally {
@@ -189,12 +196,11 @@ export const ProfilePage = () => {
                       </div>
                       {isMonthly && (
                         <Button
-                          variant="outline" size="sm"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleCancelSubscription(board)}
-                          disabled={cancellingSubscription === board}
+                          variant="ghost" size="sm"
+                          className="text-xs text-muted-foreground hover:text-destructive"
+                          onClick={() => startCancelFlow(board)}
                         >
-                          {cancellingSubscription === board ? 'Cancelling...' : 'Cancel'}
+                          Manage
                         </Button>
                       )}
                     </div>
@@ -214,6 +220,144 @@ export const ProfilePage = () => {
         {/* Referrals */}
         <ReferAFriend />
       </div>
+
+      {/* Multi-step cancellation flow */}
+      <Dialog open={cancelFlowOpen} onOpenChange={setCancelFlowOpen}>
+        <DialogContent className="sm:max-w-md">
+          {cancelFlowStep === 0 && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  Are you sure?
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-2">
+                <p className="text-sm text-muted-foreground">
+                  Exams are just around the corner. Students who keep practising in the final weeks see the biggest grade improvements.
+                </p>
+                <div className="bg-muted rounded-lg p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Flame className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
+                    <p className="text-sm">Your study streak and progress will stop building</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Gift className="h-4 w-4 text-purple-500 mt-0.5 shrink-0" />
+                    <p className="text-sm">You'll lose unlimited prompts, essay marking, and past papers</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Clock className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                    <p className="text-sm">The Exam Season Pass (£39.99 one-time) might be better value — no recurring charges</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="brand" className="flex-1" onClick={() => setCancelFlowOpen(false)}>
+                    Keep Subscription
+                  </Button>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground text-xs" onClick={() => setCancelFlowStep(1)}>
+                    Continue cancelling
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {cancelFlowStep === 1 && (
+            <>
+              <DialogHeader>
+                <DialogTitle>What could we do better?</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-2">
+                <p className="text-sm text-muted-foreground">
+                  Your feedback helps us improve for everyone. Why are you cancelling?
+                </p>
+                <div className="space-y-2">
+                  {[
+                    'Too expensive',
+                    'Not using it enough',
+                    'Answers aren\'t accurate enough',
+                    'Exams are over',
+                    'Found a better alternative',
+                    'Other',
+                  ].map(reason => (
+                    <button
+                      key={reason}
+                      onClick={() => setCancelReason(reason)}
+                      className={`w-full text-left px-4 py-2.5 rounded-lg border text-sm transition-colors ${
+                        cancelReason === reason
+                          ? 'border-primary bg-primary/5 text-foreground'
+                          : 'border-border hover:bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {reason}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="brand" className="flex-1" onClick={() => setCancelFlowOpen(false)}>
+                    Never mind, keep it
+                  </Button>
+                  <Button
+                    variant="ghost" size="sm"
+                    className="text-muted-foreground text-xs"
+                    onClick={() => cancelReason ? setCancelFlowStep(2) : toast.error('Please select a reason')}
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {cancelFlowStep === 2 && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  Last chance
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-2">
+                {cancelReason === 'Too expensive' ? (
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">Special offer just for you</p>
+                    <p className="text-sm text-green-700 dark:text-green-300">
+                      Switch to the Exam Season Pass for £39.99 one-time — that's less than 5 months of your current subscription, and it covers you all the way through exams.
+                    </p>
+                    <Button variant="brand" size="sm" className="mt-3" onClick={() => { setCancelFlowOpen(false); navigate('/compare'); }}>
+                      View Exam Season Pass
+                    </Button>
+                  </div>
+                ) : cancelReason === 'Not using it enough' ? (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">Tip: Set a daily study reminder</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      Even 10 minutes a day with the AI tutor can make a real difference. Students who study consistently score on average a full grade higher.
+                    </p>
+                  </div>
+                ) : null}
+
+                <p className="text-sm text-muted-foreground">
+                  If you cancel, you'll keep access until the end of your current billing period. After that, you'll be downgraded to the free plan (3 prompts/day).
+                </p>
+
+                <div className="flex gap-3">
+                  <Button variant="brand" className="flex-1" onClick={() => setCancelFlowOpen(false)}>
+                    Keep Subscription
+                  </Button>
+                  <Button
+                    variant="destructive" size="sm"
+                    onClick={confirmCancellation}
+                    disabled={cancellingSubscription !== null}
+                  >
+                    {cancellingSubscription ? 'Cancelling...' : 'Cancel Subscription'}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
