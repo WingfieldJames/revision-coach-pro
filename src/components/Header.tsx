@@ -12,7 +12,7 @@ import { MyAIPreferences } from '@/components/MyAIPreferences';
 import { GradeBoundariesTool } from '@/components/GradeBoundariesTool';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
 import { MyMistakesTool } from '@/components/MyMistakesTool';
-import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen, ChevronDown, TrendingUp, RotateCcw } from 'lucide-react';
+import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen, ChevronDown, TrendingUp, RotateCcw, User } from 'lucide-react';
 import { checkProductAccess } from '@/lib/productAccess';
 import {
   Dialog,
@@ -596,9 +596,10 @@ export const Header: React.FC<HeaderProps> = ({
         ) : null}
 
         {user && !hideUserDetails && !showStartStudyingButton && !customRightContent && (
-          <div className="hidden sm:flex items-center">
-            <Button variant="outline" size="sm" onClick={handleSignOut} className="text-xs sm:text-sm px-2 sm:px-3">
-              Sign Out
+          <div className="flex items-center">
+            <Button variant="outline" size="sm" onClick={() => navigate('/profile')} className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <User className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Profile</span>
             </Button>
           </div>
         )}
