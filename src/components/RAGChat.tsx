@@ -821,49 +821,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         </div>
       )}
 
-      {/* Theme toggle — only on chatbot pages */}
-      <ThemeToggle />
-
-      {/* Profile/Challenge button — vertically above theme toggle */}
-      <button
-        type="button"
-        onClick={() => {
-          if (showChallengeMode && !challengeNotificationDismissed) {
-            setChallengePopupOpen(prev => !prev);
-            setProfilePopupOpen(false);
-          } else {
-            setProfilePopupOpen(prev => !prev);
-            setChallengePopupOpen(false);
-          }
-        }}
-        className="fixed bottom-[10rem] right-6 z-[9999] pointer-events-auto w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center shadow-elevated hover:scale-105 transition-all cursor-pointer relative"
-        aria-label="Open profile"
-      >
-        <User className="w-4 h-4 text-foreground" />
-        {/* Red notification badge */}
-        {hasChallengeNotification && (
-          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-red-500 border-2 border-card" />
-        )}
-      </button>
-
-      {/* Tutor Profile Popup — positioned higher */}
-      <TutorProfilePopup
-        isOpen={profilePopupOpen && !showChallengeMode}
-        onClose={() => { setProfilePopupOpen(false); setHasPreferencesSet(true); }}
-        productId={productId}
-        trainerAvatarUrl={trainerAvatarUrl}
-        trainerName={trainerName}
-      />
-
-      {/* Challenge Popup */}
-      <ChallengePopup
-        isOpen={challengePopupOpen}
-        onClose={() => { setChallengePopupOpen(false); setChallengeNotificationDismissed(true); }}
-        productId={productId}
-        productSlug={productSlug}
-        trainerAvatarUrl={trainerAvatarUrl}
-        trainerName={trainerName}
-      />
+      {/* Profile + theme buttons and popups are rendered inside the fixed composer below */}
 
       {/* Messages area - scrollable */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
