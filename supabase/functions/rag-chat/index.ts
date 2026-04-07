@@ -1079,10 +1079,12 @@ Use this to personalise your responses — reference their weak areas, their exa
       console.error('Error fetching custom diagrams:', err);
     }
     
-    // If no custom diagrams from Build portal, fall back to hardcoded economics diagrams
-    if (customDiagrams.length === 0 && (diagram_subject === 'economics' || enable_diagrams)) {
-      customDiagrams = ECONOMICS_DIAGRAMS_FALLBACK;
-      console.log(`Using ${customDiagrams.length} hardcoded fallback diagrams`);
+    // Merge Build portal diagrams with hardcoded fallback (Build portal takes priority for duplicate IDs)
+    if (diagram_subject === 'economics' || enable_diagrams) {
+      const customIds = new Set(customDiagrams.map(d => d.id));
+      const fallbackDiagrams = ECONOMICS_DIAGRAMS_FALLBACK.filter(d => !customIds.has(d.id));
+      customDiagrams = [...customDiagrams, ...fallbackDiagrams];
+      console.log(`Merged diagrams: ${customIds.size} from Build portal + ${fallbackDiagrams.length} from fallback = ${customDiagrams.length} total`);
     }
 
     // Find relevant diagram
