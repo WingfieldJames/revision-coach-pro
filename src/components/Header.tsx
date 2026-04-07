@@ -205,6 +205,10 @@ export const Header: React.FC<HeaderProps> = ({
     if (location.pathname === '/dashboard') return 'profile';
     if (location.pathname === '/login') return 'profile';
     if (location.pathname === '/compare') return 'pricing';
+    if (location.pathname === '/gcse') return 'pricing';
+    if (location.pathname === '/select') return 'pricing';
+    if (location.pathname.endsWith('-free-version') || location.pathname.endsWith('-premium')) return 'pricing';
+    if (location.pathname.startsWith('/s/')) return 'pricing';
     return 'home';
   };
   
