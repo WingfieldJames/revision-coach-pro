@@ -523,10 +523,16 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right side: Upgrade Now / Deluxe badge on chatbot pages OR Start Studying on home */}
       <div className="flex items-center gap-2 flex-shrink-0">
+        {user && (
+          <Button variant="outline" size="sm" onClick={() => navigate('/profile')} className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+            <User className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Profile</span>
+          </Button>
+        )}
         {customRightContent ? customRightContent : showStartStudyingButton ? (
           <div className="hidden sm:flex items-center">
-            <Button 
-              onClick={() => navigate('/select')} 
+            <Button
+              onClick={() => navigate('/select')}
               className="bg-primary text-primary-foreground rounded-full px-6 py-2 font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90"
             >
               Start Studying
@@ -595,14 +601,6 @@ export const Header: React.FC<HeaderProps> = ({
           )
         ) : null}
 
-        {user && !hideUserDetails && !showStartStudyingButton && !customRightContent && (
-          <div className="flex items-center">
-            <Button variant="outline" size="sm" onClick={() => navigate('/profile')} className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-              <User className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Profile</span>
-            </Button>
-          </div>
-        )}
       </div>
     </header>
   );
