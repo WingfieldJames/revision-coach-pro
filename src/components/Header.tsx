@@ -217,7 +217,7 @@ export const Header: React.FC<HeaderProps> = ({
   React.useEffect(() => {
     const newTab = getSelectedTab();
     if (newTab !== selectedTab) setSelectedTab(newTab);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   const [subjectsDropdownOpen, setSubjectsDropdownOpen] = useState(false);
   const subjectsDropdownTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
