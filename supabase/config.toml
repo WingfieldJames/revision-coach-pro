@@ -101,3 +101,6 @@ verify_jwt = false
 
 [functions.exam-season-scheduler]
 verify_jwt = false
+
+[functions.metrics-snapshot]
+verify_jwt = false
