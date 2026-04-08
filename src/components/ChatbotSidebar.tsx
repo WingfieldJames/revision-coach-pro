@@ -72,6 +72,8 @@ const SUBJECT_TREE: SubjectGroup[] = [
     boards: [
       { name: 'Edexcel (Pure)', freePath: '/edexcel-maths-free-version', premiumPath: '/edexcel-maths-premium', slug: 'edexcel-maths' },
       { name: 'Edexcel (Applied)', freePath: '/edexcel-maths-applied-free-version', premiumPath: '/edexcel-maths-applied-premium', slug: 'edexcel-maths-applied' },
+      { name: 'AQA (Pure)', freePath: '/s/aqa-mathematics/free', premiumPath: '/s/aqa-mathematics/premium', slug: 'aqa-mathematics' },
+      { name: 'AQA (Applied)', freePath: '/s/aqa-mathematics-applied/free', premiumPath: '/s/aqa-mathematics-applied/premium', slug: 'aqa-mathematics-applied' },
     ],
   },
 ];
