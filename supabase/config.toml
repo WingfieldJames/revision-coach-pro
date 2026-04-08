@@ -110,3 +110,12 @@ verify_jwt = false
 
 [functions.update-streak]
 verify_jwt = false
+
+[functions.weekly-progress-email]
+verify_jwt = false
+
+[functions.school-invite]
+verify_jwt = false
+
+[functions.school-accept-invite]
+verify_jwt = false
