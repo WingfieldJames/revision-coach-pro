@@ -46,14 +46,14 @@ interface DynamicProduct {
 }
 
 // Hardcoded (legacy) subjects and boards
-const LEGACY_SUBJECTS = ['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'];
+const LEGACY_SUBJECTS = ['economics', 'mathematics', 'computer-science', 'psychology', 'chemistry', 'physics'];
 const LEGACY_BOARDS_MAP: Record<string, string[]> = {
   'economics': ['edexcel', 'aqa', 'cie'],
   'computer-science': ['ocr'],
   'physics': ['ocr'],
   'chemistry': ['aqa'],
   'psychology': ['aqa'],
-  'mathematics': ['edexcel', 'ocr']
+  'mathematics': ['edexcel', 'aqa', 'ocr']
 };
 const LEGACY_DEFAULT_BOARD: Record<string, string> = {
   'economics': 'edexcel',
@@ -129,7 +129,8 @@ export const ComparePage = () => {
     'ocr-physics': 'ecd5978d-3bf4-4b9c-993f-30b7f3a0f197',
     'aqa-chemistry': '3e5bf02e-1424-4bb3-88f9-2a9c58798444',
     'aqa-psychology': 'c56bc6d6-5074-4e1f-8bf2-8e900ba928ec',
-    'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+    'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    'aqa-mathematics': '5b3ea521-7803-40e6-8772-7f644a374deb'
   };
 
   // Build combined subjects list (legacy + dynamic)
@@ -325,6 +326,7 @@ export const ComparePage = () => {
       if (subject === 'chemistry') return '/aqa-chemistry-free-version';
       if (subject === 'psychology') return '/aqa-psychology-free-version';
       if (subject === 'mathematics' && examBoard === 'ocr') return '/s/ocr-maths/free';
+      if (subject === 'mathematics' && examBoard === 'aqa') return '/s/aqa-mathematics/free';
       if (subject === 'mathematics') return '/edexcel-maths-free-version';
       if (examBoard === 'aqa') return '/aqa-free-version';
       if (examBoard === 'cie') return '/cie-free-version';

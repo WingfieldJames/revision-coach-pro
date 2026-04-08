@@ -1794,7 +1794,20 @@ export function BuildPage() {
                 </div>
               )}
 
-              {/* Diagram Library */}
+              {/* Grade Boundaries Config */}
+              {selectedFeatures.includes("grade_boundaries") && (
+                <div className="mt-4 p-3 rounded-lg border border-border space-y-2">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-medium">Grade Boundaries — Configuration</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Grade boundaries are automatically loaded based on the exam board and subject. No additional configuration is needed — the tool will display historical and predicted boundaries for your students.</p>
+                  <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
+                    <p className="text-[10px] text-muted-foreground">💡 Tip: The grade boundaries tool shows 2023–2024 actual data and 2025–2026 predicted boundaries. Students can enter their score to see their predicted grade.</p>
+                  </div>
+                </div>
+              )}
+
               {selectedFeatures.includes("diagram_generator") && (
                 <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                   <div className="flex items-center gap-2">

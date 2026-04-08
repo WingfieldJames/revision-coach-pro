@@ -22,6 +22,7 @@ const PRODUCT_IDS: Record<string, string> = {
   'aqa-chemistry': '3e5bf02e-1424-4bb3-88f9-2a9c58798444',
   'aqa-psychology': 'c56bc6d6-5074-4e1f-8bf2-8e900ba928ec',
   'edexcel-mathematics': 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+  'aqa-mathematics': '5b3ea521-7803-40e6-8772-7f644a374deb',
   'ocr-maths': '7469e99a-c34e-4500-9aee-11a107a4af09'
 };
 
@@ -40,7 +41,7 @@ const BOARDS_MAP: Record<Subject, ExamBoard[]> = {
   'physics': ['ocr'],
   'chemistry': ['aqa'],
   'psychology': ['aqa'],
-  'mathematics': ['edexcel', 'ocr'],
+  'mathematics': ['edexcel', 'aqa', 'ocr'],
 };
 
 export function SubjectPlanSelector() {
@@ -79,6 +80,7 @@ export function SubjectPlanSelector() {
     if (subject === 'chemistry') return 'aqa-chemistry';
     if (subject === 'psychology') return 'aqa-psychology';
     if (subject === 'mathematics' && examBoard === 'ocr') return 'ocr-maths';
+    if (subject === 'mathematics' && examBoard === 'aqa') return 'aqa-mathematics';
     if (subject === 'mathematics') return 'edexcel-mathematics';
     return null;
   };
@@ -130,6 +132,7 @@ export function SubjectPlanSelector() {
       if (subject === 'chemistry') return '/aqa-chemistry-free-version';
       if (subject === 'psychology') return '/aqa-psychology-free-version';
       if (subject === 'mathematics' && examBoard === 'ocr') return '/s/ocr-maths/free';
+      if (subject === 'mathematics' && examBoard === 'aqa') return '/s/aqa-mathematics/free';
       if (subject === 'mathematics') return '/edexcel-maths-free-version';
       if (examBoard === 'aqa') return '/aqa-free-version';
       if (examBoard === 'cie') return '/cie-free-version';
@@ -149,7 +152,7 @@ export function SubjectPlanSelector() {
       return;
     }
     if (hasProductAccess) {
-      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : (subject === 'mathematics' && examBoard === 'ocr') ? '/s/ocr-maths/premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
+      const premiumPath = subject === 'computer-science' ? '/ocr-cs-premium' : subject === 'physics' ? '/ocr-physics-premium' : subject === 'chemistry' ? '/aqa-chemistry-premium' : subject === 'psychology' ? '/aqa-psychology-premium' : (subject === 'mathematics' && examBoard === 'ocr') ? '/s/ocr-maths/premium' : (subject === 'mathematics' && examBoard === 'aqa') ? '/s/aqa-mathematics/premium' : subject === 'mathematics' ? '/edexcel-maths-premium' : examBoard === 'aqa' ? '/aqa-premium' : examBoard === 'cie' ? '/cie-premium' : '/premium';
       window.location.href = premiumPath;
       return;
     }
@@ -195,7 +198,7 @@ export function SubjectPlanSelector() {
       <ScrollReveal delay={0.1}>
         <div className="hidden md:flex flex-col items-center gap-3 mb-12">
           <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
-            {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map((s) => (
+            {(['economics', 'mathematics', 'computer-science', 'psychology', 'chemistry', 'physics'] as Subject[]).map((s) => (
               <button
                 key={s}
                 onClick={() => {
@@ -227,7 +230,7 @@ export function SubjectPlanSelector() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-              {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
+              {(['economics', 'mathematics', 'computer-science', 'psychology', 'chemistry', 'physics'] as Subject[]).map(s => (
                 <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                   setSubject(s);
                   try {

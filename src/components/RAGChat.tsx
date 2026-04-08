@@ -838,12 +838,21 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (showChallengeMode && !challengeNotificationDismissed) {
-                setChallengePopupOpen(prev => !prev);
+              // Always toggle between the two popups based on current state
+              const isAnyOpen = profilePopupOpen || challengePopupOpen;
+              if (isAnyOpen) {
+                // Close both
                 setProfilePopupOpen(false);
-              } else {
-                setProfilePopupOpen(prev => !prev);
                 setChallengePopupOpen(false);
+              } else {
+                // Open the appropriate one
+                if (showChallengeMode && !challengeNotificationDismissed) {
+                  setChallengePopupOpen(true);
+                  setProfilePopupOpen(false);
+                } else {
+                  setProfilePopupOpen(true);
+                  setChallengePopupOpen(false);
+                }
               }
             }}
             className="fixed bottom-[10.5rem] right-6 z-[9999] pointer-events-auto w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center shadow-elevated hover:scale-105 transition-all cursor-pointer"
@@ -861,7 +870,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
       {/* Tutor Profile Popup */}
       <TutorProfilePopup
-        isOpen={profilePopupOpen && !showChallengeMode}
+        isOpen={profilePopupOpen}
         onClose={() => { setProfilePopupOpen(false); setHasPreferencesSet(true); }}
         productId={productId}
         trainerAvatarUrl={trainerAvatarUrl}

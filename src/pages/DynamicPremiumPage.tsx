@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
@@ -34,6 +34,7 @@ export const DynamicPremiumPage = () => {
   const [trainer, setTrainer] = useState<TrainerConfig | null>(null);
   const [resolvedImageUrl, setResolvedImageUrl] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [hasAppliedCounterpart, setHasAppliedCounterpart] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -58,6 +59,14 @@ export const DynamicPremiumPage = () => {
           if (publicUrlData?.publicUrl) setResolvedImageUrl(publicUrlData.publicUrl);
         }
       }
+      // Check for maths applied counterpart
+      const subLower = prod.subject.toLowerCase();
+      if (subLower.includes('math')) {
+        const isApplied = prod.slug.endsWith('-applied');
+        const targetSlug = isApplied ? prod.slug.replace(/-applied$/, '') : `${prod.slug}-applied`;
+        const { data: counterpart } = await supabase.from('products').select('id').eq('slug', targetSlug).eq('active', true).maybeSingle();
+        setHasAppliedCounterpart(!!counterpart);
+      }
       setLoading(false);
     };
     load();
@@ -75,6 +84,16 @@ export const DynamicPremiumPage = () => {
   const subjectLower = product.subject.toLowerCase();
   const diagramSubject: 'economics' | 'cs' = subjectLower.includes('computer') ? 'cs' : 'economics';
   const isMathsSubject = subjectLower.includes('math');
+
+  const isAppliedSlug = product.slug.endsWith('-applied');
+  const pureSlug = isAppliedSlug ? product.slug.replace(/-applied$/, '') : product.slug;
+  const appliedSlug = isAppliedSlug ? product.slug : `${product.slug}-applied`;
+  const mathsMode: 'pure' | 'applied' = isAppliedSlug ? 'applied' : 'pure';
+  const handleMathsModeChange = (mode: 'pure' | 'applied') => {
+    if (mode === mathsMode) return;
+    const targetSlug = mode === 'applied' ? appliedSlug : pureSlug;
+    navigate(`/s/${targetSlug}/premium`);
+  };
 
   // Parse trainer achievements
   const achievements = (trainer?.trainer_achievements || [])
@@ -103,6 +122,11 @@ export const DynamicPremiumPage = () => {
     essayMarkerCustomMarks: trainer?.essay_marker_marks || undefined,
     customPastPaperContent: <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="deluxe" />,
     customRevisionGuideContent: <DynamicRevisionGuide productId={product.id} subjectName={subjectName} tier="deluxe" />,
+    ...(isMathsSubject && hasAppliedCounterpart ? {
+      showMathsModeSwitcher: true,
+      mathsMode,
+      onMathsModeChange: handleMathsModeChange,
+    } : {}),
   };
 
   return (

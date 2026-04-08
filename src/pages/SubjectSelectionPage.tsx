@@ -21,11 +21,11 @@ interface SubjectOption {
 
 const A_LEVEL_SUBJECTS: SubjectOption[] = [
   { label: 'Economics', slug: 'economics', boards: ['Edexcel', 'AQA', 'CIE'] },
-  { label: 'Computer Science', slug: 'computer-science', boards: ['OCR'] },
-  { label: 'Physics', slug: 'physics', boards: ['OCR'] },
-  { label: 'Chemistry', slug: 'chemistry', boards: ['AQA'] },
-  { label: 'Psychology', slug: 'psychology', boards: ['AQA'] },
   { label: 'Mathematics', slug: 'mathematics', boards: ['Edexcel'] },
+  { label: 'Computer Science', slug: 'computer-science', boards: ['OCR'] },
+  { label: 'Psychology', slug: 'psychology', boards: ['AQA'] },
+  { label: 'Chemistry', slug: 'chemistry', boards: ['AQA'] },
+  { label: 'Physics', slug: 'physics', boards: ['OCR'] },
   { label: 'Biology', slug: 'biology', boards: [], comingSoon: true },
   { label: 'Politics', slug: 'politics', boards: [], comingSoon: true },
 ];
