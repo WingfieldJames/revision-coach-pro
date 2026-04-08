@@ -132,6 +132,7 @@ export function SubjectPlanSelector() {
       if (subject === 'chemistry') return '/aqa-chemistry-free-version';
       if (subject === 'psychology') return '/aqa-psychology-free-version';
       if (subject === 'mathematics' && examBoard === 'ocr') return '/s/ocr-maths/free';
+      if (subject === 'mathematics' && examBoard === 'aqa') return '/s/aqa-mathematics/free';
       if (subject === 'mathematics') return '/edexcel-maths-free-version';
       if (examBoard === 'aqa') return '/aqa-free-version';
       if (examBoard === 'cie') return '/cie-free-version';
