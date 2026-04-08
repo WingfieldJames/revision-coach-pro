@@ -46,7 +46,7 @@ interface DynamicProduct {
 }
 
 // Hardcoded (legacy) subjects and boards
-const LEGACY_SUBJECTS = ['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'];
+const LEGACY_SUBJECTS = ['economics', 'mathematics', 'computer-science', 'psychology', 'chemistry', 'physics'];
 const LEGACY_BOARDS_MAP: Record<string, string[]> = {
   'economics': ['edexcel', 'aqa', 'cie'],
   'computer-science': ['ocr'],

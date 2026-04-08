@@ -195,7 +195,7 @@ export function SubjectPlanSelector() {
       <ScrollReveal delay={0.1}>
         <div className="hidden md:flex flex-col items-center gap-3 mb-12">
           <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
-            {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map((s) => (
+            {(['economics', 'mathematics', 'computer-science', 'psychology', 'chemistry', 'physics'] as Subject[]).map((s) => (
               <button
                 key={s}
                 onClick={() => {
@@ -227,7 +227,7 @@ export function SubjectPlanSelector() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
-              {(['economics', 'computer-science', 'physics', 'chemistry', 'psychology', 'mathematics'] as Subject[]).map(s => (
+              {(['economics', 'mathematics', 'computer-science', 'psychology', 'chemistry', 'physics'] as Subject[]).map(s => (
                 <DropdownMenuItem key={s} className="cursor-pointer hover:bg-muted" onClick={() => {
                   setSubject(s);
                   try {
