@@ -35,8 +35,8 @@ export function useStreak() {
 
     const fetchStreak = async () => {
       try {
-        const { data, error } = await supabase
-          .from('user_streaks')
+        const { data, error } = await (supabase
+          .from('user_streaks' as any) as any)
           .select('current_streak, longest_streak, last_active_date')
           .eq('user_id', user.id)
           .maybeSingle();
