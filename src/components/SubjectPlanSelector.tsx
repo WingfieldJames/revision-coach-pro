@@ -80,6 +80,7 @@ export function SubjectPlanSelector() {
     if (subject === 'chemistry') return 'aqa-chemistry';
     if (subject === 'psychology') return 'aqa-psychology';
     if (subject === 'mathematics' && examBoard === 'ocr') return 'ocr-maths';
+    if (subject === 'mathematics' && examBoard === 'aqa') return 'aqa-mathematics';
     if (subject === 'mathematics') return 'edexcel-mathematics';
     return null;
   };
