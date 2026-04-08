@@ -70,6 +70,29 @@ export const DynamicFreePage = () => {
   const diagramSubject: 'economics' | 'cs' = subjectLower.includes('computer') ? 'cs' : 'economics';
   const isMathsSubject = subjectLower.includes('math');
 
+  // Maths Pure/Applied mode switcher
+  const isAppliedSlug = product.slug.endsWith('-applied');
+  const pureSlug = isAppliedSlug ? product.slug.replace(/-applied$/, '') : product.slug;
+  const appliedSlug = isAppliedSlug ? product.slug : `${product.slug}-applied`;
+  const [hasAppliedCounterpart, setHasAppliedCounterpart] = useState(false);
+  
+  useEffect(() => {
+    if (!isMathsSubject) return;
+    const checkCounterpart = async () => {
+      const targetSlug = isAppliedSlug ? pureSlug : appliedSlug;
+      const { data } = await supabase.from('products').select('id').eq('slug', targetSlug).eq('active', true).maybeSingle();
+      setHasAppliedCounterpart(!!data);
+    };
+    checkCounterpart();
+  }, [isMathsSubject, pureSlug, appliedSlug, isAppliedSlug]);
+
+  const mathsMode: 'pure' | 'applied' = isAppliedSlug ? 'applied' : 'pure';
+  const handleMathsModeChange = (mode: 'pure' | 'applied') => {
+    if (mode === mathsMode) return;
+    const targetSlug = mode === 'applied' ? appliedSlug : pureSlug;
+    navigate(`/s/${targetSlug}/free`);
+  };
+
   // Parse trainer achievements
   const achievements = (trainer?.trainer_achievements || [])
     .map((a: any) => typeof a === 'string' ? { text: a } : a)
