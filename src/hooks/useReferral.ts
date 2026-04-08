@@ -44,8 +44,8 @@ export const storeReferralCode = (code: string): void => {
 export const generateReferralCode = async (userId: string): Promise<string | null> => {
   try {
     // Check if user already has a referral code
-    const { data: existing } = await supabase
-      .from('referrals')
+    const { data: existing } = await (supabase
+      .from('referrals' as any) as any)
       .select('referral_code')
       .eq('referrer_id', userId)
       .eq('status', 'pending')
@@ -59,8 +59,8 @@ export const generateReferralCode = async (userId: string): Promise<string | nul
     // Generate a short, readable code: first 8 chars of a UUID-like random string
     const code = crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase();
 
-    const { data, error } = await supabase
-      .from('referrals')
+    const { data, error } = await (supabase
+      .from('referrals' as any) as any)
       .insert({
         referrer_id: userId,
         referral_code: code,
@@ -99,8 +99,8 @@ export interface ReferralStats {
  */
 export const getMyReferrals = async (userId: string): Promise<ReferralStats> => {
   try {
-    const { data, error } = await supabase
-      .from('referrals')
+    const { data, error } = await (supabase
+      .from('referrals' as any) as any)
       .select('id, referral_code, status, created_at, completed_at')
       .eq('referrer_id', userId)
       .order('created_at', { ascending: false });
