@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
@@ -34,6 +34,7 @@ export const DynamicPremiumPage = () => {
   const [trainer, setTrainer] = useState<TrainerConfig | null>(null);
   const [resolvedImageUrl, setResolvedImageUrl] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [hasAppliedCounterpart, setHasAppliedCounterpart] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -57,6 +58,14 @@ export const DynamicPremiumPage = () => {
           const { data: publicUrlData } = supabase.storage.from('trainer-uploads').getPublicUrl(url);
           if (publicUrlData?.publicUrl) setResolvedImageUrl(publicUrlData.publicUrl);
         }
+      }
+      // Check for maths applied counterpart
+      const subLower = prod.subject.toLowerCase();
+      if (subLower.includes('math')) {
+        const isApplied = prod.slug.endsWith('-applied');
+        const targetSlug = isApplied ? prod.slug.replace(/-applied$/, '') : `${prod.slug}-applied`;
+        const { data: counterpart } = await supabase.from('products').select('id').eq('slug', targetSlug).eq('active', true).maybeSingle();
+        setHasAppliedCounterpart(!!counterpart);
       }
       setLoading(false);
     };

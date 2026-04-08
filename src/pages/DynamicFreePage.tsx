@@ -115,6 +115,11 @@ export const DynamicFreePage = () => {
     essayMarkerCustomMarks: trainer?.essay_marker_marks || undefined,
     customPastPaperContent: <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="free" />,
     customRevisionGuideContent: <DynamicRevisionGuide productId={product.id} subjectName={subjectName} tier="free" />,
+    ...(isMathsSubject && hasAppliedCounterpart ? {
+      showMathsModeSwitcher: true,
+      mathsMode,
+      onMathsModeChange: handleMathsModeChange,
+    } : {}),
   };
 
   return (
