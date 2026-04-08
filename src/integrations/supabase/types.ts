@@ -108,6 +108,30 @@ export type Database = {
         }
         Relationships: []
       }
+      change_log: {
+        Row: {
+          category: string
+          change_date: string
+          created_at: string
+          description: string
+          id: string
+        }
+        Insert: {
+          category: string
+          change_date?: string
+          created_at?: string
+          description: string
+          id?: string
+        }
+        Update: {
+          category?: string
+          change_date?: string
+          created_at?: string
+          description?: string
+          id?: string
+        }
+        Relationships: []
+      }
       chat_conversations: {
         Row: {
           created_at: string
@@ -437,6 +461,27 @@ export type Database = {
           },
         ]
       }
+      metrics_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          metrics: Json
+          snapshot_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metrics: Json
+          snapshot_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metrics?: Json
+          snapshot_date?: string
+        }
+        Relationships: []
+      }
       monthly_tool_usage: {
         Row: {
           created_at: string
@@ -569,6 +614,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referrals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          referral_code: string
+          referred_id: string | null
+          referrer_id: string
+          reward_granted_referred: boolean
+          reward_granted_referrer: boolean
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_id?: string | null
+          referrer_id: string
+          reward_granted_referred?: boolean
+          reward_granted_referrer?: boolean
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_id?: string | null
+          referrer_id?: string
+          reward_granted_referred?: boolean
+          reward_granted_referrer?: boolean
+          status?: string
+        }
+        Relationships: []
       }
       seasonal_prompts: {
         Row: {
@@ -812,6 +893,8 @@ export type Database = {
           completed: boolean
           created_at: string
           id: string
+          last_reviewed_at: string | null
+          mastered: boolean
           next_review_at: string
           note: string | null
           product_id: string
@@ -824,6 +907,8 @@ export type Database = {
           completed?: boolean
           created_at?: string
           id?: string
+          last_reviewed_at?: string | null
+          mastered?: boolean
           next_review_at?: string
           note?: string | null
           product_id: string
@@ -836,6 +921,8 @@ export type Database = {
           completed?: boolean
           created_at?: string
           id?: string
+          last_reviewed_at?: string | null
+          mastered?: boolean
           next_review_at?: string
           note?: string | null
           product_id?: string
@@ -915,6 +1002,36 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          current_streak: number
+          id: string
+          last_active_date: string | null
+          longest_streak: number
+          streak_freeze_used: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number
+          streak_freeze_used?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number
+          streak_freeze_used?: boolean
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
