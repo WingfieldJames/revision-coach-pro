@@ -85,6 +85,16 @@ export const DynamicPremiumPage = () => {
   const diagramSubject: 'economics' | 'cs' = subjectLower.includes('computer') ? 'cs' : 'economics';
   const isMathsSubject = subjectLower.includes('math');
 
+  const isAppliedSlug = product.slug.endsWith('-applied');
+  const pureSlug = isAppliedSlug ? product.slug.replace(/-applied$/, '') : product.slug;
+  const appliedSlug = isAppliedSlug ? product.slug : `${product.slug}-applied`;
+  const mathsMode: 'pure' | 'applied' = isAppliedSlug ? 'applied' : 'pure';
+  const handleMathsModeChange = (mode: 'pure' | 'applied') => {
+    if (mode === mathsMode) return;
+    const targetSlug = mode === 'applied' ? appliedSlug : pureSlug;
+    navigate(`/s/${targetSlug}/premium`);
+  };
+
   // Parse trainer achievements
   const achievements = (trainer?.trainer_achievements || [])
     .map((a: any) => typeof a === 'string' ? { text: a } : a)
@@ -112,6 +122,11 @@ export const DynamicPremiumPage = () => {
     essayMarkerCustomMarks: trainer?.essay_marker_marks || undefined,
     customPastPaperContent: <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="deluxe" />,
     customRevisionGuideContent: <DynamicRevisionGuide productId={product.id} subjectName={subjectName} tier="deluxe" />,
+    ...(isMathsSubject && hasAppliedCounterpart ? {
+      showMathsModeSwitcher: true,
+      mathsMode,
+      onMathsModeChange: handleMathsModeChange,
+    } : {}),
   };
 
   return (
