@@ -32,6 +32,7 @@ export const DynamicFreePage = () => {
   const [trainer, setTrainer] = useState<TrainerConfig | null>(null);
   const [resolvedImageUrl, setResolvedImageUrl] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [hasAppliedCounterpart, setHasAppliedCounterpart] = useState(false);
 
   useEffect(() => {
     if (!slug) { navigate('/compare'); return; }
@@ -42,7 +43,6 @@ export const DynamicFreePage = () => {
       const { data: tp } = await supabase.from('trainer_projects').select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts, diagram_library, trainer_name, trainer_status, trainer_achievements').eq('product_id', prod.id).maybeSingle();
       const trainerData = tp as unknown as TrainerConfig | null;
       setTrainer(trainerData);
-      // Resolve trainer image URL
       if (trainerData?.trainer_image_url) {
         const url = trainerData.trainer_image_url;
         if (url.startsWith('http') || url.startsWith('/')) {
@@ -51,6 +51,14 @@ export const DynamicFreePage = () => {
           const { data: publicUrlData } = supabase.storage.from('trainer-uploads').getPublicUrl(url);
           if (publicUrlData?.publicUrl) setResolvedImageUrl(publicUrlData.publicUrl);
         }
+      }
+      // Check for maths applied counterpart
+      const subLower = prod.subject.toLowerCase();
+      if (subLower.includes('math')) {
+        const isApplied = prod.slug.endsWith('-applied');
+        const targetSlug = isApplied ? prod.slug.replace(/-applied$/, '') : `${prod.slug}-applied`;
+        const { data: counterpart } = await supabase.from('products').select('id').eq('slug', targetSlug).eq('active', true).maybeSingle();
+        setHasAppliedCounterpart(!!counterpart);
       }
       setLoading(false);
     };
@@ -70,22 +78,9 @@ export const DynamicFreePage = () => {
   const diagramSubject: 'economics' | 'cs' = subjectLower.includes('computer') ? 'cs' : 'economics';
   const isMathsSubject = subjectLower.includes('math');
 
-  // Maths Pure/Applied mode switcher
   const isAppliedSlug = product.slug.endsWith('-applied');
   const pureSlug = isAppliedSlug ? product.slug.replace(/-applied$/, '') : product.slug;
   const appliedSlug = isAppliedSlug ? product.slug : `${product.slug}-applied`;
-  const [hasAppliedCounterpart, setHasAppliedCounterpart] = useState(false);
-  
-  useEffect(() => {
-    if (!isMathsSubject) return;
-    const checkCounterpart = async () => {
-      const targetSlug = isAppliedSlug ? pureSlug : appliedSlug;
-      const { data } = await supabase.from('products').select('id').eq('slug', targetSlug).eq('active', true).maybeSingle();
-      setHasAppliedCounterpart(!!data);
-    };
-    checkCounterpart();
-  }, [isMathsSubject, pureSlug, appliedSlug, isAppliedSlug]);
-
   const mathsMode: 'pure' | 'applied' = isAppliedSlug ? 'applied' : 'pure';
   const handleMathsModeChange = (mode: 'pure' | 'applied') => {
     if (mode === mathsMode) return;
