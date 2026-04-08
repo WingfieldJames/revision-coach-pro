@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { SEOHead } from '@/components/SEOHead';
 import { RandomChatbotBackground } from '@/components/ui/random-chatbot-background';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
@@ -26,6 +26,7 @@ interface TrainerConfig {
 export const DynamicFreePage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const chatRef = useRef<RAGChatRef>(null);
   const [product, setProduct] = useState<ProductConfig | null>(null);
   const [trainer, setTrainer] = useState<TrainerConfig | null>(null);
