@@ -42,9 +42,114 @@ const TOPIC_KEYWORDS: Record<string, string[]> = {
   "Exam Technique": ["mark scheme", "exam", "marks", "command word", "how many marks", "past paper", "revision"],
 };
 
-function extractTopics(messages: string[]): string[] {
+// Mini-quiz question bank per topic for the weakest topic challenge
+const TOPIC_QUIZ_BANK: Record<string, { q: string; options: string[]; answer: string }[]> = {
+  "Organic Chemistry": [
+    { q: "What type of reaction converts an alkene to an alcohol?", options: ["Hydration", "Dehydration", "Oxidation", "Substitution"], answer: "Hydration" },
+    { q: "Which functional group is present in carboxylic acids?", options: ["-COOH", "-CHO", "-OH", "-NH2"], answer: "-COOH" },
+    { q: "What is the general formula for alkanes?", options: ["CnH2n+2", "CnH2n", "CnH2n-2", "CnHn"], answer: "CnH2n+2" },
+    { q: "What catalyst is used in the hydrogenation of alkenes?", options: ["Nickel", "Iron", "Copper", "Zinc"], answer: "Nickel" },
+  ],
+  "Inorganic Chemistry": [
+    { q: "Which type of bonding exists in sodium chloride?", options: ["Ionic", "Covalent", "Metallic", "Van der Waals"], answer: "Ionic" },
+    { q: "What happens to electronegativity across a period?", options: ["Increases", "Decreases", "Stays the same", "Fluctuates"], answer: "Increases" },
+    { q: "Which group in the periodic table are the halogens?", options: ["Group 7", "Group 1", "Group 2", "Group 0"], answer: "Group 7" },
+    { q: "What colour is the flame test for potassium?", options: ["Lilac", "Yellow", "Red", "Green"], answer: "Lilac" },
+  ],
+  "Physical Chemistry": [
+    { q: "What does a negative enthalpy change indicate?", options: ["Exothermic reaction", "Endothermic reaction", "No energy change", "Equilibrium"], answer: "Exothermic reaction" },
+    { q: "What does Le Chatelier's principle predict?", options: ["How equilibrium shifts when conditions change", "Reaction rate", "Bond energy", "Activation energy"], answer: "How equilibrium shifts when conditions change" },
+    { q: "What unit is enthalpy change measured in?", options: ["kJ/mol", "J/kg", "Pa", "mol/dm3"], answer: "kJ/mol" },
+    { q: "Increasing temperature generally does what to reaction rate?", options: ["Increases it", "Decreases it", "No effect", "Halves it"], answer: "Increases it" },
+  ],
+  "Mechanics": [
+    { q: "What is the SI unit of force?", options: ["Newton", "Joule", "Watt", "Pascal"], answer: "Newton" },
+    { q: "What is Newton's second law of motion?", options: ["F = ma", "F = mv", "F = mg", "F = ms"], answer: "F = ma" },
+    { q: "What quantity is conserved in all collisions?", options: ["Momentum", "Kinetic energy", "Speed", "Velocity"], answer: "Momentum" },
+    { q: "What is the acceleration due to gravity on Earth (approx)?", options: ["9.81 m/s\u00B2", "10.5 m/s\u00B2", "8.5 m/s\u00B2", "11 m/s\u00B2"], answer: "9.81 m/s\u00B2" },
+  ],
+  "Electricity": [
+    { q: "What is Ohm's Law?", options: ["V = IR", "P = IV", "Q = It", "E = Pt"], answer: "V = IR" },
+    { q: "In a series circuit, what is constant?", options: ["Current", "Voltage", "Resistance", "Power"], answer: "Current" },
+    { q: "What does a resistor do in a circuit?", options: ["Opposes current flow", "Stores charge", "Amplifies current", "Generates voltage"], answer: "Opposes current flow" },
+    { q: "What is the unit of electrical resistance?", options: ["Ohm", "Ampere", "Volt", "Farad"], answer: "Ohm" },
+  ],
+  "Waves & Optics": [
+    { q: "What is the speed of light in a vacuum?", options: ["3 \u00D7 10\u2078 m/s", "3 \u00D7 10\u2076 m/s", "3 \u00D7 10\u00B9\u2070 m/s", "3 \u00D7 10\u2074 m/s"], answer: "3 \u00D7 10\u2078 m/s" },
+    { q: "What type of wave is sound?", options: ["Longitudinal", "Transverse", "Electromagnetic", "Standing"], answer: "Longitudinal" },
+    { q: "What happens when light enters a denser medium?", options: ["It slows down and bends towards the normal", "It speeds up", "It stays the same", "It reflects"], answer: "It slows down and bends towards the normal" },
+    { q: "What is diffraction?", options: ["Spreading of waves through a gap", "Reflection of waves", "Absorption of waves", "Polarisation"], answer: "Spreading of waves through a gap" },
+  ],
+  "Nuclear Physics": [
+    { q: "What is an alpha particle?", options: ["2 protons + 2 neutrons", "An electron", "A photon", "A neutron"], answer: "2 protons + 2 neutrons" },
+    { q: "What does half-life measure?", options: ["Time for half the nuclei to decay", "Total decay time", "Energy released", "Radiation dose"], answer: "Time for half the nuclei to decay" },
+    { q: "Which radiation is most penetrating?", options: ["Gamma", "Beta", "Alpha", "Neutron"], answer: "Gamma" },
+    { q: "What is nuclear fission?", options: ["Splitting a heavy nucleus", "Joining light nuclei", "Radioactive decay", "Neutron capture"], answer: "Splitting a heavy nucleus" },
+  ],
+  "Algebra": [
+    { q: "What is the quadratic formula?", options: ["x = (-b \u00B1 \u221A(b\u00B2-4ac)) / 2a", "x = -b/2a", "x = b\u00B2 - 4ac", "x = a + b + c"], answer: "x = (-b \u00B1 \u221A(b\u00B2-4ac)) / 2a" },
+    { q: "How many solutions can a quadratic equation have?", options: ["0, 1, or 2", "Always 2", "Always 1", "Infinite"], answer: "0, 1, or 2" },
+    { q: "What does 'factorise' mean?", options: ["Express as a product of factors", "Expand brackets", "Simplify", "Differentiate"], answer: "Express as a product of factors" },
+    { q: "What is the discriminant of a quadratic?", options: ["b\u00B2 - 4ac", "b + 4ac", "2a", "-b/a"], answer: "b\u00B2 - 4ac" },
+  ],
+  "Calculus": [
+    { q: "What is the derivative of x\u00B2?", options: ["2x", "x", "x\u00B3", "2"], answer: "2x" },
+    { q: "What does integration find?", options: ["Area under a curve", "Gradient", "Turning point", "Intercept"], answer: "Area under a curve" },
+    { q: "What is the chain rule used for?", options: ["Differentiating composite functions", "Integrating by parts", "Finding limits", "Solving equations"], answer: "Differentiating composite functions" },
+    { q: "What is the integral of 1/x?", options: ["ln|x| + C", "x\u00B2 + C", "1/x\u00B2 + C", "e\u02E3 + C"], answer: "ln|x| + C" },
+  ],
+  "Statistics": [
+    { q: "What is the mean of 2, 4, 6, 8?", options: ["5", "4", "6", "3"], answer: "5" },
+    { q: "What does standard deviation measure?", options: ["Spread of data from the mean", "Average value", "Most common value", "Range"], answer: "Spread of data from the mean" },
+    { q: "In a normal distribution, what % of data is within 1 SD of the mean?", options: ["68%", "95%", "50%", "99%"], answer: "68%" },
+    { q: "What is a null hypothesis?", options: ["A statement of no effect or difference", "The desired outcome", "A proven theory", "An alternative explanation"], answer: "A statement of no effect or difference" },
+  ],
+  "Trigonometry": [
+    { q: "What is sin(90\u00B0)?", options: ["1", "0", "-1", "0.5"], answer: "1" },
+    { q: "How many radians are in 180\u00B0?", options: ["\u03C0", "2\u03C0", "\u03C0/2", "\u03C0/4"], answer: "\u03C0" },
+    { q: "What is the identity sin\u00B2x + cos\u00B2x equal to?", options: ["1", "0", "tan\u00B2x", "2"], answer: "1" },
+    { q: "What is tan(x) in terms of sin and cos?", options: ["sin(x)/cos(x)", "cos(x)/sin(x)", "sin(x)\u00D7cos(x)", "1/sin(x)"], answer: "sin(x)/cos(x)" },
+  ],
+  "Biology - Cells": [
+    { q: "What is the powerhouse of the cell?", options: ["Mitochondria", "Nucleus", "Ribosome", "Golgi apparatus"], answer: "Mitochondria" },
+    { q: "What type of cell division produces identical cells?", options: ["Mitosis", "Meiosis", "Binary fission", "Budding"], answer: "Mitosis" },
+    { q: "What controls what enters and exits a cell?", options: ["Cell membrane", "Cell wall", "Nucleus", "Cytoplasm"], answer: "Cell membrane" },
+    { q: "Where does protein synthesis occur?", options: ["Ribosomes", "Mitochondria", "Nucleus", "Golgi apparatus"], answer: "Ribosomes" },
+  ],
+  "Biology - Genetics": [
+    { q: "What is the shape of DNA?", options: ["Double helix", "Single strand", "Triple helix", "Circular"], answer: "Double helix" },
+    { q: "What are the base pairs in DNA?", options: ["A-T and G-C", "A-G and T-C", "A-C and G-T", "A-U and G-C"], answer: "A-T and G-C" },
+    { q: "What is a genotype?", options: ["The genetic makeup of an organism", "The physical appearance", "A type of gene", "A chromosome"], answer: "The genetic makeup of an organism" },
+    { q: "What is a dominant allele?", options: ["One that is expressed even when heterozygous", "One that is always recessive", "One that skips generations", "A mutant allele"], answer: "One that is expressed even when heterozygous" },
+  ],
+  "Biology - Ecology": [
+    { q: "What is biodiversity?", options: ["Variety of life in an ecosystem", "Number of species", "Population size", "Food chain length"], answer: "Variety of life in an ecosystem" },
+    { q: "What is the word equation for photosynthesis?", options: ["CO2 + H2O \u2192 glucose + O2", "Glucose + O2 \u2192 CO2 + H2O", "N2 + H2 \u2192 NH3", "None of these"], answer: "CO2 + H2O \u2192 glucose + O2" },
+    { q: "What is a trophic level?", options: ["A feeding level in a food chain", "A habitat type", "A population measure", "An energy source"], answer: "A feeding level in a food chain" },
+    { q: "What do decomposers do?", options: ["Break down dead organic matter", "Produce food", "Eat herbivores", "Create habitats"], answer: "Break down dead organic matter" },
+  ],
+  "Essay Writing": [
+    { q: "What should a strong essay introduction contain?", options: ["Thesis statement and context", "All your evidence", "A conclusion", "Personal opinions only"], answer: "Thesis statement and context" },
+    { q: "What does the command word 'evaluate' require?", options: ["Weigh up arguments and reach a judgement", "Simply describe", "List facts", "Define key terms"], answer: "Weigh up arguments and reach a judgement" },
+    { q: "What makes a strong paragraph?", options: ["Point, evidence, explanation", "Just facts", "Only opinions", "Quotes only"], answer: "Point, evidence, explanation" },
+    { q: "What should you avoid in academic writing?", options: ["Informal language and slang", "Evidence", "Counter-arguments", "Technical terms"], answer: "Informal language and slang" },
+  ],
+  "Exam Technique": [
+    { q: "What should you do before answering a question?", options: ["Read the command word carefully", "Start writing immediately", "Skip to the next question", "Copy the question"], answer: "Read the command word carefully" },
+    { q: "How should you allocate time in an exam?", options: ["Roughly 1 minute per mark", "Equal time per question", "Most time on first question", "Skip timing"], answer: "Roughly 1 minute per mark" },
+    { q: "What does a 'discuss' question require?", options: ["Arguments for and against with a conclusion", "A simple definition", "A list of facts", "One-sided argument"], answer: "Arguments for and against with a conclusion" },
+    { q: "Why should you plan extended answers?", options: ["To structure arguments logically", "To waste time", "Because it's required", "To copy from notes"], answer: "To structure arguments logically" },
+  ],
+};
+
+interface TopicScore {
+  topic: string;
+  count: number;
+}
+
+function extractTopicsWithScores(messages: string[]): TopicScore[] {
   const combined = messages.join(" ").toLowerCase();
-  const found: { topic: string; count: number }[] = [];
+  const found: TopicScore[] = [];
 
   for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS)) {
     let count = 0;
@@ -55,7 +160,16 @@ function extractTopics(messages: string[]): string[] {
   }
 
   found.sort((a, b) => b.count - a.count);
-  return found.slice(0, 5).map((f) => f.topic);
+  return found;
+}
+
+function getQuizQuestions(weakestTopic: string): { q: string; options: string[]; answer: string }[] {
+  const bank = TOPIC_QUIZ_BANK[weakestTopic];
+  if (!bank || bank.length === 0) return [];
+
+  // Shuffle and pick 3
+  const shuffled = [...bank].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 3);
 }
 
 async function sendEmail(
@@ -101,9 +215,12 @@ interface UserStats {
   messageCount: number;
   topicsDiscussed: string[];
   topicCount: number;
+  strongestTopic: string;
+  weakestTopic: string;
   mostActiveSubject: string;
   currentStreak: number;
   dueReviews: number;
+  quizQuestions: { q: string; options: string[]; answer: string }[];
 }
 
 function buildEmailHtml(firstName: string, stats: UserStats): string {
@@ -116,18 +233,89 @@ function buildEmailHtml(firstName: string, stats: UserStats): string {
     ? `
           <tr>
             <td style="padding:0 32px 24px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fef3c7;border-radius:12px;padding:16px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fef3c7;border-radius:12px;">
                 <tr>
                   <td style="padding:16px;">
-                    <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#92400e;">Questions to Review</p>
+                    <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#92400e;">\u23F0 Questions to Review</p>
                     <p style="margin:0 0 12px;font-size:14px;color:#a16207;">${stats.dueReviews} question${stats.dueReviews === 1 ? "" : "s"} due for review</p>
-                    <a href="${APP_URL}/chat" style="display:inline-block;background:linear-gradient(135deg,#4f36b3 0%,#7c5ce7 100%);color:#ffffff;text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:600;font-size:14px;">Start Reviewing</a>
+                    <a href="${APP_URL}/dashboard" style="display:inline-block;background:linear-gradient(135deg,#4f36b3 0%,#7c5ce7 100%);color:#ffffff;text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:600;font-size:14px;">Start Reviewing</a>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>`
     : "";
+
+  // Strongest & weakest topic section
+  const strengthSection = (stats.strongestTopic && stats.weakestTopic && stats.strongestTopic !== stats.weakestTopic)
+    ? `
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="50%" style="padding-right:6px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ecfdf5;border-radius:12px;">
+                      <tr>
+                        <td style="padding:16px;">
+                          <p style="margin:0 0 2px;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Strongest Topic \uD83C\uDFC6</p>
+                          <p style="margin:0;font-size:15px;font-weight:700;color:#065f46;">${stats.strongestTopic}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td width="50%" style="padding-left:6px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fef2f2;border-radius:12px;">
+                      <tr>
+                        <td style="padding:16px;">
+                          <p style="margin:0 0 2px;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Needs Work \uD83C\uDFAF</p>
+                          <p style="margin:0;font-size:15px;font-weight:700;color:#991b1b;">${stats.weakestTopic}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>`
+    : "";
+
+  // Mini quiz section on weakest topic
+  let quizSection = "";
+  if (stats.quizQuestions.length > 0 && stats.weakestTopic) {
+    const quizRows = stats.quizQuestions.map((quiz, i) => {
+      const optionsHtml = quiz.options.map((opt) =>
+        `<span style="display:inline-block;background:#f9fafb;border:1px solid #e5e7eb;color:#374151;padding:6px 14px;border-radius:8px;font-size:13px;margin:3px 4px 3px 0;">${opt}</span>`
+      ).join("");
+
+      return `
+            <tr>
+              <td style="padding:12px 0 ${i < stats.quizQuestions.length - 1 ? "16px" : "4px"};${i < stats.quizQuestions.length - 1 ? "border-bottom:1px solid #e5e7eb;" : ""}">
+                <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#1f2937;">${i + 1}. ${quiz.q}</p>
+                <div>${optionsHtml}</div>
+              </td>
+            </tr>`;
+    }).join("");
+
+    quizSection = `
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;">
+                <tr>
+                  <td style="padding:20px;">
+                    <p style="margin:0 0 4px;font-size:16px;font-weight:700;color:#4f36b3;">\uD83E\uDDE0 Quick Quiz: ${stats.weakestTopic}</p>
+                    <p style="margin:0 0 16px;font-size:13px;color:#6b7280;">3 questions to sharpen your weakest area. Tap a question to reveal the answer in the app.</p>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      ${quizRows}
+                    </table>
+                    <div style="margin-top:16px;text-align:center;">
+                      <a href="${APP_URL}/dashboard" style="display:inline-block;background:linear-gradient(135deg,#4f36b3 0%,#7c5ce7 100%);color:#ffffff;text-decoration:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:14px;">Practice ${stats.weakestTopic} \u2192</a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>`;
+  }
 
   return `<!DOCTYPE html>
 <html>
@@ -144,7 +332,7 @@ function buildEmailHtml(firstName: string, stats: UserStats): string {
           <tr>
             <td style="background:linear-gradient(135deg,#4f36b3 0%,#7c5ce7 100%);padding:32px 32px 24px;text-align:center;">
               <img src="${LOGO_URL}" alt="A* AI" height="36" style="height:36px;width:auto;margin-bottom:16px;" />
-              <h1 style="margin:0;font-size:24px;font-weight:700;color:#ffffff;line-height:1.3;">Your Week in Review</h1>
+              <h1 style="margin:0;font-size:24px;font-weight:700;color:#ffffff;line-height:1.3;">Your Weekly Revision Recap</h1>
               <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.8);">Here's what you accomplished this week</p>
             </td>
           </tr>
@@ -153,6 +341,7 @@ function buildEmailHtml(firstName: string, stats: UserStats): string {
           <tr>
             <td style="padding:24px 32px 8px;">
               <p style="margin:0;font-size:16px;color:#374151;">Hi ${firstName},</p>
+              <p style="margin:8px 0 0;font-size:14px;color:#6b7280;">Here's your weekly study breakdown from A* AI.</p>
             </td>
           </tr>
 
@@ -163,7 +352,7 @@ function buildEmailHtml(firstName: string, stats: UserStats): string {
                 <tr>
                   <td width="33%" align="center" style="padding:12px 4px;background:#f9fafb;border-radius:12px 0 0 12px;">
                     <p style="margin:0;font-size:28px;font-weight:700;color:#4f36b3;">${stats.messageCount}</p>
-                    <p style="margin:4px 0 0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Messages</p>
+                    <p style="margin:4px 0 0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Questions</p>
                   </td>
                   <td width="34%" align="center" style="padding:12px 4px;background:#f9fafb;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;">
                     <p style="margin:0;font-size:28px;font-weight:700;color:#4f36b3;">${stats.topicCount}</p>
@@ -192,6 +381,9 @@ function buildEmailHtml(firstName: string, stats: UserStats): string {
             </td>
           </tr>
 
+          <!-- Strongest & Weakest Topics -->
+          ${strengthSection}
+
           <!-- Topics Covered -->
           <tr>
             <td style="padding:0 32px 24px;">
@@ -203,11 +395,14 @@ function buildEmailHtml(firstName: string, stats: UserStats): string {
           <!-- Due Reviews -->
           ${reviewSection}
 
+          <!-- Mini Quiz -->
+          ${quizSection}
+
           <!-- Motivational CTA -->
           <tr>
             <td style="padding:0 32px 24px;text-align:center;">
               <p style="margin:0 0 16px;font-size:15px;color:#374151;font-weight:500;">Keep it up! Consistency is the key to exam success.</p>
-              <a href="${APP_URL}/chat" style="display:inline-block;background:linear-gradient(135deg,#4f36b3 0%,#7c5ce7 100%);color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:10px;font-weight:600;font-size:15px;">Continue Studying</a>
+              <a href="${APP_URL}/dashboard" style="display:inline-block;background:linear-gradient(135deg,#4f36b3 0%,#7c5ce7 100%);color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:10px;font-weight:600;font-size:15px;">Continue Studying</a>
             </td>
           </tr>
 
@@ -323,8 +518,16 @@ serve(async (req) => {
         // Message count
         const messageCount = userMessages[userId].messages.length;
 
-        // Topics from keyword extraction
-        const topicsDiscussed = extractTopics(userMessages[userId].messages);
+        // Topics with scores for strongest/weakest calculation
+        const topicScores = extractTopicsWithScores(userMessages[userId].messages);
+        const topicsDiscussed = topicScores.slice(0, 5).map((t) => t.topic);
+
+        // Strongest = most keyword hits (most engaged), Weakest = fewest keyword hits (least confident)
+        const strongestTopic = topicScores.length > 0 ? topicScores[0].topic : "General";
+        const weakestTopic = topicScores.length > 1 ? topicScores[topicScores.length - 1].topic : (topicScores.length === 1 ? topicScores[0].topic : "General");
+
+        // Get quiz questions for weakest topic
+        const quizQuestions = getQuizQuestions(weakestTopic);
 
         // Get products/subjects for conversations
         const conversationIds = Array.from(userMessages[userId].conversationIds);
@@ -363,13 +566,17 @@ serve(async (req) => {
           messageCount,
           topicsDiscussed,
           topicCount: topicsDiscussed.length,
+          strongestTopic,
+          weakestTopic,
           mostActiveSubject,
           currentStreak,
           dueReviews: dueReviews || 0,
+          quizQuestions,
         };
 
         const html = buildEmailHtml(firstName, stats);
-        const success = await sendEmail(email, "Your Week in Review \u2B50", html);
+        const subject = `Your weekly revision recap \u2014 ${firstName}`;
+        const success = await sendEmail(email, subject, html);
 
         if (success) {
           usersEmailed++;

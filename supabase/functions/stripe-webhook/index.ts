@@ -71,14 +71,91 @@ serve(async (req) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        logStep("Processing checkout session", { 
-          sessionId: session.id, 
-          mode: session.mode, 
+        logStep("Processing checkout session", {
+          sessionId: session.id,
+          mode: session.mode,
           paymentStatus: session.payment_status,
-          metadata: session.metadata 
+          metadata: session.metadata
         });
-        
+
         if (session.payment_status === "paid") {
+          // Handle school license checkout
+          if (session.metadata?.checkout_type === "school_license") {
+            logStep("Processing school license checkout");
+            const schoolName = session.metadata.school_name;
+            const contactEmail = session.metadata.contact_email;
+            const userId = session.metadata.user_id;
+            const seats = parseInt(session.metadata.seats || "0", 10);
+            const planType = session.metadata.plan_type || "annual";
+            const pricePerSeat = parseInt(session.metadata.price_per_seat || "0", 10);
+            const stripeSubscriptionId = session.subscription as string;
+
+            try {
+              // Create school
+              const { data: school, error: schoolError } = await supabaseClient
+                .from("schools")
+                .insert({
+                  name: schoolName,
+                  contact_email: contactEmail,
+                  created_by: userId,
+                })
+                .select()
+                .single();
+
+              if (schoolError) {
+                logStep("ERROR: Failed to create school", { error: schoolError });
+              } else {
+                logStep("School created", { schoolId: school.id });
+
+                // Create license — expires 1 year from now
+                const expiresAt = new Date();
+                expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+                const { data: license, error: licenseError } = await supabaseClient
+                  .from("school_licenses")
+                  .insert({
+                    school_id: school.id,
+                    total_seats: seats,
+                    used_seats: 0,
+                    stripe_subscription_id: stripeSubscriptionId,
+                    plan_type: planType,
+                    price_per_seat: pricePerSeat,
+                    expires_at: expiresAt.toISOString(),
+                    active: true,
+                  })
+                  .select()
+                  .single();
+
+                if (licenseError) {
+                  logStep("ERROR: Failed to create license", { error: licenseError });
+                } else {
+                  logStep("License created", { licenseId: license.id, seats });
+
+                  // Add the purchasing user as school admin
+                  const { error: memberError } = await supabaseClient
+                    .from("school_members")
+                    .insert({
+                      school_id: school.id,
+                      license_id: license.id,
+                      user_id: userId,
+                      role: "admin",
+                      invited_email: contactEmail,
+                      invite_status: "accepted",
+                      joined_at: new Date().toISOString(),
+                    });
+
+                  if (memberError) {
+                    logStep("ERROR: Failed to add admin member", { error: memberError });
+                  } else {
+                    logStep("Admin member added to school", { userId });
+                  }
+                }
+              }
+            } catch (schoolErr) {
+              logStep("ERROR: Exception during school license setup", { error: (schoolErr as Error).message });
+            }
+            break;
+          }
           // Get customer email
           let customerEmail = session.customer_email;
           let customerId = session.customer as string;

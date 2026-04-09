@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
-export default function EmailPreferences() {
+export function EmailPreferences() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [weeklyRecap, setWeeklyRecap] = useState(true);

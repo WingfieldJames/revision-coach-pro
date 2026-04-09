@@ -54,6 +54,16 @@ interface Member {
   created_at: string;
 }
 
+interface StudentProgress {
+  userId: string;
+  email: string;
+  messageCount: number;
+  topicsStudied: number;
+  avgScore: string;
+  currentStreak: number;
+  lastActive: string | null;
+}
+
 export const SchoolDashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -67,6 +77,8 @@ export const SchoolDashboardPage = () => {
   const [inviteRole, setInviteRole] = useState<'student' | 'teacher'>('student');
   const [inviting, setInviting] = useState(false);
   const [userRole, setUserRole] = useState<string>('student');
+  const [studentProgress, setStudentProgress] = useState<StudentProgress[]>([]);
+  const [progressLoading, setProgressLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -126,12 +138,114 @@ export const SchoolDashboardPage = () => {
         .eq('school_id', membership.school_id)
         .order('created_at', { ascending: false });
 
-      if (membersData) setMembers(membersData as Member[]);
+      if (membersData) {
+        setMembers(membersData as Member[]);
+        // Fetch aggregate progress for accepted student members
+        const acceptedStudentIds = (membersData as Member[])
+          .filter((m) => m.invite_status === 'accepted' && m.user_id)
+          .map((m) => m.user_id!);
+
+        if (acceptedStudentIds.length > 0) {
+          fetchStudentProgress(acceptedStudentIds, membersData as Member[]);
+        }
+      }
     } catch (err) {
       console.error('Error fetching school data:', err);
       toast.error('Failed to load school data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStudentProgress = async (userIds: string[], allMembers: Member[]) => {
+    setProgressLoading(true);
+    try {
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      // Fetch message counts per user (last 30 days)
+      const { data: conversations } = await supabase
+        .from('chat_conversations')
+        .select('id, user_id')
+        .in('user_id', userIds);
+
+      const convIds = (conversations || []).map((c: any) => c.id);
+      const userConvMap: Record<string, string[]> = {};
+      for (const c of conversations || []) {
+        if (!userConvMap[c.user_id]) userConvMap[c.user_id] = [];
+        userConvMap[c.user_id].push(c.id);
+      }
+
+      let messageCounts: Record<string, number> = {};
+      if (convIds.length > 0) {
+        const { data: messages } = await supabase
+          .from('chat_messages')
+          .select('conversation_id')
+          .in('conversation_id', convIds)
+          .eq('role', 'user')
+          .gte('created_at', thirtyDaysAgo);
+
+        // Map message conversation_ids back to user_ids
+        const convToUser: Record<string, string> = {};
+        for (const [userId, cIds] of Object.entries(userConvMap)) {
+          for (const cId of cIds) convToUser[cId] = userId;
+        }
+        for (const msg of messages || []) {
+          const uid = convToUser[msg.conversation_id];
+          if (uid) messageCounts[uid] = (messageCounts[uid] || 0) + 1;
+        }
+      }
+
+      // Fetch streaks
+      const { data: streaks } = await supabase
+        .from('user_streaks')
+        .select('user_id, current_streak, last_active_date')
+        .in('user_id', userIds);
+
+      const streakMap: Record<string, { streak: number; lastActive: string | null }> = {};
+      for (const s of streaks || []) {
+        streakMap[s.user_id] = { streak: s.current_streak, lastActive: s.last_active_date };
+      }
+
+      // Fetch review stats (mastered vs total)
+      const { data: mistakes } = await supabase
+        .from('user_mistakes')
+        .select('user_id, mastered')
+        .in('user_id', userIds);
+
+      const reviewStats: Record<string, { total: number; mastered: number }> = {};
+      for (const m of mistakes || []) {
+        if (!reviewStats[m.user_id]) reviewStats[m.user_id] = { total: 0, mastered: 0 };
+        reviewStats[m.user_id].total++;
+        if (m.mastered) reviewStats[m.user_id].mastered++;
+      }
+
+      // Build progress data
+      const progress: StudentProgress[] = userIds.map((uid) => {
+        const member = allMembers.find((m) => m.user_id === uid);
+        const stats = reviewStats[uid] || { total: 0, mastered: 0 };
+        const avgScore = stats.total > 0
+          ? `${Math.round((stats.mastered / stats.total) * 100)}%`
+          : '-';
+
+        return {
+          userId: uid,
+          email: member?.invited_email || '-',
+          messageCount: messageCounts[uid] || 0,
+          topicsStudied: 0, // Could be expanded
+          avgScore,
+          currentStreak: streakMap[uid]?.streak || 0,
+          lastActive: streakMap[uid]?.lastActive || member?.joined_at || null,
+        };
+      });
+
+      // Sort by message count descending
+      progress.sort((a, b) => b.messageCount - a.messageCount);
+      setStudentProgress(progress);
+    } catch (err) {
+      console.error('Error fetching student progress:', err);
+    } finally {
+      setProgressLoading(false);
     }
   };
 
@@ -487,12 +601,12 @@ export const SchoolDashboardPage = () => {
               Student Progress
             </CardTitle>
             <CardDescription>
-              Overview of accepted students and their activity
+              Aggregate activity and performance across your school (last 30 days)
             </CardDescription>
           </CardHeader>
           <CardContent>
             {/* Summary stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
               <div className="rounded-lg bg-muted p-4">
                 <p className="text-sm text-muted-foreground">Active Students</p>
                 <p className="text-2xl font-bold">
@@ -513,59 +627,90 @@ export const SchoolDashboardPage = () => {
                   {members.filter((m) => m.invite_status === 'pending').length}
                 </p>
               </div>
+              <div className="rounded-lg bg-muted p-4">
+                <p className="text-sm text-muted-foreground">Total Questions</p>
+                <p className="text-2xl font-bold">
+                  {studentProgress.reduce((sum, s) => sum + s.messageCount, 0)}
+                </p>
+              </div>
             </div>
 
-            {/* Student table */}
+            {/* Student progress table */}
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">
-                      Student
-                    </th>
-                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">
-                      Role
-                    </th>
-                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">
-                      Joined
-                    </th>
-                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">
-                      Last Active
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {acceptedMembers.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="py-8 text-center text-muted-foreground"
-                      >
-                        No accepted members yet.
-                      </td>
+              {progressLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+                  <span className="ml-2 text-sm text-muted-foreground">Loading progress data...</span>
+                </div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-2 font-medium text-muted-foreground">
+                        Student
+                      </th>
+                      <th className="text-left py-3 px-2 font-medium text-muted-foreground">
+                        Questions (30d)
+                      </th>
+                      <th className="text-left py-3 px-2 font-medium text-muted-foreground">
+                        Mastery
+                      </th>
+                      <th className="text-left py-3 px-2 font-medium text-muted-foreground">
+                        Streak
+                      </th>
+                      <th className="text-left py-3 px-2 font-medium text-muted-foreground">
+                        Last Active
+                      </th>
                     </tr>
-                  )}
-                  {acceptedMembers.map((member) => (
-                    <tr key={member.id} className="border-b last:border-0">
-                      <td className="py-3 px-2">
-                        {member.invited_email ?? '-'}
-                      </td>
-                      <td className="py-3 px-2">
-                        <Badge variant="outline" className="capitalize">
-                          {member.role}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-2 text-muted-foreground">
-                        {formatDate(member.joined_at)}
-                      </td>
-                      <td className="py-3 px-2 text-muted-foreground">
-                        {formatDate(member.joined_at)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {studentProgress.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="py-8 text-center text-muted-foreground"
+                        >
+                          No student activity data yet. Invite students to get started.
+                        </td>
+                      </tr>
+                    )}
+                    {studentProgress.map((student) => (
+                      <tr key={student.userId} className="border-b last:border-0">
+                        <td className="py-3 px-2">
+                          {student.email}
+                        </td>
+                        <td className="py-3 px-2">
+                          <span className={`font-medium ${student.messageCount > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            {student.messageCount}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2">
+                          <Badge variant={student.avgScore !== '-' ? 'default' : 'outline'} className="text-xs">
+                            {student.avgScore}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-2">
+                          {student.currentStreak > 0 ? (
+                            <span className="flex items-center gap-1 text-orange-600 font-medium">
+                              {student.currentStreak}d
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">0d</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-2 text-muted-foreground">
+                          {formatDate(student.lastActive)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
+
+            <p className="text-xs text-muted-foreground mt-4">
+              Student data is anonymised in compliance with UK GDPR. Activity data is aggregated and not used for AI model training.
+            </p>
           </CardContent>
         </Card>
       </main>

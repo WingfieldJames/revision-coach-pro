@@ -11,7 +11,7 @@ import { LogOut, Mail, Shield, AlertTriangle, Gift, Flame, Clock } from 'lucide-
 import { StreakDisplay } from '@/components/StreakDisplay';
 import { ReferAFriend } from '@/components/ReferAFriend';
 import { ReviewDashboardSection } from '@/components/ReviewDashboardSection';
-import EmailPreferences from '@/components/EmailPreferences';
+import { EmailPreferences } from '@/components/EmailPreferences';
 import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -28,6 +28,7 @@ export const ProfilePage = () => {
   const [cancelFlowBoard, setCancelFlowBoard] = React.useState<string | null>(null);
   const [cancelReason, setCancelReason] = React.useState('');
   const [loadingAccess, setLoadingAccess] = React.useState(true);
+  const [schoolLicense, setSchoolLicense] = React.useState<{ schoolName: string; expiresAt: string } | null>(null);
 
   React.useEffect(() => {
     const loadAccess = async () => {
@@ -72,6 +73,25 @@ export const ProfilePage = () => {
         });
         setSubscriptionDetails(details);
       }
+      // Check for school license
+      const { data: schoolMember } = await supabase
+        .from('school_members')
+        .select('school_id, role, schools(name), school_licenses(expires_at, active)')
+        .eq('user_id', user.id)
+        .eq('invite_status', 'accepted')
+        .limit(1)
+        .maybeSingle();
+
+      if (schoolMember && (schoolMember as any).schools && (schoolMember as any).school_licenses) {
+        const license = (schoolMember as any).school_licenses;
+        if (license?.active) {
+          setSchoolLicense({
+            schoolName: (schoolMember as any).schools.name,
+            expiresAt: license.expires_at,
+          });
+        }
+      }
+
       setLoadingAccess(false);
     };
     loadAccess();
@@ -165,11 +185,26 @@ export const ProfilePage = () => {
             <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" /> Subscriptions</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* School License Badge */}
+            {schoolLicense && (
+              <div className="mb-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge className="bg-primary text-primary-foreground text-xs">Premium — School License</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Provided by <span className="font-medium text-foreground">{schoolLicense.schoolName}</span>
+                  {schoolLicense.expiresAt && (
+                    <> · Expires {new Date(schoolLicense.expiresAt).toLocaleDateString()}</>
+                  )}
+                </p>
+              </div>
+            )}
+
             {loadingAccess ? (
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" /> Checking...
               </div>
-            ) : activeBoards.length === 0 ? (
+            ) : activeBoards.length === 0 && !schoolLicense ? (
               <div className="text-center py-4">
                 <p className="text-muted-foreground mb-3">No active subscriptions</p>
                 <Button variant="brand" asChild><Link to="/compare">Browse Plans</Link></Button>
@@ -185,7 +220,7 @@ export const ProfilePage = () => {
                         <span className="font-medium">{boardNames[board]}</span>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="secondary" className="text-xs">
-                            {sub?.payment_type === 'referral' ? 'Referral' : isMonthly ? 'Monthly' : 'Lifetime'}
+                            {sub?.payment_type === 'school' ? 'School License' : sub?.payment_type === 'referral' ? 'Referral' : isMonthly ? 'Monthly' : 'Lifetime'}
                           </Badge>
                           <Badge className="text-xs bg-green-100 text-green-800 hover:bg-green-100">ACTIVE</Badge>
                           {sub?.subscription_end && (
@@ -195,7 +230,7 @@ export const ProfilePage = () => {
                           )}
                         </div>
                       </div>
-                      {isMonthly && (
+                      {isMonthly && sub?.payment_type !== 'school' && (
                         <Button
                           variant="ghost" size="sm"
                           className="text-xs text-muted-foreground hover:text-destructive"

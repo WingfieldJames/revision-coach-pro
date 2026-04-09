@@ -1,11 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import schoolsMockup from "@/assets/schools-dashboard-mockup.png";
 import { Header } from "@/components/Header";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, CheckCircle, Bot, PenLine, FileText, BookOpen, Brain, BarChart3, School, GraduationCap, Users, Star, Database, Lock, FileCheck, UserCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Shield, CheckCircle, Bot, PenLine, FileText, BookOpen, Brain, BarChart3, School, GraduationCap, Users, Star, Database, Lock, FileCheck, UserCheck, Minus, Plus } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const trustItems = [
   "GDPR compliant",
@@ -44,7 +50,63 @@ const comparisonItems = [
   { name: "A*AI", desc: "Trained on your exact board and spec. Teaches exam technique, not just content — so students get better at the game.", highlight: true },
 ];
 
+function getPricePerSeat(seats: number): number {
+  if (seats >= 31) return 399;
+  if (seats >= 11) return 499;
+  return 599;
+}
+
+function getPriceTierLabel(seats: number): string {
+  if (seats >= 31) return "£3.99/seat/month";
+  if (seats >= 11) return "£4.99/seat/month";
+  return "£5.99/seat/month";
+}
+
 export const ProgressPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [buyOpen, setBuyOpen] = useState(false);
+  const [seats, setSeats] = useState(10);
+  const [schoolName, setSchoolName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [purchasing, setPurchasing] = useState(false);
+
+  const handlePurchase = async () => {
+    if (!user) {
+      toast.error("Please sign in first");
+      navigate("/login?redirect=progress");
+      return;
+    }
+
+    if (!schoolName.trim()) {
+      toast.error("Please enter your school name");
+      return;
+    }
+
+    setPurchasing(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke("school-checkout", {
+        body: { seats, schoolName, contactEmail: contactEmail || user.email, planType: "annual" },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start checkout");
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  const pricePerSeat = getPricePerSeat(seats);
+  const totalMonthly = (pricePerSeat * seats) / 100;
+
   return (
     <div className="min-h-screen bg-background font-sans">
       <SEOHead
@@ -220,46 +282,117 @@ export const ProgressPage = () => {
             Simple, transparent pricing.
           </h2>
           <p className="text-[17px] text-muted-foreground max-w-[500px]">
-            Annual licence aligned to the academic year. No hidden fees.
+            Per-seat pricing with volume discounts. No hidden fees.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-[780px]">
-          {/* Founding Partner */}
-          <Card className="border-2 border-primary">
-            <CardContent className="p-8">
-              <Badge className="mb-4 rounded-full text-[11px] uppercase tracking-wide font-bold">Founding Partner</Badge>
-              <h3 className="text-xl font-extrabold mb-2">Independent School</h3>
-              <p className="text-sm text-muted-foreground mb-1 leading-snug">Whole sixth form access. For schools joining in our founding cohort.</p>
-              <div className="text-4xl font-extrabold text-primary tracking-tight my-5">
-                £999 <span className="text-base font-medium text-muted-foreground">/ year</span>
-              </div>
-              <ul className="flex flex-col gap-2.5">
-                {["Unlimited student accounts", "All 6 tools included", "Teacher dashboard + analytics", "Dedicated account manager", "Co-branded impact report", "Priority feature requests"].map((li) => (
-                  <li key={li} className="flex items-center gap-2.5 text-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                    {li}
-                  </li>
-                ))}
-              </ul>
+
+        {/* Pricing tiers */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-[860px] mb-10">
+          <Card className={seats <= 10 ? "border-2 border-primary" : ""}>
+            <CardContent className="p-6 text-center">
+              <p className="text-sm text-muted-foreground mb-1">1-10 seats</p>
+              <div className="text-3xl font-extrabold text-primary tracking-tight">£5.99</div>
+              <p className="text-sm text-muted-foreground">/seat/month</p>
             </CardContent>
           </Card>
+          <Card className={seats >= 11 && seats <= 30 ? "border-2 border-primary" : ""}>
+            <CardContent className="p-6 text-center">
+              <Badge className="mb-2 rounded-full text-[10px] uppercase tracking-wide font-bold">Popular</Badge>
+              <p className="text-sm text-muted-foreground mb-1">11-30 seats</p>
+              <div className="text-3xl font-extrabold text-primary tracking-tight">£4.99</div>
+              <p className="text-sm text-muted-foreground">/seat/month</p>
+            </CardContent>
+          </Card>
+          <Card className={seats >= 31 ? "border-2 border-primary" : ""}>
+            <CardContent className="p-6 text-center">
+              <p className="text-sm text-muted-foreground mb-1">31+ seats</p>
+              <div className="text-3xl font-extrabold text-primary tracking-tight">£3.99</div>
+              <p className="text-sm text-muted-foreground">/seat/month</p>
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* Standard */}
-          <Card>
-            <CardContent className="p-8">
-              <h3 className="text-xl font-extrabold mb-2 mt-8">Independent School</h3>
-              <p className="text-sm text-muted-foreground mb-1 leading-snug">Standard annual licence from September 2026 onwards.</p>
-              <div className="text-4xl font-extrabold text-primary tracking-tight my-5">
-                £2,500 <span className="text-base font-medium text-muted-foreground">/ year</span>
+        {/* Seat calculator & CTA */}
+        <Card className="max-w-[860px] border-2 border-primary">
+          <CardContent className="p-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div>
+                <h3 className="text-xl font-extrabold mb-2">Get A* AI for your school</h3>
+                <p className="text-sm text-muted-foreground leading-snug max-w-[400px]">
+                  Choose your number of seats. Every student gets full premium access to all 6 tools.
+                </p>
+
+                {/* Seat selector */}
+                <div className="flex items-center gap-3 mt-4">
+                  <Button
+                    variant="outline" size="icon"
+                    onClick={() => setSeats(Math.max(1, seats - 1))}
+                    disabled={seats <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={500}
+                    value={seats}
+                    onChange={(e) => setSeats(Math.max(1, Math.min(500, parseInt(e.target.value) || 1)))}
+                    className="w-20 text-center font-bold text-lg"
+                  />
+                  <Button
+                    variant="outline" size="icon"
+                    onClick={() => setSeats(Math.min(500, seats + 1))}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-muted-foreground">seats</span>
+                </div>
+
+                <div className="mt-3 text-sm text-muted-foreground">
+                  {getPriceTierLabel(seats)} = <span className="font-bold text-foreground">£{totalMonthly.toFixed(2)}/month</span>
+                </div>
               </div>
-              <ul className="flex flex-col gap-2.5">
-                {["Unlimited student accounts", "All 6 tools included", "Teacher dashboard + analytics", "SSO (Google / Microsoft)", "DPA + compliance pack", "Termly billing available"].map((li) => (
-                  <li key={li} className="flex items-center gap-2.5 text-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                    {li}
-                  </li>
-                ))}
-              </ul>
+
+              <div className="text-center sm:text-right">
+                <div className="text-4xl font-extrabold text-primary tracking-tight mb-1">
+                  £{totalMonthly.toFixed(2)}
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">per month</p>
+                <Button variant="brand" size="xl" className="rounded-full" onClick={() => setBuyOpen(true)}>
+                  Get Started
+                </Button>
+              </div>
+            </div>
+
+            <ul className="flex flex-wrap gap-x-6 gap-y-2 mt-6 pt-6 border-t border-border">
+              {["All 6 tools included", "Teacher dashboard", "Cancel anytime", "GDPR compliant", "No setup fees"].map((li) => (
+                <li key={li} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CheckCircle className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                  {li}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        {/* Enterprise / Founding Partner option */}
+        <div className="max-w-[860px] mt-6">
+          <Card>
+            <CardContent className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge className="rounded-full text-[10px] uppercase tracking-wide font-bold">Enterprise</Badge>
+                  <h4 className="font-bold">Whole sixth form?</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Unlimited seats, SSO, DPA, dedicated account manager, and co-branded impact report. From £999/year.
+                </p>
+              </div>
+              <a href="https://calendly.com/jrrwingfield0/30min" target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="rounded-full whitespace-nowrap">
+                  Book a demo
+                </Button>
+              </a>
             </CardContent>
           </Card>
         </div>
@@ -272,22 +405,89 @@ export const ProgressPage = () => {
           <span className="text-primary">to your sixth form?</span>
         </h2>
         <p className="text-lg text-muted-foreground mb-9">
-          Book a 20-minute demo. We'll show you exactly how it works for your exam boards and subjects.
+          Start with a few seats or book a demo for whole-school access.
         </p>
         <div className="flex flex-wrap gap-3.5 justify-center">
+          <Button variant="brand" size="xl" className="rounded-full" onClick={() => setBuyOpen(true)}>
+            Get A* AI for your school
+          </Button>
           <a href="https://calendly.com/jrrwingfield0/30min" target="_blank" rel="noopener noreferrer">
-            <Button variant="brand" size="xl" className="rounded-full">
-              Book a demo →
+            <Button variant="outline" size="xl" className="rounded-full">
+              Book a demo instead
             </Button>
           </a>
-          <Button variant="outline" size="xl" className="rounded-full">
-            Email us instead
-          </Button>
         </div>
         <p className="mt-5 text-[13px] text-muted-foreground/50">
-          Usually responds within 24 hours · No sales pressure
+          Cancel anytime · No setup fees · GDPR compliant
         </p>
       </section>
+
+      {/* Purchase Dialog */}
+      <Dialog open={buyOpen} onOpenChange={setBuyOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <School className="h-5 w-5 text-primary" />
+              Get A* AI for your school
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <label className="text-sm font-medium mb-1 block">School Name</label>
+              <Input
+                placeholder="e.g. Eton College"
+                value={schoolName}
+                onChange={(e) => setSchoolName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Contact Email</label>
+              <Input
+                type="email"
+                placeholder={user?.email || "admin@school.ac.uk"}
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Invoice and admin access will be sent here</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Number of Seats</label>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="icon" onClick={() => setSeats(Math.max(1, seats - 5))}>
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="number" min={1} max={500} value={seats}
+                  onChange={(e) => setSeats(Math.max(1, Math.min(500, parseInt(e.target.value) || 1)))}
+                  className="w-20 text-center font-bold"
+                />
+                <Button variant="outline" size="icon" onClick={() => setSeats(Math.min(500, seats + 5))}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{getPriceTierLabel(seats)}</p>
+            </div>
+
+            <div className="bg-muted rounded-lg p-4 text-center">
+              <p className="text-sm text-muted-foreground">Total</p>
+              <p className="text-3xl font-extrabold text-primary">£{totalMonthly.toFixed(2)}<span className="text-sm font-medium text-muted-foreground">/month</span></p>
+              <p className="text-xs text-muted-foreground mt-1">{seats} seats at {getPriceTierLabel(seats)}</p>
+            </div>
+
+            <Button
+              variant="brand" className="w-full" size="lg"
+              onClick={handlePurchase}
+              disabled={purchasing || !schoolName.trim()}
+            >
+              {purchasing ? "Redirecting to checkout..." : `Continue to Payment`}
+            </Button>
+
+            <p className="text-xs text-muted-foreground text-center">
+              You'll be the school admin. Invite teachers and students after purchase.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
