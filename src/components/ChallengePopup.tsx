@@ -3,21 +3,20 @@ import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
-// Challenge is active for 3 days starting April 6 2026
-const CHALLENGE_START = new Date('2026-04-06T00:00:00Z');
-const CHALLENGE_END = new Date('2026-04-09T00:00:00Z');
-
-export function isChallengeActive(): boolean {
-  const now = new Date();
-  return now >= CHALLENGE_START && now < CHALLENGE_END;
+// --- Challenge config type ---
+export interface ChallengeConfig {
+  title: string;
+  description: string;
+  start: string; // ISO date string
+  end: string;   // ISO date string
 }
 
-// Grade boundary predictions for 2026 (percentages of max UMS)
-const GRADE_BOUNDARIES_2026: Record<string, { label: string; percent: number }[]> = {
-  // Edexcel Economics 9EC0 max UMS 335
+// Grade boundary predictions fallback (percentages of max UMS)
+const DEFAULT_GRADE_BOUNDARIES: Record<string, { label: string; percent: number }[]> = {
   'edexcel-economics': [
     { label: 'A*', percent: 87.8 },
     { label: 'A', percent: 80.8 },
@@ -26,7 +25,6 @@ const GRADE_BOUNDARIES_2026: Record<string, { label: string; percent: number }[]
     { label: 'D', percent: 49.3 },
     { label: 'E', percent: 38.8 },
   ],
-  // AQA Economics 
   'aqa-economics': [
     { label: 'A*', percent: 85 },
     { label: 'A', percent: 76 },
@@ -35,7 +33,6 @@ const GRADE_BOUNDARIES_2026: Record<string, { label: string; percent: number }[]
     { label: 'D', percent: 43 },
     { label: 'E', percent: 33 },
   ],
-  // Fallback
   default: [
     { label: 'A*', percent: 86 },
     { label: 'A', percent: 77 },
@@ -46,6 +43,56 @@ const GRADE_BOUNDARIES_2026: Record<string, { label: string; percent: number }[]
   ],
 };
 
+/** Check if a challenge config is currently active */
+export function isChallengeActiveFromConfig(config: ChallengeConfig | null): boolean {
+  if (!config) return false;
+  const now = new Date();
+  return now >= new Date(config.start) && now < new Date(config.end);
+}
+
+/** Backward-compat wrapper — always returns false now (use isChallengeActiveFromConfig instead) */
+export function isChallengeActive(): boolean {
+  return false;
+}
+
+// Build grade boundary list from DB data (predicted 2026) or fallback
+function buildGradeBoundaries(
+  gradeBoundariesData: Record<string, Record<string, number>> | null,
+  productSlug?: string
+): { label: string; percent: number }[] {
+  if (gradeBoundariesData) {
+    // Calculate 2026 predicted from linear extrapolation of 2023-2025
+    const years = ['2023', '2024', '2025'];
+    const grades = ['A*', 'A', 'B', 'C', 'D', 'E'];
+    const predicted: { label: string; percent: number }[] = [];
+
+    for (const grade of grades) {
+      const vals = years.map(y => gradeBoundariesData[y]?.[grade]).filter((v): v is number => v != null);
+      if (vals.length >= 2) {
+        // Simple linear extrapolation
+        const n = vals.length;
+        const avgX = (n - 1) / 2;
+        const avgY = vals.reduce((a, b) => a + b, 0) / n;
+        let num = 0, den = 0;
+        for (let i = 0; i < n; i++) {
+          num += (i - avgX) * (vals[i] - avgY);
+          den += (i - avgX) ** 2;
+        }
+        const slope = den !== 0 ? num / den : 0;
+        const predict2026 = avgY + slope * (n - avgX);
+        predicted.push({ label: grade, percent: Math.round(predict2026 * 10) / 10 });
+      }
+    }
+    if (predicted.length > 0) return predicted;
+  }
+  return DEFAULT_GRADE_BOUNDARIES[productSlug || ''] || DEFAULT_GRADE_BOUNDARIES.default;
+}
+
+// Generate a short hash for challenge identity (for localStorage keys)
+function challengeKey(config: ChallengeConfig): string {
+  return btoa(config.title + config.start).replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
+}
+
 interface ChallengePopupProps {
   isOpen: boolean;
   onClose: () => void;
@@ -53,6 +100,8 @@ interface ChallengePopupProps {
   productSlug?: string;
   trainerAvatarUrl?: string;
   trainerName?: string;
+  challengeConfig: ChallengeConfig | null;
+  gradeBoundariesData?: Record<string, Record<string, number>> | null;
 }
 
 export const ChallengePopup: React.FC<ChallengePopupProps> = ({
@@ -62,23 +111,31 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
   productSlug,
   trainerAvatarUrl,
   trainerName,
+  challengeConfig,
+  gradeBoundariesData,
 }) => {
   const { user } = useAuth();
   const [score, setScore] = useState('');
   const [maxScore, setMaxScore] = useState('100');
   const [submitted, setSubmitted] = useState(false);
   const [gradeResult, setGradeResult] = useState<string | null>(null);
+  const [reflection, setReflection] = useState('');
+  const [reflectionSaved, setReflectionSaved] = useState(false);
 
-  // Check if user already submitted a challenge score
+  const cKey = challengeConfig ? challengeKey(challengeConfig) : '';
+
+  // Check if user already submitted
   useEffect(() => {
-    if (!user || !isOpen) return;
-    const key = `astar_challenge_submitted_${productId}_${user.id}`;
+    if (!user || !isOpen || !cKey) return;
+    const key = `astar_challenge_submitted_${cKey}_${productId}_${user.id}`;
     if (localStorage.getItem(key) === 'true') {
       setSubmitted(true);
-      const savedGrade = localStorage.getItem(`astar_challenge_grade_${productId}_${user.id}`);
+      const savedGrade = localStorage.getItem(`astar_challenge_grade_${cKey}_${productId}_${user.id}`);
       if (savedGrade) setGradeResult(savedGrade);
     }
-  }, [user, isOpen, productId]);
+  }, [user, isOpen, productId, cKey]);
+
+  const boundaries = buildGradeBoundaries(gradeBoundariesData || null, productSlug);
 
   const handleSubmitScore = useCallback(async () => {
     if (!user || !score.trim() || !maxScore.trim()) return;
@@ -88,8 +145,6 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
 
     const percent = (numScore / numMax) * 100;
 
-    // Find grade from boundaries
-    const boundaries = GRADE_BOUNDARIES_2026[productSlug || ''] || GRADE_BOUNDARIES_2026.default;
     let grade = 'U';
     for (const b of boundaries) {
       if (percent >= b.percent) {
@@ -102,12 +157,11 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
     setSubmitted(true);
 
     // Save to localStorage
-    const key = `astar_challenge_submitted_${productId}_${user.id}`;
+    const key = `astar_challenge_submitted_${cKey}_${productId}_${user.id}`;
     localStorage.setItem(key, 'true');
-    localStorage.setItem(`astar_challenge_grade_${productId}_${user.id}`, grade);
-    localStorage.setItem(`astar_challenge_score_${productId}_${user.id}`, JSON.stringify({ score: numScore, max: numMax, percent: Math.round(percent * 10) / 10 }));
+    localStorage.setItem(`astar_challenge_grade_${cKey}_${productId}_${user.id}`, grade);
 
-    // Also save to user preferences additional_info
+    // Save to user preferences
     try {
       const { data } = await supabase
         .from('user_preferences')
@@ -117,7 +171,7 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
         .maybeSingle();
 
       const existingInfo = data?.additional_info || '';
-      const challengeNote = `Easter Challenge: ${numScore}/${numMax} (${Math.round(percent)}%) = ${grade}`;
+      const challengeNote = `${challengeConfig?.title || 'Challenge'}: ${numScore}/${numMax} (${Math.round(percent)}%) = ${grade}`;
       const updatedInfo = existingInfo ? `${existingInfo} | ${challengeNote}` : challengeNote;
 
       await supabase.from('user_preferences').upsert({
@@ -131,13 +185,40 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
     } catch (e) {
       console.error('Error saving challenge score:', e);
     }
-  }, [user, score, maxScore, productId, productSlug]);
+  }, [user, score, maxScore, productId, productSlug, cKey, boundaries, challengeConfig]);
 
-  if (!isOpen) return null;
+  const handleSaveReflection = useCallback(async () => {
+    if (!user || !reflection.trim()) return;
+    try {
+      const { data } = await supabase
+        .from('user_preferences')
+        .select('additional_info')
+        .eq('user_id', user.id)
+        .eq('product_id', productId)
+        .maybeSingle();
+
+      const existingInfo = data?.additional_info || '';
+      const reflectionNote = `${challengeConfig?.title || 'Challenge'} reflection: ${reflection.trim()}`;
+      const updatedInfo = existingInfo ? `${existingInfo} | ${reflectionNote}` : reflectionNote;
+
+      await supabase.from('user_preferences').upsert({
+        user_id: user.id,
+        product_id: productId,
+        additional_info: updatedInfo,
+        year: 'Year 13',
+        predicted_grade: 'C',
+        target_grade: 'A',
+      }, { onConflict: 'user_id,product_id' });
+      setReflectionSaved(true);
+    } catch (e) {
+      console.error('Error saving reflection:', e);
+    }
+  }, [user, reflection, productId, challengeConfig]);
+
+  if (!isOpen || !challengeConfig) return null;
 
   return (
     <div className="fixed bottom-[14rem] right-4 z-[301] w-[320px] rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-[0_8px_40px_-8px_rgba(0,0,0,0.25)] animate-in slide-in-from-bottom-4 fade-in duration-300">
-      {/* Close button */}
       <button
         onClick={onClose}
         className="absolute top-2.5 right-2.5 p-1 rounded-full hover:bg-muted transition-colors z-10"
@@ -146,7 +227,7 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
       </button>
 
       <div className="p-4 space-y-3">
-        {/* Trainer header - same style as fill-me-in */}
+        {/* Trainer header */}
         <div className="flex items-center gap-3 pr-6">
           {trainerAvatarUrl && (
             <div className="relative flex-shrink-0">
@@ -159,17 +240,14 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
             </div>
           )}
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-foreground leading-tight">🎯 Your Challenge</h3>
+            <h3 className="text-sm font-bold text-foreground leading-tight">🎯 {challengeConfig.title}</h3>
           </div>
         </div>
 
         {!submitted ? (
           <>
             <p className="text-[12px] text-muted-foreground leading-relaxed">
-              As we're basically half way through the Easter Break now is the time to swap from final content learning to going all in on exam practice and technique.
-            </p>
-            <p className="text-[12px] text-muted-foreground leading-relaxed">
-              Now to see where we're at, I want you to try a <span className="font-semibold text-foreground">Paper 1 Past Paper</span> and do it fully under timed conditions.
+              {challengeConfig.description}
             </p>
 
             {/* Score input */}
@@ -214,12 +292,38 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
             </div>
             <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
               <p className="text-[10px] text-muted-foreground text-center">
-                🔴 This is based on <span className="font-semibold">2026 predicted boundaries only</span> — these are forecasts, not official grades. Use this as a guide to see where you need to improve.
+                🔴 This is based on <span className="font-semibold">2026 predicted boundaries only</span> — these are forecasts, not official grades.
               </p>
             </div>
-            <p className="text-[11px] text-muted-foreground text-center pt-1">
-              Your score has been saved to your profile ✓
-            </p>
+
+            {/* Reflection section */}
+            {!reflectionSaved ? (
+              <div className="space-y-2 pt-1">
+                <p className="text-[11px] text-foreground font-medium">
+                  Now tell me — what went wrong? Which topics tripped you up?
+                </p>
+                <Textarea
+                  value={reflection}
+                  onChange={(e) => setReflection(e.target.value)}
+                  placeholder="e.g. I struggled with market structures and couldn't finish the data response question in time..."
+                  className="text-xs min-h-[60px] resize-none"
+                  rows={3}
+                />
+                <Button
+                  onClick={handleSaveReflection}
+                  disabled={!reflection.trim()}
+                  size="sm"
+                  className="w-full h-7 text-xs"
+                  variant="outline"
+                >
+                  Save reflection
+                </Button>
+              </div>
+            ) : (
+              <p className="text-[11px] text-muted-foreground text-center pt-1">
+                Your score and reflection have been saved ✓
+              </p>
+            )}
           </div>
         )}
       </div>

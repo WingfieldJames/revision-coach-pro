@@ -177,7 +177,7 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
         {tier === 'free' && (
           <div className="bg-muted/50 rounded-lg px-3 py-2">
             <p className="text-xs text-muted-foreground">
-              📚 Free version — showing <span className="font-medium">2023–2024</span> papers only
+              Free version — showing <span className="font-medium">2023–2024</span> papers only
             </p>
           </div>
         )}
@@ -238,7 +238,7 @@ export const PastPaperFinderTool: React.FC<PastPaperFinderToolProps> = ({
       {tier === 'free' && (
         <div className="bg-muted/50 rounded-lg px-3 py-2">
           <p className="text-xs text-muted-foreground">
-            📚 Free version — trained on <span className="font-medium">2023–2024</span> papers only
+            Free version — trained on <span className="font-medium">2023–2024</span> papers only
           </p>
         </div>
       )}
