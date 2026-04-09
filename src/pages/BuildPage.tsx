@@ -195,6 +195,19 @@ export function BuildPage() {
   const [uploadingDiagram, setUploadingDiagram] = useState(false);
   const diagramImageInputRef = useRef<HTMLInputElement>(null);
 
+  // Challenge config
+  const [challengeTitle, setChallengeTitle] = useState("");
+  const [challengeDescription, setChallengeDescription] = useState("");
+  const [challengeStart, setChallengeStart] = useState("");
+  const [challengeEnd, setChallengeEnd] = useState("");
+
+  // Grade boundaries data entry (2023-2025 actuals)
+  const [gbData, setGbData] = useState<Record<string, Record<string, string>>>({
+    '2023': { 'A*': '', 'A': '', 'B': '' },
+    '2024': { 'A*': '', 'A': '', 'B': '' },
+    '2025': { 'A*': '', 'A': '', 'B': '' },
+  });
+
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
