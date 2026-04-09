@@ -34,13 +34,22 @@ export const TrainerInfoViewer: React.FC<TrainerInfoViewerProps> = ({ productId 
           setTrainer({ ...data, trainer_achievements: Array.isArray(data.trainer_achievements) ? data.trainer_achievements : [] } as TrainerData);
           // Resolve image URL
           if (data.trainer_image_url) {
-            if (data.trainer_image_url.startsWith('/') || data.trainer_image_url.startsWith('http')) {
+            if (data.trainer_image_url.startsWith('/src/assets/') || data.trainer_image_url.startsWith('src/assets/')) {
+              // Resolve local asset via Vite glob
+              const assetName = data.trainer_image_url.replace(/^\/?(src\/assets\/)/, '');
+              try {
+                const modules = import.meta.glob('/src/assets/*', { eager: true, import: 'default' }) as Record<string, string>;
+                setImageUrl(modules[`/src/assets/${assetName}`] || null);
+              } catch {
+                setImageUrl(null);
+              }
+            } else if (data.trainer_image_url.startsWith('http')) {
               setImageUrl(data.trainer_image_url);
             } else {
-              const { data: signedData } = await supabase.storage
+              const { data: publicUrlData } = supabase.storage
                 .from('trainer-uploads')
-                .createSignedUrl(data.trainer_image_url, 3600);
-              setImageUrl(signedData?.signedUrl || null);
+                .getPublicUrl(data.trainer_image_url);
+              setImageUrl(publicUrlData?.publicUrl || null);
             }
           }
         }

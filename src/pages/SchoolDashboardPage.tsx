@@ -82,8 +82,8 @@ export const SchoolDashboardPage = () => {
 
     try {
       // Get user's school membership
-      const { data: membership, error: memberError } = await supabase
-        .from('school_members')
+      const { data: membership, error: memberError } = await (supabase
+        .from('school_members' as any) as any)
         .select('school_id, role')
         .eq('user_id', user.id)
         .in('role', ['admin', 'teacher'])
@@ -99,8 +99,8 @@ export const SchoolDashboardPage = () => {
       setUserRole(membership.role);
 
       // Get school details
-      const { data: schoolData } = await supabase
-        .from('schools')
+      const { data: schoolData } = await (supabase
+        .from('schools' as any) as any)
         .select('*')
         .eq('id', membership.school_id)
         .single();
@@ -108,8 +108,8 @@ export const SchoolDashboardPage = () => {
       if (schoolData) setSchool(schoolData as School);
 
       // Get active license
-      const { data: licenseData } = await supabase
-        .from('school_licenses')
+      const { data: licenseData } = await (supabase
+        .from('school_licenses' as any) as any)
         .select('*')
         .eq('school_id', membership.school_id)
         .eq('active', true)
@@ -120,8 +120,8 @@ export const SchoolDashboardPage = () => {
       if (licenseData) setLicense(licenseData as License);
 
       // Get all members
-      const { data: membersData } = await supabase
-        .from('school_members')
+      const { data: membersData } = await (supabase
+        .from('school_members' as any) as any)
         .select('*')
         .eq('school_id', membership.school_id)
         .order('created_at', { ascending: false });
@@ -188,8 +188,8 @@ export const SchoolDashboardPage = () => {
     if (!confirm('Are you sure you want to remove this member?')) return;
 
     try {
-      const { error } = await supabase
-        .from('school_members')
+      const { error } = await (supabase
+        .from('school_members' as any) as any)
         .delete()
         .eq('id', memberId);
 

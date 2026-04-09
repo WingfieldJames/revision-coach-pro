@@ -68,14 +68,26 @@ export function useTrainerConfig(productId: string | null | undefined): TrainerC
             .map((a: any) => (typeof a === 'string' ? { text: a } : a))
             .filter((a: any) => a?.text?.trim());
 
-          // Resolve trainer image URL (handle storage paths)
+          // Resolve trainer image URL (handle storage paths and local asset paths)
           let resolvedImageUrl: string | null = (data.trainer_image_url as string) || null;
-          if (resolvedImageUrl && !resolvedImageUrl.startsWith('http') && !resolvedImageUrl.startsWith('/')) {
-            // trainer-uploads is a public bucket, use getPublicUrl for reliable access
-            const { data: publicUrlData } = supabase.storage
-              .from('trainer-uploads')
-              .getPublicUrl(resolvedImageUrl);
-            resolvedImageUrl = publicUrlData?.publicUrl || null;
+          if (resolvedImageUrl) {
+            if (resolvedImageUrl.startsWith('/src/assets/') || resolvedImageUrl.startsWith('src/assets/')) {
+              // Local dev asset path — resolve dynamically via Vite
+              const assetName = resolvedImageUrl.replace(/^\/?(src\/assets\/)/, '');
+              try {
+                const modules = import.meta.glob('/src/assets/*', { eager: true, import: 'default' }) as Record<string, string>;
+                const key = `/src/assets/${assetName}`;
+                resolvedImageUrl = modules[key] || null;
+              } catch {
+                resolvedImageUrl = null;
+              }
+            } else if (!resolvedImageUrl.startsWith('http') && !resolvedImageUrl.startsWith('/')) {
+              // trainer-uploads is a public bucket, use getPublicUrl for reliable access
+              const { data: publicUrlData } = supabase.storage
+                .from('trainer-uploads')
+                .getPublicUrl(resolvedImageUrl);
+              resolvedImageUrl = publicUrlData?.publicUrl || null;
+            }
           }
 
           setConfig({
