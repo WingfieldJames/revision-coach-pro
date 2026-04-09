@@ -195,6 +195,19 @@ export function BuildPage() {
   const [uploadingDiagram, setUploadingDiagram] = useState(false);
   const diagramImageInputRef = useRef<HTMLInputElement>(null);
 
+  // Challenge config
+  const [challengeTitle, setChallengeTitle] = useState("");
+  const [challengeDescription, setChallengeDescription] = useState("");
+  const [challengeStart, setChallengeStart] = useState("");
+  const [challengeEnd, setChallengeEnd] = useState("");
+
+  // Grade boundaries data entry (2023-2025 actuals)
+  const [gbData, setGbData] = useState<Record<string, Record<string, string>>>({
+    '2023': { 'A*': '', 'A': '', 'B': '' },
+    '2024': { 'A*': '', 'A': '', 'B': '' },
+    '2025': { 'A*': '', 'A': '', 'B': '' },
+  });
+
   // Uploads
   const [uploads, setUploads] = useState<TrainerUpload[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -319,10 +332,12 @@ export function BuildPage() {
       systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
       selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary,
+      challengeTitle, challengeDescription, challengeStart, challengeEnd, gbData,
     });
   }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
       trainerName, trainerStatus, trainerAchievements,
-      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary]);
+      selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary,
+      challengeTitle, challengeDescription, challengeStart, challengeEnd, gbData]);
 
   // savedSnapshotParsed for field-level comparison
   const savedSnapshotParsed = useMemo(() => {
@@ -434,7 +449,44 @@ export function BuildPage() {
     setSuggestedPrompts(initialSuggestedPrompts);
     setDiagramLibrary(initialDiagramLibrary);
 
-    // Handle specs with normalization
+    // Load challenge config
+    const dbChallenge = (existing as any).active_challenge;
+    if (dbChallenge && typeof dbChallenge === 'object') {
+      setChallengeTitle(dbChallenge.title || '');
+      setChallengeDescription(dbChallenge.description || '');
+      setChallengeStart(dbChallenge.start ? dbChallenge.start.slice(0, 10) : '');
+      setChallengeEnd(dbChallenge.end ? dbChallenge.end.slice(0, 10) : '');
+    } else {
+      setChallengeTitle('');
+      setChallengeDescription('');
+      setChallengeStart('');
+      setChallengeEnd('');
+    }
+
+    // Load grade boundaries data
+    const dbGb = (existing as any).grade_boundaries_data;
+    if (dbGb && typeof dbGb === 'object') {
+      const loaded: Record<string, Record<string, string>> = {
+        '2023': { 'A*': '', 'A': '', 'B': '' },
+        '2024': { 'A*': '', 'A': '', 'B': '' },
+        '2025': { 'A*': '', 'A': '', 'B': '' },
+      };
+      for (const yr of ['2023', '2024', '2025']) {
+        if (dbGb[yr]) {
+          for (const g of ['A*', 'A', 'B']) {
+            if (dbGb[yr][g] != null) loaded[yr][g] = String(dbGb[yr][g]);
+          }
+        }
+      }
+      setGbData(loaded);
+    } else {
+      setGbData({
+        '2023': { 'A*': '', 'A': '', 'B': '' },
+        '2024': { 'A*': '', 'A': '', 'B': '' },
+        '2025': { 'A*': '', 'A': '', 'B': '' },
+      });
+    }
+
     const savedSpecs = existing.staged_specifications;
     const normalizedSpecs = normalizeSpecifications(savedSpecs);
     if (normalizedSpecs && normalizedSpecs.length > 0) {
@@ -672,6 +724,28 @@ export function BuildPage() {
           staged_specifications: stagedSpecData as unknown as import("@/integrations/supabase/types").Json,
           suggested_prompts: suggestedPrompts as unknown as import("@/integrations/supabase/types").Json,
           diagram_library: diagramLibrary as unknown as import("@/integrations/supabase/types").Json,
+          active_challenge: (challengeTitle.trim() ? {
+            title: challengeTitle,
+            description: challengeDescription,
+            start: challengeStart ? `${challengeStart}T00:00:00Z` : '',
+            end: challengeEnd ? `${challengeEnd}T00:00:00Z` : '',
+          } : null) as unknown as import("@/integrations/supabase/types").Json,
+          grade_boundaries_data: (() => {
+            const parsed: Record<string, Record<string, number>> = {};
+            let hasData = false;
+            for (const yr of ['2023', '2024', '2025']) {
+              const row = gbData[yr];
+              if (row) {
+                const entry: Record<string, number> = {};
+                for (const g of ['A*', 'A', 'B']) {
+                  const v = parseFloat(row[g]);
+                  if (!isNaN(v)) { entry[g] = v; hasData = true; }
+                }
+                if (Object.keys(entry).length > 0) parsed[yr] = entry;
+              }
+            }
+            return hasData ? parsed : null;
+          })() as unknown as import("@/integrations/supabase/types").Json,
           system_prompt_submitted: systemPrompt.trim().length >= 10,
           exam_technique_submitted: examTechnique.trim().length >= 10,
           trainer_bio_submitted: trainerDescription.trim().length >= 10,
@@ -1796,14 +1870,71 @@ export function BuildPage() {
 
               {/* Grade Boundaries Config */}
               {selectedFeatures.includes("grade_boundaries") && (
-                <div className="mt-4 p-3 rounded-lg border border-border space-y-2">
+                <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                   <div className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4 text-primary" />
-                    <p className="text-sm font-medium">Grade Boundaries — Configuration</p>
+                    <p className="text-sm font-medium">Grade Boundaries — Data Entry</p>
                   </div>
-                  <p className="text-xs text-muted-foreground">Grade boundaries are automatically loaded based on the exam board and subject. No additional configuration is needed — the tool will display historical and predicted boundaries for your students.</p>
-                  <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
-                    <p className="text-[10px] text-muted-foreground">💡 Tip: The grade boundaries tool shows 2023–2024 actual data and 2025–2026 predicted boundaries. Students can enter their score to see their predicted grade.</p>
+                  <p className="text-xs text-muted-foreground">Enter actual grade boundary percentages for 2023–2025. The 2026 prediction is calculated automatically using linear extrapolation.</p>
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground">
+                      <span>Year</span>
+                      <span>A*</span>
+                      <span>A</span>
+                      <span>B</span>
+                    </div>
+                    {['2023', '2024', '2025'].map(yr => (
+                      <div key={yr} className="grid grid-cols-4 gap-2 items-center">
+                        <span className="text-sm font-medium">{yr}</span>
+                        {['A*', 'A', 'B'].map(grade => (
+                          <Input
+                            key={grade}
+                            type="number"
+                            step="0.1"
+                            value={gbData[yr]?.[grade] || ''}
+                            onChange={(e) => {
+                              setGbData(prev => ({
+                                ...prev,
+                                [yr]: { ...prev[yr], [grade]: e.target.value },
+                              }));
+                            }}
+                            placeholder="%"
+                            className="h-8 text-sm"
+                          />
+                        ))}
+                      </div>
+                    ))}
+                    {/* Predicted 2026 row */}
+                    {(() => {
+                      const predicted: Record<string, string> = {};
+                      for (const grade of ['A*', 'A', 'B']) {
+                        const vals = ['2023', '2024', '2025']
+                          .map(yr => parseFloat(gbData[yr]?.[grade] || ''))
+                          .filter(v => !isNaN(v));
+                        if (vals.length >= 2) {
+                          const n = vals.length;
+                          const avgX = (n - 1) / 2;
+                          const avgY = vals.reduce((a, b) => a + b, 0) / n;
+                          let num = 0, den = 0;
+                          for (let i = 0; i < n; i++) {
+                            num += (i - avgX) * (vals[i] - avgY);
+                            den += (i - avgX) ** 2;
+                          }
+                          const slope = den !== 0 ? num / den : 0;
+                          const predict = avgY + slope * (n - avgX);
+                          predicted[grade] = (Math.round(predict * 10) / 10).toString();
+                        }
+                      }
+                      if (Object.keys(predicted).length === 0) return null;
+                      return (
+                        <div className="grid grid-cols-4 gap-2 items-center pt-1 border-t border-border/50">
+                          <span className="text-sm font-medium text-primary">2026 <span className="text-[10px] text-muted-foreground">(pred.)</span></span>
+                          {['A*', 'A', 'B'].map(grade => (
+                            <span key={grade} className="text-sm text-center font-medium text-primary">{predicted[grade] || '—'}%</span>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
@@ -2108,7 +2239,65 @@ export function BuildPage() {
             </Card>
           )}
 
-          {/* Remove from Website Button */}
+          {/* Challenges Section */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base">Challenges</CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">Set a challenge that appears to existing students when they open the chatbot. New users still see "Fill me in" first. This applies universally to all subjects.</p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <Label className="text-xs font-medium">Title</Label>
+                <Input
+                  value={challengeTitle}
+                  onChange={(e) => setChallengeTitle(e.target.value)}
+                  placeholder="e.g. Easter Challenge 2"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-medium">Description</Label>
+                <Textarea
+                  value={challengeDescription}
+                  onChange={(e) => setChallengeDescription(e.target.value)}
+                  placeholder="e.g. Try a Paper 2 under timed conditions..."
+                  className="mt-1 min-h-[60px]"
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs font-medium">Start date</Label>
+                  <Input
+                    type="date"
+                    value={challengeStart}
+                    onChange={(e) => setChallengeStart(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs font-medium">End date</Label>
+                  <Input
+                    type="date"
+                    value={challengeEnd}
+                    onChange={(e) => setChallengeEnd(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              {challengeTitle && challengeStart && challengeEnd && (
+                <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
+                  <p className="text-[10px] text-muted-foreground">
+                    Challenge "<span className="font-semibold text-foreground">{challengeTitle}</span>" will be active from {challengeStart} to {challengeEnd}. Remember to Save for changes to take effect.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {projectStatus === "deployed" && (
             <AlertDialog>
               <AlertDialogTrigger asChild>

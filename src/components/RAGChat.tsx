@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2, Quote, User, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TutorProfilePopup } from '@/components/TutorProfilePopup';
-import { ChallengePopup, isChallengeActive } from '@/components/ChallengePopup';
+import { ChallengePopup, isChallengeActiveFromConfig, type ChallengeConfig } from '@/components/ChallengePopup';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
@@ -198,6 +198,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [hasPreferencesSet, setHasPreferencesSet] = useState(true); // assume true until checked
   const [challengeNotificationDismissed, setChallengeNotificationDismissed] = useState(false);
   const challengeShownOnceRef = useRef(false);
+  const [challengeConfig, setChallengeConfig] = useState<ChallengeConfig | null>(null);
+  const [gradeBoundariesData, setGradeBoundariesData] = useState<Record<string, Record<string, number>> | null>(null);
   // Feedback state: maps messageId -> 'thumbs_up' | 'thumbs_down'
   const [feedbackMap, setFeedbackMap] = useState<Record<string, 'thumbs_up' | 'thumbs_down'>>({});
 
@@ -394,10 +396,29 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       setChallengeNotificationDismissed(true);
     }
   }, [user, productId]);
+  // Fetch challenge config from trainer_projects
+  useEffect(() => {
+    const fetchChallenge = async () => {
+      try {
+        const { data } = await supabase
+          .from('trainer_projects')
+          .select('active_challenge, grade_boundaries_data')
+          .eq('product_id', productId)
+          .maybeSingle();
+        if (data) {
+          if (data.active_challenge) setChallengeConfig(data.active_challenge as unknown as ChallengeConfig);
+          if (data.grade_boundaries_data) setGradeBoundariesData(data.grade_boundaries_data as unknown as Record<string, Record<string, number>>);
+        }
+      } catch (e) {
+        console.error('Error fetching challenge config:', e);
+      }
+    };
+    fetchChallenge();
+  }, [productId]);
 
   // Determine which popup to show: challenge (existing users) or fill-me-in (new users)
-  const showChallengeMode = isChallengeActive() && hasPreferencesSet;
-  const hasChallengeNotification = isChallengeActive() && hasPreferencesSet && !challengeNotificationDismissed;
+  const showChallengeMode = isChallengeActiveFromConfig(challengeConfig) && hasPreferencesSet;
+  const hasChallengeNotification = isChallengeActiveFromConfig(challengeConfig) && hasPreferencesSet && !challengeNotificationDismissed;
 
   // Auto-trigger popup on first prompt
   useEffect(() => {
@@ -885,6 +906,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         productSlug={productSlug}
         trainerAvatarUrl={trainerAvatarUrl}
         trainerName={trainerName}
+        challengeConfig={challengeConfig}
+        gradeBoundariesData={gradeBoundariesData}
       />
 
       {/* Messages area - scrollable */}

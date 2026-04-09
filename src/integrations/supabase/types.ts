@@ -685,6 +685,7 @@ export type Database = {
       }
       trainer_projects: {
         Row: {
+          active_challenge: Json | null
           created_at: string
           created_by: string | null
           custom_sections: Json | null
@@ -694,6 +695,7 @@ export type Database = {
           exam_dates: Json | null
           exam_technique: string | null
           exam_technique_submitted: boolean
+          grade_boundaries_data: Json | null
           id: string
           last_deployed_at: string | null
           product_id: string | null
@@ -714,6 +716,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active_challenge?: Json | null
           created_at?: string
           created_by?: string | null
           custom_sections?: Json | null
@@ -723,6 +726,7 @@ export type Database = {
           exam_dates?: Json | null
           exam_technique?: string | null
           exam_technique_submitted?: boolean
+          grade_boundaries_data?: Json | null
           id?: string
           last_deployed_at?: string | null
           product_id?: string | null
@@ -743,6 +747,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active_challenge?: Json | null
           created_at?: string
           created_by?: string | null
           custom_sections?: Json | null
@@ -752,6 +757,7 @@ export type Database = {
           exam_dates?: Json | null
           exam_technique?: string | null
           exam_technique_submitted?: boolean
+          grade_boundaries_data?: Json | null
           id?: string
           last_deployed_at?: string | null
           product_id?: string | null

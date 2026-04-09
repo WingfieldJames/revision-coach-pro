@@ -255,7 +255,7 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
         {tier === 'free' && (
           <div className="bg-muted/50 rounded-lg px-3 py-2">
             <p className="text-xs text-muted-foreground">
-              📚 Free version — showing limited results
+              Free version — showing limited results
             </p>
           </div>
         )}
@@ -325,7 +325,7 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
       {tier === 'free' && (
         <div className="bg-muted/50 rounded-lg px-3 py-2">
           <p className="text-xs text-muted-foreground">
-            📚 Free version — limited results
+            Free version — limited results
           </p>
         </div>
       )}
