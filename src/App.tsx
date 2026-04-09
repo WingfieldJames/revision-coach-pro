@@ -49,6 +49,7 @@ import { SchoolDashboardPage } from "./pages/SchoolDashboardPage";
 import { SchoolJoinPage } from "./pages/SchoolJoinPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
 import { FeedbackResultsPage } from "./pages/FeedbackResultsPage";
+import { SchoolInfoPackPage } from "./pages/SchoolInfoPackPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -102,6 +103,7 @@ const App = () => (
             <Route path="/s/:slug/premium" element={<DynamicPremiumPage />} />
             <Route path="/select" element={<SubjectSelectionPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/schools/info-pack" element={<SchoolInfoPackPage />} />
             <Route path="/school/dashboard" element={<SchoolDashboardPage />} />
             <Route path="/school/join" element={<SchoolJoinPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />

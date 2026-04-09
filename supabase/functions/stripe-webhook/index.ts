@@ -87,7 +87,7 @@ serve(async (req) => {
             const userId = session.metadata.user_id;
             const seats = parseInt(session.metadata.seats || "0", 10);
             const planType = session.metadata.plan_type || "annual";
-            const pricePerSeat = parseInt(session.metadata.price_per_seat || "0", 10);
+            const totalMonthly = parseInt(session.metadata.total_monthly || "0", 10);
             const stripeSubscriptionId = session.subscription as string;
 
             try {
@@ -119,7 +119,7 @@ serve(async (req) => {
                     used_seats: 0,
                     stripe_subscription_id: stripeSubscriptionId,
                     plan_type: planType,
-                    price_per_seat: pricePerSeat,
+                    price_per_seat: totalMonthly > 0 && seats > 0 ? Math.round(totalMonthly / seats) : 0,
                     expires_at: expiresAt.toISOString(),
                     active: true,
                   })

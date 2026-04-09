@@ -13,20 +13,30 @@ const logStep = (step: string, details?: any) => {
   console.log(`[SCHOOL-CHECKOUT] ${step}${detailsStr}`);
 };
 
-// Per-seat pricing tiers (in pence)
-// 1-10 seats: £5.99/seat/month
-// 11-30 seats: £4.99/seat/month
-// 31+ seats: £3.99/seat/month
-function getPricePerSeat(seatCount: number): number {
-  if (seatCount >= 31) return 399;
-  if (seatCount >= 11) return 499;
-  return 599;
+// Graduated pricing (in pence):
+// First 10 seats: £8.99/seat/month
+// Seats 11-30: £5.99/seat/month
+// Seats 31+: £3.99/seat/month
+interface TierLine { name: string; unitAmount: number; quantity: number }
+
+function buildTierLineItems(seats: number): TierLine[] {
+  const lines: TierLine[] = [];
+  const tier1 = Math.min(seats, 10);
+  const tier2 = Math.min(Math.max(seats - 10, 0), 20);
+  const tier3 = Math.max(seats - 30, 0);
+
+  if (tier1 > 0) lines.push({ name: `Seats 1–${tier1} @ £8.99/month`, unitAmount: 899, quantity: tier1 });
+  if (tier2 > 0) lines.push({ name: `Seats 11–${10 + tier2} @ £5.99/month`, unitAmount: 599, quantity: tier2 });
+  if (tier3 > 0) lines.push({ name: `Seats 31–${30 + tier3} @ £3.99/month`, unitAmount: 399, quantity: tier3 });
+
+  return lines;
 }
 
-function getPriceTierLabel(seatCount: number): string {
-  if (seatCount >= 31) return "31+ seats — £3.99/seat/month";
-  if (seatCount >= 11) return "11-30 seats — £4.99/seat/month";
-  return "1-10 seats — £5.99/seat/month";
+function calculateTotal(seats: number): number {
+  const tier1 = Math.min(seats, 10);
+  const tier2 = Math.min(Math.max(seats - 10, 0), 20);
+  const tier3 = Math.max(seats - 30, 0);
+  return tier1 * 899 + tier2 * 599 + tier3 * 399;
 }
 
 serve(async (req) => {
@@ -76,16 +86,15 @@ serve(async (req) => {
       );
     }
 
-    const pricePerSeat = getPricePerSeat(seats);
-    const totalMonthly = pricePerSeat * seats;
+    const tierLines = buildTierLineItems(seats);
+    const totalMonthly = calculateTotal(seats);
 
     logStep("Creating school checkout", {
       seats,
       schoolName,
-      pricePerSeat,
       totalMonthly,
       planType,
-      tier: getPriceTierLabel(seats),
+      tiers: tierLines,
     });
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -102,20 +111,18 @@ serve(async (req) => {
       customer_email: contactEmail || user.email,
       payment_method_types: ["card"],
       mode: "subscription",
-      line_items: [
-        {
-          price_data: {
-            currency: "gbp",
-            product_data: {
-              name: `A* AI School License — ${seats} seats`,
-              description: `${getPriceTierLabel(seats)}. Premium access for ${seats} students.`,
-            },
-            unit_amount: pricePerSeat,
-            recurring: { interval: "month" },
+      line_items: tierLines.map((tier) => ({
+        price_data: {
+          currency: "gbp",
+          product_data: {
+            name: `A* AI School License — ${tier.name}`,
+            description: `Premium access for students`,
           },
-          quantity: seats,
+          unit_amount: tier.unitAmount,
+          recurring: { interval: "month" },
         },
-      ],
+        quantity: tier.quantity,
+      })),
       success_url: `${origin}/school/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/progress`,
       metadata: {
@@ -125,7 +132,7 @@ serve(async (req) => {
         contact_email: contactEmail || user.email,
         seats: String(seats),
         plan_type: planType,
-        price_per_seat: String(pricePerSeat),
+        total_monthly: String(totalMonthly),
       },
     };
 

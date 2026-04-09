@@ -50,16 +50,18 @@ const comparisonItems = [
   { name: "A*AI", desc: "Trained on your exact board and spec. Teaches exam technique, not just content — so students get better at the game.", highlight: true },
 ];
 
-function getPricePerSeat(seats: number): number {
-  if (seats >= 31) return 399;
-  if (seats >= 11) return 499;
-  return 599;
+// Graduated pricing: first 10 at £8.99, seats 11-30 at £5.99, seats 31+ at £3.99
+function calculateTotalMonthly(seats: number): number {
+  let total = 0;
+  const tier1 = Math.min(seats, 10);
+  const tier2 = Math.min(Math.max(seats - 10, 0), 20);
+  const tier3 = Math.max(seats - 30, 0);
+  total = tier1 * 899 + tier2 * 599 + tier3 * 399;
+  return total; // in pence
 }
 
-function getPriceTierLabel(seats: number): string {
-  if (seats >= 31) return "£3.99/seat/month";
-  if (seats >= 11) return "£4.99/seat/month";
-  return "£5.99/seat/month";
+function getEffectivePerSeat(seats: number): string {
+  return (calculateTotalMonthly(seats) / seats / 100).toFixed(2);
 }
 
 export const ProgressPage = () => {
@@ -104,8 +106,8 @@ export const ProgressPage = () => {
     }
   };
 
-  const pricePerSeat = getPricePerSeat(seats);
-  const totalMonthly = (pricePerSeat * seats) / 100;
+  const totalMonthly = calculateTotalMonthly(seats) / 100;
+  const effectivePerSeat = getEffectivePerSeat(seats);
 
   return (
     <div className="min-h-screen bg-background font-sans">
@@ -150,9 +152,11 @@ export const ProgressPage = () => {
                   Book a demo →
                 </Button>
               </a>
-              <Button variant="outline" size="xl" className="rounded-full">
-                Download info pack
-              </Button>
+              <a href="/schools/info-pack" target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="xl" className="rounded-full">
+                  Download info pack
+                </Button>
+              </a>
             </div>
             <p className="mt-4 text-[13px] text-muted-foreground/60">
               No commitment required · GDPR compliant · UK data hosting
@@ -286,26 +290,26 @@ export const ProgressPage = () => {
           </p>
         </div>
 
-        {/* Pricing tiers */}
+        {/* Pricing tiers — graduated */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-[860px] mb-10">
-          <Card className={seats <= 10 ? "border-2 border-primary" : ""}>
+          <Card className="border-2 border-primary">
             <CardContent className="p-6 text-center">
-              <p className="text-sm text-muted-foreground mb-1">1-10 seats</p>
+              <p className="text-sm text-muted-foreground mb-1">First 10 seats</p>
+              <div className="text-3xl font-extrabold text-primary tracking-tight">£8.99</div>
+              <p className="text-sm text-muted-foreground">/seat/month</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6 text-center">
+              <Badge className="mb-2 rounded-full text-[10px] uppercase tracking-wide font-bold">Volume Discount</Badge>
+              <p className="text-sm text-muted-foreground mb-1">Seats 11–30</p>
               <div className="text-3xl font-extrabold text-primary tracking-tight">£5.99</div>
               <p className="text-sm text-muted-foreground">/seat/month</p>
             </CardContent>
           </Card>
-          <Card className={seats >= 11 && seats <= 30 ? "border-2 border-primary" : ""}>
+          <Card>
             <CardContent className="p-6 text-center">
-              <Badge className="mb-2 rounded-full text-[10px] uppercase tracking-wide font-bold">Popular</Badge>
-              <p className="text-sm text-muted-foreground mb-1">11-30 seats</p>
-              <div className="text-3xl font-extrabold text-primary tracking-tight">£4.99</div>
-              <p className="text-sm text-muted-foreground">/seat/month</p>
-            </CardContent>
-          </Card>
-          <Card className={seats >= 31 ? "border-2 border-primary" : ""}>
-            <CardContent className="p-6 text-center">
-              <p className="text-sm text-muted-foreground mb-1">31+ seats</p>
+              <p className="text-sm text-muted-foreground mb-1">Seats 31+</p>
               <div className="text-3xl font-extrabold text-primary tracking-tight">£3.99</div>
               <p className="text-sm text-muted-foreground">/seat/month</p>
             </CardContent>
@@ -349,7 +353,7 @@ export const ProgressPage = () => {
                 </div>
 
                 <div className="mt-3 text-sm text-muted-foreground">
-                  {getPriceTierLabel(seats)} = <span className="font-bold text-foreground">£{totalMonthly.toFixed(2)}/month</span>
+                  {seats} seats · avg £{effectivePerSeat}/seat = <span className="font-bold text-foreground">£{totalMonthly.toFixed(2)}/month</span>
                 </div>
               </div>
 
@@ -465,13 +469,13 @@ export const ProgressPage = () => {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">{getPriceTierLabel(seats)}</p>
+              <p className="text-xs text-muted-foreground mt-1">Avg £{effectivePerSeat}/seat/month</p>
             </div>
 
             <div className="bg-muted rounded-lg p-4 text-center">
               <p className="text-sm text-muted-foreground">Total</p>
               <p className="text-3xl font-extrabold text-primary">£{totalMonthly.toFixed(2)}<span className="text-sm font-medium text-muted-foreground">/month</span></p>
-              <p className="text-xs text-muted-foreground mt-1">{seats} seats at {getPriceTierLabel(seats)}</p>
+              <p className="text-xs text-muted-foreground mt-1">{seats} seats · avg £{effectivePerSeat}/seat</p>
             </div>
 
             <Button
