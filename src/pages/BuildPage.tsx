@@ -1870,14 +1870,71 @@ export function BuildPage() {
 
               {/* Grade Boundaries Config */}
               {selectedFeatures.includes("grade_boundaries") && (
-                <div className="mt-4 p-3 rounded-lg border border-border space-y-2">
+                <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                   <div className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4 text-primary" />
-                    <p className="text-sm font-medium">Grade Boundaries — Configuration</p>
+                    <p className="text-sm font-medium">Grade Boundaries — Data Entry</p>
                   </div>
-                  <p className="text-xs text-muted-foreground">Grade boundaries are automatically loaded based on the exam board and subject. No additional configuration is needed — the tool will display historical and predicted boundaries for your students.</p>
-                  <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
-                    <p className="text-[10px] text-muted-foreground">💡 Tip: The grade boundaries tool shows 2023–2024 actual data and 2025–2026 predicted boundaries. Students can enter their score to see their predicted grade.</p>
+                  <p className="text-xs text-muted-foreground">Enter actual grade boundary percentages for 2023–2025. The 2026 prediction is calculated automatically using linear extrapolation.</p>
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground">
+                      <span>Year</span>
+                      <span>A*</span>
+                      <span>A</span>
+                      <span>B</span>
+                    </div>
+                    {['2023', '2024', '2025'].map(yr => (
+                      <div key={yr} className="grid grid-cols-4 gap-2 items-center">
+                        <span className="text-sm font-medium">{yr}</span>
+                        {['A*', 'A', 'B'].map(grade => (
+                          <Input
+                            key={grade}
+                            type="number"
+                            step="0.1"
+                            value={gbData[yr]?.[grade] || ''}
+                            onChange={(e) => {
+                              setGbData(prev => ({
+                                ...prev,
+                                [yr]: { ...prev[yr], [grade]: e.target.value },
+                              }));
+                            }}
+                            placeholder="%"
+                            className="h-8 text-sm"
+                          />
+                        ))}
+                      </div>
+                    ))}
+                    {/* Predicted 2026 row */}
+                    {(() => {
+                      const predicted: Record<string, string> = {};
+                      for (const grade of ['A*', 'A', 'B']) {
+                        const vals = ['2023', '2024', '2025']
+                          .map(yr => parseFloat(gbData[yr]?.[grade] || ''))
+                          .filter(v => !isNaN(v));
+                        if (vals.length >= 2) {
+                          const n = vals.length;
+                          const avgX = (n - 1) / 2;
+                          const avgY = vals.reduce((a, b) => a + b, 0) / n;
+                          let num = 0, den = 0;
+                          for (let i = 0; i < n; i++) {
+                            num += (i - avgX) * (vals[i] - avgY);
+                            den += (i - avgX) ** 2;
+                          }
+                          const slope = den !== 0 ? num / den : 0;
+                          const predict = avgY + slope * (n - avgX);
+                          predicted[grade] = (Math.round(predict * 10) / 10).toString();
+                        }
+                      }
+                      if (Object.keys(predicted).length === 0) return null;
+                      return (
+                        <div className="grid grid-cols-4 gap-2 items-center pt-1 border-t border-border/50">
+                          <span className="text-sm font-medium text-primary">2026 <span className="text-[10px] text-muted-foreground">(pred.)</span></span>
+                          {['A*', 'A', 'B'].map(grade => (
+                            <span key={grade} className="text-sm text-center font-medium text-primary">{predicted[grade] || '—'}%</span>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
