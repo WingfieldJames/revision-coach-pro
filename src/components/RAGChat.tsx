@@ -198,6 +198,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [hasPreferencesSet, setHasPreferencesSet] = useState(true); // assume true until checked
   const [challengeNotificationDismissed, setChallengeNotificationDismissed] = useState(false);
   const challengeShownOnceRef = useRef(false);
+  const [challengeConfig, setChallengeConfig] = useState<ChallengeConfig | null>(null);
+  const [gradeBoundariesData, setGradeBoundariesData] = useState<Record<string, Record<string, number>> | null>(null);
   // Feedback state: maps messageId -> 'thumbs_up' | 'thumbs_down'
   const [feedbackMap, setFeedbackMap] = useState<Record<string, 'thumbs_up' | 'thumbs_down'>>({});
 
