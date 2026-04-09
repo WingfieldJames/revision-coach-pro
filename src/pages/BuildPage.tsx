@@ -724,6 +724,28 @@ export function BuildPage() {
           staged_specifications: stagedSpecData as unknown as import("@/integrations/supabase/types").Json,
           suggested_prompts: suggestedPrompts as unknown as import("@/integrations/supabase/types").Json,
           diagram_library: diagramLibrary as unknown as import("@/integrations/supabase/types").Json,
+          active_challenge: (challengeTitle.trim() ? {
+            title: challengeTitle,
+            description: challengeDescription,
+            start: challengeStart ? `${challengeStart}T00:00:00Z` : '',
+            end: challengeEnd ? `${challengeEnd}T00:00:00Z` : '',
+          } : null) as unknown as import("@/integrations/supabase/types").Json,
+          grade_boundaries_data: (() => {
+            const parsed: Record<string, Record<string, number>> = {};
+            let hasData = false;
+            for (const yr of ['2023', '2024', '2025']) {
+              const row = gbData[yr];
+              if (row) {
+                const entry: Record<string, number> = {};
+                for (const g of ['A*', 'A', 'B']) {
+                  const v = parseFloat(row[g]);
+                  if (!isNaN(v)) { entry[g] = v; hasData = true; }
+                }
+                if (Object.keys(entry).length > 0) parsed[yr] = entry;
+              }
+            }
+            return hasData ? parsed : null;
+          })() as unknown as import("@/integrations/supabase/types").Json,
           system_prompt_submitted: systemPrompt.trim().length >= 10,
           exam_technique_submitted: examTechnique.trim().length >= 10,
           trainer_bio_submitted: trainerDescription.trim().length >= 10,
