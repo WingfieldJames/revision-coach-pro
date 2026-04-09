@@ -396,10 +396,29 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       setChallengeNotificationDismissed(true);
     }
   }, [user, productId]);
+  // Fetch challenge config from trainer_projects
+  useEffect(() => {
+    const fetchChallenge = async () => {
+      try {
+        const { data } = await supabase
+          .from('trainer_projects')
+          .select('active_challenge, grade_boundaries_data')
+          .eq('product_id', productId)
+          .maybeSingle();
+        if (data) {
+          if (data.active_challenge) setChallengeConfig(data.active_challenge as unknown as ChallengeConfig);
+          if (data.grade_boundaries_data) setGradeBoundariesData(data.grade_boundaries_data as unknown as Record<string, Record<string, number>>);
+        }
+      } catch (e) {
+        console.error('Error fetching challenge config:', e);
+      }
+    };
+    fetchChallenge();
+  }, [productId]);
 
   // Determine which popup to show: challenge (existing users) or fill-me-in (new users)
-  const showChallengeMode = isChallengeActive() && hasPreferencesSet;
-  const hasChallengeNotification = isChallengeActive() && hasPreferencesSet && !challengeNotificationDismissed;
+  const showChallengeMode = isChallengeActiveFromConfig(challengeConfig) && hasPreferencesSet;
+  const hasChallengeNotification = isChallengeActiveFromConfig(challengeConfig) && hasPreferencesSet && !challengeNotificationDismissed;
 
   // Auto-trigger popup on first prompt
   useEffect(() => {
@@ -887,6 +906,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         productSlug={productSlug}
         trainerAvatarUrl={trainerAvatarUrl}
         trainerName={trainerName}
+        challengeConfig={challengeConfig}
+        gradeBoundariesData={gradeBoundariesData}
       />
 
       {/* Messages area - scrollable */}
