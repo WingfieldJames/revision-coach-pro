@@ -449,7 +449,44 @@ export function BuildPage() {
     setSuggestedPrompts(initialSuggestedPrompts);
     setDiagramLibrary(initialDiagramLibrary);
 
-    // Handle specs with normalization
+    // Load challenge config
+    const dbChallenge = (existing as any).active_challenge;
+    if (dbChallenge && typeof dbChallenge === 'object') {
+      setChallengeTitle(dbChallenge.title || '');
+      setChallengeDescription(dbChallenge.description || '');
+      setChallengeStart(dbChallenge.start ? dbChallenge.start.slice(0, 10) : '');
+      setChallengeEnd(dbChallenge.end ? dbChallenge.end.slice(0, 10) : '');
+    } else {
+      setChallengeTitle('');
+      setChallengeDescription('');
+      setChallengeStart('');
+      setChallengeEnd('');
+    }
+
+    // Load grade boundaries data
+    const dbGb = (existing as any).grade_boundaries_data;
+    if (dbGb && typeof dbGb === 'object') {
+      const loaded: Record<string, Record<string, string>> = {
+        '2023': { 'A*': '', 'A': '', 'B': '' },
+        '2024': { 'A*': '', 'A': '', 'B': '' },
+        '2025': { 'A*': '', 'A': '', 'B': '' },
+      };
+      for (const yr of ['2023', '2024', '2025']) {
+        if (dbGb[yr]) {
+          for (const g of ['A*', 'A', 'B']) {
+            if (dbGb[yr][g] != null) loaded[yr][g] = String(dbGb[yr][g]);
+          }
+        }
+      }
+      setGbData(loaded);
+    } else {
+      setGbData({
+        '2023': { 'A*': '', 'A': '', 'B': '' },
+        '2024': { 'A*': '', 'A': '', 'B': '' },
+        '2025': { 'A*': '', 'A': '', 'B': '' },
+      });
+    }
+
     const savedSpecs = existing.staged_specifications;
     const normalizedSpecs = normalizeSpecifications(savedSpecs);
     if (normalizedSpecs && normalizedSpecs.length > 0) {
