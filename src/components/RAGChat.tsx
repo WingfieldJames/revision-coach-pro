@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2, Quote, User, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TutorProfilePopup } from '@/components/TutorProfilePopup';
-import { ChallengePopup, isChallengeActive } from '@/components/ChallengePopup';
+import { ChallengePopup, isChallengeActiveFromConfig, type ChallengeConfig } from '@/components/ChallengePopup';
 import aStarIcon from '@/assets/a-star-icon.png';
 import aStarIconLight from '@/assets/a-star-icon-light.png';
 import logo from '@/assets/logo.png';
