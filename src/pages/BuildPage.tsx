@@ -2239,7 +2239,65 @@ export function BuildPage() {
             </Card>
           )}
 
-          {/* Remove from Website Button */}
+          {/* Challenges Section */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base">Challenges</CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">Set a challenge that appears to existing students when they open the chatbot. New users still see "Fill me in" first. This applies universally to all subjects.</p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <Label className="text-xs font-medium">Title</Label>
+                <Input
+                  value={challengeTitle}
+                  onChange={(e) => setChallengeTitle(e.target.value)}
+                  placeholder="e.g. Easter Challenge 2"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-medium">Description</Label>
+                <Textarea
+                  value={challengeDescription}
+                  onChange={(e) => setChallengeDescription(e.target.value)}
+                  placeholder="e.g. Try a Paper 2 under timed conditions..."
+                  className="mt-1 min-h-[60px]"
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs font-medium">Start date</Label>
+                  <Input
+                    type="date"
+                    value={challengeStart}
+                    onChange={(e) => setChallengeStart(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs font-medium">End date</Label>
+                  <Input
+                    type="date"
+                    value={challengeEnd}
+                    onChange={(e) => setChallengeEnd(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              {challengeTitle && challengeStart && challengeEnd && (
+                <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
+                  <p className="text-[10px] text-muted-foreground">
+                    Challenge "<span className="font-semibold text-foreground">{challengeTitle}</span>" will be active from {challengeStart} to {challengeEnd}. Remember to Save for changes to take effect.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {projectStatus === "deployed" && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
