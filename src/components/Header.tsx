@@ -95,6 +95,7 @@ interface HeaderProps {
   pastPaperBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
   revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
   gradeBoundariesSubject?: 'economics' | 'maths';
+  gradeBoundariesData?: Record<string, Record<string, number>> | null;
   productId?: string;
   productSlug?: string;
   onEssayMarkerSubmit?: (message: string, imageDataUrl?: string) => void;
@@ -129,6 +130,7 @@ export const Header: React.FC<HeaderProps> = ({
   pastPaperBoard = 'edexcel',
   revisionGuideBoard = 'edexcel',
   gradeBoundariesSubject = 'economics',
+  gradeBoundariesData,
   productId,
   productSlug,
   onEssayMarkerSubmit,
@@ -335,7 +337,7 @@ export const Header: React.FC<HeaderProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
-              <GradeBoundariesTool subject={gradeBoundariesSubject} />
+              <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} />
             </PopoverContent>
           </Popover>
         )}
