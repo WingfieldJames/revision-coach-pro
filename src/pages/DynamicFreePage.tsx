@@ -21,6 +21,7 @@ interface TrainerConfig {
   diagram_library: Array<{ id: string; title: string; imagePath: string }> | null;
   trainer_name: string | null; trainer_status: string | null;
   trainer_achievements: any[] | null;
+  grade_boundaries_data: Record<string, Record<string, number>> | null;
 }
 
 export const DynamicFreePage = () => {
@@ -40,7 +41,7 @@ export const DynamicFreePage = () => {
       const { data: prod } = await supabase.from('products').select('id, name, slug, subject, exam_board, system_prompt_deluxe').eq('slug', slug).eq('active', true).maybeSingle();
       if (!prod) { navigate('/compare'); return; }
       setProduct(prod);
-      const { data: tp } = await supabase.from('trainer_projects').select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts, diagram_library, trainer_name, trainer_status, trainer_achievements').eq('product_id', prod.id).maybeSingle();
+      const { data: tp } = await supabase.from('trainer_projects').select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts, diagram_library, trainer_name, trainer_status, trainer_achievements, grade_boundaries_data').eq('product_id', prod.id).maybeSingle();
       const trainerData = tp as unknown as TrainerConfig | null;
       setTrainer(trainerData);
       if (trainerData?.trainer_image_url) {
@@ -106,6 +107,7 @@ export const DynamicFreePage = () => {
     showEssayMarker: hasFeature('essay_marker'),
     showExamCountdown: hasFeature('exam_countdown'),
     showGradeBoundaries: hasFeature('grade_boundaries'),
+    gradeBoundariesData: (trainer as any)?.grade_boundaries_data || null,
     showGraphSketcher: isMathsSubject,
     showStatDistribution: isMathsSubject,
     examDates,

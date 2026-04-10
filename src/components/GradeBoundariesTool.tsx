@@ -10,70 +10,93 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-type GradeBoundarySubject = 'economics' | 'maths';
-
-interface SubjectConfig {
-  label: string;
-  code: string;
-  maxUms: number;
-  actualData: Record<string, string | number>[];
-  predictedData: Record<string, string | number>[];
-  yDomain: [number, number];
+interface GradeBoundariesData {
+  [year: string]: { [grade: string]: number };
 }
 
-const SUBJECT_CONFIGS: Record<GradeBoundarySubject, SubjectConfig> = {
-  economics: {
-    label: 'Edexcel A Level Economics',
-    code: '9EC0',
-    maxUms: 335,
-    actualData: [
-      { year: "2023", "A*": 81.5, A: 73.1, B: 63.0 },
-      { year: "2024", "A*": 83.0, A: 74.9, B: 64.5 },
-      { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
-    ],
-    predictedData: [
-      { year: "2025", "A*": 85.7, A: 78.2, B: 67.8 },
-      { year: "2026 (Predicted)", "A*": 87.8, A: 80.8, B: 70.2 },
-    ],
-    yDomain: [55, 95],
-  },
-  maths: {
-    label: 'Edexcel A Level Mathematics',
-    code: '9MA0',
-    maxUms: 300,
-    actualData: [
-      { year: "2023", "A*": 81.3, A: 65.3, B: 52.7 },
-      { year: "2024", "A*": 83.7, A: 68.3, B: 55.7 },
-      { year: "2025", "A*": 86.0, A: 71.3, B: 59.3 },
-    ],
-    predictedData: [
-      { year: "2025", "A*": 86.0, A: 71.3, B: 59.3 },
-      { year: "2026 (Predicted)", "A*": 88.4, A: 74.3, B: 62.6 },
-    ],
-    yDomain: [45, 95],
-  },
-};
+interface GradeBoundariesToolProps {
+  /** DB-driven grade boundaries data from trainer_projects */
+  gradeBoundariesData?: GradeBoundariesData | null;
+  /** Subject label for display */
+  subjectLabel?: string;
+}
 
-const COLORS = {
+const COLORS: Record<string, string> = {
   "A*": "#1e3a8a",
   A: "#6d28d9",
   B: "#a855f7",
 };
 
-interface GradeBoundariesToolProps {
-  subject?: GradeBoundarySubject;
+function computePredicted2026(data: GradeBoundariesData): Record<string, number> | null {
+  const years = ['2023', '2024', '2025'];
+  const grades = ['A*', 'A', 'B'];
+  const predicted: Record<string, number> = {};
+  let hasAny = false;
+
+  for (const grade of grades) {
+    const vals = years.map(yr => data[yr]?.[grade]).filter((v): v is number => typeof v === 'number' && !isNaN(v));
+    if (vals.length >= 2) {
+      // Linear regression
+      const n = vals.length;
+      const xs = vals.map((_, i) => i);
+      const avgX = xs.reduce((a, b) => a + b, 0) / n;
+      const avgY = vals.reduce((a, b) => a + b, 0) / n;
+      let num = 0, den = 0;
+      for (let i = 0; i < n; i++) {
+        num += (xs[i] - avgX) * (vals[i] - avgY);
+        den += (xs[i] - avgX) ** 2;
+      }
+      const slope = den !== 0 ? num / den : 0;
+      const predict = avgY + slope * (n - avgX);
+      predicted[grade] = Math.round(predict * 10) / 10;
+      hasAny = true;
+    }
+  }
+  return hasAny ? predicted : null;
 }
 
-export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subject = 'economics' }) => {
-  const config = SUBJECT_CONFIGS[subject];
+export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ gradeBoundariesData, subjectLabel }) => {
+  // If no data provided, don't render anything
+  if (!gradeBoundariesData) return null;
+
+  const years = ['2023', '2024', '2025'];
+  // Check if we have any actual data
+  const hasData = years.some(yr => {
+    const yrData = gradeBoundariesData[yr];
+    return yrData && Object.values(yrData).some(v => typeof v === 'number' && !isNaN(v) && v > 0);
+  });
+  if (!hasData) return null;
+
+  const predicted = computePredicted2026(gradeBoundariesData);
+
+  const actualData = years
+    .filter(yr => gradeBoundariesData[yr])
+    .map(yr => ({
+      year: yr,
+      ...gradeBoundariesData[yr],
+    }));
+
+  const predictedData = predicted && actualData.length > 0
+    ? [
+        actualData[actualData.length - 1], // bridge from last actual year
+        { year: "2026 (Predicted)", ...predicted },
+      ]
+    : [];
+
+  // Calculate Y domain
+  const allVals = [...actualData, ...predictedData]
+    .flatMap(d => ['A*', 'A', 'B'].map(g => (d as any)[g]).filter((v): v is number => typeof v === 'number'));
+  const minVal = Math.min(...allVals);
+  const maxVal = Math.max(...allVals);
+  const yDomain: [number, number] = [Math.floor(minVal - 5), Math.ceil(maxVal + 5)];
 
   return (
     <div className="space-y-3">
       <div>
         <h3 className="text-base font-semibold text-foreground">Grade Boundaries</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {config.label} ({config.code}) • Percentage of max UMS ({config.maxUms})
-        </p>
+        {subjectLabel && (
+          <p className="text-xs text-muted-foreground mt-0.5">{subjectLabel} • Percentage thresholds</p>
+        )}
       </div>
 
       <div className="w-full h-[260px]">
@@ -88,23 +111,15 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subjec
               allowDuplicatedCategory={false}
             />
             <YAxis
-              domain={config.yDomain}
+              domain={yDomain}
               tick={{ fontSize: 11 }}
               className="fill-muted-foreground"
               tickLine={false}
               tickFormatter={(v) => `${v}%`}
             />
             <Tooltip
-              contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
-                fontSize: '12px',
-                color: 'hsl(var(--foreground))',
-              }}
               content={({ active, payload, label }: any) => {
                 if (!active || !payload?.length) return null;
-                // Deduplicate: for year "2025" we get both actual + predicted lines
                 const seen = new Set<string>();
                 const items: { grade: string; value: number; color: string }[] = [];
                 for (const entry of payload) {
@@ -145,7 +160,7 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subjec
             {(["A*", "A", "B"] as const).map((grade) => (
               <Line
                 key={grade}
-                data={config.actualData}
+                data={actualData}
                 type="monotone"
                 dataKey={grade}
                 stroke={COLORS[grade]}
@@ -154,10 +169,10 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ subjec
                 activeDot={{ r: 6 }}
               />
             ))}
-            {(["A*", "A", "B"] as const).map((grade) => (
+            {predictedData.length > 0 && (["A*", "A", "B"] as const).map((grade) => (
               <Line
                 key={`${grade}-predicted`}
-                data={config.predictedData}
+                data={predictedData}
                 type="monotone"
                 dataKey={grade}
                 stroke={COLORS[grade]}

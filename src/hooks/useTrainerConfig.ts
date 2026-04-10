@@ -13,6 +13,7 @@ interface TrainerConfig {
   trainer_description: string | null;
   trainer_image_url: string | null;
   trainer_achievements: Array<{ text: string }>;
+  grade_boundaries_data: Record<string, Record<string, number>> | null;
   loaded: boolean;
 }
 
@@ -27,6 +28,7 @@ const defaultConfig: TrainerConfig = {
   trainer_description: null,
   trainer_image_url: null,
   trainer_achievements: [],
+  grade_boundaries_data: null,
   loaded: false,
 };
 
@@ -45,7 +47,7 @@ export function useTrainerConfig(productId: string | null | undefined): TrainerC
       try {
         const { data } = await supabase
           .from('trainer_projects')
-          .select('selected_features, suggested_prompts, essay_marker_marks, exam_dates, diagram_library, trainer_name, trainer_status, trainer_description, trainer_image_url, trainer_achievements')
+          .select('selected_features, suggested_prompts, essay_marker_marks, exam_dates, diagram_library, trainer_name, trainer_status, trainer_description, trainer_image_url, trainer_achievements, grade_boundaries_data')
           .eq('product_id', productId)
           .maybeSingle();
 
@@ -90,6 +92,8 @@ export function useTrainerConfig(productId: string | null | undefined): TrainerC
             }
           }
 
+          const gbData = (data as any).grade_boundaries_data as Record<string, Record<string, number>> | null;
+
           setConfig({
             selected_features: features,
             suggested_prompts: prompts,
@@ -101,6 +105,7 @@ export function useTrainerConfig(productId: string | null | undefined): TrainerC
             trainer_description: (data.trainer_description as string) || null,
             trainer_image_url: resolvedImageUrl,
             trainer_achievements: achievements,
+            grade_boundaries_data: gbData || null,
             loaded: true,
           });
         } else {

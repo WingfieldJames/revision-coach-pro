@@ -65,6 +65,7 @@ export const PremiumVersionPage = () => {
     diagramSubject: "economics" as const,
     customDiagramData: tc.diagram_library.length > 0 ? tc.diagram_library : undefined,
     showGradeBoundaries: resolveFeature(tc, 'grade_boundaries', true),
+    gradeBoundariesData: tc.grade_boundaries_data,
     showPastPaperFinder: resolveFeature(tc, 'past_papers', true),
     showRevisionGuide: resolveFeature(tc, 'revision_guide', true),
     revisionGuideBoard: "edexcel" as const,
