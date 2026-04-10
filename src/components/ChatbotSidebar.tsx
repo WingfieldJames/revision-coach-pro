@@ -95,6 +95,7 @@ export interface ChatbotSidebarProps {
   pastPaperBoard?: string;
   revisionGuideBoard?: string;
   gradeBoundariesSubject?: string;
+  gradeBoundariesData?: Record<string, Record<string, number>> | null;
   essayMarkerLabel?: string;
   essayMarkerFixedMark?: number;
   essayMarkerCustomMarks?: number[];
