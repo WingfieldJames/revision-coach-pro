@@ -1614,6 +1614,7 @@ export function BuildPage() {
       </Dialog>
 
 
+      {projects.length === 0 && (
         <div className="max-w-md mx-auto mt-24 text-center space-y-4">
           <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
           <h2 className="text-lg font-semibold">No subjects yet</h2>
