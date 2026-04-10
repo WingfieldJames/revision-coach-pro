@@ -154,6 +154,14 @@ export function BuildPage() {
   const [showAddSubjectDialog, setShowAddSubjectDialog] = useState(false);
   const [customSubjectName, setCustomSubjectName] = useState("");
 
+  // Universal Challenge dialog
+  const [showUniversalChallengeDialog, setShowUniversalChallengeDialog] = useState(false);
+  const [universalChallengeTitle, setUniversalChallengeTitle] = useState("");
+  const [universalChallengeDescription, setUniversalChallengeDescription] = useState("");
+  const [universalChallengeStart, setUniversalChallengeStart] = useState("");
+  const [universalChallengeEnd, setUniversalChallengeEnd] = useState("");
+  const [savingUniversalChallenge, setSavingUniversalChallenge] = useState(false);
+
   // Content fields
   const [systemPrompt, setSystemPrompt] = useState("");
   const [examTechnique, setExamTechnique] = useState("");
