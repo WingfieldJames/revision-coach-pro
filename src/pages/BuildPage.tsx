@@ -74,6 +74,8 @@ interface TrainerProject {
   updated_at: string;
   last_deployed_at: string | null;
   diagram_library: Array<{ id: string; title: string; imagePath: string }> | null;
+  active_challenge: any | null;
+  grade_boundaries_data: any | null;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
@@ -153,6 +155,14 @@ export function BuildPage() {
   // Add New Subject (custom subject name flow)
   const [showAddSubjectDialog, setShowAddSubjectDialog] = useState(false);
   const [customSubjectName, setCustomSubjectName] = useState("");
+
+  // Universal Challenge dialog
+  const [showUniversalChallengeDialog, setShowUniversalChallengeDialog] = useState(false);
+  const [universalChallengeTitle, setUniversalChallengeTitle] = useState("");
+  const [universalChallengeDescription, setUniversalChallengeDescription] = useState("");
+  const [universalChallengeStart, setUniversalChallengeStart] = useState("");
+  const [universalChallengeEnd, setUniversalChallengeEnd] = useState("");
+  const [savingUniversalChallenge, setSavingUniversalChallenge] = useState(false);
 
   // Content fields
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -310,6 +320,17 @@ export function BuildPage() {
         typed.push(group[0]);
       }
       setProjects(typed);
+      // Load universal challenge from first project that has one
+      const withChallenge = all.find(p => p.active_challenge && typeof (p as any).active_challenge === 'object' && (p as any).active_challenge.title);
+      // We treat the first project's active_challenge as the "universal" one for display
+      // (universal saves overwrite all projects)
+      if (withChallenge) {
+        const uc = (withChallenge as any).active_challenge;
+        setUniversalChallengeTitle(uc.title || '');
+        setUniversalChallengeDescription(uc.description || '');
+        setUniversalChallengeStart(uc.start ? uc.start.slice(0, 10) : '');
+        setUniversalChallengeEnd(uc.end ? uc.end.slice(0, 10) : '');
+      }
       // Auto-select: use stored preference if valid, otherwise first project
       if (typed.length > 0) {
         const stored = localStorage.getItem('build_selected_project_id');
@@ -729,6 +750,7 @@ export function BuildPage() {
             description: challengeDescription,
             start: challengeStart ? `${challengeStart}T00:00:00Z` : '',
             end: challengeEnd ? `${challengeEnd}T00:00:00Z` : '',
+            universal: false,
           } : null) as unknown as import("@/integrations/supabase/types").Json,
           grade_boundaries_data: (() => {
             const parsed: Record<string, Record<string, number>> = {};
@@ -1333,6 +1355,17 @@ export function BuildPage() {
                     <Plus className="h-4 w-4" />
                     <span className="hidden sm:inline">New Subject</span>
                   </Button>
+
+                  {/* Universal Challenge */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 gap-1.5"
+                    onClick={() => setShowUniversalChallengeDialog(true)}
+                  >
+                    🎯
+                    <span className="hidden sm:inline">Challenge</span>
+                  </Button>
                 </div>
               );
             })()}
@@ -1465,6 +1498,122 @@ export function BuildPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Universal Challenge Dialog */}
+      <Dialog open={showUniversalChallengeDialog} onOpenChange={setShowUniversalChallengeDialog}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>🎯 Universal Challenge</DialogTitle>
+            <DialogDescription>Set a challenge that appears to all existing students across every subject. Subject-specific challenges override this.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label className="text-xs font-medium">Title</Label>
+              <Input
+                value={universalChallengeTitle}
+                onChange={(e) => setUniversalChallengeTitle(e.target.value)}
+                placeholder="e.g. Easter Challenge 2"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-medium">Description</Label>
+              <Textarea
+                value={universalChallengeDescription}
+                onChange={(e) => setUniversalChallengeDescription(e.target.value)}
+                placeholder="e.g. Try a Paper 2 under timed conditions..."
+                className="mt-1 min-h-[60px]"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-medium">Start date</Label>
+                <Input
+                  type="date"
+                  value={universalChallengeStart}
+                  onChange={(e) => setUniversalChallengeStart(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-medium">End date</Label>
+                <Input
+                  type="date"
+                  value={universalChallengeEnd}
+                  onChange={(e) => setUniversalChallengeEnd(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            {universalChallengeTitle && universalChallengeStart && universalChallengeEnd && (
+              <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
+                <p className="text-[10px] text-muted-foreground">
+                  Challenge "<span className="font-semibold text-foreground">{universalChallengeTitle}</span>" will be active from {universalChallengeStart} to {universalChallengeEnd} across all subjects.
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUniversalChallengeDialog(false)}>Cancel</Button>
+            <Button
+              disabled={savingUniversalChallenge}
+              onClick={async () => {
+                setSavingUniversalChallenge(true);
+                try {
+                  const challengePayload = universalChallengeTitle.trim() ? {
+                    title: universalChallengeTitle,
+                    description: universalChallengeDescription,
+                    start: universalChallengeStart ? `${universalChallengeStart}T00:00:00Z` : '',
+                    end: universalChallengeEnd ? `${universalChallengeEnd}T00:00:00Z` : '',
+                    universal: true,
+                  } : null;
+
+                  // Get all project IDs that DON'T have a subject-specific challenge
+                  const { data: allProjects } = await supabase
+                    .from('trainer_projects')
+                    .select('id, active_challenge');
+                  
+                  if (allProjects) {
+                    for (const p of allProjects) {
+                      const existing = p.active_challenge as any;
+                      // Only overwrite if no subject-specific challenge (or if it was previously universal)
+                      const isSubjectSpecific = existing && existing.title && !existing.universal;
+                      if (!isSubjectSpecific) {
+                        await supabase
+                          .from('trainer_projects')
+                          .update({ active_challenge: challengePayload as any })
+                          .eq('id', p.id);
+                      }
+                    }
+                  }
+
+                  // Also update the local challenge fields if current project doesn't have subject-specific
+                  const currentChallenge = currentProject?.active_challenge;
+                  const currentIsSubjectSpecific = currentChallenge && currentChallenge.title && !currentChallenge.universal;
+                  if (!currentIsSubjectSpecific && challengePayload) {
+                    setChallengeTitle(challengePayload.title);
+                    setChallengeDescription(challengePayload.description);
+                    setChallengeStart(universalChallengeStart);
+                    setChallengeEnd(universalChallengeEnd);
+                  }
+
+                  toast({ title: "Universal challenge saved", description: "Applied to all subjects without a subject-specific override." });
+                  setShowUniversalChallengeDialog(false);
+                } catch (e) {
+                  console.error('Error saving universal challenge:', e);
+                  toast({ title: "Error", description: "Failed to save universal challenge.", variant: "destructive" });
+                } finally {
+                  setSavingUniversalChallenge(false);
+                }
+              }}
+            >
+              {savingUniversalChallenge ? <><Loader2 className="h-4 w-4 animate-spin mr-1" /> Saving...</> : 'Save to All Subjects'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {projects.length === 0 && (
         <div className="max-w-md mx-auto mt-24 text-center space-y-4">
@@ -2246,7 +2395,7 @@ export function BuildPage() {
                 <Bot className="h-5 w-5 text-primary" />
                 <CardTitle className="text-base">Challenges</CardTitle>
               </div>
-              <p className="text-xs text-muted-foreground">Set a challenge that appears to existing students when they open the chatbot. New users still see "Fill me in" first. This applies universally to all subjects.</p>
+              <p className="text-xs text-muted-foreground">Set a subject-specific challenge. If set, this <span className="font-semibold text-foreground">overrides the universal challenge</span> for this subject only.</p>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
@@ -2254,7 +2403,7 @@ export function BuildPage() {
                 <Input
                   value={challengeTitle}
                   onChange={(e) => setChallengeTitle(e.target.value)}
-                  placeholder="e.g. Easter Challenge 2"
+                  placeholder="Leave empty to use universal challenge"
                   className="mt-1"
                 />
               </div>

@@ -74,9 +74,9 @@ export const ProfilePage = () => {
         setSubscriptionDetails(details);
       }
       // Check for school license
-      const { data: schoolMember } = await supabase
-        .from('school_members')
-        .select('school_id, role, schools(name), school_licenses(expires_at, active)')
+      const { data: schoolMember } = await (supabase
+        .from('school_members' as any)
+        .select('school_id, role, schools(name), school_licenses(expires_at, active)') as any)
         .eq('user_id', user.id)
         .eq('invite_status', 'accepted')
         .limit(1)

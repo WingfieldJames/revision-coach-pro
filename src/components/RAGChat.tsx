@@ -396,18 +396,34 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       setChallengeNotificationDismissed(true);
     }
   }, [user, productId]);
-  // Fetch challenge config from trainer_projects
+  // Fetch challenge config from trainer_projects (subject-specific first, then universal fallback)
   useEffect(() => {
     const fetchChallenge = async () => {
       try {
+        // First try subject-specific challenge
         const { data } = await supabase
           .from('trainer_projects')
           .select('active_challenge, grade_boundaries_data')
           .eq('product_id', productId)
           .maybeSingle();
         if (data) {
-          if (data.active_challenge) setChallengeConfig(data.active_challenge as unknown as ChallengeConfig);
           if (data.grade_boundaries_data) setGradeBoundariesData(data.grade_boundaries_data as unknown as Record<string, Record<string, number>>);
+          const challenge = data.active_challenge as any;
+          if (challenge && challenge.title) {
+            setChallengeConfig(challenge as unknown as ChallengeConfig);
+            return;
+          }
+        }
+        // Fallback: fetch any universal challenge from any trainer_project
+        const { data: anyProject } = await supabase
+          .from('trainer_projects')
+          .select('active_challenge')
+          .not('active_challenge', 'is', null)
+          .limit(1)
+          .maybeSingle();
+        if (anyProject?.active_challenge) {
+          const uc = anyProject.active_challenge as any;
+          if (uc.title) setChallengeConfig(uc as unknown as ChallengeConfig);
         }
       } catch (e) {
         console.error('Error fetching challenge config:', e);
