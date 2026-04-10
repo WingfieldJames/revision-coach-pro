@@ -750,6 +750,7 @@ export function BuildPage() {
             description: challengeDescription,
             start: challengeStart ? `${challengeStart}T00:00:00Z` : '',
             end: challengeEnd ? `${challengeEnd}T00:00:00Z` : '',
+            universal: false,
           } : null) as unknown as import("@/integrations/supabase/types").Json,
           grade_boundaries_data: (() => {
             const parsed: Record<string, Record<string, number>> = {};
