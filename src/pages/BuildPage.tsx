@@ -318,6 +318,17 @@ export function BuildPage() {
         typed.push(group[0]);
       }
       setProjects(typed);
+      // Load universal challenge from first project that has one
+      const withChallenge = all.find(p => p.active_challenge && typeof (p as any).active_challenge === 'object' && (p as any).active_challenge.title);
+      // We treat the first project's active_challenge as the "universal" one for display
+      // (universal saves overwrite all projects)
+      if (withChallenge) {
+        const uc = (withChallenge as any).active_challenge;
+        setUniversalChallengeTitle(uc.title || '');
+        setUniversalChallengeDescription(uc.description || '');
+        setUniversalChallengeStart(uc.start ? uc.start.slice(0, 10) : '');
+        setUniversalChallengeEnd(uc.end ? uc.end.slice(0, 10) : '');
+      }
       // Auto-select: use stored preference if valid, otherwise first project
       if (typed.length > 0) {
         const stored = localStorage.getItem('build_selected_project_id');
