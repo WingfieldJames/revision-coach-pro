@@ -74,6 +74,8 @@ interface TrainerProject {
   updated_at: string;
   last_deployed_at: string | null;
   diagram_library: Array<{ id: string; title: string; imagePath: string }> | null;
+  active_challenge: any | null;
+  grade_boundaries_data: any | null;
 }
 
 const PAPER_YEARS = ["2024", "2023", "2022", "2021", "2020", "2019", "2018"];
@@ -2265,7 +2267,7 @@ export function BuildPage() {
                 <Bot className="h-5 w-5 text-primary" />
                 <CardTitle className="text-base">Challenges</CardTitle>
               </div>
-              <p className="text-xs text-muted-foreground">Set a challenge that appears to existing students when they open the chatbot. New users still see "Fill me in" first. This applies universally to all subjects.</p>
+              <p className="text-xs text-muted-foreground">Set a subject-specific challenge. If set, this <span className="font-semibold text-foreground">overrides the universal challenge</span> for this subject only.</p>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
@@ -2273,7 +2275,7 @@ export function BuildPage() {
                 <Input
                   value={challengeTitle}
                   onChange={(e) => setChallengeTitle(e.target.value)}
-                  placeholder="e.g. Easter Challenge 2"
+                  placeholder="Leave empty to use universal challenge"
                   className="mt-1"
                 />
               </div>
