@@ -114,6 +114,7 @@ export const DynamicPremiumPage = () => {
     showEssayMarker: hasFeature('essay_marker'),
     showExamCountdown: hasFeature('exam_countdown'),
     showGradeBoundaries: hasFeature('grade_boundaries'),
+    gradeBoundariesData: (trainer as any)?.grade_boundaries_data || null,
     showGraphSketcher: isMathsSubject,
     showStatDistribution: isMathsSubject,
     examDates,
