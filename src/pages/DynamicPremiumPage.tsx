@@ -23,6 +23,7 @@ interface TrainerConfig {
   diagram_library: Array<{ id: string; title: string; imagePath: string }> | null;
   trainer_name: string | null; trainer_status: string | null;
   trainer_achievements: any[] | null;
+  grade_boundaries_data: Record<string, Record<string, number>> | null;
 }
 
 export const DynamicPremiumPage = () => {
@@ -46,7 +47,7 @@ export const DynamicPremiumPage = () => {
       const access = await checkProductAccess(user.id, prod.slug);
       if (!access.hasAccess) { navigate('/compare'); return; }
       setProduct(prod);
-      const { data: tp } = await supabase.from('trainer_projects').select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts, diagram_library, trainer_name, trainer_status, trainer_achievements').eq('product_id', prod.id).maybeSingle();
+      const { data: tp } = await supabase.from('trainer_projects').select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts, diagram_library, trainer_name, trainer_status, trainer_achievements, grade_boundaries_data').eq('product_id', prod.id).maybeSingle();
       const trainerData = tp as unknown as TrainerConfig | null;
       setTrainer(trainerData);
       // Resolve trainer image URL
