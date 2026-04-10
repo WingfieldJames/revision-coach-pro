@@ -1498,7 +1498,122 @@ export function BuildPage() {
         </DialogContent>
       </Dialog>
 
-      {projects.length === 0 && (
+      {/* Universal Challenge Dialog */}
+      <Dialog open={showUniversalChallengeDialog} onOpenChange={setShowUniversalChallengeDialog}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>🎯 Universal Challenge</DialogTitle>
+            <DialogDescription>Set a challenge that appears to all existing students across every subject. Subject-specific challenges override this.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label className="text-xs font-medium">Title</Label>
+              <Input
+                value={universalChallengeTitle}
+                onChange={(e) => setUniversalChallengeTitle(e.target.value)}
+                placeholder="e.g. Easter Challenge 2"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-medium">Description</Label>
+              <Textarea
+                value={universalChallengeDescription}
+                onChange={(e) => setUniversalChallengeDescription(e.target.value)}
+                placeholder="e.g. Try a Paper 2 under timed conditions..."
+                className="mt-1 min-h-[60px]"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-medium">Start date</Label>
+                <Input
+                  type="date"
+                  value={universalChallengeStart}
+                  onChange={(e) => setUniversalChallengeStart(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-medium">End date</Label>
+                <Input
+                  type="date"
+                  value={universalChallengeEnd}
+                  onChange={(e) => setUniversalChallengeEnd(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            {universalChallengeTitle && universalChallengeStart && universalChallengeEnd && (
+              <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
+                <p className="text-[10px] text-muted-foreground">
+                  Challenge "<span className="font-semibold text-foreground">{universalChallengeTitle}</span>" will be active from {universalChallengeStart} to {universalChallengeEnd} across all subjects.
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUniversalChallengeDialog(false)}>Cancel</Button>
+            <Button
+              disabled={savingUniversalChallenge}
+              onClick={async () => {
+                setSavingUniversalChallenge(true);
+                try {
+                  const challengePayload = universalChallengeTitle.trim() ? {
+                    title: universalChallengeTitle,
+                    description: universalChallengeDescription,
+                    start: universalChallengeStart ? `${universalChallengeStart}T00:00:00Z` : '',
+                    end: universalChallengeEnd ? `${universalChallengeEnd}T00:00:00Z` : '',
+                    universal: true,
+                  } : null;
+
+                  // Get all project IDs that DON'T have a subject-specific challenge
+                  const { data: allProjects } = await supabase
+                    .from('trainer_projects')
+                    .select('id, active_challenge');
+                  
+                  if (allProjects) {
+                    for (const p of allProjects) {
+                      const existing = p.active_challenge as any;
+                      // Only overwrite if no subject-specific challenge (or if it was previously universal)
+                      const isSubjectSpecific = existing && existing.title && !existing.universal;
+                      if (!isSubjectSpecific) {
+                        await supabase
+                          .from('trainer_projects')
+                          .update({ active_challenge: challengePayload as any })
+                          .eq('id', p.id);
+                      }
+                    }
+                  }
+
+                  // Also update the local challenge fields if current project doesn't have subject-specific
+                  const currentChallenge = currentProject?.active_challenge;
+                  const currentIsSubjectSpecific = currentChallenge && currentChallenge.title && !currentChallenge.universal;
+                  if (!currentIsSubjectSpecific && challengePayload) {
+                    setChallengeTitle(challengePayload.title);
+                    setChallengeDescription(challengePayload.description);
+                    setChallengeStart(universalChallengeStart);
+                    setChallengeEnd(universalChallengeEnd);
+                  }
+
+                  toast({ title: "Universal challenge saved", description: "Applied to all subjects without a subject-specific override." });
+                  setShowUniversalChallengeDialog(false);
+                } catch (e) {
+                  console.error('Error saving universal challenge:', e);
+                  toast({ title: "Error", description: "Failed to save universal challenge.", variant: "destructive" });
+                } finally {
+                  setSavingUniversalChallenge(false);
+                }
+              }}
+            >
+              {savingUniversalChallenge ? <><Loader2 className="h-4 w-4 animate-spin mr-1" /> Saving...</> : 'Save to All Subjects'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
         <div className="max-w-md mx-auto mt-24 text-center space-y-4">
           <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
           <h2 className="text-lg font-semibold">No subjects yet</h2>
