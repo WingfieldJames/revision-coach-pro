@@ -1354,6 +1354,17 @@ export function BuildPage() {
                     <Plus className="h-4 w-4" />
                     <span className="hidden sm:inline">New Subject</span>
                   </Button>
+
+                  {/* Universal Challenge */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 gap-1.5"
+                    onClick={() => setShowUniversalChallengeDialog(true)}
+                  >
+                    🎯
+                    <span className="hidden sm:inline">Challenge</span>
+                  </Button>
                 </div>
               );
             })()}
