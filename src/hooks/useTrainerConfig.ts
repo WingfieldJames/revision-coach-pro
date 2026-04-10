@@ -13,6 +13,7 @@ interface TrainerConfig {
   trainer_description: string | null;
   trainer_image_url: string | null;
   trainer_achievements: Array<{ text: string }>;
+  grade_boundaries_data: Record<string, Record<string, number>> | null;
   loaded: boolean;
 }
 
@@ -27,6 +28,7 @@ const defaultConfig: TrainerConfig = {
   trainer_description: null,
   trainer_image_url: null,
   trainer_achievements: [],
+  grade_boundaries_data: null,
   loaded: false,
 };
 
