@@ -83,6 +83,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   revisionGuideBoard = 'edexcel',
   gradeBoundariesSubject = 'economics',
   gradeBoundariesData,
+  isGCSE = false,
   essayMarkerLabel = 'Essay Marker',
   essayMarkerFixedMark,
   essayMarkerCustomMarks,

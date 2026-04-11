@@ -132,6 +132,7 @@ export const Header: React.FC<HeaderProps> = ({
   revisionGuideBoard = 'edexcel',
   gradeBoundariesSubject = 'economics',
   gradeBoundariesData,
+  isGCSE = false,
   productId,
   productSlug,
   onEssayMarkerSubmit,
