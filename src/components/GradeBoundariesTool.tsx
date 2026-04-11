@@ -19,7 +19,7 @@ interface GradeBoundariesToolProps {
   gradeBoundariesData?: GradeBoundariesData | null;
   /** Subject label for display */
   subjectLabel?: string;
-  /** Whether this is a GCSE subject (uses 9/8/7 labels instead of A*/A/B) */
+  /** Whether this is a GCSE subject (uses 9, 8, 7 labels instead of A-star, A, B) */
   isGCSE?: boolean;
 }
 
