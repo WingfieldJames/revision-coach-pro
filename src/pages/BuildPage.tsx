@@ -2018,7 +2018,11 @@ export function BuildPage() {
               )}
 
               {/* Grade Boundaries Config */}
-              {selectedFeatures.includes("grade_boundaries") && (
+              {selectedFeatures.includes("grade_boundaries") && (() => {
+                const isGCSEProject = currentProject?.qualification_type === 'GCSE';
+                const storageGrades = ['A*', 'A', 'B'];
+                const displayLabels = isGCSEProject ? ['9', '8', '7'] : ['A*', 'A', 'B'];
+                return (
                 <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
                   <div className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4 text-primary" />
@@ -2028,14 +2032,12 @@ export function BuildPage() {
                   <div className="space-y-2">
                     <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground">
                       <span>Year</span>
-                      <span>A*</span>
-                      <span>A</span>
-                      <span>B</span>
+                      {displayLabels.map(label => <span key={label}>{label}</span>)}
                     </div>
                     {['2023', '2024', '2025'].map(yr => (
                       <div key={yr} className="grid grid-cols-4 gap-2 items-center">
                         <span className="text-sm font-medium">{yr}</span>
-                        {['A*', 'A', 'B'].map(grade => (
+                        {storageGrades.map((grade, idx) => (
                           <Input
                             key={grade}
                             type="number"
@@ -2056,7 +2058,7 @@ export function BuildPage() {
                     {/* Predicted 2026 row */}
                     {(() => {
                       const predicted: Record<string, string> = {};
-                      for (const grade of ['A*', 'A', 'B']) {
+                      for (const grade of storageGrades) {
                         const vals = ['2023', '2024', '2025']
                           .map(yr => parseFloat(gbData[yr]?.[grade] || ''))
                           .filter(v => !isNaN(v));
@@ -2078,7 +2080,7 @@ export function BuildPage() {
                       return (
                         <div className="grid grid-cols-4 gap-2 items-center pt-1 border-t border-border/50">
                           <span className="text-sm font-medium text-primary">2026 <span className="text-[10px] text-muted-foreground">(pred.)</span></span>
-                          {['A*', 'A', 'B'].map(grade => (
+                          {storageGrades.map((grade, idx) => (
                             <span key={grade} className="text-sm text-center font-medium text-primary">{predicted[grade] || '—'}%</span>
                           ))}
                         </div>
@@ -2086,7 +2088,8 @@ export function BuildPage() {
                     })()}
                   </div>
                 </div>
-              )}
+                );
+              })()}
 
               {selectedFeatures.includes("diagram_generator") && (
                 <div className="mt-4 p-3 rounded-lg border border-border space-y-3">
