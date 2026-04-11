@@ -19,24 +19,37 @@ interface GradeBoundariesToolProps {
   gradeBoundariesData?: GradeBoundariesData | null;
   /** Subject label for display */
   subjectLabel?: string;
+  /** Whether this is a GCSE subject (uses 9/8/7 labels instead of A*/A/B) */
+  isGCSE?: boolean;
 }
 
-const COLORS: Record<string, string> = {
+const A_LEVEL_COLORS: Record<string, string> = {
   "A*": "#1e3a8a",
   A: "#6d28d9",
   B: "#a855f7",
 };
 
-function computePredicted2026(data: GradeBoundariesData): Record<string, number> | null {
+const GCSE_COLORS: Record<string, string> = {
+  "9": "#1e3a8a",
+  "8": "#6d28d9",
+  "7": "#a855f7",
+};
+
+// Map from internal storage keys (A*/A/B) to display labels
+const GCSE_LABEL_MAP: Record<string, string> = {
+  "A*": "9",
+  "A": "8",
+  "B": "7",
+};
+
+function computePredicted2026(data: GradeBoundariesData, grades: string[]): Record<string, number> | null {
   const years = ['2023', '2024', '2025'];
-  const grades = ['A*', 'A', 'B'];
   const predicted: Record<string, number> = {};
   let hasAny = false;
 
   for (const grade of grades) {
     const vals = years.map(yr => data[yr]?.[grade]).filter((v): v is number => typeof v === 'number' && !isNaN(v));
     if (vals.length >= 2) {
-      // Linear regression
       const n = vals.length;
       const xs = vals.map((_, i) => i);
       const avgX = xs.reduce((a, b) => a + b, 0) / n;
@@ -55,37 +68,51 @@ function computePredicted2026(data: GradeBoundariesData): Record<string, number>
   return hasAny ? predicted : null;
 }
 
-export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ gradeBoundariesData, subjectLabel }) => {
-  // If no data provided, don't render anything
+export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ gradeBoundariesData, subjectLabel, isGCSE }) => {
   if (!gradeBoundariesData) return null;
 
+  // Internal storage always uses A*/A/B keys
+  const storageGrades = ['A*', 'A', 'B'];
   const years = ['2023', '2024', '2025'];
-  // Check if we have any actual data
+  
   const hasData = years.some(yr => {
     const yrData = gradeBoundariesData[yr];
     return yrData && Object.values(yrData).some(v => typeof v === 'number' && !isNaN(v) && v > 0);
   });
   if (!hasData) return null;
 
-  const predicted = computePredicted2026(gradeBoundariesData);
+  // Display labels and colors
+  const displayGrades = isGCSE ? ['9', '8', '7'] : ['A*', 'A', 'B'];
+  const colors = isGCSE ? GCSE_COLORS : A_LEVEL_COLORS;
+
+  const predicted = computePredicted2026(gradeBoundariesData, storageGrades);
+
+  // Remap data from storage keys to display keys
+  const remapRow = (row: Record<string, any>) => {
+    if (!isGCSE) return row;
+    const remapped: Record<string, any> = { year: row.year };
+    for (const [storageKey, displayKey] of Object.entries(GCSE_LABEL_MAP)) {
+      if (row[storageKey] != null) remapped[displayKey] = row[storageKey];
+    }
+    return remapped;
+  };
 
   const actualData = years
     .filter(yr => gradeBoundariesData[yr])
-    .map(yr => ({
+    .map(yr => remapRow({
       year: yr,
       ...gradeBoundariesData[yr],
     }));
 
   const predictedData = predicted && actualData.length > 0
     ? [
-        actualData[actualData.length - 1], // bridge from last actual year
-        { year: "2026 (Predicted)", ...predicted },
+        actualData[actualData.length - 1],
+        remapRow({ year: "2026 (Predicted)", ...predicted }),
       ]
     : [];
 
-  // Calculate Y domain
   const allVals = [...actualData, ...predictedData]
-    .flatMap(d => ['A*', 'A', 'B'].map(g => (d as any)[g]).filter((v): v is number => typeof v === 'number'));
+    .flatMap(d => displayGrades.map(g => (d as any)[g]).filter((v): v is number => typeof v === 'number'));
   const minVal = Math.min(...allVals);
   const maxVal = Math.max(...allVals);
   const yDomain: [number, number] = [Math.floor(minVal - 5), Math.ceil(maxVal + 5)];
@@ -151,36 +178,36 @@ export const GradeBoundariesTool: React.FC<GradeBoundariesToolProps> = ({ gradeB
             <Legend
               wrapperStyle={{ fontSize: '12px' }}
               iconType="circle"
-              payload={[
-                { value: 'A*', type: 'circle', color: COLORS['A*'] },
-                { value: 'A', type: 'circle', color: COLORS['A'] },
-                { value: 'B', type: 'circle', color: COLORS['B'] },
-              ]}
+              payload={displayGrades.map(g => ({
+                value: g,
+                type: 'circle' as const,
+                color: colors[g],
+              }))}
             />
-            {(["A*", "A", "B"] as const).map((grade) => (
+            {displayGrades.map((grade) => (
               <Line
                 key={grade}
                 data={actualData}
                 type="monotone"
                 dataKey={grade}
-                stroke={COLORS[grade]}
+                stroke={colors[grade]}
                 strokeWidth={2.5}
-                dot={{ r: 4, fill: COLORS[grade] }}
+                dot={{ r: 4, fill: colors[grade] }}
                 activeDot={{ r: 6 }}
               />
             ))}
-            {predictedData.length > 0 && (["A*", "A", "B"] as const).map((grade) => (
+            {predictedData.length > 0 && displayGrades.map((grade) => (
               <Line
                 key={`${grade}-predicted`}
                 data={predictedData}
                 type="monotone"
                 dataKey={grade}
-                stroke={COLORS[grade]}
+                stroke={colors[grade]}
                 strokeWidth={2.5}
                 strokeDasharray="6 4"
                 dot={({ cx, cy, index }: any) => {
                   if (index === 0) return <circle key={index} cx={cx} cy={cy} r={0} />;
-                  return <circle key={index} cx={cx} cy={cy} r={4} fill={COLORS[grade]} stroke="none" />;
+                  return <circle key={index} cx={cx} cy={cy} r={4} fill={colors[grade]} stroke="none" />;
                 }}
                 activeDot={{ r: 6 }}
                 legendType="none"
