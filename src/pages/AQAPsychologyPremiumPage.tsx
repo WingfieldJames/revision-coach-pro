@@ -68,6 +68,8 @@ export const AQAPsychologyPremiumPage = () => {
     showEssayMarker: resolveFeature(tc, 'essay_marker', true),
     showExamCountdown: resolveFeature(tc, 'exam_countdown', true),
     showMyMistakes: resolveFeature(tc, 'my_mistakes', false),
+    showGradeBoundaries: resolveFeature(tc, 'grade_boundaries', false),
+    gradeBoundariesData: tc.grade_boundaries_data,
     examDates,
     examSubjectName: "AQA Psychology",
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
