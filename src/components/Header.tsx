@@ -96,6 +96,7 @@ interface HeaderProps {
   revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
   gradeBoundariesSubject?: 'economics' | 'maths';
   gradeBoundariesData?: Record<string, Record<string, number>> | null;
+  isGCSE?: boolean;
   productId?: string;
   productSlug?: string;
   onEssayMarkerSubmit?: (message: string, imageDataUrl?: string) => void;
@@ -337,7 +338,7 @@ export const Header: React.FC<HeaderProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>
-              <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} />
+              <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} isGCSE={isGCSE} />
             </PopoverContent>
           </Popover>
         )}
