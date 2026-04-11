@@ -42,6 +42,8 @@ export const OCRCSPremiumPage = () => {
     examDates,
     examSubjectName: "OCR Computer Science",
     showMyMistakes: resolveFeature(tc, 'my_mistakes', true),
+    showGradeBoundaries: resolveFeature(tc, 'grade_boundaries', false),
+    gradeBoundariesData: tc.grade_boundaries_data,
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: tc.essay_marker_marks.length > 0 ? tc.essay_marker_marks : undefined,
     customRevisionGuideContent: <DynamicRevisionGuide productId={OCR_CS_PRODUCT_ID} subjectName="OCR Computer Science" tier="deluxe" />,
