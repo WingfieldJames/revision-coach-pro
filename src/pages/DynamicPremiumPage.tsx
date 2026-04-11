@@ -115,6 +115,7 @@ export const DynamicPremiumPage = () => {
     showExamCountdown: hasFeature('exam_countdown'),
     showGradeBoundaries: hasFeature('grade_boundaries'),
     gradeBoundariesData: (trainer as any)?.grade_boundaries_data || null,
+    isGCSE: qualType === 'GCSE',
     showGraphSketcher: isMathsSubject,
     showStatDistribution: isMathsSubject,
     examDates,

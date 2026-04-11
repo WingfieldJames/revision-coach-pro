@@ -48,6 +48,7 @@ export interface ChatbotToolbarProps {
   revisionGuideBoard?: 'edexcel' | 'aqa' | 'ocr-cs' | 'ocr-physics' | 'aqa-psychology' | 'edexcel-maths' | 'edexcel-maths-applied';
   gradeBoundariesSubject?: 'economics' | 'maths';
   gradeBoundariesData?: Record<string, Record<string, number>> | null;
+  isGCSE?: boolean;
   essayMarkerLabel?: string;
   essayMarkerFixedMark?: number;
   essayMarkerCustomMarks?: number[];
@@ -82,6 +83,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   revisionGuideBoard = 'edexcel',
   gradeBoundariesSubject = 'economics',
   gradeBoundariesData,
+  isGCSE = false,
   essayMarkerLabel = 'Essay Marker',
   essayMarkerFixedMark,
   essayMarkerCustomMarks,
@@ -182,7 +184,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
         </div>
       );
       case 'my-ai': return <MyAIPreferences productId={productId} isDeluxe={isDeluxe} />;
-      case 'grade-boundaries': return <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} />;
+      case 'grade-boundaries': return <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} isGCSE={isGCSE} />;
       case 'graph-sketcher': return <GraphSketcherTool />;
       case 'stat-distribution': return <StatisticalDistributionTool />;
       case 'past-papers': return customPastPaperContent || <PastPaperFinderTool tier={tier} productId={productId} board={pastPaperBoard} />;
