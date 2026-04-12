@@ -205,6 +205,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const getSelectedTab = () => {
+    if (location.pathname.startsWith('/mock-exam')) return 'mock-exam';
     if (location.pathname === '/progress') return 'profile';
     if (location.pathname === '/dashboard') return 'profile';
     if (location.pathname === '/login') return 'profile';
@@ -246,6 +247,9 @@ export const Header: React.FC<HeaderProps> = ({
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } else if (value === "merch") {
       window.open('https://astarai.printify.me', '_blank');
+    } else if (value === "mock-exam") {
+      navigate('/mock-exam');
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } else if (value === "profile") {
       navigate('/progress');
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
@@ -516,6 +520,14 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => handleTabChange('merch')}
             >
               Merch
+            </div>
+
+            {/* Mock Exams */}
+            <div
+              className={`relative text-sm duration-100 cursor-pointer pb-[5px] hover:text-foreground ${selectedTab === 'mock-exam' ? 'border-b-2 border-foreground -mb-0.5 text-foreground font-medium' : 'text-muted-foreground'}`}
+              onClick={() => handleTabChange('mock-exam')}
+            >
+              Mock Exams
             </div>
 
             {/* Schools */}
