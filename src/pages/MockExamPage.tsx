@@ -16,6 +16,7 @@ interface Question {
   section?: string;
   extract_text?: string;
   diagram_required?: boolean;
+  options?: string[];
 }
 
 interface ExamResult {
@@ -335,41 +336,75 @@ export const MockExamPage = () => {
                 {current.question_text}
               </p>
 
-              {/* Answer textarea */}
-              <div className="relative">
-                <textarea
-                  value={answers[current.question_number] || ""}
-                  onChange={(e) => updateAnswer(current.question_number, e.target.value)}
-                  placeholder="Type your answer here..."
-                  className={`w-full rounded-lg border border-input bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y ${
-                    current.marks_available >= 15
-                      ? "min-h-[400px]"
-                      : current.marks_available >= 8
-                      ? "min-h-[250px]"
-                      : "min-h-[150px]"
-                  }`}
-                />
-                <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                  <span>
-                    {(answers[current.question_number] || "")
-                      .trim()
-                      .split(/\s+/)
-                      .filter(Boolean).length}{" "}
-                    words
-                  </span>
-                  <span>
+              {/* Answer input — MC or written */}
+              {current.options && current.options.length > 0 ? (
+                <div className="space-y-2">
+                  {current.options.map((opt, idx) => {
+                    const letter = String.fromCharCode(65 + idx);
+                    const selected = answers[current.question_number] === letter;
+                    return (
+                      <button
+                        key={letter}
+                        onClick={() => updateAnswer(current.question_number, letter)}
+                        className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors ${
+                          selected
+                            ? "border-primary bg-primary/5 text-foreground font-medium"
+                            : "border-border hover:bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        <span className="font-bold mr-2">{letter}.</span>
+                        {opt}
+                      </button>
+                    );
+                  })}
+                  <div className="flex justify-end mt-1 text-xs text-muted-foreground">
                     {(answers[current.question_number] || "").trim().length > 0 ? (
                       <span className="flex items-center gap-1 text-green-600">
-                        <CheckCircle className="h-3 w-3" /> Answered
+                        <CheckCircle className="h-3 w-3" /> Answered: {answers[current.question_number]}
                       </span>
                     ) : (
                       <span className="flex items-center gap-1">
                         <Circle className="h-3 w-3" /> Unanswered
                       </span>
                     )}
-                  </span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="relative">
+                  <textarea
+                    value={answers[current.question_number] || ""}
+                    onChange={(e) => updateAnswer(current.question_number, e.target.value)}
+                    placeholder="Type your answer here..."
+                    className={`w-full rounded-lg border border-input bg-background px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y ${
+                      current.marks_available >= 15
+                        ? "min-h-[400px]"
+                        : current.marks_available >= 8
+                        ? "min-h-[250px]"
+                        : "min-h-[150px]"
+                    }`}
+                  />
+                  <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                    <span>
+                      {(answers[current.question_number] || "")
+                        .trim()
+                        .split(/\s+/)
+                        .filter(Boolean).length}{" "}
+                      words
+                    </span>
+                    <span>
+                      {(answers[current.question_number] || "").trim().length > 0 ? (
+                        <span className="flex items-center gap-1 text-green-600">
+                          <CheckCircle className="h-3 w-3" /> Answered
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1">
+                          <Circle className="h-3 w-3" /> Unanswered
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Navigation buttons */}
               <div className="flex justify-between mt-6">
