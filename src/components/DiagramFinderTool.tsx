@@ -137,7 +137,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
         </div>
         <div className="space-y-2">
           <Button className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold" onClick={() => handleUpgrade('lifetime')} disabled={isCheckingOut}>
-            {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : 'Exam Season Pass – £39.99'}
+            {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : <>Exam Season Pass – <span className="line-through opacity-60 mr-1">£39.99</span>£24.99</>}
           </Button>
           <Button variant="outline" className="w-full" onClick={() => handleUpgrade('monthly')} disabled={isCheckingOut}>
             Monthly – £8.99/mo

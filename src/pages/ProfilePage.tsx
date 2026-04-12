@@ -288,7 +288,7 @@ export const ProfilePage = () => {
                   </div>
                   <div className="flex items-start gap-3">
                     <Clock className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-                    <p className="text-sm">The Exam Season Pass (£39.99 one-time) might be better value — no recurring charges</p>
+                    <p className="text-sm">The Exam Season Pass (£24.99 one-time) might be better value — no recurring charges</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
@@ -363,7 +363,7 @@ export const ProfilePage = () => {
                   <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                     <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">Special offer just for you</p>
                     <p className="text-sm text-green-700 dark:text-green-300">
-                      Switch to the Exam Season Pass for £39.99 one-time — that's less than 5 months of your current subscription, and it covers you all the way through exams.
+                      Switch to the Exam Season Pass for £24.99 one-time — that's less than 3 months of your current subscription, and it covers you all the way through exams.
                     </p>
                     <Button variant="brand" size="sm" className="mt-3" onClick={() => { setCancelFlowOpen(false); navigate('/compare'); }}>
                       View Exam Season Pass
