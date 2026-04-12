@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatHistoryProvider } from "@/contexts/ChatHistoryContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -50,10 +50,8 @@ import { SchoolJoinPage } from "./pages/SchoolJoinPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
 import { FeedbackResultsPage } from "./pages/FeedbackResultsPage";
 import { SchoolInfoPackPage } from "./pages/SchoolInfoPackPage";
-import { MockExamSetupPage } from "./pages/MockExamSetupPage";
 import { MockExamPage } from "./pages/MockExamPage";
 import { MockExamResultsPage } from "./pages/MockExamResultsPage";
-import { MockExamHistoryPage } from "./pages/MockExamHistoryPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -108,8 +106,8 @@ const App = () => (
             <Route path="/select" element={<SubjectSelectionPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/schools/info-pack" element={<SchoolInfoPackPage />} />
-            <Route path="/mock-exam" element={<MockExamSetupPage />} />
-            <Route path="/mock-exam/history" element={<MockExamHistoryPage />} />
+            <Route path="/mock-exam" element={<Navigate to="/select" replace />} />
+            <Route path="/mock-exam/history" element={<Navigate to="/select" replace />} />
             <Route path="/mock-exam/:resultId" element={<MockExamPage />} />
             <Route path="/mock-exam/:resultId/results" element={<MockExamResultsPage />} />
             <Route path="/school/dashboard" element={<SchoolDashboardPage />} />

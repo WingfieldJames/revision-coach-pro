@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Sparkles, TrendingUp, PenLine, FileSearch, BookOpen,
-  BarChart2, RotateCcw, Timer, Crown, ArrowLeftRight,
+  BarChart2, RotateCcw, Timer, Crown, ArrowLeftRight, ClipboardList,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -26,6 +26,7 @@ import { MyMistakesTool } from '@/components/MyMistakesTool';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
 import { GraphSketcherTool } from '@/components/GraphSketcherTool';
 import { StatisticalDistributionTool } from '@/components/StatisticalDistributionTool';
+import { MockExamTool } from '@/components/MockExamTool';
 
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
@@ -57,6 +58,9 @@ export interface ChatbotToolbarProps {
   examSubjectName?: string;
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
+  showMockExam?: boolean;
+  mockExamBoard?: string;
+  mockExamSubject?: string;
   showGraphSketcher?: boolean;
   showStatDistribution?: boolean;
   /** Maths mode switcher */
@@ -92,6 +96,9 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   examSubjectName = 'Exams',
   customPastPaperContent,
   customRevisionGuideContent,
+  showMockExam = false,
+  mockExamBoard = '',
+  mockExamSubject = '',
   showGraphSketcher = false,
   showStatDistribution = false,
   showMathsModeSwitcher = false,
@@ -159,6 +166,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
     { id: 'essay-marker', label: essayMarkerLabel, icon: <PenLine className="h-4 w-4" />, show: showEssayMarker },
     { id: 'past-papers', label: 'Past Papers', icon: <FileSearch className="h-4 w-4" />, show: showPastPaperFinder },
     { id: 'revision-guide', label: 'Revision Guide', icon: <BookOpen className="h-4 w-4" />, show: showRevisionGuide },
+    { id: 'mock-exams', label: 'Mock Exams', icon: <ClipboardList className="h-4 w-4" />, show: showMockExam },
     { id: 'my-mistakes', label: 'My Mistakes', icon: <RotateCcw className="h-4 w-4" />, show: showMyMistakes, badge: mistakesDueCount },
     { id: 'exam-countdown', label: 'Exam Countdown', icon: <Timer className="h-4 w-4" />, show: showExamCountdown && examDates.length > 0 },
   ];
@@ -201,6 +209,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
         />
       );
       case 'diagrams': return <DiagramFinderTool subject={diagramSubject} tier={tier} productId={productId} customDiagrams={customDiagramData} />;
+      case 'mock-exams': return <MockExamTool examBoard={mockExamBoard} subject={mockExamSubject} productId={productId} onClose={() => setOpenPopover(null)} />;
       case 'my-mistakes': return <MyMistakesTool productId={productId} onDueCountChange={setMistakesDueCount} />;
       case 'exam-countdown': return <ExamCountdown exams={examDates} subjectName={examSubjectName} />;
       default: return null;

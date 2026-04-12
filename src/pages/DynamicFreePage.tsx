@@ -116,6 +116,9 @@ export const DynamicFreePage = () => {
     showMyMistakes: hasFeature('my_mistakes'),
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: trainer?.essay_marker_marks || undefined,
+    showMockExam: true,
+    mockExamBoard: product.exam_board,
+    mockExamSubject: product.subject,
     customPastPaperContent: <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="free" />,
     customRevisionGuideContent: <DynamicRevisionGuide productId={product.id} subjectName={subjectName} tier="free" />,
     ...(isMathsSubject && hasAppliedCounterpart ? {
