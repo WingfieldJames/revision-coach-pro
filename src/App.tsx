@@ -50,6 +50,10 @@ import { SchoolJoinPage } from "./pages/SchoolJoinPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
 import { FeedbackResultsPage } from "./pages/FeedbackResultsPage";
 import { SchoolInfoPackPage } from "./pages/SchoolInfoPackPage";
+import { MockExamSetupPage } from "./pages/MockExamSetupPage";
+import { MockExamPage } from "./pages/MockExamPage";
+import { MockExamResultsPage } from "./pages/MockExamResultsPage";
+import { MockExamHistoryPage } from "./pages/MockExamHistoryPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -104,6 +108,10 @@ const App = () => (
             <Route path="/select" element={<SubjectSelectionPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/schools/info-pack" element={<SchoolInfoPackPage />} />
+            <Route path="/mock-exam" element={<MockExamSetupPage />} />
+            <Route path="/mock-exam/history" element={<MockExamHistoryPage />} />
+            <Route path="/mock-exam/:resultId" element={<MockExamPage />} />
+            <Route path="/mock-exam/:resultId/results" element={<MockExamResultsPage />} />
             <Route path="/school/dashboard" element={<SchoolDashboardPage />} />
             <Route path="/school/join" element={<SchoolJoinPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
