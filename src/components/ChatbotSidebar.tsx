@@ -146,6 +146,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   productSlug,
   examDates = [],
 }) => {
+  const isGCSE = productSlug?.startsWith('gcse-') ?? false;
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
