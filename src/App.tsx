@@ -52,6 +52,7 @@ import { FeedbackResultsPage } from "./pages/FeedbackResultsPage";
 import { SchoolInfoPackPage } from "./pages/SchoolInfoPackPage";
 import { MockExamPage } from "./pages/MockExamPage";
 import { MockExamResultsPage } from "./pages/MockExamResultsPage";
+import { AdminSeedPage } from "./pages/AdminSeedPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -115,6 +116,7 @@ const App = () => (
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/feedback-results" element={<FeedbackResultsPage />} />
+            <Route path="/admin/seed" element={<AdminSeedPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
