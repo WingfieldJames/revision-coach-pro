@@ -1,0 +1,119 @@
+{
+  "exam_board": "Edexcel",
+  "subject": "Economics",
+  "paper_number": 2,
+  "paper_name": "Edexcel Economics A Paper 2: The National and Global Economy (June 2023)",
+  "year": 2023,
+  "total_marks": 100,
+  "time_limit_minutes": 120,
+  "content_source": "representative",
+  "sections": [
+    {
+      "id": "A",
+      "name": "Section A: Data Response — UK Inflation",
+      "questions": ["1a", "1b", "1c", "1d", "1e"]
+    },
+    {
+      "id": "B",
+      "name": "Section B: Data Response — UK Trade",
+      "questions": ["2a", "2b", "2c", "2d", "2e"]
+    },
+    {
+      "id": "C",
+      "name": "Section C: Essay (choose one)",
+      "questions": ["3", "4"]
+    }
+  ],
+  "questions": [
+    {
+      "question_number": "1a",
+      "question_text": "With reference to Extract A, identify two significant features of the data shown.",
+      "marks_available": 5,
+      "question_type": "5-marker",
+      "section": "A",
+      "extract_text": "Extract A shows UK CPI inflation and Bank of England base rate from 2020 to 2023. CPI inflation rose from 0.7% in January 2021 to a peak of 11.1% in October 2022, before falling to 6.7% by September 2023. The Bank of England base rate was held at 0.1% until December 2021, then increased 14 consecutive times to reach 5.25% by August 2023. Average real wages fell by 3.1% in the year to March 2023."
+    },
+    {
+      "question_number": "1b",
+      "question_text": "With reference to the information provided, explain how cost-push factors contributed to the inflationary pressures experienced by the UK economy.",
+      "marks_available": 8,
+      "question_type": "8-marker",
+      "section": "A"
+    },
+    {
+      "question_number": "1c",
+      "question_text": "With reference to Extract B and your own knowledge, assess the effectiveness of monetary policy in controlling inflation in the UK.",
+      "marks_available": 10,
+      "question_type": "10-marker",
+      "section": "A",
+      "extract_text": "Extract B: The Bank of England's Monetary Policy Committee raised interest rates from 0.1% to 5.25% between December 2021 and August 2023. Mortgage approvals fell by 28% in the year to July 2023. However, inflation remained above the 2% target throughout 2023. Some economists argue that monetary policy is less effective when inflation is driven by supply-side shocks rather than excess demand. Business investment fell by 1.2% in Q2 2023."
+    },
+    {
+      "question_number": "1d",
+      "question_text": "With reference to the extracts and your own knowledge, evaluate the trade-offs the Bank of England faces when setting interest rates during a period of high inflation and low economic growth.",
+      "marks_available": 12,
+      "question_type": "12-marker",
+      "section": "A"
+    },
+    {
+      "question_number": "1e",
+      "question_text": "Evaluate the view that fiscal policy would be more effective than monetary policy in managing the UK economy during the current macroeconomic environment.",
+      "marks_available": 15,
+      "question_type": "15-marker",
+      "section": "A"
+    },
+    {
+      "question_number": "2a",
+      "question_text": "With reference to Extract C, identify two significant features of the data shown.",
+      "marks_available": 5,
+      "question_type": "5-marker",
+      "section": "B",
+      "extract_text": "Extract C shows the UK's balance of trade in goods and services from 2018 to 2023. The trade deficit in goods widened from £139bn in 2018 to £186bn in 2023. The trade surplus in services grew from £108bn to £132bn over the same period. The overall current account deficit was £83bn (3.1% of GDP) in 2023. UK exports to the EU fell by 7% between 2019 and 2023, while exports to non-EU countries grew by 4%."
+    },
+    {
+      "question_number": "2b",
+      "question_text": "With reference to the information provided, explain how a depreciating exchange rate might affect the UK's balance of trade.",
+      "marks_available": 8,
+      "question_type": "8-marker",
+      "section": "B"
+    },
+    {
+      "question_number": "2c",
+      "question_text": "With reference to Extract D and your own knowledge, assess the impact of increased trade barriers on the UK economy since 2021.",
+      "marks_available": 10,
+      "question_type": "10-marker",
+      "section": "B",
+      "extract_text": "Extract D: Since leaving the EU single market in January 2021, UK firms have faced new customs checks, regulatory divergence, and rules of origin requirements on exports to the EU. A 2023 study estimated that these barriers reduced UK-EU trade by approximately 15% compared to a scenario where the UK had remained in the single market. However, the UK has signed new trade agreements with Australia, New Zealand, and is seeking CPTPP membership. Small and medium-sized enterprises have been disproportionately affected, with 24% of SMEs that previously exported to the EU ceasing to do so."
+    },
+    {
+      "question_number": "2d",
+      "question_text": "With reference to the extracts and your own knowledge, evaluate whether the UK's comparative advantage has changed as a result of its new trading relationships.",
+      "marks_available": 12,
+      "question_type": "12-marker",
+      "section": "B"
+    },
+    {
+      "question_number": "2e",
+      "question_text": "Evaluate the view that free trade always leads to net economic benefits for all participating countries.",
+      "marks_available": 15,
+      "question_type": "15-marker",
+      "section": "B"
+    },
+    {
+      "question_number": "3",
+      "question_text": "Evaluate the effectiveness of supply-side policies in promoting long-run economic growth in the UK. Refer to at least one diagram in your answer.",
+      "marks_available": 25,
+      "question_type": "25-marker",
+      "section": "C",
+      "diagram_required": true
+    },
+    {
+      "question_number": "4",
+      "question_text": "Evaluate the view that a floating exchange rate system is always preferable to a fixed exchange rate system for the UK. Refer to at least one diagram in your answer.",
+      "marks_available": 25,
+      "question_type": "25-marker",
+      "section": "C",
+      "diagram_required": true
+    }
+  ]
+}

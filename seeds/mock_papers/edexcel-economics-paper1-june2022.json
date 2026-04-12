@@ -1,0 +1,119 @@
+{
+  "exam_board": "Edexcel",
+  "subject": "Economics",
+  "paper_number": 1,
+  "paper_name": "Edexcel Economics A Paper 1: Markets and Business Behaviour (June 2022)",
+  "year": 2022,
+  "total_marks": 100,
+  "time_limit_minutes": 120,
+  "content_source": "representative",
+  "sections": [
+    {
+      "id": "A",
+      "name": "Section A: Data Response — UK Supermarkets",
+      "questions": ["1a", "1b", "1c", "1d", "1e"]
+    },
+    {
+      "id": "B",
+      "name": "Section B: Data Response — UK Labour Market",
+      "questions": ["2a", "2b", "2c", "2d", "2e"]
+    },
+    {
+      "id": "C",
+      "name": "Section C: Essay (choose one)",
+      "questions": ["3", "4"]
+    }
+  ],
+  "questions": [
+    {
+      "question_number": "1a",
+      "question_text": "With reference to Extract A, identify two significant features of the data shown.",
+      "marks_available": 5,
+      "question_type": "5-marker",
+      "section": "A",
+      "extract_text": "Extract A shows market share data for UK supermarkets from 2019 to 2022. Tesco's market share fell from 27.4% to 26.9%, while Aldi's share rose from 7.9% to 9.3% and Lidl's from 5.9% to 7.1%. The total value of the UK grocery market grew from £203bn to £228bn over the period. Average food prices increased by 16.4% in the year to March 2023, the highest rate in 45 years."
+    },
+    {
+      "question_number": "1b",
+      "question_text": "With reference to the information provided, explain how the characteristics of an oligopoly are demonstrated in the UK supermarket industry.",
+      "marks_available": 8,
+      "question_type": "8-marker",
+      "section": "A"
+    },
+    {
+      "question_number": "1c",
+      "question_text": "With reference to Extract B and your own knowledge, assess the extent to which the growth of discount supermarkets has increased contestability in the UK grocery market.",
+      "marks_available": 10,
+      "question_type": "10-marker",
+      "section": "A",
+      "extract_text": "Extract B: Aldi and Lidl have opened over 400 new stores in the UK since 2015, investing £3.5bn. Their combined market share has more than doubled from 8% to 16.4% between 2015 and 2022. Aldi's average basket price is estimated to be 20% lower than the 'Big Four' supermarkets. However, barriers to entry remain significant — a new full-size supermarket requires investment of £30m-£50m, planning permission takes 12-18 months, and established retailers control the most desirable locations."
+    },
+    {
+      "question_number": "1d",
+      "question_text": "With reference to the extracts and your own knowledge, evaluate the impact of non-price competition on consumer welfare in the UK supermarket industry.",
+      "marks_available": 12,
+      "question_type": "12-marker",
+      "section": "A"
+    },
+    {
+      "question_number": "1e",
+      "question_text": "Evaluate the view that the Competition and Markets Authority (CMA) is effective in promoting competition and protecting consumers in oligopolistic markets such as the UK supermarket industry.",
+      "marks_available": 15,
+      "question_type": "15-marker",
+      "section": "A"
+    },
+    {
+      "question_number": "2a",
+      "question_text": "With reference to Extract C, identify two significant features of the data shown.",
+      "marks_available": 5,
+      "question_type": "5-marker",
+      "section": "B",
+      "extract_text": "Extract C shows UK labour market data from 2019 to 2022. The unemployment rate fell from 3.8% in Q4 2019 to 3.5% in Q3 2022. Job vacancies reached a record 1.3 million in March 2022. Average weekly earnings growth was 6.0% in nominal terms but -2.5% in real terms in Q3 2022. The economic inactivity rate increased from 20.4% to 21.6% over the period, with over 500,000 additional people classified as long-term sick."
+    },
+    {
+      "question_number": "2b",
+      "question_text": "With reference to the information provided, explain how the concepts of derived demand and wage determination are relevant to understanding the current UK labour market.",
+      "marks_available": 8,
+      "question_type": "8-marker",
+      "section": "B"
+    },
+    {
+      "question_number": "2c",
+      "question_text": "With reference to Extract D and your own knowledge, assess the impact of the National Living Wage on employment and income inequality in the UK.",
+      "marks_available": 10,
+      "question_type": "10-marker",
+      "section": "B",
+      "extract_text": "Extract D: The National Living Wage increased from £8.91 to £9.50 in April 2022, with a further increase to £10.42 in April 2023. The Low Pay Commission estimated that the NLW directly increased wages for 2 million workers. Research by the London School of Economics found no significant negative impact on employment levels. However, the Federation of Small Businesses reported that 38% of small firms found the increase 'very difficult' to absorb, with some reducing hours rather than making redundancies."
+    },
+    {
+      "question_number": "2d",
+      "question_text": "With reference to the extracts and your own knowledge, evaluate the effectiveness of education and training policies in addressing labour market failures in the UK.",
+      "marks_available": 12,
+      "question_type": "12-marker",
+      "section": "B"
+    },
+    {
+      "question_number": "2e",
+      "question_text": "Evaluate the view that trade unions improve economic outcomes for workers without causing significant labour market distortions.",
+      "marks_available": 15,
+      "question_type": "15-marker",
+      "section": "B"
+    },
+    {
+      "question_number": "3",
+      "question_text": "Evaluate the view that third-degree price discrimination always benefits producers more than consumers. Refer to at least one diagram in your answer.",
+      "marks_available": 25,
+      "question_type": "25-marker",
+      "section": "C",
+      "diagram_required": true
+    },
+    {
+      "question_number": "4",
+      "question_text": "Evaluate the view that perfect competition leads to the most efficient allocation of resources compared to other market structures. Refer to at least one diagram in your answer.",
+      "marks_available": 25,
+      "question_type": "25-marker",
+      "section": "C",
+      "diagram_required": true
+    }
+  ]
+}

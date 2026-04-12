@@ -1,0 +1,119 @@
+{
+  "exam_board": "Edexcel",
+  "subject": "Economics",
+  "paper_number": 1,
+  "paper_name": "Edexcel Economics A Paper 1: Markets and Business Behaviour (June 2023)",
+  "year": 2023,
+  "total_marks": 100,
+  "time_limit_minutes": 120,
+  "content_source": "representative",
+  "sections": [
+    {
+      "id": "A",
+      "name": "Section A: Data Response — Housing Market",
+      "questions": ["1a", "1b", "1c", "1d", "1e"]
+    },
+    {
+      "id": "B",
+      "name": "Section B: Data Response — Energy Market",
+      "questions": ["2a", "2b", "2c", "2d", "2e"]
+    },
+    {
+      "id": "C",
+      "name": "Section C: Essay (choose one)",
+      "questions": ["3", "4"]
+    }
+  ],
+  "questions": [
+    {
+      "question_number": "1a",
+      "question_text": "With reference to Extract A, identify two significant features of the data shown.",
+      "marks_available": 5,
+      "question_type": "5-marker",
+      "section": "A",
+      "extract_text": "Extract A shows data on UK house prices and housing supply from 2018 to 2023. Average house prices rose from £230,000 in 2018 to £290,000 in 2023, a 26% increase. Over the same period, the number of new housing completions fell from 195,000 to 170,000 per year. The ratio of median house prices to median earnings reached 8.3 in 2023, compared to 7.8 in 2018."
+    },
+    {
+      "question_number": "1b",
+      "question_text": "With reference to the information provided, explain how the concept of price elasticity of supply is relevant to the UK housing market.",
+      "marks_available": 8,
+      "question_type": "8-marker",
+      "section": "A"
+    },
+    {
+      "question_number": "1c",
+      "question_text": "With reference to Extract B and your own knowledge, assess the view that government subsidies for first-time buyers are the most effective policy to improve housing affordability.",
+      "marks_available": 10,
+      "question_type": "10-marker",
+      "section": "A",
+      "extract_text": "Extract B: The government introduced the Help to Buy scheme in 2013, providing equity loans to first-time buyers. By 2023, the scheme had supported over 350,000 purchases. Critics argue the policy inflated house prices by increasing demand without addressing supply constraints. The Office for Budget Responsibility estimated that Help to Buy increased house prices by 0.8% overall, but by up to 5% in some areas."
+    },
+    {
+      "question_number": "1d",
+      "question_text": "With reference to the extracts and your own knowledge, evaluate government intervention in the UK housing market. You should consider both demand-side and supply-side policies.",
+      "marks_available": 12,
+      "question_type": "12-marker",
+      "section": "A"
+    },
+    {
+      "question_number": "1e",
+      "question_text": "Evaluate the view that the UK housing market is a clear example of market failure that justifies significant government intervention.",
+      "marks_available": 15,
+      "question_type": "15-marker",
+      "section": "A"
+    },
+    {
+      "question_number": "2a",
+      "question_text": "With reference to Extract C, identify two significant features of the data shown.",
+      "marks_available": 5,
+      "question_type": "5-marker",
+      "section": "B",
+      "extract_text": "Extract C shows UK electricity generation by source (2018–2023). Renewable energy generation increased from 33% to 42% of total generation. Gas-fired generation fell from 40% to 33%. Nuclear remained roughly constant at 15%. Average wholesale electricity prices tripled from £50/MWh in 2020 to £150/MWh in 2022, before falling to £90/MWh in 2023."
+    },
+    {
+      "question_number": "2b",
+      "question_text": "With reference to the information provided, explain how negative externalities arise in the energy market and why they may lead to market failure.",
+      "marks_available": 8,
+      "question_type": "8-marker",
+      "section": "B"
+    },
+    {
+      "question_number": "2c",
+      "question_text": "With reference to Extract D and your own knowledge, assess the effectiveness of carbon taxes as a method of correcting market failure in the energy market.",
+      "marks_available": 10,
+      "question_type": "10-marker",
+      "section": "B",
+      "extract_text": "Extract D: The UK Emissions Trading Scheme (UK ETS) replaced the EU ETS in 2021. Carbon prices rose from £50 per tonne in 2021 to £80 per tonne in 2023. Research suggests the scheme has accelerated the shift from coal to gas generation but has had limited impact on the transition to renewable energy. Industry groups argue that high carbon prices damage international competitiveness, while environmental campaigners say the price remains too low to meet net zero targets by 2050."
+    },
+    {
+      "question_number": "2d",
+      "question_text": "With reference to the extracts and your own knowledge, evaluate the impact of subsidies for renewable energy on economic efficiency and resource allocation.",
+      "marks_available": 12,
+      "question_type": "12-marker",
+      "section": "B"
+    },
+    {
+      "question_number": "2e",
+      "question_text": "Evaluate the view that government intervention through regulation is more effective than market-based policies in achieving environmental objectives in the energy market.",
+      "marks_available": 15,
+      "question_type": "15-marker",
+      "section": "B"
+    },
+    {
+      "question_number": "3",
+      "question_text": "Evaluate the view that monopoly power is always detrimental to consumer welfare. Refer to at least one diagram in your answer.",
+      "marks_available": 25,
+      "question_type": "25-marker",
+      "section": "C",
+      "diagram_required": true
+    },
+    {
+      "question_number": "4",
+      "question_text": "Evaluate the extent to which contestable markets deliver better outcomes for consumers than oligopolistic markets. Refer to at least one diagram in your answer.",
+      "marks_available": 25,
+      "question_type": "25-marker",
+      "section": "C",
+      "diagram_required": true
+    }
+  ]
+}
