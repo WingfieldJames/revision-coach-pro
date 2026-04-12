@@ -199,7 +199,7 @@ serve(async (req) => {
               name: `${productName} (Exam Season Pass)`,
               description: "Premium AI-powered academic assistance - Access until June 30, 2026"
             },
-            unit_amount: product?.lifetime_price || 3499, // £34.99 in pence
+            unit_amount: product?.lifetime_price || 2499, // £24.99 in pence
           },
           quantity: 1,
         },
