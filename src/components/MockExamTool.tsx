@@ -49,6 +49,7 @@ export const MockExamTool: React.FC<MockExamToolProps> = ({
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -58,7 +59,7 @@ export const MockExamTool: React.FC<MockExamToolProps> = ({
     setLoading(true);
 
     // Fetch papers for this board + subject
-    const { data: paperData } = await (supabase as any)
+    const { data: paperData, error: paperError } = await (supabase as any)
       .from("mock_papers")
       .select("*")
       .eq("active", true)
@@ -66,7 +67,32 @@ export const MockExamTool: React.FC<MockExamToolProps> = ({
       .eq("subject", subject)
       .order("year", { ascending: false });
 
-    setPapers(paperData || []);
+    // If table doesn't exist or is empty, auto-seed
+    if (paperError || !paperData || paperData.length === 0) {
+      if (!seeding) {
+        setSeeding(true);
+        try {
+          await supabase.functions.invoke("seed-mock-papers");
+          // Re-fetch after seeding
+          const { data: retryData } = await (supabase as any)
+            .from("mock_papers")
+            .select("*")
+            .eq("active", true)
+            .eq("exam_board", examBoard)
+            .eq("subject", subject)
+            .order("year", { ascending: false });
+          setPapers(retryData || []);
+        } catch {
+          setPapers([]);
+        }
+        setSeeding(false);
+        setLoading(false);
+        return;
+      }
+      setPapers([]);
+    } else {
+      setPapers(paperData);
+    }
 
     // Fetch user's past attempts for these papers
     if (user && paperData && paperData.length > 0) {
