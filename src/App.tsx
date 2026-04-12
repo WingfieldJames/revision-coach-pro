@@ -53,6 +53,8 @@ import { SchoolInfoPackPage } from "./pages/SchoolInfoPackPage";
 import { MockExamPage } from "./pages/MockExamPage";
 import { MockExamResultsPage } from "./pages/MockExamResultsPage";
 import { AdminSeedPage } from "./pages/AdminSeedPage";
+import { RevisionTopicPage } from "./pages/RevisionTopicPage";
+import { AdminContentHooksPage } from "./pages/AdminContentHooksPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -117,6 +119,8 @@ const App = () => (
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/feedback-results" element={<FeedbackResultsPage />} />
             <Route path="/admin/seed" element={<AdminSeedPage />} />
+            <Route path="/revision/:slug" element={<RevisionTopicPage />} />
+            <Route path="/admin/content-hooks" element={<AdminContentHooksPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
