@@ -1,0 +1,1 @@
+UPDATE trainer_projects SET exam_board = 'Edexcel IGCSE', updated_at = now() WHERE qualification_type = 'GCSE' AND subject IN ('Chemistry', 'Physics') AND exam_board = 'Edexcel';
