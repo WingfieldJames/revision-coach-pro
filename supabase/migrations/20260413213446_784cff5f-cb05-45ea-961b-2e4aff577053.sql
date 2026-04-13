@@ -1,0 +1,1 @@
+UPDATE products SET monthly_price = 499, lifetime_price = 1299 WHERE id = 'e2e5eea8-b2bd-436a-9ef2-ceedb6e0db25';
