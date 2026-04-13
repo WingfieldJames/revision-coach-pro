@@ -252,6 +252,48 @@ export type Database = {
           },
         ]
       }
+      content_scripts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          exam_board: string
+          hook_line: string | null
+          hook_type: string
+          id: string
+          script_text: string
+          status: string
+          subject: string
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          exam_board: string
+          hook_line?: string | null
+          hook_type?: string
+          id?: string
+          script_text: string
+          status?: string
+          subject?: string
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          exam_board?: string
+          hook_line?: string | null
+          hook_type?: string
+          id?: string
+          script_text?: string
+          status?: string
+          subject?: string
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       conversion_nudges: {
         Row: {
           id: string
@@ -481,6 +523,134 @@ export type Database = {
           snapshot_date?: string
         }
         Relationships: []
+      }
+      mock_papers: {
+        Row: {
+          active: boolean
+          content_source: string
+          created_at: string
+          exam_board: string
+          id: string
+          paper_name: string
+          paper_number: number
+          product_id: string | null
+          questions: Json
+          sections: Json | null
+          subject: string
+          time_limit_minutes: number
+          total_marks: number
+          year: number
+        }
+        Insert: {
+          active?: boolean
+          content_source?: string
+          created_at?: string
+          exam_board: string
+          id?: string
+          paper_name: string
+          paper_number?: number
+          product_id?: string | null
+          questions?: Json
+          sections?: Json | null
+          subject: string
+          time_limit_minutes?: number
+          total_marks: number
+          year: number
+        }
+        Update: {
+          active?: boolean
+          content_source?: string
+          created_at?: string
+          exam_board?: string
+          id?: string
+          paper_name?: string
+          paper_number?: number
+          product_id?: string | null
+          questions?: Json
+          sections?: Json | null
+          subject?: string
+          time_limit_minutes?: number
+          total_marks?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_papers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_results: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          created_at: string
+          id: string
+          max_score: number
+          paper_id: string
+          percentage: number | null
+          product_id: string | null
+          question_results: Json
+          started_at: string
+          status: string
+          tab_switches: number
+          time_taken_seconds: number | null
+          total_score: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          max_score: number
+          paper_id: string
+          percentage?: number | null
+          product_id?: string | null
+          question_results?: Json
+          started_at?: string
+          status?: string
+          tab_switches?: number
+          time_taken_seconds?: number | null
+          total_score?: number | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          max_score?: number
+          paper_id?: string
+          percentage?: number | null
+          product_id?: string | null
+          question_results?: Json
+          started_at?: string
+          status?: string
+          tab_switches?: number
+          time_taken_seconds?: number | null
+          total_score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_results_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "mock_papers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_results_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       monthly_tool_usage: {
         Row: {
