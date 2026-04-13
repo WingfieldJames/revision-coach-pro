@@ -272,7 +272,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               onFocusOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
             >
               <ScrollArea className="max-h-[70vh]">
-                {renderToolContent(tool.id)}
+                {openPopover === tool.id && renderToolContent(tool.id)}
               </ScrollArea>
             </PopoverContent>
           </Popover>

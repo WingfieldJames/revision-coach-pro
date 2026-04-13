@@ -51,10 +51,11 @@ export const MockExamTool: React.FC<MockExamToolProps> = ({
   const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    if (examBoard && subject) fetchData();
   }, [examBoard, subject, user]);
 
   const fetchData = async () => {
+    if (!examBoard || !subject) return;
     setLoading(true);
 
     // Fetch papers for this board + subject
