@@ -23,6 +23,7 @@ interface MockPaper {
   time_limit_minutes: number;
   sections: any[];
   questions: any[];
+  product_id?: string | null;
 }
 
 export const MockExamSetupPage = () => {
