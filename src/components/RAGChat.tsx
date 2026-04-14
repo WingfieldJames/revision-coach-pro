@@ -1345,7 +1345,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       </div>
 
       {/* Fixed bottom composer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent pt-4 pb-4 z-50">
+      <div className="fixed bottom-0 left-12 right-0 bg-gradient-to-t from-background/90 to-transparent pt-4 pb-4 z-50">
         {/* Suggested prompts — hidden when an image is pending */}
         {messages.length === 0 && suggestedPrompts.length > 0 && !pendingImage && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-4xl w-full mx-auto mb-5 px-4 pl-14 md:pl-4">
