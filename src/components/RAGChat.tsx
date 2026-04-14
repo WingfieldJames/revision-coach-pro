@@ -1283,10 +1283,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 </div>
                 <div className="space-y-2">
                   <Button className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold" onClick={() => handleUpgradeCheckout('lifetime')} disabled={isCheckingOut}>
-                    {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : <>Exam Season Pass – <span className="line-through opacity-60 mr-1">£39.99</span>{productSlug?.startsWith('gcse-') ? '£12.99' : '£24.99'}</>}
+                    {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : <>Exam Season Pass – <span className="line-through opacity-60 mr-1">£39.99</span>{productSlug?.startsWith('gcse-') ? '£14.99' : '£24.99'}</>}
                   </Button>
                   <Button variant="outline" className="w-full" onClick={() => handleUpgradeCheckout('monthly')} disabled={isCheckingOut}>
-                    Monthly – {productSlug?.startsWith('gcse-') ? '£4.99' : '£8.99'}/mo
+                    Monthly – {productSlug?.startsWith('gcse-') ? '£5.99' : '£8.99'}/mo
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-3">Your free prompts reset at midnight</p>

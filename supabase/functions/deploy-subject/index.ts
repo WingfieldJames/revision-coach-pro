@@ -110,8 +110,8 @@ serve(async (req) => {
       // Determine pricing based on qualification type
       const qualType = project.qualification_type || 'A Level';
       const isGCSE = qualType === 'GCSE';
-      const activateMonthly = isGCSE ? 599 : 699;
-      const activateLifetime = isGCSE ? 2799 : 2499;
+      const activateMonthly = isGCSE ? 599 : 899;
+      const activateLifetime = isGCSE ? 1499 : 2499;
 
       // Set product as active with appropriate pricing
       await supabase.from("products").update({
@@ -163,8 +163,8 @@ serve(async (req) => {
 
     const qualType = project.qualification_type || 'A Level';
     const isGCSE = qualType === 'GCSE';
-    const defaultMonthly = isGCSE ? 599 : 499;
-    const defaultLifetime = isGCSE ? 2799 : 1499;
+    const defaultMonthly = isGCSE ? 599 : 899;
+    const defaultLifetime = isGCSE ? 1499 : 2499;
 
     if (!productId) {
       // Create the product
