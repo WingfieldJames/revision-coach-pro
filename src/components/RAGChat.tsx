@@ -1009,7 +1009,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   />
                   {daysToFirstExam !== null ? (
                     <>
-                      <h2 className="text-[1.75rem] font-bold mb-1 leading-[1.08] tracking-tight whitespace-nowrap">
+                      <h2 className="text-[1.4rem] sm:text-[1.75rem] font-bold mb-1 leading-[1.08] tracking-tight sm:whitespace-nowrap">
                         <span className="text-foreground">{daysToFirstExam} days to go.</span>{' '}
                         <span className="text-primary">Let's get you that A*.</span>
                       </h2>
@@ -1019,7 +1019,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     </>
                   ) : (
                     <>
-                      <h2 className="text-[1.75rem] font-bold mb-1 leading-[1.08] tracking-tight whitespace-nowrap">
+                      <h2 className="text-[1.4rem] sm:text-[1.75rem] font-bold mb-1 leading-[1.08] tracking-tight sm:whitespace-nowrap">
                         <span className="text-primary">Let's get you that A*.</span>
                       </h2>
                       <p className="text-muted-foreground text-sm">
