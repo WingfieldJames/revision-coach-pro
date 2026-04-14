@@ -939,40 +939,40 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             <div className="py-8 sm:py-12 lg:py-16">
               <div
                 className={cn(
-                  "mx-auto grid items-start gap-6 lg:gap-8",
+                  "mx-auto grid items-start gap-6",
                   trainerName && trainerAvatarUrl
-                    ? "md:grid-cols-[minmax(11rem,13rem)_minmax(0,1fr)] lg:grid-cols-[minmax(12rem,16rem)_minmax(0,1fr)]"
+                    ? "md:grid-cols-[minmax(10rem,12rem)_minmax(0,1fr)] lg:grid-cols-[minmax(12rem,15rem)_minmax(0,1fr)]"
                     : "grid-cols-1"
                 )}
               >
-                {/* Meet Your Tutor column — desktop only, only when trainer data exists */}
+                {/* Meet Your Tutor column — tablet+ only, only when trainer data exists */}
                 {trainerName && trainerAvatarUrl && (
                   <div className="hidden md:block min-w-0 animate-in fade-in slide-in-from-left-4 duration-700">
-                    <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-5 w-full shadow-lg">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4 text-center">Meet Your Tutor</p>
+                    <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-4 lg:p-5 w-full shadow-lg">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 text-center">Meet Your Tutor</p>
 
                       {/* Avatar with online indicator */}
-                      <div className="relative mx-auto w-20 h-20 mb-3">
+                      <div className="relative mx-auto w-16 h-16 lg:w-20 lg:h-20 mb-2">
                         <img
                           src={trainerAvatarUrl}
                           alt={trainerName}
-                          className="w-20 h-20 rounded-full object-cover border-2 border-primary/30 shadow-md"
+                          className="w-16 h-16 lg:w-20 lg:h-20 rounded-full object-cover border-2 border-primary/30 shadow-md"
                         />
-                        <span className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-card" />
+                        <span className="absolute bottom-1 right-1 w-3 h-3 lg:w-3.5 lg:h-3.5 rounded-full bg-green-500 border-2 border-card" />
                       </div>
 
-                      <h3 className="text-base font-bold text-foreground text-center">{trainerName}</h3>
+                      <h3 className="text-sm lg:text-base font-bold text-foreground text-center">{trainerName}</h3>
                       {trainerStatus && (
-                        <p className="text-[11px] text-muted-foreground text-center mt-0.5">{trainerStatus}</p>
+                        <p className="text-[10px] lg:text-[11px] text-muted-foreground text-center mt-0.5">{trainerStatus}</p>
                       )}
 
                       {/* Achievement badges */}
                       {trainerAchievements && trainerAchievements.length > 0 && (
-                        <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+                        <div className="flex flex-wrap justify-center gap-1.5 mt-2 lg:mt-3">
                           {trainerAchievements.slice(0, 3).map((a, i) => (
                             <span
                               key={i}
-                              className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20"
+                              className="text-[9px] lg:text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20"
                             >
                               {a.text}
                             </span>
@@ -980,9 +980,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                         </div>
                       )}
 
-                      {/* Quote */}
+                      {/* Quote — hidden on tablets (md), shown on desktop (lg+) */}
                       {trainerDescription && (
-                        <div className="mt-3 rounded-lg bg-muted/50 border border-border p-2.5">
+                        <div className="hidden lg:block mt-3 rounded-lg bg-muted/50 border border-border p-2.5">
                           <Quote className="w-3 h-3 text-primary/40 mb-1" />
                           <p className="text-[11px] text-foreground/70 italic leading-relaxed">
                             {trainerDescription}
@@ -990,7 +990,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                         </div>
                       )}
 
-                      <div className="mt-3 pt-3 border-t border-border">
+                      <div className="mt-2 lg:mt-3 pt-2 lg:pt-3 border-t border-border">
                         <p className="text-[10px] text-center text-muted-foreground">
                           <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1 align-middle" />
                           Online now · Ready to help
@@ -1000,62 +1000,62 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   </div>
                 )}
 
-                {/* Main hero content */}
+                {/* Main hero content — locked sizes, no scaling up */}
                 <div className={cn("min-w-0 text-center", trainerName && trainerAvatarUrl && "md:text-left md:pt-3")}>
                   <img
                     src={currentLogo}
                     alt="A* AI"
-                    className={cn("h-20 sm:h-24 mb-1", trainerName && trainerAvatarUrl ? "mx-auto md:mx-0" : "mx-auto")}
+                    className={cn("h-20 mb-1", trainerName && trainerAvatarUrl ? "mx-auto md:mx-0" : "mx-auto")}
                   />
                   {daysToFirstExam !== null ? (
                     <>
-                      <h2 className="text-[1.75rem] sm:text-[2rem] lg:text-[2.5rem] xl:text-[2.75rem] font-bold mb-1 leading-[1.08] tracking-tight text-balance">
+                      <h2 className="text-[1.4rem] sm:text-[1.75rem] font-bold mb-1 leading-[1.08] tracking-tight sm:whitespace-nowrap">
                         <span className="text-foreground">{daysToFirstExam} days to go.</span>{' '}
                         <span className="text-primary">Let's get you that A*.</span>
                       </h2>
-                      <p className="max-w-2xl text-muted-foreground text-sm sm:text-base md:max-w-xl">
+                      <p className="text-muted-foreground text-sm">
                         Your {subjectName} revision, sorted
                       </p>
                     </>
                   ) : (
                     <>
-                      <h2 className="text-[1.75rem] sm:text-[2rem] lg:text-[2.5rem] xl:text-[2.75rem] font-bold mb-1 leading-[1.08] tracking-tight text-balance">
+                      <h2 className="text-[1.4rem] sm:text-[1.75rem] font-bold mb-1 leading-[1.08] tracking-tight sm:whitespace-nowrap">
                         <span className="text-primary">Let's get you that A*.</span>
                       </h2>
-                      <p className="max-w-2xl text-muted-foreground text-sm sm:text-base md:max-w-xl">
+                      <p className="text-muted-foreground text-sm">
                         Your {subjectName} revision, sorted
                       </p>
                     </>
                   )}
 
-                  {/* Social proof badges */}
+                  {/* Social proof badges — always single row */}
                   <div
                     className={cn(
-                      "mt-3 flex flex-wrap items-center gap-2.5",
-                      trainerName && trainerAvatarUrl ? "justify-center md:justify-start" : "justify-center"
+                      "mt-3 flex flex-nowrap items-center gap-2 overflow-x-auto scrollbar-hide",
+                      trainerName && trainerAvatarUrl ? "justify-start md:justify-start" : "justify-center"
                     )}
                   >
-                    <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
+                    <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm">
                       <div className="flex">
                         <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-card z-[3]" />
                         <img src={jamesImage} alt="James" className="w-5 h-5 rounded-full object-cover border-2 border-card -ml-1.5 z-[2]" />
                         <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-card -ml-1.5 z-[1]" />
                       </div>
-                      <span className="text-xs font-medium text-foreground">{displayedUserCount !== null ? `${displayedUserCount.toLocaleString()} students` : '...'}</span>
+                      <span className="text-xs font-medium text-foreground whitespace-nowrap">{displayedUserCount !== null ? `${displayedUserCount.toLocaleString()} students` : '...'}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
+                    <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm">
                       {useEmojiStars ? (
                         <span className="text-xs">⭐⭐⭐⭐⭐</span>
                       ) : (
                         <span className="text-xs tracking-wider text-amber-500 dark:text-amber-400">★★★★★</span>
                       )}
-                      <span className="text-xs font-medium text-foreground">4.9 / 5</span>
+                      <span className="text-xs font-medium text-foreground whitespace-nowrap">4.9 / 5</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
+                    <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm">
                       <span className="text-xs text-primary font-bold">↑</span>
-                      <span className="text-xs font-medium text-foreground">620% growth this term</span>
+                      <span className="text-xs font-medium text-foreground whitespace-nowrap">620% growth this term</span>
                     </div>
                   </div>
                 </div>
@@ -1345,7 +1345,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       </div>
 
       {/* Fixed bottom composer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent pt-4 pb-4 z-50">
+      <div className="fixed bottom-0 left-12 right-0 bg-gradient-to-t from-background/90 to-transparent pt-4 pb-4 z-50">
         {/* Suggested prompts — hidden when an image is pending */}
         {messages.length === 0 && suggestedPrompts.length > 0 && !pendingImage && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-4xl w-full mx-auto mb-5 px-4">
