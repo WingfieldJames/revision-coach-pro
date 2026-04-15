@@ -7,7 +7,7 @@ import ryanImage from '@/assets/ryan-davies.png';
 import alexandruImage from '@/assets/alexandru-leoca.png';
 import louisImage from '@/assets/louis-yung.png';
 import oliverImage from '@/assets/oliver-mobolaji.png';
-import freddieImage from '@/assets/freddie-jones.png';
+
 import mikelImage from '@/assets/mikel-donkor.png';
 import dlyetImage from '@/assets/dlyet-tewolde.png';
 
@@ -141,12 +141,6 @@ export const allTestimonials: Testimonial[] = [
     image: oliverImage,
     name: "Oliver Mobolaji",
     role: "Year 13",
-  },
-  {
-    text: "I actually have an 'Examiner AI' (Tutor2u) subscription but I find the feedback is pretty useless. A*AI actually provides useful and specific feedback for the students.",
-    image: freddieImage,
-    name: "Freddie Jones",
-    role: "Economics Teacher\n@ KCS Wimbledon",
   },
   {
     text: "On the home page, you can see a profile on all the people who built the models on the website. AI often has a conception of being inhumane, kind of robotic and such — that addition adds a more humane feel to it.\n\nThere are also so many different components to this website, and overall it's really great!",
