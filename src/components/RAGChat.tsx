@@ -410,8 +410,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           if (data.grade_boundaries_data) setGradeBoundariesData(data.grade_boundaries_data as unknown as Record<string, Record<string, number>>);
           const challenge = data.active_challenge as any;
           if (challenge && challenge.title) {
-            setChallengeConfig(challenge as unknown as ChallengeConfig);
-            return;
+            // Only use this challenge if it's currently active (not expired)
+            const now = new Date();
+            const end = challenge.end ? new Date(challenge.end) : null;
+            if (!end || now < end) {
+              setChallengeConfig(challenge as unknown as ChallengeConfig);
+              return;
+            }
           }
         }
         // Fallback: fetch any universal challenge from any trainer_project
