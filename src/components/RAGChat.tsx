@@ -410,20 +410,33 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           if (data.grade_boundaries_data) setGradeBoundariesData(data.grade_boundaries_data as unknown as Record<string, Record<string, number>>);
           const challenge = data.active_challenge as any;
           if (challenge && challenge.title) {
-            setChallengeConfig(challenge as unknown as ChallengeConfig);
-            return;
+            // Only use this challenge if it's currently active (not expired)
+            const now = new Date();
+            const end = challenge.end ? new Date(challenge.end) : null;
+            if (!end || now < end) {
+              setChallengeConfig(challenge as unknown as ChallengeConfig);
+              return;
+            }
           }
         }
-        // Fallback: fetch any universal challenge from any trainer_project
-        const { data: anyProject } = await supabase
+        // Fallback: fetch any active universal challenge from any deployed trainer_project
+        const { data: fallbackProjects } = await supabase
           .from('trainer_projects')
           .select('active_challenge')
           .not('active_challenge', 'is', null)
-          .limit(1)
-          .maybeSingle();
-        if (anyProject?.active_challenge) {
-          const uc = anyProject.active_challenge as any;
-          if (uc.title) setChallengeConfig(uc as unknown as ChallengeConfig);
+          .order('updated_at', { ascending: false })
+          .limit(10);
+        if (fallbackProjects) {
+          const now = new Date();
+          for (const fp of fallbackProjects) {
+            const uc = fp.active_challenge as any;
+            if (uc?.title && uc.start && uc.end) {
+              if (now >= new Date(uc.start) && now < new Date(uc.end)) {
+                setChallengeConfig(uc as unknown as ChallengeConfig);
+                break;
+              }
+            }
+          }
         }
       } catch (e) {
         console.error('Error fetching challenge config:', e);

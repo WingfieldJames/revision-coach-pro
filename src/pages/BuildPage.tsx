@@ -1577,9 +1577,10 @@ export function BuildPage() {
                   if (allProjects) {
                     for (const p of allProjects) {
                       const existing = p.active_challenge as any;
-                      // Only overwrite if no subject-specific challenge (or if it was previously universal)
+                      // Overwrite if: no challenge, previously universal, or existing challenge has expired
                       const isSubjectSpecific = existing && existing.title && !existing.universal;
-                      if (!isSubjectSpecific) {
+                      const isExpired = existing && existing.end && new Date(existing.end) < new Date();
+                      if (!isSubjectSpecific || isExpired) {
                         await supabase
                           .from('trainer_projects')
                           .update({ active_challenge: challengePayload as any })
