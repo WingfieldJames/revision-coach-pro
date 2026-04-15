@@ -1005,11 +1005,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
 
                 {/* Main hero content — locked sizes, no scaling up */}
-                <div className={cn("min-w-0 text-center", trainerName && trainerAvatarUrl && "md:text-left lg:text-center md:pt-3 lg:pt-0")}>
+                <div className={cn("min-w-0 text-left", trainerName && trainerAvatarUrl && "md:pt-3 lg:pt-0")}>
                   <img
                     src={currentLogo}
                     alt="A* AI"
-                    className={cn("h-20 mb-1", trainerName && trainerAvatarUrl ? "mx-auto md:mx-0 lg:mx-auto" : "mx-auto")}
+                    className="h-20 mb-1"
                   />
                   {daysToFirstExam !== null ? (
                     <>
