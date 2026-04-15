@@ -1009,7 +1009,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   <img
                     src={currentLogo}
                     alt="A* AI"
-                    className={cn("h-20 mb-1", trainerName && trainerAvatarUrl ? "mx-auto md:mx-0" : "mx-auto")}
+                    className={cn("h-20 mb-1", trainerName && trainerAvatarUrl ? "mx-auto md:mx-0 lg:mx-auto" : "mx-auto")}
                   />
                   {daysToFirstExam !== null ? (
                     <>
