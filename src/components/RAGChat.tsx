@@ -993,14 +993,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 {daysToFirstExam !== null ? (
                   <>
                     <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
-                      <span className="text-foreground">{daysToFirstExam} days to go.</span> <span className="text-primary">Let's get you that A*!</span>
+                      <span className="text-foreground">{daysToFirstExam} days to go.</span> <span className="text-primary">Let's get you that A*.</span>
                     </h2>
                     <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
                   </>
                 ) : (
                   <>
                     <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.25rem] lg:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
-                      <span className="text-primary">Let's get you that A*!</span>
+                      <span className="text-primary">Let's get you that A*.</span>
                     </h2>
                     <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
                   </>
