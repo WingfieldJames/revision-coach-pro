@@ -410,10 +410,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           if (data.grade_boundaries_data) setGradeBoundariesData(data.grade_boundaries_data as unknown as Record<string, Record<string, number>>);
           const challenge = data.active_challenge as any;
           if (challenge && challenge.title) {
-            // Only use this challenge if it's currently active (not expired)
-            const now = new Date();
-            const end = challenge.end ? new Date(challenge.end) : null;
-            if (!end || now < end) {
+            const now = Date.now();
+            const start = challenge.start ? new Date(challenge.start).getTime() : Number.NEGATIVE_INFINITY;
+            const end = challenge.end ? new Date(challenge.end).getTime() : Number.POSITIVE_INFINITY;
+            if (now >= start && now <= end) {
               setChallengeConfig(challenge as unknown as ChallengeConfig);
               return;
             }
@@ -427,11 +427,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           .order('updated_at', { ascending: false })
           .limit(10);
         if (fallbackProjects) {
-          const now = new Date();
+          const now = Date.now();
           for (const fp of fallbackProjects) {
             const uc = fp.active_challenge as any;
-            if (uc?.title && uc.start && uc.end) {
-              if (now >= new Date(uc.start) && now < new Date(uc.end)) {
+            if (uc?.title) {
+              const start = uc.start ? new Date(uc.start).getTime() : Number.NEGATIVE_INFINITY;
+              const end = uc.end ? new Date(uc.end).getTime() : Number.POSITIVE_INFINITY;
+              if (now >= start && now <= end) {
                 setChallengeConfig(uc as unknown as ChallengeConfig);
                 break;
               }

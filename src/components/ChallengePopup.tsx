@@ -46,8 +46,10 @@ const DEFAULT_GRADE_BOUNDARIES: Record<string, { label: string; percent: number 
 /** Check if a challenge config is currently active */
 export function isChallengeActiveFromConfig(config: ChallengeConfig | null): boolean {
   if (!config) return false;
-  const now = new Date();
-  return now >= new Date(config.start) && now < new Date(config.end);
+  const now = Date.now();
+  const start = config.start ? new Date(config.start).getTime() : Number.NEGATIVE_INFINITY;
+  const end = config.end ? new Date(config.end).getTime() : Number.POSITIVE_INFINITY;
+  return now >= start && now <= end;
 }
 
 /** Backward-compat wrapper — always returns false now (use isChallengeActiveFromConfig instead) */

@@ -47,6 +47,10 @@ const AVAILABLE_SUBJECTS = [
   "Biology", "Politics"
 ];
 
+const toChallengeBoundaryIso = (date: string, boundary: 'start' | 'end') => (
+  date ? `${date}T${boundary === 'start' ? '00:00:00' : '23:59:59'}Z` : ''
+);
+
 interface TrainerProject {
   id: string;
   subject: string;
@@ -748,8 +752,8 @@ export function BuildPage() {
           active_challenge: (challengeTitle.trim() ? {
             title: challengeTitle,
             description: challengeDescription,
-            start: challengeStart ? `${challengeStart}T00:00:00Z` : '',
-            end: challengeEnd ? `${challengeEnd}T00:00:00Z` : '',
+            start: toChallengeBoundaryIso(challengeStart, 'start'),
+            end: toChallengeBoundaryIso(challengeEnd, 'end'),
             universal: false,
           } : null) as unknown as import("@/integrations/supabase/types").Json,
           grade_boundaries_data: (() => {
@@ -1564,8 +1568,8 @@ export function BuildPage() {
                   const challengePayload = universalChallengeTitle.trim() ? {
                     title: universalChallengeTitle,
                     description: universalChallengeDescription,
-                    start: universalChallengeStart ? `${universalChallengeStart}T00:00:00Z` : '',
-                    end: universalChallengeEnd ? `${universalChallengeEnd}T00:00:00Z` : '',
+                    start: toChallengeBoundaryIso(universalChallengeStart, 'start'),
+                    end: toChallengeBoundaryIso(universalChallengeEnd, 'end'),
                     universal: true,
                   } : null;
 
