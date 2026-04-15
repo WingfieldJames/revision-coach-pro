@@ -1005,7 +1005,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
 
                 {/* Main hero content — locked sizes, no scaling up */}
-                <div className={cn("min-w-0 text-left", trainerName && trainerAvatarUrl && "md:pt-3 lg:pt-0")}>
+                <div className={cn("min-w-0 text-left lg:pl-72", trainerName && trainerAvatarUrl && "md:pt-3 lg:pt-0")}>
                   <img
                     src={currentLogo}
                     alt="A* AI"
