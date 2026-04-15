@@ -303,13 +303,7 @@ export const GCSEComparePage = () => {
             )}
           </ScrollReveal>
 
-          {!hasSubjects ? (
-            <ScrollReveal delay={0.1}>
-              <div className="max-w-md mx-auto mt-12 text-center space-y-4">
-                <p className="text-muted-foreground">GCSE subjects are coming soon! Check back later.</p>
-              </div>
-            </ScrollReveal>
-          ) : (
+          {!hasSubjects ? null : (
             <>
               {/* Subject Feature Grid with inline board dropdown */}
               <ScrollReveal delay={0.2}>
