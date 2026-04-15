@@ -224,7 +224,6 @@ export const GCSEComparePage = () => {
 
   const formatBoard = (b: string, subjectKey?: string) => {
     if (b === 'edexcel igcse') return 'Edexcel IGCSE';
-    if (b === 'edexcel' && subjectKey && isGcseScienceSubject(subjectKey)) return 'Edexcel IGCSE';
     if (b === 'cie') return 'CIE';
     if (b === 'aqa') return 'AQA';
     if (b === 'ocr') return 'OCR';
