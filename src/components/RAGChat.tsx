@@ -1005,11 +1005,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
 
                 {/* Main hero content — locked sizes, no scaling up */}
-                <div className={cn("min-w-0 text-center", trainerName && trainerAvatarUrl && "md:text-left lg:text-center md:pt-3 lg:pt-0")}>
+                <div className={cn("min-w-0 text-left", trainerName && trainerAvatarUrl && "md:pt-3 lg:pt-0")}>
                   <img
                     src={currentLogo}
                     alt="A* AI"
-                    className={cn("h-20 mb-1", trainerName && trainerAvatarUrl ? "mx-auto md:mx-0 lg:mx-auto" : "mx-auto")}
+                    className="h-20 mb-1"
                   />
                   {daysToFirstExam !== null ? (
                     <>
@@ -1034,10 +1034,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
                   {/* Social proof badges — always single row */}
                   <div
-                    className={cn(
-                      "mt-3 flex flex-nowrap items-center gap-2 overflow-x-auto scrollbar-hide",
-                      trainerName && trainerAvatarUrl ? "justify-start md:justify-start" : "justify-center"
-                    )}
+                    className="mt-3 flex flex-nowrap items-center gap-2 overflow-x-auto scrollbar-hide justify-start"
                   >
                     <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm">
                       <div className="flex">
