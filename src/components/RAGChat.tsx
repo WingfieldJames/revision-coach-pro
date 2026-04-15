@@ -937,60 +937,64 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
             <div className="py-8 sm:py-12 lg:py-16">
-              <div
-                className={cn(
-                  "mx-auto grid items-start gap-6",
-                  trainerName && trainerAvatarUrl
-                    ? "md:grid-cols-[minmax(10rem,12rem)_minmax(0,1fr)] lg:grid-cols-[minmax(12rem,15rem)_minmax(0,1fr)]"
-                    : "grid-cols-1"
-                )}
-              >
-                {/* Meet Your Tutor column — tablet+ only, only when trainer data exists */}
-                {trainerName && trainerAvatarUrl && (
-                  <div className="hidden md:block min-w-0 animate-in fade-in slide-in-from-left-4 duration-700">
-                    <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-4 lg:p-5 w-full shadow-lg">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 text-center">Meet Your Tutor</p>
-
-                      {/* Avatar with online indicator */}
-                      <div className="relative mx-auto w-16 h-16 lg:w-20 lg:h-20 mb-2">
-                        <img
-                          src={trainerAvatarUrl}
-                          alt={trainerName}
-                          className="w-16 h-16 lg:w-20 lg:h-20 rounded-full object-cover border-2 border-primary/30 shadow-md"
-                        />
-                        <span className="absolute bottom-1 right-1 w-3 h-3 lg:w-3.5 lg:h-3.5 rounded-full bg-green-500 border-2 border-card" />
+               {/* Meet Your Tutor — fixed left on desktop (lg+) */}
+              {trainerName && trainerAvatarUrl && messages.length === 0 && (
+                <div className="hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-[50] w-56 animate-in fade-in slide-in-from-left-4 duration-700">
+                  <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-5 shadow-lg">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 text-center">Meet Your Tutor</p>
+                    <div className="relative mx-auto w-20 h-20 mb-2">
+                      <img src={trainerAvatarUrl} alt={trainerName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30 shadow-md" />
+                      <span className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-card" />
+                    </div>
+                    <h3 className="text-base font-bold text-foreground text-center">{trainerName}</h3>
+                    {trainerStatus && <p className="text-[11px] text-muted-foreground text-center mt-0.5">{trainerStatus}</p>}
+                    {trainerAchievements && trainerAchievements.length > 0 && (
+                      <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+                        {trainerAchievements.slice(0, 3).map((a, i) => (
+                          <span key={i} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{a.text}</span>
+                        ))}
                       </div>
+                    )}
+                    {trainerDescription && (
+                      <div className="mt-3 rounded-lg bg-muted/50 border border-border p-2.5">
+                        <Quote className="w-3 h-3 text-primary/40 mb-1" />
+                        <p className="text-[11px] text-foreground/70 italic leading-relaxed">{trainerDescription}</p>
+                      </div>
+                    )}
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <p className="text-[10px] text-center text-muted-foreground">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1 align-middle" />
+                        Online now · Ready to help
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-                      <h3 className="text-sm lg:text-base font-bold text-foreground text-center">{trainerName}</h3>
-                      {trainerStatus && (
-                        <p className="text-[10px] lg:text-[11px] text-muted-foreground text-center mt-0.5">{trainerStatus}</p>
-                      )}
-
-                      {/* Achievement badges */}
+              <div className={cn("mx-auto grid items-start gap-6",
+                trainerName && trainerAvatarUrl
+                  ? "md:grid-cols-[minmax(10rem,12rem)_minmax(0,1fr)] lg:grid-cols-1"
+                  : "grid-cols-1"
+              )}>
+                {/* Meet Your Tutor — in-grid for tablet (md) only, no description */}
+                {trainerName && trainerAvatarUrl && (
+                  <div className="hidden md:block lg:hidden min-w-0 animate-in fade-in slide-in-from-left-4 duration-700">
+                    <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-4 w-full shadow-lg">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 text-center">Meet Your Tutor</p>
+                      <div className="relative mx-auto w-16 h-16 mb-2">
+                        <img src={trainerAvatarUrl} alt={trainerName} className="w-16 h-16 rounded-full object-cover border-2 border-primary/30 shadow-md" />
+                        <span className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-green-500 border-2 border-card" />
+                      </div>
+                      <h3 className="text-sm font-bold text-foreground text-center">{trainerName}</h3>
+                      {trainerStatus && <p className="text-[10px] text-muted-foreground text-center mt-0.5">{trainerStatus}</p>}
                       {trainerAchievements && trainerAchievements.length > 0 && (
-                        <div className="flex flex-wrap justify-center gap-1.5 mt-2 lg:mt-3">
+                        <div className="flex flex-wrap justify-center gap-1.5 mt-2">
                           {trainerAchievements.slice(0, 3).map((a, i) => (
-                            <span
-                              key={i}
-                              className="text-[9px] lg:text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20"
-                            >
-                              {a.text}
-                            </span>
+                            <span key={i} className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{a.text}</span>
                           ))}
                         </div>
                       )}
-
-                      {/* Quote — hidden on tablets (md), shown on desktop (lg+) */}
-                      {trainerDescription && (
-                        <div className="hidden lg:block mt-3 rounded-lg bg-muted/50 border border-border p-2.5">
-                          <Quote className="w-3 h-3 text-primary/40 mb-1" />
-                          <p className="text-[11px] text-foreground/70 italic leading-relaxed">
-                            {trainerDescription}
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="mt-2 lg:mt-3 pt-2 lg:pt-3 border-t border-border">
+                      <div className="mt-2 pt-2 border-t border-border">
                         <p className="text-[10px] text-center text-muted-foreground">
                           <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1 align-middle" />
                           Online now · Ready to help
@@ -1001,11 +1005,11 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
 
                 {/* Main hero content — locked sizes, no scaling up */}
-                <div className={cn("min-w-0 text-center", trainerName && trainerAvatarUrl && "md:text-left md:pt-3")}>
+                <div className={cn("min-w-0 text-center", trainerName && trainerAvatarUrl && "md:text-left lg:text-center md:pt-3 lg:pt-0")}>
                   <img
                     src={currentLogo}
                     alt="A* AI"
-                    className={cn("h-20 mb-1", trainerName && trainerAvatarUrl ? "mx-auto md:mx-0" : "mx-auto")}
+                    className={cn("h-20 mb-1", trainerName && trainerAvatarUrl ? "mx-auto md:mx-0 lg:mx-auto" : "mx-auto")}
                   />
                   {daysToFirstExam !== null ? (
                     <>
