@@ -939,7 +939,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             <div className="py-8 sm:py-12 lg:py-16">
                {/* Meet Your Tutor — fixed left on desktop (lg+) */}
               {trainerName && trainerAvatarUrl && messages.length === 0 && (
-                <div className="hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-[50] w-56 animate-in fade-in slide-in-from-left-4 duration-700">
+                <div className="hidden lg:block fixed left-20 top-1/2 -translate-y-1/2 z-[50] w-56 animate-in fade-in slide-in-from-left-4 duration-700">
                   <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-5 shadow-lg">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 text-center">Meet Your Tutor</p>
                     <div className="relative mx-auto w-20 h-20 mb-2">
