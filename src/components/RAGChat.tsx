@@ -927,56 +927,40 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       />
 
       {/* Messages area - scrollable */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
+      <div
+        ref={messagesContainerRef}
+        className={cn(
+          "flex-1 overflow-y-auto p-4",
+          messages.length === 0 ? "pb-[420px] sm:pb-[340px] lg:pb-[280px]" : "pb-[160px]"
+        )}
+      >
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
-            <div className="relative py-16 max-[767px]:py-2 max-[767px]:-mt-14 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:py-0 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:-mt-28">
-              
-              {/* Meet Your Tutor column — desktop only, only when trainer data exists */}
-              {trainerName && trainerAvatarUrl && (
-                <div className="hidden md:flex flex-col items-center w-48 lg:w-64 shrink-0 animate-in fade-in slide-in-from-left-4 duration-700 absolute right-[calc(100%+0.75rem)] lg:right-[calc(100%+1.5rem)] top-4">
-                  <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-5 w-full shadow-lg">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4 text-center">Meet Your Tutor</p>
-                    
-                    {/* Avatar with online indicator */}
-                    <div className="relative mx-auto w-20 h-20 mb-3">
-                      <img 
-                        src={trainerAvatarUrl} 
-                        alt={trainerName} 
-                        className="w-20 h-20 rounded-full object-cover border-2 border-primary/30 shadow-md"
-                      />
+            <div className="py-8 sm:py-12 lg:py-16">
+               {/* Meet Your Tutor — fixed left on desktop (lg+) */}
+              {trainerName && trainerAvatarUrl && messages.length === 0 && (
+                <div className="hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-[50] w-56 animate-in fade-in slide-in-from-left-4 duration-700">
+                  <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-5 shadow-lg">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 text-center">Meet Your Tutor</p>
+                    <div className="relative mx-auto w-20 h-20 mb-2">
+                      <img src={trainerAvatarUrl} alt={trainerName} className="w-20 h-20 rounded-full object-cover border-2 border-primary/30 shadow-md" />
                       <span className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-card" />
                     </div>
-
                     <h3 className="text-base font-bold text-foreground text-center">{trainerName}</h3>
-                    {trainerStatus && (
-                      <p className="text-[11px] text-muted-foreground text-center mt-0.5">{trainerStatus}</p>
-                    )}
-
-                    {/* Achievement badges */}
+                    {trainerStatus && <p className="text-[11px] text-muted-foreground text-center mt-0.5">{trainerStatus}</p>}
                     {trainerAchievements && trainerAchievements.length > 0 && (
                       <div className="flex flex-wrap justify-center gap-1.5 mt-3">
                         {trainerAchievements.slice(0, 3).map((a, i) => (
-                          <span
-                            key={i}
-                            className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20"
-                          >
-                            {a.text}
-                          </span>
+                          <span key={i} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{a.text}</span>
                         ))}
                       </div>
                     )}
-
-                    {/* Quote */}
                     {trainerDescription && (
                       <div className="mt-3 rounded-lg bg-muted/50 border border-border p-2.5">
                         <Quote className="w-3 h-3 text-primary/40 mb-1" />
-                        <p className="text-[11px] text-foreground/70 italic leading-relaxed">
-                          {trainerDescription}
-                        </p>
+                        <p className="text-[11px] text-foreground/70 italic leading-relaxed">{trainerDescription}</p>
                       </div>
                     )}
-
                     <div className="mt-3 pt-3 border-t border-border">
                       <p className="text-[10px] text-center text-muted-foreground">
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1 align-middle" />
@@ -987,48 +971,96 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 </div>
               )}
 
-              {/* Main hero content */}
-              <div className={cn("text-center", trainerName && trainerAvatarUrl && "md:ml-16 lg:ml-0")}>
-                <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-1" />
-                {daysToFirstExam !== null ? (
-                  <>
-                    <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
-                      <span className="text-foreground">{daysToFirstExam} days to go.</span> <span className="text-primary">Let's get you that A*.</span>
-                    </h2>
-                    <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
-                  </>
-                ) : (
-                  <>
-                    <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
-                      <span className="text-primary">Let's get you that A*.</span>
-                    </h2>
-                    <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
-                  </>
-                )}
-                
-                {/* Social proof badges */}
-                <div className="flex items-center justify-center gap-2.5 flex-wrap mt-3">
-                  <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
-                    <div className="flex">
-                      <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-card z-[3]" />
-                      <img src={jamesImage} alt="James" className="w-5 h-5 rounded-full object-cover border-2 border-card -ml-1.5 z-[2]" />
-                      <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-card -ml-1.5 z-[1]" />
+              <div className={cn("mx-auto grid items-start gap-6",
+                trainerName && trainerAvatarUrl
+                  ? "md:grid-cols-[minmax(10rem,12rem)_minmax(0,1fr)] lg:grid-cols-1"
+                  : "grid-cols-1"
+              )}>
+                {/* Meet Your Tutor — in-grid for tablet (md) only, no description */}
+                {trainerName && trainerAvatarUrl && (
+                  <div className="hidden md:block lg:hidden min-w-0 animate-in fade-in slide-in-from-left-4 duration-700">
+                    <div className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-4 w-full shadow-lg">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3 text-center">Meet Your Tutor</p>
+                      <div className="relative mx-auto w-16 h-16 mb-2">
+                        <img src={trainerAvatarUrl} alt={trainerName} className="w-16 h-16 rounded-full object-cover border-2 border-primary/30 shadow-md" />
+                        <span className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-green-500 border-2 border-card" />
+                      </div>
+                      <h3 className="text-sm font-bold text-foreground text-center">{trainerName}</h3>
+                      {trainerStatus && <p className="text-[10px] text-muted-foreground text-center mt-0.5">{trainerStatus}</p>}
+                      {trainerAchievements && trainerAchievements.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                          {trainerAchievements.slice(0, 3).map((a, i) => (
+                            <span key={i} className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{a.text}</span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="mt-2 pt-2 border-t border-border">
+                        <p className="text-[10px] text-center text-muted-foreground">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1 align-middle" />
+                          Online now · Ready to help
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-xs font-medium text-foreground">{displayedUserCount !== null ? `${displayedUserCount.toLocaleString()} students` : '...'}</span>
                   </div>
+                )}
 
-                  <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
-                    {useEmojiStars ? (
-                      <span className="text-xs">⭐⭐⭐⭐⭐</span>
-                    ) : (
-                      <span className="text-xs tracking-wider text-amber-500 dark:text-amber-400">★★★★★</span>
+                {/* Main hero content — locked sizes, no scaling up */}
+                <div className={cn("min-w-0 text-center", trainerName && trainerAvatarUrl && "md:text-left lg:text-center md:pt-3 lg:pt-0")}>
+                  <img
+                    src={currentLogo}
+                    alt="A* AI"
+                    className={cn("h-20 mb-1", trainerName && trainerAvatarUrl ? "mx-auto md:mx-0 lg:mx-auto" : "mx-auto")}
+                  />
+                  {daysToFirstExam !== null ? (
+                    <>
+                      <h2 className="text-[1.4rem] sm:text-[1.75rem] font-bold mb-1 leading-[1.08] tracking-tight sm:whitespace-nowrap">
+                        <span className="text-foreground">{daysToFirstExam} days to go.</span>{' '}
+                        <span className="text-primary">Let's get you that A*.</span>
+                      </h2>
+                      <p className="text-muted-foreground text-sm">
+                        Your {subjectName} revision, sorted
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-[1.4rem] sm:text-[1.75rem] font-bold mb-1 leading-[1.08] tracking-tight sm:whitespace-nowrap">
+                        <span className="text-primary">Let's get you that A*.</span>
+                      </h2>
+                      <p className="text-muted-foreground text-sm">
+                        Your {subjectName} revision, sorted
+                      </p>
+                    </>
+                  )}
+
+                  {/* Social proof badges — always single row */}
+                  <div
+                    className={cn(
+                      "mt-3 flex flex-nowrap items-center gap-2 overflow-x-auto scrollbar-hide",
+                      trainerName && trainerAvatarUrl ? "justify-start md:justify-start" : "justify-center"
                     )}
-                    <span className="text-xs font-medium text-foreground">4.9 / 5</span>
-                  </div>
+                  >
+                    <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm">
+                      <div className="flex">
+                        <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-card z-[3]" />
+                        <img src={jamesImage} alt="James" className="w-5 h-5 rounded-full object-cover border-2 border-card -ml-1.5 z-[2]" />
+                        <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-card -ml-1.5 z-[1]" />
+                      </div>
+                      <span className="text-xs font-medium text-foreground whitespace-nowrap">{displayedUserCount !== null ? `${displayedUserCount.toLocaleString()} students` : '...'}</span>
+                    </div>
 
-                  <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
-                    <span className="text-xs text-primary font-bold">↑</span>
-                    <span className="text-xs font-medium text-foreground">620% growth this term</span>
+                    <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm">
+                      {useEmojiStars ? (
+                        <span className="text-xs">⭐⭐⭐⭐⭐</span>
+                      ) : (
+                        <span className="text-xs tracking-wider text-amber-500 dark:text-amber-400">★★★★★</span>
+                      )}
+                      <span className="text-xs font-medium text-foreground whitespace-nowrap">4.9 / 5</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm">
+                      <span className="text-xs text-primary font-bold">↑</span>
+                      <span className="text-xs font-medium text-foreground whitespace-nowrap">620% growth this term</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1255,10 +1287,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 </div>
                 <div className="space-y-2">
                   <Button className="w-full bg-gradient-brand hover:opacity-90 text-white font-semibold" onClick={() => handleUpgradeCheckout('lifetime')} disabled={isCheckingOut}>
-                    {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : <>Exam Season Pass – <span className="line-through opacity-60 mr-1">£39.99</span>{productSlug?.startsWith('gcse-') ? '£12.99' : '£24.99'}</>}
+                    {isCheckingOut ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Loading...</> : <>Exam Season Pass – <span className="line-through opacity-60 mr-1">£39.99</span>{productSlug?.startsWith('gcse-') ? '£14.99' : '£24.99'}</>}
                   </Button>
                   <Button variant="outline" className="w-full" onClick={() => handleUpgradeCheckout('monthly')} disabled={isCheckingOut}>
-                    Monthly – {productSlug?.startsWith('gcse-') ? '£4.99' : '£8.99'}/mo
+                    Monthly – {productSlug?.startsWith('gcse-') ? '£5.99' : '£8.99'}/mo
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-3">Your free prompts reset at midnight</p>
@@ -1317,10 +1349,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       </div>
 
       {/* Fixed bottom composer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent pt-4 pb-4 z-50">
+      <div className="fixed bottom-0 left-12 right-0 bg-gradient-to-t from-background/90 to-transparent pt-4 pb-4 z-50">
         {/* Suggested prompts — hidden when an image is pending */}
         {messages.length === 0 && suggestedPrompts.length > 0 && !pendingImage && (
-          <div className="grid grid-cols-2 gap-3 max-w-3xl w-full mx-auto mb-5 px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-4xl w-full mx-auto mb-5 px-4">
               {suggestedPrompts.map((prompt, idx) => {
                 const defaultLabels = ['Topic', 'Key concept', 'Exam technique', 'Study plan'];
                 const labels = promptLabels || defaultLabels;
