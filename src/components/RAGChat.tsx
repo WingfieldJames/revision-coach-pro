@@ -927,10 +927,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       />
 
       {/* Messages area - scrollable */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px]">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px] md:pb-[200px]">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
-            <div className="relative py-16 max-[767px]:py-2 max-[767px]:-mt-14 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:py-0 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:-mt-28">
+            <div className="relative py-16 max-[767px]:py-2 max-[767px]:-mt-14 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:py-0 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:-mt-16">
               
               {/* Meet Your Tutor column — desktop only, only when trainer data exists */}
               {trainerName && trainerAvatarUrl && (
@@ -999,7 +999,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                   </>
                 ) : (
                   <>
-                    <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
+                    <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.25rem] lg:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
                       <span className="text-primary">Let's get you that A*.</span>
                     </h2>
                     <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
@@ -1007,7 +1007,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
                 
                 {/* Social proof badges */}
-                <div className="flex items-center justify-center gap-2.5 flex-wrap mt-3">
+                <div className="flex items-center justify-center gap-1.5 md:gap-1.5 lg:gap-2.5 flex-wrap mt-2 md:mt-2 lg:mt-3">
                   <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
                     <div className="flex">
                       <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-card z-[3]" />
