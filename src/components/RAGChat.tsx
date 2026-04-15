@@ -1034,9 +1034,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
                   {/* Social proof badges — always single row */}
                   <div
-                    className={cn(
-                      "mt-3 flex flex-nowrap items-center gap-2 overflow-x-auto scrollbar-hide justify-start"
-                    
+                    className="mt-3 flex flex-nowrap items-center gap-2 overflow-x-auto scrollbar-hide justify-start"
                   >
                     <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-3 shadow-sm">
                       <div className="flex">
