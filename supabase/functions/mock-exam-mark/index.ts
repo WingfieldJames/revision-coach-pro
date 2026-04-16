@@ -55,12 +55,13 @@ INSTRUCTIONS:
 1. Mark this answer out of ${question.marks_available} using the exact marking criteria for this ${question.question_type}.
 2. Award marks strictly — do not be generous.
 3. If the student wrote nothing or a clearly irrelevant answer, award 0.
+4. Do NOT repeat or restate the student's answer. Give direct feedback only. Reference specific phrases only when correcting an error.
 
 YOU MUST respond in EXACTLY this JSON format (no markdown, no extra text):
 {
   "marks_awarded": <number>,
   "level": "<e.g. Level 2, or N/A for short questions>",
-  "feedback": "<2-4 sentences: what they did well, what's missing, how to improve>"
+  "feedback": "<2-4 concise sentences: what they did well, what's missing, how to improve. Do not quote the answer back.>"
 }`;
 
   try {

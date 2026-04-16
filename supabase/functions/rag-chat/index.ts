@@ -1104,7 +1104,13 @@ When a student asks you to mark their essay, answer, or response:
 2. Once you know the mark value, provide detailed feedback using the marking criteria from your training data.
 3. Give a mark out of the total, identify what they did well, what's missing, and how to improve.
 4. If they upload an image of their work, analyse it and mark it the same way.
-5. Use exact marking criteria and level descriptors from your training data where available.`;
+5. Use exact marking criteria and level descriptors from your training data where available.
+
+CRITICAL — CONCISENESS RULES FOR ALL FEEDBACK:
+- Do NOT repeat, restate, or quote back the student's full answer. They already know what they wrote.
+- Reference specific phrases ONLY when pointing out an error, a missing element, or suggesting a concrete improvement. Keep quotes short (a few words, not whole sentences).
+- Never reproduce the student's answer line by line. Jump straight to the mark, strengths, weaknesses, and how to improve.
+- Keep feedback direct and actionable. Aim for quality over quantity — a focused 150-word response beats a padded 500-word one.`;
 
     if (relevantContext) {
       finalSystemPrompt += `\n\n--- TRAINING DATA CONTEXT ---\nUse the following information to inform your responses:\n\n${relevantContext}`;
