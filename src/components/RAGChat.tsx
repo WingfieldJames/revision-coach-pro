@@ -202,6 +202,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [gradeBoundariesData, setGradeBoundariesData] = useState<Record<string, Record<string, number>> | null>(null);
   // Feedback state: maps messageId -> 'thumbs_up' | 'thumbs_down'
   const [feedbackMap, setFeedbackMap] = useState<Record<string, 'thumbs_up' | 'thumbs_down'>>({});
+  const [viewportHeight, setViewportHeight] = useState(() => typeof window !== 'undefined' ? window.innerHeight : 900);
 
   const submitFeedback = useCallback(async (messageId: string, feedbackType: 'thumbs_up' | 'thumbs_down') => {
     if (!user) return;
