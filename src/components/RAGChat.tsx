@@ -360,6 +360,29 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     }
     return null;
   }, [user, createConversation, saveMessage, chatHistoryCtx]);
+  // Check if free-tier user has already exhausted daily prompts (persists across refresh)
+  useEffect(() => {
+    const checkUsage = async () => {
+      if (!user || effectiveTier === 'deluxe') return;
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const { data } = await supabase
+          .from('daily_prompt_usage')
+          .select('prompt_count')
+          .eq('user_id', user.id)
+          .eq('product_id', promptProductId || productId)
+          .eq('usage_date', today)
+          .maybeSingle();
+        if (data && data.prompt_count >= 3) {
+          setLimitReached(true);
+        }
+      } catch (err) {
+        console.error('Error checking daily usage:', err);
+      }
+    };
+    checkUsage();
+  }, [user, productId, promptProductId, effectiveTier]);
+
   // Fetch user preferences for this product
   useEffect(() => {
     const fetchPreferences = async () => {

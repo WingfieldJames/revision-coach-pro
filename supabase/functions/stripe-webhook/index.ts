@@ -554,6 +554,41 @@ serve(async (req) => {
         break;
       }
       
+      case "invoice.payment_failed": {
+        const failedInvoice = event.data.object as Stripe.Invoice;
+        logStep("Processing payment failure", {
+          invoiceId: failedInvoice.id,
+          subscriptionId: failedInvoice.subscription,
+          attemptCount: failedInvoice.attempt_count,
+          nextAttempt: failedInvoice.next_payment_attempt,
+        });
+
+        const failedSubId = failedInvoice.subscription as string | null;
+        if (failedSubId) {
+          // Mark the subscription as having a payment issue
+          const { error: failErr } = await supabaseClient
+            .from('user_subscriptions')
+            .update({
+              updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_subscription_id', failedSubId);
+
+          if (failErr) {
+            logStep("ERROR: Failed to update subscription on payment failure", { error: failErr });
+          }
+
+          // Log for monitoring — Stripe will retry automatically
+          logStep("Payment failed — Stripe will retry", {
+            subscriptionId: failedSubId,
+            attemptCount: failedInvoice.attempt_count,
+            nextAttempt: failedInvoice.next_payment_attempt
+              ? new Date(failedInvoice.next_payment_attempt * 1000).toISOString()
+              : "no retry scheduled",
+          });
+        }
+        break;
+      }
+
       default:
         logStep("Unhandled event type", { eventType: event.type });
     }

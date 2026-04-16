@@ -11,7 +11,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const BASE_URL = "https://astarai.lovable.app";
-const FROM_EMAIL = "A* AI <onboarding@resend.dev>"; // Using Resend test sender until astarai.co.uk is verified
+const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "A* AI <hello@astarai.co.uk>";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

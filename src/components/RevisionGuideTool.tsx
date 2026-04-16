@@ -182,8 +182,29 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
 
   const enabledOptions = contentOptions.filter(o => o.enabled && !o.locked);
 
+  const FREE_MONTHLY_GUIDE_LIMIT = 2;
+
   const handleGenerate = async () => {
     if (!selectedSpec || !productId) return;
+
+    // Enforce monthly limit for free-tier users
+    if (tier === 'free') {
+      try {
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data: usage } = await supabase.rpc('get_tool_usage', {
+          p_user_id: (await supabase.auth.getUser()).data.user?.id,
+          p_product_id: productId,
+          p_tool_type: 'revision_guide',
+        });
+        if (usage !== null && usage >= FREE_MONTHLY_GUIDE_LIMIT) {
+          toast.error(`Free users can generate ${FREE_MONTHLY_GUIDE_LIMIT} revision guides per month. Upgrade to Deluxe for unlimited.`);
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking guide usage:', err);
+      }
+    }
+
     setGenerating(true);
     setGuideContent(null);
 
@@ -242,6 +263,24 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
 
       const data = await response.json();
       setGuideContent(data.content || 'Unable to generate guide. Please try again.');
+
+      // Increment usage for free-tier users
+      if (tier === 'free') {
+        try {
+          const { supabase: sb } = await import('@/integrations/supabase/client');
+          const userId = (await sb.auth.getUser()).data.user?.id;
+          if (userId) {
+            await sb.rpc('increment_tool_usage', {
+              p_user_id: userId,
+              p_product_id: productId,
+              p_tool_type: 'revision_guide',
+              p_limit: 100, // high limit — we check separately
+            });
+          }
+        } catch (err) {
+          console.error('Error incrementing guide usage:', err);
+        }
+      }
     } catch (err) {
       console.error('Error generating guide:', err);
       toast.error('Failed to generate revision guide. Please try again.');

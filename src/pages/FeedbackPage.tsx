@@ -29,7 +29,7 @@ export const FeedbackPage: React.FC = () => {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate(`/login?redirect=feedback${feedbackType === 'deluxe' ? '?type=deluxe' : ''}`);
+      navigate(`/login?redirect=${encodeURIComponent(`feedback${feedbackType === 'deluxe' ? '?type=deluxe' : ''}`)}`);
     }
   }, [user, loading, navigate, feedbackType]);
 
