@@ -119,7 +119,8 @@ serve(async (req) => {
                 }
               }
             } else {
-              console.error("Stripe API error:", stripeRes.status, await stripeRes.text());
+              const stripeErrText = await stripeRes.text();
+              console.error("Stripe API error — subscription check may be stale:", stripeRes.status, stripeErrText);
             }
           } catch (stripeErr) {
             console.error("Stripe verification failed for subscription", {
