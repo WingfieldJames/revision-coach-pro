@@ -451,6 +451,54 @@ serve(async (req) => {
         break;
       }
       
+      case "customer.subscription.updated": {
+        // Handle cancel_at_period_end changes
+        const updatedSub = event.data.object as Stripe.Subscription;
+        logStep("Processing subscription update", {
+          subscriptionId: updatedSub.id,
+          cancelAtPeriodEnd: updatedSub.cancel_at_period_end,
+          status: updatedSub.status,
+        });
+
+        if (updatedSub.cancel_at_period_end) {
+          // User requested cancellation at period end
+          const { error: updateErr } = await supabaseClient
+            .from('user_subscriptions')
+            .update({
+              cancelled_at: new Date().toISOString(),
+              subscription_end: new Date(updatedSub.current_period_end * 1000).toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_subscription_id', updatedSub.id);
+
+          if (updateErr) {
+            logStep("ERROR: Failed to mark cancel_at_period_end", { error: updateErr });
+          } else {
+            logStep("Marked subscription as cancelling at period end", {
+              subscriptionId: updatedSub.id,
+              periodEnd: new Date(updatedSub.current_period_end * 1000).toISOString(),
+            });
+          }
+        } else if (updatedSub.status === 'active') {
+          // Cancellation was reversed (user resubscribed)
+          const { error: reactivateErr } = await supabaseClient
+            .from('user_subscriptions')
+            .update({
+              cancelled_at: null,
+              active: true,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_subscription_id', updatedSub.id);
+
+          if (reactivateErr) {
+            logStep("ERROR: Failed to reactivate subscription", { error: reactivateErr });
+          } else {
+            logStep("Subscription reactivated (cancel reversed)", { subscriptionId: updatedSub.id });
+          }
+        }
+        break;
+      }
+
       case "customer.subscription.deleted": {
         // Handle subscription cancellations (monthly only)
         const subscription = event.data.object as Stripe.Subscription;

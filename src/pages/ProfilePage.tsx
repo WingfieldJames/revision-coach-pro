@@ -110,15 +110,25 @@ export const ProfilePage = () => {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) { toast.error('Please log in again'); return; }
+      // Pass the specific subscription ID so the backend cancels the right one
+      const sub = subscriptionDetails[cancelFlowBoard];
       const { data, error } = await supabase.functions.invoke('cancel-subscription', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
-        body: { cancelAtPeriodEnd: true },
+        body: { cancelAtPeriodEnd: true, subscriptionId: sub?.id || undefined },
       });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       toast.success(data.message || 'Subscription cancelled — you keep access until the end of your billing period.');
       setCancelFlowOpen(false);
+      // Show cancelled state immediately
+      if (sub?.id) {
+        setSubscriptionDetails((prev: Record<string, any>) => ({
+          ...prev,
+          [cancelFlowBoard]: { ...prev[cancelFlowBoard], cancelled_at: new Date().toISOString() },
+        }));
+      }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to cancel');
+      toast.error(error.message || 'Failed to cancel subscription. Please try again or contact support.');
     } finally {
       setCancellingSubscription(null);
     }
@@ -222,15 +232,19 @@ export const ProfilePage = () => {
                           <Badge variant="secondary" className="text-xs">
                             {sub?.payment_type === 'school' ? 'School License' : sub?.payment_type === 'referral' ? 'Referral' : isMonthly ? 'Monthly' : 'Lifetime'}
                           </Badge>
-                          <Badge className="text-xs bg-green-100 text-green-800 hover:bg-green-100">ACTIVE</Badge>
+                          {sub?.cancelled_at ? (
+                            <Badge className="text-xs bg-amber-100 text-amber-800 hover:bg-amber-100">Cancelling</Badge>
+                          ) : (
+                            <Badge className="text-xs bg-green-100 text-green-800 hover:bg-green-100">ACTIVE</Badge>
+                          )}
                           {sub?.subscription_end && (
                             <span className="text-xs text-muted-foreground">
-                              {isMonthly ? 'Renews' : 'Expires'}: {new Date(sub.subscription_end).toLocaleDateString()}
+                              {sub?.cancelled_at ? 'Access until' : isMonthly ? 'Renews' : 'Expires'}: {new Date(sub.subscription_end).toLocaleDateString()}
                             </span>
                           )}
                         </div>
                       </div>
-                      {isMonthly && sub?.payment_type !== 'school' && (
+                      {isMonthly && sub?.payment_type !== 'school' && !sub?.cancelled_at && (
                         <Button
                           variant="ghost" size="sm"
                           className="text-xs text-muted-foreground hover:text-destructive"
