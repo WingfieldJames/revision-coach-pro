@@ -683,7 +683,7 @@ export const DashboardPage = () => {
                     );
                   })}
                   
-                  {!productAccess['edexcel']?.hasAccess && !productAccess['aqa']?.hasAccess && !productAccess['cie']?.hasAccess && !productAccess['ocr-cs']?.hasAccess && !productAccess['ocr-physics']?.hasAccess && !productAccess['aqa-chemistry']?.hasAccess && (
+                  {!productAccess['edexcel']?.hasAccess && !productAccess['aqa']?.hasAccess && !productAccess['cie']?.hasAccess && !productAccess['ocr-cs']?.hasAccess && !productAccess['ocr-physics']?.hasAccess && !productAccess['aqa-chemistry']?.hasAccess && !productAccess['aqa-psychology']?.hasAccess && !productAccess['edexcel-maths']?.hasAccess && (
                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                       Free
                     </span>

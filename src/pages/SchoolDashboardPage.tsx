@@ -343,7 +343,7 @@ export const SchoolDashboardPage = () => {
       <div className="min-h-screen bg-background">
         <Header showNavLinks />
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Loading school dashboard...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
         </div>
       </div>
     );

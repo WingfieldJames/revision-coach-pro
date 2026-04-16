@@ -1112,7 +1112,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             const showCursor = isLastAssistant && (isLoading || isAnimating) && displayContent.length > 0;
             return (
               <div
-                key={index}
+                key={message.messageId || `msg-${index}`}
                 className={cn(
                   "flex gap-3 p-4 rounded-xl",
                   message.role === 'user'
