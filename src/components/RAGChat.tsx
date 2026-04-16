@@ -253,6 +253,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     resolve();
   }, [currentDiagram]);
 
+  useEffect(() => {
+    const handleResize = () => setViewportHeight(window.innerHeight);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Animation refs
   const bufferRef = useRef('');
   const animationRef = useRef<number | null>(null);
@@ -946,7 +953,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 pb-[160px] md:pb-[200px]">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.length === 0 && (
-            <div className="relative py-16 max-[767px]:py-2 max-[767px]:-mt-14 [@media_(min-width:768px)_and_(max-height:850px)]:py-8 [@media_(min-width:768px)_and_(max-height:750px)]:py-4 [@media_(min-width:768px)_and_(max-height:650px)]:py-1 [@media_(min-width:768px)_and_(max-height:650px)]:-mt-4 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:py-0 [@media_(min-width:768px)_and_(max-width:1366px)_and_(min-aspect-ratio:3/4)_and_(max-aspect-ratio:4/3)]:-mt-16">
+            <div
+              className="relative"
+              style={{
+                paddingTop: viewportHeight <= 650 ? '0.25rem' : viewportHeight <= 750 ? '1rem' : viewportHeight <= 850 ? '2rem' : '4rem',
+                paddingBottom: viewportHeight <= 650 ? '0.25rem' : viewportHeight <= 750 ? '1rem' : viewportHeight <= 850 ? '2rem' : '4rem',
+                marginTop: viewportHeight <= 650 ? '-1rem' : viewportHeight <= 750 ? '-0.5rem' : undefined,
+              }}
+            >
               
               {/* Meet Your Tutor column — desktop only, only when trainer data exists */}
               {trainerName && trainerAvatarUrl && (
