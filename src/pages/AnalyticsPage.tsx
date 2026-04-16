@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -103,11 +105,31 @@ interface AnalyticsData {
 }
 
 export const AnalyticsPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [authorized, setAuthorized] = useState(false);
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<string>("all");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  // Auth gate: require admin or trainer role
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate('/login'); return; }
+    const checkRole = async () => {
+      const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+      const isAdmin = roles?.some((r: any) => r.role === 'admin' || r.role === 'trainer');
+      if (!isAdmin) { navigate('/'); return; }
+      setAuthorized(true);
+    };
+    checkRole();
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || !authorized) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  }
 
   const fetchAnalytics = async (isBackground = false) => {
     if (!isBackground) setLoading(true);

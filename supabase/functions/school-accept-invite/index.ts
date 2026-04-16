@@ -15,15 +15,42 @@ serve(async (req) => {
   }
 
   try {
-    const { invite_code, user_id } = await req.json();
+    const body = await req.json();
+    const { invite_code } = body;
+    let user_id = body.user_id;
 
-    if (!invite_code || !user_id) {
+    if (!invite_code) {
       return new Response(
-        JSON.stringify({ error: "invite_code and user_id are required" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
+        JSON.stringify({ error: "invite_code is required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    // SECURITY: Derive user_id from auth token, not request body
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      try {
+        const anonClient = createClient(
+          Deno.env.get("SUPABASE_URL") ?? "",
+          Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+        );
+        const token = authHeader.replace("Bearer ", "");
+        const { data: authData } = await anonClient.auth.getUser(token);
+        if (authData?.user?.id) {
+          if (user_id && user_id !== authData.user.id) {
+            console.warn(`[SECURITY] school-accept-invite user_id mismatch: body=${user_id}, token=${authData.user.id}`);
+          }
+          user_id = authData.user.id;
         }
+      } catch (err) {
+        console.warn("Auth token verification failed:", err);
+      }
+    }
+
+    if (!user_id) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
       );
     }
 

@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -42,11 +45,31 @@ interface FeedbackData {
 }
 
 export const FeedbackResultsPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [authorized, setAuthorized] = useState(false);
   const [data, setData] = useState<FeedbackData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterRating, setFilterRating] = useState<string>("all");
+
+  // Auth gate: require admin or trainer role
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate('/login'); return; }
+    const checkRole = async () => {
+      const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+      const isAdmin = roles?.some((r: any) => r.role === 'admin' || r.role === 'trainer');
+      if (!isAdmin) { navigate('/'); return; }
+      setAuthorized(true);
+    };
+    checkRole();
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || !authorized) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  }
 
   useEffect(() => {
     const fetchData = async () => {

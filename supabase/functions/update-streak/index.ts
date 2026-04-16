@@ -14,7 +14,29 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { user_id } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    let user_id = body.user_id;
+
+    // SECURITY: Derive user_id from auth token when available
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      try {
+        const anonClient = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+        );
+        const token = authHeader.replace("Bearer ", "");
+        const { data: authData } = await anonClient.auth.getUser(token);
+        if (authData?.user?.id) {
+          if (user_id && user_id !== authData.user.id) {
+            console.warn(`[SECURITY] update-streak user_id mismatch: body=${user_id}, token=${authData.user.id}`);
+          }
+          user_id = authData.user.id;
+        }
+      } catch (err) {
+        console.warn("Auth token verification failed, using body user_id:", err);
+      }
+    }
 
     if (!user_id) {
       return new Response(
