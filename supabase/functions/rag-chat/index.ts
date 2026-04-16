@@ -730,7 +730,53 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.json();
-    const { message, product_id, user_preferences, history = [], tier: _clientTier = 'free', user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id, spec_content } = body;
+    const { message, product_id, history = [], tier: _clientTier = 'free', user_id: client_user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id, spec_content } = body;
+
+    // SECURITY: Derive user_id from auth token when available — never trust the client blindly
+    let user_id = client_user_id;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      try {
+        const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") ?? "");
+        const token = authHeader.replace("Bearer ", "");
+        const { data: authData } = await anonClient.auth.getUser(token);
+        if (authData?.user?.id) {
+          if (user_id && user_id !== authData.user.id) {
+            console.warn(`[SECURITY] user_id mismatch: body=${user_id}, token=${authData.user.id}. Using token.`);
+          }
+          user_id = authData.user.id;
+        }
+      } catch (err) {
+        console.warn("Auth token verification failed, falling back to client user_id:", err);
+      }
+    }
+
+    // SECURITY: Fetch user_preferences server-side — ignore any sent by the client
+    let user_preferences: { year: string; predicted_grade: string; target_grade: string; additional_info: string | null } | null = null;
+    if (user_id && product_id) {
+      try {
+        const { data: prefs } = await supabaseAdmin
+          .from('user_preferences')
+          .select('year, predicted_grade, target_grade, additional_info')
+          .eq('user_id', user_id)
+          .eq('product_id', product_id)
+          .maybeSingle();
+        if (prefs) {
+          user_preferences = prefs;
+        } else {
+          // Fallback: check for preferences without product_id
+          const { data: globalPrefs } = await supabaseAdmin
+            .from('user_preferences')
+            .select('year, predicted_grade, target_grade, additional_info')
+            .eq('user_id', user_id)
+            .is('product_id', null)
+            .maybeSingle();
+          if (globalPrefs) user_preferences = globalPrefs;
+        }
+      } catch (err) {
+        console.error('Error fetching user preferences server-side:', err);
+      }
+    }
 
     // search_only mode: keyword search for past paper chunks, return JSON
     if (search_only && product_id) {

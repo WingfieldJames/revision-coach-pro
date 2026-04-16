@@ -576,17 +576,20 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     setSearchedSources([]);
     setCurrentDiagram(null);
     try {
+      // Get session token for server-side auth verification
+      const { data: sessionData } = await supabase.auth.getSession();
+      const authToken = sessionData?.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
       const response = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+          'Authorization': `Bearer ${authToken}`
         },
         body: JSON.stringify({
           message: messageText || '(Please analyse the attached file)',
           product_id: productId,
           prompt_product_id: promptProductId || productId,
-          user_preferences: userPreferences,
           history: messages.slice(-10).map(m => ({
             role: m.role,
             content: m.content
