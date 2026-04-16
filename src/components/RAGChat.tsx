@@ -580,6 +580,19 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       const { data: sessionData } = await supabase.auth.getSession();
       const authToken = sessionData?.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+      // If no image on this message, check if a recent message had one (e.g. essay upload)
+      // so the AI can still "see" it on follow-up messages like "25 marks"
+      let effectiveImageData = imageDataUrl || null;
+      if (!effectiveImageData) {
+        const recentHistory = messages.slice(-6);
+        for (let i = recentHistory.length - 1; i >= 0; i--) {
+          if (recentHistory[i].role === 'user' && recentHistory[i].imageUrl) {
+            effectiveImageData = recentHistory[i].imageUrl as string;
+            break;
+          }
+        }
+      }
+
       const response = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
@@ -598,8 +611,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           user_id: user?.id,
           enable_diagrams: enableDiagrams,
           diagram_subject: diagramSubject,
-          image_data: imageDataUrl || null,
-          multi_image: Array.isArray(imageDataUrl),
+          image_data: effectiveImageData,
+          multi_image: Array.isArray(effectiveImageData),
         })
       });
       if (!response.ok) {
