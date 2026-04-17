@@ -1054,12 +1054,12 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       fetchSystemPrompt(supabaseAdmin, product_id),
       // Brain profile (deluxe only)
       (tier === 'deluxe' && user_id)
-        ? supabaseAdmin.from('user_brain_profiles').select('profile_summary').eq('user_id', user_id).maybeSingle().catch(() => ({ data: null }))
+        ? Promise.resolve(supabaseAdmin.from('user_brain_profiles').select('profile_summary').eq('user_id', user_id).maybeSingle()).then((r: any) => r).catch(() => ({ data: null }))
         : Promise.resolve({ data: null }),
       // Feedback guidelines
-      supabaseAdmin.from('prompt_improvements').select('guidelines').eq('product_id', product_id).maybeSingle().catch(() => ({ data: null })),
+      Promise.resolve(supabaseAdmin.from('prompt_improvements').select('guidelines').eq('product_id', product_id).maybeSingle()).then((r: any) => r).catch(() => ({ data: null })),
       // Seasonal guidelines
-      supabaseAdmin.from('seasonal_prompts').select('guidelines').eq('product_id', product_id).maybeSingle().catch(() => ({ data: null })),
+      Promise.resolve(supabaseAdmin.from('seasonal_prompts').select('guidelines').eq('product_id', product_id).maybeSingle()).then((r: any) => r).catch(() => ({ data: null })),
     ]);
 
     // Process parallel results
