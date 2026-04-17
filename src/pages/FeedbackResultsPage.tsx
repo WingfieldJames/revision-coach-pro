@@ -82,6 +82,36 @@ export const FeedbackResultsPage = () => {
     checkRole();
   }, [user, authLoading, navigate]);
 
+  // Fetch feedback data — only runs when authorized. MUST be declared above early returns
+  // to respect the Rules of Hooks (no hooks after conditional returns).
+  useEffect(() => {
+    if (authStatus !== 'authorized') return;
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `https://xoipyycgycmpflfnrlty.supabase.co/functions/v1/get-feedback`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvaXB5eWNneWNtcGZsZm5ybHR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzkzMjUsImV4cCI6MjA2OTM1NTMyNX0.pU8Ej1aAvGoAQ6CuVZwvcCvWBxSGo61X16cfQxW7_bI",
+            },
+          }
+        );
+        const result = await response.json();
+        if (response.ok) {
+          setData(result);
+        } else {
+          setError(result?.error || "Failed to load feedback data");
+        }
+      } catch {
+        setError("Network error");
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, [authStatus]);
+
   if (authLoading || authStatus === 'checking') {
     return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
@@ -116,32 +146,6 @@ VALUES ('${user?.id}', 'admin');`}
     );
   }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `https://xoipyycgycmpflfnrlty.supabase.co/functions/v1/get-feedback`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvaXB5eWNneWNtcGZsZm5ybHR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzkzMjUsImV4cCI6MjA2OTM1NTMyNX0.pU8Ej1aAvGoAQ6CuVZwvcCvWBxSGo61X16cfQxW7_bI",
-            },
-          }
-        );
-        const result = await response.json();
-        if (response.ok) {
-          setData(result);
-        } else {
-          setError(result?.error || "Failed to load feedback data");
-        }
-      } catch {
-        setError("Network error");
-      }
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
 
   const filteredResponses = data?.responses.filter(r => {
     if (filterType !== "all" && r.feedback_type !== filterType) return false;

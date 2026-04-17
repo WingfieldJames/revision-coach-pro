@@ -147,6 +147,41 @@ export const AnalyticsPage = () => {
     checkRole();
   }, [user, authLoading, navigate]);
 
+  // Analytics fetch — only runs when authorized. MUST be declared above early returns
+  // to respect the Rules of Hooks (no hooks after conditional returns).
+  useEffect(() => {
+    if (authStatus !== 'authorized') return;
+    const fetchAnalytics = async (isBackground = false) => {
+      if (!isBackground) setLoading(true);
+      try {
+        const response = await fetch(
+          `https://xoipyycgycmpflfnrlty.supabase.co/functions/v1/get-analytics`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvaXB5eWNneWNtcGZsZm5ybHR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzkzMjUsImV4cCI6MjA2OTM1NTMyNX0.pU8Ej1aAvGoAQ6CuVZwvcCvWBxSGo61X16cfQxW7_bI",
+            },
+          }
+        );
+        const result = await response.json();
+        if (response.ok && !result?.error) {
+          setData(result);
+          setLastUpdated(new Date());
+          setError(null);
+        } else {
+          if (!isBackground) setError(result?.error || "Failed to load analytics");
+        }
+      } catch (e) {
+        if (!isBackground) setError("Network error");
+      }
+      if (!isBackground) setLoading(false);
+    };
+    fetchAnalytics();
+    const interval = setInterval(() => fetchAnalytics(true), 30000);
+    return () => clearInterval(interval);
+  }, [authStatus]);
+
   if (authLoading || authStatus === 'checking') {
     return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
@@ -180,39 +215,6 @@ VALUES ('${user?.id}', 'admin');`}
       </div>
     );
   }
-
-  const fetchAnalytics = async (isBackground = false) => {
-    if (!isBackground) setLoading(true);
-    try {
-      const response = await fetch(
-        `https://xoipyycgycmpflfnrlty.supabase.co/functions/v1/get-analytics`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvaXB5eWNneWNtcGZsZm5ybHR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzkzMjUsImV4cCI6MjA2OTM1NTMyNX0.pU8Ej1aAvGoAQ6CuVZwvcCvWBxSGo61X16cfQxW7_bI",
-          },
-        }
-      );
-      const result = await response.json();
-      if (response.ok && !result?.error) {
-        setData(result);
-        setLastUpdated(new Date());
-        setError(null);
-      } else {
-        if (!isBackground) setError(result?.error || "Failed to load analytics");
-      }
-    } catch (e) {
-      if (!isBackground) setError("Network error");
-    }
-    if (!isBackground) setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchAnalytics();
-    const interval = setInterval(() => fetchAnalytics(true), 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Get filtered daily prompts for selected product
   const getFilteredDailyPrompts = () => {
