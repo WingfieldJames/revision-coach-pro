@@ -592,25 +592,369 @@ const EDEXCEL_MATHS_P3_2023: PaperDef = {
 
 
 // ═══════════════════════════════════════════════════════════════════════════
+// 2022 PAPERS + MISSING PAPER NUMBERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Edexcel Economics P3 2022
+const EDEXCEL_ECON_P3_2022: PaperDef = {
+  exam_board: "Edexcel", subject: "Economics", paper_number: 3, year: 2022, total_marks: 100, time_limit_minutes: 120,
+  paper_name: "Edexcel Economics A Paper 3: Microeconomics and Macroeconomics (June 2022)",
+  product_slug: "edexcel-economics",
+  sections: [
+    { id: "A", name: "Section A: Micro Data Response", questions: ["1a","1b","1c","1d","1e"] },
+    { id: "B", name: "Section B: Macro Data Response", questions: ["2a","2b","2c","2d","2e"] },
+  ],
+  questions: [
+    q("1a", "With reference to Extract A, identify two significant features of the data shown.", 5, "5-marker", "A", { extract_text: "Extract A shows UK pharmaceutical industry data. The top 5 firms hold 62% of market share. R&D spending in the sector reached £4.9bn in 2022, with average drug development costing £1.2bn and taking 12 years. Patent protection lasts 20 years from filing, but effective market exclusivity averages 10-12 years." }),
+    q("1b", "With reference to the information, explain how patents create barriers to entry in the pharmaceutical market.", 8, "8-marker", "A"),
+    q("1c", "With reference to Extract B, evaluate whether the pharmaceutical industry demonstrates natural monopoly characteristics.", 12, "12-marker", "A", { extract_text: "Extract B: Generic drug manufacturers can produce medicines at 80-90% lower cost once patents expire. However, the initial R&D investment creates enormous sunk costs. The NHS spent £18.2bn on medicines in 2022, of which branded drugs accounted for 74%." }),
+    q("1d", "Evaluate the view that patent protection in the pharmaceutical industry improves consumer welfare in the long run. [Answer EITHER 1d OR 1e]", 25, "25-marker", "A", { diagram_required: true }),
+    q("1e", "Evaluate the effectiveness of government regulation in ensuring pharmaceutical companies act in the public interest. [Answer EITHER 1d OR 1e]", 25, "25-marker", "A", { diagram_required: true }),
+    q("2a", "With reference to Extract C, identify two significant features of the data shown.", 5, "5-marker", "B", { extract_text: "Extract C: UK productivity (output per hour) grew by only 0.4% per year between 2010-2022, compared to 2.1% pre-2008. The UK ranks below the US, Germany, and France in output per worker. Business investment was 9.6% of GDP vs OECD average of 12%." }),
+    q("2b", "With reference to the information, explain how low productivity growth affects the UK's long-run aggregate supply.", 8, "8-marker", "B"),
+    q("2c", "With reference to Extract D, evaluate whether increased government spending on infrastructure is the most effective policy to boost UK productivity.", 12, "12-marker", "B", { extract_text: "Extract D: The government announced £600bn of infrastructure spending over 5 years. Critics argue that skills shortages and planning delays mean much of this spending will be inflationary rather than productivity-enhancing. Business groups call for corporation tax cuts to incentivise private investment." }),
+    q("2d", "Evaluate the view that the UK's productivity problem is primarily a failure of the private sector rather than the government. [Answer EITHER 2d OR 2e]", 25, "25-marker", "B", { diagram_required: true }),
+    q("2e", "Evaluate the view that supply-side reforms are more important than demand management for improving UK living standards. [Answer EITHER 2d OR 2e]", 25, "25-marker", "B", { diagram_required: true }),
+  ],
+};
+
+// AQA Economics 2022 (P1, P2, P3)
+const AQA_ECON_P1_2022: PaperDef = {
+  exam_board: "AQA", subject: "Economics", paper_number: 1, year: 2022, total_marks: 80, time_limit_minutes: 120,
+  paper_name: "AQA Economics Paper 1: Markets and Market Failure (June 2022)",
+  product_slug: "aqa-economics",
+  sections: [
+    { id: "A", name: "Section A: Data Response (compulsory)", questions: ["1a","1b","1c","1d"] },
+    { id: "B", name: "Section B: Essay (choose one)", questions: ["2","3","4"] },
+  ],
+  questions: [
+    q("1a", "Using Extract A, calculate the four-firm concentration ratio for the UK broadband market and comment on its significance.", 4, "4-marker", "A", { extract_text: "UK broadband market shares (2022): BT/EE 34%, Virgin Media 20%, Sky 14%, TalkTalk 8%, Others 24%. Average broadband prices rose 8.5% in 2022. Ofcom reported that switching rates remained below 15%." }),
+    q("1b", "Using a diagram, explain how non-price competition operates in the UK broadband market.", 9, "9-marker", "A", { diagram_required: true }),
+    q("1c", "Using the extracts and your own knowledge, evaluate the effectiveness of Ofcom in promoting competition in the broadband market.", 15, "15-marker", "A"),
+    q("1d", "Using the data and your own knowledge, evaluate whether consumers would benefit from breaking up BT's network infrastructure into a separate company.", 25, "25-marker", "A"),
+    q("2", "Evaluate the view that free markets always allocate resources efficiently. [25 marks]", 25, "25-marker", "B"),
+    q("3", "Evaluate the view that minimum prices are the most effective way to reduce the consumption of demerit goods. [25 marks]", 25, "25-marker", "B"),
+    q("4", "Evaluate the extent to which labour markets can be left to operate freely without government intervention. [25 marks]", 25, "25-marker", "B"),
+  ],
+};
+
+const AQA_ECON_P2_2022: PaperDef = {
+  exam_board: "AQA", subject: "Economics", paper_number: 2, year: 2022, total_marks: 80, time_limit_minutes: 120,
+  paper_name: "AQA Economics Paper 2: The National Economy in a Global Context (June 2022)",
+  product_slug: "aqa-economics",
+  sections: [
+    { id: "A", name: "Section A: Data Response (compulsory)", questions: ["1a","1b","1c","1d"] },
+    { id: "B", name: "Section B: Essay (choose one)", questions: ["2","3","4"] },
+  ],
+  questions: [
+    q("1a", "Using Extract A, calculate the change in the UK's terms of trade between 2020 and 2022.", 4, "4-marker", "A", { extract_text: "UK trade data: Export price index rose from 100 (2020) to 118 (2022). Import price index rose from 100 to 132. The trade deficit in goods was £186bn in 2022, while the services surplus was £132bn." }),
+    q("1b", "Using an AD/AS diagram, explain the likely impact of a deterioration in the terms of trade on the UK economy.", 9, "9-marker", "A", { diagram_required: true }),
+    q("1c", "Using the data and your own knowledge, assess the significance of the UK's growing trade deficit in goods.", 15, "15-marker", "A"),
+    q("1d", "Using the data and your own knowledge, evaluate the view that a weaker pound would solve the UK's trade deficit.", 25, "25-marker", "A"),
+    q("2", "Evaluate the view that reducing income inequality should be the primary objective of government economic policy. [25 marks]", 25, "25-marker", "B"),
+    q("3", "Evaluate the effectiveness of fiscal policy in promoting economic growth during a recession. [25 marks]", 25, "25-marker", "B"),
+    q("4", "Evaluate the view that developing countries benefit more from free trade than from protectionism. [25 marks]", 25, "25-marker", "B"),
+  ],
+};
+
+const AQA_ECON_P3_2022: PaperDef = {
+  exam_board: "AQA", subject: "Economics", paper_number: 3, year: 2022, total_marks: 80, time_limit_minutes: 120,
+  paper_name: "AQA Economics Paper 3: Economic Principles and Issues (June 2022)",
+  product_slug: "aqa-economics",
+  sections: [
+    { id: "A", name: "Section A: Multiple Choice (30 questions)", questions: Array.from({length:30},(_,i)=>`mc${i+1}`) },
+    { id: "B", name: "Section B: Case Study", questions: ["31a","31b","31c","31d"] },
+  ],
+  questions: [
+    mcq("mc1", "An increase in the minimum wage above the equilibrium level will:", "A", ["Reduce unemployment", "Create excess supply of labour", "Increase the demand for labour", "Have no effect on the labour market"]),
+    mcq("mc2", "A negative externality in production shifts:", "A", ["The MPC curve to the left", "The MSC curve above the MPC curve", "The demand curve to the right", "The MPB curve below the MSB curve"]),
+    mcq("mc3", "Allocative efficiency occurs where:", "A", ["MC = AC", "P = MC", "MR = MC", "AR = AC"]),
+    mcq("mc4", "A merit good is:", "A", ["Non-rival and non-excludable", "Under-consumed in a free market", "Over-consumed in a free market", "Provided only by government"]),
+    mcq("mc5", "The cross elasticity of demand for complementary goods is:", "A", ["Positive", "Negative", "Zero", "Infinite"]),
+    mcq("mc6", "In monopolistic competition, firms can earn supernormal profit in the:", "A", ["Short run only", "Long run only", "Both short and long run", "Neither short nor long run"]),
+    mcq("mc7", "A tariff on imports will:", "A", ["Reduce the domestic price", "Increase government revenue", "Increase consumer surplus", "Shift the supply curve left"]),
+    mcq("mc8", "GDP at market prices minus indirect taxes plus subsidies equals:", "A", ["GDP at factor cost", "GNI", "Net national income", "Real GDP"]),
+    mcq("mc9", "Demand-pull inflation is most likely caused by:", "A", ["Rising oil prices", "Excessive growth of AD", "Supply chain disruptions", "Rising import costs"]),
+    mcq("mc10", "The natural rate of unemployment includes:", "A", ["Cyclical unemployment", "Frictional and structural unemployment", "Demand-deficient unemployment", "All types of unemployment"]),
+    mcq("mc11", "Quantitative easing primarily works by:", "A", ["Raising interest rates", "Increasing the money supply through bond purchases", "Reducing government spending", "Increasing tax revenue"]),
+    mcq("mc12", "A supply-side policy is:", "A", ["An increase in government spending", "A cut in interest rates", "Investment in education and training", "An increase in income tax"]),
+    mcq("mc13", "The multiplier effect will be larger when:", "A", ["The MPC is lower", "The tax rate is higher", "The MPC is higher", "Imports are higher"]),
+    mcq("mc14", "A current account deficit could be reduced by:", "A", ["An appreciation of the currency", "Increased consumer spending", "Improved export competitiveness", "Reduced interest rates"]),
+    mcq("mc15", "Absolute advantage means:", "A", ["Producing at lower opportunity cost", "Producing more output with the same resources", "Having a trade surplus", "Being the largest economy"]),
+    mcq("mc16", "The law of diminishing returns applies in the:", "A", ["Long run only", "Short run only", "Both short and long run", "Neither short nor long run"]),
+    mcq("mc17", "Price discrimination requires:", "A", ["Perfect competition", "Different price elasticities in separate markets", "Government regulation", "Identical consumers"]),
+    mcq("mc18", "An increase in interest rates would most directly:", "A", ["Increase investment", "Reduce the exchange rate", "Reduce consumer spending on credit", "Increase aggregate demand"]),
+    mcq("mc19", "The Gini coefficient ranges from:", "A", ["0 (complete equality) to 1 (complete inequality)", "-1 to +1", "0 to 100", "1 to 10"]),
+    mcq("mc20", "A public good is:", "A", ["Rival and excludable", "Non-rival and non-excludable", "Provided by the private sector", "A good the public wants"]),
+    mcq("mc21", "Structural unemployment is caused by:", "A", ["Seasonal changes", "A lack of aggregate demand", "Changes in the structure of the economy", "Frictional factors"]),
+    mcq("mc22", "An appreciation of the exchange rate will:", "A", ["Make exports more competitive", "Make imports cheaper", "Increase inflation", "Increase the trade surplus"]),
+    mcq("mc23", "The Phillips Curve shows:", "A", ["A positive relationship between inflation and growth", "An inverse relationship between unemployment and inflation", "A positive relationship between interest rates and investment", "No relationship between any variables"]),
+    mcq("mc24", "Economies of scale lead to:", "A", ["Rising average costs", "Falling average costs as output increases", "Constant average costs", "Rising marginal costs only"]),
+    mcq("mc25", "The Bank of England's primary objective is:", "A", ["Full employment", "Price stability (2% CPI target)", "Economic growth", "A balanced budget"]),
+    mcq("mc26", "A progressive tax means:", "A", ["Everyone pays the same amount", "Higher earners pay a higher proportion", "Tax rates decrease with income", "Only the rich pay tax"]),
+    mcq("mc27", "Government failure occurs when:", "A", ["The government runs a deficit", "Government intervention leads to a worse allocation of resources", "The government raises taxes", "Markets fail"]),
+    mcq("mc28", "The infant industry argument supports:", "A", ["Free trade", "Permanent protectionism", "Temporary protectionism for new industries", "Export subsidies"]),
+    mcq("mc29", "A contractionary fiscal policy involves:", "A", ["Increasing government spending", "Reducing taxes", "Reducing government spending and/or raising taxes", "Lowering interest rates"]),
+    mcq("mc30", "In the circular flow, a withdrawal/leakage is:", "A", ["Investment", "Government spending", "Exports", "Savings"]),
+    q("31a", "Using the data, explain two factors that contributed to the rise in UK house prices described in the case study.", 10, "10-marker", "B", { extract_text: "UK house prices rose 10.8% in 2022. Average house price reached £295,000. Mortgage rates rose from 1.5% to 5.5%. Housing completions fell 12% from 2019 levels. Population grew by 606,000 in 2022. The ratio of house prices to earnings reached 8.3." }),
+    q("31b", "Analyse how rising interest rates affected the UK housing market and the wider economy.", 15, "15-marker", "B"),
+    q("31c", "Evaluate government policies to improve housing affordability in the UK.", 25, "25-marker", "B"),
+    q("31d", "To what extent is the UK housing market an example of market failure?", 25, "25-marker", "B"),
+  ],
+};
+
+// OCR CS 2022
+const OCR_CS_P1_2022: PaperDef = {
+  exam_board: "OCR", subject: "Computer Science", paper_number: 1, year: 2022, total_marks: 140, time_limit_minutes: 150,
+  paper_name: "OCR Computer Science Paper 1: Computer Systems (June 2022)",
+  product_slug: "ocr-computer-science",
+  sections: [
+    { id: "A", name: "Section A: Short Answer", questions: ["1","2","3","4","5","6","7"] },
+    { id: "B", name: "Section B: Extended Response", questions: ["8","9","10"] },
+  ],
+  questions: [
+    q("1", "Explain the differences between RISC and CISC processor architectures. Give one advantage of each.", 8, "8-marker", "A"),
+    q("2", "Describe three types of secondary storage (magnetic, optical, solid-state) and compare their speed, capacity, and cost.", 8, "8-marker", "A"),
+    q("3", "Perform the following binary arithmetic. Show all working: (a) 10110101 + 01101110, (b) 11001010 - 00110111.", 8, "8-marker", "A"),
+    q("4", "Explain the purpose of a firewall, encryption, and MAC address filtering in network security.", 10, "10-marker", "A"),
+    q("5", "Describe the stages of the software development life cycle (SDLC). Explain when a waterfall model would be preferred over agile.", 8, "8-marker", "A"),
+    q("6", "Explain what is meant by normalisation in databases. Describe the differences between 1NF, 2NF, and 3NF with an example.", 8, "8-marker", "A"),
+    q("7", "Explain the differences between compilation and interpretation. Give a scenario where each would be appropriate.", 6, "6-marker", "A"),
+    q("8", "A hospital wants to implement an electronic patient records system. Discuss the technical, ethical, and legal considerations. Consider data protection, accessibility, and system reliability.", 20, "20-marker", "B"),
+    q("9", "Compare and contrast the use of cloud computing versus local server infrastructure for a medium-sized business. Consider cost, security, scalability, and reliability.", 20, "20-marker", "B"),
+    q("10", "Discuss the impact of quantum computing on current encryption methods. Evaluate whether organisations should be preparing now for the threat of quantum decryption.", 20, "20-marker", "B"),
+  ],
+};
+
+// OCR Physics 2022
+const OCR_PHYSICS_P1_2022: PaperDef = {
+  exam_board: "OCR", subject: "Physics", paper_number: 1, year: 2022, total_marks: 100, time_limit_minutes: 135,
+  paper_name: "OCR Physics A Paper 1: Modelling Physics (June 2022)",
+  product_slug: "ocr-physics",
+  sections: [
+    { id: "A", name: "Section A: Multiple Choice (15 questions)", questions: Array.from({length:15},(_,i)=>`mc${i+1}`) },
+    { id: "B", name: "Section B: Structured Questions", questions: ["16","17","18","19","20","21"] },
+  ],
+  questions: [
+    mcq("mc1", "A car decelerates uniformly from 20 m/s to rest in 8 s. The deceleration is:", "A", ["2.5 m/s²", "160 m/s²", "0.4 m/s²", "1.6 m/s²"]),
+    mcq("mc2", "The SI unit of energy is:", "A", ["Watt", "Joule", "Newton", "Pascal"]),
+    mcq("mc3", "Which is a vector quantity?", "A", ["Mass", "Energy", "Displacement", "Temperature"]),
+    mcq("mc4", "Work done is calculated by:", "A", ["Force × distance in the direction of the force", "Force × time", "Mass × velocity", "Power × distance"]),
+    mcq("mc5", "The stress on a material is defined as:", "A", ["Force × area", "Force ÷ area", "Extension ÷ length", "Energy ÷ volume"]),
+    mcq("mc6", "A standing wave is formed by:", "A", ["A single wave reflecting off a boundary", "Superposition of two waves travelling in opposite directions", "A wave diffracting through a gap", "A wave refracting at a boundary"]),
+    mcq("mc7", "The frequency of a wave increases. If the speed stays constant, the wavelength:", "A", ["Increases", "Decreases", "Stays the same", "Becomes zero"]),
+    mcq("mc8", "Constructive interference occurs when the path difference is:", "A", ["λ/2", "nλ (whole number of wavelengths)", "3λ/4", "Zero only"]),
+    mcq("mc9", "Internal energy is the sum of:", "A", ["Kinetic and gravitational potential energy", "Random kinetic and potential energy of molecules", "Work done and heat transferred", "Pressure and volume"]),
+    mcq("mc10", "In SHM, the velocity is maximum at:", "A", ["Maximum displacement", "The equilibrium position", "Half amplitude", "The turning points"]),
+    mcq("mc11", "The period of a simple pendulum depends on:", "A", ["Mass and length", "Length and g only", "Mass and g", "Amplitude and length"]),
+    mcq("mc12", "Three 12 Ω resistors in parallel have a combined resistance of:", "A", ["36 Ω", "4 Ω", "12 Ω", "6 Ω"]),
+    mcq("mc13", "Power dissipated in a resistor is:", "A", ["I²R", "IR²", "V/I", "I/R"]),
+    mcq("mc14", "A transverse wave has oscillations:", "A", ["Along the direction of travel", "Perpendicular to the direction of travel", "In a circular path", "Without energy transfer"]),
+    mcq("mc15", "The moment of a force about a point equals:", "A", ["Force × perpendicular distance from the point", "Force × mass", "Force ÷ distance", "Force × velocity"]),
+    q("16", "A ball is thrown horizontally at 15 m/s from a cliff 45 m high. Calculate: (a) time to reach the ground, (b) horizontal distance travelled, (c) velocity on impact (magnitude and direction).", 10, "10-marker", "B"),
+    q("17", "In a Young's double-slit experiment, the slit separation is 0.5 mm and the screen is 1.5 m away. The fringe spacing is 1.8 mm. Calculate the wavelength of light used. Explain what happens to the fringe pattern if one slit is covered.", 10, "10-marker", "B"),
+    q("18", "A copper wire of length 2 m and cross-sectional area 1.5 × 10⁻⁶ m² has a resistance of 0.023 Ω. Calculate the resistivity of copper. A potential difference of 6 V is applied across the wire. Calculate the current and power dissipated.", 10, "10-marker", "B"),
+    q("19", "Explain the first law of thermodynamics. A gas in a cylinder is compressed by a piston. 500 J of work is done on the gas, and 200 J of heat escapes. Calculate the change in internal energy.", 10, "10-marker", "B"),
+    q("20", "Describe an experiment to measure the speed of sound using a resonance tube. Include a diagram, the measurements taken, and how the speed is calculated.", 18, "18-marker", "B"),
+    q("21", "Discuss the evidence that supports the particle model of electromagnetic radiation. Reference the photoelectric effect, and explain why the wave model fails to explain it. Include the equation E = hf.", 22, "22-marker", "B"),
+  ],
+};
+
+// AQA Chemistry P2 2023 + 2022
+const AQA_CHEM_P2_2023: PaperDef = {
+  exam_board: "AQA", subject: "Chemistry", paper_number: 2, year: 2023, total_marks: 105, time_limit_minutes: 120,
+  paper_name: "AQA Chemistry Paper 2: Organic and Physical Chemistry (June 2023)",
+  product_slug: "aqa-chemistry",
+  sections: [
+    { id: "A", name: "Short and Long Answer Questions", questions: ["1","2","3","4","5","6","7"] },
+  ],
+  questions: [
+    q("1", "Draw the mechanism for the nucleophilic substitution of 1-bromobutane with aqueous sodium hydroxide. State the type of mechanism and the role of the hydroxide ion.", 8, "8-marker", "A"),
+    q("2", "Describe how you would distinguish between propanal and propanone using chemical tests. Write equations for the positive test.", 8, "8-marker", "A"),
+    q("3", "Explain what is meant by optical isomerism. Draw the two enantiomers of 2-hydroxypropanoic acid (lactic acid). Explain how you could distinguish between a racemic mixture and a pure enantiomer.", 10, "10-marker", "A"),
+    q("4", "Describe the process of addition polymerisation and condensation polymerisation. Give one example of each. Explain the environmental issues associated with disposal of addition polymers.", 12, "12-marker", "A"),
+    q("5", "A student dissolves 2.65 g of anhydrous sodium carbonate in 250 cm³ of water. Calculate the concentration in mol/dm³. A 25.0 cm³ sample is titrated against hydrochloric acid. 23.50 cm³ of acid is required. Calculate the concentration of the acid.", 12, "12-marker", "A"),
+    q("6", "Discuss the chemistry of alcohols including classification (primary, secondary, tertiary), oxidation reactions, dehydration, and ester formation. Write balanced equations for each reaction type.", 25, "25-marker", "A"),
+    q("7", "Discuss the factors that affect the rate of an organic reaction. Compare SN1 and SN2 mechanisms in terms of rate equations, intermediates, and stereochemistry.", 25, "25-marker", "A"),
+  ],
+};
+
+const AQA_CHEM_P1_2022: PaperDef = {
+  exam_board: "AQA", subject: "Chemistry", paper_number: 1, year: 2022, total_marks: 105, time_limit_minutes: 120,
+  paper_name: "AQA Chemistry Paper 1: Inorganic and Physical Chemistry (June 2022)",
+  product_slug: "aqa-chemistry",
+  sections: [
+    { id: "A", name: "Short and Long Answer Questions", questions: ["1","2","3","4","5","6","7"] },
+  ],
+  questions: [
+    q("1", "State Hess's law. Draw an energy cycle and use the bond enthalpies provided to calculate the enthalpy of combustion of methane. (C-H: 413, O=O: 498, C=O: 805, O-H: 463 kJ/mol)", 10, "10-marker", "A"),
+    q("2", "Describe and explain the trend in atomic radius and electronegativity across Period 3. Explain why there is a discontinuity in first ionisation energy between Mg and Al.", 10, "10-marker", "A"),
+    q("3", "Explain what is meant by the term 'buffer solution'. Describe how an acidic buffer made from ethanoic acid and sodium ethanoate resists changes in pH when small amounts of acid or base are added.", 10, "10-marker", "A"),
+    q("4", "Calculate the pH of: (a) 0.1 mol/dm³ HCl, (b) 0.05 mol/dm³ NaOH, (c) a buffer made from 0.1 mol/dm³ ethanoic acid and 0.15 mol/dm³ sodium ethanoate. Ka = 1.74 × 10⁻⁵.", 12, "12-marker", "A"),
+    q("5", "A student sets up an electrochemical cell using zinc and copper half-cells. Draw a labelled diagram. State which electrode is positive and explain why. Calculate the cell EMF. (E° Zn²⁺/Zn = -0.76V, E° Cu²⁺/Cu = +0.34V)", 8, "8-marker", "A"),
+    q("6", "Describe the reactions of the Period 3 elements Na to Ar with water and with oxygen. Write balanced equations and state the oxidation states.", 25, "25-marker", "A"),
+    q("7", "Discuss the factors affecting electrode potentials and the limitations of using standard electrode potentials to predict whether reactions will occur.", 25, "25-marker", "A"),
+  ],
+};
+
+// AQA Psychology P2 2023 + P1 2022
+const AQA_PSYCH_P2_2023: PaperDef = {
+  exam_board: "AQA", subject: "Psychology", paper_number: 2, year: 2023, total_marks: 96, time_limit_minutes: 120,
+  paper_name: "AQA Psychology Paper 2: Psychology in Context (June 2023)",
+  product_slug: "aqa-psychology",
+  sections: [
+    { id: "A", name: "Section A: Approaches in Psychology", questions: ["1","2","3"] },
+    { id: "B", name: "Section B: Biopsychology", questions: ["4","5","6"] },
+    { id: "C", name: "Section C: Research Methods", questions: ["7","8","9","10","11","12"] },
+  ],
+  questions: [
+    mcq("1", "Which approach in psychology emphasises the role of the unconscious mind?", "A", ["Behaviourist", "Cognitive", "Psychodynamic", "Humanistic"]),
+    q("2", "Outline two assumptions of the cognitive approach.", 4, "4-marker", "A"),
+    q("3", "Discuss the behaviourist approach in psychology. Compare it with the social learning theory approach. Refer to evidence.", 16, "16-marker", "A"),
+    mcq("4", "The part of the nervous system responsible for the 'fight or flight' response is the:", "B", ["Parasympathetic nervous system", "Sympathetic nervous system", "Somatic nervous system", "Central nervous system"]),
+    q("5", "Outline the structure and function of the synapse. Explain how drugs can affect synaptic transmission.", 6, "6-marker", "B"),
+    q("6", "Discuss the localisation of function in the brain. Evaluate the evidence for and against localisation. Refer to research studies.", 16, "16-marker", "B"),
+    mcq("7", "A correlation coefficient of -0.85 indicates:", "C", ["A strong positive correlation", "A weak negative correlation", "A strong negative correlation", "No correlation"]),
+    q("8", "Explain the difference between a Type I and Type II error. State which is more likely when using a significance level of p < 0.01.", 4, "4-marker", "C"),
+    q("9", "A researcher wants to investigate whether sleep affects exam performance. Design a study to test this. Include: hypothesis, variables, sampling method, procedure, and one ethical consideration.", 10, "10-marker", "C"),
+    q("10", "Explain two advantages and two disadvantages of using a questionnaire as a research method.", 6, "6-marker", "C"),
+    q("11", "A researcher records the number of errors made by participants on a memory task under three conditions: no distraction, music, and conversation. What statistical test would be appropriate? Justify your choice.", 4, "4-marker", "C"),
+    q("12", "Discuss the scientific status of psychology. Evaluate whether psychology should be considered a science. Refer to the features of science and research evidence.", 16, "16-marker", "C"),
+  ],
+};
+
+const AQA_PSYCH_P1_2022: PaperDef = {
+  exam_board: "AQA", subject: "Psychology", paper_number: 1, year: 2022, total_marks: 96, time_limit_minutes: 120,
+  paper_name: "AQA Psychology Paper 1: Introductory Topics in Psychology (June 2022)",
+  product_slug: "aqa-psychology",
+  sections: [
+    { id: "A", name: "Section A: Social Influence", questions: ["1","2","3","4"] },
+    { id: "B", name: "Section B: Memory", questions: ["5","6","7","8"] },
+    { id: "C", name: "Section C: Attachment", questions: ["9","10","11","12"] },
+    { id: "D", name: "Section D: Psychopathology", questions: ["13","14","15","16"] },
+  ],
+  questions: [
+    mcq("1", "Normative social influence is most associated with:", "A", ["Compliance", "Internalisation", "Identification", "Obedience"]),
+    q("2", "Outline two situational variables that Milgram identified as affecting obedience.", 4, "4-marker", "A"),
+    q("3", "Describe Zimbardo's Stanford Prison Experiment. Outline two ethical issues with this study.", 8, "8-marker", "A"),
+    q("4", "Discuss explanations of resistance to social influence. Refer to research evidence in your answer.", 16, "16-marker", "A"),
+    mcq("5", "In the multi-store model, the capacity of short-term memory is approximately:", "B", ["2 items", "7 ± 2 items", "Unlimited", "20 items"]),
+    q("6", "Outline the working memory model. Explain how it differs from the multi-store model.", 6, "6-marker", "B"),
+    q("7", "Explain two factors that affect the accuracy of eyewitness testimony.", 6, "6-marker", "B"),
+    q("8", "Evaluate the multi-store model of memory. Refer to research evidence and alternative models.", 16, "16-marker", "B"),
+    mcq("9", "According to Bowlby, the critical period for attachment formation is:", "C", ["0-6 months", "0-2.5 years", "3-5 years", "Birth to 1 year"]),
+    q("10", "Outline Schaffer and Emerson's stages of attachment.", 6, "6-marker", "C"),
+    q("11", "Explain two effects of institutionalisation as identified by Rutter's Romanian orphan studies.", 6, "6-marker", "C"),
+    q("12", "Discuss cultural variations in attachment. Evaluate the use of the Strange Situation in cross-cultural research.", 16, "16-marker", "C"),
+    mcq("13", "Which of the following is a cognitive characteristic of depression?", "D", ["Reduced appetite", "Low self-esteem", "Social withdrawal", "Insomnia"]),
+    q("14", "Outline two characteristics of obsessive-compulsive disorder (OCD).", 4, "4-marker", "D"),
+    q("15", "Explain how the two-process model (classical + operant conditioning) explains the maintenance of phobias.", 6, "6-marker", "D"),
+    q("16", "Discuss biological explanations of OCD. Evaluate the effectiveness of drug therapy as a treatment for OCD.", 16, "16-marker", "D"),
+  ],
+};
+
+// Edexcel Maths P2 2023 + P1 2022
+const EDEXCEL_MATHS_P2_2023: PaperDef = {
+  exam_board: "Edexcel", subject: "Mathematics", paper_number: 2, year: 2023, total_marks: 100, time_limit_minutes: 120,
+  paper_name: "Edexcel Mathematics Paper 2: Pure Mathematics 2 (June 2023)",
+  product_slug: "edexcel-mathematics",
+  sections: [{ id: "A", name: "Full Paper", questions: ["1","2","3","4","5","6","7","8","9","10","11"] }],
+  questions: [
+    q("1", "Express (2 + 3√5)² in the form a + b√5 where a and b are integers.", 3, "3-marker", "A"),
+    q("2", "Solve the simultaneous equations: y = 2x + 1 and x² + y² = 25.", 6, "6-marker", "A"),
+    q("3", "A circle has centre (3, -2) and passes through (7, 1). Find the equation of the circle.", 5, "5-marker", "A"),
+    q("4", "Given that log₃x = a, express log₃(9x³) in terms of a.", 4, "4-marker", "A"),
+    q("5", "Differentiate with respect to x: (a) y = sin(3x²), (b) y = e²ˣ·ln(x), (c) y = x³/(2x+1).", 10, "10-marker", "A"),
+    q("6", "The curve y = f(x) passes through (2, 5) and f'(x) = 6x² - 4x + 1. Find f(x).", 5, "5-marker", "A"),
+    q("7", "Prove that the sum of the first n terms of the series 1 + 3 + 5 + ... + (2n-1) is n².", 4, "4-marker", "A"),
+    q("8", "A curve has parametric equations x = 3cos(t), y = 2sin(t). (a) Find dy/dx in terms of t. (b) Find the equation of the tangent at t = π/4. (c) Show the curve is an ellipse.", 12, "12-marker", "A"),
+    q("9", "Using the trapezium rule with 5 strips, estimate ∫₀¹ e^(x²) dx. Give your answer to 4 decimal places. State whether the trapezium rule gives an overestimate or underestimate.", 8, "8-marker", "A"),
+    q("10", "Solve the differential equation dy/dx = 2xy, given that y = 3 when x = 0.", 6, "6-marker", "A"),
+    q("11", "A particle moves along a straight line. At time t, the displacement from O is s = t³ - 6t² + 9t. (a) Find the velocity and acceleration at time t. (b) Find when the particle is at rest. (c) Find the total distance travelled in the first 4 seconds.", 12, "12-marker", "A"),
+  ],
+};
+
+const EDEXCEL_MATHS_P1_2022: PaperDef = {
+  exam_board: "Edexcel", subject: "Mathematics", paper_number: 1, year: 2022, total_marks: 100, time_limit_minutes: 120,
+  paper_name: "Edexcel Mathematics Paper 1: Pure Mathematics 1 (June 2022)",
+  product_slug: "edexcel-mathematics",
+  sections: [{ id: "A", name: "Full Paper", questions: ["1","2","3","4","5","6","7","8","9","10"] }],
+  questions: [
+    q("1", "Factorise completely: 2x³ - 8x.", 2, "2-marker", "A"),
+    q("2", "Find the set of values of x for which 3x - 7 > 2x + 1 AND x² - 4x - 5 < 0.", 6, "6-marker", "A"),
+    q("3", "A sequence is defined by u₁ = 3, uₙ₊₁ = 2uₙ - 1. Find u₂, u₃, and u₄.", 4, "4-marker", "A"),
+    q("4", "The line y = 2x + k is tangent to the curve y = x² + 3. Find the value(s) of k.", 5, "5-marker", "A"),
+    q("5", "Show that (sinθ + cosθ)² ≡ 1 + 2sinθcosθ. Hence solve (sinθ + cosθ)² = 1.5 for 0 ≤ θ ≤ 2π.", 8, "8-marker", "A"),
+    q("6", "Find ∫(3x² + 2x⁻³) dx. Evaluate ∫₁⁴ (3x² + 2x⁻³) dx.", 6, "6-marker", "A"),
+    q("7", "The curve y = 4x - x² and the line y = 3 intersect at two points. Find the area enclosed between the curve and the line.", 10, "10-marker", "A"),
+    q("8", "The function f(x) = 2x³ - 3x² - 12x + 5 is defined for all real x. (a) Find f'(x). (b) Find the coordinates of the stationary points. (c) Determine the nature of each. (d) Sketch y = f(x).", 14, "14-marker", "A"),
+    q("9", "Given that y = x²eˣ, (a) find dy/dx, (b) find d²y/dx², (c) show that d²y/dx² = (x² + 4x + 2)eˣ.", 10, "10-marker", "A"),
+    q("10", "Prove by induction that Σᵣ₌₁ⁿ r(r+1) = n(n+1)(n+2)/3 for all positive integers n.", 8, "8-marker", "A"),
+  ],
+};
+
+// CIE Economics 2022
+const CIE_ECON_P1_2022: PaperDef = {
+  exam_board: "CIE", subject: "Economics", paper_number: 1, year: 2022, total_marks: 30, time_limit_minutes: 60,
+  paper_name: "CIE Economics Paper 1: Multiple Choice (AS) (June 2022)",
+  product_slug: "cie-economics",
+  sections: [{ id: "A", name: "Multiple Choice (30 questions)", questions: Array.from({length:30},(_,i)=>`mc${i+1}`) }],
+  questions: [
+    mcq("mc1", "The opportunity cost of producing more military equipment is:", "A", ["The money spent on defence", "The civilian goods that could have been produced instead", "The profit from arms exports", "The cost of raw materials"]),
+    mcq("mc2", "A movement along a demand curve is caused by:", "A", ["A change in income", "A change in the price of the good", "A change in tastes", "A change in population"]),
+    mcq("mc3", "When PED is greater than 1, demand is:", "A", ["Price inelastic", "Price elastic", "Unit elastic", "Perfectly inelastic"]),
+    mcq("mc4", "A subsidy shifts the:", "A", ["Demand curve left", "Supply curve right", "Supply curve left", "Demand curve right"]),
+    mcq("mc5", "Consumer surplus is largest when:", "A", ["Price is high", "Price equals the maximum a consumer would pay", "Price is well below the maximum willingness to pay", "Demand is perfectly inelastic"]),
+    mcq("mc6", "A demerit good is:", "A", ["Non-rival", "Over-consumed in a free market", "Under-consumed in a free market", "A public good"]),
+    mcq("mc7", "The condition for profit maximisation is:", "A", ["TR = TC", "MR = MC", "AR = AC", "P = MC"]),
+    mcq("mc8", "In perfect competition in the long run, firms earn:", "A", ["Supernormal profit", "Normal profit", "Losses", "Zero revenue"]),
+    mcq("mc9", "A natural monopoly exists when:", "A", ["There is one firm in the market", "LRAC falls continuously over the relevant range of output", "The firm owns all the resources", "The government grants a licence"]),
+    mcq("mc10", "Price discrimination requires:", "A", ["Perfect competition", "Different elasticities in separate markets that can be kept apart", "Identical consumers", "Government regulation"]),
+    mcq("mc11", "GDP measures:", "A", ["Total wealth in the economy", "The total value of output produced in a year", "Government spending only", "Only the production of goods"]),
+    mcq("mc12", "An injection into the circular flow is:", "A", ["Savings", "Taxation", "Investment", "Imports"]),
+    mcq("mc13", "If the MPC is 0.8, the multiplier is:", "A", ["0.8", "4", "5", "1.25"]),
+    mcq("mc14", "Cost-push inflation is caused by:", "A", ["Excess demand", "Rising production costs", "Low unemployment", "High consumer confidence"]),
+    mcq("mc15", "Cyclical unemployment is caused by:", "A", ["Structural change", "A fall in aggregate demand", "Seasonal factors", "Workers between jobs"]),
+    mcq("mc16", "A current account deficit means:", "A", ["More capital inflows than outflows", "More spent on imports of goods and services than earned from exports", "Government spending exceeds tax revenue", "The exchange rate is falling"]),
+    mcq("mc17", "Comparative advantage is based on:", "A", ["Absolute cost differences", "Differences in opportunity cost", "Exchange rates", "Labour productivity"]),
+    mcq("mc18", "A tariff is:", "A", ["A limit on the quantity of imports", "A tax on imports", "A subsidy on exports", "A quota on exports"]),
+    mcq("mc19", "An expansionary monetary policy involves:", "A", ["Raising taxes", "Cutting interest rates", "Reducing government spending", "Increasing the exchange rate"]),
+    mcq("mc20", "The Human Development Index includes:", "A", ["GDP only", "Life expectancy, education, and income per capita", "Trade balance and inflation", "Only economic indicators"]),
+    mcq("mc21", "A supply-side policy is:", "A", ["Cutting interest rates", "Increasing income tax", "Deregulation of industries", "Increasing government borrowing"]),
+    mcq("mc22", "The law of diminishing marginal returns states that:", "A", ["Total output always falls", "Adding more variable factor to a fixed factor eventually reduces marginal output", "Average costs always rise", "Profits always fall"]),
+    mcq("mc23", "Positive externalities lead to:", "A", ["Overproduction", "Underproduction", "Efficient allocation", "No market failure"]),
+    mcq("mc24", "A regressive tax takes a:", "A", ["Higher proportion from the rich", "Same proportion from everyone", "Higher proportion from the poor", "Same amount from everyone"]),
+    mcq("mc25", "The terms of trade are calculated as:", "A", ["Export volume ÷ import volume", "Export price index ÷ import price index × 100", "Total trade ÷ GDP", "Exchange rate × trade balance"]),
+    mcq("mc26", "Fiscal policy involves:", "A", ["Interest rate changes", "Money supply changes", "Government spending and taxation changes", "Exchange rate intervention"]),
+    mcq("mc27", "The infant industry argument justifies:", "A", ["Free trade", "Permanent protection", "Temporary protection for new industries", "Banning imports"]),
+    mcq("mc28", "A floating exchange rate is determined by:", "A", ["Government decree", "Market forces of supply and demand", "International agreement", "Central bank intervention only"]),
+    mcq("mc29", "Economic development differs from economic growth because it includes:", "A", ["Only GDP increases", "Improvements in living standards, health, and education", "Only industrial output", "Military spending"]),
+    mcq("mc30", "Market failure occurs when:", "A", ["Firms make losses", "Resources are not allocated efficiently", "The government intervenes", "There is perfect competition"]),
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
 // EXPORT ALL PAPERS
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const ALL_MOCK_PAPERS: PaperDef[] = [
-  // Edexcel Economics (6 papers: P1+P2+P3 × 2 years)
+  // Edexcel Economics (7 papers)
   EDEXCEL_ECON_P1_2023, EDEXCEL_ECON_P2_2023, EDEXCEL_ECON_P3_2023,
-  EDEXCEL_ECON_P1_2022, EDEXCEL_ECON_P2_2022,
-  // AQA Economics (3 papers including MCQ paper)
+  EDEXCEL_ECON_P1_2022, EDEXCEL_ECON_P2_2022, EDEXCEL_ECON_P3_2022,
+  // AQA Economics (6 papers)
   AQA_ECON_P1_2023, AQA_ECON_P2_2023, AQA_ECON_P3_2023,
-  // CIE Economics (MCQ paper + written paper)
-  CIE_ECON_P1_2023, CIE_ECON_P4_2023,
-  // OCR Computer Science (2 papers)
-  OCR_CS_P1_2023, OCR_CS_P2_2023,
-  // OCR Physics (2 papers with MCQ sections)
-  OCR_PHYSICS_P1_2023, OCR_PHYSICS_P2_2023,
-  // AQA Chemistry (Paper 1 + Paper 3 with MCQs)
-  AQA_CHEM_P1_2023, AQA_CHEM_P3_2023,
-  // AQA Psychology (Paper 1 with embedded MCQs)
-  AQA_PSYCH_P1_2023,
-  // Edexcel Mathematics (Paper 1 Pure + Paper 3 Stats/Mechanics)
-  EDEXCEL_MATHS_P1_2023, EDEXCEL_MATHS_P3_2023,
+  AQA_ECON_P1_2022, AQA_ECON_P2_2022, AQA_ECON_P3_2022,
+  // CIE Economics (3 papers)
+  CIE_ECON_P1_2023, CIE_ECON_P4_2023, CIE_ECON_P1_2022,
+  // OCR Computer Science (3 papers)
+  OCR_CS_P1_2023, OCR_CS_P2_2023, OCR_CS_P1_2022,
+  // OCR Physics (3 papers)
+  OCR_PHYSICS_P1_2023, OCR_PHYSICS_P2_2023, OCR_PHYSICS_P1_2022,
+  // AQA Chemistry (4 papers)
+  AQA_CHEM_P1_2023, AQA_CHEM_P2_2023, AQA_CHEM_P3_2023, AQA_CHEM_P1_2022,
+  // AQA Psychology (3 papers)
+  AQA_PSYCH_P1_2023, AQA_PSYCH_P2_2023, AQA_PSYCH_P1_2022,
+  // Edexcel Mathematics (4 papers)
+  EDEXCEL_MATHS_P1_2023, EDEXCEL_MATHS_P2_2023, EDEXCEL_MATHS_P3_2023,
+  EDEXCEL_MATHS_P1_2022,
 ];
