@@ -9,11 +9,26 @@ const corsHeaders = {
 // Maximum characters of training data context to include in the prompt
 const MAX_CONTEXT_CHARS = 25000;
 
-// Model tiers — Pro for quality student responses, lite for utility tasks
+// Model tiers — Flash for fast chat, Pro for essay marking, lite for utility
 const MODELS = {
-  main: "google/gemini-2.0-pro-exp-02-05",  // Student-facing chat responses + diagram matching
-  utility: "google/gemini-2.0-flash-lite",   // Search query generation only
+  fast: "google/gemini-2.5-flash",           // Quick questions, explanations, general chat
+  marking: "google/gemini-2.0-pro-exp-02-05", // Essay marking, structured feedback, long answers
+  utility: "google/gemini-2.0-flash-lite",    // Search query generation only
 };
+
+// Detect if the message is an essay marking request
+function isMarkingRequest(message: string, imageData: any): boolean {
+  const lower = message.toLowerCase();
+  const markingKeywords = ["mark my", "mark this", "grade my", "grade this", "marks out of", "marker", "/25", "/15", "/12", "/10", "/9", "/8", "/5", "/4"];
+  const hasImage = !!imageData;
+  const hasMarkingKeyword = markingKeywords.some(kw => lower.includes(kw));
+  // Image uploads are almost always essay marking
+  if (hasImage) return true;
+  if (hasMarkingKeyword) return true;
+  // Short follow-ups to marking (e.g. "25 marks", "out of 15") after an image was in history
+  if (/^\d+\s*mark/.test(lower) || /^out of \d+/.test(lower)) return true;
+  return false;
+}
 
 // Hardcoded economics diagrams fallback (used when Build portal has no diagrams)
 const ECONOMICS_DIAGRAMS_FALLBACK = [
@@ -1162,9 +1177,11 @@ CRITICAL RULES:
       userMessageContent = message;
     }
 
-    // Step 3: Call AI gateway for response (streaming)
+    // Step 3: Select model — Pro for marking, Flash for everything else
     const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const aiModel = MODELS.main;
+    const useProModel = isMarkingRequest(message, image_data);
+    const aiModel = useProModel ? MODELS.marking : MODELS.fast;
+    console.log(`Model selected: ${aiModel} (marking: ${useProModel})`);
 
     const response = await fetch(aiUrl, {
       method: "POST",
