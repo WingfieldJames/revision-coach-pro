@@ -1018,6 +1018,7 @@ serve(async (req) => {
       console.log(`Usage check for ${user_id}: ${usageResult.count}/${usageResult.limit} (allowed: ${usageResult.allowed})`);
       
       if (!usageResult.allowed) {
+        console.warn(`[PAYWALL] Limit exceeded for user ${user_id}`, { productId: usageProductId, count: usageResult.count, limit: usageResult.limit, tier });
         const limitMessage = `🔒 **You've used all ${usageResult.limit} free prompts for today!**
 
 To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:

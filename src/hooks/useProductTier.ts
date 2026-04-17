@@ -15,13 +15,17 @@ export function useProductTier(productId: string) {
         return;
       }
       try {
-        const { data: sub } = await supabase
+        // Use limit(1) ordered by most-recent to tolerate duplicate subscription rows
+        const { data: subs } = await supabase
           .from('user_subscriptions')
           .select('tier, subscription_end, payment_type')
           .eq('user_id', user.id)
           .eq('product_id', productId)
           .eq('active', true)
-          .maybeSingle();
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        const sub = subs?.[0];
 
         if (sub?.tier === 'deluxe') {
           if (!sub.subscription_end) {

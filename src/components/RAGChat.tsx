@@ -191,7 +191,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [pendingImage, setPendingImage] = useState<{ dataUrl: string; file: File } | null>(null);
   const [diagramFullscreen, setDiagramFullscreen] = useState(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
-  const { tier: effectiveTier } = useProductTier(productId);
+  const { tier: effectiveTier, isLoading: tierLoading } = useProductTier(productId);
   const [limitReached, setLimitReached] = useState(false);
   const [profilePopupOpen, setProfilePopupOpen] = useState(false);
   const [challengePopupOpen, setChallengePopupOpen] = useState(false);
@@ -361,9 +361,19 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     return null;
   }, [user, createConversation, saveMessage, chatHistoryCtx]);
   // Check if free-tier user has already exhausted daily prompts (persists across refresh)
+  // CRITICAL: must wait for tier to finish loading — otherwise paying users get locked out
+  // while useProductTier is still resolving (it defaults to 'free' during load)
   useEffect(() => {
+    // If user is deluxe, ALWAYS clear the paywall (they should never be limited)
+    if (effectiveTier === 'deluxe') {
+      setLimitReached(false);
+      return;
+    }
+    // Don't run usage check until tier has finished loading
+    if (tierLoading) return;
+    if (!user) return;
+
     const checkUsage = async () => {
-      if (!user || effectiveTier === 'deluxe') return;
       try {
         const today = new Date().toISOString().split('T')[0];
         const { data } = await supabase
@@ -374,6 +384,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           .eq('usage_date', today)
           .maybeSingle();
         if (data && data.prompt_count >= 3) {
+          console.log('[PAYWALL] Triggered on mount', { userId: user.id, productId: promptProductId || productId, count: data.prompt_count, tier: effectiveTier });
           setLimitReached(true);
         }
       } catch (err) {
@@ -381,7 +392,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       }
     };
     checkUsage();
-  }, [user, productId, promptProductId, effectiveTier]);
+  }, [user, productId, promptProductId, effectiveTier, tierLoading]);
 
   // Fetch user preferences for this product
   useEffect(() => {
