@@ -9,9 +9,9 @@ const corsHeaders = {
 // Maximum characters of training data context to include in the prompt
 const MAX_CONTEXT_CHARS = 25000;
 
-// Model tiers — use cheaper models for simple utility tasks
+// Model tiers — Pro for quality student responses, lite for utility tasks
 const MODELS = {
-  main: "google/gemini-2.5-flash",          // Student-facing chat responses + diagram matching
+  main: "google/gemini-2.0-pro-exp-02-05",  // Student-facing chat responses + diagram matching
   utility: "google/gemini-2.0-flash-lite",   // Search query generation only
 };
 
@@ -1033,112 +1033,79 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
       }
     }
 
-    // Step 1: Generate AI search queries (fast, ~0.5s)
-    const searchQueries = await generateSearchQueries(lovableApiKey, message, history);
+    // Step 1: Run search query generation AND parallel DB fetches simultaneously
+    const [searchQueries, basePrompt, brainResult, feedbackResult, seasonalResult] = await Promise.all([
+      generateSearchQueries(lovableApiKey, message, history),
+      fetchSystemPrompt(supabaseAdmin, product_id),
+      // Brain profile (deluxe only)
+      (tier === 'deluxe' && user_id)
+        ? supabaseAdmin.from('user_brain_profiles').select('profile_summary').eq('user_id', user_id).maybeSingle().catch(() => ({ data: null }))
+        : Promise.resolve({ data: null }),
+      // Feedback guidelines
+      supabaseAdmin.from('prompt_improvements').select('guidelines').eq('product_id', product_id).maybeSingle().catch(() => ({ data: null })),
+      // Seasonal guidelines
+      supabaseAdmin.from('seasonal_prompts').select('guidelines').eq('product_id', product_id).maybeSingle().catch(() => ({ data: null })),
+    ]);
 
-    // Fetch the deluxe system prompt from database (unified for all users)
-    const basePrompt = await fetchSystemPrompt(supabaseAdmin, product_id);
-    
-    // Check if user has A* Brain enabled and fetch their brain profile
+    // Process parallel results
     let brainContext = '';
-    if (tier === 'deluxe' && user_id) {
-      try {
-        const { data: brainProfile } = await supabaseAdmin
-          .from('user_brain_profiles')
-          .select('profile_summary')
-          .eq('user_id', user_id)
-          .maybeSingle();
-        
-        if (brainProfile?.profile_summary) {
-          brainContext = `\n--- A* BRAIN: STUDENT MEMORY ---
-Here is context about this student from their previous sessions: ${brainProfile.profile_summary}
+    if (brainResult?.data?.profile_summary) {
+      brainContext = `\n--- A* BRAIN: STUDENT MEMORY ---
+Here is context about this student from their previous sessions: ${brainResult.data.profile_summary}
 
 Use this to personalise your responses — reference their weak areas, their exam board, and their progress where relevant. Do not explicitly tell the user you are reading their profile, just use it naturally to give more tailored responses.
 ---\n`;
-          console.log(`Brain profile injected for user ${user_id} (${brainProfile.profile_summary.length} chars)`);
-        }
-      } catch (err) {
-        console.error('Error fetching brain profile:', err);
-      }
-    }
-    
-    // Fetch feedback-driven prompt improvements
-    let feedbackGuidelines = '';
-    try {
-      const { data: improvements } = await supabaseAdmin
-        .from('prompt_improvements')
-        .select('guidelines')
-        .eq('product_id', product_id)
-        .maybeSingle();
-      if (improvements?.guidelines) {
-        feedbackGuidelines = `\n--- FEEDBACK-DRIVEN IMPROVEMENTS ---\n${improvements.guidelines}\n---\n`;
-        console.log(`Injected feedback guidelines for product ${product_id}`);
-      }
-    } catch (err) {
-      console.error('Error fetching prompt improvements:', err);
+      console.log(`Brain profile injected for user ${user_id} (${brainResult.data.profile_summary.length} chars)`);
     }
 
-    // Fetch seasonal prompt adjustments
+    let feedbackGuidelines = '';
+    if (feedbackResult?.data?.guidelines) {
+      feedbackGuidelines = `\n--- FEEDBACK-DRIVEN IMPROVEMENTS ---\n${feedbackResult.data.guidelines}\n---\n`;
+      console.log(`Injected feedback guidelines for product ${product_id}`);
+    }
+
     let seasonalGuidelines = '';
-    try {
-      const { data: seasonal } = await supabaseAdmin
-        .from('seasonal_prompts')
-        .select('guidelines')
-        .eq('product_id', product_id)
-        .maybeSingle();
-      if (seasonal?.guidelines) {
-        seasonalGuidelines = `\n${seasonal.guidelines}\n`;
-        console.log(`Injected seasonal guidelines for product ${product_id}`);
-      }
-    } catch (err) {
-      console.error('Error fetching seasonal prompts:', err);
+    if (seasonalResult?.data?.guidelines) {
+      seasonalGuidelines = `\n${seasonalResult.data.guidelines}\n`;
+      console.log(`Injected seasonal guidelines for product ${product_id}`);
     }
 
     // Add user personalization context
     const personalizedPrompt = buildPersonalizedPrompt(brainContext + feedbackGuidelines + seasonalGuidelines + basePrompt, user_preferences, message, product_id);
     
-    // Step 2: Fetch relevant training data using AI queries
-    const { context: relevantContext, sourcesSearched } = await fetchRelevantContext(
-      supabaseAdmin, 
-      product_id, 
-      message,
-      undefined,
-      user_preferences,
-      searchQueries,
+    // Step 2: Fetch context AND diagram in parallel (saves ~500ms)
+    const contextPromise = fetchRelevantContext(
+      supabaseAdmin, product_id, message, undefined, user_preferences, searchQueries,
     );
-    
-    // Fetch custom diagrams from Build portal
-    let customDiagrams: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }> = [];
-    try {
-      const { data: trainerProject } = await supabaseAdmin
-        .from('trainer_projects')
-        .select('diagram_library')
-        .eq('product_id', product_id)
-        .eq('status', 'deployed')
-        .maybeSingle();
-      
-      if (trainerProject?.diagram_library && Array.isArray(trainerProject.diagram_library)) {
-        customDiagrams = trainerProject.diagram_library as typeof customDiagrams;
-        console.log(`Loaded ${customDiagrams.length} custom diagrams from Build portal`);
-      }
-    } catch (err) {
-      console.error('Error fetching custom diagrams:', err);
-    }
-    
-    // Merge Build portal diagrams with hardcoded fallback (Build portal takes priority for duplicate IDs)
-    if (diagram_subject === 'economics' || enable_diagrams) {
-      const customIds = new Set(customDiagrams.map(d => d.id));
-      const fallbackDiagrams = ECONOMICS_DIAGRAMS_FALLBACK.filter(d => !customIds.has(d.id));
-      customDiagrams = [...customDiagrams, ...fallbackDiagrams];
-      console.log(`Merged diagrams: ${customIds.size} from Build portal + ${fallbackDiagrams.length} from fallback = ${customDiagrams.length} total`);
-    }
 
-    // Find relevant diagram
-    let relevantDiagram: { id: string; title: string; imagePath: string } | null = null;
-    relevantDiagram = await findRelevantDiagram(message, customDiagrams, lovableApiKey);
-    if (relevantDiagram) {
-      console.log(`Found relevant diagram: ${relevantDiagram.title}`);
-    }
+    const diagramPromise = (async () => {
+      let customDiagrams: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }> = [];
+      try {
+        const { data: trainerProject } = await supabaseAdmin
+          .from('trainer_projects')
+          .select('diagram_library')
+          .eq('product_id', product_id)
+          .eq('status', 'deployed')
+          .maybeSingle();
+        if (trainerProject?.diagram_library && Array.isArray(trainerProject.diagram_library)) {
+          customDiagrams = trainerProject.diagram_library as typeof customDiagrams;
+        }
+      } catch (err) {
+        console.error('Error fetching custom diagrams:', err);
+      }
+      if (diagram_subject === 'economics' || enable_diagrams) {
+        const customIds = new Set(customDiagrams.map(d => d.id));
+        const fallbackDiagrams = ECONOMICS_DIAGRAMS_FALLBACK.filter(d => !customIds.has(d.id));
+        customDiagrams = [...customDiagrams, ...fallbackDiagrams];
+      }
+      const diagram = await findRelevantDiagram(message, customDiagrams, lovableApiKey);
+      if (diagram) console.log(`Found relevant diagram: ${diagram.title}`);
+      return diagram;
+    })();
+
+    const [{ context: relevantContext, sourcesSearched }, relevantDiagram] = await Promise.all([
+      contextPromise, diagramPromise,
+    ]);
     
     // Build final system prompt with context injection
     let finalSystemPrompt = personalizedPrompt;
@@ -1213,6 +1180,8 @@ CRITICAL RULES:
           { role: "user", content: userMessageContent },
         ],
         stream: true,
+        max_tokens: 2000,
+        temperature: 0.7,
       }),
     });
 

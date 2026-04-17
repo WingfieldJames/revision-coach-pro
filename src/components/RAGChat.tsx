@@ -95,7 +95,7 @@ interface RAGChatProps {
   productSlug?: string;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
-const WORD_DELAY_MS = 30;
+const WORD_DELAY_MS = 12;
 
 // Helper to format source names nicely
 const formatSourceName = (name: string): string => {
