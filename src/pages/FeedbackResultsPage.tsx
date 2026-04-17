@@ -47,7 +47,8 @@ interface FeedbackData {
 export const FeedbackResultsPage = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [authorized, setAuthorized] = useState(false);
+  const [authStatus, setAuthStatus] = useState<'checking' | 'authorized' | 'no-role' | 'error'>('checking');
+  const [authError, setAuthError] = useState<string | null>(null);
   const [data, setData] = useState<FeedbackData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,16 +60,60 @@ export const FeedbackResultsPage = () => {
     if (authLoading) return;
     if (!user) { navigate('/login'); return; }
     const checkRole = async () => {
-      const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
-      const isAdmin = roles?.some((r: any) => r.role === 'admin' || r.role === 'trainer');
-      if (!isAdmin) { navigate('/'); return; }
-      setAuthorized(true);
+      try {
+        const { data: roles, error: rolesErr } = await supabase
+          .from('user_roles').select('role').eq('user_id', user.id);
+        if (rolesErr) {
+          console.error('[FEEDBACK] Role check failed:', rolesErr);
+          setAuthError(rolesErr.message);
+          setAuthStatus('error');
+          return;
+        }
+        const isAdmin = roles?.some((r: any) => r.role === 'admin' || r.role === 'trainer');
+        console.log('[FEEDBACK] Roles for user', user.id, ':', roles, 'isAdmin:', isAdmin);
+        if (!isAdmin) { setAuthStatus('no-role'); return; }
+        setAuthStatus('authorized');
+      } catch (err: any) {
+        console.error('[FEEDBACK] Auth check exception:', err);
+        setAuthError(err.message);
+        setAuthStatus('error');
+      }
     };
     checkRole();
   }, [user, authLoading, navigate]);
 
-  if (authLoading || !authorized) {
+  if (authLoading || authStatus === 'checking') {
     return <div className="min-h-screen bg-background flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  }
+
+  if (authStatus === 'no-role') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-xl font-bold mb-2">Admin access required</h1>
+          <p className="text-sm text-muted-foreground mb-4">
+            Your account doesn't have an admin or trainer role. Run the SQL below in Supabase:
+          </p>
+          <pre className="bg-muted rounded-lg p-3 text-xs text-left overflow-x-auto mb-4">
+{`INSERT INTO public.user_roles (user_id, role)
+VALUES ('${user?.id}', 'admin');`}
+          </pre>
+          <button onClick={() => navigate('/')} className="text-sm underline">Back to home</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (authStatus === 'error') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-xl font-bold mb-2 text-destructive">Auth check failed</h1>
+          <p className="text-sm text-muted-foreground mb-4">{authError}</p>
+          <button onClick={() => navigate('/')} className="text-sm underline">Back to home</button>
+        </div>
+      </div>
+    );
   }
 
   useEffect(() => {
