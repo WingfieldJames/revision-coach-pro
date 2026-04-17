@@ -199,12 +199,13 @@ serve(async (req) => {
 
     // Save staged specification data if provided
     let specChunksCreated = 0;
+    let specChunksFailed = 0;
     if (staged_specifications && Array.isArray(staged_specifications) && staged_specifications.length > 0) {
       const normalizedSpecPoints = staged_specifications
         .map((specPoint: unknown) => sanitizeSpecPoint(specPoint))
         .filter((specPoint): specPoint is string => !!specPoint);
 
-      console.log(`Saving ${normalizedSpecPoints.length} staged specification points...`);
+      console.log(`Saving ${normalizedSpecPoints.length} staged specification points (batched)...`);
 
       // Delete any existing spec chunks for this product first
       await supabase
@@ -213,22 +214,47 @@ serve(async (req) => {
         .eq("product_id", productId)
         .contains("metadata", { content_type: "specification" });
 
-      for (const specPoint of normalizedSpecPoints) {
-        const embedding = await generateEmbedding(lovableApiKey, specPoint);
-        const { error: insertErr } = await supabase.from("document_chunks").insert({
-          product_id: productId,
-          content: specPoint,
-          embedding,
-          metadata: {
-            content_type: "specification",
-            type: "specification",
-          },
+      // Generate embeddings in parallel batches of 10 to stay under the 150s function timeout
+      // For a 300-point spec: 30 batches × ~1-2s each = ~30-60s total instead of 300 sequential waits
+      const BATCH_SIZE = 10;
+      const allRows: Array<{ product_id: string; content: string; embedding: number[] | null; metadata: any }> = [];
+
+      for (let i = 0; i < normalizedSpecPoints.length; i += BATCH_SIZE) {
+        const batch = normalizedSpecPoints.slice(i, i + BATCH_SIZE);
+        const embeddings = await Promise.all(
+          batch.map((specPoint) =>
+            generateEmbedding(lovableApiKey, specPoint).catch((err) => {
+              console.error(`Embedding failed for spec point (continuing with null): ${err?.message}`);
+              return null;
+            })
+          )
+        );
+        batch.forEach((specPoint, idx) => {
+          allRows.push({
+            product_id: productId,
+            content: specPoint,
+            embedding: embeddings[idx],
+            metadata: { content_type: "specification", type: "specification" },
+          });
         });
-        if (!insertErr) specChunksCreated++;
-        else console.error("Spec chunk insert error:", insertErr);
       }
 
-      console.log(`Saved ${specChunksCreated} specification chunks`);
+      // Bulk insert all rows in chunks of 100 (Supabase payload limit safety)
+      const INSERT_BATCH_SIZE = 100;
+      for (let i = 0; i < allRows.length; i += INSERT_BATCH_SIZE) {
+        const rows = allRows.slice(i, i + INSERT_BATCH_SIZE);
+        const { error: insertErr, count } = await supabase
+          .from("document_chunks")
+          .insert(rows, { count: "exact" });
+        if (insertErr) {
+          console.error(`Bulk spec insert failed (rows ${i}–${i + rows.length}):`, insertErr);
+          specChunksFailed += rows.length;
+        } else {
+          specChunksCreated += count ?? rows.length;
+        }
+      }
+
+      console.log(`Spec chunks: ${specChunksCreated} saved, ${specChunksFailed} failed (of ${normalizedSpecPoints.length} total)`);
     }
 
     // Save system prompt as training data chunk
@@ -279,25 +305,46 @@ serve(async (req) => {
         .eq("product_id", productId)
         .contains("metadata", { content_type: "custom_section" });
 
-      for (const section of staged_custom_sections) {
-        const sectionName = section.name || "Custom Section";
-        const sectionContent = section.content || "";
-        if (sectionContent.trim().length < 10) continue;
+      // Build rows with embeddings in parallel batches of 10
+      const validSections = staged_custom_sections.filter(
+        (s: any) => (s.content || "").trim().length >= 10
+      );
+      const BATCH_SIZE = 10;
+      const customRows: Array<any> = [];
 
-        const chunkContent = `[${sectionName}]\n${sectionContent}`;
-        const embedding = await generateEmbedding(lovableApiKey, chunkContent);
-        const { error: insertErr } = await supabase.from("document_chunks").insert({
-          product_id: productId,
-          content: chunkContent,
-          embedding,
-          metadata: {
-            content_type: "custom_section",
-            type: "custom_section",
-            section_name: sectionName,
-          },
+      for (let i = 0; i < validSections.length; i += BATCH_SIZE) {
+        const batch = validSections.slice(i, i + BATCH_SIZE);
+        const embeddings = await Promise.all(
+          batch.map((section: any) => {
+            const content = `[${section.name || "Custom Section"}]\n${section.content}`;
+            return generateEmbedding(lovableApiKey, content).catch(() => null);
+          })
+        );
+        batch.forEach((section: any, idx: number) => {
+          const sectionName = section.name || "Custom Section";
+          const chunkContent = `[${sectionName}]\n${section.content}`;
+          customRows.push({
+            product_id: productId,
+            content: chunkContent,
+            embedding: embeddings[idx],
+            metadata: {
+              content_type: "custom_section",
+              type: "custom_section",
+              section_name: sectionName,
+            },
+          });
         });
-        if (!insertErr) customChunksCreated++;
-        else console.error("Custom section chunk insert error:", insertErr);
+      }
+
+      if (customRows.length > 0) {
+        const { error: insertErr, count } = await supabase
+          .from("document_chunks")
+          .insert(customRows, { count: "exact" });
+        if (insertErr) {
+          console.error("Bulk custom section insert failed:", insertErr);
+        } else {
+          customChunksCreated = count ?? customRows.length;
+        }
       }
 
       console.log(`Saved ${customChunksCreated} custom section chunks`);
@@ -319,18 +366,29 @@ serve(async (req) => {
 
     console.log(`Deployed project ${project_id} as product ${productId} with ${count} chunks (${specChunksCreated} spec, ${customChunksCreated} custom)`);
 
+    const isPartial = specChunksFailed > 0;
     return new Response(JSON.stringify({
       success: true,
+      partial: isPartial,
       product_id: productId,
       chunks_count: count,
       spec_chunks_created: specChunksCreated,
-      message: `${project.exam_board} ${project.subject} deployed successfully with ${count} chunks.`,
+      spec_chunks_failed: specChunksFailed,
+      message: isPartial
+        ? `${project.exam_board} ${project.subject} deployed with ${specChunksFailed} spec chunks failed (${specChunksCreated} saved). Check function logs.`
+        : `${project.exam_board} ${project.subject} deployed successfully with ${count} chunks.`,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Deploy error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errStack = error instanceof Error ? error.stack : undefined;
+    console.error("[DEPLOY-SUBJECT] Deploy error:", errMsg, errStack);
+    return new Response(JSON.stringify({
+      error: errMsg,
+      error_type: error instanceof Error ? error.constructor.name : "Unknown",
+      details: "Check Supabase function logs for full stack trace (filter by [DEPLOY-SUBJECT]).",
+    }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
