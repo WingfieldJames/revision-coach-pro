@@ -35,11 +35,28 @@ interface MarkResult {
   level: string;
 }
 
+async function logUsage(
+  adminClient: ReturnType<typeof createClient>,
+  userId: string,
+  inputTok: number,
+  outputTok: number,
+) {
+  try {
+    const cost = (inputTok / 1_000_000) * 0.30 + (outputTok / 1_000_000) * 2.50;
+    await adminClient.from("api_usage_logs").insert({
+      user_id: userId, feature: "mock_exam", model: MODEL,
+      input_tokens: inputTok, output_tokens: outputTok, estimated_cost_usd: cost,
+    });
+  } catch (e) { console.error("usage log failed:", e); }
+}
+
 async function markQuestion(
   question: QuestionToMark,
   systemPrompt: string,
   examBoard: string,
-  subject: string
+  subject: string,
+  adminClient: ReturnType<typeof createClient>,
+  userId: string,
 ): Promise<MarkResult> {
   const markingPrompt = `You are marking a student's exam answer. Be strict and fair — use the exact marking criteria from your training.
 
@@ -96,6 +113,7 @@ YOU MUST respond in EXACTLY this JSON format (no markdown, no extra text):
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
+    await logUsage(adminClient, userId, data.usage?.prompt_tokens || 0, data.usage?.completion_tokens || 0);
 
     // Parse JSON from AI response — handle markdown code blocks
     let cleanContent = content.trim();
@@ -225,7 +243,7 @@ serve(async (req) => {
     for (let i = 0; i < questionsToMark.length; i += BATCH_SIZE) {
       const batch = questionsToMark.slice(i, i + BATCH_SIZE);
       const batchResults = await Promise.all(
-        batch.map((q) => markQuestion(q, systemPrompt, paper.exam_board, paper.subject))
+        batch.map((q) => markQuestion(q, systemPrompt, paper.exam_board, paper.subject, supabaseAdmin, userId))
       );
       allResults.push(...batchResults);
       logStep(`Marked batch ${Math.floor(i / BATCH_SIZE) + 1}`, {

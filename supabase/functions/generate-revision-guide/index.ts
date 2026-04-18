@@ -392,6 +392,18 @@ The main objectives include protecting consumers, promoting efficiency, and prev
     const aiResult = await response.json();
     const content = aiResult.choices?.[0]?.message?.content || "";
 
+    // Log AI usage
+    try {
+      const inputTok = aiResult.usage?.prompt_tokens || 0;
+      const outputTok = aiResult.usage?.completion_tokens || 0;
+      const cost = (inputTok / 1_000_000) * 0.30 + (outputTok / 1_000_000) * 2.50;
+      await supabaseAdmin.from("api_usage_logs").insert({
+        user_id: user_id ?? null, product_id: product_id ?? null,
+        feature: "revision_guide", model: aiModel,
+        input_tokens: inputTok, output_tokens: outputTok, estimated_cost_usd: cost,
+      });
+    } catch (logErr) { console.error("usage log failed:", logErr); }
+
     if (!content) {
       return new Response(
         JSON.stringify({ error: "AI returned empty content. Please try again." }),
