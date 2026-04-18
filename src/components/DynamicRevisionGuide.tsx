@@ -133,7 +133,8 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
                 .filter((w: string) => w.length > 3)
                 .slice(0, 20);
               return { id: c.id, code, name, content: c.content, keywords };
-            });
+            })
+            .filter((s: any) => s !== null);
           setSpecPoints(specs);
         }
 
