@@ -25,6 +25,20 @@ const STORAGE_PATHS: Record<string, string> = {
 
 const trainersData: Trainer[] = [
   {
+    id: 'zainab',
+    name: 'Zainab',
+    university: 'A-Level Politics Trainer',
+    stats: 'A-Level: A*A*A* · GCSE: Straight 9s',
+    image: null,
+  },
+  {
+    id: 'aadi',
+    name: 'Aadi',
+    university: 'OCR MEI Maths Trainer',
+    stats: 'A-Level: A*A*A* · GCSE: Straight 9s',
+    image: null,
+  },
+  {
     id: 'naman',
     name: 'Naman Tiwari',
     university: 'Imperial Offer Holder',
@@ -76,6 +90,13 @@ const trainersData: Trainer[] = [
     stats: 'A-Level: A*A*A*A* · GCSES: Straight 9s',
     image: null,
     storageKey: 'tudor',
+  },
+  {
+    id: 'fidel',
+    name: 'Fidel',
+    university: 'AQA Computer Science Trainer',
+    stats: 'A-Level: A*A*A* · GCSE: Straight 9s',
+    image: null,
   },
 ];
 
