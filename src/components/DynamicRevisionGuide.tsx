@@ -103,9 +103,29 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
               const specId = String(c.metadata?.spec_id || '');
               // Extract code and name from topic like "3.1.1 Atomic Structure" or "1.1.1 Economics as a social science: ..."
               const codeMatch = topic.match(/^([\d.]+)\s+(.+)/);
-              const code = codeMatch ? codeMatch[1] : specId || '';
+              let code = codeMatch ? codeMatch[1] : specId || '';
               // Name is JUST the topic text (no code prefix), with any accidental leading colon stripped
-              const rawName = codeMatch ? codeMatch[2] : (topic || c.content.slice(0, 80));
+              let rawName = codeMatch ? codeMatch[2] : (topic || '');
+
+              // Fallback: parse the bracket header from content when metadata.topic is missing
+              // e.g. "[Edexcel A-Level Mathematics Specification 9MA0 - 7.1: Differentiation]"
+              if (!rawName) {
+                const headerMatch = String(c.content || '').match(/^\[[^\]]*?-\s*([\d.]+)\s*:\s*([^\]]+?)\]/);
+                if (headerMatch) {
+                  if (!code) code = headerMatch[1].trim();
+                  rawName = headerMatch[2].trim();
+                } else {
+                  // Last resort: strip any leading bracket header before slicing
+                  const stripped = String(c.content || '').replace(/^\[[^\]]*\]\s*/, '').trim();
+                  rawName = stripped.slice(0, 80);
+                }
+              }
+
+              // Skip non-spec-point overview chunks (Qualification Overview, Aims, Assessment, Overarching Themes)
+              if (/Qualification Overview|Aims and Objectives|Assessment Information|Overarching Theme|Statistics Large Data Set/i.test(topic + ' ' + rawName)) {
+                return null;
+              }
+
               const name = rawName.replace(/^\s*:\s*/, '').trim();
               // Build keywords from content
               const keywords = (c.content || '').toLowerCase()
@@ -113,7 +133,8 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
                 .filter((w: string) => w.length > 3)
                 .slice(0, 20);
               return { id: c.id, code, name, content: c.content, keywords };
-            });
+            })
+            .filter((s: any) => s !== null);
           setSpecPoints(specs);
         }
 
