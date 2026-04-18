@@ -11,9 +11,9 @@ const MAX_CONTEXT_CHARS = 25000;
 
 // Model tiers — Flash for fast chat, Pro for essay marking, lite for utility
 const MODELS = {
-  fast: "google/gemini-2.5-flash",           // Quick questions, explanations, general chat
-  marking: "google/gemini-2.0-pro-exp-02-05", // Essay marking, structured feedback, long answers
-  utility: "google/gemini-2.0-flash-lite",    // Search query generation only
+  fast: "google/gemini-2.5-flash",   // Quick questions, explanations, general chat
+  marking: "google/gemini-2.5-pro",  // Essay marking, structured feedback, long answers
+  utility: "google/gemini-2.0-flash-lite", // Search query generation only
 };
 
 // Detect if the message is an essay marking request
@@ -1184,23 +1184,25 @@ CRITICAL RULES:
     const aiModel = useProModel ? MODELS.marking : MODELS.fast;
     console.log(`Model selected: ${aiModel} (marking: ${useProModel})`);
 
-    const response = await fetch(aiUrl, {
+    const buildAiBody = (model: string) => JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: finalSystemPrompt },
+        ...history.slice(-10),
+        { role: "user", content: userMessageContent },
+      ],
+      stream: true,
+      max_tokens: 2000,
+      temperature: 0.7,
+    });
+
+    let response = await fetch(aiUrl, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: aiModel,
-        messages: [
-          { role: "system", content: finalSystemPrompt },
-          ...history.slice(-10),  // Cap history to last 10 messages to reduce token usage
-          { role: "user", content: userMessageContent },
-        ],
-        stream: true,
-        max_tokens: 2000,
-        temperature: 0.7,
-      }),
+      body: buildAiBody(aiModel),
     });
 
     if (!response.ok) {
@@ -1217,12 +1219,29 @@ CRITICAL RULES:
         );
       }
       const errorText = await response.text();
-      console.error(`AI API error (${response.status}): ${errorText}`);
-      // Return user-friendly error instead of raw gateway error
-      return new Response(
-        JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error(`[RAG-CHAT] AI API error (${response.status}) with model ${aiModel}:`, errorText);
+      // Auto-fallback to Flash if Pro failed (handles model rejection, 400s, 503s, etc.)
+      if (useProModel && response.status !== 429 && response.status !== 402) {
+        console.warn(`[RAG-CHAT] Pro model failed, retrying with Flash fallback`);
+        response = await fetch(aiUrl, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${lovableApiKey}`, "Content-Type": "application/json" },
+          body: buildAiBody(MODELS.fast),
+        });
+        if (!response.ok) {
+          const fbText = await response.text();
+          console.error(`[RAG-CHAT] Fallback also failed (${response.status}):`, fbText);
+          return new Response(
+            JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else {
+        return new Response(
+          JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // Log estimated AI usage (streaming = no usage in response, so estimate from input length)
