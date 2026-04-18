@@ -124,6 +124,22 @@ If there are diagrams, describe the labels/text ON the diagram only (axis labels
     const data = await response.json();
     const extractedText = data.choices?.[0]?.message?.content;
 
+    // Log AI usage
+    try {
+      const inputTok = data.usage?.prompt_tokens || 0;
+      const outputTok = data.usage?.completion_tokens || 0;
+      const cost = (inputTok / 1_000_000) * 0.30 + (outputTok / 1_000_000) * 2.50;
+      const adminClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+        { auth: { persistSession: false } }
+      );
+      await adminClient.from("api_usage_logs").insert({
+        user_id: user.id, feature: "essay", model: aiModel,
+        input_tokens: inputTok, output_tokens: outputTok, estimated_cost_usd: cost,
+      });
+    } catch (logErr) { console.error("usage log failed:", logErr); }
+
     if (!extractedText) {
       console.error("No content in response:", data);
       return new Response(

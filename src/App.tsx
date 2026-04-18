@@ -55,6 +55,7 @@ import { MockExamResultsPage } from "./pages/MockExamResultsPage";
 import { AdminSeedPage } from "./pages/AdminSeedPage";
 import { RevisionTopicPage } from "./pages/RevisionTopicPage";
 import { AdminContentHooksPage } from "./pages/AdminContentHooksPage";
+import { MetricsDashboard } from "./pages/MetricsDashboard";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -121,6 +122,7 @@ const App = () => (
             <Route path="/admin/seed" element={<AdminSeedPage />} />
             <Route path="/revision/:slug" element={<RevisionTopicPage />} />
             <Route path="/admin/content-hooks" element={<AdminContentHooksPage />} />
+            <Route path="/metrics" element={<MetricsDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

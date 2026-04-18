@@ -1225,6 +1225,18 @@ CRITICAL RULES:
       );
     }
 
+    // Log estimated AI usage (streaming = no usage in response, so estimate from input length)
+    try {
+      const estInputTok = Math.ceil((finalSystemPrompt.length + JSON.stringify(history).length + (typeof message === "string" ? message.length : 0)) / 4);
+      const estOutputTok = 600; // average completion length estimate
+      const cost = (estInputTok / 1_000_000) * 0.30 + (estOutputTok / 1_000_000) * 2.50;
+      await supabaseAdmin.from("api_usage_logs").insert({
+        user_id: user_id ?? null, product_id: product_id ?? null,
+        feature: "chat", model: aiModel,
+        input_tokens: estInputTok, output_tokens: estOutputTok, estimated_cost_usd: cost,
+      });
+    } catch (logErr) { console.error("usage log failed:", logErr); }
+
     // Create a custom stream that prepends sources metadata and diagram info
     const encoder = new TextEncoder();
     const metadataEvent = `data: ${JSON.stringify({ 

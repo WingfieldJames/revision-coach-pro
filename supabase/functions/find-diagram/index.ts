@@ -153,7 +153,23 @@ Response format (JSON only, no explanation):
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
 
-    let diagramId = null;
+    // Log AI usage
+    try {
+      const inputTok = data.usage?.prompt_tokens || 0;
+      const outputTok = data.usage?.completion_tokens || 0;
+      const cost = (inputTok / 1_000_000) * 0.30 + (outputTok / 1_000_000) * 2.50;
+      const adminClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+        { auth: { persistSession: false } }
+      );
+      await adminClient.from("api_usage_logs").insert({
+        user_id: user.id, feature: "diagram", model: "google/gemini-2.5-flash",
+        input_tokens: inputTok, output_tokens: outputTok, estimated_cost_usd: cost,
+      });
+    } catch (logErr) { console.error("usage log failed:", logErr); }
+
+    let diagramId: string | null = null;
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
