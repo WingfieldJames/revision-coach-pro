@@ -183,6 +183,40 @@ serve(async (req) => {
         return false;
       });
 
+      // Edexcel Maths only: spec chunks are stored with a "[Edexcel A-Level Mathematics Specification 9MA0 - X]" header
+      // line followed by raw JSON. Strip the bracket header and convert/remove JSON so it doesn't appear verbatim in the guide.
+      const isEdexcelMaths = board === "edexcel-maths" || board === "edexcel-maths-applied";
+      const cleanEdexcelMathsSpec = (raw: string): string => {
+        let s = raw;
+        // Remove leading "[...spec header...]" line
+        s = s.replace(/^\s*\[[^\]\n]*\]\s*\n?/, "");
+        // Remove any standalone JSON object blocks (greedy across lines, balanced enough for our chunks)
+        s = s.replace(/\{[\s\S]*?\}\s*/g, (block) => {
+          // Try to extract human-readable string values from the JSON; otherwise drop it
+          try {
+            const obj = JSON.parse(block.trim());
+            const lines: string[] = [];
+            const walk = (v: any, prefix = "") => {
+              if (v == null) return;
+              if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
+                lines.push(`${prefix}${v}`);
+              } else if (Array.isArray(v)) {
+                v.forEach((x) => walk(x, prefix));
+              } else if (typeof v === "object") {
+                for (const k of Object.keys(v)) {
+                  walk(v[k], `${k.replace(/_/g, " ")}: `);
+                }
+              }
+            };
+            walk(obj);
+            return lines.join("\n") + "\n";
+          } catch {
+            return "";
+          }
+        });
+        return s.trim();
+      };
+
       // Build context with cap
       if (relevantChunks.length > 0) {
         const parts: string[] = [];
@@ -190,7 +224,11 @@ serve(async (req) => {
         for (const c of relevantChunks) {
           const type = String((c as any).metadata?.content_type || "general").toUpperCase();
           const topic = (c as any).metadata?.topic || "";
-          const part = `[${type}${topic ? ` - ${topic}` : ""}]\n${c.content}`;
+          let body = c.content;
+          if (isEdexcelMaths && type === "SPECIFICATION") {
+            body = cleanEdexcelMathsSpec(body);
+          }
+          const part = `[${type}${topic ? ` - ${topic}` : ""}]\n${body}`;
           if (totalChars + part.length > MAX_CONTEXT_CHARS && parts.length > 0) break;
           parts.push(part);
           totalChars += part.length;
@@ -306,6 +344,10 @@ ${finalDiagramContext ? `DIAGRAMS: The following diagrams are available. Insert 
 
     if (options.includes("past_papers") && pastPaperContext) {
       prompt += `\n\nInclude a section titled "Real Past Paper Questions" (as a ## heading). List the following real past paper questions:\n\n${pastPaperContext}\n\nFor each question, note what the examiner is looking for and key points needed for full marks.`;
+    }
+
+    if (board === "edexcel-maths" || board === "edexcel-maths-applied") {
+      prompt += `\n\nIMPORTANT (Edexcel Maths): The training data may contain bracketed labels like "[Edexcel A-Level Mathematics Specification 9MA0 - ...]" and raw JSON fragments. NEVER copy these into your output. Convert all information into clean prose, sub-headings, and bullet points. The reader must never see square-bracket headers, curly braces, or JSON syntax.`;
     }
 
     prompt += `\n\nCRITICAL FORMATTING RULES:
