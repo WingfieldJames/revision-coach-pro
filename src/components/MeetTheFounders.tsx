@@ -105,7 +105,7 @@ export function MeetTheFounders() {
   const isDark = theme === 'dark';
   const [trainers, setTrainers] = useState<Trainer[]>(trainersData);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(3);
+  const [activeIndex, setActiveIndex] = useState(trainersData.findIndex((t) => t.id === 'james'));
   const isResetting = useRef(false);
 
   useEffect(() => {
@@ -133,7 +133,8 @@ export function MeetTheFounders() {
     if (!el) return;
     const timer = setTimeout(() => {
       const cards = el.children;
-      const midJames = total + 3; // James in middle set
+      const jamesIndex = trainers.findIndex((t) => t.id === 'james');
+      const midJames = total + (jamesIndex >= 0 ? jamesIndex : 3);
       if (cards[midJames]) {
         const target = cards[midJames] as HTMLElement;
         const scrollLeft = target.offsetLeft - el.offsetWidth / 2 + target.offsetWidth / 2;
