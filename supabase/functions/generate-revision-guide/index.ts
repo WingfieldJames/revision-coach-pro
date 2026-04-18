@@ -346,6 +346,10 @@ ${finalDiagramContext ? `DIAGRAMS: The following diagrams are available. Insert 
       prompt += `\n\nInclude a section titled "Real Past Paper Questions" (as a ## heading). List the following real past paper questions:\n\n${pastPaperContext}\n\nFor each question, note what the examiner is looking for and key points needed for full marks.`;
     }
 
+    if (board === "edexcel-maths" || board === "edexcel-maths-applied") {
+      prompt += `\n\nIMPORTANT (Edexcel Maths): The training data may contain bracketed labels like "[Edexcel A-Level Mathematics Specification 9MA0 - ...]" and raw JSON fragments. NEVER copy these into your output. Convert all information into clean prose, sub-headings, and bullet points. The reader must never see square-bracket headers, curly braces, or JSON syntax.`;
+    }
+
     prompt += `\n\nCRITICAL FORMATTING RULES:
 - Do NOT include any overall title - it will be added automatically by the system
 - Do NOT use emoji anywhere in headings or text
