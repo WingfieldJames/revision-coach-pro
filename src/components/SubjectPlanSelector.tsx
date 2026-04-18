@@ -244,6 +244,18 @@ export function SubjectPlanSelector() {
         <div className="md:hidden flex items-center justify-center gap-3 mb-8">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
+              <button className="rounded-full px-5 py-2.5 text-sm font-semibold border border-border bg-background flex items-center gap-2">
+                A-Level
+                <ChevronDown className="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+              <DropdownMenuItem className="cursor-pointer hover:bg-muted" onClick={() => { localStorage.setItem('qualification_level', 'alevel'); }}>A-Level</DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer hover:bg-muted" onClick={() => { localStorage.setItem('qualification_level', 'gcse'); navigate('/gcse'); }}>GCSE</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <button className="rounded-full px-5 py-2.5 text-sm font-semibold bg-gradient-brand text-white flex items-center gap-2 glow-brand">
                 {subjectLabels[subject]}
                 <ChevronDown className="h-3.5 w-3.5" />
