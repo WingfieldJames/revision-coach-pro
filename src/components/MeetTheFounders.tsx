@@ -105,7 +105,7 @@ export function MeetTheFounders() {
   const isDark = theme === 'dark';
   const [trainers, setTrainers] = useState<Trainer[]>(trainersData);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(3);
+  const [activeIndex, setActiveIndex] = useState(trainersData.findIndex((t) => t.id === 'james'));
   const isResetting = useRef(false);
 
   useEffect(() => {
