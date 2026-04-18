@@ -1231,7 +1231,7 @@ CRITICAL RULES:
       const estOutputTok = 600; // average completion length estimate
       const cost = (estInputTok / 1_000_000) * 0.30 + (estOutputTok / 1_000_000) * 2.50;
       await supabaseAdmin.from("api_usage_logs").insert({
-        user_id: user.id, product_id: product_id ?? null,
+        user_id: user_id ?? null, product_id: product_id ?? null,
         feature: "chat", model: aiModel,
         input_tokens: estInputTok, output_tokens: estOutputTok, estimated_cost_usd: cost,
       });
