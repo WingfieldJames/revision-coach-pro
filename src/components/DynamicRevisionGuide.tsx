@@ -101,28 +101,40 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
             .map((c: any) => {
               const topic = String(c.metadata?.topic || '');
               const specId = String(c.metadata?.spec_id || '');
+              const contentStr = String(c.content || '');
               // Extract code and name from topic like "3.1.1 Atomic Structure" or "1.1.1 Economics as a social science: ..."
               const codeMatch = topic.match(/^([\d.]+)\s+(.+)/);
               let code = codeMatch ? codeMatch[1] : specId || '';
               // Name is JUST the topic text (no code prefix), with any accidental leading colon stripped
               let rawName = codeMatch ? codeMatch[2] : (topic || '');
 
-              // Fallback: parse the bracket header from content when metadata.topic is missing
+              // Always try to parse the bracket header to get a clean name,
               // e.g. "[Edexcel A-Level Mathematics Specification 9MA0 - 7.1: Differentiation]"
+              // or   "[... - Qualification Overview]" / "[... - Overarching Theme: ...]"
               if (!rawName) {
-                const headerMatch = String(c.content || '').match(/^\[[^\]]*?-\s*([\d.]+)\s*:\s*([^\]]+?)\]/);
-                if (headerMatch) {
-                  if (!code) code = headerMatch[1].trim();
-                  rawName = headerMatch[2].trim();
+                const numberedHeader = contentStr.match(/^\[[^\]]*?-\s*([\d.]+)\s*:\s*([^\]]+?)\]/);
+                const relaxedHeader = contentStr.match(/^\[[^\]]*?-\s*(.+?)\]/);
+                if (numberedHeader) {
+                  if (!code) code = numberedHeader[1].trim();
+                  rawName = numberedHeader[2].trim();
+                } else if (relaxedHeader) {
+                  rawName = relaxedHeader[1].trim();
                 } else {
-                  // Last resort: strip any leading bracket header before slicing
-                  const stripped = String(c.content || '').replace(/^\[[^\]]*\]\s*/, '').trim();
+                  const stripped = contentStr.replace(/^\[[^\]]*\]\s*/, '').trim();
                   rawName = stripped.slice(0, 80);
                 }
               }
 
-              // Skip non-spec-point overview chunks (Qualification Overview, Aims, Assessment, Overarching Themes)
-              if (/Qualification Overview|Aims and Objectives|Assessment Information|Overarching Theme|Statistics Large Data Set/i.test(topic + ' ' + rawName)) {
+              // Skip non-spec-point overview chunks (Qualification Overview, Aims, Assessment, Overarching Themes, etc.)
+              if (/Qualification Overview|Qualification|Aims and Objectives|Assessment Information|Assessment|Overarching Theme|Overarching|Overview|Statistics Large Data Set/i.test(topic + ' ' + rawName)) {
+                return null;
+              }
+              // Defensive: skip anything where the parsed name is raw JSON
+              if (rawName.trim().startsWith('{') || rawName.trim().startsWith('"')) {
+                return null;
+              }
+              // Skip chunks with no numeric code AND no recognisable spec structure
+              if (!code && !/^\d/.test(rawName)) {
                 return null;
               }
 
