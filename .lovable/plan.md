@@ -1,49 +1,39 @@
 
 
-## Problem
+## Diagnosis
 
-Two raw JSON blobs are sitting in `document_chunks` for Edexcel Economics (product `6dc19d53...`):
+The Edexcel Maths spec has **5 non-spec-point overview chunks** that lack metadata `topic`/`spec_id` AND lack a numeric code (`X.Y:`) in their bracket header, so my previous fix can't recognise or filter them:
 
-- `ad5de0ed-3b0e-4ec4-bd5b-c3d5afeef22a` — `[2023 Paper 1 QP + MS]` (15,111 chars)
-- `15246283-12bd-43e0-850d-e1da1bb827b9` — `[Paper 1 QP + MS 2023]` (15,111 chars)
+1. `Qualification Overview` — body is JSON `{ "overall_structure": ... }`
+2. `Assessment Information` — body is JSON `{ "first_assessment": ... }`
+3. `Overarching Theme: theme 1 mathematical argument language and proof` — `Code: OT1`
+4. `Overarching Theme: theme 2 mathematical problem solving` — `Code: OT2`
+5. `Overarching Theme: theme 3 mathematical modelling` — `Code: OT3`
 
-Both look like text someone pasted via the "Add text" feature in the Build portal — they're not parsed PDFs, they're literal JSON dumps with `"papers":`, `"mark_scheme":`, `"indicative_points"` etc. Because `metadata.content_type = "past_paper"` and they contain Economics keywords, the Past Paper Finder surfaces them on almost every search.
+Because the header-regex requires `X.Y:`, these fall through to the "first 80 chars of content" fallback → the JSON braces / `Code: OT1 GENERAL REQUIREMENT...` end up as the dropdown name. The keyword filter then can't catch them either, because the words `Qualification Overview` / `Assessment Information` are no longer in the parsed `rawName`.
 
-The proper June 2023 Paper 1 QP + MS files are already in the DB, properly chunked (19 chunks each). These two blobs are pure duplicates in a broken format.
+This affects **only Edexcel Maths** — other subjects don't have these JSON-bodied overview chunks. **No re-upload needed** — the data underneath is fine, it's purely a UI parsing issue. The 80+ proper spec points (1.1, 2.4, 7.1, etc.) load correctly.
 
-## Fix
+## Fix (single file: `src/components/DynamicRevisionGuide.tsx`)
 
-**1. Delete the two bad chunks via migration** (one-time cleanup):
-```sql
-DELETE FROM document_chunks
-WHERE id IN (
-  'ad5de0ed-3b0e-4ec4-bd5b-c3d5afeef22a',
-  '15246283-12bd-43e0-850d-e1da1bb827b9'
-);
-```
+Tighten the spec-load loop in two ways:
 
-**2. Add a defensive filter in `DynamicPastPaperFinder.tsx`** so any future raw-JSON pastes never appear as past-paper results. In the `paperResults` filter (around line 206), reject chunks whose content starts with a JSON brace or contains JSON-schema markers like `"indicative_points"`, `"mark_scheme":`, `"ao_allocation"`. These never appear in real exam questions.
+1. **Always parse the bracket header first** to get the `name` text after the dash, regardless of whether it has a numeric code. Use a relaxed regex: `^\[[^\]]*?-\s*(.+?)\]` then secondarily extract `X.Y:` if present. This means `Qualification Overview`, `Assessment Information`, and `Overarching Theme: ...` become the parsed name (not the JSON body).
 
-```ts
-const looksLikeRawJson = (s: string) => {
-  const t = s.trim();
-  if (t.startsWith('{') || t.startsWith('[{')) return true;
-  if (/"(indicative_points|ao_allocation|levels_grid_summary|evaluation_points)"\s*:/i.test(t)) return true;
-  return false;
-};
-// then in the filter:
-if (looksLikeRawJson(content)) return false;
-```
+2. **Expand the skip-list** to also drop:
+   - `Overarching Theme` (any of OT1/OT2/OT3)
+   - Anything where the parsed body still starts with `{` (defensive — JSON should never appear as a spec point name)
+   - Anything with no numeric code AND name matching `/Qualification|Assessment|Overarching|Overview|Aims/i`
 
-This is a Edexcel-Economics-only request, but the filter is generic and protects every subject without affecting legitimate parsed chunks (real questions never contain those JSON keys).
+Net effect: dropdown shows only the 80+ real numbered spec points (1.1 Proof, 2.4 Algebra, 7.1 Differentiation, etc.) — the 5 overview chunks vanish from the picker. They remain in the DB so RAG chat can still reference them if needed.
 
 ## Out of scope
 
-- Re-parsing the deleted JSON into structured chunks — the proper June 2023 papers are already ingested, so deletion alone is sufficient.
-- Touching the build-portal "Add text" UI — fix is downstream so historical bad pastes never leak through.
+- Re-uploading the spec (unnecessary — data is correct, only the dropdown parser is wrong)
+- Other subjects (filter changes are scoped via the existing logic and are safe additions — won't surface new chunks anywhere else)
+- Edge function (`generate-revision-guide` is already sanitised from the prior fix)
 
 ## Files touched
 
-- `supabase/migrations/<new>.sql` — DELETE the two chunk IDs
-- `src/components/DynamicPastPaperFinder.tsx` — add `looksLikeRawJson` filter inside `paperResults`
+- `src/components/DynamicRevisionGuide.tsx` — tighten header parsing + expand overview skip-list
 
