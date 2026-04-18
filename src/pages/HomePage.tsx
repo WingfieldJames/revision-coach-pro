@@ -131,6 +131,11 @@ export const HomePage = () => {
       <SEOHead canonical="https://astarai.co.uk/" />
       <Header showNavLinks showStartStudyingButton />
 
+      {/* Outage banner */}
+      <div className="w-full bg-amber-500/15 border-b border-amber-500/30 text-amber-900 dark:text-amber-200 px-4 py-2.5 text-center text-sm font-medium">
+        ⚠️ External provider outage — login, signup and some features may be temporarily unavailable. We're monitoring and it should resolve shortly.
+      </div>
+
       {/* Hero Section */}
       <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4 relative">
         {/* Mobile-only purple animated paths behind hero */}
