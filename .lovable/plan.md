@@ -1,81 +1,49 @@
 
-Got it — Gemini 2.5 Flash via Lovable AI Gateway, NOT OpenAI. I'll update the plan to reflect this throughout.
 
-## Plan: A* AI Metrics Dashboard (Gemini-aware)
+## Problem
 
-### 1. Access control
-- Migration: insert `admin` role into `user_roles` for `jrrwingfield0@gmail.com` only (lookup user_id by email).
-- New `/metrics` route in `App.tsx` wrapped in `AdminGuard` that calls `has_role(uid, 'admin')` and redirects non-admins to `/`.
+Two raw JSON blobs are sitting in `document_chunks` for Edexcel Economics (product `6dc19d53...`):
 
-### 2. Token logging (Gemini, not OpenAI)
-Migration creates `api_usage_logs`:
+- `ad5de0ed-3b0e-4ec4-bd5b-c3d5afeef22a` — `[2023 Paper 1 QP + MS]` (15,111 chars)
+- `15246283-12bd-43e0-850d-e1da1bb827b9` — `[Paper 1 QP + MS 2023]` (15,111 chars)
+
+Both look like text someone pasted via the "Add text" feature in the Build portal — they're not parsed PDFs, they're literal JSON dumps with `"papers":`, `"mark_scheme":`, `"indicative_points"` etc. Because `metadata.content_type = "past_paper"` and they contain Economics keywords, the Past Paper Finder surfaces them on almost every search.
+
+The proper June 2023 Paper 1 QP + MS files are already in the DB, properly chunked (19 chunks each). These two blobs are pure duplicates in a broken format.
+
+## Fix
+
+**1. Delete the two bad chunks via migration** (one-time cleanup):
+```sql
+DELETE FROM document_chunks
+WHERE id IN (
+  'ad5de0ed-3b0e-4ec4-bd5b-c3d5afeef22a',
+  '15246283-12bd-43e0-850d-e1da1bb827b9'
+);
 ```
-id, user_id, product_id, feature (chat|essay|diagram|past_paper|revision_guide|mock_exam),
-model (e.g. 'google/gemini-2.5-flash'),
-input_tokens, output_tokens, estimated_cost_usd, created_at
+
+**2. Add a defensive filter in `DynamicPastPaperFinder.tsx`** so any future raw-JSON pastes never appear as past-paper results. In the `paperResults` filter (around line 206), reject chunks whose content starts with a JSON brace or contains JSON-schema markers like `"indicative_points"`, `"mark_scheme":`, `"ao_allocation"`. These never appear in real exam questions.
+
+```ts
+const looksLikeRawJson = (s: string) => {
+  const t = s.trim();
+  if (t.startsWith('{') || t.startsWith('[{')) return true;
+  if (/"(indicative_points|ao_allocation|levels_grid_summary|evaluation_points)"\s*:/i.test(t)) return true;
+  return false;
+};
+// then in the filter:
+if (looksLikeRawJson(content)) return false;
 ```
-RLS: admin-only SELECT; service-role INSERT.
 
-Update AI edge functions (`rag-chat`, `analyze-image`, `find-diagram`, `generate-revision-guide`, `mock-exam-mark`, `analyze-feedback`) to log a row per call. Read token counts from the Lovable AI Gateway response (`usage.prompt_tokens`, `usage.completion_tokens` — OpenAI-compatible shape returned by the gateway).
+This is a Edexcel-Economics-only request, but the filter is generic and protects every subject without affecting legitimate parsed chunks (real questions never contain those JSON keys).
 
-**Gemini 2.5 Flash pricing** (current, USD per 1M tokens):
-- Input: $0.30
-- Output: $2.50
+## Out of scope
 
-Cost = `(input_tokens/1e6 * 0.30) + (output_tokens/1e6 * 2.50)`. Stored as a constant in a shared helper inside each function (no shared module — Edge Functions can't share files).
+- Re-parsing the deleted JSON into structured chunks — the proper June 2023 papers are already ingested, so deletion alone is sufficient.
+- Touching the build-portal "Add text" UI — fix is downstream so historical bad pastes never leak through.
 
-**Historical estimate**: backfill not actually inserted into the table; instead, the dashboard computes historical cost on the fly from `daily_prompt_usage.prompt_count × avg_cost_per_prompt` (avg derived from new logged data once it exists, default ~$0.0024 fallback).
+## Files touched
 
-### 3. New edge function `get-metrics-dashboard` (admin-gated)
-Verifies caller has `admin` role, then aggregates:
+- `supabase/migrations/<new>.sql` — DELETE the two chunk IDs
+- `src/components/DynamicPastPaperFinder.tsx` — add `looksLikeRawJson` filter inside `paperResults`
 
-**From Stripe (live every load, ~2-3s):**
-- MRR (sum of active monthly subscriptions, normalized to monthly)
-- Daily gross volume (Charges API, last 30d)
-- New subscribers today/week/month
-- Churn rate (cancellations this period vs last)
-- Refunds
-
-**From Supabase:**
-- Active subscribers by tier (A-Level monthly/season, GCSE monthly/season) via `user_subscriptions` joined to `products` (using `qualification_type` + `payment_type`)
-- DAU / WAU / MAU from `daily_prompt_usage`
-- Avg sessions/user, avg messages/session from `chat_conversations` + `chat_messages`
-- Conversion rate + time-to-conversion (signup → first paid sub)
-- AI cost per day (last 30d) from `api_usage_logs`, with historical estimate fallback
-- Token usage / cost per feature
-- Top 10 heaviest users by cost
-- Subject mix, exam-board mix, A-Level vs GCSE split (via `products` join)
-- Free vs paid usage split
-
-**Computed alerts:**
-- RED: AI cost > 15% of revenue
-- RED: daily AI spend > £50
-- YELLOW: DAU drop > 20% day-on-day
-- YELLOW: monthly churn > 10%
-
-Returns single JSON payload. Frontend re-fetches every 5 min.
-
-### 4. Frontend: `src/pages/MetricsDashboard.tsx`
-Layout per spec, mobile-responsive:
-- **Row 1 — KPI cards:** MRR, Daily Revenue, Active Subscribers, Gross Margin %
-- **Row 2 — Charts (recharts):** 30d revenue line + 30d AI cost line (side by side, stacked on mobile)
-- **Row 3 — Subscribers by tier table + Engagement metrics**
-- **Row 4 — Product mix:** subject bar, feature pie, A-Level vs GCSE split, exam-board breakdown
-- **Bottom — Alerts panel** + Heaviest users table + Token/cost by feature
-- "Last refreshed" timestamp; manual refresh button; auto-refresh interval 5 min
-
-### 5. Build error cleanup (incidental)
-The build-error list shows pre-existing TS errors in many edge functions (most are `'error' is of type unknown` and Supabase type inference issues). These are unrelated to this feature but will block deployment. I'll fix the small `error: unknown` cases in any edge function I touch for this feature, and the rest stay as they were (out of scope unless you want me to sweep them).
-
-### 6. Out of scope (confirm if you want them in)
-- Public/student-facing UI changes — none.
-- Header link to `/metrics` — none (bookmark only).
-- Henry/Tanuj admin access — skipped per your earlier answer; just you for now.
-
-### Files touched
-- Migration: add `api_usage_logs` table + RLS + grant `admin` role to your user
-- `supabase/functions/get-metrics-dashboard/index.ts` (new)
-- `supabase/functions/rag-chat/index.ts`, `analyze-image/index.ts`, `find-diagram/index.ts`, `generate-revision-guide/index.ts`, `mock-exam-mark/index.ts` — add token logging
-- `src/pages/MetricsDashboard.tsx` (new)
-- `src/components/AdminGuard.tsx` (new)
-- `src/App.tsx` — register `/metrics` route
