@@ -108,6 +108,42 @@ export type Database = {
         }
         Relationships: []
       }
+      api_usage_logs: {
+        Row: {
+          created_at: string
+          estimated_cost_usd: number
+          feature: string
+          id: string
+          input_tokens: number
+          model: string
+          output_tokens: number
+          product_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          estimated_cost_usd?: number
+          feature: string
+          id?: string
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          product_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          estimated_cost_usd?: number
+          feature?: string
+          id?: string
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          product_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       change_log: {
         Row: {
           category: string
