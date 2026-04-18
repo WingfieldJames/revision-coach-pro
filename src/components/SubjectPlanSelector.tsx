@@ -236,6 +236,7 @@ export function SubjectPlanSelector() {
                 {subjectLabels[s]}
               </button>
             ))}
+            </div>
           </div>
         </div>
 
