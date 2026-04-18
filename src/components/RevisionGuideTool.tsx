@@ -196,7 +196,8 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
           p_product_id: productId,
           p_tool_type: 'revision_guide',
         });
-        if (usage !== null && usage >= FREE_MONTHLY_GUIDE_LIMIT) {
+        const usageCount = (usage as { count?: number } | null)?.count ?? 0;
+        if (usageCount >= FREE_MONTHLY_GUIDE_LIMIT) {
           toast.error(`Free users can generate ${FREE_MONTHLY_GUIDE_LIMIT} revision guides per month. Upgrade to Deluxe for unlimited.`);
           return;
         }
