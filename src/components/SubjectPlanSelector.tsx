@@ -197,7 +197,26 @@ export function SubjectPlanSelector() {
       {/* Subject Tabs */}
       <ScrollReveal delay={0.1}>
         <div className="hidden md:flex flex-col items-center gap-3 mb-12">
-          <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
+          <div className="flex items-center gap-3">
+            {/* Qualification Level Pill */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-5 py-2 text-sm font-medium hover:bg-muted transition-all whitespace-nowrap" style={{ paddingTop: '0.625rem', paddingBottom: '0.625rem' }}>
+                  A-Level
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-background border border-border z-50 rounded-lg shadow-elevated">
+                <DropdownMenuItem className="cursor-pointer hover:bg-muted" onClick={() => { localStorage.setItem('qualification_level', 'alevel'); }}>
+                  A-Level
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer hover:bg-muted" onClick={() => { localStorage.setItem('qualification_level', 'gcse'); navigate('/gcse'); }}>
+                  GCSE
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <div className="inline-flex rounded-full border border-border bg-background p-1.5 gap-1">
             {(['economics', 'mathematics', 'computer-science', 'psychology', 'chemistry', 'physics'] as Subject[]).map((s) => (
               <button
                 key={s}
