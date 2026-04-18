@@ -312,12 +312,30 @@ ${finalDiagramContext ? `DIAGRAMS: The following diagrams are available. Insert 
 - Do NOT include any overall title - it will be added automatically by the system
 - Do NOT use emoji anywhere in headings or text
 - Use ## for main section headings (like "Exam Technique", "Real Past Paper Questions")
-- Use ### for sub-topic headings within the spec explanation
-- Use bold for key terms and definitions
+- Use ### for sub-topic headings within the spec explanation (e.g. "### Price Regulation", "### Competition Policy Objectives")
+- Do NOT use "**Bold Heading:**" as a substitute for a proper ### sub-heading. If it's a heading, use ###.
+- Every heading (## or ###) MUST be followed by at least one paragraph or bullet list of body content — never leave a heading empty
+- Separate every block element (heading, paragraph, list, diagram reference) with a blank line
+- Use **bold** only for key terms and definitions INSIDE paragraphs, not as standalone headings
 - Use indented bullet points for detailed explanations
-- Leave clear spacing between different sections
 - Start directly with the first sub-topic of the spec point explanation
-- Keep language precise, technical, and exam-focused`;
+- Keep language precise, technical, and exam-focused
+
+WORKED EXAMPLE of correct formatting:
+
+### Price Regulation
+Price regulation is a tool used by the CMA to limit how much monopoly firms can charge consumers. The most common approach is **RPI-X** pricing, where firms can increase prices by inflation minus an efficiency factor X.
+
+- The formula forces firms to cut costs to maintain profits
+- Used in UK water and energy markets
+- Example: Ofwat sets RPI-X for water companies every 5 years
+
+### Objectives of Competition Policy
+The main objectives include protecting consumers, promoting efficiency, and preventing abuse of monopoly power.
+
+- **Consumer welfare**: keep prices low and quality high
+- **Allocative efficiency**: ensure P = MC
+- **Dynamic efficiency**: incentivise innovation through contestability`;
 
     // Build system prompt
     let systemPrompt = systemPromptBase || `You are an expert ${boardLabel} tutor creating revision materials.`;

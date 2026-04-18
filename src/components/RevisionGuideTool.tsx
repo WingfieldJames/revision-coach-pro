@@ -294,21 +294,52 @@ export const RevisionGuideTool: React.FC<RevisionGuideToolProps> = ({
 
     const boardLabel = BOARD_LABELS[board] || board;
 
-    // Convert markdown to HTML using marked library
+    // Convert markdown to HTML — parse markdown FIRST, then replace diagram placeholders.
+    // (Previously did it the other way round: injecting raw HTML <div> blocks before
+    // marked() caused marked v17 to treat adjacent markdown as part of the HTML block,
+    // silently dropping body content under headings that happened to be near diagrams.)
     const markdownToHtml = (md: string): string => {
-      // Replace diagram placeholders before markdown conversion
-      let processed = md.replace(/\[DIAGRAM:\s*(.+?)\]/g, (match, title) => {
+      // Step 1: Replace [DIAGRAM: title] with a safe placeholder token that marked()
+      // will pass through as plain text without interfering with paragraph/list parsing.
+      const diagramMap = new Map<string, string>();
+      let tokenIndex = 0;
+      const tokenised = md.replace(/\[DIAGRAM:\s*(.+?)\]/g, (_match, title) => {
         const diagram = matchedDiagrams.find(d =>
           d.title.toLowerCase().includes(title.toLowerCase().trim()) ||
           title.toLowerCase().trim().includes(d.title.toLowerCase())
         );
-        if (diagram) {
-          return `<div class="diagram-inline"><img src="${window.location.origin}${diagram.imagePath}" alt="${diagram.title}" /><p class="diagram-caption">${diagram.title}</p></div>`;
-        }
-        return '';
+        if (!diagram) return '';
+        const token = `@@DIAGRAM_TOKEN_${tokenIndex++}@@`;
+        diagramMap.set(
+          token,
+          `<div class="diagram-inline"><img src="${window.location.origin}${diagram.imagePath}" alt="${diagram.title}" /><p class="diagram-caption">${diagram.title}</p></div>`
+        );
+        return `\n\n${token}\n\n`;
       });
 
-      return marked(processed, { async: false }) as string;
+      // Step 2: Parse the clean markdown (no inline HTML) to HTML safely
+      let html = marked(tokenised, { async: false }) as string;
+
+      // Step 3: Replace the tokens with the diagram HTML blocks. Marked wraps plain
+      // text tokens in <p>...</p>, so we strip those wrappers to avoid <div> inside <p>.
+      for (const [token, diagramHtml] of diagramMap.entries()) {
+        html = html.replace(new RegExp(`<p>\\s*${token}\\s*</p>`, 'g'), diagramHtml);
+        html = html.replace(new RegExp(token, 'g'), diagramHtml); // fallback if not wrapped
+      }
+
+      // Step 4: Validation — log a warning if any heading has no following body content.
+      // Helps catch regressions without failing the PDF render.
+      const headingRegex = /<(h[2-4])[^>]*>(.*?)<\/\1>\s*(<(h[2-4])|<\/div>|$)/g;
+      let match;
+      const emptyHeadings: string[] = [];
+      while ((match = headingRegex.exec(html)) !== null) {
+        emptyHeadings.push(match[2]);
+      }
+      if (emptyHeadings.length > 0) {
+        console.warn('[REVISION-GUIDE] Headings with no body content:', emptyHeadings);
+      }
+
+      return html;
     };
 
     const htmlContent = markdownToHtml(guideContent);

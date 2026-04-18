@@ -259,18 +259,34 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
   const handleDownload = async () => {
     if (!guideContent || !selectedSpec) return;
 
+    // Convert markdown to HTML — tokenise diagram placeholders first so marked()
+    // parses clean markdown, then swap tokens for diagram HTML. Avoids marked v17
+    // consuming adjacent paragraphs/lists when raw HTML is injected pre-parse.
     const markdownToHtml = (md: string): string => {
-      let processed = md.replace(/\[DIAGRAM:\s*(.+?)\]/g, (match, title) => {
+      const diagramMap = new Map<string, string>();
+      let tokenIndex = 0;
+      const tokenised = md.replace(/\[DIAGRAM:\s*(.+?)\]/g, (_match, title) => {
         const diagram = matchedDiagrams.find(d =>
           d.title.toLowerCase().includes(title.toLowerCase().trim()) ||
           title.toLowerCase().trim().includes(d.title.toLowerCase())
         );
-        if (diagram) {
-          return `<div class="diagram-inline"><img src="${window.location.origin}${diagram.imagePath}" alt="${diagram.title}" /><p class="diagram-caption">${diagram.title}</p></div>`;
-        }
-        return '';
+        if (!diagram) return '';
+        const token = `@@DIAGRAM_TOKEN_${tokenIndex++}@@`;
+        diagramMap.set(
+          token,
+          `<div class="diagram-inline"><img src="${window.location.origin}${diagram.imagePath}" alt="${diagram.title}" /><p class="diagram-caption">${diagram.title}</p></div>`
+        );
+        return `\n\n${token}\n\n`;
       });
-      return marked(processed, { async: false }) as string;
+
+      let html = marked(tokenised, { async: false }) as string;
+
+      for (const [token, diagramHtml] of diagramMap.entries()) {
+        html = html.replace(new RegExp(`<p>\\s*${token}\\s*</p>`, 'g'), diagramHtml);
+        html = html.replace(new RegExp(token, 'g'), diagramHtml);
+      }
+
+      return html;
     };
 
     const htmlContent = markdownToHtml(guideContent);
