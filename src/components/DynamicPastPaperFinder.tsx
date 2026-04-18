@@ -203,11 +203,19 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
       const chunks: SearchResult[] = (data.results || data.chunks || []);
 
       const paperTypes = ['paper', 'combined', 'question', 'past_paper', 'past_paper_qp', 'paper_1', 'paper_2', 'paper_3'];
+      const looksLikeRawJson = (s: string) => {
+        const t = s.trim();
+        if (t.startsWith('{') || t.startsWith('[{')) return true;
+        if (/"(indicative_points|ao_allocation|levels_grid_summary|evaluation_points|mark_scheme)"\s*:/i.test(t)) return true;
+        return false;
+      };
       const paperResults = chunks.filter((c: SearchResult) => {
         const ct = String(c.metadata?.content_type || '');
         const content = (c.content || '').trim();
         // Exclude pure mark scheme chunks
         if (content.match(/^Mark Scheme/i)) return false;
+        // Exclude raw JSON pastes that slipped past ingestion
+        if (looksLikeRawJson(content)) return false;
         // Include paper-type chunks or chunks with figure references
         const isPaper = paperTypes.some(t => ct.includes(t));
         const hasFigure = /Figure\s+\d+/i.test(content) || /Figure\s+\d+/i.test(c.metadata?.topic || '');
