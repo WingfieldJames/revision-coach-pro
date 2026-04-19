@@ -454,6 +454,30 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                         <span className="block text-[10px] text-muted-foreground leading-tight">Builds your personal profile from every conversation</span>
                       </div>
                     </button>
+                    {showMyAIProp && (
+                      <button
+                        onClick={() => setShowMyAI(true)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      >
+                        <Sparkles className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <span className="block text-sm">My AI</span>
+                          <span className="block text-[10px] text-muted-foreground leading-tight">Personalize your tutor with your grades and goals</span>
+                        </div>
+                      </button>
+                    )}
+                    {showGradeBoundariesProp && (
+                      <button
+                        onClick={() => setShowGradeBoundaries(true)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      >
+                        <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <span className="block text-sm">Grade Boundaries</span>
+                          <span className="block text-[10px] text-muted-foreground leading-tight">See historic and forecasted grade thresholds</span>
+                        </div>
+                      </button>
+                    )}
                   </div>
                 </div>
 
