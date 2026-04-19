@@ -76,7 +76,7 @@ const trainersData: Trainer[] = [
     id: 'tanuj',
     name: 'Tanuj Kakumani',
     university: 'Imperial EFDS',
-    stats: 'A-Level: A*A*A*A · GCSE: 7 9s',
+    stats: 'A-Level: A*A*A*AA',
     image: tanujKakumani,
   },
   {
