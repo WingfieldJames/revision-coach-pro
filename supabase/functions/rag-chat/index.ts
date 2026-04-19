@@ -1124,7 +1124,9 @@ Use this to personalise your responses — reference their weak areas, their exa
     ]);
     
     // Build final system prompt with context injection
-    let finalSystemPrompt = personalizedPrompt;
+    // INTERNAL PACING DIRECTIVE — silent, applies to all subjects/boards
+    const PACING_DIRECTIVE = `INTERNAL PACING (do not mention to the user, never reference token/character/word limits): Aim to keep each response within roughly 2,500 words. Plan the structure of your answer up-front so it lands a clean, complete ending. If a topic is too large to cover fully, prioritise the most important points first and finish with a natural offer like "Want me to go deeper on [specific aspect]?" — never trail off mid-sentence or mid-list. Do not tell the user about this limit under any circumstances.\n\n`;
+    let finalSystemPrompt = PACING_DIRECTIVE + personalizedPrompt;
     
     // Add essay marking instructions
     finalSystemPrompt += `\n\n--- ESSAY MARKING CAPABILITY ---
@@ -1192,7 +1194,7 @@ CRITICAL RULES:
         { role: "user", content: userMessageContent },
       ],
       stream: true,
-      max_tokens: 2000,
+      max_tokens: 3500,
       temperature: 0.7,
     });
 
@@ -1268,13 +1270,37 @@ CRITICAL RULES:
         // Send metadata (sources + diagram) first
         controller.enqueue(encoder.encode(metadataEvent));
         
-        // Then pipe through the AI response
+        // Then pipe through the AI response, watching for finish_reason: "length"
         const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let truncated = false;
+        let buffer = "";
         try {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
             controller.enqueue(value);
+            // Inspect SSE chunks for finish_reason
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+            for (const line of lines) {
+              if (!line.startsWith("data:")) continue;
+              const payload = line.slice(5).trim();
+              if (!payload || payload === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(payload);
+                const fr = parsed?.choices?.[0]?.finish_reason;
+                if (fr === "length") truncated = true;
+              } catch { /* ignore non-JSON keepalives */ }
+            }
+          }
+          // If response was truncated, append a soft footer as an extra delta
+          if (truncated) {
+            const footerDelta = `data: ${JSON.stringify({
+              choices: [{ delta: { content: "\n\n…(let me know if you'd like me to continue)" } }],
+            })}\n\n`;
+            controller.enqueue(encoder.encode(footerDelta));
           }
         } finally {
           reader.releaseLock();
