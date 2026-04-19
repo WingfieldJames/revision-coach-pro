@@ -94,7 +94,7 @@ const trainersData: Trainer[] = [
   {
     id: 'fidel',
     name: 'Fidel',
-    university: 'AQA Computer Science Trainer',
+    university: 'Goldman Sachs DA',
     stats: 'A-Level: A*A*A* · GCSE: Straight 9s',
     image: null,
   },
