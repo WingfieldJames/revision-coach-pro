@@ -19,6 +19,7 @@ interface Trainer {
 const STORAGE_PATHS: Record<string, string> = {
   naman: '6bd8c73c-249f-4b08-b03d-7b857bab7831/trainer_image_1772193739946_Screenshot 2026-02-27 at 12.01.41.png',
   fidel: 'ded35975-95f4-4657-8bed-cfba5348241b/trainer_image_1775758014677_1757594615280.jpg',
+  zainab: '3f755502-c3c2-459f-b3e9-52b4f708e493/trainer_image_1775819072740_1773489249873.jpeg',
   zoya: '8b5b3c36-34ad-44b2-b73c-414d18fefe8a/trainer_image_1772194171764_Screenshot 2026-02-27 at 12.08.42.png',
   yan: '2f504dd8-a94a-492b-94a4-3e46f8264dd8/trainer_image_1772189725122_tudor profile pic .jpg',
   tudor: '7539dc96-eb2e-45be-b5b0-6957dde51974/trainer_image_1772049746995_Screenshot 2026-02-25 at 15.41.22.png',
@@ -31,6 +32,7 @@ const trainersData: Trainer[] = [
     university: 'UCL Politics & History',
     stats: 'A-Level: A*A*A*A*',
     image: null,
+    storageKey: 'zainab',
   },
   {
     id: 'aadi',
