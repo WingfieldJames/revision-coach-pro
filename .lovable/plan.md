@@ -1,39 +1,45 @@
 
 
-## Diagnosis
+## Plan: Unified 3500 token cap + silent self-pacing instruction
 
-The Edexcel Maths spec has **5 non-spec-point overview chunks** that lack metadata `topic`/`spec_id` AND lack a numeric code (`X.Y:`) in their bracket header, so my previous fix can't recognise or filter them:
+### Change 1 — Set `max_tokens: 3500` everywhere relevant
 
-1. `Qualification Overview` — body is JSON `{ "overall_structure": ... }`
-2. `Assessment Information` — body is JSON `{ "first_assessment": ... }`
-3. `Overarching Theme: theme 1 mathematical argument language and proof` — `Code: OT1`
-4. `Overarching Theme: theme 2 mathematical problem solving` — `Code: OT2`
-5. `Overarching Theme: theme 3 mathematical modelling` — `Code: OT3`
+- `supabase/functions/rag-chat/index.ts` (line ~1195): change `max_tokens` from `2000` to `3500` (applies to both regular chat and marking — same value, no Pro/Flash split).
+- `supabase/functions/mock-exam-mark/index.ts` (line ~98): change `max_tokens` from `500` to `3500`.
 
-Because the header-regex requires `X.Y:`, these fall through to the "first 80 chars of content" fallback → the JSON braces / `Code: OT1 GENERAL REQUIREMENT...` end up as the dropdown name. The keyword filter then can't catch them either, because the words `Qualification Overview` / `Assessment Information` are no longer in the parsed `rawName`.
+Leave `generate-revision-guide` alone (already 8000, it's PDF generation), and leave the small utility calls (150, 300, 2048) alone — they're internal short-output helpers.
 
-This affects **only Edexcel Maths** — other subjects don't have these JSON-bodied overview chunks. **No re-upload needed** — the data underneath is fine, it's purely a UI parsing issue. The 80+ proper spec points (1.1, 2.4, 7.1, etc.) load correctly.
+### Change 2 — Silent self-pacing instruction at the top of every system prompt
 
-## Fix (single file: `src/components/DynamicRevisionGuide.tsx`)
+In `rag-chat/index.ts`, prepend a hidden pacing directive to the system prompt **before** the subject/board persona is appended. This way it applies to every subject and board automatically (Economics, Maths, Chemistry, Physics, CS, Psychology — all of them, since they all flow through `rag-chat`).
 
-Tighten the spec-load loop in two ways:
+The directive will be phrased as an internal instruction the model must NOT reveal to the user:
 
-1. **Always parse the bracket header first** to get the `name` text after the dash, regardless of whether it has a numeric code. Use a relaxed regex: `^\[[^\]]*?-\s*(.+?)\]` then secondarily extract `X.Y:` if present. This means `Qualification Overview`, `Assessment Information`, and `Overarching Theme: ...` become the parsed name (not the JSON body).
+> "INTERNAL PACING (do not mention to the user, never reference token/character/word limits): Aim to keep each response within roughly 2,500 words. Plan the structure of your answer up-front so it lands a clean, complete ending. If a topic is too large to cover fully, prioritise the most important points first and finish with a natural offer like 'Want me to go deeper on [specific aspect]?' — never trail off mid-sentence or mid-list. Do not tell the user about this limit under any circumstances."
 
-2. **Expand the skip-list** to also drop:
-   - `Overarching Theme` (any of OT1/OT2/OT3)
-   - Anything where the parsed body still starts with `{` (defensive — JSON should never appear as a spec point name)
-   - Anything with no numeric code AND name matching `/Qualification|Assessment|Overarching|Overview|Aims/i`
+This makes Gemini self-pace and land clean endings instead of running into the 3500-token wall mid-sentence. Because it's framed as an internal directive with explicit "do not mention" guardrails, the user will never see references to character/token caps.
 
-Net effect: dropdown shows only the 80+ real numbered spec points (1.1 Proof, 2.4 Algebra, 7.1 Differentiation, etc.) — the 5 overview chunks vanish from the picker. They remain in the DB so RAG chat can still reference them if needed.
+Also bump `mock-exam-mark` system prompt with the same directive so marked-essay responses pace cleanly too.
 
-## Out of scope
+### Change 3 — Server-side truncation safety net (silent)
 
-- Re-uploading the spec (unnecessary — data is correct, only the dropdown parser is wrong)
-- Other subjects (filter changes are scoped via the existing logic and are safe additions — won't surface new chunks anywhere else)
-- Edge function (`generate-revision-guide` is already sanitised from the prior fix)
+In `rag-chat/index.ts`, after the AI response returns, check `finish_reason`. If it equals `"length"` (i.e. the model still hit the cap despite pacing), append a small, friendly footer to the response text:
 
-## Files touched
+> *"…(let me know if you'd like me to continue)"*
 
-- `src/components/DynamicRevisionGuide.tsx` — tighten header parsing + expand overview skip-list
+This is shown to the user only as a soft prompt — no mention of token limits. They can simply reply "continue" and chat history carries forward.
+
+### Why this approach works
+
+- **3500 tokens** ≈ ~2,600 words of English. Comfortable headroom for full essay marking + AO breakdown + improvement suggestions.
+- **Self-pacing instruction** is the actual fix — Gemini doesn't natively know its budget, so telling it the soft target makes it plan a clean ending.
+- **Silent guardrail** ("do not mention this to the user") keeps the UX polished — students never see "I can only output X characters."
+- **Truncation footer** is a belt-and-braces fallback for the rare case the model overshoots anyway.
+
+### Files to edit
+
+- `supabase/functions/rag-chat/index.ts` — `max_tokens: 3500`, prepend pacing directive to system prompt, add finish_reason footer
+- `supabase/functions/mock-exam-mark/index.ts` — `max_tokens: 3500`, prepend same pacing directive
+
+No DB changes, no client changes, no new secrets. Pure edge-function edit.
 
