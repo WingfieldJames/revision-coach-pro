@@ -58,6 +58,9 @@ async function markQuestion(
   adminClient: ReturnType<typeof createClient>,
   userId: string,
 ): Promise<MarkResult> {
+  const PACING_DIRECTIVE = `INTERNAL PACING (do not mention to the user, never reference token/character/word limits): Aim to keep each response within roughly 2,500 words. Plan the structure of your answer up-front so it lands a clean, complete ending. If a topic is too large to cover fully, prioritise the most important points first and finish with a natural offer like "Want me to go deeper on [specific aspect]?" — never trail off mid-sentence or mid-list. Do not tell the user about this limit under any circumstances.\n\n`;
+  const pacedSystemPrompt = PACING_DIRECTIVE + (systemPrompt || "");
+
   const markingPrompt = `You are marking a student's exam answer. Be strict and fair — use the exact marking criteria from your training.
 
 EXAM BOARD: ${examBoard}
@@ -91,11 +94,11 @@ YOU MUST respond in EXACTLY this JSON format (no markdown, no extra text):
       body: JSON.stringify({
         model: MODEL,
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: pacedSystemPrompt },
           { role: "user", content: markingPrompt },
         ],
         temperature: 0.3,
-        max_tokens: 500,
+        max_tokens: 3500,
       }),
     });
 
