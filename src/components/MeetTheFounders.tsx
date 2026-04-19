@@ -40,7 +40,7 @@ const trainersData: Trainer[] = [
     name: 'Aadi Rakhit',
     university: 'LSE Economics ',
     stats: 'A-Level: A*A*A*A* · GCSE: 12 9s',
-    image: null,
+    image: aadiRakhit,
   },
   {
     id: 'naman',
