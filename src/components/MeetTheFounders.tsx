@@ -28,7 +28,7 @@ const trainersData: Trainer[] = [
     id: 'zainab',
     name: 'Zainab Haider',
     university: 'UCL Politics & History',
-    stats: 'A-Level: A*A*A* · GCSE: Straight 9s',
+    stats: 'A-Level: A*A*A*A*',
     image: null,
   },
   {
