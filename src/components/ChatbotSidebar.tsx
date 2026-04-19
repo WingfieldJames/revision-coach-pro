@@ -106,6 +106,7 @@ export interface ChatbotSidebarProps {
   examSubjectName?: string;
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
+  isGCSE?: boolean;
 }
 
 const groupConversations = (convos: ChatConversation[]) => {
