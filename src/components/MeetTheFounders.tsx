@@ -16,6 +16,7 @@ interface Trainer {
   stats: string;
   image: string | null;
   storageKey?: string;
+  linkedin?: string;
 }
 
 const STORAGE_PATHS: Record<string, string> = {
@@ -243,12 +244,17 @@ export function MeetTheFounders() {
               key={`${trainer.id}-${i}`}
               className="flex flex-col items-center text-center flex-shrink-0 w-36 sm:w-40 md:w-48"
             >
-              <motion.div
-                className={`w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-lg bg-muted border-4 ${
+              <motion.a
+                href={trainer.linkedin || undefined}
+                target={trainer.linkedin ? '_blank' : undefined}
+                rel={trainer.linkedin ? 'noopener noreferrer' : undefined}
+                onClick={(e) => { if (!trainer.linkedin) e.preventDefault(); }}
+                className={`block w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-lg bg-muted border-4 ${
                   isDark ? 'border-primary/20' : 'border-border'
-                }`}
+                } ${trainer.linkedin ? 'cursor-pointer' : 'cursor-default'}`}
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
+                aria-label={trainer.linkedin ? `Open ${trainer.name}'s LinkedIn` : trainer.name}
               >
                 {trainer.image ? (
                   <img
@@ -261,7 +267,7 @@ export function MeetTheFounders() {
                     {trainer.name.charAt(0)}
                   </div>
                 )}
-              </motion.div>
+              </motion.a>
               <h3 className="mt-4 text-sm sm:text-base md:text-lg font-bold text-foreground">
                 {trainer.name}
               </h3>
