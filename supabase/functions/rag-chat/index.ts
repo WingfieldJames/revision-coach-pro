@@ -1298,7 +1298,7 @@ CRITICAL RULES:
           // If response was truncated, append a soft footer as an extra delta
           if (truncated) {
             const footerDelta = `data: ${JSON.stringify({
-              choices: [{ delta: { content: "\n\n…(let me know if you'd like me to continue)" } }],
+              choices: [{ delta: { content: "\n\n---\n\n**Want me to continue?** Just reply \"continue\" and I'll pick up where I left off." } }],
             })}\n\n`;
             controller.enqueue(encoder.encode(footerDelta));
           }
