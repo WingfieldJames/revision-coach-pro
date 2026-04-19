@@ -6,8 +6,10 @@ import { Separator } from '@/components/ui/separator';
 import {
   ArrowLeft, Sparkles, Timer, Crown, ChevronRight, ChevronDown, ChevronUp,
   GraduationCap, Home, MessageSquare, Plus, Trash2, LogIn,
-  CalendarDays, Clock3, X, Brain, User, BookOpen,
+  CalendarDays, Clock3, X, Brain, User, BookOpen, TrendingUp,
 } from 'lucide-react';
+import { MyAIPreferences } from '@/components/MyAIPreferences';
+import { GradeBoundariesTool } from '@/components/GradeBoundariesTool';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/lib/supabase';
