@@ -36,6 +36,7 @@ const trainersData: Trainer[] = [
     stats: 'A-Level: A*A*A*A*',
     image: null,
     storageKey: 'zainab',
+    linkedin: 'https://www.linkedin.com/in/zainabhaider17/',
   },
   {
     id: 'aadi',
@@ -43,14 +44,16 @@ const trainersData: Trainer[] = [
     university: 'LSE Economics ',
     stats: 'A-Level: A*A*A*A* · GCSE: 12 9s',
     image: aadiRakhit,
+    linkedin: 'https://www.linkedin.com/in/aadirakhit/',
   },
   {
     id: 'naman',
     name: 'Naman Tiwari',
-    university: 'Imperial Offer Holder',
+    university: 'Imperial CS',
     stats: 'A-Level: A*A*A*A* · 8.9 TMUA · Straight 9s',
     image: null,
     storageKey: 'naman',
+    linkedin: 'https://www.linkedin.com/in/naman-tiwari-906935326/',
   },
   {
     id: 'zoya',
@@ -59,6 +62,7 @@ const trainersData: Trainer[] = [
     stats: 'A-Level: A*A*AA · GCSE: 11 9s',
     image: null,
     storageKey: 'zoya',
+    linkedin: 'https://www.linkedin.com/in/zoya-siddiqui-57381629b/',
   },
   {
     id: 'henry',
@@ -66,6 +70,7 @@ const trainersData: Trainer[] = [
     university: 'LSE PPE',
     stats: 'A-Level: A*A*A*A* · GCSE: 11 9s',
     image: henryLi,
+    linkedin: 'https://www.linkedin.com/in/henry-xli-/',
   },
   {
     id: 'james',
@@ -73,6 +78,7 @@ const trainersData: Trainer[] = [
     university: 'LSE Management',
     stats: 'A-Level: A*A*A · GCSE: 11 9s',
     image: jamesFounder,
+    linkedin: 'https://www.linkedin.com/in/james-wingfield/',
   },
   {
     id: 'tanuj',
@@ -80,6 +86,7 @@ const trainersData: Trainer[] = [
     university: 'Imperial EFDS',
     stats: 'A-Level: A*A*A*AA',
     image: tanujKakumani,
+    linkedin: 'https://www.linkedin.com/in/tanujkakumani/',
   },
   {
     id: 'yan',
@@ -87,14 +94,16 @@ const trainersData: Trainer[] = [
     university: 'Warwick Discrete Maths ',
     stats: 'A-Level: A*A*A*A*A* · GCSE: 10 9s',
     image: yanBeletskiy,
+    linkedin: 'https://www.linkedin.com/in/yan-beletskiy-51974530b/',
   },
   {
     id: 'tudor',
-    name: 'Tudor Cranciun',
-    university: 'Imperial Offer Holder',
+    name: 'Tudor Craciun',
+    university: 'Imperial CS',
     stats: 'A-Level: A*A*A*A* · GCSES: Straight 9s',
     image: null,
     storageKey: 'tudor',
+    linkedin: 'https://www.linkedin.com/in/tudor-craciun-90847b378/',
   },
   {
     id: 'fidel',
@@ -103,6 +112,7 @@ const trainersData: Trainer[] = [
     stats: 'A-Level: A*A*A',
     image: null,
     storageKey: 'fidel',
+    linkedin: 'https://www.linkedin.com/in/fidelsacoor/',
   },
 ];
 
