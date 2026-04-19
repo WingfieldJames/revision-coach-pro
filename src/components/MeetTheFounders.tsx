@@ -98,6 +98,7 @@ const trainersData: Trainer[] = [
     university: 'Goldman Sachs DA',
     stats: 'A-Level: A*A*A',
     image: null,
+    storageKey: 'fidel',
   },
 ];
 
