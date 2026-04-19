@@ -904,6 +904,7 @@ export type Database = {
           grade_boundaries_data: Json | null
           id: string
           last_deployed_at: string | null
+          linkedin_url: string | null
           product_id: string | null
           qualification_type: string
           selected_features: Json | null
@@ -935,6 +936,7 @@ export type Database = {
           grade_boundaries_data?: Json | null
           id?: string
           last_deployed_at?: string | null
+          linkedin_url?: string | null
           product_id?: string | null
           qualification_type?: string
           selected_features?: Json | null
@@ -966,6 +968,7 @@ export type Database = {
           grade_boundaries_data?: Json | null
           id?: string
           last_deployed_at?: string | null
+          linkedin_url?: string | null
           product_id?: string | null
           qualification_type?: string
           selected_features?: Json | null
