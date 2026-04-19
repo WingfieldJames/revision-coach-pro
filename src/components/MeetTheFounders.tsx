@@ -32,6 +32,7 @@ const trainersData: Trainer[] = [
     university: 'UCL Politics & History',
     stats: 'A-Level: A*A*A*A*',
     image: null,
+    storageKey: 'zainab',
   },
   {
     id: 'aadi',
