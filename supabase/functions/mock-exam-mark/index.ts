@@ -116,21 +116,7 @@ YOU MUST respond in EXACTLY this JSON format (no markdown, no extra text):
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
-    const finishReason = data.choices?.[0]?.finish_reason;
     await logUsage(adminClient, userId, data.usage?.prompt_tokens || 0, data.usage?.completion_tokens || 0);
-
-    // If response was truncated by token limit, return graceful retry message
-    // (don't try to parse — JSON will be incomplete)
-    if (finishReason === "length") {
-      logStep("Response truncated by token limit", { question: question.question_number });
-      return {
-        question_number: question.question_number,
-        marks_awarded: 0,
-        marks_available: question.marks_available,
-        feedback: "This answer was too long to mark in one pass — please retry this question.",
-        level: "N/A",
-      };
-    }
 
     // Parse JSON from AI response — handle markdown code blocks
     let cleanContent = content.trim();
