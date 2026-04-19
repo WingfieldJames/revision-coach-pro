@@ -9,26 +9,11 @@ const corsHeaders = {
 // Maximum characters of training data context to include in the prompt
 const MAX_CONTEXT_CHARS = 25000;
 
-// Model tiers — Flash for fast chat, Pro for essay marking, lite for utility
+// Model tiers — single Flash model for all chat, lite for utility
 const MODELS = {
-  fast: "google/gemini-2.5-flash",   // Quick questions, explanations, general chat
-  marking: "google/gemini-2.5-pro",  // Essay marking, structured feedback, long answers
+  fast: "google/gemini-2.5-flash",   // All chat, including essay marking
   utility: "google/gemini-2.0-flash-lite", // Search query generation only
 };
-
-// Detect if the message is an essay marking request
-function isMarkingRequest(message: string, imageData: any): boolean {
-  const lower = message.toLowerCase();
-  const markingKeywords = ["mark my", "mark this", "grade my", "grade this", "marks out of", "marker", "/25", "/15", "/12", "/10", "/9", "/8", "/5", "/4"];
-  const hasImage = !!imageData;
-  const hasMarkingKeyword = markingKeywords.some(kw => lower.includes(kw));
-  // Image uploads are almost always essay marking
-  if (hasImage) return true;
-  if (hasMarkingKeyword) return true;
-  // Short follow-ups to marking (e.g. "25 marks", "out of 15") after an image was in history
-  if (/^\d+\s*mark/.test(lower) || /^out of \d+/.test(lower)) return true;
-  return false;
-}
 
 // Hardcoded economics diagrams fallback (used when Build portal has no diagrams)
 const ECONOMICS_DIAGRAMS_FALLBACK = [
@@ -1126,9 +1111,7 @@ Use this to personalise your responses — reference their weak areas, their exa
     // Build final system prompt with context injection
     // INTERNAL PACING DIRECTIVE — silent, applies to all subjects/boards
     const PACING_DIRECTIVE = `INTERNAL PACING (do not mention to the user, never reference token/character/word/space limits, never say you are "running out of space" or similar): Aim to keep each response within roughly 2,500 words. Plan the structure of your answer up-front so it lands a clean, complete ending. If a topic is too large to cover fully, prioritise the most important points first and finish with a natural offer like "Want me to go deeper on [specific aspect]?" — never trail off mid-sentence or mid-list. Do not tell the user about this limit under any circumstances.\n\n`;
-    const MARKING_PACING = `MARKING PACING (do not mention to the user): Essay marking responses must always end at a natural stopping point. Finish the current AO / section / bullet completely before stopping. If you sense you are getting long, wrap up the section you are on with a one-line summary instead of starting a new section or AO. Never stop mid-sentence, mid-bullet, or mid-AO breakdown. Never reference any output limit.\n\n`;
-    const isMarking = isMarkingRequest(message, image_data);
-    let finalSystemPrompt = PACING_DIRECTIVE + (isMarking ? MARKING_PACING : "") + personalizedPrompt;
+    let finalSystemPrompt = PACING_DIRECTIVE + personalizedPrompt;
     
     // Add essay marking instructions
     finalSystemPrompt += `\n\n--- ESSAY MARKING CAPABILITY ---
@@ -1182,11 +1165,10 @@ CRITICAL RULES:
       userMessageContent = message;
     }
 
-    // Step 3: Select model — Pro for marking, Flash for everything else
+    // Step 3: Use unified Flash model for all chat (including essay marking)
     const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const useProModel = isMarkingRequest(message, image_data);
-    const aiModel = useProModel ? MODELS.marking : MODELS.fast;
-    console.log(`Model selected: ${aiModel} (marking: ${useProModel})`);
+    const aiModel = MODELS.fast;
+    console.log(`Model selected: ${aiModel}`);
 
     const buildAiBody = (model: string) => JSON.stringify({
       model,
@@ -1224,28 +1206,10 @@ CRITICAL RULES:
       }
       const errorText = await response.text();
       console.error(`[RAG-CHAT] AI API error (${response.status}) with model ${aiModel}:`, errorText);
-      // Auto-fallback to Flash if Pro failed (handles model rejection, 400s, 503s, etc.)
-      if (useProModel && response.status !== 429 && response.status !== 402) {
-        console.warn(`[RAG-CHAT] Pro model failed, retrying with Flash fallback`);
-        response = await fetch(aiUrl, {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${lovableApiKey}`, "Content-Type": "application/json" },
-          body: buildAiBody(MODELS.fast),
-        });
-        if (!response.ok) {
-          const fbText = await response.text();
-          console.error(`[RAG-CHAT] Fallback also failed (${response.status}):`, fbText);
-          return new Response(
-            JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
-            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-      } else {
-        return new Response(
-          JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      return new Response(
+        JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Log estimated AI usage (streaming = no usage in response, so estimate from input length)
