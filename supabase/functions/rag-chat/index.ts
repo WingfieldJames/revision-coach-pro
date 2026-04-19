@@ -1165,11 +1165,10 @@ CRITICAL RULES:
       userMessageContent = message;
     }
 
-    // Step 3: Select model — Pro for marking, Flash for everything else
+    // Step 3: Use unified Flash model for all chat (including essay marking)
     const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const useProModel = isMarkingRequest(message, image_data);
-    const aiModel = useProModel ? MODELS.marking : MODELS.fast;
-    console.log(`Model selected: ${aiModel} (marking: ${useProModel})`);
+    const aiModel = MODELS.fast;
+    console.log(`Model selected: ${aiModel}`);
 
     const buildAiBody = (model: string) => JSON.stringify({
       model,
