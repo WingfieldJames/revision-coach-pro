@@ -9,26 +9,11 @@ const corsHeaders = {
 // Maximum characters of training data context to include in the prompt
 const MAX_CONTEXT_CHARS = 25000;
 
-// Model tiers — Flash for fast chat, Pro for essay marking, lite for utility
+// Model tiers — single Flash model for all chat, lite for utility
 const MODELS = {
-  fast: "google/gemini-2.5-flash",   // Quick questions, explanations, general chat
-  marking: "google/gemini-2.5-pro",  // Essay marking, structured feedback, long answers
+  fast: "google/gemini-2.5-flash",   // All chat, including essay marking
   utility: "google/gemini-2.0-flash-lite", // Search query generation only
 };
-
-// Detect if the message is an essay marking request
-function isMarkingRequest(message: string, imageData: any): boolean {
-  const lower = message.toLowerCase();
-  const markingKeywords = ["mark my", "mark this", "grade my", "grade this", "marks out of", "marker", "/25", "/15", "/12", "/10", "/9", "/8", "/5", "/4"];
-  const hasImage = !!imageData;
-  const hasMarkingKeyword = markingKeywords.some(kw => lower.includes(kw));
-  // Image uploads are almost always essay marking
-  if (hasImage) return true;
-  if (hasMarkingKeyword) return true;
-  // Short follow-ups to marking (e.g. "25 marks", "out of 15") after an image was in history
-  if (/^\d+\s*mark/.test(lower) || /^out of \d+/.test(lower)) return true;
-  return false;
-}
 
 // Hardcoded economics diagrams fallback (used when Build portal has no diagrams)
 const ECONOMICS_DIAGRAMS_FALLBACK = [
