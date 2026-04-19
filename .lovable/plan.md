@@ -1,33 +1,34 @@
 
 
-The truncation footer already exists in `rag-chat` from the last change but it's possible: (a) the wording is too soft / not visible enough, (b) it's not firing reliably, or (c) `mock-exam-mark` doesn't have it at all. Let me verify.
+## What's currently happening
 
-Looking at current state:
-- `rag-chat/index.ts` — has footer `"…(let me know if you'd like me to continue)"` when `finish_reason === "length"`. Italicised, easy to miss.
-- `mock-exam-mark/index.ts` — NO truncation footer at all (it's not streaming, it returns JSON per question).
+The Essay Marker tool itself already submits via the normal chat (`onSubmitToChat` → `RAGChat.submitMessage` → `rag-chat` edge function). The "different API" behaviour is inside `supabase/functions/rag-chat/index.ts`, which detects marking requests and switches to a **different model** (`gemini-2.5-pro`) plus extra prompt directives.
 
-## Plan
+## What to change
 
-**1. Make the rag-chat footer clearer and more actionable**
+Single-file edit: `supabase/functions/rag-chat/index.ts`
 
-Change the appended footer from the soft italic line to a clear, bold question on its own line:
+1. **Remove model branching** — Always use `gemini-2.5-flash` (same as normal chat). Drop the Pro model selection.
+   - Line 1185–1189: replace with `const aiModel = MODELS.fast;`
+   - Line 1227–1234: remove the Pro→Flash fallback block (no longer needed since Flash is the only model).
 
-> `\n\n---\n\n**Want me to continue?** Just reply "continue" and I'll pick up where I left off.`
+2. **Remove marking-specific prompt logic** — Drop the `MARKING_PACING` directive injection so the system prompt is identical to normal chat.
+   - Line 1129: delete the `MARKING_PACING` constant.
+   - Line 1130–1131: simplify to `let finalSystemPrompt = PACING_DIRECTIVE + personalizedPrompt;` (no `isMarking` branch).
 
-Same trigger (`finish_reason === "length"`), same streaming injection — just better wording so students actually notice and act on it.
+3. **Remove the `isMarkingRequest` helper** — No longer referenced after the above changes.
+   - Lines 19–31: delete the function.
+   - Lines 12–17: simplify `MODELS` to just keep `fast` and `utility` (drop `marking`).
 
-**2. Add the same safety net to mock-exam-mark**
+4. **Keep the existing "ESSAY MARKING CAPABILITY" instructions block** (line 1134+) — this is just static guidance text appended to the system prompt for ALL chats and doesn't switch models or behaviour. It's part of the unified persona, so leaving it preserves marking quality without any branching.
 
-Currently `mock-exam-mark` parses JSON from the AI per question. If the AI's JSON gets truncated (finish_reason "length"), `JSON.parse` throws and the question silently shows "Marking error". 
+## Files touched
 
-Fix: detect `finish_reason === "length"` BEFORE parsing. If truncated, return a graceful result with feedback `"This answer was too long to mark in one pass — please retry this question."` instead of a parse error. (We don't offer "continue" here because marking is structured JSON, not conversational — retry is the right action.)
+- `supabase/functions/rag-chat/index.ts` — only file
 
-**3. No changes to max_tokens or pacing directive** — those are already set to 3500 + the silent pacing instruction from the previous change. This plan only fixes the *fallback* when pacing fails.
+## Out of scope (not touched)
 
-### Files to edit
-
-- `supabase/functions/rag-chat/index.ts` — update truncation footer text (1 line change)
-- `supabase/functions/mock-exam-mark/index.ts` — add `finish_reason` check before JSON.parse, return graceful retry message
-
-No DB, no client, no secrets. Pure edge-function edit.
+- `EssayMarkerTool.tsx` — already routes through main chat; no changes needed.
+- `mock-exam-mark` edge function — separate tool (mock exams), not the in-chat essay marker. User said "main chat for essay marking", so this stays as is.
+- Frontend, DB, secrets — none required.
 
