@@ -1111,9 +1111,7 @@ Use this to personalise your responses — reference their weak areas, their exa
     // Build final system prompt with context injection
     // INTERNAL PACING DIRECTIVE — silent, applies to all subjects/boards
     const PACING_DIRECTIVE = `INTERNAL PACING (do not mention to the user, never reference token/character/word/space limits, never say you are "running out of space" or similar): Aim to keep each response within roughly 2,500 words. Plan the structure of your answer up-front so it lands a clean, complete ending. If a topic is too large to cover fully, prioritise the most important points first and finish with a natural offer like "Want me to go deeper on [specific aspect]?" — never trail off mid-sentence or mid-list. Do not tell the user about this limit under any circumstances.\n\n`;
-    const MARKING_PACING = `MARKING PACING (do not mention to the user): Essay marking responses must always end at a natural stopping point. Finish the current AO / section / bullet completely before stopping. If you sense you are getting long, wrap up the section you are on with a one-line summary instead of starting a new section or AO. Never stop mid-sentence, mid-bullet, or mid-AO breakdown. Never reference any output limit.\n\n`;
-    const isMarking = isMarkingRequest(message, image_data);
-    let finalSystemPrompt = PACING_DIRECTIVE + (isMarking ? MARKING_PACING : "") + personalizedPrompt;
+    let finalSystemPrompt = PACING_DIRECTIVE + personalizedPrompt;
     
     // Add essay marking instructions
     finalSystemPrompt += `\n\n--- ESSAY MARKING CAPABILITY ---
