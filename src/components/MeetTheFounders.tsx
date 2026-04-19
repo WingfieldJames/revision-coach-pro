@@ -7,6 +7,7 @@ import henryLi from '@/assets/henry-li.jpg';
 import jamesFounder from '@/assets/james-founder.png';
 import tanujKakumani from '@/assets/tanuj-kakumani.jpg';
 import aadiRakhit from '@/assets/aadi-rakhit.png';
+import yanBeletskiy from '@/assets/yan-beletskiy.png';
 
 interface Trainer {
   id: string;
@@ -84,8 +85,7 @@ const trainersData: Trainer[] = [
     name: 'Yan Beletskiy',
     university: 'Warwick Discrete Maths ',
     stats: 'A-Level: A*A*A*A*A* · GCSE: 10 9s',
-    image: null,
-    storageKey: 'yan',
+    image: yanBeletskiy,
   },
   {
     id: 'tudor',
