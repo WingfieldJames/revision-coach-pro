@@ -148,8 +148,8 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   productId,
   productSlug,
   examDates = [],
-  showMyAI = false,
-  showGradeBoundaries = false,
+  showMyAI: showMyAIProp = false,
+  showGradeBoundaries: showGradeBoundariesProp = false,
   gradeBoundariesData,
   isGCSE: isGCSEProp,
 }) => {
