@@ -26,7 +26,7 @@ const STORAGE_PATHS: Record<string, string> = {
 const trainersData: Trainer[] = [
   {
     id: 'zainab',
-    name: 'Zainab',
+    name: 'Zainab Haider',
     university: 'UCL Politics & History',
     stats: 'A-Level: A*A*A* · GCSE: Straight 9s',
     image: null,
