@@ -33,7 +33,7 @@ const trainersData: Trainer[] = [
   },
   {
     id: 'aadi',
-    name: 'Aadi',
+    name: 'Aadi Rakhit',
     university: 'OCR MEI Maths Trainer',
     stats: 'A-Level: A*A*A* · GCSE: Straight 9s',
     image: null,
