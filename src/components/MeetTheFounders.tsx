@@ -6,6 +6,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import henryLi from '@/assets/henry-li.jpg';
 import jamesFounder from '@/assets/james-founder.png';
 import tanujKakumani from '@/assets/tanuj-kakumani.jpg';
+import aadiRakhit from '@/assets/aadi-rakhit.png';
 
 interface Trainer {
   id: string;
@@ -39,7 +40,7 @@ const trainersData: Trainer[] = [
     name: 'Aadi Rakhit',
     university: 'LSE Economics ',
     stats: 'A-Level: A*A*A*A* · GCSE: 12 9s',
-    image: null,
+    image: aadiRakhit,
   },
   {
     id: 'naman',
