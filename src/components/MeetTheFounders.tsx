@@ -93,7 +93,7 @@ const trainersData: Trainer[] = [
   },
   {
     id: 'fidel',
-    name: 'Fidel',
+    name: 'Fidel Sacoor',
     university: 'Goldman Sachs DA',
     stats: 'A-Level: A*A*A',
     image: null,
