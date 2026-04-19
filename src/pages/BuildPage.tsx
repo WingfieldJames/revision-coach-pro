@@ -70,6 +70,7 @@ interface TrainerProject {
   trainer_description: string | null;
   trainer_name: string | null;
   trainer_status: string | null;
+  linkedin_url: string | null;
   trainer_achievements: string[] | null;
   trainer_bio_submitted: boolean;
   selected_features: string[] | null;
@@ -194,6 +195,7 @@ export function BuildPage() {
   const [trainerDescription, setTrainerDescription] = useState("");
   const [trainerName, setTrainerName] = useState("");
   const [trainerStatus, setTrainerStatus] = useState("");
+  const [trainerLinkedin, setTrainerLinkedin] = useState("");
   const [trainerAchievements, setTrainerAchievements] = useState<string[]>(["", "", ""]);
   const [trainerBioSubmitted, setTrainerBioSubmitted] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -355,12 +357,12 @@ export function BuildPage() {
   const currentFormSnapshot = useMemo(() => {
     return JSON.stringify({
       systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
-      trainerName, trainerStatus, trainerAchievements,
+      trainerName, trainerStatus, trainerLinkedin, trainerAchievements,
       selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary,
       challengeTitle, challengeDescription, challengeStart, challengeEnd, gbData,
     });
   }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
-      trainerName, trainerStatus, trainerAchievements,
+      trainerName, trainerStatus, trainerLinkedin, trainerAchievements,
       selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary,
       challengeTitle, challengeDescription, challengeStart, challengeEnd, gbData]);
 
@@ -432,6 +434,7 @@ export function BuildPage() {
 
     const initialTrainerName = (existing as any).trainer_name?.trim() ? (existing as any).trainer_name : (legacy?.trainerName || "");
     const initialTrainerStatus = (existing as any).trainer_status?.trim() ? (existing as any).trainer_status : (legacy?.trainerStatus || "");
+    const initialTrainerLinkedin = (existing as any).linkedin_url || "";
     const dbAchievements = Array.isArray((existing as any).trainer_achievements) ? (existing as any).trainer_achievements as string[] : [];
     const initialTrainerAchievements = dbAchievements.length > 0 && dbAchievements.some((a: string) => a.trim()) ? dbAchievements : ["", "", ""];
 
@@ -467,6 +470,7 @@ export function BuildPage() {
     setTrainerDescription(initialTrainerDescription);
     setTrainerName(initialTrainerName);
     setTrainerStatus(initialTrainerStatus);
+    setTrainerLinkedin(initialTrainerLinkedin);
     setTrainerAchievements(initialTrainerAchievements);
     setSelectedFeatures(initialSelectedFeatures);
     setExamDates(initialExamDates);
@@ -742,6 +746,7 @@ export function BuildPage() {
           trainer_image_url: trainerImageUrl,
           trainer_name: trainerName,
           trainer_status: trainerStatus,
+          linkedin_url: trainerLinkedin || null,
           trainer_achievements: trainerAchievements as unknown as import("@/integrations/supabase/types").Json,
           selected_features: selectedFeatures as unknown as import("@/integrations/supabase/types").Json,
           exam_dates: examDates as unknown as import("@/integrations/supabase/types").Json,
@@ -1762,6 +1767,16 @@ export function BuildPage() {
                       className="text-sm"
                     />
                   </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">LinkedIn profile URL (optional)</Label>
+                  <Input
+                    value={trainerLinkedin}
+                    onChange={e => setTrainerLinkedin(e.target.value)}
+                    placeholder="https://www.linkedin.com/in/your-profile"
+                    className="text-sm"
+                  />
+                  <p className="text-[11px] text-muted-foreground mt-1">Students who click your photo on the trainers page will be taken here.</p>
                 </div>
                 <Textarea
                   value={trainerDescription}
