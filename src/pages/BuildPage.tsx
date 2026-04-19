@@ -1768,16 +1768,6 @@ export function BuildPage() {
                     />
                   </div>
                 </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">LinkedIn profile URL (optional)</Label>
-                  <Input
-                    value={trainerLinkedin}
-                    onChange={e => setTrainerLinkedin(e.target.value)}
-                    placeholder="https://www.linkedin.com/in/your-profile"
-                    className="text-sm"
-                  />
-                  <p className="text-[11px] text-muted-foreground mt-1">Students who click your photo on the trainers page will be taken here.</p>
-                </div>
                 <Textarea
                   value={trainerDescription}
                   onChange={e => setTrainerDescription(e.target.value)}
@@ -1801,6 +1791,16 @@ export function BuildPage() {
                       />
                     ))}
                   </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">LinkedIn profile URL (optional)</Label>
+                  <Input
+                    value={trainerLinkedin}
+                    onChange={e => setTrainerLinkedin(e.target.value)}
+                    placeholder="https://www.linkedin.com/in/your-profile"
+                    className="text-sm"
+                  />
+                  <p className="text-[11px] text-muted-foreground mt-1">Students who click your photo on the trainers page will be taken here.</p>
                 </div>
               </div>
             </CardContent>
