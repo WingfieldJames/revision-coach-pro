@@ -6,8 +6,10 @@ import { Separator } from '@/components/ui/separator';
 import {
   ArrowLeft, Sparkles, Timer, Crown, ChevronRight, ChevronDown, ChevronUp,
   GraduationCap, Home, MessageSquare, Plus, Trash2, LogIn,
-  CalendarDays, Clock3, X, Brain, User, BookOpen,
+  CalendarDays, Clock3, X, Brain, User, BookOpen, TrendingUp,
 } from 'lucide-react';
+import { MyAIPreferences } from '@/components/MyAIPreferences';
+import { GradeBoundariesTool } from '@/components/GradeBoundariesTool';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/lib/supabase';
@@ -104,6 +106,7 @@ export interface ChatbotSidebarProps {
   examSubjectName?: string;
   customPastPaperContent?: React.ReactNode;
   customRevisionGuideContent?: React.ReactNode;
+  isGCSE?: boolean;
 }
 
 const groupConversations = (convos: ChatConversation[]) => {
@@ -145,8 +148,12 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   productId,
   productSlug,
   examDates = [],
+  showMyAI: showMyAIProp = false,
+  showGradeBoundaries: showGradeBoundariesProp = false,
+  gradeBoundariesData,
+  isGCSE: isGCSEProp,
 }) => {
-  const isGCSE = productSlug?.startsWith('gcse-') ?? false;
+  const isGCSE = isGCSEProp ?? (productSlug?.startsWith('gcse-') ?? false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -157,6 +164,8 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const [showRevisionTimetable, setShowRevisionTimetable] = useState(false);
   const [showBrainViewer, setShowBrainViewer] = useState(false);
   const [showTrainerInfo, setShowTrainerInfo] = useState(false);
+  const [showMyAI, setShowMyAI] = useState(false);
+  const [showGradeBoundaries, setShowGradeBoundaries] = useState(false);
   const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
   const [subjectsOpen, setSubjectsOpen] = useState(false);
   const [showAllChats, setShowAllChats] = useState(false);
@@ -445,6 +454,30 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                         <span className="block text-[10px] text-muted-foreground leading-tight">Builds your personal profile from every conversation</span>
                       </div>
                     </button>
+                    {showMyAIProp && (
+                      <button
+                        onClick={() => setShowMyAI(true)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      >
+                        <Sparkles className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <span className="block text-sm">My AI</span>
+                          <span className="block text-[10px] text-muted-foreground leading-tight">Personalize your tutor with your grades and goals</span>
+                        </div>
+                      </button>
+                    )}
+                    {showGradeBoundariesProp && (
+                      <button
+                        onClick={() => setShowGradeBoundaries(true)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      >
+                        <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <span className="block text-sm">Grade Boundaries</span>
+                          <span className="block text-[10px] text-muted-foreground leading-tight">See historic and forecasted grade thresholds</span>
+                        </div>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -657,6 +690,48 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
               <ExamCalendarFeature compact />
             </React.Suspense>
+          </div>
+        </div>
+      )}
+
+      {/* My AI Popup */}
+      {showMyAI && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowMyAI(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                My AI
+              </h2>
+              <button onClick={() => setShowMyAI(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <MyAIPreferences productId={productId} isDeluxe={isDeluxe} />
+          </div>
+        </div>
+      )}
+
+      {/* Grade Boundaries Popup */}
+      {showGradeBoundaries && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowGradeBoundaries(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Grade Boundaries
+              </h2>
+              <button onClick={() => setShowGradeBoundaries(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} isGCSE={isGCSE} />
           </div>
         </div>
       )}
