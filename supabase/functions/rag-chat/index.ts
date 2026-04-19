@@ -1206,28 +1206,10 @@ CRITICAL RULES:
       }
       const errorText = await response.text();
       console.error(`[RAG-CHAT] AI API error (${response.status}) with model ${aiModel}:`, errorText);
-      // Auto-fallback to Flash if Pro failed (handles model rejection, 400s, 503s, etc.)
-      if (useProModel && response.status !== 429 && response.status !== 402) {
-        console.warn(`[RAG-CHAT] Pro model failed, retrying with Flash fallback`);
-        response = await fetch(aiUrl, {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${lovableApiKey}`, "Content-Type": "application/json" },
-          body: buildAiBody(MODELS.fast),
-        });
-        if (!response.ok) {
-          const fbText = await response.text();
-          console.error(`[RAG-CHAT] Fallback also failed (${response.status}):`, fbText);
-          return new Response(
-            JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
-            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-      } else {
-        return new Response(
-          JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      return new Response(
+        JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Log estimated AI usage (streaming = no usage in response, so estimate from input length)
