@@ -70,6 +70,7 @@ interface TrainerProject {
   trainer_description: string | null;
   trainer_name: string | null;
   trainer_status: string | null;
+  linkedin_url: string | null;
   trainer_achievements: string[] | null;
   trainer_bio_submitted: boolean;
   selected_features: string[] | null;
@@ -194,6 +195,7 @@ export function BuildPage() {
   const [trainerDescription, setTrainerDescription] = useState("");
   const [trainerName, setTrainerName] = useState("");
   const [trainerStatus, setTrainerStatus] = useState("");
+  const [trainerLinkedin, setTrainerLinkedin] = useState("");
   const [trainerAchievements, setTrainerAchievements] = useState<string[]>(["", "", ""]);
   const [trainerBioSubmitted, setTrainerBioSubmitted] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -355,12 +357,12 @@ export function BuildPage() {
   const currentFormSnapshot = useMemo(() => {
     return JSON.stringify({
       systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
-      trainerName, trainerStatus, trainerAchievements,
+      trainerName, trainerStatus, trainerLinkedin, trainerAchievements,
       selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary,
       challengeTitle, challengeDescription, challengeStart, challengeEnd, gbData,
     });
   }, [systemPrompt, examTechnique, customSections, trainerDescription, trainerImageUrl,
-      trainerName, trainerStatus, trainerAchievements,
+      trainerName, trainerStatus, trainerLinkedin, trainerAchievements,
       selectedFeatures, examDates, essayMarkerMarks, stagedSpecData, suggestedPrompts, diagramLibrary,
       challengeTitle, challengeDescription, challengeStart, challengeEnd, gbData]);
 
