@@ -110,7 +110,7 @@ export const DynamicFreePage = () => {
     gradeBoundariesData: (trainer as any)?.grade_boundaries_data || null,
     isGCSE: qualType === 'GCSE',
     showGraphSketcher: isMathsSubject,
-    showStatDistribution: isMathsSubject,
+    showStatDistribution: isMathsSubject && qualType !== 'GCSE',
     examDates,
     examSubjectName: subjectName,
     showMyMistakes: hasFeature('my_mistakes'),
