@@ -148,7 +148,7 @@ export const HomePage = () => {
                   
                   <span className="text-base">⭐</span>
                   <span className="text-foreground text-xs sm:text-sm font-medium">
-                    Loved by 5k+ students with a 4.9 star rating.
+                    Loved by 5k+ students with a 4.9 star rating
                   </span>
                 </div>
 
