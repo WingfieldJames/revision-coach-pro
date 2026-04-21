@@ -716,6 +716,52 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
           </div>
         </div>
       )}
+
+      {/* My AI Popup */}
+      {showMyAIPopup && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowMyAIPopup(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                My AI
+              </h2>
+              <button onClick={() => setShowMyAIPopup(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <MyAIPreferences productId={productId} isDeluxe={isDeluxe} />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
+
+      {/* Grade Boundaries Popup */}
+      {showGradeBoundariesPopup && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowGradeBoundariesPopup(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Grade Boundaries
+              </h2>
+              <button onClick={() => setShowGradeBoundariesPopup(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} isGCSE={isGCSE} />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
     </>
   );
 };
