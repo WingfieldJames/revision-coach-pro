@@ -165,12 +165,16 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
   const [subjectsOpen, setSubjectsOpen] = useState(false);
   const [showAllChats, setShowAllChats] = useState(false);
+  const [showMyAIPopup, setShowMyAIPopup] = useState(false);
+  const [showGradeBoundariesPopup, setShowGradeBoundariesPopup] = useState(false);
 
   // Lazy load heavy components
   const ExamCalendarFeature = React.lazy(() => import('@/components/ExamCalendarFeature').then(m => ({ default: m.ExamCalendarFeature })));
   const RevisionTimetable = React.lazy(() => import('@/components/RevisionTimetable').then(m => ({ default: m.RevisionTimetable })));
   const AStarBrainViewer = React.lazy(() => import('@/components/AStarBrainViewer').then(m => ({ default: m.AStarBrainViewer })));
   const TrainerInfoViewer = React.lazy(() => import('@/components/TrainerInfoViewer').then(m => ({ default: m.TrainerInfoViewer })));
+  const MyAIPreferences = React.lazy(() => import('@/components/MyAIPreferences').then(m => ({ default: m.MyAIPreferences })));
+  const GradeBoundariesTool = React.lazy(() => import('@/components/GradeBoundariesTool').then(m => ({ default: m.GradeBoundariesTool })));
 
   const chatHistoryCtx = useChatHistoryContext();
   const { conversations, loading, deleteConversation, fetchConversations } = useChatHistory(productId);
