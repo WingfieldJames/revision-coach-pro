@@ -1,34 +1,29 @@
 
+## GCSE Subject Order Change
 
-## What's currently happening
+### Objective
+Reorder the GCSE subject cards on the GCSE selection page to the new sequence: **Geography, Biology, Chemistry, Physics, Maths** (instead of the current order).
 
-The Essay Marker tool itself already submits via the normal chat (`onSubmitToChat` → `RAGChat.submitMessage` → `rag-chat` edge function). The "different API" behaviour is inside `supabase/functions/rag-chat/index.ts`, which detects marking requests and switches to a **different model** (`gemini-2.5-pro`) plus extra prompt directives.
+### Current State
+The GCSE subject list is hardcoded in `src/pages/GCSESubjectSelectionPage.tsx` with the existing order: Maths, Biology, Chemistry, Physics, Geography, etc.
 
-## What to change
+### Implementation Plan
 
-Single-file edit: `supabase/functions/rag-chat/index.ts`
+1. **Edit `src/pages/GCSESubjectSelectionPage.tsx`** — Reorder the `GCSE_SUBJECTS` array elements so they appear in the requested sequence:
+   - Geography (first)
+   - Biology (second)
+   - Chemistry (third)
+   - Physics (fourth)
+   - Mathematics (fifth)
 
-1. **Remove model branching** — Always use `gemini-2.5-flash` (same as normal chat). Drop the Pro model selection.
-   - Line 1185–1189: replace with `const aiModel = MODELS.fast;`
-   - Line 1227–1234: remove the Pro→Flash fallback block (no longer needed since Flash is the only model).
+2. **Verify responsive layout** — Confirm the 2-column grid layout still renders correctly on mobile after reordering.
 
-2. **Remove marking-specific prompt logic** — Drop the `MARKING_PACING` directive injection so the system prompt is identical to normal chat.
-   - Line 1129: delete the `MARKING_PACING` constant.
-   - Line 1130–1131: simplify to `let finalSystemPrompt = PACING_DIRECTIVE + personalizedPrompt;` (no `isMarking` branch).
+3. **Test navigation** — Ensure clicking each subject card correctly routes to the corresponding GCSE subject chatbot.
 
-3. **Remove the `isMarkingRequest` helper** — No longer referenced after the above changes.
-   - Lines 19–31: delete the function.
-   - Lines 12–17: simplify `MODELS` to just keep `fast` and `utility` (drop `marking`).
+### Files Modified
+- `src/pages/GCSESubjectSelectionPage.tsx` (only)
 
-4. **Keep the existing "ESSAY MARKING CAPABILITY" instructions block** (line 1134+) — this is just static guidance text appended to the system prompt for ALL chats and doesn't switch models or behaviour. It's part of the unified persona, so leaving it preserves marking quality without any branching.
-
-## Files touched
-
-- `supabase/functions/rag-chat/index.ts` — only file
-
-## Out of scope (not touched)
-
-- `EssayMarkerTool.tsx` — already routes through main chat; no changes needed.
-- `mock-exam-mark` edge function — separate tool (mock exams), not the in-chat essay marker. User said "main chat for essay marking", so this stays as is.
-- Frontend, DB, secrets — none required.
-
+### No other changes required
+- No database updates needed (hardcoded UI array)
+- No routing changes needed (existing paths remain)
+- No CSS changes required (grid layout unchanged)
