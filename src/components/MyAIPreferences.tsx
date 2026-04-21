@@ -81,10 +81,22 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isD
         if (error) throw error;
 
         if (data) {
+          // If the saved grade/year was written on a different qualification scale
+          // (e.g. "C" saved under A-Level now showing in a GCSE product),
+          // fall back to the qualification-appropriate default.
+          const validPredicted = GRADES.includes(data.predicted_grade)
+            ? data.predicted_grade
+            : getDefaultPredictedGrade(qualLevel);
+          const validTarget = GRADES.includes(data.target_grade)
+            ? data.target_grade
+            : getDefaultTargetGrade(qualLevel);
+          const validYear = yearOptions.includes(data.year)
+            ? data.year
+            : getDefaultYear(qualLevel);
           setPreferences({
-            year: data.year,
-            predicted_grade: data.predicted_grade,
-            target_grade: data.target_grade,
+            year: validYear,
+            predicted_grade: validPredicted,
+            target_grade: validTarget,
             additional_info: data.additional_info,
           });
         }

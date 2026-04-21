@@ -22,7 +22,7 @@ export function getDefaultPredictedGrade(q: QualLevel = getQualLevel()): string 
 }
 
 export function getDefaultTargetGrade(q: QualLevel = getQualLevel()): string {
-  return q === 'gcse' ? '7' : 'A';
+  return q === 'gcse' ? '9' : 'A';
 }
 
 export function getYearOptions(q: QualLevel = getQualLevel()): string[] {
