@@ -91,14 +91,22 @@ export const GCSEComparePage = () => {
     loadGCSEProducts();
   }, []);
 
-  // Build subjects list
+  // Build subjects list (custom GCSE order: Geography, Biology, Chemistry, Physics, Maths, then others)
+  const GCSE_SUBJECT_ORDER = ['geography', 'biology', 'chemistry', 'physics', 'mathematics', 'maths'];
   const allSubjects = React.useMemo(() => {
     const subjects: string[] = [];
     for (const p of gcseProducts) {
       const key = p.subject.toLowerCase().replace(/\s+/g, '-');
       if (!subjects.includes(key)) subjects.push(key);
     }
-    return subjects;
+    return subjects.sort((a, b) => {
+      const ai = GCSE_SUBJECT_ORDER.indexOf(a);
+      const bi = GCSE_SUBJECT_ORDER.indexOf(b);
+      if (ai === -1 && bi === -1) return a.localeCompare(b);
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
   }, [gcseProducts]);
 
   // Build subject labels
