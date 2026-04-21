@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   ArrowLeft, Sparkles, Timer, Crown, ChevronRight, ChevronDown, ChevronUp,
   GraduationCap, Home, MessageSquare, Plus, Trash2, LogIn,
-  CalendarDays, Clock3, X, Brain, User, BookOpen,
+  CalendarDays, Clock3, X, Brain, User, BookOpen, TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
@@ -96,6 +96,7 @@ export interface ChatbotSidebarProps {
   revisionGuideBoard?: string;
   gradeBoundariesSubject?: string;
   gradeBoundariesData?: Record<string, Record<string, number>> | null;
+  isGCSE?: boolean;
   essayMarkerLabel?: string;
   essayMarkerFixedMark?: number;
   essayMarkerCustomMarks?: number[];
@@ -145,8 +146,12 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   productId,
   productSlug,
   examDates = [],
+  showMyAI = false,
+  showGradeBoundaries = false,
+  gradeBoundariesData,
+  isGCSE: isGCSEProp,
 }) => {
-  const isGCSE = productSlug?.startsWith('gcse-') ?? false;
+  const isGCSE = isGCSEProp ?? (productSlug?.startsWith('gcse-') ?? false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -160,12 +165,16 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
   const [subjectsOpen, setSubjectsOpen] = useState(false);
   const [showAllChats, setShowAllChats] = useState(false);
+  const [showMyAIPopup, setShowMyAIPopup] = useState(false);
+  const [showGradeBoundariesPopup, setShowGradeBoundariesPopup] = useState(false);
 
   // Lazy load heavy components
   const ExamCalendarFeature = React.lazy(() => import('@/components/ExamCalendarFeature').then(m => ({ default: m.ExamCalendarFeature })));
   const RevisionTimetable = React.lazy(() => import('@/components/RevisionTimetable').then(m => ({ default: m.RevisionTimetable })));
   const AStarBrainViewer = React.lazy(() => import('@/components/AStarBrainViewer').then(m => ({ default: m.AStarBrainViewer })));
   const TrainerInfoViewer = React.lazy(() => import('@/components/TrainerInfoViewer').then(m => ({ default: m.TrainerInfoViewer })));
+  const MyAIPreferences = React.lazy(() => import('@/components/MyAIPreferences').then(m => ({ default: m.MyAIPreferences })));
+  const GradeBoundariesTool = React.lazy(() => import('@/components/GradeBoundariesTool').then(m => ({ default: m.GradeBoundariesTool })));
 
   const chatHistoryCtx = useChatHistoryContext();
   const { conversations, loading, deleteConversation, fetchConversations } = useChatHistory(productId);
@@ -445,6 +454,30 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                         <span className="block text-[10px] text-muted-foreground leading-tight">Builds your personal profile from every conversation</span>
                       </div>
                     </button>
+                    {showMyAI && (
+                      <button
+                        onClick={() => setShowMyAIPopup(true)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      >
+                        <Sparkles className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <span className="block text-sm">My AI</span>
+                          <span className="block text-[10px] text-muted-foreground leading-tight">Personalize your AI tutor's responses</span>
+                        </div>
+                      </button>
+                    )}
+                    {showGradeBoundaries && (
+                      <button
+                        onClick={() => setShowGradeBoundariesPopup(true)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      >
+                        <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <span className="block text-sm">Grade Boundaries</span>
+                          <span className="block text-[10px] text-muted-foreground leading-tight">See historical and forecasted grade thresholds</span>
+                        </div>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -679,6 +712,52 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             </div>
             <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
               <RevisionTimetable />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
+
+      {/* My AI Popup */}
+      {showMyAIPopup && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowMyAIPopup(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                My AI
+              </h2>
+              <button onClick={() => setShowMyAIPopup(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <MyAIPreferences productId={productId} isDeluxe={isDeluxe} />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
+
+      {/* Grade Boundaries Popup */}
+      {showGradeBoundariesPopup && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowGradeBoundariesPopup(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Grade Boundaries
+              </h2>
+              <button onClick={() => setShowGradeBoundariesPopup(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} isGCSE={isGCSE} />
             </React.Suspense>
           </div>
         </div>
