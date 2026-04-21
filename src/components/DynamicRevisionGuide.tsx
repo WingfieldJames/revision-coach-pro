@@ -119,6 +119,20 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
                   rawName = numberedHeader[2].trim();
                 } else if (relaxedHeader) {
                   rawName = relaxedHeader[1].trim();
+                } else if (contentStr.includes(' > ')) {
+                  // Politics-style nested format: "Component 1: ... > UK Politics > 1. Political Participation: details"
+                  const firstLine = contentStr.split('\n')[0];
+                  const segments = firstLine.split(' > ').map(s => s.trim()).filter(Boolean);
+                  const deepest = segments[segments.length - 1] || '';
+                  // Strip details after colon
+                  const headPart = deepest.split(':')[0].trim();
+                  const numMatch = headPart.match(/^(\d+(?:\.\d+)*)\.\s+(.+)$/);
+                  if (numMatch) {
+                    if (!code) code = numMatch[1].trim();
+                    rawName = numMatch[2].trim();
+                  } else {
+                    rawName = headPart;
+                  }
                 } else {
                   const stripped = contentStr.replace(/^\[[^\]]*\]\s*/, '').trim();
                   rawName = stripped.slice(0, 80);
@@ -133,8 +147,8 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
               if (rawName.trim().startsWith('{') || rawName.trim().startsWith('"')) {
                 return null;
               }
-              // Skip chunks with no numeric code AND no recognisable spec structure
-              if (!code && !/^\d/.test(rawName)) {
+              // Skip chunks with no usable name
+              if (!rawName || rawName.trim().length < 3) {
                 return null;
               }
 
