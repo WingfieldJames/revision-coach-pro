@@ -189,7 +189,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
           ))}
         </div>
       );
-      case 'my-ai': return <MyAIPreferences productId={productId} isDeluxe={isDeluxe} />;
+      case 'my-ai': return <MyAIPreferences productId={productId} isDeluxe={isDeluxe} isGCSE={isGCSE} />;
       case 'grade-boundaries': return <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} isGCSE={isGCSE} />;
       case 'graph-sketcher': return <GraphSketcherTool />;
       case 'stat-distribution': return <StatisticalDistributionTool />;

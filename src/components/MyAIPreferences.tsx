@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,8 +10,14 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator';
 import { AStarBrainToggle } from '@/components/AStarBrainToggle';
-
-const GRADES = ['D', 'C', 'B', 'A', 'A*'];
+import {
+  getQualLevel,
+  getGradeScale,
+  getYearOptions,
+  getDefaultYear,
+  getDefaultPredictedGrade,
+  getDefaultTargetGrade,
+} from '@/lib/qualification';
 
 interface UserPreferences {
   year: string;
@@ -23,18 +29,29 @@ interface UserPreferences {
 interface MyAIPreferencesProps {
   productId?: string;
   isDeluxe?: boolean;
+  isGCSE?: boolean;
 }
 
-export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isDeluxe = false }) => {
+export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isDeluxe = false, isGCSE }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Prefer the explicit isGCSE prop (derived from product context by the parent).
+  // Fall back to localStorage only when no product context is available (e.g. the global header popover).
+  const qualLevel = useMemo(
+    () => (isGCSE === true ? 'gcse' : isGCSE === false ? 'alevel' : getQualLevel()),
+    [isGCSE],
+  );
+  const GRADES = useMemo(() => getGradeScale(qualLevel), [qualLevel]);
+  const yearOptions = useMemo(() => getYearOptions(qualLevel), [qualLevel]);
+
   const [preferences, setPreferences] = useState<UserPreferences>({
-    year: 'Year 13',
-    predicted_grade: 'C',
-    target_grade: 'A',
+    year: getDefaultYear(qualLevel),
+    predicted_grade: getDefaultPredictedGrade(qualLevel),
+    target_grade: getDefaultTargetGrade(qualLevel),
     additional_info: null,
   });
 
@@ -141,7 +158,7 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isD
 
   const getGradeIndex = (grade: string) => {
     const index = GRADES.indexOf(grade);
-    return index >= 0 ? index : 2; // Default to 'B' if not found
+    return index >= 0 ? index : Math.floor(GRADES.length / 2);
   };
 
   if (!user) {
@@ -200,8 +217,9 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isD
             <SelectValue placeholder="Select your year" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Year 13">Year 13</SelectItem>
-            <SelectItem value="Year 12">Year 12</SelectItem>
+            {yearOptions.map(y => (
+              <SelectItem key={y} value={y}>{y}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -219,7 +237,7 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isD
             value={[getGradeIndex(preferences.predicted_grade)]}
             onValueChange={handlePredictedGradeChange}
             min={0}
-            max={4}
+            max={GRADES.length - 1}
             step={1}
             className="w-full"
           />
@@ -244,7 +262,7 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isD
             value={[getGradeIndex(preferences.target_grade)]}
             onValueChange={handleTargetGradeChange}
             min={0}
-            max={4}
+            max={GRADES.length - 1}
             step={1}
             className="w-full"
           />

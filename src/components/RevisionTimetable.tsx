@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -6,12 +6,18 @@ import { toast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Plus, X, RotateCcw, Brain, Zap, Shuffle, Clock, Moon, Download, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  getQualLevel,
+  getGradeScale,
+  getMaxSubjects,
+  getDefaultPredictedGrade,
+  getDefaultTargetGrade,
+} from "@/lib/qualification";
 
 /* ─── constants ─── */
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 6); // 06:00–21:00 (represents 06:00–22:00 blocks)
-const GRADES = ["U", "G", "F", "E", "D", "C", "B", "A", "A*"] as const;
-type Grade = (typeof GRADES)[number];
+type Grade = string;
 
 const SUBJECT_TYPES = [
   "STEM - Heavy Calculation",
@@ -99,7 +105,7 @@ interface ScheduledSlot {
 type GeneratedMap = Record<string, ScheduledSlot>;
 
 /* ─── helpers ─── */
-const gradeIndex = (g: Grade) => GRADES.indexOf(g);
+const gradeIndex = (g: Grade, scale: readonly string[]) => scale.indexOf(g);
 const slotKey = (day: string, hour: number) => `${day}-${hour}`;
 
 function loadJSON<T>(key: string, fallback: T): T {
@@ -118,10 +124,10 @@ function energyTier(hour: number): "high" | "medium" | "low" {
 }
 
 /* ─── defaults ─── */
-const defaultSubjects = (): Subject[] => [
-  { id: "1", name: "", predicted: "C", target: "A", importance: 50, subjectType: "STEM - Conceptual", isCustom: false },
-  { id: "2", name: "", predicted: "C", target: "A", importance: 50, subjectType: "Essay-Based / Humanities", isCustom: false },
-  { id: "3", name: "", predicted: "C", target: "A", importance: 50, subjectType: "STEM - Conceptual", isCustom: false },
+const defaultSubjects = (predicted: string, target: string): Subject[] => [
+  { id: "1", name: "", predicted, target, importance: 50, subjectType: "STEM - Conceptual", isCustom: false },
+  { id: "2", name: "", predicted, target, importance: 50, subjectType: "Essay-Based / Humanities", isCustom: false },
+  { id: "3", name: "", predicted, target, importance: 50, subjectType: "STEM - Conceptual", isCustom: false },
 ];
 
 function defaultSlots(): SlotMap {
@@ -140,14 +146,14 @@ function getSessionType(weekIndex: number, isLowEnergy: boolean): string {
 }
 
 /* ─── SCHEDULING ALGORITHM (per spec) ─── */
-function generateTimetable(subjects: Subject[], freeSlots: SlotMap): GeneratedMap {
+function generateTimetable(subjects: Subject[], freeSlots: SlotMap, scale: readonly string[]): GeneratedMap {
   const filled = subjects.filter(s => s.name.trim());
   const freeKeys = Object.keys(freeSlots).filter(k => freeSlots[k]);
   const totalHours = freeKeys.length;
 
   // Step 1: Calculate subject weights
   const weighted = filled.map(s => {
-    const gap = gradeIndex(s.target) - gradeIndex(s.predicted);
+    const gap = gradeIndex(s.target, scale) - gradeIndex(s.predicted, scale);
     const baseWeight = Math.max(gap, 1);
     const priorityMultiplier = 0.5 + (s.importance / 100);
     return { subject: s, weight: baseWeight * priorityMultiplier, gap };
@@ -277,9 +283,10 @@ const SubjectCard: React.FC<{
   index: number;
   disabled: boolean;
   canRemove: boolean;
+  gradeScale: readonly string[];
   onUpdate: (patch: Partial<Subject>) => void;
   onRemove: () => void;
-}> = ({ subject, index, disabled, canRemove, onUpdate, onRemove }) => {
+}> = ({ subject, index, disabled, canRemove, gradeScale, onUpdate, onRemove }) => {
   const [query, setQuery] = useState(subject.name);
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -317,7 +324,7 @@ const SubjectCard: React.FC<{
   const priorityLabel = subject.importance < 33 ? "Low" : subject.importance < 66 ? "Medium" : "High";
 
   // Show warning if predicted >= target
-  const gap = gradeIndex(subject.target) - gradeIndex(subject.predicted);
+  const gap = gradeIndex(subject.target, gradeScale) - gradeIndex(subject.predicted, gradeScale);
   const atOrAbove = subject.name.trim() && gap <= 0;
 
   return (
@@ -393,7 +400,7 @@ const SubjectCard: React.FC<{
             onChange={(e) => onUpdate({ predicted: e.target.value as Grade })}
             className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
             disabled={disabled}
-          >{GRADES.map(g => <option key={g} value={g}>{g}</option>)}</select>
+          >{gradeScale.map(g => <option key={g} value={g}>{g}</option>)}</select>
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Target</label>
@@ -402,7 +409,7 @@ const SubjectCard: React.FC<{
             onChange={(e) => onUpdate({ target: e.target.value as Grade })}
             className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
             disabled={disabled}
-          >{GRADES.map(g => <option key={g} value={g}>{g}</option>)}</select>
+          >{gradeScale.map(g => <option key={g} value={g}>{g}</option>)}</select>
         </div>
       </div>
 
@@ -435,7 +442,11 @@ const SubjectCard: React.FC<{
 /* ──────────────────────────────────────────────
    Main component
    ────────────────────────────────────────────── */
-export const RevisionTimetable: React.FC = () => {
+interface RevisionTimetableProps {
+  isGCSE?: boolean;
+}
+
+export const RevisionTimetable: React.FC<RevisionTimetableProps> = ({ isGCSE }) => {
   // Get user ID for per-user storage
   const userId = (() => {
     try {
@@ -452,7 +463,16 @@ export const RevisionTimetable: React.FC = () => {
   const SLOTS_KEY = `${SLOTS_KEY_PREFIX}${userId}`;
   const GENERATED_KEY = `${GENERATED_KEY_PREFIX}${userId}`;
 
-  const [subjects, setSubjects] = useState<Subject[]>(() => loadJSON(SUBJECTS_KEY, defaultSubjects()));
+  const qualLevel = useMemo(
+    () => (isGCSE === true ? 'gcse' : isGCSE === false ? 'alevel' : getQualLevel()),
+    [isGCSE],
+  );
+  const gradeScale = useMemo(() => getGradeScale(qualLevel), [qualLevel]);
+  const maxSubjects = useMemo(() => getMaxSubjects(qualLevel), [qualLevel]);
+  const defaultPredicted = useMemo(() => getDefaultPredictedGrade(qualLevel), [qualLevel]);
+  const defaultTarget = useMemo(() => getDefaultTargetGrade(qualLevel), [qualLevel]);
+
+  const [subjects, setSubjects] = useState<Subject[]>(() => loadJSON(SUBJECTS_KEY, defaultSubjects(defaultPredicted, defaultTarget)));
   const [freeSlots, setFreeSlots] = useState<SlotMap>(() => loadJSON(SLOTS_KEY, defaultSlots()));
   const [generated, setGenerated] = useState<GeneratedMap | null>(() => loadJSON(GENERATED_KEY, null));
   const [isGenerating, setIsGenerating] = useState(false);
@@ -467,8 +487,8 @@ export const RevisionTimetable: React.FC = () => {
     setSubjects(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s));
 
   const addSubject = () => {
-    if (subjects.length >= 6) return;
-    setSubjects(prev => [...prev, { id: crypto.randomUUID(), name: "", predicted: "C", target: "A", importance: 50, subjectType: "STEM - Conceptual", isCustom: false }]);
+    if (subjects.length >= maxSubjects) return;
+    setSubjects(prev => [...prev, { id: crypto.randomUUID(), name: "", predicted: defaultPredicted, target: defaultTarget, importance: 50, subjectType: "STEM - Conceptual", isCustom: false }]);
   };
 
   const removeSubject = (id: string) => setSubjects(prev => prev.filter(s => s.id !== id));
@@ -513,7 +533,7 @@ export const RevisionTimetable: React.FC = () => {
 
     setIsGenerating(true);
     setTimeout(() => {
-      const result = generateTimetable(filled, freeSlots);
+      const result = generateTimetable(filled, freeSlots, gradeScale);
       setGenerated(result);
       setIsGenerating(false);
       setTimeout(() => {
@@ -711,16 +731,17 @@ export const RevisionTimetable: React.FC = () => {
               index={i}
               disabled={!!generated}
               canRemove={subjects.length > 1}
+              gradeScale={gradeScale}
               onUpdate={(patch) => updateSubject(s.id, patch)}
               onRemove={() => removeSubject(s.id)}
             />
           ))}
         </div>
 
-        {subjects.length < 6 && !generated && (
+        {subjects.length < maxSubjects && !generated && (
           <div className="flex justify-center mb-8">
             <Button variant="outline" size="sm" onClick={addSubject} className="flex items-center gap-1.5 text-sm">
-              <Plus className="h-4 w-4" /> Add Subject (max 6)
+              <Plus className="h-4 w-4" /> Add Subject (max {maxSubjects})
             </Button>
           </div>
         )}

@@ -711,7 +711,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
               </button>
             </div>
             <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
-              <RevisionTimetable />
+              <RevisionTimetable isGCSE={isGCSE} />
             </React.Suspense>
           </div>
         </div>
@@ -734,7 +734,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
               </button>
             </div>
             <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
-              <MyAIPreferences productId={productId} isDeluxe={isDeluxe} />
+              <MyAIPreferences productId={productId} isDeluxe={isDeluxe} isGCSE={isGCSE} />
             </React.Suspense>
           </div>
         </div>
