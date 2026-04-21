@@ -147,8 +147,8 @@ export const DynamicRevisionGuide: React.FC<DynamicRevisionGuideProps> = ({
               if (rawName.trim().startsWith('{') || rawName.trim().startsWith('"')) {
                 return null;
               }
-              // Skip chunks with no numeric code AND no recognisable spec structure
-              if (!code && !/^\d/.test(rawName)) {
+              // Skip chunks with no usable name
+              if (!rawName || rawName.trim().length < 3) {
                 return null;
               }
 
