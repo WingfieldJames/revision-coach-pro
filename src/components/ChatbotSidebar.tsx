@@ -474,12 +474,27 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                     {showGradeBoundaries && (
                       <button
                         onClick={() => setShowGradeBoundariesPopup(true)}
-                        className="lg:hidden w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                        className={cn(
+                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted",
+                          !isGCSE && "lg:hidden"
+                        )}
                       >
                         <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
                         <div className="min-w-0">
                           <span className="block text-sm">Grade Boundaries</span>
                           <span className="block text-[10px] text-muted-foreground leading-tight">See historical and forecasted grade thresholds</span>
+                        </div>
+                      </button>
+                    )}
+                    {isGCSE && showExamCountdown && examDates.length > 0 && (
+                      <button
+                        onClick={() => setShowExamCountdownPopup(true)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      >
+                        <Timer className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <span className="block text-sm">Days to Exam{daysUntilFirstExam !== null && daysUntilFirstExam > 0 ? ` · ${daysUntilFirstExam}d` : ''}</span>
+                          <span className="block text-[10px] text-muted-foreground leading-tight">Countdown to your upcoming exams</span>
                         </div>
                       </button>
                     )}
