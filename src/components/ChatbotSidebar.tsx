@@ -170,6 +170,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const [showAllChats, setShowAllChats] = useState(false);
   const [showMyAIPopup, setShowMyAIPopup] = useState(false);
   const [showGradeBoundariesPopup, setShowGradeBoundariesPopup] = useState(false);
+  const [showExamCountdownPopup, setShowExamCountdownPopup] = useState(false);
 
   // Lazy load heavy components
   const ExamCalendarFeature = React.lazy(() => import('@/components/ExamCalendarFeature').then(m => ({ default: m.ExamCalendarFeature })));
