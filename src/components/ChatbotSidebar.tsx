@@ -782,6 +782,28 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
           </div>
         </div>
       )}
+      {/* Exam Countdown Popup (GCSE only) */}
+      {showExamCountdownPopup && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowExamCountdownPopup(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Timer className="h-5 w-5 text-primary" />
+                Exam Countdown
+              </h2>
+              <button onClick={() => setShowExamCountdownPopup(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <ExamCountdown exams={examDates} subjectName={examSubjectName} />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
     </>
   );
 };
