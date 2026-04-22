@@ -1,36 +1,32 @@
 
+## Restore "My AI" and "Grade Boundaries" to top toolbar on wide screens
 
-## Fix Edexcel Politics revision guide spec loading
+### Goal
+On wide desktop screens, "My AI" and "Grade Boundaries" should appear in the top `ChatbotToolbar` (as they were originally). On narrower screens, they remain in the `ChatbotSidebar` under "Features" (current behavior).
 
-### Problem
-Edexcel Politics has **821 specification chunks** correctly stored in `document_chunks`, but **zero appear** in the Revision Guide's spec search. The Politics chunks were ingested with bare metadata (`{content_type: "specification"}` only — no `topic`, no `spec_id`) and content shaped like:
+### Breakpoint
+Use Tailwind's `lg` breakpoint (≥1024px) as the threshold for "full width wide". This keeps tablets/small laptops using the sidebar version and only restores the toolbar buttons on true desktop widths.
 
-> `Component 1: UK Politics and Core Political Ideas > UK Politics > 1. Political Participation: democracy and participation, ...`
+### Changes
 
-The parser in `DynamicRevisionGuide.tsx` requires either `metadata.topic`, a numeric prefix like `"3.1.1"`, or a `[bracket header]` in content. Politics has none of these, so every chunk is dropped by the filter `if (!code && !/^\d/.test(rawName))`.
+**1. `src/components/ChatbotToolbar.tsx`**
+- Re-add `my-ai` and `grade-boundaries` entries to the `toolItems` array (they already have `renderToolContent` cases intact — no popover/render logic to restore).
+- Both entries gated by `show: showMyAI` and `show: showGradeBoundaries` respectively, so pages that don't pass those props are unaffected.
+- Wrap each of these two buttons (only) with a `hidden lg:flex` class so they are hidden below the `lg` breakpoint and the sidebar version takes over.
 
-### Fix (single file)
+**2. `src/components/ChatbotSidebar.tsx`**
+- Wrap the "My AI" and "Grade Boundaries" buttons inside the Features section with a `lg:hidden` wrapper so they only appear under `lg` width.
+- Leave all other sidebar Features (Past Papers, etc.) untouched.
+- Keep the existing modal wrappers and lazy-loaded components intact (they only render when their popup state is true, so no overhead on desktop).
 
-**`src/components/DynamicRevisionGuide.tsx`** — extend the spec-point parser to recognise the `"A > B > N. Title: details"` format used by Politics (and other newer ingests):
-
-1. **New format detector**: when `metadata.topic` is empty AND no bracket header, try parsing `content` itself:
-   - Split on `" > "` → use the deepest segment as the spec point name.
-   - Match leading `^(\d+)\.\s+(.+?)(?::|$)` in the deepest segment to extract `code` (e.g. `"1"`) and `name` (e.g. `"Political Participation"`).
-   - Use the parent segments (e.g. `"Component 1: UK Politics … > UK Politics"`) as the topic context, surfaced in the search dropdown subtitle.
-
-2. **Relax the drop filter**: keep a chunk if it has a non-empty parsed `name` of reasonable length (≥3 chars) and isn't pure JSON, even when there's no numeric `code`. The existing "Qualification Overview / Assessment" skip list stays.
-
-3. **Keyword extraction unchanged** — already derived from `content`, which is rich for Politics.
-
-4. **No backend changes needed**: `generate-revision-guide` already pulls all `content_type='specification'` chunks for the product, so once the client surfaces them in the search list, the AI will receive them as context automatically. The function's keyword-overlap relevance filter (≥2 keyword matches) works on the raw content, which is descriptive.
-
-### Verification after deploy
-- Open Edexcel Politics → Revision Guide → search "democracy", "parliament", "constitution", "Supreme Court" → spec points should appear in the dropdown.
-- Generate a guide for a Politics spec point → confirm the AI output references the actual Edexcel Politics syllabus content (not generic).
+### Result
+- ≥1024px: My AI + Grade Boundaries appear in the top toolbar exactly as they were before, alongside Diagram Generator / Essay Marker / Past Papers / etc. Sidebar shows Features without these two.
+- <1024px: Top toolbar omits them; sidebar Features list shows them (current behavior preserved for mobile/tablet).
 
 ### Files modified
-- `src/components/DynamicRevisionGuide.tsx` (parser logic only)
+- `src/components/ChatbotToolbar.tsx`
+- `src/components/ChatbotSidebar.tsx`
 
 ### Out of scope
-- Re-ingesting Politics with proper `topic`/`spec_id` metadata (not needed; parser fix handles existing chunks).
-
+- No changes to per-page props (`FreeVersionPage`, premium pages, etc.) — they already pass `showMyAI` and `showGradeBoundaries`.
+- No changes to the underlying `MyAIPreferences` or `GradeBoundariesTool` components.
