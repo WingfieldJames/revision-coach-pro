@@ -18,7 +18,9 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { Star, MessageSquare, Mail, TrendingUp, Users, Crown } from "lucide-react";
+import { Star, MessageSquare, Mail, TrendingUp, Users, Crown, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface FeedbackData {
   stats: {
@@ -54,6 +56,26 @@ export const FeedbackResultsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterRating, setFilterRating] = useState<string>("all");
+  const [reanalyzing, setReanalyzing] = useState(false);
+
+  const runReanalyze = async () => {
+    setReanalyzing(true);
+    try {
+      const { data: result, error: fnError } = await supabase.functions.invoke('analyze-feedback');
+      if (fnError) throw fnError;
+      const updated = result?.results ? Object.keys(result.results).length : 0;
+      if (result?.message) {
+        toast.info(result.message);
+      } else {
+        toast.success(`Re-analyzed ${updated} product${updated === 1 ? '' : 's'}. Guidelines updated.`);
+      }
+    } catch (err: any) {
+      console.error('[FEEDBACK] analyze-feedback failed:', err);
+      toast.error(err?.message || 'Failed to re-analyze feedback');
+    } finally {
+      setReanalyzing(false);
+    }
+  };
 
   // Auth gate: require admin or trainer role
   useEffect(() => {
@@ -197,9 +219,20 @@ VALUES ('${user?.id}', 'admin');`}
         <h1 className="text-3xl font-bold text-foreground tracking-tight font-['DM_Sans']">
           Feedback Results
         </h1>
-        <Badge variant="secondary" className="text-xs">
-          {data.stats.total} responses
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={runReanalyze}
+            disabled={reanalyzing}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${reanalyzing ? 'animate-spin' : ''}`} />
+            {reanalyzing ? 'Analyzing…' : 'Re-analyze feedback'}
+          </Button>
+          <Badge variant="secondary" className="text-xs">
+            {data.stats.total} responses
+          </Badge>
+        </div>
       </div>
 
       {/* Stats Cards */}

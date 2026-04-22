@@ -191,7 +191,7 @@ serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Revision Coach Pro <digest@revisioncoachpro.com>",
+            from: "A* AI Digest <digest@astarai.co.uk>",
             to: [adminEmail],
             subject: `Daily Digest - ${now.toISOString().substring(0, 10)}`,
             text: plainText,
