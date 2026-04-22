@@ -38,14 +38,15 @@ const trainersData: Trainer[] = [
     storageKey: 'zainab',
     linkedin: 'https://www.linkedin.com/in/zainabhaider17/',
   },
-  {
-    id: 'aadi',
-    name: 'Aadi Rakhit',
-    university: 'LSE Economics ',
-    stats: 'A-Level: A*A*A*A* · GCSE: 12 9s',
-    image: aadiRakhit,
-    linkedin: 'https://www.linkedin.com/in/aadirakhit/',
-  },
+  // TEMPORARILY REMOVED – uncomment to restore
+  // {
+  //   id: 'aadi',
+  //   name: 'Aadi Rakhit',
+  //   university: 'LSE Economics ',
+  //   stats: 'A-Level: A*A*A*A* · GCSE: 12 9s',
+  //   image: aadiRakhit,
+  //   linkedin: 'https://www.linkedin.com/in/aadirakhit/',
+  // },
   {
     id: 'naman',
     name: 'Naman Tiwari',
