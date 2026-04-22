@@ -160,7 +160,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const toolItems = [
     { id: 'maths-mode', label: mathsMode === 'pure' ? 'Pure' : 'Applied (Statistics and Mechanics)', icon: <ArrowLeftRight className="h-4 w-4" />, show: showMathsModeSwitcher },
     { id: 'my-ai', label: 'My AI', icon: <Sparkles className="h-4 w-4" />, show: showMyAI, wideOnly: true },
-    { id: 'grade-boundaries', label: 'Grade Boundaries', icon: <TrendingUp className="h-4 w-4" />, show: showGradeBoundaries, wideOnly: true },
+    { id: 'grade-boundaries', label: 'Grade Boundaries', icon: <TrendingUp className="h-4 w-4" />, show: showGradeBoundaries && !isGCSE, wideOnly: true },
     { id: 'graph-sketcher', label: 'Graph Sketcher', icon: <BarChart2 className="h-4 w-4" />, show: showGraphSketcher },
     { id: 'stat-distribution', label: 'Distributions', icon: <TrendingUp className="h-4 w-4" />, show: showStatDistribution },
     { id: 'diagrams', label: 'Diagram Generator', icon: <BarChart2 className="h-4 w-4" />, show: showDiagramTool },
@@ -169,7 +169,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
     { id: 'revision-guide', label: 'Revision Guide', icon: <BookOpen className="h-4 w-4" />, show: showRevisionGuide },
     { id: 'mock-exams', label: 'Mock Exams', icon: <ClipboardList className="h-4 w-4" />, show: showMockExam },
     { id: 'my-mistakes', label: 'My Mistakes', icon: <RotateCcw className="h-4 w-4" />, show: showMyMistakes, badge: mistakesDueCount },
-    { id: 'exam-countdown', label: 'Exam Countdown', icon: <Timer className="h-4 w-4" />, show: showExamCountdown && examDates.length > 0 },
+    { id: 'exam-countdown', label: 'Exam Countdown', icon: <Timer className="h-4 w-4" />, show: showExamCountdown && examDates.length > 0 && !isGCSE },
   ];
 
   const visibleTools = toolItems.filter(t => t.show);
