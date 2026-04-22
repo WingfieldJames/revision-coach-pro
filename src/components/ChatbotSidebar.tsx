@@ -458,7 +458,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                     {showMyAI && (
                       <button
                         onClick={() => setShowMyAIPopup(true)}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                        className="lg:hidden w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
                       >
                         <Sparkles className="h-4 w-4 text-muted-foreground shrink-0" />
                         <div className="min-w-0">
@@ -470,7 +470,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                     {showGradeBoundaries && (
                       <button
                         onClick={() => setShowGradeBoundariesPopup(true)}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                        className="lg:hidden w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
                       >
                         <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
                         <div className="min-w-0">

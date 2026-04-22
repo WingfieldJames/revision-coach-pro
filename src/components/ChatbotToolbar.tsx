@@ -159,6 +159,8 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
 
   const toolItems = [
     { id: 'maths-mode', label: mathsMode === 'pure' ? 'Pure' : 'Applied (Statistics and Mechanics)', icon: <ArrowLeftRight className="h-4 w-4" />, show: showMathsModeSwitcher },
+    { id: 'my-ai', label: 'My AI', icon: <Sparkles className="h-4 w-4" />, show: showMyAI, wideOnly: true },
+    { id: 'grade-boundaries', label: 'Grade Boundaries', icon: <TrendingUp className="h-4 w-4" />, show: showGradeBoundaries, wideOnly: true },
     { id: 'graph-sketcher', label: 'Graph Sketcher', icon: <BarChart2 className="h-4 w-4" />, show: showGraphSketcher },
     { id: 'stat-distribution', label: 'Distributions', icon: <TrendingUp className="h-4 w-4" />, show: showStatDistribution },
     { id: 'diagrams', label: 'Diagram Generator', icon: <BarChart2 className="h-4 w-4" />, show: showDiagramTool },
@@ -245,7 +247,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative"
+                className={`flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative ${tool.wideOnly ? 'hidden lg:flex' : ''}`}
               >
                 {tool.id !== 'exam-countdown' && tool.icon}
                 {tool.id !== 'exam-countdown' && <span className="hidden sm:inline">{tool.label}</span>}
