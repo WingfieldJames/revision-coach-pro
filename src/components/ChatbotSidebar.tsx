@@ -149,6 +149,8 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   examDates = [],
   showMyAI = false,
   showGradeBoundaries = false,
+  showExamCountdown = false,
+  examSubjectName = 'Exams',
   gradeBoundariesData,
   isGCSE: isGCSEProp,
 }) => {
@@ -168,6 +170,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const [showAllChats, setShowAllChats] = useState(false);
   const [showMyAIPopup, setShowMyAIPopup] = useState(false);
   const [showGradeBoundariesPopup, setShowGradeBoundariesPopup] = useState(false);
+  const [showExamCountdownPopup, setShowExamCountdownPopup] = useState(false);
 
   // Lazy load heavy components
   const ExamCalendarFeature = React.lazy(() => import('@/components/ExamCalendarFeature').then(m => ({ default: m.ExamCalendarFeature })));
@@ -176,6 +179,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const TrainerInfoViewer = React.lazy(() => import('@/components/TrainerInfoViewer').then(m => ({ default: m.TrainerInfoViewer })));
   const MyAIPreferences = React.lazy(() => import('@/components/MyAIPreferences').then(m => ({ default: m.MyAIPreferences })));
   const GradeBoundariesTool = React.lazy(() => import('@/components/GradeBoundariesTool').then(m => ({ default: m.GradeBoundariesTool })));
+  const ExamCountdown = React.lazy(() => import('@/components/ExamCountdown').then(m => ({ default: m.ExamCountdown })));
 
   const chatHistoryCtx = useChatHistoryContext();
   const { conversations, loading, deleteConversation, fetchConversations } = useChatHistory(productId);
@@ -470,12 +474,27 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                     {showGradeBoundaries && (
                       <button
                         onClick={() => setShowGradeBoundariesPopup(true)}
-                        className="lg:hidden w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                        className={cn(
+                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted",
+                          !isGCSE && "lg:hidden"
+                        )}
                       >
                         <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
                         <div className="min-w-0">
                           <span className="block text-sm">Grade Boundaries</span>
                           <span className="block text-[10px] text-muted-foreground leading-tight">See historical and forecasted grade thresholds</span>
+                        </div>
+                      </button>
+                    )}
+                    {isGCSE && showExamCountdown && examDates.length > 0 && (
+                      <button
+                        onClick={() => setShowExamCountdownPopup(true)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      >
+                        <Timer className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <span className="block text-sm">Days to Exam{daysUntilFirstExam !== null && daysUntilFirstExam > 0 ? ` · ${daysUntilFirstExam}d` : ''}</span>
+                          <span className="block text-[10px] text-muted-foreground leading-tight">Countdown to your upcoming exams</span>
                         </div>
                       </button>
                     )}
@@ -759,6 +778,28 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             </div>
             <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
               <GradeBoundariesTool gradeBoundariesData={gradeBoundariesData} isGCSE={isGCSE} />
+            </React.Suspense>
+          </div>
+        </div>
+      )}
+      {/* Exam Countdown Popup (GCSE only) */}
+      {showExamCountdownPopup && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4" onClick={() => setShowExamCountdownPopup(false)}>
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Timer className="h-5 w-5 text-primary" />
+                Exam Countdown
+              </h2>
+              <button onClick={() => setShowExamCountdownPopup(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <React.Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <ExamCountdown exams={examDates} subjectName={examSubjectName} />
             </React.Suspense>
           </div>
         </div>
