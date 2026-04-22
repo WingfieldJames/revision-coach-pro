@@ -32,3 +32,8 @@ export function getYearOptions(q: QualLevel = getQualLevel()): string[] {
 export function getDefaultYear(q: QualLevel = getQualLevel()): string {
   return q === 'gcse' ? 'Year 11' : 'Year 13';
 }
+
+// Top grade for display in aspirational copy ("get you that ___").
+export function getTopGrade(q: QualLevel = getQualLevel()): string {
+  return q === 'gcse' ? '9' : 'A*';
+}

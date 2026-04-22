@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
+import { getTopGrade } from '@/lib/qualification';
 import { supabase } from '@/lib/supabase';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -315,7 +316,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
                 <p className="text-sm text-muted-foreground mb-4">Cancel anytime</p>
                 <ul className="space-y-2 mb-4 text-sm">
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All past papers & mark schemes</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Full A* exam technique training</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Full {getTopGrade(isGCSE ? 'gcse' : 'alevel')} exam technique training</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Essay Marker + Diagram Generator</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Past Paper Finder</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Priority support</li>

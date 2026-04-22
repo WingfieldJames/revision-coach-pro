@@ -15,6 +15,7 @@ import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png
 import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
 import matanImage from '@/assets/matan-g.png';
 import { cn } from '@/lib/utils';
+import { getTopGrade } from '@/lib/qualification';
 import { useTheme } from '@/contexts/ThemeContext';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -93,6 +94,8 @@ interface RAGChatProps {
   useEmojiStars?: boolean;
   /** Product slug for challenge popup grade boundaries lookup */
   productSlug?: string;
+  /** Whether this product is GCSE (overrides productSlug-based detection) */
+  isGCSE?: boolean;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 12;
@@ -126,7 +129,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   productId,
   promptProductId,
   subjectName,
-  subjectDescription = "Your personal A* tutor. Ask me anything!",
+  subjectDescription = "Your personal tutor. Ask me anything!",
   footerText = "Powered by A* AI",
   placeholder = "Ask me anything...",
   tier = 'deluxe',
@@ -143,7 +146,10 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   trainerAchievements,
   useEmojiStars = false,
   productSlug,
+  isGCSE: isGCSEProp,
 }) => {
+  const isGCSE = isGCSEProp ?? (productSlug?.startsWith('gcse-') ?? false);
+  const topGrade = getTopGrade(isGCSE ? 'gcse' : 'alevel');
   const {
     user
   } = useAuth();
@@ -1073,14 +1079,14 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 {daysToFirstExam !== null ? (
                   <>
                     <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
-                      <span className="text-foreground">{daysToFirstExam} days to go.</span> <span className="text-primary">Let's get you that A*.</span>
+                      <span className="text-foreground">{daysToFirstExam} days to go.</span> <span className="text-primary">Let's get you that {topGrade}.</span>
                     </h2>
                     <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
                   </>
                 ) : (
                   <>
                     <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.25rem] lg:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
-                      <span className="text-primary">Let's get you that A*.</span>
+                      <span className="text-primary">Let's get you that {topGrade}.</span>
                     </h2>
                     <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
                   </>

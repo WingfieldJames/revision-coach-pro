@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
 import { Loader2 } from 'lucide-react';
+import { getTopGrade } from '@/lib/qualification';
 
 interface ProductConfig {
   id: string; name: string; slug: string; subject: string; exam_board: string; system_prompt_deluxe: string | null;
@@ -79,6 +80,8 @@ export const DynamicPremiumPage = () => {
   const hasFeature = (id: string) => features.includes(id);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
   const qualType = (trainer as any)?.qualification_type || 'A-Level';
+  const isGCSE = qualType === 'GCSE';
+  const topGrade = getTopGrade(isGCSE ? 'gcse' : 'alevel');
   const subjectName = `${product.exam_board} ${product.subject}`;
   const examDates: ExamDate[] = (trainer?.exam_dates || []).filter((d: any) => d.name && d.date).map((d: any) => ({ name: d.name, date: new Date(d.date), description: d.description || '' }));
 
@@ -144,7 +147,7 @@ export const DynamicPremiumPage = () => {
       <div className="flex-1 relative z-10">
         <RAGChat
           productId={product.id} subjectName={subjectName}
-          subjectDescription={`Your personal A* ${qualType} ${product.subject} tutor with full access. Ask me anything!`}
+          subjectDescription={`Your personal ${topGrade} ${qualType} ${product.subject} tutor with full access. Ask me anything!`}
           footerText={`Powered by A* AI • Trained on ${subjectName} ${qualType} specification`}
           placeholder={`Ask about ${product.subject}...`}
           examDates={examDates}
@@ -155,6 +158,8 @@ export const DynamicPremiumPage = () => {
           trainerAchievements={achievements.length > 0 ? achievements : undefined}
           trainerDescription={trainer?.trainer_description || undefined}
           useEmojiStars
+          productSlug={product.slug}
+          isGCSE={isGCSE}
         />
       </div>
     </div>
