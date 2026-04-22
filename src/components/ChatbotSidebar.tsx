@@ -149,6 +149,8 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   examDates = [],
   showMyAI = false,
   showGradeBoundaries = false,
+  showExamCountdown = false,
+  examSubjectName = 'Exams',
   gradeBoundariesData,
   isGCSE: isGCSEProp,
 }) => {
