@@ -14,7 +14,7 @@ import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
 import { MyMistakesTool } from '@/components/MyMistakesTool';
 import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen, ChevronDown, TrendingUp, RotateCcw, User } from 'lucide-react';
 import { checkProductAccess } from '@/lib/productAccess';
-import { getTopGrade } from '@/lib/qualification';
+import { getTopGradeLabel } from '@/lib/qualification';
 import {
   Dialog,
   DialogContent,
@@ -582,7 +582,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <p className="text-sm text-muted-foreground mb-4">Cancel anytime</p>
                     <ul className="space-y-2 mb-4 text-sm">
                       <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All past papers & mark schemes</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Full {getTopGrade(isGCSE ? 'gcse' : 'alevel')} exam technique training</li>
+                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Full {getTopGradeLabel(isGCSE ? 'gcse' : 'alevel')} exam technique training</li>
                       <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Essay Marker + Diagram Generator</li>
                       <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Past Paper Finder</li>
                       <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> Priority support</li>

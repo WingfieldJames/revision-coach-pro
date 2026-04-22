@@ -37,3 +37,8 @@ export function getDefaultYear(q: QualLevel = getQualLevel()): string {
 export function getTopGrade(q: QualLevel = getQualLevel()): string {
   return q === 'gcse' ? '9' : 'A*';
 }
+
+// Natural-reading label when the grade sits before a noun ("Full ___ exam technique").
+export function getTopGradeLabel(q: QualLevel = getQualLevel()): string {
+  return q === 'gcse' ? 'Grade 9' : 'A*';
+}

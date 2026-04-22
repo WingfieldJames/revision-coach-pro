@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
 import { Loader2 } from 'lucide-react';
-import { getTopGrade } from '@/lib/qualification';
+import { getTopGradeLabel } from '@/lib/qualification';
 
 interface ProductConfig {
   id: string; name: string; slug: string; subject: string; exam_board: string; system_prompt_deluxe: string | null;
@@ -81,7 +81,7 @@ export const DynamicPremiumPage = () => {
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
   const qualType = (trainer as any)?.qualification_type || 'A-Level';
   const isGCSE = qualType === 'GCSE';
-  const topGrade = getTopGrade(isGCSE ? 'gcse' : 'alevel');
+  const topGrade = getTopGradeLabel(isGCSE ? 'gcse' : 'alevel');
   const subjectName = `${product.exam_board} ${product.subject}`;
   const examDates: ExamDate[] = (trainer?.exam_dates || []).filter((d: any) => d.name && d.date).map((d: any) => ({ name: d.name, date: new Date(d.date), description: d.description || '' }));
 
