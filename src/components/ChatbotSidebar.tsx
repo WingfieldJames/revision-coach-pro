@@ -179,6 +179,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const TrainerInfoViewer = React.lazy(() => import('@/components/TrainerInfoViewer').then(m => ({ default: m.TrainerInfoViewer })));
   const MyAIPreferences = React.lazy(() => import('@/components/MyAIPreferences').then(m => ({ default: m.MyAIPreferences })));
   const GradeBoundariesTool = React.lazy(() => import('@/components/GradeBoundariesTool').then(m => ({ default: m.GradeBoundariesTool })));
+  const ExamCountdown = React.lazy(() => import('@/components/ExamCountdown').then(m => ({ default: m.ExamCountdown })));
 
   const chatHistoryCtx = useChatHistoryContext();
   const { conversations, loading, deleteConversation, fetchConversations } = useChatHistory(productId);
