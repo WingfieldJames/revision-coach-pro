@@ -57,9 +57,15 @@ export function useTrainerConfig(productId: string | null | undefined): TrainerC
             ? (data.suggested_prompts as Array<{ text: string; usesPersonalization?: boolean }>).filter(p => p.text?.trim())
             : [];
           const marks = Array.isArray(data.essay_marker_marks) ? (data.essay_marker_marks as number[]) : [];
+          // Parse YYYY-MM-DD as LOCAL midnight (not UTC) so countdowns aren't off-by-one due to timezone offset.
+          const parseExamDate = (raw: string): Date => {
+            const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+            if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+            return new Date(raw);
+          };
           const examDates: ExamDate[] = (Array.isArray(data.exam_dates) ? data.exam_dates : [])
             .filter((d: any) => d.name && d.date)
-            .map((d: any) => ({ name: d.name, date: new Date(d.date), description: d.description || '' }));
+            .map((d: any) => ({ name: d.name, date: parseExamDate(String(d.date)), description: d.description || '' }));
           const diagrams = Array.isArray(data.diagram_library)
             ? (data.diagram_library as Array<{ id: string; title: string; imagePath: string }>)
             : [];
