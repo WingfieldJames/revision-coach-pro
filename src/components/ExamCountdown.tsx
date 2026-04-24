@@ -21,7 +21,7 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
   
   // Calculate days until first exam
   const firstExam = sortedExams[0];
-  const daysUntilFirst = Math.ceil((firstExam.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const daysUntilFirst = Math.round((firstExam.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   
   // Calculate total timeline span (from today to last exam)
   const lastExam = sortedExams[sortedExams.length - 1];
@@ -43,7 +43,7 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
   };
 
   const getDaysUntil = (date: Date) => {
-    return Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   };
 
   return (
