@@ -167,7 +167,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     today.setHours(0, 0, 0, 0);
     const sorted = [...examDatesProp].sort((a, b) => a.date.getTime() - b.date.getTime());
     const first = sorted[0];
-    return Math.ceil((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.round((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }, [examDatesProp]);
 
   // Fetch real user count (actual signups + 2000) — updates on each page load
