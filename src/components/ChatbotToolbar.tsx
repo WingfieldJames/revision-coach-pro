@@ -121,7 +121,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const tier = isDeluxe ? 'deluxe' : 'free';
 
   const daysUntilFirstExam = examDates.length > 0
-    ? Math.ceil((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24))
+    ? Math.round((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24))
     : null;
 
   useEffect(() => {
