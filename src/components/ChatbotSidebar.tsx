@@ -185,7 +185,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const { conversations, loading, deleteConversation, fetchConversations } = useChatHistory(productId);
 
   const daysUntilFirstExam = examDates.length > 0
-    ? Math.ceil((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24))
+    ? Math.round((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24))
     : null;
 
   useEffect(() => {
