@@ -1,0 +1,1 @@
+UPDATE public.products SET subject = 'Politics' WHERE subject = 'politics';
