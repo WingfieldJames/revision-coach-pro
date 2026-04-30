@@ -1,0 +1,1 @@
+UPDATE public.products SET lifetime_price = 1999, updated_at = now() WHERE qualification_type = 'A Level' AND lifetime_price = 2499;
