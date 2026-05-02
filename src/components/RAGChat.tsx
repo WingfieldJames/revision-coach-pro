@@ -58,7 +58,7 @@ interface DiagramData {
 }
 
 export interface RAGChatRef {
-  submitMessage: (message: string, imageDataUrl?: string | string[]) => void;
+  submitMessage: (message: string, imageDataUrl?: string | string[]) => boolean;
 }
 
 interface TrainerAchievement {
@@ -592,7 +592,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     }
   }, [isAnimating, animateNextWord]);
   const handleSendWithMessage = async (messageText: string, imageDataUrl?: string | string[]) => {
-    if (!messageText.trim() && !imageDataUrl || isLoading) return;
+    if ((!messageText.trim() && !imageDataUrl) || isLoading) return false;
     // Persist user message
     persistMessage('user', messageText, Array.isArray(imageDataUrl) ? imageDataUrl[0] : imageDataUrl);
 
@@ -661,7 +661,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           setLimitReached(true);
           setIsLoading(false);
           setIsSearching(false);
-          return;
+          return false;
         }
         // Show user-friendly error instead of raw gateway messages
         throw new Error(errorData.error || 'Something went wrong. Please try again.');
@@ -778,10 +778,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         content: `⚠️ ${friendlyMessage}`,
         displayedContent: `⚠️ ${friendlyMessage}`
       }]);
+      return false;
     } finally {
       setIsLoading(false);
       setIsSearching(false);
     }
+    return Boolean(fullContentRef.current);
   };
   const handleSend = async () => {
     if ((!input.trim() && !pendingImage) || isLoading) return;
@@ -804,7 +806,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     if (chatRef) {
       (chatRef as React.MutableRefObject<RAGChatRef>).current = {
         submitMessage: (messageText: string, imageDataUrl?: string | string[]) => {
-          if ((!messageText.trim() && !imageDataUrl) || isLoading) return;
+          if ((!messageText.trim() && !imageDataUrl) || isLoading) return false;
           const userMessage: Message = {
             role: 'user',
             content: messageText,
@@ -812,6 +814,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           };
           setMessages(prev => [...prev, userMessage]);
           handleSendWithMessage(messageText, imageDataUrl);
+          return true;
         }
       };
     }
