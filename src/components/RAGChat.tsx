@@ -58,7 +58,7 @@ interface DiagramData {
 }
 
 export interface RAGChatRef {
-  submitMessage: (message: string, imageDataUrl?: string | string[]) => boolean;
+  submitMessage: (message: string, imageDataUrl?: string | string[]) => Promise<boolean>;
 }
 
 interface TrainerAchievement {
@@ -813,8 +813,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
             ...(imageDataUrl ? { imageUrl: imageDataUrl } : {})
           };
           setMessages(prev => [...prev, userMessage]);
-          handleSendWithMessage(messageText, imageDataUrl);
-          return true;
+          return handleSendWithMessage(messageText, imageDataUrl);
         }
       };
     }
