@@ -1232,6 +1232,18 @@ CRITICAL RULES:
       );
     }
 
+    if (tier === 'free' && !isTrainerTest && tool_type === 'essay_marker' && user_id && product_id) {
+      const { data: toolUsage, error: toolUsageError } = await supabaseAdmin.rpc('increment_tool_usage', {
+        p_user_id: user_id,
+        p_product_id: product_id,
+        p_tool_type: 'essay_marker',
+        p_limit: FREE_MONTHLY_ESSAY_LIMIT,
+      });
+      if (toolUsageError || toolUsage?.exceeded) {
+        console.error('Essay marker usage increment failed or exceeded after AI success:', toolUsageError || toolUsage);
+      }
+    }
+
     // Log estimated AI usage (streaming = no usage in response, so estimate from input length)
     try {
       const estInputTok = Math.ceil((finalSystemPrompt.length + JSON.stringify(history).length + (typeof message === "string" ? message.length : 0)) / 4);
