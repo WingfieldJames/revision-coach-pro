@@ -805,7 +805,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   useEffect(() => {
     if (chatRef) {
       (chatRef as React.MutableRefObject<RAGChatRef>).current = {
-        submitMessage: (messageText: string, imageDataUrl?: string | string[]) => {
+        submitMessage: async (messageText: string, imageDataUrl?: string | string[]) => {
           if ((!messageText.trim() && !imageDataUrl) || isLoading) return false;
           const userMessage: Message = {
             role: 'user',
