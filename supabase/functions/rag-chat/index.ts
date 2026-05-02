@@ -15,6 +15,8 @@ const MODELS = {
   utility: "google/gemini-2.0-flash-lite", // Search query generation only
 };
 
+const FREE_MONTHLY_ESSAY_LIMIT = 2;
+
 // Hardcoded economics diagrams fallback (used when Build portal has no diagrams)
 const ECONOMICS_DIAGRAMS_FALLBACK = [
   { id: 'ppf', title: 'Production Possibility Frontier (PPF)', imagePath: '/diagrams/ppf.jpg', keywords: ['PPF', 'production possibility frontier', 'PPC', 'opportunity cost'] },
