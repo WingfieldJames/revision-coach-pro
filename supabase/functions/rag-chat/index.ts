@@ -732,7 +732,7 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.json();
-    const { message, product_id, history = [], tier: _clientTier = 'free', user_id: client_user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id, spec_content } = body;
+    const { message, product_id, history = [], tier: _clientTier = 'free', user_id: client_user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id, spec_content, tool_type } = body;
 
     // SECURITY: Derive user_id from auth token when available — never trust the client blindly
     let user_id = client_user_id;
@@ -996,6 +996,24 @@ serve(async (req) => {
     }
     
     console.log(`Verified tier for user ${user_id}: ${tier}`);
+
+    if (tier === 'free' && !isTrainerTest && tool_type === 'essay_marker' && user_id && product_id) {
+      const { data: usageRow } = await supabaseAdmin
+        .from('monthly_tool_usage')
+        .select('usage_count')
+        .eq('user_id', user_id)
+        .eq('product_id', product_id)
+        .eq('tool_type', 'essay_marker')
+        .eq('usage_month', new Date().toISOString().slice(0, 7) + '-01')
+        .maybeSingle();
+
+      if ((usageRow?.usage_count || 0) >= FREE_MONTHLY_ESSAY_LIMIT) {
+        return new Response(JSON.stringify({ error: 'essay_limit_exceeded' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
 
     // Check daily usage limit for FREE tier only
     const usageProductId = prompt_product_id || product_id;
