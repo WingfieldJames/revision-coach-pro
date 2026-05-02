@@ -58,7 +58,7 @@ interface DiagramData {
 }
 
 export interface RAGChatRef {
-  submitMessage: (message: string, imageDataUrl?: string | string[]) => void;
+  submitMessage: (message: string, imageDataUrl?: string | string[]) => Promise<boolean>;
 }
 
 interface TrainerAchievement {
@@ -99,6 +99,7 @@ interface RAGChatProps {
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 12;
+const ESSAY_MARKER_PATTERN = /^Mark my \d+ marker\. Use exact marking criteria\./i;
 
 // Helper to format source names nicely
 const formatSourceName = (name: string): string => {
@@ -592,7 +593,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     }
   }, [isAnimating, animateNextWord]);
   const handleSendWithMessage = async (messageText: string, imageDataUrl?: string | string[]) => {
-    if (!messageText.trim() && !imageDataUrl || isLoading) return;
+    if ((!messageText.trim() && !imageDataUrl) || isLoading) return false;
     // Persist user message
     persistMessage('user', messageText, Array.isArray(imageDataUrl) ? imageDataUrl[0] : imageDataUrl);
 
@@ -651,6 +652,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           user_id: user?.id,
           enable_diagrams: enableDiagrams,
           diagram_subject: diagramSubject,
+          tool_type: ESSAY_MARKER_PATTERN.test(messageText) ? 'essay_marker' : undefined,
           image_data: effectiveImageData,
           multi_image: Array.isArray(effectiveImageData),
         })
@@ -661,7 +663,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           setLimitReached(true);
           setIsLoading(false);
           setIsSearching(false);
-          return;
+          return false;
         }
         // Show user-friendly error instead of raw gateway messages
         throw new Error(errorData.error || 'Something went wrong. Please try again.');
@@ -778,10 +780,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         content: `⚠️ ${friendlyMessage}`,
         displayedContent: `⚠️ ${friendlyMessage}`
       }]);
+      return false;
     } finally {
       setIsLoading(false);
       setIsSearching(false);
     }
+    return Boolean(fullContentRef.current);
   };
   const handleSend = async () => {
     if ((!input.trim() && !pendingImage) || isLoading) return;
@@ -803,15 +807,15 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   useEffect(() => {
     if (chatRef) {
       (chatRef as React.MutableRefObject<RAGChatRef>).current = {
-        submitMessage: (messageText: string, imageDataUrl?: string | string[]) => {
-          if ((!messageText.trim() && !imageDataUrl) || isLoading) return;
+        submitMessage: async (messageText: string, imageDataUrl?: string | string[]) => {
+          if ((!messageText.trim() && !imageDataUrl) || isLoading) return false;
           const userMessage: Message = {
             role: 'user',
             content: messageText,
             ...(imageDataUrl ? { imageUrl: imageDataUrl } : {})
           };
           setMessages(prev => [...prev, userMessage]);
-          handleSendWithMessage(messageText, imageDataUrl);
+          return handleSendWithMessage(messageText, imageDataUrl);
         }
       };
     }

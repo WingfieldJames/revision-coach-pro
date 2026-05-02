@@ -33,7 +33,7 @@ const markPrompts: Record<number, string> = {
 interface EssayMarkerToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
-  onSubmitToChat?: (message: string, imageDataUrl?: string | string[]) => void;
+  onSubmitToChat?: (message: string, imageDataUrl?: string | string[]) => void | boolean | Promise<boolean | void>;
   onClose?: () => void;
   fixedMark?: number;
   toolLabel?: string;
@@ -236,24 +236,12 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
         );
       }
       
-      onSubmitToChat(prompt, imageDataUrl);
+      const submitted = await onSubmitToChat(prompt, imageDataUrl);
 
-      // Increment usage AFTER successful submission
-      if (tier === 'free' && user) {
-        try {
-          const { data, error } = await supabase.rpc('increment_tool_usage', {
-            p_user_id: user.id,
-            p_product_id: productId || null,
-            p_tool_type: 'essay_marker',
-            p_limit: FREE_MONTHLY_ESSAY_LIMIT
-          });
-          if (!error && data) {
-            const typedData = data as unknown as IncrementToolUsageResponse;
-            setMonthlyUsage(typedData.count);
-          }
-        } catch (err) {
-          console.error('Usage tracking error:', err);
-        }
+      if (submitted === false) {
+        toast.error('Essay marker is still responding. Please wait and try again.');
+        setIsSubmitting(false);
+        return;
       }
 
       // Close the popover after submitting
