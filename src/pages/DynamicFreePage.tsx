@@ -13,7 +13,7 @@ import { Loader2 } from 'lucide-react';
 import { getTopGradeLabel } from '@/lib/qualification';
 
 interface ProductConfig {
-  id: string; name: string; slug: string; subject: string; exam_board: string; system_prompt_deluxe: string | null;
+  id: string; name: string; slug: string; subject: string; exam_board: string;
 }
 interface TrainerConfig {
   trainer_image_url: string | null; trainer_description: string | null; selected_features: string[] | null;
@@ -39,7 +39,7 @@ export const DynamicFreePage = () => {
   useEffect(() => {
     if (!slug) { navigate('/compare'); return; }
     const load = async () => {
-      const { data: prod } = await supabase.from('products').select('id, name, slug, subject, exam_board, system_prompt_deluxe').eq('slug', slug).eq('active', true).maybeSingle();
+      const { data: prod } = await supabase.from('products').select('id, name, slug, subject, exam_board').eq('slug', slug).eq('active', true).maybeSingle();
       if (!prod) { navigate('/compare'); return; }
       setProduct(prod);
       const { data: tp } = await supabase.from('trainer_projects').select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts, diagram_library, trainer_name, trainer_status, trainer_achievements, grade_boundaries_data').eq('product_id', prod.id).maybeSingle();
