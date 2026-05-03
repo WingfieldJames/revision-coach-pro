@@ -1,48 +1,47 @@
-## Goal
+## Diagnosis
 
-Change the A-Level Exam Season Pass (lifetime/one-time) price from **£24.99 → £19.99**. GCSE pricing (£17.99) stays unchanged. Monthly subscription pricing also stays unchanged.
+Dylan's account (`dylanirving040@gmail.com`, user id `dd30bab6-eb69-4c20-9e0d-42c7c18e587a`) is set up but his purchase didn't grant access:
 
-## Current state
+- `users` row: `is_premium = false`, `subscription_tier = null`, but he does have a Stripe customer id `cus_URtp3ZUURfY434` — meaning a Stripe checkout did happen.
+- `user_subscriptions`: **0 rows** for his user id. This is why the app shows him as free.
+- The Stripe webhook never wrote his subscription. Either the `checkout.session.completed` event fired without the `user_id` in metadata, or it failed silently. (No matching webhook logs for his customer id are retrievable.)
 
-- **Database**: All 19 A-Level products in `products` have `lifetime_price = 2499` (pence). GCSE products are at `1799`.
-- **Frontend / edge functions**: The £24.99 figure is also hardcoded in 11+ places, so the DB update alone will not change what users see on marketing/checkout UI. These all need to be updated in lockstep.
+So the immediate fix is to manually grant his Edexcel Economics Deluxe access, then patch the webhook gap so it can't recur.
 
-## Changes
+## Plan
 
-### 1. Database (data update via insert tool)
+### 1. Restore Dylan's access (migration)
 
-Update `products.lifetime_price` from `2499` → `1999` for all rows where `qualification_type = 'A Level'`. Affects 19 products (every AQA / Edexcel / OCR / CIE A-Level subject).
+Insert a row into `user_subscriptions` for his user, against the Edexcel Economics product:
 
-GCSE rows (`1799`) untouched. Monthly prices untouched.
+- Look up Stripe to confirm which product he paid for and whether it was monthly or lifetime, plus the `subscription_end` (if monthly) and the `stripe_subscription_id`.
+- Insert `user_subscriptions` row with: `user_id`, `product_id` (Edexcel Economics A-Level), `tier = 'deluxe'`, `payment_type` (monthly/lifetime), `active = true`, `stripe_customer_id = cus_URtp3ZUURfY434`, `stripe_subscription_id` (if monthly), `subscription_end` (period end if monthly, null if lifetime), `started_at = now()`.
+- Also update `users` row: `is_premium = true`, `subscription_tier = 'Deluxe'`, `subscription_end` to match (for legacy compatibility).
 
-### 2. Frontend hardcoded `£24.99` → `£19.99`
+### 2. Harden the webhook against this class of failure
 
-- `src/pages/ComparePage.tsx` (line 217) — A-Level price object
-- `src/pages/ProfilePage.tsx` (lines 305, 380) — Exam Season Pass upsell copy
-- `src/pages/DashboardPage.tsx` (line 463) — pricing display
-- `src/components/ChatbotSidebar.tsx` (line 635) — A-Level branch of ternary
-- `src/components/ChatbotToolbar.tsx` (line 330) — A-Level branch of ternary
-- `src/components/Header.tsx` (line 597) — A-Level branch of ternary
-- `src/components/DiagramFinderTool.tsx` (line 140) — Exam Season Pass button
-- `src/components/RAGChat.tsx` (line 1344) — Exam Season Pass button (A-Level branch)
+In `supabase/functions/stripe-webhook/index.ts`, on `checkout.session.completed`:
 
-### 3. Edge functions / fallbacks `2499` → `1999`
+- If `session.metadata.user_id` is missing, fall back to looking up the user by `customer_email` (or by `stripe_customer_id` already saved on `users`) before bailing out — currently it likely silently no-ops.
+- Always log the full session payload (event id, customer, metadata) on entry and on every early-return path so we can audit failed grants from logs.
+- Wrap the subscription upsert in a try/catch that re-raises so Stripe will retry the webhook instead of returning 200 on a partial failure.
 
-- `supabase/functions/create-checkout/index.ts` (line 202) — fallback when product row has no price
-- `supabase/functions/deploy-subject/index.ts` (lines 114, 167) — default lifetime price applied when newly deploying an A-Level subject
+### 3. Add a self-healing reconciliation path
 
-### 4. Strike-through price
+Extend `check-subscription` (already does Stripe-based healing for monthly subs) so that if a user has a `stripe_customer_id` but **no `user_subscriptions` rows**, it queries Stripe for that customer's active subscriptions / completed one-time payments and back-fills `user_subscriptions`. This means future webhook misses self-correct the next time the user opens the app.
 
-Leave the `£39.99` "was" price as-is — it stays as the anchor against the new £19.99.
+### 4. Notify Dylan
 
-## Out of scope
+Suggested reply once access is restored:
 
-- Stripe Price IDs in `stripe_lifetime_price_id`. Checkout uses `price_data` (dynamic per session) not preset Price IDs, so no Stripe dashboard changes required — the new amount is sent to Stripe at checkout time.
-- Existing active subscriptions. Already-purchased Exam Season Passes are untouched.
-- GCSE pricing.
+> Hi Dylan — sorry about that. I've checked your account: the payment came through on our side but a sync step failed so your Deluxe access wasn't switched on. I've manually applied your Edexcel Economics Deluxe subscription now and patched the underlying issue so it can't happen again. You should be able to use everything straight away — log out and back in if it doesn't appear immediately.
 
-## Verification after build
+## Technical details
 
-1. Re-query `products` to confirm all A-Level rows now show `1999` and GCSE rows still show `1799`.
-2. Spot-check ComparePage, ChatbotSidebar, Header upsell, and Profile upsell render `£19.99`.
-3. Trigger a test checkout on an A-Level product and confirm Stripe charges £19.99.
+- Tables touched: `user_subscriptions` (insert), `users` (update for legacy `is_premium`).
+- Edge functions touched: `stripe-webhook` (resilience + logging), `check-subscription` (Stripe reconciliation fallback).
+- No schema changes required.
+- Need to query Stripe (via STRIPE_SECRET_KEY) for `cus_URtp3ZUURfY434` to determine exact product purchased, payment type, and period end before inserting the row — avoids guessing.  
+  
+  
+Give dylan Edexcel politics deluxe too please. Manually make sure he has both edexcel politics and edexcel economics deluxe 
