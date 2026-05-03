@@ -73,7 +73,7 @@ export const TestimonialsColumn = ({
                 </div>
               </div>
             ))}
-          </React.Fragment>
+          </div>
         ))}
       </motion.div>
     </div>
