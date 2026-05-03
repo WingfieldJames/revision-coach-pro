@@ -171,15 +171,65 @@ serve(async (req) => {
 
           if (customerEmail) {
             const paymentType = session.metadata?.payment_type || 'lifetime';
-            const productId = session.metadata?.product_id;
-            const userId = session.metadata?.user_id;
-            
-            logStep("Processing payment", { 
-              email: customerEmail, 
-              paymentType, 
+            let productId = session.metadata?.product_id || null;
+            let userId = session.metadata?.user_id || null;
+
+            // RESILIENCE: If user_id missing from metadata, look up by email
+            if (!userId && customerEmail) {
+              const { data: userByEmail } = await supabaseClient
+                .from('users')
+                .select('id')
+                .eq('email', customerEmail)
+                .maybeSingle();
+              if (userByEmail?.id) {
+                userId = userByEmail.id;
+                logStep("Recovered user_id via email fallback", { email: customerEmail, userId });
+              }
+            }
+
+            // RESILIENCE: If product_id missing, infer from Stripe line_items price
+            if (!productId) {
+              try {
+                const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 5 });
+                const priceId = lineItems.data?.[0]?.price?.id;
+                if (priceId) {
+                  const col = paymentType === 'monthly' ? 'stripe_monthly_price_id' : 'stripe_lifetime_price_id';
+                  const { data: prodByPrice } = await supabaseClient
+                    .from('products')
+                    .select('id')
+                    .eq(col, priceId)
+                    .maybeSingle();
+                  if (prodByPrice?.id) {
+                    productId = prodByPrice.id;
+                    logStep("Recovered product_id via price fallback", { priceId, productId });
+                  } else {
+                    logStep("WARNING: price_id not mapped to any product", { priceId });
+                  }
+                }
+              } catch (err) {
+                logStep("ERROR: Failed to infer product from line_items", { error: (err as Error).message });
+              }
+            }
+
+            // Last-resort fallback: default to Edexcel Economics (legacy /compare flow)
+            if (!productId) {
+              const { data: defaultProd } = await supabaseClient
+                .from('products')
+                .select('id')
+                .eq('slug', 'edexcel-economics')
+                .maybeSingle();
+              if (defaultProd?.id) {
+                productId = defaultProd.id;
+                logStep("Using default product fallback (edexcel-economics)", { productId });
+              }
+            }
+
+            logStep("Processing payment", {
+              email: customerEmail,
+              paymentType,
               mode: session.mode,
               productId,
-              userId 
+              userId
             });
             
             let subscriptionEnd = null;
