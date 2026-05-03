@@ -1,0 +1,2 @@
+INSERT INTO public.user_subscriptions (user_id, product_id, tier, payment_type, stripe_subscription_id, stripe_customer_id, subscription_end, active)
+VALUES ('2e6d7c89-21f7-4691-be25-3ba4639ebd6c', '6dc19d53-8a88-4741-9528-f25af97afb21', 'deluxe', 'monthly', 'sub_1TSxc3E8sOwOumdQAjyARxNN', 'cus_URrKwoV5NwFfIk', '2026-06-03 10:51:03+00', true);
