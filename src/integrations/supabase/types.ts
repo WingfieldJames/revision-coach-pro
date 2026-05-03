@@ -889,6 +889,48 @@ export type Database = {
           },
         ]
       }
+      stripe_webhook_events: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json | null
+          processed_at: string | null
+          product_id: string | null
+          status: string
+          stripe_object_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          event_id: string
+          event_type: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          product_id?: string | null
+          status?: string
+          stripe_object_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          product_id?: string | null
+          status?: string
+          stripe_object_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       trainer_projects: {
         Row: {
           active_challenge: Json | null

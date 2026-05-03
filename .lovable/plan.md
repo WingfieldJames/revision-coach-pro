@@ -1,47 +1,67 @@
-## Diagnosis
+I found several concrete checkout risks that can explain today’s missed Deluxe grants and could cause repeat incidents.
 
-Dylan's account (`dylanirving040@gmail.com`, user id `dd30bab6-eb69-4c20-9e0d-42c7c18e587a`) is set up but his purchase didn't grant access:
+Key findings:
+- `create-checkout` is using the anon client to read `products`, but the database currently does not grant SELECT privileges on `public.products` to `anon` or `authenticated`. The function logs show `permission denied for table products`, so Stripe sessions can be created without product data even when the UI passed a product ID.
+- All `products.stripe_monthly_price_id` and `stripe_lifetime_price_id` values are NULL, while checkout creates inline `price_data`. That means the webhook’s new “infer product from Stripe price id” fallback cannot work for these purchases, because there are no reusable product price IDs to match against.
+- The webhook still acknowledges every processing failure with HTTP 200. This prevents Stripe retries even when the database write fails.
+- There is no durable webhook event ledger / idempotency table. Current duplicate prevention checks for an existing active subscription, but it is not atomic and does not record failed events for recovery.
+- `verify-payment` is unsafe and incomplete: it only updates the legacy `users` table, does not insert into `user_subscriptions`, does not validate the authenticated user owns the Stripe session, and can mask webhook failure.
+- `check-subscription` updates the legacy `users` table based on “any premium product”, which can overwrite legacy fields even when the user is checking a different product. Product-specific access is still mostly handled through `user_subscriptions`, but the legacy sync can confuse UI state.
+- Some premium pages directly query `products` and `user_subscriptions` rather than using the shared `checkProductAccess` logic, which can miss expiry/grace/bundle behavior.
+- There are existing duplicate active subscriptions for a few users; this is not the main failure but shows idempotency is not strict enough.
+- The recent live example in logs (`raiyanahmed7002@gmail.com`) created a Stripe checkout session after the product lookup failed. In the database they currently have no `user_subscriptions` row, so this user should be included in the next recovery audit.
 
-- `users` row: `is_premium = false`, `subscription_tier = null`, but he does have a Stripe customer id `cus_URtp3ZUURfY434` — meaning a Stripe checkout did happen.
-- `user_subscriptions`: **0 rows** for his user id. This is why the app shows him as free.
-- The Stripe webhook never wrote his subscription. Either the `checkout.session.completed` event fired without the `user_id` in metadata, or it failed silently. (No matching webhook logs for his customer id are retrievable.)
+Plan to fix this properly:
 
-So the immediate fix is to manually grant his Edexcel Economics Deluxe access, then patch the webhook gap so it can't recur.
+1. Immediate database permission fix
+   - Add a migration granting SELECT on `public.products` to `anon` and `authenticated`.
+   - Keep RLS policy limiting public reads to `active = true`.
+   - This fixes frontend product loading and the product lookup inside checkout when using the anon-auth client.
 
-## Plan
+2. Make `create-checkout` fail closed instead of creating bad sessions
+   - Switch product lookup to the service-role client inside the Edge Function, so checkout does not depend on frontend table grants.
+   - Validate `paymentType` is only `monthly` or `lifetime`.
+   - Require a valid product from `productId` or `productSlug`; only use `edexcel-economics` fallback for truly legacy requests with no product passed.
+   - If a product ID is passed but cannot be resolved, return a 400 and do not create a Stripe session.
+   - Put redundant metadata on the Stripe session: `user_id`, `user_email`, `product_id`, `product_slug`, `payment_type`, and affiliate fields.
+   - Change success/cancel URLs to preserve qualification route where possible (`/compare` vs `/gcse`/dynamic product), so users land in the right place.
 
-### 1. Restore Dylan's access (migration)
+3. Harden `stripe-webhook` so paid sessions always become access rows
+   - Stop returning 200 on critical processing errors; return 500 so Stripe retries when subscription creation fails.
+   - On `checkout.session.completed`, retrieve full session details and line items if needed.
+   - Resolve user in this order: metadata `user_id`, then `users.email`, then auth/admin lookup by email if available.
+   - Resolve product in this order: metadata `product_id`, metadata `product_slug`, price-id mapping if available, then safe legacy fallback only for old generic sessions.
+   - For monthly subscriptions, retrieve the live Stripe subscription and use `current_period_end` instead of “now + one month”.
+   - Upsert into `user_subscriptions` by `(user_id, product_id)` rather than insert-only, updating Stripe IDs and end date when an existing row exists.
+   - Keep the legacy `users` table in sync after the product subscription write succeeds.
 
-Insert a row into `user_subscriptions` for his user, against the Edexcel Economics product:
+4. Add proper idempotency and recovery observability
+   - Create a `stripe_webhook_events` table with `event_id` UNIQUE, `event_type`, `stripe_object_id`, `status`, `error_message`, `processed_at`, and resolved `user_id/product_id`.
+   - Record every webhook event as `processing`, `processed`, or `failed`.
+   - Duplicate Stripe retries should return safely only after checking the stored event status.
+   - Add indexes on `user_subscriptions` for Stripe subscription/customer lookups and a partial unique index to prevent multiple active rows for the same `(user_id, product_id)` going forward.
 
-- Look up Stripe to confirm which product he paid for and whether it was monthly or lifetime, plus the `subscription_end` (if monthly) and the `stripe_subscription_id`.
-- Insert `user_subscriptions` row with: `user_id`, `product_id` (Edexcel Economics A-Level), `tier = 'deluxe'`, `payment_type` (monthly/lifetime), `active = true`, `stripe_customer_id = cus_URtp3ZUURfY434`, `stripe_subscription_id` (if monthly), `subscription_end` (period end if monthly, null if lifetime), `started_at = now()`.
-- Also update `users` row: `is_premium = true`, `subscription_tier = 'Deluxe'`, `subscription_end` to match (for legacy compatibility).
+5. Replace/repair `verify-payment`
+   - Do not let `verify-payment` grant access by email alone.
+   - Either remove its granting behavior and make it return session status only, or make it call the same secure grant/upsert path as the webhook after verifying the logged-in user owns the session.
+   - Update success redirect pages to call `check-subscription`/product access after returning from Stripe, not rely on legacy-only updates.
 
-### 2. Harden the webhook against this class of failure
+6. Frontend checkout consistency
+   - Ensure every `create-checkout` call sends either `productId` or `productSlug` reliably.
+   - Add `productSlug` alongside `productId` from Compare, GCSE, chatbot toolbar, sidebar, RAG chat upgrade, Essay Marker, Diagram Finder, Header, and Dashboard flows.
+   - Improve user-facing errors so “checkout could not identify the subject” is shown instead of a vague failure.
 
-In `supabase/functions/stripe-webhook/index.ts`, on `checkout.session.completed`:
+7. Product access consistency
+   - Refactor premium page guards that directly query subscriptions to use `checkProductAccess` so grace periods, product bundles, and expiry rules are consistent.
+   - Keep `useProductTier` for chat tier decisions, but consider routing it through the same shared access helper.
 
-- If `session.metadata.user_id` is missing, fall back to looking up the user by `customer_email` (or by `stripe_customer_id` already saved on `users`) before bailing out — currently it likely silently no-ops.
-- Always log the full session payload (event id, customer, metadata) on entry and on every early-return path so we can audit failed grants from logs.
-- Wrap the subscription upsert in a try/catch that re-raises so Stripe will retry the webhook instead of returning 200 on a partial failure.
+8. Recovery audit after deploy
+   - Run a live audit of today’s Stripe checkout sessions and invoices against `users` and `user_subscriptions`.
+   - Grant missing Deluxe access for every paid session that has no active subscription row, including the new logged example `raiyanahmed7002@gmail.com` if Stripe confirms payment.
+   - Produce a concise report: paid sessions checked, already granted, newly recovered, skipped/unpaid, and any unresolved email/user mismatches.
 
-### 3. Add a self-healing reconciliation path
-
-Extend `check-subscription` (already does Stripe-based healing for monthly subs) so that if a user has a `stripe_customer_id` but **no `user_subscriptions` rows**, it queries Stripe for that customer's active subscriptions / completed one-time payments and back-fills `user_subscriptions`. This means future webhook misses self-correct the next time the user opens the app.
-
-### 4. Notify Dylan
-
-Suggested reply once access is restored:
-
-> Hi Dylan — sorry about that. I've checked your account: the payment came through on our side but a sync step failed so your Deluxe access wasn't switched on. I've manually applied your Edexcel Economics Deluxe subscription now and patched the underlying issue so it can't happen again. You should be able to use everything straight away — log out and back in if it doesn't appear immediately.
-
-## Technical details
-
-- Tables touched: `user_subscriptions` (insert), `users` (update for legacy `is_premium`).
-- Edge functions touched: `stripe-webhook` (resilience + logging), `check-subscription` (Stripe reconciliation fallback).
-- No schema changes required.
-- Need to query Stripe (via STRIPE_SECRET_KEY) for `cus_URtp3ZUURfY434` to determine exact product purchased, payment type, and period end before inserting the row — avoids guessing.  
-  
-  
-Give dylan Edexcel politics deluxe too please. Manually make sure he has both edexcel politics and edexcel economics deluxe 
+Technical implementation notes:
+- Database changes need a migration for product grants, webhook event ledger, indexes, and active-subscription uniqueness.
+- Edge functions to modify: `create-checkout`, `stripe-webhook`, and `verify-payment`.
+- Frontend files to touch include checkout callers and premium access guards.
+- After implementation, deploy the modified Edge Functions and run targeted checks against `create-checkout`, `stripe-webhook` logs, and database subscription rows.
