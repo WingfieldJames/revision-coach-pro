@@ -7,199 +7,152 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const json = (status: number, body: any) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
 serve(async (req) => {
-  console.log("Create-checkout function called");
-  
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    console.log("Initializing Supabase client");
-    const supabaseClient = createClient(
+    // Auth client uses caller JWT; admin client uses service role for table reads.
+    const authClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       {
-        global: {
-          headers: {
-            Authorization: req.headers.get("Authorization") ?? "",
-          },
-        },
+        global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
         auth: { persistSession: false },
       }
     );
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
 
-    console.log("Getting user from auth context");
-    const { data, error: authError } = await supabaseClient.auth.getUser();
-    const user = data?.user;
-
+    const { data: authData, error: authError } = await authClient.auth.getUser();
+    const user = authData?.user;
     if (authError || !user?.email) {
-      console.log("User not authenticated in create-checkout", authError || null);
-      return new Response(
-        JSON.stringify({ error: "not_authenticated" }),
-        { 
-          headers: { ...corsHeaders, "Content-Type": "application/json" }, 
-          status: 401 
-        }
-      );
+      return json(401, { error: "not_authenticated" });
     }
 
-    console.log("User authenticated:", user.email);
+    const body = await req.json().catch(() => ({}));
+    const paymentType: "monthly" | "lifetime" =
+      body?.paymentType === "monthly" ? "monthly" : "lifetime";
+    const productId: string | undefined = body?.productId || undefined;
+    const productSlug: string | undefined = body?.productSlug || undefined;
+    const affiliateCode: string | undefined = body?.affiliateCode || undefined;
 
-    const { paymentType = 'lifetime', productId, productSlug, affiliateCode } = await req.json().catch(() => ({ paymentType: 'lifetime' }));
-    console.log("Payment type:", paymentType);
-    console.log("Product ID:", productId);
-    console.log("Product Slug:", productSlug);
-    console.log("Affiliate code:", affiliateCode || 'none');
-
-    // Validate affiliate code if provided - use service role to bypass RLS
-    let validatedAffiliateId = null;
-    let validatedAffiliateName = null;
-    if (affiliateCode) {
-      console.log("Creating service client for affiliate lookup");
-      const serviceClient = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-      );
-      
-      const { data: affiliate, error: affiliateError } = await serviceClient
-        .from('affiliates')
-        .select('id, name, commission_rate')
-        .eq('code', affiliateCode)
-        .eq('active', true)
-        .maybeSingle();
-      
-      if (affiliateError) {
-        console.error('Error looking up affiliate:', affiliateError);
-      }
-      
-      if (affiliate) {
-        validatedAffiliateId = affiliate.id;
-        validatedAffiliateName = affiliate.name;
-        console.log('✅ Valid affiliate found:', affiliate.name, 'ID:', affiliate.id, 'Commission:', (affiliate.commission_rate * 100) + '%');
-      } else {
-        console.log('❌ Affiliate code not found or inactive:', affiliateCode);
-      }
-    }
-
-    // Get product details from database
-    let product = null;
-    let productName = "A* AI Deluxe Plan";
-    
+    // Resolve product via service role (immune to RLS / table grant changes).
+    let product: any = null;
     if (productId) {
-      console.log("Fetching product by ID:", productId);
-      const { data: productData, error: productError } = await supabaseClient
-        .from('products')
-        .select('*')
-        .eq('id', productId)
-        .single();
-      
-      if (productError) {
-        console.error("Error fetching product:", productError);
-      } else {
-        product = productData;
-        productName = productData.name;
-        console.log("Product found:", productName);
-      }
+      const { data } = await adminClient.from("products").select("*").eq("id", productId).maybeSingle();
+      product = data;
     } else if (productSlug) {
-      console.log("Fetching product by slug:", productSlug);
-      const { data: productData, error: productError } = await supabaseClient
-        .from('products')
-        .select('*')
-        .eq('slug', productSlug)
-        .single();
-      
-      if (productError) {
-        console.error("Error fetching product by slug:", productError);
-      } else {
-        product = productData;
-        productName = productData.name;
-        console.log("Product found by slug:", productName);
-      }
+      const { data } = await adminClient.from("products").select("*").eq("slug", productSlug).maybeSingle();
+      product = data;
     } else {
-      console.log("No product ID or slug provided, using default Edexcel Economics");
-      // Default to Edexcel Economics for backward compatibility
-      const { data: productData } = await supabaseClient
-        .from('products')
-        .select('*')
-        .eq('slug', 'edexcel-economics')
-        .single();
-      
-      if (productData) {
-        product = productData;
-        productName = productData.name;
-      }
+      // Legacy generic /compare flow with no identifiers — default Edexcel Economics.
+      const { data } = await adminClient
+        .from("products")
+        .select("*")
+        .eq("slug", "edexcel-economics")
+        .maybeSingle();
+      product = data;
+    }
+
+    if (!product) {
+      console.error("create-checkout: product not resolved", { productId, productSlug });
+      return json(400, { error: "product_not_found" });
+    }
+    if (product.active === false) {
+      return json(400, { error: "product_inactive" });
+    }
+
+    // Validate / resolve affiliate.
+    let validatedAffiliateId: string | null = null;
+    if (affiliateCode) {
+      const { data: affiliate } = await adminClient
+        .from("affiliates")
+        .select("id, name")
+        .eq("code", affiliateCode)
+        .eq("active", true)
+        .maybeSingle();
+      if (affiliate) validatedAffiliateId = affiliate.id;
     }
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
-      console.error("Stripe secret key not found");
-      throw new Error("Stripe configuration missing");
+      console.error("create-checkout: STRIPE_SECRET_KEY missing");
+      return json(500, { error: "stripe_not_configured" });
     }
 
-    // Debug: Check if we're using live or test key
-    const keyType = stripeKey.startsWith("sk_live_") ? "LIVE" : "TEST";
-    console.log("Stripe key type:", keyType);
-    console.log("Stripe key prefix:", stripeKey.substring(0, 12) + "...");
-
-    console.log("Initializing Stripe with Fetch HTTP client");
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2023-10-16",
       httpClient: Stripe.createFetchHttpClient(),
     });
 
-    // Simplified: Let Stripe handle customer creation per session
-    console.log("Using customer_email for checkout:", user.email);
+    const origin = req.headers.get("origin") || "https://astarai.co.uk";
+    const productName: string = product.name || "A* AI Deluxe Plan";
 
-    console.log("Creating checkout session for payment type:", paymentType);
-    
-    // Configure session based on payment type
-    let sessionConfig: any = {
+    // Choose post-checkout return route based on qualification, defaulting to /compare.
+    const returnRoot = product.qualification_type === "GCSE" ? "/gcse" : "/compare";
+
+    const sessionConfig: any = {
       customer_email: user.email,
-      payment_method_types: ['card'],
+      payment_method_types: ["card"],
       allow_promotion_codes: true,
-      success_url: `${req.headers.get("origin")}/compare?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/compare`,
+      success_url: `${origin}${returnRoot}?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}${returnRoot}`,
       metadata: {
         user_id: user.id,
+        user_email: user.email,
         payment_type: paymentType,
-        product_id: product?.id || '',
-        affiliate_code: affiliateCode || '',
-        affiliate_id: validatedAffiliateId || '',
+        product_id: product.id,
+        product_slug: product.slug,
+        qualification_type: product.qualification_type || "A Level",
+        affiliate_code: affiliateCode || "",
+        affiliate_id: validatedAffiliateId || "",
       },
     };
 
-    if (paymentType === 'monthly') {
-      // Monthly subscription
-      sessionConfig.mode = 'subscription';
+    if (paymentType === "monthly") {
+      sessionConfig.mode = "subscription";
       sessionConfig.line_items = [
         {
           price_data: {
             currency: "gbp",
-            product_data: { 
+            product_data: {
               name: `${productName} (Monthly)`,
-              description: "Premium AI-powered academic assistance - Monthly subscription"
+              description: "Premium AI-powered academic assistance - Monthly subscription",
             },
-            unit_amount: product?.monthly_price || 899, // £8.99 in pence
-            recurring: {
-              interval: 'month',
-            },
+            unit_amount: product.monthly_price || 899,
+            recurring: { interval: "month" },
           },
           quantity: 1,
         },
       ];
+      sessionConfig.subscription_data = {
+        metadata: {
+          user_id: user.id,
+          user_email: user.email,
+          product_id: product.id,
+          product_slug: product.slug,
+        },
+      };
     } else {
-      // Exam Season Pass (one-time payment) - expires June 30, 2026
-      sessionConfig.mode = 'payment';
+      sessionConfig.mode = "payment";
       sessionConfig.line_items = [
         {
           price_data: {
             currency: "gbp",
-            product_data: { 
+            product_data: {
               name: `${productName} (Exam Season Pass)`,
-              description: "Premium AI-powered academic assistance - Access until June 30, 2026"
+              description: "Premium AI-powered academic assistance - Access until June 30, 2026",
             },
-            unit_amount: product?.lifetime_price || 1999, // £19.99 in pence
+            unit_amount: product.lifetime_price || 1999,
           },
           quantity: 1,
         },
@@ -207,20 +160,10 @@ serve(async (req) => {
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
-
-    console.log("Checkout session created successfully:", session.id);
-    return new Response(JSON.stringify({ url: session.url }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    console.log("create-checkout: session created", { sessionId: session.id, productSlug: product.slug, paymentType });
+    return json(200, { url: session.url });
   } catch (error) {
-    console.error("Error in create-checkout:", error);
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      details: "Check the function logs for more information"
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    console.error("create-checkout: unhandled error", error);
+    return json(500, { error: (error as Error)?.message || "unknown_error" });
   }
 });
