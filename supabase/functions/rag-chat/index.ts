@@ -323,8 +323,6 @@ function detectContentTypePriorities(userMessage: string): string[] {
       lowerMessage.includes('how to answer') || lowerMessage.includes('marks') ||
       lowerMessage.includes('structure') || lowerMessage.includes('essay')) {
     priorities.push(CONTENT_TYPES.EXAM_TECHNIQUE, CONTENT_TYPES.ESSAY_WRITING, CONTENT_TYPES.MARK_SCHEME);
-    // Mark schemes are stored inside past paper chunks — include them too
-    priorities.push(...PAST_PAPER_TYPES);
   }
   
   // Past paper / practice question keywords
@@ -342,13 +340,10 @@ function detectContentTypePriorities(userMessage: string): string[] {
     priorities.push(CONTENT_TYPES.SPECIFICATION);
   }
   
-  // Mark scheme keywords — these chunks live under past_paper / past_paper_ms
+  // Mark scheme keywords
   if (lowerMessage.includes('mark scheme') || lowerMessage.includes('marking') ||
-      lowerMessage.includes('how many marks') || lowerMessage.includes('mark breakdown') ||
-      lowerMessage.includes('breakdown') || lowerMessage.includes('marker') ||
-      lowerMessage.includes('mark it') || lowerMessage.includes('mark this')) {
+      lowerMessage.includes('how many marks')) {
     priorities.push(CONTENT_TYPES.MARK_SCHEME);
-    priorities.push(...PAST_PAPER_TYPES);
   }
   
   // Default: specification is always useful

@@ -1374,34 +1374,6 @@ export type Database = {
       }
     }
     Functions: {
-      get_product_full: {
-        Args: { _product_id: string }
-        Returns: {
-          active: boolean | null
-          chatbase_free_url: string | null
-          chatbase_premium_url: string | null
-          created_at: string | null
-          exam_board: string
-          id: string
-          lifetime_price: number
-          monthly_price: number
-          name: string
-          qualification_type: string
-          slug: string
-          stripe_lifetime_price_id: string | null
-          stripe_monthly_price_id: string | null
-          subject: string
-          system_prompt_deluxe: string | null
-          system_prompt_free: string | null
-          updated_at: string | null
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "products"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
       get_tool_usage: {
         Args: { p_product_id: string; p_tool_type: string; p_user_id: string }
         Returns: Json

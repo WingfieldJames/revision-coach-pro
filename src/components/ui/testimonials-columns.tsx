@@ -43,7 +43,7 @@ export const TestimonialsColumn = ({
         className="flex flex-col gap-4"
       >
         {[...new Array(2)].map((_, index) => (
-          <div key={index} style={{ display: 'contents' }}>
+          <React.Fragment key={index}>
             {testimonials.map(({ text, image, name, role }, i) => (
               <div
                 key={`${index}-${i}`}
@@ -73,7 +73,7 @@ export const TestimonialsColumn = ({
                 </div>
               </div>
             ))}
-          </div>
+          </React.Fragment>
         ))}
       </motion.div>
     </div>
