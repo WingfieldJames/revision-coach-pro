@@ -255,18 +255,29 @@ serve(async (req) => {
             
             // Create entry in new user_subscriptions table
             if (productId && userId) {
-              const { error: subError } = await supabaseClient
+              // Check for existing active subscription to avoid duplicates on retries
+              const { data: existingSub } = await supabaseClient
                 .from('user_subscriptions')
-                .insert({
-                  user_id: userId,
-                  product_id: productId,
-                  tier: 'deluxe',
-                  payment_type: paymentType,
-                  stripe_subscription_id: stripeSubscriptionId,
-                  stripe_customer_id: customerId,
-                  subscription_end: subscriptionEnd,
-                  active: true
-                });
+                .select('id')
+                .eq('user_id', userId)
+                .eq('product_id', productId)
+                .eq('active', true)
+                .maybeSingle();
+
+              const subError = existingSub
+                ? null
+                : (await supabaseClient
+                    .from('user_subscriptions')
+                    .insert({
+                      user_id: userId,
+                      product_id: productId,
+                      tier: 'deluxe',
+                      payment_type: paymentType,
+                      stripe_subscription_id: stripeSubscriptionId,
+                      stripe_customer_id: customerId,
+                      subscription_end: subscriptionEnd,
+                      active: true
+                    })).error;
                 
               if (subError) {
                 logStep("ERROR: Failed to create subscription", { userId, productId, error: subError });
