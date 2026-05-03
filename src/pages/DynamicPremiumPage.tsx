@@ -15,7 +15,7 @@ import { Loader2 } from 'lucide-react';
 import { getTopGradeLabel } from '@/lib/qualification';
 
 interface ProductConfig {
-  id: string; name: string; slug: string; subject: string; exam_board: string; system_prompt_deluxe: string | null;
+  id: string; name: string; slug: string; subject: string; exam_board: string;
 }
 interface TrainerConfig {
   trainer_image_url: string | null; trainer_description: string | null; selected_features: string[] | null;
@@ -42,7 +42,7 @@ export const DynamicPremiumPage = () => {
     if (authLoading) return;
     if (!slug) { navigate('/compare'); return; }
     const load = async () => {
-      const { data: prod } = await supabase.from('products').select('id, name, slug, subject, exam_board, system_prompt_deluxe').eq('slug', slug).eq('active', true).maybeSingle();
+      const { data: prod } = await supabase.from('products').select('id, name, slug, subject, exam_board').eq('slug', slug).eq('active', true).maybeSingle();
       if (!prod) { navigate('/compare'); return; }
       if (!user) { navigate(`/login?redirect=${prod.slug}-premium`); return; }
       const access = await checkProductAccess(user.id, prod.slug);

@@ -595,15 +595,13 @@ export function BuildPage() {
           }
         }
 
-        // Fallback: system prompt from products table
+        // Fallback: system prompt from products table (trainer/admin only via RPC)
         if (!hydratedSP.trim()) {
-          const { data: product } = await supabase
-            .from("products")
-            .select("system_prompt_deluxe")
-            .eq("id", productId)
-            .single();
+          const { data: productRows } = await supabase
+            .rpc("get_product_full", { _product_id: productId });
+          const product = Array.isArray(productRows) ? productRows[0] : null;
           if (product?.system_prompt_deluxe) {
-            hydratedSP = product.system_prompt_deluxe;
+            hydratedSP = product.system_prompt_deluxe as string;
           }
         }
       }
