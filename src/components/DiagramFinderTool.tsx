@@ -39,6 +39,7 @@ export const DiagramFinderTool: React.FC<DiagramFinderToolProps> = ({
   subject = 'economics',
   tier = 'deluxe',
   productId,
+  productSlug,
   customDiagrams,
 }) => {
   const { user } = useAuth();

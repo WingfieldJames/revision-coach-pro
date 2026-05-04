@@ -44,6 +44,7 @@ interface EssayMarkerToolProps {
 export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   tier = 'deluxe',
   productId,
+  productSlug,
   onSubmitToChat,
   onClose,
   fixedMark,
