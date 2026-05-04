@@ -33,6 +33,7 @@ const markPrompts: Record<number, string> = {
 interface EssayMarkerToolProps {
   tier?: 'free' | 'deluxe';
   productId?: string;
+  productSlug?: string;
   onSubmitToChat?: (message: string, imageDataUrl?: string | string[]) => void | boolean | Promise<boolean | void>;
   onClose?: () => void;
   fixedMark?: number;
@@ -134,6 +135,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
         body: {
           paymentType,
           productId: productId,
+          productSlug,
           affiliateCode
         }
       });

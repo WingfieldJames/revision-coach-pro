@@ -30,6 +30,7 @@ import { diagrams } from '@/data/diagrams';
 import { csDiagrams } from '@/data/csDiagrams';
 import { useChatHistory } from '@/hooks/useChatHistory';
 import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
+import { saveCheckoutIntent } from '@/lib/checkoutIntent';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -857,7 +858,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   // Handle upgrade to Stripe checkout
   const handleUpgradeCheckout = async (paymentType: 'monthly' | 'lifetime' = 'lifetime') => {
     if (!user) {
-      window.location.href = '/login';
+      saveCheckoutIntent({ productId, productSlug, paymentType });
+      window.location.href = '/login?redirect=stripe';
       return;
     }
     setIsCheckingOut(true);
