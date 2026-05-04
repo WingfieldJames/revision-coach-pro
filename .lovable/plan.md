@@ -1,37 +1,16 @@
-## Why the Build page is empty
+## Plan
 
-Trainer accounts can sign in fine (the `user_roles` lookup works, so `hasAccess` becomes true), but the next query `supabase.from('trainer_projects').select('*')` silently returns zero rows.
+### 1. Grant Aleisha OCR Maths Deluxe (data migration)
+Insert a complimentary lifetime Deluxe subscription on `user_subscriptions` for `aleishadhalla@gmail.com` (`1485c772-ac3c-4c89-acff-3bb03fabb712`) against the OCR Mathematics product (`d5859e4a-4a7f-4c46-ad62-24b01605947b`). Leave the existing Edexcel Economics row in place as a goodwill extra.
 
-Inspecting Postgres ACLs:
+### 2. Harden `create-checkout` to prevent silent product mis-selection
+In `supabase/functions/create-checkout/index.ts`, remove the `edexcel-economics` fallback when neither `productId` nor `productSlug` is supplied. Return `400 product_required` instead. This was the root cause of Aleisha's wrong subscription — she was logged into OCR Maths but the legacy `/compare` upgrade button sent no product context, so the function defaulted to Edexcel Economics.
 
-```text
-trainer_projects → anon=awdDxtm, authenticated=awdDxtm    ← no 'r' (SELECT)
-products / user_roles / trainer_uploads / etc → arwdDxtm  ← has 'r'
-```
+Mirror the same change in `stripe-webhook/index.ts` `resolveProductId` — drop the `edexcel-economics` last-resort fallback so any future ambiguous session fails loudly instead of being assigned to the wrong product.
 
-So the table-level `SELECT` privilege on `public.trainer_projects` was revoked from `anon` and `authenticated` (likely by a prior security action — none of our migrations did it). Because Postgres checks table-level grants *before* RLS, the trainer policies never get a chance to allow the read. Result: `loadProjects()` resolves to `[]`, the cascading Qualification/Subject/Board selectors render empty, and the page looks "wiped". The 40 rows in `trainer_projects` are still intact.
+### 3. Audit upgrade CTAs for product context
+Search every "Upgrade to Deluxe" call site (premium pages, `SubjectPlanSelector`, dynamic premium page, GCSE compare) to confirm each one passes `productSlug` (or `productId`) derived from the current bot. Patch any that don't.
 
-This also affects the trainer-side queries on `trainer_projects` everywhere (deploy flow, save flow, etc.).
-
-## Fix
-
-A single tiny migration:
-
-```sql
-GRANT SELECT, INSERT, UPDATE ON public.trainer_projects TO authenticated;
-GRANT SELECT ON public.trainer_projects TO anon;
-```
-
-RLS already restricts what each role can actually see/modify:
-- `anon` / non-trainer: only rows where `status='deployed'` (existing public policy, column-restricted).
-- trainers/admins: full read + write via existing `has_role(...)` policies.
-
-So this only restores the privilege that should have been there; it does not widen data exposure.
-
-## Verification after migration
-
-1. Re-check ACLs: `relacl` for `trainer_projects` should show `arwdDxtm` for both roles.
-2. Reload `/build` as a trainer — Qualification / Subject / Board dropdowns repopulate, and the previously selected project rehydrates from `localStorage`.
-3. Confirm public chat pages still load deployed trainer assets unchanged.
-
-No frontend code changes required.
+### 4. Verify
+- Re-query `user_subscriptions` to confirm Aleisha's OCR Maths row is active.
+- Confirm `create-checkout` returns 400 when called without product info.

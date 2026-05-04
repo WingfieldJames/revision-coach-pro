@@ -1,0 +1,1 @@
+INSERT INTO public.user_subscriptions (user_id, product_id, tier, payment_type, active, started_at, subscription_end) VALUES ('1485c772-ac3c-4c89-acff-3bb03fabb712', 'd5859e4a-4a7f-4c46-ad62-24b01605947b', 'deluxe', 'lifetime', true, now(), '2026-06-30T23:59:59.000Z');
