@@ -211,7 +211,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
       const affiliateCode = getValidAffiliateCode();
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
-        body: { paymentType, productId, affiliateCode },
+        body: { paymentType, productId, productSlug, affiliateCode },
       });
       if (error) { alert(`Failed: ${(error as any).message || String(error)}`); return; }
       if (data?.url) window.location.href = data.url;

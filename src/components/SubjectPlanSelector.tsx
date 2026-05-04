@@ -165,10 +165,14 @@ export function SubjectPlanSelector() {
         return;
       }
       const productId = productSlug ? PRODUCT_IDS[productSlug] : null;
+      if (!productId && !productSlug) {
+        alert('Please select a subject before upgrading.');
+        return;
+      }
       const affiliateCode = getValidAffiliateCode();
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
-        body: { paymentType: selectedPaymentType, productId, affiliateCode }
+        body: { paymentType: selectedPaymentType, productId, productSlug, affiliateCode }
       });
       if (error) {
         const msg = (error as any).message || String(error);

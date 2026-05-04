@@ -54,13 +54,8 @@ serve(async (req) => {
       const { data } = await adminClient.from("products").select("*").eq("slug", productSlug).maybeSingle();
       product = data;
     } else {
-      // Legacy generic /compare flow with no identifiers — default Edexcel Economics.
-      const { data } = await adminClient
-        .from("products")
-        .select("*")
-        .eq("slug", "edexcel-economics")
-        .maybeSingle();
-      product = data;
+      console.error("create-checkout: missing product context", { productId, productSlug });
+      return json(400, { error: "product_required" });
     }
 
     if (!product) {

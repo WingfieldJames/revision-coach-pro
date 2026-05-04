@@ -286,7 +286,7 @@ export const Header: React.FC<HeaderProps> = ({
       const affiliateCode = getValidAffiliateCode();
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
-        body: { paymentType, productId, affiliateCode }
+        body: { paymentType, productId, productSlug, affiliateCode }
       });
       if (error) {
         alert(`Failed to create checkout: ${(error as any).message || String(error)}`);

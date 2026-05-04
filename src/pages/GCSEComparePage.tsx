@@ -213,10 +213,14 @@ export const GCSEComparePage = () => {
         window.location.href = '/login';
         return;
       }
+      if (!product.id && !product.slug) {
+        alert('Please select a GCSE subject before upgrading.');
+        return;
+      }
       const affiliateCode = getValidAffiliateCode();
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
-        body: { paymentType: selectedPaymentType, productId: product.id, affiliateCode }
+        body: { paymentType: selectedPaymentType, productId: product.id, productSlug: product.slug, affiliateCode }
       });
       if (error) {
         alert(`Failed to create checkout session: ${(error as any).message || String(error)}`);

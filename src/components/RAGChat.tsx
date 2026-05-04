@@ -870,7 +870,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       const affiliateCode = localStorage.getItem('affiliate_code') || undefined;
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
-        body: { paymentType, productId, affiliateCode }
+        body: { paymentType, productId, productSlug, affiliateCode }
       });
       if (error) throw error;
       if (data?.url) window.location.href = data.url;

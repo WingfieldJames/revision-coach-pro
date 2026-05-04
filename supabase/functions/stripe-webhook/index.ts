@@ -110,13 +110,9 @@ async function resolveProductId(
     log("WARN: line item lookup failed", { error: (e as Error).message });
   }
 
-  // Last resort: legacy generic checkouts default to Edexcel Economics.
-  const { data: fallback } = await db
-    .from("products")
-    .select("id")
-    .eq("slug", "edexcel-economics")
-    .maybeSingle();
-  return fallback?.id ?? null;
+  // Do not guess a product. Ambiguous paid sessions must fail loudly so they can be repaired,
+  // rather than granting access to the wrong subject.
+  return null;
 }
 
 async function upsertSubscription(
