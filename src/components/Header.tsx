@@ -25,6 +25,7 @@ import {
 import { Check } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
+import { saveCheckoutIntent } from '@/lib/checkoutIntent';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -274,6 +275,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleUpgradeClick = async (paymentType: 'monthly' | 'lifetime') => {
     if (!user) {
+      saveCheckoutIntent({ productId, productSlug, paymentType });
       window.location.href = '/login?redirect=stripe';
       return;
     }

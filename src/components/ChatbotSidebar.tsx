@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { checkProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/lib/supabase';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
+import { saveCheckoutIntent } from '@/lib/checkoutIntent';
 import { useChatHistory, ChatConversation } from '@/hooks/useChatHistory';
 import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
 import { ExamDate } from '@/components/ExamCountdown';
@@ -204,7 +205,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   }, [user, productSlug]);
 
   const handleUpgradeClick = async (paymentType: 'monthly' | 'lifetime') => {
-    if (!user) { window.location.href = '/login?redirect=stripe'; return; }
+    if (!user) { saveCheckoutIntent({ productId, productSlug, paymentType }); window.location.href = '/login?redirect=stripe'; return; }
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !sessionData.session?.access_token) { window.location.href = '/login'; return; }
