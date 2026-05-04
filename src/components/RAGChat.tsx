@@ -30,6 +30,7 @@ import { diagrams } from '@/data/diagrams';
 import { csDiagrams } from '@/data/csDiagrams';
 import { useChatHistory } from '@/hooks/useChatHistory';
 import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
+import { saveCheckoutIntent } from '@/lib/checkoutIntent';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -857,7 +858,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   // Handle upgrade to Stripe checkout
   const handleUpgradeCheckout = async (paymentType: 'monthly' | 'lifetime' = 'lifetime') => {
     if (!user) {
-      window.location.href = '/login';
+      saveCheckoutIntent({ productId, productSlug, paymentType });
+      window.location.href = '/login?redirect=stripe';
       return;
     }
     setIsCheckingOut(true);
@@ -870,7 +872,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
       const affiliateCode = localStorage.getItem('affiliate_code') || undefined;
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
-        body: { paymentType, productId, affiliateCode }
+        body: { paymentType, productId, productSlug, affiliateCode }
       });
       if (error) throw error;
       if (data?.url) window.location.href = data.url;

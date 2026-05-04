@@ -306,13 +306,9 @@ export const ComparePage = () => {
   }, []);
 
   useEffect(() => {
-    if (loading || !shouldCheckout || !user) return;
-    if (profile?.is_premium) {
-      navigate('/premium');
-    } else {
-      handlePremiumClick();
-    }
-  }, [shouldCheckout, user, profile?.is_premium, loading, navigate]);
+    if (loading || !shouldCheckout || !user || checkingAccess) return;
+    handlePremiumClick();
+  }, [shouldCheckout, user, loading, checkingAccess, subject, examBoard]);
 
   const handleFreeClick = async () => {
     const getFreePath = () => {
@@ -362,10 +358,14 @@ export const ComparePage = () => {
       // Look up product ID: check legacy first, then dynamic
       const dp = getDynamicProduct();
       const productId = productSlug ? PRODUCT_IDS[productSlug] || dp?.id || null : null;
+      if (!productId && !productSlug) {
+        alert('Please select a subject before upgrading.');
+        return;
+      }
       const affiliateCode = getValidAffiliateCode();
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
-        body: { paymentType: selectedPaymentType, productId, affiliateCode }
+        body: { paymentType: selectedPaymentType, productId, productSlug, affiliateCode }
       });
       if (error) {
         const msg = (error as any).message || String(error);

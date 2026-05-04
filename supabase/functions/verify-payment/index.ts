@@ -58,6 +58,10 @@ serve(async (req) => {
       paid: isPaid,
       owns_session: ownsSession,
       mode: session.mode,
+      product_id: session.metadata?.product_id || null,
+      product_slug: session.metadata?.product_slug || null,
+      payment_type: session.metadata?.payment_type || (session.mode === "subscription" ? "monthly" : "lifetime"),
+      qualification_type: session.metadata?.qualification_type || null,
     });
   } catch (error) {
     console.error("verify-payment error:", error);
