@@ -32,6 +32,7 @@ import { useChatHistory } from '@/hooks/useChatHistory';
 import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
 import { saveCheckoutIntent } from '@/lib/checkoutIntent';
 import { AnswerFooter } from '@/components/AnswerFooter';
+import { useReactiveThinking } from '@/hooks/useReactiveThinking';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
