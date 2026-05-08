@@ -1,92 +1,68 @@
-## Goal
+# Reactive Thinking UI — Edexcel Economics
 
-After every *substantive* assistant reply on the **Edexcel Economics** chatbot only (Free + Deluxe), render a polished footer block under the latest message containing:
-
-1. **Spec point chip** — links into the spec/revision guide tool
-2. **Recommended follow-up questions** — 3 chips, click to auto-send
-3. **Related past paper questions** — 1–2 PEQ chips, click opens Past Paper Finder pre-filtered
-4. **Streak nudge** — small flame badge ("🔥 5-day streak")
-
-Footer only appears on the **latest** assistant message and only when the answer is substantive (≥200 chars and not a pure greeting/clarification). Older messages stay clean. **Zero changes to RAG behaviour, system prompt, or token usage** — exam-season-safe.
+Replace the static 4-line "Searching knowledge base..." block with a live, prompt-aware sequence that scrolls through *real* source names from the knowledge base, one at a time, like the bot is actually scanning.
 
 ## Scope
+- **Edexcel Economics only** (Free + Deluxe). All other bots keep current behaviour.
+- Pure frontend change. No edits to `rag-chat` edge function. No DB migrations.
+- Exam-season safe: zero risk to answer generation pipeline.
 
-- **Pages touched:** `FreeVersionPage.tsx` and `PremiumVersionPage.tsx` only (Edexcel Economics). All other bots untouched.
-- **Component:** new `<AnswerFooter />` rendered inside `RAGChat` only when an opt-in prop `showAnswerFooter` is true.
-- No DB schema changes. No edge function rewrites.
+## What the user will see
 
-## Visual design
+Right after pressing send, instead of the same 4 lines every time, they'll see something like (for prompt *"explain the multiplier effect"*):
 
 ```text
-┌── (assistant message body) ──────────────────────┐
-│  …answer text…                                   │
-│  👍 👎                                           │
-├──────────────────────────────────────────────────┤
-│  📘 Spec 2.2.1 — AD     🔥 5-day streak          │
-│                                                  │
-│  Recommended next:                               │
-│   [ How does AD shift left? ]  [ Show diagram ]  │
-│   [ Real-world AD example 2024 ]                 │
-│                                                  │
-│  Related past paper questions:                   │
-│   [ Jun 2023 Q3 — 12 mark ]  [ Jun 2022 Q1b ]    │
-└──────────────────────────────────────────────────┘
+Searching knowledge base...
+  ✓ Edexcel Economics Specification
+  ↻ Multiplier — Past Paper Mark Scheme
+  ↻ Circular Flow of Income — Past Paper
+  ↻ Aggregate Demand diagram
+  ↻ Macroeconomic Objectives — Section A
 ```
 
-Subtle divider, condensed typography, chip buttons use `variant="outline" size="sm"` with hover lift. Streak chip is just text + flame, no card.
+Items appear **one at a time, ~350ms apart**, with a fade+slide-in. The icon animates from a spinner to a check as the next one arrives. When real `sources_searched` data streams back from the server, it swaps to the existing "Found:" list.
 
-## How each block is sourced
+## How matching works
 
-| Block | Source | Cost |
-|---|---|---|
-| **Spec point** | Already streamed in the existing `metadataEvent` sources from `rag-chat`. Pick the top spec-type chunk's `metadata.spec_point` / `topic`. Fallback: hide. | Free (already fetched) |
-| **Follow-ups (3)** | New tiny edge function `suggest-followups` — single Gemini 2.5 Flash call (~150 tokens out) given the user Q + first 800 chars of the answer. Cached per `messageId`. Fires *after* main stream completes so it never blocks the answer. | ~£0.0001/call |
-| **Related PEQs** | Reuse existing Past Paper Finder search logic — query by the spec-point keyword against `document_chunks` where `content_type='past_paper_qp'`, take top 2. Same edge function returns these. | Free DB query |
-| **Streak** | Existing `useStreak()` hook — read-only, no extra writes. | Free |
+1. **Source pool** built once per session (cached in component state, refreshed on `productId` change):
+   - Distinct `metadata.topic` + `content_type` from `document_chunks` for the Edexcel Economics product
+   - Diagram titles from `trainer_projects.diagram_library`
+   - Always include a generic "[Subject] Specification" anchor as the first item
+2. **Keyword scoring** of the user's prompt against each source:
+   - Tokenise prompt (lowercase, strip ~80 stop words — reuse Past Paper Finder list)
+   - Score = sum of token matches in topic name (2× weight on exact word match)
+   - Tie-breaker: prefer mix of content types (1 spec, 1 past paper, 1 diagram, 1 mark scheme)
+3. **Top 4–5 results** become the displayed sequence. If nothing matches, fall back to the **4 most-common topics** (per user choice).
 
-## Implementation steps
+## Animation
 
-1. **New component** `src/components/AnswerFooter.tsx`
-   - Props: `messageId`, `userQuestion`, `assistantAnswer`, `sources`, `onPromptClick(text)`, `onOpenSpec(point)`, `onOpenPastPaper(ref)`.
-   - Internal: `useEffect` calls `suggest-followups` once per `messageId`; loading skeleton while pending; gracefully hides any sub-section that returns empty.
-
-2. **New edge function** `supabase/functions/suggest-followups/index.ts`
-   - Body: `{ productId, question, answer, specPoint? }`
-   - Calls Lovable AI gateway (Gemini 2.5 Flash) with a strict JSON-only prompt: `{ followups: string[3], related_peqs: [{label, paper, year, qNum}] }`.
-   - Past paper lookup via existing chunk search by topic keyword.
-   - Returns within ~1.5s.
-
-3. **`RAGChat.tsx` integration** (minimal)
-   - Add prop `showAnswerFooter?: boolean`.
-   - Inside the assistant message render block, after the feedback buttons, when `isLastAssistant && showAnswerFooter && !isAnimating && message.content.length >= 200`, render `<AnswerFooter ...>`.
-   - `onPromptClick` reuses existing `submitMessage` path.
-   - `onOpenSpec` / `onOpenPastPaper` open the existing sidebar tools (RevisionGuide / PastPaperFinder) via the existing toolbar dispatch pattern.
-
-4. **Wire up only Edexcel Economics**
-   - In `FreeVersionPage.tsx` and `PremiumVersionPage.tsx`: pass `showAnswerFooter` to `<RAGChat />`. Done.
-
-5. **Substantive-answer gate** (in `AnswerFooter`)
-   - Skip rendering if: answer < 200 chars, OR answer matches greeting/clarifier regex (`/^(hi|hello|sure|got it|of course)/i`), OR `sources.length === 0`.
-
-## Safeguards (exam-season)
-
-- Footer is purely additive — if `suggest-followups` fails or times out, the footer silently hides. Main chat untouched.
-- Feature flag via the `showAnswerFooter` prop — if anything breaks, flip one boolean in two files to disable instantly.
-- No changes to `rag-chat`, system prompt, RAG retrieval, streaming, persistence, or limits.
+- Sequential reveal, **350ms stagger**
+- Each row: spinner → after 400ms swap to faint check, next row spawns
+- Reuse existing `SearchingSourceItem` component visuals (just feed dynamic props)
+- Once `setIsSearching(false)` fires (server returned), current sequence stops and "Generating response..." block takes over as today
 
 ## Files
 
-**New:**
-- `src/components/AnswerFooter.tsx`
-- `supabase/functions/suggest-followups/index.ts`
+**Edited:**
+- `src/components/RAGChat.tsx`
+  - Add `useReactiveThinking(prompt, productSlug)` hook call right before send
+  - Replace the 4 hardcoded `<SearchingSourceItem>` rows (lines 1402–1405) with `{thinkingItems.map(...)}`
+  - Gate the new behaviour: `productSlug === 'edexcel-economics'` (existing slug)
 
-**Modified:**
-- `src/components/RAGChat.tsx` (add prop + ~10-line render block)
-- `src/pages/FreeVersionPage.tsx` (pass `showAnswerFooter`)
-- `src/pages/PremiumVersionPage.tsx` (pass `showAnswerFooter`)
+**Created:**
+- `src/hooks/useReactiveThinking.ts` — fetches & caches the source pool per product, exposes `getThinkingSequence(prompt)`
+- `src/lib/thinkingMatcher.ts` — pure tokenise + score function (easy to unit test, reusable)
+
+## Technical details
+
+- **Source pool query** (one-time per product): `select metadata->>'topic' as topic, metadata->>'content_type' as type from document_chunks where product_id = ? and metadata->>'topic' is not null` — cached in module-level Map keyed by productId so navigating between chats reuses it
+- **Diagrams**: read from existing `trainerProject.diagram_library` already loaded in RAGChat (no extra fetch)
+- **Display formatting**: reuse existing `formatSourceName()` helper (lines around 1418) for consistency with the post-search list
+- **Dedup**: drop entries whose normalised topic equals another higher-scoring one (e.g. "Section A" vs "SECTION A")
+- **Stop words & 2× boost**: mirror config from `mem://features/past-paper-finder-v4-migration-specs`
 
 ## Out of scope
-
-- Other subjects (will roll out later once validated on Econ post-exam-season)
-- Persisting follow-up suggestions to DB
-- Changing the answer generation itself
+- Server-side streaming of "scanning" events
+- Other bots
+- Persisting which sources were shown
+- Changing the "Generating response..." stage

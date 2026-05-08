@@ -32,6 +32,7 @@ import { useChatHistory } from '@/hooks/useChatHistory';
 import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
 import { saveCheckoutIntent } from '@/lib/checkoutIntent';
 import { AnswerFooter } from '@/components/AnswerFooter';
+import { useReactiveThinking } from '@/hooks/useReactiveThinking';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -197,6 +198,17 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchedSources, setSearchedSources] = useState<SearchedSource[]>([]);
+  const [thinkingPrompt, setThinkingPrompt] = useState<string>('');
+  const reactiveThinkingEnabled = productSlug === 'edexcel-economics';
+  const { getSequence: getThinkingSequence } = useReactiveThinking(
+    productId,
+    subjectName,
+    reactiveThinkingEnabled,
+  );
+  const thinkingItems = useMemo(
+    () => (reactiveThinkingEnabled && thinkingPrompt ? getThinkingSequence(thinkingPrompt, 4) : []),
+    [reactiveThinkingEnabled, thinkingPrompt, getThinkingSequence],
+  );
   const [currentDiagram, setCurrentDiagram] = useState<DiagramData | null>(null);
   const [resolvedDiagramUrl, setResolvedDiagramUrl] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -620,6 +632,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     setIsLoading(true);
     setIsSearching(true);
     setSearchedSources([]);
+    setThinkingPrompt(messageText || '');
     setCurrentDiagram(null);
     try {
       // Get session token for server-side auth verification
@@ -1399,10 +1412,30 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                       <span className="text-sm font-medium text-foreground">Searching knowledge base...</span>
                     </div>
                     <div className="space-y-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
-                      <SearchingSourceItem icon={BookOpen} label="Searching" source={`${subjectName} Specification`} delay={0} />
-                      <SearchingSourceItem icon={FileText} label="Searching" source={`${subjectName} Exam Structure`} delay={100} />
-                      <SearchingSourceItem icon={GraduationCap} label="Searching" source={`${subjectName} Structured Response Guide`} delay={200} />
-                      <SearchingSourceItem icon={FileText} label="Searching" source="Past Paper Questions" delay={300} />
+                      {reactiveThinkingEnabled && thinkingItems.length > 0 ? (
+                        thinkingItems.map((it, i) => {
+                          const Icon = it.type === 'specification' ? BookOpen
+                            : it.type === 'diagram' ? BarChart2
+                            : (it.type.startsWith('past_paper') || it.type.startsWith('paper_')) ? FileText
+                            : GraduationCap;
+                          return (
+                            <SearchingSourceItem
+                              key={`${it.type}-${i}`}
+                              icon={Icon}
+                              label="Reading"
+                              source={it.label}
+                              delay={i * 350}
+                            />
+                          );
+                        })
+                      ) : (
+                        <>
+                          <SearchingSourceItem icon={BookOpen} label="Searching" source={`${subjectName} Specification`} delay={0} />
+                          <SearchingSourceItem icon={FileText} label="Searching" source={`${subjectName} Exam Structure`} delay={100} />
+                          <SearchingSourceItem icon={GraduationCap} label="Searching" source={`${subjectName} Structured Response Guide`} delay={200} />
+                          <SearchingSourceItem icon={FileText} label="Searching" source="Past Paper Questions" delay={300} />
+                        </>
+                      )}
                     </div>
                   </>
                 ) : searchedSources.length > 0 ? (
