@@ -151,6 +151,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   useEmojiStars = false,
   productSlug,
   isGCSE: isGCSEProp,
+  showAnswerFooter = false,
 }) => {
   const isGCSE = isGCSEProp ?? (productSlug?.startsWith('gcse-') ?? false);
   const topGrade = getTopGrade(isGCSE ? 'gcse' : 'alevel');
