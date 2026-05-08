@@ -1412,10 +1412,30 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                       <span className="text-sm font-medium text-foreground">Searching knowledge base...</span>
                     </div>
                     <div className="space-y-1.5 animate-in fade-in slide-in-from-left-2 duration-300">
-                      <SearchingSourceItem icon={BookOpen} label="Searching" source={`${subjectName} Specification`} delay={0} />
-                      <SearchingSourceItem icon={FileText} label="Searching" source={`${subjectName} Exam Structure`} delay={100} />
-                      <SearchingSourceItem icon={GraduationCap} label="Searching" source={`${subjectName} Structured Response Guide`} delay={200} />
-                      <SearchingSourceItem icon={FileText} label="Searching" source="Past Paper Questions" delay={300} />
+                      {reactiveThinkingEnabled && thinkingItems.length > 0 ? (
+                        thinkingItems.map((it, i) => {
+                          const Icon = it.type === 'specification' ? BookOpen
+                            : it.type === 'diagram' ? BarChart2
+                            : (it.type.startsWith('past_paper') || it.type.startsWith('paper_')) ? FileText
+                            : GraduationCap;
+                          return (
+                            <SearchingSourceItem
+                              key={`${it.type}-${i}`}
+                              icon={Icon}
+                              label="Reading"
+                              source={it.label}
+                              delay={i * 350}
+                            />
+                          );
+                        })
+                      ) : (
+                        <>
+                          <SearchingSourceItem icon={BookOpen} label="Searching" source={`${subjectName} Specification`} delay={0} />
+                          <SearchingSourceItem icon={FileText} label="Searching" source={`${subjectName} Exam Structure`} delay={100} />
+                          <SearchingSourceItem icon={GraduationCap} label="Searching" source={`${subjectName} Structured Response Guide`} delay={200} />
+                          <SearchingSourceItem icon={FileText} label="Searching" source="Past Paper Questions" delay={300} />
+                        </>
+                      )}
                     </div>
                   </>
                 ) : searchedSources.length > 0 ? (
