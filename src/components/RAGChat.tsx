@@ -1325,6 +1325,28 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                       </button>
                     </div>
                   )}
+
+                  {/* Specialised answer footer (Edexcel Econ only) */}
+                  {showAnswerFooter && isLastAssistant && message.messageId && !isLoading && !isAnimating && (
+                    <AnswerFooter
+                      messageId={message.messageId}
+                      productId={productId}
+                      userQuestion={(() => {
+                        for (let i = index - 1; i >= 0; i--) {
+                          if (messages[i].role === 'user') return messages[i].content;
+                        }
+                        return '';
+                      })()}
+                      assistantAnswer={message.content}
+                      sources={searchedSources}
+                      onPromptClick={(text) => {
+                        if (isLoading) return;
+                        const userMessage: Message = { role: 'user', content: text };
+                        setMessages(prev => [...prev, userMessage]);
+                        handleSendWithMessage(text);
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             );
