@@ -108,6 +108,7 @@ export const PremiumVersionPage = () => {
           trainerAchievements={tc.trainer_achievements.length > 0 ? tc.trainer_achievements : undefined}
           trainerDescription={tc.trainer_description || undefined}
           useEmojiStars
+          showAnswerFooter
         />
       </div>
     </div>
