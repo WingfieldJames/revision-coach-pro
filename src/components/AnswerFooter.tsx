@@ -93,36 +93,76 @@ export const AnswerFooter: React.FC<AnswerFooterProps> = ({
   const hasAnyContent = specTopic || followups.length > 0 || peqs.length > 0 || streakCount > 0;
   if (!loading && !hasAnyContent) return null;
 
+  // Build last-7-days study dot map
+  const studyDots = (() => {
+    const dots: { date: string; label: string; color: string; title: string }[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const lastActive = streak?.last_active_date ? new Date(streak.last_active_date + 'T00:00:00') : null;
+    const studiedDates = new Set<string>();
+    if (lastActive && streakCount > 0) {
+      for (let i = 0; i < streakCount; i++) {
+        const d = new Date(lastActive);
+        d.setDate(d.getDate() - i);
+        studiedDates.add(d.toISOString().slice(0, 10));
+      }
+    }
+    const todayStr = today.toISOString().slice(0, 10);
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const iso = d.toISOString().slice(0, 10);
+      const dayLabel = d.toLocaleDateString('en-GB', { weekday: 'short' })[0];
+      let color = 'bg-red-500';
+      let title = `${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })} — missed`;
+      if (studiedDates.has(iso)) {
+        color = 'bg-green-500';
+        title = `${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })} — studied`;
+      } else if (iso === todayStr) {
+        color = 'bg-orange-400';
+        title = "Today — study to keep your streak";
+      }
+      dots.push({ date: iso, label: dayLabel, color, title });
+    }
+    return dots;
+  })();
+
   return (
-    <div className="not-prose mt-4 pt-3 border-t border-border/60 space-y-3 text-sm">
-      {/* Top row: spec chip + streak */}
-      {(specTopic || streakCount > 0) && (
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="not-prose mt-4 p-4 rounded-xl bg-white border border-border/60 space-y-3 text-sm text-foreground shadow-sm">
+      {/* Top row: spec chip + streak dots */}
+      {(specTopic || streakCount > 0 || streak) && (
+        <div className="flex flex-wrap items-center gap-3">
           {specTopic && (
             <button
               onClick={() => onPromptClick(`Explain spec point "${specTopic}" in more depth with examples.`)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15 transition-colors text-xs font-medium"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15 transition-colors text-xs font-bold"
               title="Dive deeper into this spec point"
             >
               <BookOpen className="w-3.5 h-3.5" />
               <span className="truncate max-w-[220px]">{specTopic}</span>
             </button>
           )}
-          {streakCount > 0 && (
-            <span
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-semibold"
-              title="Daily study streak"
-            >
-              <Flame className="w-3.5 h-3.5" />
-              {streakCount}-day streak
-            </span>
-          )}
+          <div className="flex items-center gap-1.5" title="Last 7 days of study activity">
+            <Flame className="w-3.5 h-3.5 text-orange-500" />
+            <div className="flex items-center gap-1">
+              {studyDots.map((dot) => (
+                <span
+                  key={dot.date}
+                  className={cn("w-2.5 h-2.5 rounded-full ring-1 ring-black/5", dot.color)}
+                  title={dot.title}
+                />
+              ))}
+            </div>
+            {streakCount > 0 && (
+              <span className="text-xs font-bold text-orange-600 ml-1">{streakCount}d</span>
+            )}
+          </div>
         </div>
       )}
 
       {/* Recommended follow-ups */}
       <div>
-        <div className="flex items-center gap-1.5 mb-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        <div className="flex items-center gap-1.5 mb-1.5 text-xs font-bold text-foreground uppercase tracking-wide">
           <Sparkles className="w-3 h-3" />
           Recommended next
         </div>
@@ -138,7 +178,7 @@ export const AnswerFooter: React.FC<AnswerFooterProps> = ({
                 key={i}
                 onClick={() => onPromptClick(f)}
                 className={cn(
-                  "text-left px-3 py-1.5 rounded-lg border border-border bg-background/60",
+                  "text-left px-3 py-1.5 rounded-lg border border-border bg-white",
                   "hover:bg-accent hover:border-primary/40 hover:-translate-y-0.5",
                   "transition-all text-xs font-medium text-foreground"
                 )}
@@ -155,7 +195,7 @@ export const AnswerFooter: React.FC<AnswerFooterProps> = ({
       {/* Related PEQs */}
       {peqs.length > 0 && (
         <div>
-          <div className="flex items-center gap-1.5 mb-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          <div className="flex items-center gap-1.5 mb-1.5 text-xs font-bold text-foreground uppercase tracking-wide">
             <FileText className="w-3 h-3" />
             Related past paper questions
           </div>
