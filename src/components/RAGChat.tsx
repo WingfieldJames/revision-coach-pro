@@ -97,6 +97,8 @@ interface RAGChatProps {
   productSlug?: string;
   /** Whether this product is GCSE (overrides productSlug-based detection) */
   isGCSE?: boolean;
+  /** Show post-answer footer with spec point, follow-ups, related PEQs, and streak */
+  showAnswerFooter?: boolean;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 12;
