@@ -119,3 +119,6 @@ verify_jwt = false
 
 [functions.school-accept-invite]
 verify_jwt = false
+
+[functions.suggest-followups]
+verify_jwt = false

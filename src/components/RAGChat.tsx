@@ -31,6 +31,7 @@ import { csDiagrams } from '@/data/csDiagrams';
 import { useChatHistory } from '@/hooks/useChatHistory';
 import { useChatHistoryContext } from '@/contexts/ChatHistoryContext';
 import { saveCheckoutIntent } from '@/lib/checkoutIntent';
+import { AnswerFooter } from '@/components/AnswerFooter';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -97,6 +98,8 @@ interface RAGChatProps {
   productSlug?: string;
   /** Whether this product is GCSE (overrides productSlug-based detection) */
   isGCSE?: boolean;
+  /** Show post-answer footer with spec point, follow-ups, related PEQs, and streak */
+  showAnswerFooter?: boolean;
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 12;
@@ -149,6 +152,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   useEmojiStars = false,
   productSlug,
   isGCSE: isGCSEProp,
+  showAnswerFooter = false,
 }) => {
   const isGCSE = isGCSEProp ?? (productSlug?.startsWith('gcse-') ?? false);
   const topGrade = getTopGrade(isGCSE ? 'gcse' : 'alevel');
@@ -1321,6 +1325,28 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                         <ThumbsDown className="h-3.5 w-3.5" />
                       </button>
                     </div>
+                  )}
+
+                  {/* Specialised answer footer (Edexcel Econ only) */}
+                  {showAnswerFooter && isLastAssistant && message.messageId && !isLoading && !isAnimating && (
+                    <AnswerFooter
+                      messageId={message.messageId}
+                      productId={productId}
+                      userQuestion={(() => {
+                        for (let i = index - 1; i >= 0; i--) {
+                          if (messages[i].role === 'user') return messages[i].content;
+                        }
+                        return '';
+                      })()}
+                      assistantAnswer={message.content}
+                      sources={searchedSources}
+                      onPromptClick={(text) => {
+                        if (isLoading) return;
+                        const userMessage: Message = { role: 'user', content: text };
+                        setMessages(prev => [...prev, userMessage]);
+                        handleSendWithMessage(text);
+                      }}
+                    />
                   )}
                 </div>
               </div>
