@@ -84,6 +84,7 @@ export const FreeVersionPage = () => {
            trainerDescription={tc.trainer_description || undefined}
            useEmojiStars
            productSlug="edexcel-economics"
+           showAnswerFooter
         />
       </div>
     </div>
