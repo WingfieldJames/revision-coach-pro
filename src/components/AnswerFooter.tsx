@@ -128,7 +128,7 @@ export const AnswerFooter: React.FC<AnswerFooterProps> = ({
   })();
 
   return (
-    <div className="not-prose mt-4 p-4 rounded-xl bg-white border border-border/60 space-y-3 text-sm text-foreground shadow-sm">
+    <div className="not-prose mt-4 p-4 rounded-xl bg-white dark:bg-slate-900 border border-border/60 dark:border-white/10 space-y-3 text-sm text-foreground shadow-sm">
       {/* Top row: spec chip + streak dots */}
       {(specTopic || streakCount > 0 || streak) && (
         <div className="flex flex-wrap items-center gap-3">
@@ -178,7 +178,7 @@ export const AnswerFooter: React.FC<AnswerFooterProps> = ({
                 key={i}
                 onClick={() => onPromptClick(f)}
                 className={cn(
-                  "text-left px-3 py-1.5 rounded-lg border border-border bg-white",
+                  "text-left px-3 py-1.5 rounded-lg border border-border bg-white dark:bg-slate-800 dark:border-white/10",
                   "hover:bg-accent hover:border-primary/40 hover:-translate-y-0.5",
                   "transition-all text-xs font-medium text-foreground"
                 )}
