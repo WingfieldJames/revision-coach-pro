@@ -198,6 +198,17 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchedSources, setSearchedSources] = useState<SearchedSource[]>([]);
+  const [thinkingPrompt, setThinkingPrompt] = useState<string>('');
+  const reactiveThinkingEnabled = productSlug === 'edexcel-economics';
+  const { getSequence: getThinkingSequence } = useReactiveThinking(
+    productId,
+    subjectName,
+    reactiveThinkingEnabled,
+  );
+  const thinkingItems = useMemo(
+    () => (reactiveThinkingEnabled && thinkingPrompt ? getThinkingSequence(thinkingPrompt, 4) : []),
+    [reactiveThinkingEnabled, thinkingPrompt, getThinkingSequence],
+  );
   const [currentDiagram, setCurrentDiagram] = useState<DiagramData | null>(null);
   const [resolvedDiagramUrl, setResolvedDiagramUrl] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
