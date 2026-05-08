@@ -632,6 +632,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     setIsLoading(true);
     setIsSearching(true);
     setSearchedSources([]);
+    setThinkingPrompt(messageText || '');
     setCurrentDiagram(null);
     try {
       // Get session token for server-side auth verification
