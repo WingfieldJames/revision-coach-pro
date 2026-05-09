@@ -1154,21 +1154,22 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               <div
                 key={message.messageId || `msg-${index}`}
                 className={cn(
-                  "flex gap-3 p-4 rounded-xl",
+                  "rounded-xl",
                   message.role === 'user'
-                    ? cn("text-foreground ml-auto max-w-[70%]", theme === 'dark' ? "bg-white/10 border border-white/5" : "bg-accent/60 border border-border")
-                    : "bg-muted max-w-[90%]"
+                    ? cn("flex gap-3 p-4 text-foreground ml-auto max-w-[70%]", theme === 'dark' ? "bg-white/10 border border-white/5" : "bg-accent/60 border border-border")
+                    : "flex flex-col p-2 bg-muted max-w-[90%]"
                 )}
               >
-                {message.role === 'assistant' && (
-                  <div className="flex-shrink-0">
-                    {trainerAvatarUrl ? (
-                      <img src={trainerAvatarUrl} alt={trainerName || 'Trainer'} className="w-8 h-8 rounded-full object-cover" />
-                    ) : (
-                      <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
-                    )}
-                  </div>
-                )}
+                <div className={cn(message.role === 'assistant' && "flex gap-3 p-2")}>
+                  {message.role === 'assistant' && (
+                    <div className="flex-shrink-0">
+                      {trainerAvatarUrl ? (
+                        <img src={trainerAvatarUrl} alt={trainerName || 'Trainer'} className="w-8 h-8 rounded-full object-cover" />
+                      ) : (
+                        <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
+                      )}
+                    </div>
+                  )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
                   {message.role === 'assistant' && trainerName && (
                     <p className="font-bold text-foreground mt-0 mb-1 not-prose text-sm">{trainerName}</p>
@@ -1340,28 +1341,29 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                     </div>
                   )}
 
-                  {/* Specialised answer footer (Edexcel Econ only) */}
-                  {showAnswerFooter && isLastAssistant && message.messageId && !isLoading && !isAnimating && (
-                    <AnswerFooter
-                      messageId={message.messageId}
-                      productId={productId}
-                      userQuestion={(() => {
-                        for (let i = index - 1; i >= 0; i--) {
-                          if (messages[i].role === 'user') return messages[i].content;
-                        }
-                        return '';
-                      })()}
-                      assistantAnswer={message.content}
-                      sources={searchedSources}
-                      onPromptClick={(text) => {
-                        if (isLoading) return;
-                        const userMessage: Message = { role: 'user', content: text };
-                        setMessages(prev => [...prev, userMessage]);
-                        handleSendWithMessage(text);
-                      }}
-                    />
-                  )}
                 </div>
+                </div>
+                {/* Specialised answer footer (Edexcel Econ only) — full bubble width */}
+                {message.role === 'assistant' && showAnswerFooter && isLastAssistant && message.messageId && !isLoading && !isAnimating && (
+                  <AnswerFooter
+                    messageId={message.messageId}
+                    productId={productId}
+                    userQuestion={(() => {
+                      for (let i = index - 1; i >= 0; i--) {
+                        if (messages[i].role === 'user') return messages[i].content;
+                      }
+                      return '';
+                    })()}
+                    assistantAnswer={message.content}
+                    sources={searchedSources}
+                    onPromptClick={(text) => {
+                      if (isLoading) return;
+                      const userMessage: Message = { role: 'user', content: text };
+                      setMessages(prev => [...prev, userMessage]);
+                      handleSendWithMessage(text);
+                    }}
+                  />
+                )}
               </div>
             );
           })}
