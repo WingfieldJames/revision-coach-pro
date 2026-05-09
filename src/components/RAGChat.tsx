@@ -1154,13 +1154,13 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               <div
                 key={message.messageId || `msg-${index}`}
                 className={cn(
-                  "flex gap-3 p-4 rounded-xl",
+                  "rounded-xl",
                   message.role === 'user'
-                    ? cn("text-foreground ml-auto max-w-[70%]", theme === 'dark' ? "bg-white/10 border border-white/5" : "bg-accent/60 border border-border")
-                    : "bg-muted max-w-[90%]"
+                    ? cn("flex gap-3 p-4 text-foreground ml-auto max-w-[70%]", theme === 'dark' ? "bg-white/10 border border-white/5" : "bg-accent/60 border border-border")
+                    : "flex flex-col p-2 bg-muted max-w-[90%]"
                 )}
               >
-                {message.role === 'assistant' && (
+                <div className={cn(message.role === 'assistant' && "flex gap-3 p-2")}>
                   <div className="flex-shrink-0">
                     {trainerAvatarUrl ? (
                       <img src={trainerAvatarUrl} alt={trainerName || 'Trainer'} className="w-8 h-8 rounded-full object-cover" />
