@@ -1161,14 +1161,15 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
               >
                 <div className={cn(message.role === 'assistant' && "flex gap-3 p-2")}>
-                  <div className="flex-shrink-0">
-                    {trainerAvatarUrl ? (
-                      <img src={trainerAvatarUrl} alt={trainerName || 'Trainer'} className="w-8 h-8 rounded-full object-cover" />
-                    ) : (
-                      <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
-                    )}
-                  </div>
-                )}
+                  {message.role === 'assistant' && (
+                    <div className="flex-shrink-0">
+                      {trainerAvatarUrl ? (
+                        <img src={trainerAvatarUrl} alt={trainerName || 'Trainer'} className="w-8 h-8 rounded-full object-cover" />
+                      ) : (
+                        <img src={theme === 'dark' ? aStarIcon : aStarIconLight} alt="A* AI" className="w-8 h-8 object-contain" />
+                      )}
+                    </div>
+                  )}
                 <div className="flex-1 prose prose-sm dark:prose-invert max-w-none overflow-x-auto">
                   {message.role === 'assistant' && trainerName && (
                     <p className="font-bold text-foreground mt-0 mb-1 not-prose text-sm">{trainerName}</p>
