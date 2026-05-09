@@ -128,7 +128,7 @@ export const AnswerFooter: React.FC<AnswerFooterProps> = ({
   })();
 
   return (
-    <div className="not-prose mt-4 -ml-[44px] -mr-1 -mb-1 p-4 rounded-xl bg-white dark:bg-slate-900 border border-border/60 dark:border-white/10 space-y-3 text-sm text-foreground shadow-sm">
+    <div className="not-prose mt-4 p-4 rounded-xl bg-white dark:bg-slate-900 border border-border/60 dark:border-white/10 space-y-3 text-sm text-foreground shadow-sm">
       {/* Top row: spec chip + streak dots */}
       {(specTopic || streakCount > 0 || streak) && (
         <div className="flex flex-wrap items-center gap-3">
