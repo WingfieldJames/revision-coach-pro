@@ -126,7 +126,19 @@ export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
               <p className="text-[11px] text-muted-foreground leading-snug">
                 Tell me where you're at - I'll tailor everything to you
               </p>
+          </div>
+
+          {/* Message from trainer */}
+          {trainerDescription && (
+            <div className="rounded-lg bg-primary/5 border border-primary/20 p-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">
+                Message from {trainerName || 'your tutor'}
+              </p>
+              <p className="text-[11px] text-foreground/80 italic leading-relaxed">
+                "{trainerDescription}"
+              </p>
             </div>
+          )}
           </div>
 
           {/* Name */}
