@@ -2464,17 +2464,26 @@ export function BuildPage() {
                   <Input
                     type="date"
                     value={challengeEnd}
+                    min={challengeStart || undefined}
                     onChange={(e) => setChallengeEnd(e.target.value)}
                     className="mt-1"
                   />
                 </div>
               </div>
               {challengeTitle && challengeStart && challengeEnd && (
-                <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
-                  <p className="text-[10px] text-muted-foreground">
-                    Challenge "<span className="font-semibold text-foreground">{challengeTitle}</span>" will be active from {challengeStart} to {challengeEnd}. Remember to Save for changes to take effect.
-                  </p>
-                </div>
+                challengeEnd < challengeStart ? (
+                  <div className="bg-destructive/10 rounded-lg p-2.5 border border-destructive/40">
+                    <p className="text-[10px] text-destructive">
+                      End date ({challengeEnd}) is before start date ({challengeStart}). Fix this before saving — otherwise the challenge will not appear in the chatbot.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-muted/50 rounded-lg p-2.5 border border-border/50">
+                    <p className="text-[10px] text-muted-foreground">
+                      Challenge "<span className="font-semibold text-foreground">{challengeTitle}</span>" will be active from {challengeStart} to {challengeEnd}. Remember to Save for changes to take effect.
+                    </p>
+                  </div>
+                )
               )}
             </CardContent>
           </Card>
