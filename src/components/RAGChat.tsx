@@ -1014,6 +1014,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
         productId={productId}
         trainerAvatarUrl={trainerAvatarUrl}
         trainerName={trainerName}
+        trainerDescription={trainerDescription}
       />
 
       {/* Challenge Popup */}
