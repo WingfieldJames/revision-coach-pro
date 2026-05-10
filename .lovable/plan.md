@@ -1,33 +1,31 @@
 ## Goal
 
-Make sure today's "My tip for today!" challenge shows for everyone using the A‑Level Edexcel Economics chatbot, and copy the exact same challenge into A‑Level AQA Economics.
+Future-proof the chatbot hero countdown so it gracefully handles exam day and rolls forward to the next exam afterwards, across every subject.
 
-## Current state (verified in DB)
+## Current behaviour (`src/components/RAGChat.tsx`)
 
-- **Edexcel A-Level Economics** (`6dc19d53-...`) `active_challenge`:
-  - title: "My tip for today!"
-  - description: "Guys, can't believe we're finally here. Today's the last big push for paper 1…"
-  - start: `2026-05-10T00:00:00Z`, end: `2026-05-12T23:59:59Z`
-  - This challenge is stored on the trainer_project for that product, so every authenticated user opening the Edexcel Economics chatbot will load it via `RAGChat`'s `fetchChallenge` (no per-user gating exists). It is already visible for all Edexcel A-Level Economics users — no extra change needed there.
+- `daysToFirstExam` (line 171) sorts `examDatesProp` ascending and uses index `[0]` regardless of whether it's already passed.
+- Hero (line 1105) always renders `"{n} days to go."` — so "1 days to go." (bad grammar), "0 days to go." on exam day, and negative numbers the day after.
 
-- **AQA A-Level Economics** (`17ade690-...`) `active_challenge`: still the older "past paper cycle" tip with dates 2026-04-20 → 2026-04-22 (expired).
+## Change (single component, applies to all subjects since every chatbot uses RAGChat)
 
-## Change
+1. **`daysToFirstExam` memo** — filter to the next exam that is today or later:
+   - Compute `today` at midnight.
+   - From sorted `examDatesProp`, pick the first entry where `date >= today`.
+   - If none remain (all exams finished for the year), return `null` so the hero falls back to the existing "Let's get you that {grade}" line.
+   - Return the day delta for that next upcoming exam.
 
-Run a single data migration that overwrites AQA A-Level Economics' `active_challenge` JSONB with the exact same payload as Edexcel's current one (title, description, start, end, universal flag).
+2. **Hero label** (line 1105) — replace the hardcoded `"{n} days to go."` span with a small helper:
+   - `n === 0` → "Exam today."
+   - `n === 1` → "1 day to go."
+   - `n > 1`  → "{n} days to go."
+   
+   Same `text-foreground` styling, same wrapping `<h2>`.
 
-```sql
-UPDATE public.trainer_projects
-SET active_challenge = (
-  SELECT active_challenge
-  FROM public.trainer_projects
-  WHERE product_id = '6dc19d53-8a88-4741-9528-f25af97afb21'
-)
-WHERE product_id = '17ade690-8c44-4961-83b5-0edf42a9faea';
-```
-
-After this, AQA A-Level Economics users will see the same notification dot + auto-popup on their next chatbot load, with identical wording and the 10–12 May active window.
+3. No schema, no per-subject branching — because each subject's `exam_dates` array already includes every paper in chronological order, the filter automatically advances to (e.g.) Edexcel Econ Paper 2 the day after Paper 1.
 
 ## Out of scope
 
-- No code changes. No schema changes. No edits to other subjects/boards (CIE, OCR keep their existing tips).
+- No changes to the Build portal exam date editor.
+- No changes to the sidebar exam calendar (already handled separately per memory `exam-calendar-2026-v2-sidebar-only`).
+- No copy changes to the "Your {subject} revision, sorted" subtitle.

@@ -173,8 +173,9 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const sorted = [...examDatesProp].sort((a, b) => a.date.getTime() - b.date.getTime());
-    const first = sorted[0];
-    return Math.round((first.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const next = sorted.find(e => e.date.getTime() >= today.getTime());
+    if (!next) return null;
+    return Math.round((next.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }, [examDatesProp]);
 
   // Fetch real user count (actual signups + 2000) — updates on each page load
@@ -1102,7 +1103,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 {daysToFirstExam !== null ? (
                   <>
                     <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
-                      <span className="text-foreground">{daysToFirstExam} days to go.</span> <span className="text-primary">Let's get you that {topGrade}.</span>
+                      <span className="text-foreground">{daysToFirstExam === 0 ? "Exam today." : daysToFirstExam === 1 ? "1 day to go." : `${daysToFirstExam} days to go.`}</span> <span className="text-primary">Let's get you that {topGrade}.</span>
                     </h2>
                     <p className="text-muted-foreground text-sm sm:text-base">Your {subjectName} revision, sorted</p>
                   </>
