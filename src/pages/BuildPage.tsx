@@ -729,6 +729,15 @@ export function BuildPage() {
   // Manual Save handler
   const handleSave = async ({ silent = false }: { silent?: boolean } = {}): Promise<boolean> => {
     if (!projectId) return false;
+    // Validate challenge dates: end must be on/after start
+    if (challengeTitle.trim() && challengeStart && challengeEnd && challengeEnd < challengeStart) {
+      toast({
+        title: "Invalid challenge dates",
+        description: "Challenge end date must be on or after the start date.",
+        variant: "destructive",
+      });
+      return false;
+    }
     setIsSaving(true);
     try {
       const parsedMarks = essayMarkerMarks
