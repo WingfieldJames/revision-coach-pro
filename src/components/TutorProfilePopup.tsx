@@ -14,6 +14,7 @@ interface TutorProfilePopupProps {
   productId: string;
   trainerAvatarUrl?: string;
   trainerName?: string;
+  trainerDescription?: string;
 }
 
 export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
@@ -22,6 +23,7 @@ export const TutorProfilePopup: React.FC<TutorProfilePopupProps> = ({
   productId,
   trainerAvatarUrl,
   trainerName,
+  trainerDescription,
 }) => {
   const { user } = useAuth();
   const [studentName, setStudentName] = useState('');
