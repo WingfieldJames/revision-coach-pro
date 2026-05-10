@@ -1,19 +1,30 @@
-## Goal
-Make the `AnswerFooter` (Edexcel Econ) span the full width of the assistant chat bubble, keeping a small inset so a thin strip of the grey bubble shows as a border around it.
+## What's happening
 
-## Current layout
-The assistant bubble (`RAGChat.tsx` ~line 1157) is `flex gap-3 p-4 rounded-xl bg-muted`. Inside, the avatar (32px) sits left and the message content lives in a `flex-1` column. The `AnswerFooter` renders inside that column, so it's already inset by avatar(32) + gap(12) + bubble padding(16) on the left and 16px on the right/bottom — making it look like a small "add-on" card.
+Your challenge ("My tip for today!") is saved on the Edexcel Economics trainer project, but the dates are inverted:
 
-## Change
-In `src/components/AnswerFooter.tsx`, on the outer wrapper (line 131), use negative margins to break out of the content column so the card hugs the bubble edges, leaving only a small visible grey strip as the "border":
+- start: **2026-05-10** (today)
+- end:   **2026-04-11** (about a month *before* the start)
 
-- Left: `-ml-[44px]` (offsets avatar 32px + gap 12px) so it aligns with the bubble's left padding edge, then a small inset.
-- Right/bottom: extend to bubble edge with a small inset.
-- Net result: roughly `mt-4 -ml-[40px] -mr-1 -mb-1` (tweakable) — gives ~4px grey strip on right/bottom and aligns left with the bubble's inner padding while remaining visually "full width".
+The chatbot checks `now >= start AND now <= end`. Since today is already past April 11, the challenge is treated as expired, so:
+- the profile button never gets the red notification dot
+- the daily challenge popup never auto-opens
 
-Keep the existing rounded corners, white/dark background, and border so the footer still reads as its own surface but feels like an integrated section, not a small chip.
+The data path itself is working — RAGChat does read `active_challenge` from `trainer_projects` for this product. The only problem is the date range you saved.
 
-No changes to logic, props, or other components.
+## Fix (two parts)
 
-## Files
-- `src/components/AnswerFooter.tsx` — adjust outer div className only.
+### 1. Correct the saved dates
+In Build → Edexcel Economics → Challenge section, set the **end date** to a date on or after **2026-05-10** (e.g. `2026-05-11` or however long you want it active for) and re-save. After this the popup + notification dot will fire on the next chat load.
+
+### 2. Add validation in BuildPage so this can't happen again
+In `src/pages/BuildPage.tsx`, around the challenge save (line ~757) and the date inputs (line ~2448):
+
+- Before saving, if `challengeEnd < challengeStart`, block the save and show a toast: "Challenge end date must be on or after the start date."
+- On the end-date `<input type="date">`, set `min={challengeStart}` so the picker prevents picking earlier dates.
+- In the green confirmation banner (line ~2463), if dates are invalid, replace with a red warning instead of "will be active from … to …".
+
+No schema, no RAGChat changes needed — purely a Build-side guard plus a one-off data correction.
+
+## Want me to also…
+
+I can optionally make RAGChat more forgiving — e.g. if `end < start`, treat it as "active from start indefinitely" or "single-day on start". Let me know if you want that fallback added, otherwise I'll just do the validation above.
