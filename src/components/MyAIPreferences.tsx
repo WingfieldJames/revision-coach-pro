@@ -225,7 +225,7 @@ export const MyAIPreferences: React.FC<MyAIPreferencesProps> = ({ productId, isD
       <div className="space-y-2">
         <Label>What year are you in?</Label>
         <Select value={preferences.year} onValueChange={handleYearChange}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0">
             <SelectValue placeholder="Select your year" />
           </SelectTrigger>
           <SelectContent>
