@@ -263,15 +263,13 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
                 variant="outline"
                 size="sm"
                 onMouseEnter={() => {
-                  if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-                    handlePopoverChange(tool.id, true);
-                  }
+                  if (!isHoverDevice()) return;
+                  cancelHoverClose();
+                  handlePopoverChange(tool.id, true);
                 }}
                 onMouseLeave={() => {
-                  if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-                    if (fileDialogOpen.current) return;
-                    setOpenPopover((cur) => (cur === tool.id ? null : cur));
-                  }
+                  if (!isHoverDevice()) return;
+                  scheduleHoverClose(tool.id);
                 }}
                 className={`flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative ${tool.wideOnly ? 'hidden lg:flex' : ''}`}
               >
@@ -291,9 +289,15 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl"
+              className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:duration-0"
               align="start"
               sideOffset={8}
+              onMouseEnter={() => { if (isHoverDevice()) cancelHoverClose(); }}
+              onMouseLeave={() => {
+                if (!isHoverDevice()) return;
+                if (fileDialogOpen.current) return;
+                setOpenPopover((cur) => (cur === tool.id ? null : cur));
+              }}
               onInteractOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
               onPointerDownOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
               onFocusOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
