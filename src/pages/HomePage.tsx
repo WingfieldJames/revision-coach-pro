@@ -221,28 +221,9 @@ export const HomePage = () => {
         <MeetTheFounders />
       </div>
 
-      {/* See A* AI in action - Demo Video */}
-      <section data-section="demo-video" className="hidden md:block py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
-        <ScrollReveal className="text-center mb-8 md:mb-12">
-          <h2 className={`${sectionHeadingClass} flex items-center justify-center gap-0 flex-nowrap`}>
-            <span className="text-foreground">See</span>
-            <img src={currentLogo} alt="A* AI" className="h-16 sm:h-20 md:h-24 inline-block -mx-2 md:-mx-3 translate-y-[0.1cm]" />
-            <span className="text-foreground">in action</span>
-          </h2>
-        </ScrollReveal>
-        <ScrollReveal delay={0.2}>
-          <div className="rounded-2xl overflow-hidden border border-border/50 shadow-elevated" style={{ position: 'relative', paddingTop: '62.28%' }}>
-            <iframe
-              src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&autoplay=1&muted=1&background=1"
-              frameBorder="0"
-              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-              title="A* AI Demo" />
-            
-          </div>
-        </ScrollReveal>
-      </section>
+      {/* See A* AI in action - Demo Video with scroll-scale reveal */}
+      <DemoVideoSection />
+
 
       
 
