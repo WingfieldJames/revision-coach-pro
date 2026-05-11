@@ -284,7 +284,8 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
 
       {/* Header */}
       <div className="flex items-center gap-3">
-        <img src={aStarIcon} alt="A*" className="w-10 h-10 object-contain" />
+        <img src={aStarIconLight} alt="A*" className="w-10 h-10 object-contain block dark:hidden" />
+        <img src={aStarIconDark} alt="A*" className="w-10 h-10 object-contain hidden dark:block" />
         <div>
           <h3 className="font-semibold text-foreground">Mark my essay</h3>
           <p className="text-xs text-muted-foreground">
