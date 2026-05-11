@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -117,6 +117,20 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [openPopover, setOpenPopover] = useState<string | null>(null);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const hoverCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isHoverDevice = () =>
+    typeof window !== 'undefined' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const cancelHoverClose = () => {
+    if (hoverCloseTimer.current) { clearTimeout(hoverCloseTimer.current); hoverCloseTimer.current = null; }
+  };
+  const scheduleHoverClose = (id: string) => {
+    cancelHoverClose();
+    hoverCloseTimer.current = setTimeout(() => {
+      if (fileDialogOpen.current) return;
+      setOpenPopover((cur) => (cur === id ? null : cur));
+    }, 80);
+  };
 
   const isPremiumRoute = location.pathname.includes('premium');
   const tier = isDeluxe ? 'deluxe' : 'free';
@@ -248,6 +262,15 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               <Button
                 variant="outline"
                 size="sm"
+                onMouseEnter={() => {
+                  if (!isHoverDevice()) return;
+                  cancelHoverClose();
+                  handlePopoverChange(tool.id, true);
+                }}
+                onMouseLeave={() => {
+                  if (!isHoverDevice()) return;
+                  scheduleHoverClose(tool.id);
+                }}
                 className={`flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative ${tool.wideOnly ? 'hidden lg:flex' : ''}`}
               >
                 {tool.id !== 'exam-countdown' && tool.icon}
@@ -266,9 +289,15 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl"
+              className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:duration-0"
               align="start"
               sideOffset={8}
+              onMouseEnter={() => { if (isHoverDevice()) cancelHoverClose(); }}
+              onMouseLeave={() => {
+                if (!isHoverDevice()) return;
+                if (fileDialogOpen.current) return;
+                setOpenPopover((cur) => (cur === tool.id ? null : cur));
+              }}
               onInteractOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
               onPointerDownOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
               onFocusOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
