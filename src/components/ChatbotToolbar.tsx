@@ -388,6 +388,22 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
         )}
       </div>
 
+      {/* Essay Marker centered modal (matches Revision Timetable pattern) */}
+      {showEssayMarker && openPopover === 'essay-marker' && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4 animate-in fade-in-0 duration-150"
+          onClick={(e) => { if (e.target === e.currentTarget && !fileDialogOpen.current) setOpenPopover(null); }}
+        >
+          <div className="bg-background dark:bg-card border border-border rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-150">
+            <ScrollArea className="max-h-[90vh]">
+              <div className="p-6">
+                {renderToolContent('essay-marker')}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      )}
+
       {/* Upgrade Dialog */}
       {!isDeluxe && (
         <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
