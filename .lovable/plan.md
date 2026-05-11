@@ -1,17 +1,17 @@
-## Goal
-Update the Essay Marker tool's internal popup header (not the toolbar button).
+## Root cause
 
-## Changes — `src/components/EssayMarkerTool.tsx` (lines 283–294)
+The Essay Marker modal is rendered **inside** the sticky toolbar `<div>`, which has `backdrop-blur-sm`. CSS filter/backdrop-filter creates a new containing block, so `position: fixed` is anchored to the toolbar's box (not the viewport). That's why:
 
-1. **Icon**: Replace the gradient-purple `PenLine` icon block with the A* logo on a transparent background — no colored container behind it.
-   - Generate a transparent-background version of the existing A* icon → `src/assets/a-star-icon-transparent.png` (using imagegen, prompted to match the existing 3D gradient A* badge).
-   - Import it and render as a plain `<img className="w-10 h-10 object-contain" />` — no `bg-gradient-brand` wrapper.
-   - Remove the now-unused `PenLine` import from the header (still used later in the "Mark Essay" button at line 437, so keep the import).
+- The modal sits at the top of the screen (toolbar height area), not centered in the viewport.
+- The grey overlay only covers the toolbar strip, not the whole page.
 
-2. **Title**: Change `{toolLabel}` → `Mark my essay` (hardcoded, overriding the prop for the in-popup heading).
+## Fix — `src/components/ChatbotToolbar.tsx`
 
-3. **Subtitle**: Change `Upload a photo or paste your {fixedMark ? '${fixedMark}-marker' : 'essay'}` → `Get examiner-grade feedback in seconds`.
+Render the Essay Marker modal through a **React portal to `document.body`**, so it escapes the toolbar's containing block.
 
-## Out of scope
-- Toolbar button icon/label (user explicitly said "not the button image").
-- Any other Essay Marker behavior or styling.
+1. Import `createPortal` from `react-dom`.
+2. Wrap the existing essay-marker modal JSX block in `createPortal(<...>, document.body)`.
+3. Keep all existing classes (`fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4`) — they will now correctly cover the full viewport and centre the modal.
+4. No changes to size, layout, content, or trigger button behaviour.
+
+That's the only change needed — the modal will then center vertically/horizontally and the grey backdrop will cover the entire screen, identical to the Revision Timetable.
