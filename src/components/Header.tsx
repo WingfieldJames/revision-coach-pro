@@ -634,5 +634,84 @@ export const Header: React.FC<HeaderProps> = ({
 
       </div>
     </header>
+
+    {showFloatingPill && (
+      <AnimatePresence>
+        {isScrolled && (
+          <motion.div
+            key="floating-pill"
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -16, scale: 0.92 }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12, scale: 0.94 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28, mass: 0.7 }}
+            className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 rounded-full border border-border bg-background/85 backdrop-blur-md shadow-xl"
+            style={{ willChange: 'transform, opacity' }}
+          >
+            <Link to="/" className="flex items-center pl-1" onClick={() => window.scrollTo(0, 0)} aria-label="Home">
+              <img src={logoMark} alt="A* AI" className="h-7 w-7 object-contain" />
+            </Link>
+
+            <div className="hidden md:flex items-center gap-5 text-[13px]">
+              <button
+                onClick={() => handleTabChange('home')}
+                className={`hover:text-foreground transition-colors ${selectedTab === 'home' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
+              >
+                Home
+              </button>
+              <div
+                className="relative"
+                onMouseEnter={openSubjectsDropdown}
+                onMouseLeave={closeSubjectsDropdown}
+              >
+                <button
+                  onClick={toggleSubjectsDropdown}
+                  className={`flex items-center gap-1 hover:text-foreground transition-colors ${selectedTab === 'pricing' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
+                >
+                  Subjects
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+                {subjectsDropdownOpen && <div className="absolute left-0 right-0 h-2 top-full" />}
+                <div
+                  className={`absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] w-36 bg-white dark:bg-popover rounded-lg shadow-md border border-border overflow-hidden transition-all duration-150 origin-top z-50 ${subjectsDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}
+                >
+                  <div
+                    className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    onClick={() => handleSubjectLevelClick('gcse')}
+                  >
+                    GCSE
+                  </div>
+                  <div
+                    className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    onClick={() => handleSubjectLevelClick('alevel')}
+                  >
+                    A-Level
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handleTabChange('merch')}
+                className={`hover:text-foreground transition-colors ${selectedTab === 'merch' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
+              >
+                Merch
+              </button>
+              <button
+                onClick={() => handleTabChange('profile')}
+                className={`hover:text-foreground transition-colors ${selectedTab === 'profile' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
+              >
+                Schools
+              </button>
+            </div>
+
+            <Button
+              onClick={() => navigate('/select')}
+              className="bg-primary text-primary-foreground rounded-full px-4 py-1.5 h-auto font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg hover:bg-primary/90 transition-all"
+            >
+              Start Studying
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    )}
+    </>
   );
 };
