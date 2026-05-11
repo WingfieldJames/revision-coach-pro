@@ -99,8 +99,22 @@ const DemoVideoSection: React.FC = () => {
     <section ref={sectionRef} data-section="demo-video" className="hidden md:block py-16 md:py-28 px-4 md:px-8 max-w-5xl mx-auto">
       <motion.div
         style={{ scale: screenScale, y: screenY, opacity: screenOpacity, willChange: "transform, opacity" }}
-        className="rounded-2xl overflow-hidden border border-border/50 shadow-elevated origin-bottom"
+        className="rounded-2xl overflow-hidden border border-border/50 shadow-elevated origin-bottom bg-muted"
       >
+        {/* Browser chrome */}
+        <div className="flex items-center gap-3 px-4 py-2.5 bg-muted border-b border-border/50">
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+            <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
+            <span className="w-3 h-3 rounded-full bg-[#28c840]" />
+          </div>
+          <div className="flex-1 flex justify-center">
+            <div className="px-4 py-1 rounded-md bg-background/80 border border-border/50 text-xs text-muted-foreground font-medium tracking-tight max-w-[280px] w-full text-center truncate">
+              astarai.co.uk
+            </div>
+          </div>
+          <div className="w-12" />
+        </div>
         <div style={{ position: 'relative', paddingTop: '62.28%' }}>
           <iframe
             src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&autoplay=1&muted=1&background=1"
