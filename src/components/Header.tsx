@@ -314,7 +314,14 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className={`sticky top-0 z-50 flex justify-between items-center px-3 sm:px-6 pt-4 sm:pt-6 pb-2 text-foreground ${transparentBg ? 'bg-transparent' : 'bg-background/95 backdrop-blur-sm'}`}>
+    <>
+    <header
+      className={`sticky top-0 z-50 flex justify-between items-center px-3 sm:px-6 pt-4 sm:pt-6 pb-2 text-foreground ${transparentBg ? 'bg-transparent' : 'bg-background/95 backdrop-blur-sm'} ${
+        showFloatingPill && isScrolled && !prefersReducedMotion
+          ? 'opacity-0 -translate-y-2 pointer-events-none'
+          : 'opacity-100 translate-y-0'
+      } transition-[opacity,transform] duration-300 ease-out will-change-transform`}
+    >
       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
         <Link to="/" className="flex items-center" onClick={() => window.scrollTo(0, 0)}>
           <img src={currentLogo} alt="A* AI logo" className="h-16 sm:h-20" />
