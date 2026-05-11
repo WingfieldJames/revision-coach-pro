@@ -201,13 +201,15 @@ export const HomePage = () => {
 
               {/* Right side - Device mockup */}
               <div className="hidden md:flex flex-1 justify-end items-center relative -mr-20 xl:-mr-40 2xl:-mr-64">
-                <div className="w-full max-w-[720px] xl:max-w-[950px] 2xl:max-w-[1200px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
+                <motion.div
+                  style={{ x: heroMockX, willChange: "transform" }}
+                  className="w-full max-w-[720px] xl:max-w-[950px] 2xl:max-w-[1200px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
                   <img
                     src={appScreenshot}
                     alt="A* AI essay marker demo"
                     className="w-full h-auto" />
                   
-                </div>
+                </motion.div>
               </div>
             </div>
           </div>
