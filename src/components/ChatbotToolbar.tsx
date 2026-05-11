@@ -346,7 +346,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               }}
               onFocusOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
             >
-              <ScrollArea className="max-h-[70vh]">
+              <ScrollArea className={tool.id === 'essay-marker' ? 'max-h-[85vh]' : 'max-h-[70vh]'}>
                 {mountedTools.has(tool.id) && renderToolContent(tool.id)}
               </ScrollArea>
             </PopoverContent>
