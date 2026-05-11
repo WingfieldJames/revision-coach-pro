@@ -160,6 +160,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const hoverCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [showExamCalendar, setShowExamCalendar] = useState(false);
