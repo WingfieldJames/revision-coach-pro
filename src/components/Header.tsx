@@ -168,6 +168,17 @@ export const Header: React.FC<HeaderProps> = ({
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [isDeluxe, setIsDeluxe] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const showFloatingPill = showNavLinks && showStartStudyingButton;
+
+  useEffect(() => {
+    if (!showFloatingPill) return;
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [showFloatingPill]);
 
   const daysUntilFirstExam = examDates.length > 0 
     ? Math.round((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24))
