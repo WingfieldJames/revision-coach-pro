@@ -248,6 +248,17 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               <Button
                 variant="outline"
                 size="sm"
+                onMouseEnter={() => {
+                  if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                    handlePopoverChange(tool.id, true);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                    if (fileDialogOpen.current) return;
+                    setOpenPopover((cur) => (cur === tool.id ? null : cur));
+                  }
+                }}
                 className={`flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative ${tool.wideOnly ? 'hidden lg:flex' : ''}`}
               >
                 {tool.id !== 'exam-countdown' && tool.icon}
