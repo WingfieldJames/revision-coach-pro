@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -160,6 +160,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const hoverCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [showExamCalendar, setShowExamCalendar] = useState(false);
@@ -247,8 +248,18 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
     <>
       {/* Sidebar panel */}
       <div
+        onMouseEnter={() => {
+          if (hoverCloseTimer.current) { clearTimeout(hoverCloseTimer.current); hoverCloseTimer.current = null; }
+          if (window.matchMedia('(min-width: 768px)').matches) setOpen(true);
+        }}
+        onMouseLeave={() => {
+          if (window.matchMedia('(min-width: 768px)').matches) {
+            hoverCloseTimer.current = setTimeout(() => setOpen(false), 200);
+          }
+        }}
         className={cn(
-          "hidden md:flex fixed left-0 top-[5.5rem] h-[calc(100vh-5.5rem)] z-[35] flex-col bg-background transition-all duration-300 ease-in-out pt-2",
+          "hidden md:flex fixed left-0 top-[5.5rem] h-[calc(100vh-5.5rem)] z-[35] flex-col bg-background pt-2",
+          "transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width]",
           "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:bg-gradient-to-b after:from-transparent after:via-border after:to-transparent",
           open ? "w-[300px] sm:w-[340px]" : "w-12"
         )}
