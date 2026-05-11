@@ -309,7 +309,11 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
             </PopoverTrigger>
             <PopoverContent
               forceMount={mountedTools.has(tool.id) ? true : undefined}
-              className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:hidden"
+              className={`p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:hidden ${
+                tool.id === 'essay-marker'
+                  ? 'w-[95vw] max-w-5xl'
+                  : 'w-[90vw] max-w-md'
+              }`}
               align="start"
               sideOffset={8}
               onPointerDown={() => { pointerDownInsideRef.current = true; }}
@@ -342,7 +346,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               }}
               onFocusOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
             >
-              <ScrollArea className="max-h-[70vh]">
+              <ScrollArea className={tool.id === 'essay-marker' ? 'max-h-[85vh]' : 'max-h-[70vh]'}>
                 {mountedTools.has(tool.id) && renderToolContent(tool.id)}
               </ScrollArea>
             </PopoverContent>
