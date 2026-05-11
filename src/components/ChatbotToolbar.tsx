@@ -272,10 +272,12 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
                 variant="outline"
                 size="sm"
                 onMouseEnter={() => {
+                  markMounted(tool.id);
                   if (!isHoverDevice()) return;
                   cancelHoverClose();
                   handlePopoverChange(tool.id, true);
                 }}
+                onClick={() => markMounted(tool.id)}
                 onMouseLeave={() => {
                   if (!isHoverDevice()) return;
                   scheduleHoverClose(tool.id);
