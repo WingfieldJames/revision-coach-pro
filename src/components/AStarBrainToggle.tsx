@@ -53,6 +53,7 @@ export const AStarBrainToggle: React.FC<AStarBrainToggleProps> = ({ isDeluxe, pr
             checked={enabled}
             onCheckedChange={handleToggle}
             disabled={!isDeluxe}
+            className="data-[state=checked]:bg-purple-600"
           />
           {!isDeluxe && (
             <Lock className="h-3 w-3 text-muted-foreground absolute -top-1 -right-1" />
