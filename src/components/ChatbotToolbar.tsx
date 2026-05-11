@@ -300,7 +300,8 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:duration-0"
+              forceMount={mountedTools.has(tool.id) ? true : undefined}
+              className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:hidden"
               align="start"
               sideOffset={8}
               onMouseEnter={() => { if (isHoverDevice()) cancelHoverClose(); }}
