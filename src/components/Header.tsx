@@ -28,7 +28,9 @@ import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { saveCheckoutIntent } from '@/lib/checkoutIntent';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
+import logoMark from '@/assets/logo-mark.png';
 import { useTheme } from '@/contexts/ThemeContext';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 import { fileDialogOpen } from '@/lib/fileDialogState';
 import {
