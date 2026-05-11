@@ -1098,8 +1098,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               )}
 
               {/* Main hero content */}
-              <div className={cn("text-center", trainerName && trainerAvatarUrl && "md:ml-16 lg:ml-0")}>
-                <img src={currentLogo} alt="A* AI" className="h-24 mx-auto mb-1" />
+              <div className={cn("text-left", trainerName && trainerAvatarUrl && "md:ml-16 lg:ml-0")}>
+                <img src={currentLogo} alt="A* AI" className="h-24 mb-1" />
                 {daysToFirstExam !== null ? (
                   <>
                     <h2 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.75rem] font-bold mb-1 leading-[1.1] tracking-tight">
@@ -1117,7 +1117,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
                 
                 {/* Social proof badges */}
-                <div className="flex items-center justify-center gap-1.5 md:gap-1.5 lg:gap-2.5 flex-wrap mt-2 md:mt-2 lg:mt-3">
+                <div className="flex items-center justify-start gap-1.5 md:gap-1.5 lg:gap-2.5 flex-wrap mt-2 md:mt-2 lg:mt-3">
                   <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
                     <div className="flex">
                       <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-card z-[3]" />
