@@ -247,29 +247,29 @@
 
   :root .my-ai-panel .panel-badge,
   :root .exam-countdown-panel .panel-badge {
-    background-color: hsl(263 70% 50% / 0.1);
-    color: hsl(263 70% 50%);
+    background-color: hsl(222 75% 31% / 0.1);
+    color: hsl(222 75% 31%);
   }
 
-  /* Exam countdown timeline colours – light mode only */
+  /* Exam countdown timeline colours – light mode only (deep blue to match My AI) */
   :root .exam-countdown-panel .panel-timeline-line {
-    background: linear-gradient(to bottom, hsl(263 70% 50%), hsl(263 70% 50%), hsl(263 70% 50% / 0.3));
+    background: linear-gradient(to bottom, hsl(222 75% 31%), hsl(222 75% 31%), hsl(222 75% 31% / 0.3));
   }
 
   :root .exam-countdown-panel .panel-dot-filled {
-    background-color: hsl(263 70% 50%);
+    background-color: hsl(222 75% 31%);
   }
 
   :root .exam-countdown-panel .panel-dot-outline {
-    border: 2px solid hsl(263 70% 50%);
+    border: 2px solid hsl(222 75% 31%);
   }
 
   :root .exam-countdown-panel .panel-dot-inner {
-    background-color: hsl(263 70% 50%);
+    background-color: hsl(222 75% 31%);
   }
 
   :root .exam-countdown-panel .panel-accent-text {
-    color: hsl(263 70% 50%);
+    color: hsl(222 75% 31%);
   }
 
   /* Edexcel Econ – deep blue slider & badge overrides (light mode) */
