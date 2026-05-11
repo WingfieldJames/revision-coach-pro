@@ -28,7 +28,9 @@ import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { saveCheckoutIntent } from '@/lib/checkoutIntent';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
+import logoMark from '@/assets/logo-mark.png';
 import { useTheme } from '@/contexts/ThemeContext';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 import { fileDialogOpen } from '@/lib/fileDialogState';
 import {
@@ -166,6 +168,17 @@ export const Header: React.FC<HeaderProps> = ({
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [isDeluxe, setIsDeluxe] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const showFloatingPill = showNavLinks && showStartStudyingButton;
+
+  useEffect(() => {
+    if (!showFloatingPill) return;
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [showFloatingPill]);
 
   const daysUntilFirstExam = examDates.length > 0 
     ? Math.round((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24))
@@ -301,7 +314,14 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className={`sticky top-0 z-50 flex justify-between items-center px-3 sm:px-6 pt-4 sm:pt-6 pb-2 text-foreground ${transparentBg ? 'bg-transparent' : 'bg-background/95 backdrop-blur-sm'}`}>
+    <>
+    <header
+      className={`sticky top-0 z-50 flex justify-between items-center px-3 sm:px-6 pt-4 sm:pt-6 pb-2 text-foreground ${transparentBg ? 'bg-transparent' : 'bg-background/95 backdrop-blur-sm'} ${
+        showFloatingPill && isScrolled && !prefersReducedMotion
+          ? 'opacity-0 -translate-y-2 pointer-events-none'
+          : 'opacity-100 translate-y-0'
+      } transition-[opacity,transform] duration-300 ease-out will-change-transform`}
+    >
       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
         <Link to="/" className="flex items-center" onClick={() => window.scrollTo(0, 0)}>
           <img src={currentLogo} alt="A* AI logo" className="h-16 sm:h-20" />
@@ -614,5 +634,84 @@ export const Header: React.FC<HeaderProps> = ({
 
       </div>
     </header>
+
+    {showFloatingPill && (
+      <AnimatePresence>
+        {isScrolled && (
+          <motion.div
+            key="floating-pill"
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -16, scale: 0.92 }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12, scale: 0.94 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28, mass: 0.7 }}
+            className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 rounded-full border border-border bg-background/85 backdrop-blur-md shadow-xl"
+            style={{ willChange: 'transform, opacity' }}
+          >
+            <Link to="/" className="flex items-center pl-1" onClick={() => window.scrollTo(0, 0)} aria-label="Home">
+              <img src={logoMark} alt="A* AI" className="h-7 w-7 object-contain" />
+            </Link>
+
+            <div className="hidden md:flex items-center gap-5 text-[13px]">
+              <button
+                onClick={() => handleTabChange('home')}
+                className={`hover:text-foreground transition-colors ${selectedTab === 'home' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
+              >
+                Home
+              </button>
+              <div
+                className="relative"
+                onMouseEnter={openSubjectsDropdown}
+                onMouseLeave={closeSubjectsDropdown}
+              >
+                <button
+                  onClick={toggleSubjectsDropdown}
+                  className={`flex items-center gap-1 hover:text-foreground transition-colors ${selectedTab === 'pricing' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
+                >
+                  Subjects
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+                {subjectsDropdownOpen && <div className="absolute left-0 right-0 h-2 top-full" />}
+                <div
+                  className={`absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] w-36 bg-white dark:bg-popover rounded-lg shadow-md border border-border overflow-hidden transition-all duration-150 origin-top z-50 ${subjectsDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}
+                >
+                  <div
+                    className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    onClick={() => handleSubjectLevelClick('gcse')}
+                  >
+                    GCSE
+                  </div>
+                  <div
+                    className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    onClick={() => handleSubjectLevelClick('alevel')}
+                  >
+                    A-Level
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handleTabChange('merch')}
+                className={`hover:text-foreground transition-colors ${selectedTab === 'merch' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
+              >
+                Merch
+              </button>
+              <button
+                onClick={() => handleTabChange('profile')}
+                className={`hover:text-foreground transition-colors ${selectedTab === 'profile' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
+              >
+                Schools
+              </button>
+            </div>
+
+            <Button
+              onClick={() => navigate('/select')}
+              className="bg-primary text-primary-foreground rounded-full px-4 py-1.5 h-auto font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg hover:bg-primary/90 transition-all"
+            >
+              Start Studying
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    )}
+    </>
   );
 };
