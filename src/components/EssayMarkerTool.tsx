@@ -7,7 +7,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { fileDialogOpen } from '@/lib/fileDialogState';
 import { useNavigate } from 'react-router-dom';
-import aStarIcon from '@/assets/a-star-icon-transparent.png';
+import aStarIconLight from '@/assets/a-star-icon-light-mode.png';
+import aStarIconDark from '@/assets/a-star-icon-dark-mode.png';
 const DEFAULT_MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
 const FREE_MONTHLY_ESSAY_LIMIT = 2;
 
