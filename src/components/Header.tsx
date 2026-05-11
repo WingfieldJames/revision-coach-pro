@@ -638,13 +638,24 @@ export const Header: React.FC<HeaderProps> = ({
     {showFloatingPill && (
       <AnimatePresence>
         {isScrolled && (
+          <>
+          <motion.div
+            key="floating-pill-fade"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="fixed top-0 left-0 right-0 h-24 z-[55] pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, hsl(var(--background) / 0.85) 0%, hsl(var(--background) / 0.55) 45%, transparent 100%)' }}
+          />
+          <div className="fixed top-3 left-0 right-0 z-[60] flex justify-center pointer-events-none">
           <motion.div
             key="floating-pill"
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -16, scale: 0.92 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12, scale: 0.94 }}
             transition={{ type: 'spring', stiffness: 320, damping: 28, mass: 0.7 }}
-            className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 rounded-full border border-border bg-background/85 backdrop-blur-md shadow-xl"
+            className="pointer-events-auto flex items-center gap-2 sm:gap-4 px-2 sm:px-3 py-2 rounded-full border border-border bg-background/85 backdrop-blur-md shadow-xl"
             style={{ willChange: 'transform, opacity' }}
           >
             <Link to="/" className="flex items-center pl-1" onClick={() => window.scrollTo(0, 0)} aria-label="Home">
@@ -709,6 +720,8 @@ export const Header: React.FC<HeaderProps> = ({
               Start Studying
             </Button>
           </motion.div>
+          </div>
+          </>
         )}
       </AnimatePresence>
     )}
