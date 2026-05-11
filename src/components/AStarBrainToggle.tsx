@@ -42,8 +42,8 @@ export const AStarBrainToggle: React.FC<AStarBrainToggleProps> = ({ isDeluxe, pr
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-          <Brain className="h-5 w-5 text-primary" />
+        <div className="h-10 w-10 rounded-xl bg-purple-100 flex items-center justify-center">
+          <Brain className="h-5 w-5 text-purple-600" />
         </div>
         <div className="flex-1">
           <h3 className="font-semibold text-base text-foreground">Your A* Brain</h3>
