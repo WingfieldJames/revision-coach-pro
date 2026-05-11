@@ -116,6 +116,15 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [openPopover, setOpenPopover] = useState<string | null>(null);
+  const [mountedTools, setMountedTools] = useState<Set<string>>(new Set());
+  const markMounted = (id: string) => {
+    setMountedTools((cur) => {
+      if (cur.has(id)) return cur;
+      const next = new Set(cur);
+      next.add(id);
+      return next;
+    });
+  };
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const hoverCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isHoverDevice = () =>
@@ -263,10 +272,12 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
                 variant="outline"
                 size="sm"
                 onMouseEnter={() => {
+                  markMounted(tool.id);
                   if (!isHoverDevice()) return;
                   cancelHoverClose();
                   handlePopoverChange(tool.id, true);
                 }}
+                onClick={() => markMounted(tool.id)}
                 onMouseLeave={() => {
                   if (!isHoverDevice()) return;
                   scheduleHoverClose(tool.id);
@@ -289,7 +300,8 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:duration-0"
+              forceMount={mountedTools.has(tool.id) ? true : undefined}
+              className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:hidden"
               align="start"
               sideOffset={8}
               onMouseEnter={() => { if (isHoverDevice()) cancelHoverClose(); }}
@@ -303,7 +315,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               onFocusOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
             >
               <ScrollArea className="max-h-[70vh]">
-                {openPopover === tool.id && renderToolContent(tool.id)}
+                {mountedTools.has(tool.id) && renderToolContent(tool.id)}
               </ScrollArea>
             </PopoverContent>
           </Popover>
