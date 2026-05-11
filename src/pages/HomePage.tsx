@@ -126,13 +126,21 @@ export const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
+
+  // Smooth right→left parallax for hero device mockup
+  const heroRef = React.useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const xRaw = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -80]);
+  const heroMockX = useSpring(xRaw, { stiffness: 80, damping: 20, mass: 0.5 });
+
   return (
     <div className="min-h-screen bg-background font-sans">
       <SEOHead canonical="https://astarai.co.uk/" />
       <Header showNavLinks showStartStudyingButton />
 
       {/* Hero Section */}
-      <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4 relative">
+      <section ref={heroRef} className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4 relative">
         {/* Mobile-only purple animated paths behind hero */}
         <div className="md:hidden absolute inset-0 z-0 overflow-hidden">
           <ChatbotFullscreenPaths />
