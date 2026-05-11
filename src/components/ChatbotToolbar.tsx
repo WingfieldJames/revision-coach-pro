@@ -117,6 +117,20 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [openPopover, setOpenPopover] = useState<string | null>(null);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const hoverCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isHoverDevice = () =>
+    typeof window !== 'undefined' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const cancelHoverClose = () => {
+    if (hoverCloseTimer.current) { clearTimeout(hoverCloseTimer.current); hoverCloseTimer.current = null; }
+  };
+  const scheduleHoverClose = (id: string) => {
+    cancelHoverClose();
+    hoverCloseTimer.current = setTimeout(() => {
+      if (fileDialogOpen.current) return;
+      setOpenPopover((cur) => (cur === id ? null : cur));
+    }, 80);
+  };
 
   const isPremiumRoute = location.pathname.includes('premium');
   const tier = isDeluxe ? 'deluxe' : 'free';
