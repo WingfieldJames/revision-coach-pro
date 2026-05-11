@@ -1,34 +1,27 @@
-## Add decorative "Predicted mark" preview card to Essay Marker header
+## Goal
+Give the hero device-mockup image (right side of the homepage hero) a smooth, subtle right-to-left drift as the user scrolls down. The image should never fully reveal — it stays partially clipped off the right edge, just like today.
 
-The Essay Marker modal (max-w-5xl) leaves a lot of empty white space to the right of the "Mark my essay" title and subtitle. We'll fill it with a stylised preview card matching the supplied mockup, themed to the site's tokens.
+## Where
+`src/pages/HomePage.tsx`, lines 194–203 — the `Right side - Device mockup` block (desktop only, `hidden md:flex`).
 
-### Change
+## Approach
 
-In `src/components/EssayMarkerTool.tsx`, restructure the header block (lines ~286–295) into a two-column layout:
+1. Convert the wrapper around the `<img>` into a `motion.div` from framer-motion (already used elsewhere in the project, e.g. `MeetTheFounders`).
+2. Use framer-motion's `useScroll` + `useTransform` driven by the hero `<section>` ref so the motion is tied directly to scroll position (smoother and more predictable than scroll listeners + state).
+3. Wrap the resulting `MotionValue` in `useSpring` with gentle damping so the movement eases instead of tracking 1:1 with the scrollwheel — this is the key to "as smooth as possible".
+4. Map scroll progress (`0 → 1` across the hero) to a small horizontal translate, e.g. `0px → -80px` (subtle, ~6–8% of the mockup width). The starting position keeps the current `-mr-20 xl:-mr-40 2xl:-mr-64` clipping, and the negative translate only pulls it further left, so the right edge stays cropped throughout — it never fully reveals.
+5. Desktop-only (already gated by `hidden md:flex`); skip the effect on mobile to avoid jank. Respect `prefers-reduced-motion` by zeroing the transform when the user opts out.
 
-- **Left column:** existing A* icon + "Mark my essay" title + subtitle (unchanged).
-- **Right column:** new decorative card, hidden on mobile (`hidden md:block`), shown from `md:` upwards. Purely visual — not interactive, no real data.
+## Technical details
 
-### Card design (tokenised, not hardcoded purple)
+- Add a `heroRef` on the hero `<section>` (line 207's parent).
+- `const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })`
+- `const xRaw = useTransform(scrollYProgress, [0, 1], [0, -80])`
+- `const x = useSpring(xRaw, { stiffness: 80, damping: 20, mass: 0.5 })` for the buttery feel.
+- Apply `style={{ x }}` to the `motion.div` wrapping the `<img>`. Add `will-change: transform` for GPU compositing.
+- No layout/width changes — the existing `max-w-[720px] xl:max-w-[950px] 2xl:max-w-[1200px]` and negative right margins stay, so the crop on the right edge is preserved.
+- Reduced-motion: `const prefersReducedMotion = useReducedMotion()` from framer-motion → if true, set the transform output to `[0, 0]`.
 
-- Container: `bg-card`, `rounded-xl`, `border border-border`, subtle `shadow-sm`, `p-4`, fixed `w-[280px]`.
-- Top row (flex justify-between):
-  - Left: caption "Predicted mark" in `text-muted-foreground text-xs`, then big number `19` (`text-3xl font-medium tracking-tight`) with `/25` smaller and muted.
-  - Right: pill badge "A* band" using `bg-primary/10 text-primary` (deep blue in light mode via existing `--primary` token), `rounded-full px-3 py-1 text-xs font-medium`.
-- Segmented progress bar (5 segments, `h-1.5 rounded-full overflow-hidden flex gap-1`):
-  - 3 segments solid `bg-primary`
-  - 1 segment `bg-primary/40`
-  - 1 segment `bg-muted`
-- Bottom grid (2 cols): "KAA 12/15" and "Evaluation 7/10" with muted captions and `text-foreground font-medium` values.
-
-### Theming notes
-
-- No hardcoded `#6D28D9` / `#F5F3FF`. Uses `primary`, `card`, `border`, `muted`, `foreground`, `muted-foreground` tokens so it adopts dark-mode and per-subject primary automatically.
-- Font already inherits Inter/DM Sans from app — no overrides needed.
-- Decorative only: no props, no state, no click handlers; `aria-hidden="true"` on the card.
-
-### Files
-
-- `src/components/EssayMarkerTool.tsx` — replace the header `<div className="flex items-center gap-3">` block with a `flex items-start justify-between gap-6` wrapper containing the existing header (left) and the new preview card (right, `hidden md:block`).
-
-No other files affected; no logic, data, or routing changes.
+## Out of scope
+- No changes to mobile layout, copy, CTAs, or any other section.
+- No new dependencies (framer-motion is already installed).
