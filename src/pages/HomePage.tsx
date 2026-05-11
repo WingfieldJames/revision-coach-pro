@@ -131,7 +131,7 @@ export const HomePage = () => {
   const heroRef = React.useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const xRaw = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -80]);
+  const xRaw = useTransform(scrollYProgress, [0, 0.75], prefersReducedMotion ? [0, 0] : [0, -80]);
   const heroMockX = useSpring(xRaw, { stiffness: 80, damping: 20, mass: 0.5 });
 
   return (
