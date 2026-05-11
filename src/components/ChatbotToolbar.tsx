@@ -312,13 +312,29 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               align="start"
               sideOffset={8}
               onMouseEnter={() => { if (isHoverDevice()) cancelHoverClose(); }}
-              onMouseLeave={() => {
+              onMouseLeave={(e) => {
                 if (!isHoverDevice()) return;
                 if (fileDialogOpen.current) return;
+                if (isNestedPortalOpen()) return;
+                // If the cursor moved into another radix portal layered above, ignore
+                const related = e.relatedTarget as Node | null;
+                if (related && (related as Element).closest?.('[data-radix-popper-content-wrapper]')) return;
                 setOpenPopover((cur) => (cur === tool.id ? null : cur));
               }}
-              onInteractOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
-              onPointerDownOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
+              onInteractOutside={(e) => {
+                if (fileDialogOpen.current) { e.preventDefault(); return; }
+                const target = e.target as Element | null;
+                if (target?.closest?.('[data-radix-popper-content-wrapper], [data-radix-select-content], [data-radix-dropdown-menu-content], [role="listbox"]')) {
+                  e.preventDefault();
+                }
+              }}
+              onPointerDownOutside={(e) => {
+                if (fileDialogOpen.current) { e.preventDefault(); return; }
+                const target = e.target as Element | null;
+                if (target?.closest?.('[data-radix-popper-content-wrapper], [data-radix-select-content], [data-radix-dropdown-menu-content], [role="listbox"]')) {
+                  e.preventDefault();
+                }
+              }}
               onFocusOutside={(e) => { if (fileDialogOpen.current) e.preventDefault(); }}
             >
               <ScrollArea className="max-h-[70vh]">
