@@ -269,6 +269,17 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               {tool.icon}
               <span className="hidden sm:inline">{tool.label}</span>
             </Button>
+          ) : tool.id === 'essay-marker' ? (
+            <Button
+              key={tool.id}
+              variant="outline"
+              size="sm"
+              onClick={() => { markMounted('essay-marker'); setOpenPopover('essay-marker'); }}
+              className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0"
+            >
+              {tool.icon}
+              <span className="hidden sm:inline">{tool.label}</span>
+            </Button>
           ) : (
           <Popover
             key={tool.id}
