@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { fileDialogOpen } from '@/lib/fileDialogState';
 import { useNavigate } from 'react-router-dom';
+import aStarIcon from '@/assets/a-star-icon-transparent.png';
 const DEFAULT_MARK_OPTIONS = [5, 8, 10, 12, 15, 25] as const;
 const FREE_MONTHLY_ESSAY_LIMIT = 2;
 
@@ -282,13 +283,11 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
 
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-gradient-brand">
-          <PenLine className="w-5 h-5 text-primary-foreground" />
-        </div>
+        <img src={aStarIcon} alt="A*" className="w-10 h-10 object-contain" />
         <div>
-          <h3 className="font-semibold text-foreground">{toolLabel}</h3>
+          <h3 className="font-semibold text-foreground">Mark my essay</h3>
           <p className="text-xs text-muted-foreground">
-            Upload a photo or paste your {fixedMark ? `${fixedMark}-marker` : 'essay'}
+            Get examiner-grade feedback in seconds
           </p>
         </div>
       </div>
