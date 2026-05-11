@@ -312,11 +312,15 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               className="w-[90vw] max-w-md p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:hidden"
               align="start"
               sideOffset={8}
+              onPointerDown={() => { pointerDownInsideRef.current = true; }}
+              onPointerUp={() => { pointerDownInsideRef.current = false; }}
               onMouseEnter={() => { if (isHoverDevice()) cancelHoverClose(); }}
               onMouseLeave={(e) => {
                 if (!isHoverDevice()) return;
                 if (fileDialogOpen.current) return;
                 if (isNestedPortalOpen()) return;
+                // Don't close while user is mid-interaction (dragging a slider, holding a switch)
+                if (pointerDownInsideRef.current) return;
                 // If the cursor moved into another radix portal layered above, ignore
                 const related = e.relatedTarget as Node | null;
                 if (related && (related as Element).closest?.('[data-radix-popper-content-wrapper]')) return;
