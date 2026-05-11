@@ -1810,6 +1810,17 @@ export function BuildPage() {
                     className="text-sm"
                   />
                   <p className="text-[11px] text-muted-foreground mt-1">Students who click your photo on the trainers page will be taken here.</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Built by{" "}
+                    <a
+                      href="https://www.linkedin.com/in/naman-tiwari-906935326/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Naman Tiwari
+                    </a>
+                  </p>
                 </div>
               </div>
             </CardContent>
