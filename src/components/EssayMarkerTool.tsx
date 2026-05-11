@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { PenLine, Loader2, Image, FileText, X } from 'lucide-react';
+import { PenLine, Loader2, Image, FileText, X, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -364,28 +364,28 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
         {/* Input Mode Toggle */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Input Method</label>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2 max-w-[320px]">
             <button
               onClick={() => setInputMode('text')}
-              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-[10px] text-[13px] transition-all ${
                 inputMode === 'text'
-                  ? 'bg-gradient-brand text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  ? 'border border-primary bg-primary/10 text-primary font-medium'
+                  : 'border border-border bg-background text-foreground/70 font-normal hover:bg-muted/50'
               }`}
             >
               <FileText className="w-4 h-4" />
-              Type/Paste
+              Type / paste
             </button>
             <button
               onClick={() => setInputMode('image')}
-              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-[10px] text-[13px] transition-all ${
                 inputMode === 'image'
-                  ? 'bg-gradient-brand text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  ? 'border border-primary bg-primary/10 text-primary font-medium'
+                  : 'border border-border bg-background text-foreground/70 font-normal hover:bg-muted/50'
               }`}
             >
-              <Image className="w-4 h-4" />
-              Upload Photo
+              <Camera className="w-4 h-4" />
+              Upload photo
             </button>
           </div>
         </div>
