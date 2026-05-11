@@ -1,31 +1,40 @@
-## Goal
+## What you're describing is already live
 
-Future-proof the chatbot hero countdown so it gracefully handles exam day and rolls forward to the next exam afterwards, across every subject.
+The previous change to `src/components/RAGChat.tsx` (lines 171-179) already does exactly this for **every subject** — Edexcel Econ, AQA Econ, AQA Chem, AQA Psych, OCR Physics, OCR CS, Edexcel Maths, Edexcel Maths Applied, CIE Econ, and any future subject built through the Build portal.
 
-## Current behaviour (`src/components/RAGChat.tsx`)
+### How it works (one place, applies everywhere)
 
-- `daysToFirstExam` (line 171) sorts `examDatesProp` ascending and uses index `[0]` regardless of whether it's already passed.
-- Hero (line 1105) always renders `"{n} days to go."` — so "1 days to go." (bad grammar), "0 days to go." on exam day, and negative numbers the day after.
+Every chatbot — Free or Deluxe — renders through the shared `RAGChat` component and is fed `examDates` from `useTrainerConfig`, which reads the `exam_dates` JSONB array you set in the Build portal for that subject.
 
-## Change (single component, applies to all subjects since every chatbot uses RAGChat)
+The countdown memo:
 
-1. **`daysToFirstExam` memo** — filter to the next exam that is today or later:
-   - Compute `today` at midnight.
-   - From sorted `examDatesProp`, pick the first entry where `date >= today`.
-   - If none remain (all exams finished for the year), return `null` so the hero falls back to the existing "Let's get you that {grade}" line.
-   - Return the day delta for that next upcoming exam.
+```ts
+const sorted = [...examDatesProp].sort((a, b) => a.date - b.date);
+const next = sorted.find(e => e.date >= today);   // skip past papers
+if (!next) return null;                            // all done — hides countdown
+return Math.round((next.date - today) / 86_400_000);
+```
 
-2. **Hero label** (line 1105) — replace the hardcoded `"{n} days to go."` span with a small helper:
-   - `n === 0` → "Exam today."
-   - `n === 1` → "1 day to go."
-   - `n > 1`  → "{n} days to go."
-   
-   Same `text-foreground` styling, same wrapping `<h2>`.
+So for Edexcel Economics with Paper 1 = 11 May, Paper 2 = 18 May, Paper 3 = 4 June:
 
-3. No schema, no per-subject branching — because each subject's `exam_dates` array already includes every paper in chronological order, the filter automatically advances to (e.g.) Edexcel Econ Paper 2 the day after Paper 1.
+| Today is | Hero shows |
+|---|---|
+| 10 May | "1 day to go." (Paper 1) |
+| 11 May | "Exam today." (Paper 1) |
+| 12 May | "6 days to go." (auto-rolled to Paper 2) |
+| 19 May | "16 days to go." (auto-rolled to Paper 3) |
+| 5 June | hides countdown, falls back to "Let's get you that {grade}" |
 
-## Out of scope
+The same logic applies to every other subject's exam dates — no per-subject branching, no code edits per subject. As long as each subject's Build portal has every paper listed in `exam_dates`, it rolls automatically.
 
-- No changes to the Build portal exam date editor.
-- No changes to the sidebar exam calendar (already handled separately per memory `exam-calendar-2026-v2-sidebar-only`).
-- No copy changes to the "Your {subject} revision, sorted" subtitle.
+### What you need to verify in Build (not code)
+
+For this to roll correctly for **every** subject, each subject's Build portal entry must have **every paper** populated in `exam_dates`, not just Paper 1. If a subject only has Paper 1 listed, the countdown will hide the day after Paper 1 instead of rolling to Paper 2.
+
+If you tell me which subject is missing later papers, I can add a one-off migration to backfill the Build portal `exam_dates` arrays from the hardcoded `ExamCountdown.tsx` constants (which already list every paper for AQA Econ, Edexcel Econ, AQA Chem, AQA Psych, OCR Physics, OCR CS, Edexcel Maths, CIE Econ).
+
+### Out of scope
+
+- No new logic — the auto-roll already shipped.
+- No change to the sidebar exam calendar.
+- No code change unless you confirm a specific subject's Build portal is missing papers.
