@@ -1,17 +1,34 @@
-## Root cause
+## Add decorative "Predicted mark" preview card to Essay Marker header
 
-The Essay Marker modal is rendered **inside** the sticky toolbar `<div>`, which has `backdrop-blur-sm`. CSS filter/backdrop-filter creates a new containing block, so `position: fixed` is anchored to the toolbar's box (not the viewport). That's why:
+The Essay Marker modal (max-w-5xl) leaves a lot of empty white space to the right of the "Mark my essay" title and subtitle. We'll fill it with a stylised preview card matching the supplied mockup, themed to the site's tokens.
 
-- The modal sits at the top of the screen (toolbar height area), not centered in the viewport.
-- The grey overlay only covers the toolbar strip, not the whole page.
+### Change
 
-## Fix — `src/components/ChatbotToolbar.tsx`
+In `src/components/EssayMarkerTool.tsx`, restructure the header block (lines ~286–295) into a two-column layout:
 
-Render the Essay Marker modal through a **React portal to `document.body`**, so it escapes the toolbar's containing block.
+- **Left column:** existing A* icon + "Mark my essay" title + subtitle (unchanged).
+- **Right column:** new decorative card, hidden on mobile (`hidden md:block`), shown from `md:` upwards. Purely visual — not interactive, no real data.
 
-1. Import `createPortal` from `react-dom`.
-2. Wrap the existing essay-marker modal JSX block in `createPortal(<...>, document.body)`.
-3. Keep all existing classes (`fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4`) — they will now correctly cover the full viewport and centre the modal.
-4. No changes to size, layout, content, or trigger button behaviour.
+### Card design (tokenised, not hardcoded purple)
 
-That's the only change needed — the modal will then center vertically/horizontally and the grey backdrop will cover the entire screen, identical to the Revision Timetable.
+- Container: `bg-card`, `rounded-xl`, `border border-border`, subtle `shadow-sm`, `p-4`, fixed `w-[280px]`.
+- Top row (flex justify-between):
+  - Left: caption "Predicted mark" in `text-muted-foreground text-xs`, then big number `19` (`text-3xl font-medium tracking-tight`) with `/25` smaller and muted.
+  - Right: pill badge "A* band" using `bg-primary/10 text-primary` (deep blue in light mode via existing `--primary` token), `rounded-full px-3 py-1 text-xs font-medium`.
+- Segmented progress bar (5 segments, `h-1.5 rounded-full overflow-hidden flex gap-1`):
+  - 3 segments solid `bg-primary`
+  - 1 segment `bg-primary/40`
+  - 1 segment `bg-muted`
+- Bottom grid (2 cols): "KAA 12/15" and "Evaluation 7/10" with muted captions and `text-foreground font-medium` values.
+
+### Theming notes
+
+- No hardcoded `#6D28D9` / `#F5F3FF`. Uses `primary`, `card`, `border`, `muted`, `foreground`, `muted-foreground` tokens so it adopts dark-mode and per-subject primary automatically.
+- Font already inherits Inter/DM Sans from app — no overrides needed.
+- Decorative only: no props, no state, no click handlers; `aria-hidden="true"` on the card.
+
+### Files
+
+- `src/components/EssayMarkerTool.tsx` — replace the header `<div className="flex items-center gap-3">` block with a `flex items-start justify-between gap-6` wrapper containing the existing header (left) and the new preview card (right, `hidden md:block`).
+
+No other files affected; no logic, data, or routing changes.
