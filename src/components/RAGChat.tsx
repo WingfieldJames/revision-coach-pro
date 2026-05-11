@@ -1117,7 +1117,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 )}
                 
                 {/* Social proof badges */}
-                <div className="flex items-center justify-center gap-1.5 md:gap-1.5 lg:gap-2.5 flex-wrap mt-2 md:mt-2 lg:mt-3">
+                <div className="flex items-center justify-start gap-1.5 md:gap-1.5 lg:gap-2.5 flex-wrap mt-2 md:mt-2 lg:mt-3">
                   <div className="flex items-center gap-2 border border-border bg-card/80 backdrop-blur-sm rounded-full py-1.5 px-4 shadow-sm">
                     <div className="flex">
                       <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-card z-[3]" />
