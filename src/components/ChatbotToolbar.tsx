@@ -126,6 +126,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
     });
   };
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const pointerDownInsideRef = useRef(false);
   const hoverCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isHoverDevice = () =>
     typeof window !== 'undefined' &&
