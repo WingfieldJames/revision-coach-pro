@@ -247,8 +247,8 @@
 
   :root .my-ai-panel .panel-badge,
   :root .exam-countdown-panel .panel-badge {
-    background-color: hsl(263 70% 50% / 0.1);
-    color: hsl(263 70% 50%);
+    background-color: hsl(222 75% 31% / 0.1);
+    color: hsl(222 75% 31%);
   }
 
   /* Exam countdown timeline colours – light mode only (deep blue to match My AI) */
