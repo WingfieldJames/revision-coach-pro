@@ -116,6 +116,15 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [openPopover, setOpenPopover] = useState<string | null>(null);
+  const [mountedTools, setMountedTools] = useState<Set<string>>(new Set());
+  const markMounted = (id: string) => {
+    setMountedTools((cur) => {
+      if (cur.has(id)) return cur;
+      const next = new Set(cur);
+      next.add(id);
+      return next;
+    });
+  };
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const hoverCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isHoverDevice = () =>
