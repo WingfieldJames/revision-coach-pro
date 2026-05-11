@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ChevronDown, Instagram, Youtube, Linkedin, Calendar, BookOpen, GraduationCap, Search, FileCheck } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform, useSpring, useReducedMotion } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeroBackgroundPaths } from "@/components/ui/hero-background-paths";
@@ -126,13 +126,21 @@ export const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
+
+  // Smooth right→left parallax for hero device mockup
+  const heroRef = React.useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const xRaw = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -80]);
+  const heroMockX = useSpring(xRaw, { stiffness: 80, damping: 20, mass: 0.5 });
+
   return (
     <div className="min-h-screen bg-background font-sans">
       <SEOHead canonical="https://astarai.co.uk/" />
       <Header showNavLinks showStartStudyingButton />
 
       {/* Hero Section */}
-      <section className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4 relative">
+      <section ref={heroRef} className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4 relative">
         {/* Mobile-only purple animated paths behind hero */}
         <div className="md:hidden absolute inset-0 z-0 overflow-hidden">
           <ChatbotFullscreenPaths />
@@ -193,13 +201,15 @@ export const HomePage = () => {
 
               {/* Right side - Device mockup */}
               <div className="hidden md:flex flex-1 justify-end items-center relative -mr-20 xl:-mr-40 2xl:-mr-64">
-                <div className="w-full max-w-[720px] xl:max-w-[950px] 2xl:max-w-[1200px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
+                <motion.div
+                  style={{ x: heroMockX, willChange: "transform" }}
+                  className="w-full max-w-[720px] xl:max-w-[950px] 2xl:max-w-[1200px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
                   <img
                     src={appScreenshot}
                     alt="A* AI essay marker demo"
                     className="w-full h-auto" />
                   
-                </div>
+                </motion.div>
               </div>
             </div>
           </div>
