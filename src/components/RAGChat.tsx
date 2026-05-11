@@ -1098,7 +1098,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
               )}
 
               {/* Main hero content */}
-              <div className={cn("text-left", trainerName && trainerAvatarUrl && "md:ml-16 lg:ml-0")}>
+              <div className={cn("text-left pl-3 sm:pl-4 scale-[0.92] origin-top-left", trainerName && trainerAvatarUrl && "md:ml-16 lg:ml-0")}>
                 <img src={currentLogo} alt="A* AI" className="h-24 mb-1" />
                 {daysToFirstExam !== null ? (
                   <>
