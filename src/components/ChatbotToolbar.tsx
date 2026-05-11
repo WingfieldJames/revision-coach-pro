@@ -275,6 +275,16 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               key={tool.id}
               variant="outline"
               size="sm"
+              onMouseEnter={() => {
+                markMounted('essay-marker');
+                if (!isHoverDevice()) return;
+                cancelHoverClose();
+                setOpenPopover('essay-marker');
+              }}
+              onMouseLeave={() => {
+                if (!isHoverDevice()) return;
+                scheduleHoverClose('essay-marker');
+              }}
               onClick={() => { markMounted('essay-marker'); setOpenPopover('essay-marker'); }}
               className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0"
             >
