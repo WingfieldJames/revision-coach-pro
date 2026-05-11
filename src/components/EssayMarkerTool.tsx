@@ -272,7 +272,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -282,52 +282,50 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
         onChange={handleFileSelect}
       />
 
-      {/* Header */}
-      <div className="flex items-start justify-between gap-6">
-        <div className="flex items-center gap-3">
-          <img src={aStarIconLight} alt="A*" className="w-10 h-10 object-contain block dark:hidden" />
-          <img src={aStarIconDark} alt="A*" className="w-10 h-10 object-contain hidden dark:block" />
+      {/* Decorative predicted-mark preview card (absolute, doesn't affect left column) */}
+      <div
+        aria-hidden="true"
+        className="hidden md:block absolute top-0 right-0 w-[280px] bg-card border border-border rounded-xl shadow-sm p-4 pointer-events-none"
+      >
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="font-semibold text-foreground">Mark my essay</h3>
-            <p className="text-xs text-muted-foreground">
-              Get examiner-grade feedback in seconds
+            <p className="text-xs text-muted-foreground m-0">Predicted mark</p>
+            <p className="text-3xl font-medium tracking-tight text-foreground leading-none mt-1">
+              19<span className="text-base text-muted-foreground font-normal">/25</span>
             </p>
           </div>
+          <div className="bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-medium">
+            A* band
+          </div>
         </div>
+        <div className="flex gap-1 h-1.5 rounded-full overflow-hidden mb-3">
+          <div className="flex-[4] bg-primary" />
+          <div className="flex-[4] bg-primary" />
+          <div className="flex-[4] bg-primary" />
+          <div className="flex-[3] bg-primary/40" />
+          <div className="flex-[4] bg-muted" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-[11px] text-muted-foreground m-0 mb-0.5">KAA</p>
+            <p className="text-[13px] font-medium text-foreground m-0">12/15</p>
+          </div>
+          <div>
+            <p className="text-[11px] text-muted-foreground m-0 mb-0.5">Evaluation</p>
+            <p className="text-[13px] font-medium text-foreground m-0">7/10</p>
+          </div>
+        </div>
+      </div>
 
-        {/* Decorative predicted-mark preview card */}
-        <div
-          aria-hidden="true"
-          className="hidden md:block w-[280px] shrink-0 bg-card border border-border rounded-xl shadow-sm p-4"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-xs text-muted-foreground m-0">Predicted mark</p>
-              <p className="text-3xl font-medium tracking-tight text-foreground leading-none mt-1">
-                19<span className="text-base text-muted-foreground font-normal">/25</span>
-              </p>
-            </div>
-            <div className="bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-medium">
-              A* band
-            </div>
-          </div>
-          <div className="flex gap-1 h-1.5 rounded-full overflow-hidden mb-3">
-            <div className="flex-[4] bg-primary" />
-            <div className="flex-[4] bg-primary" />
-            <div className="flex-[4] bg-primary" />
-            <div className="flex-[3] bg-primary/40" />
-            <div className="flex-[4] bg-muted" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-[11px] text-muted-foreground m-0 mb-0.5">KAA</p>
-              <p className="text-[13px] font-medium text-foreground m-0">12/15</p>
-            </div>
-            <div>
-              <p className="text-[11px] text-muted-foreground m-0 mb-0.5">Evaluation</p>
-              <p className="text-[13px] font-medium text-foreground m-0">7/10</p>
-            </div>
-          </div>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <img src={aStarIconLight} alt="A*" className="w-10 h-10 object-contain block dark:hidden" />
+        <img src={aStarIconDark} alt="A*" className="w-10 h-10 object-contain hidden dark:block" />
+        <div>
+          <h3 className="font-semibold text-foreground">Mark my essay</h3>
+          <p className="text-xs text-muted-foreground">
+            Get examiner-grade feedback in seconds
+          </p>
         </div>
       </div>
 
