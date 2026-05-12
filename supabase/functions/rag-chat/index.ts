@@ -1202,14 +1202,40 @@ CRITICAL RULES:
       temperature: 0.7,
     });
 
-    let response = await fetch(aiUrl, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: buildAiBody(aiModel),
-    });
+    // Time-to-first-byte timeout: abort only if the upstream hasn't sent
+    // response headers within 8s of the request starting. Once the response
+    // is received, the timeout is cleared so long streaming answers are never killed.
+    const ttfbController = new AbortController();
+    const ttfbTimeoutId = setTimeout(() => ttfbController.abort(), 8000);
+    let response: Response;
+    try {
+      response = await fetch(aiUrl, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${lovableApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: buildAiBody(aiModel),
+        signal: ttfbController.signal,
+      });
+    } catch (err) {
+      clearTimeout(ttfbTimeoutId);
+      const aborted = (err as { name?: string })?.name === "AbortError";
+      console.error(JSON.stringify({
+        event: "rag_chat_upstream_error",
+        status: aborted ? 504 : 0,
+        statusText: aborted ? "ttfb_timeout" : "fetch_failed",
+        model: aiModel,
+        product_id: product_id ?? null,
+        user_id: user_id ?? null,
+        body: String((err as Error)?.message ?? err).slice(0, 500),
+      }));
+      return new Response(
+        JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
+        { status: aborted ? 504 : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    clearTimeout(ttfbTimeoutId);
 
     if (!response.ok) {
       if (response.status === 429) {
