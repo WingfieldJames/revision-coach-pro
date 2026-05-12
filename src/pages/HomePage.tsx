@@ -307,33 +307,9 @@ export const HomePage = () => {
         <MeetTheFounders />
       </div>
 
-      {/* See A* AI in action - Demo Video with scroll-scale reveal */}
-      <DemoVideoSection />
+      {/* Demo video tilts away to reveal testimonials underneath (desktop) */}
+      <DemoTestimonialsStage />
 
-
-      
-
-      {/* Testimonials Section - Desktop */}
-      <section data-section="testimonials" className="hidden md:block py-16 px-8 overflow-hidden bg-background">
-        <div className="max-w-7xl mx-auto">
-          <ScrollReveal className="text-center mb-12">
-            <h2 className={sectionHeadingClass}>
-              <span className="text-foreground">What our </span>
-              <span className="text-primary">users</span>
-              <span className="text-foreground"> say</span>
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto mt-4">
-              Join 2000+ students and teachers achieving real results
-            </p>
-          </ScrollReveal>
-
-          <div className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]">
-            <TestimonialsColumn testimonials={firstColumn} duration={45} />
-            <TestimonialsColumn testimonials={secondColumn} duration={40} />
-            <TestimonialsColumn testimonials={thirdColumn} duration={50} />
-          </div>
-        </div>
-      </section>
 
       <section className="md:hidden py-8 px-4">
         <div className="max-w-md mx-auto">
