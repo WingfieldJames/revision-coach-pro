@@ -1225,7 +1225,7 @@ CRITICAL RULES:
         );
       }
       const errorText = await response.text();
-      console.error(`[RAG-CHAT] AI API error (${response.status}) with model ${aiModel}:`, errorText);
+      console.error(JSON.stringify({ event: "rag_chat_upstream_error", status: response.status, statusText: response.statusText, model: aiModel, product_id: product_id ?? null, user_id: user_id ?? null, body: (errorText || "").slice(0, 500) }));
       return new Response(
         JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
