@@ -87,48 +87,91 @@ const revisionFeatures = [
 /** Shared heading class matching FoundersCarousel / hero style */
 const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight";
 
-const DemoVideoSection: React.FC = () => {
-  const sectionRef = React.useRef<HTMLElement>(null);
+const DemoTestimonialsStage: React.FC = () => {
+  const stageRef = React.useRef<HTMLDivElement>(null);
+  const videoRef = React.useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "center center"] });
-  const screenScale = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [1, 1] : [0.7, 1]);
-  const screenY = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [120, 0]);
-  const screenOpacity = useTransform(scrollYProgress, [0, 0.3, 1], prefersReducedMotion ? [1, 1, 1] : [0, 0.6, 1]);
+
+  // Entry animation for the video (drives scale-up as it enters viewport)
+  const { scrollYProgress: enterProgress } = useScroll({
+    target: videoRef,
+    offset: ["start end", "center center"],
+  });
+  const screenScale = useTransform(enterProgress, [0, 1], prefersReducedMotion ? [1, 1] : [0.7, 1]);
+  const screenY = useTransform(enterProgress, [0, 1], prefersReducedMotion ? [0, 0] : [120, 0]);
+  const screenOpacityIn = useTransform(enterProgress, [0, 0.3, 1], prefersReducedMotion ? [1, 1, 1] : [0, 0.6, 1]);
+
+  // Shared exit/reveal progress: video tilts away, testimonials fade in beneath
+  const { scrollYProgress: stageProgress } = useScroll({
+    target: stageRef,
+    offset: ["start start", "end end"],
+  });
+  const tiltRotate = useTransform(stageProgress, [0.35, 0.75], prefersReducedMotion ? [0, 0] : [0, -35]);
+  const tiltY = useTransform(stageProgress, [0.35, 0.8], prefersReducedMotion ? [0, 0] : [0, -140]);
+  const tiltOpacity = useTransform(stageProgress, [0.55, 0.85], prefersReducedMotion ? [1, 1] : [1, 0]);
+
+  const testimonialsOpacity = useTransform(stageProgress, [0.45, 0.85], prefersReducedMotion ? [1, 1] : [0, 1]);
+  const testimonialsY = useTransform(stageProgress, [0.45, 0.85], prefersReducedMotion ? [0, 0] : [60, 0]);
 
   return (
-    <section ref={sectionRef} data-section="demo-video" className="hidden md:block py-16 md:py-28 px-4 md:px-8 max-w-5xl mx-auto">
-      <motion.div
-        style={{ scale: screenScale, y: screenY, opacity: screenOpacity, willChange: "transform, opacity" }}
-        className="rounded-2xl overflow-hidden border border-border/50 shadow-elevated origin-bottom bg-muted"
-      >
-        {/* Browser chrome */}
-        <div className="flex items-center gap-3 px-4 py-2.5 bg-muted border-b border-border/50">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-            <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
-            <span className="w-3 h-3 rounded-full bg-[#28c840]" />
-          </div>
-          <div className="flex-1 flex justify-center">
-            <div className="px-4 py-1 rounded-md bg-background/80 border border-border/50 text-xs text-muted-foreground font-medium tracking-tight max-w-[280px] w-full text-center truncate">
-              astarai.co.uk
+    <div ref={stageRef} className="hidden md:block relative">
+      <section ref={videoRef} data-section="demo-video" className="py-16 md:py-28 px-4 md:px-8 max-w-5xl mx-auto" style={{ perspective: "1200px" }}>
+        <motion.div
+          style={{
+            scale: screenScale,
+            y: screenY,
+            opacity: useTransform([screenOpacityIn, tiltOpacity], ([a, b]: number[]) => a * b),
+            rotateX: tiltRotate,
+            translateY: tiltY,
+            transformOrigin: "bottom center",
+            willChange: "transform, opacity",
+          }}
+          className="rounded-2xl overflow-hidden border border-border/50 shadow-elevated bg-muted"
+        >
+          {/* Browser chrome */}
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-muted border-b border-border/50">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+              <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
+              <span className="w-3 h-3 rounded-full bg-[#28c840]" />
             </div>
+            <div className="flex-1 flex justify-center">
+              <div className="px-4 py-1 rounded-md bg-background/80 border border-border/50 text-xs text-muted-foreground font-medium tracking-tight max-w-[280px] w-full text-center truncate">
+                astarai.co.uk
+              </div>
+            </div>
+            <div className="w-12" />
           </div>
-          <div className="w-12" />
+          <div style={{ position: 'relative', paddingTop: '62.28%' }}>
+            <iframe
+              src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&autoplay=1&muted=1&controls=0&title=0&byline=0&portrait=0"
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+              title="A* AI Demo"
+            />
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Testimonials revealed beneath as the video tilts away */}
+      <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-16">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
+            className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
+          >
+            <TestimonialsColumn testimonials={firstColumn} duration={45} />
+            <TestimonialsColumn testimonials={secondColumn} duration={40} />
+            <TestimonialsColumn testimonials={thirdColumn} duration={50} />
+          </motion.div>
         </div>
-        <div style={{ position: 'relative', paddingTop: '62.28%' }}>
-          <iframe
-            src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&autoplay=1&muted=1&controls=0&title=0&byline=0&portrait=0"
-            frameBorder="0"
-            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-            title="A* AI Demo"
-          />
-        </div>
-      </motion.div>
-    </section>
+      </section>
+    </div>
   );
 };
+
 
 export const HomePage = () => {
   const { user, loading } = useAuth();
