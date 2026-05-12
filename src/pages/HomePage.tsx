@@ -158,6 +158,9 @@ const DemoTestimonialsStage: React.FC = () => {
       {/* Testimonials revealed beneath as the video tilts away */}
       <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-40">
         <div className="max-w-7xl mx-auto">
+          <h2 className={`${sectionHeadingClass} text-center mb-10`}>
+            10,000 students. One unfair advantage
+          </h2>
           <motion.div
             style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
             className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
