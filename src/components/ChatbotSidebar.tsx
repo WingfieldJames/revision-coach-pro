@@ -448,7 +448,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                       <Clock3 className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0">
                         <span className="block text-sm">Revision Timetable</span>
-                        <span className="block text-[10px] text-muted-foreground leading-tight">Optimally allocates revision time based on your predicted grades</span>
+                        <span className="block text-[10px] text-muted-foreground leading-tight">Optimally allocates time based on your predicted grades</span>
                       </div>
                     </button>
                     <button
