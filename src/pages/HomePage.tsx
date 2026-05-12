@@ -156,7 +156,7 @@ const DemoTestimonialsStage: React.FC = () => {
       </section>
 
       {/* Testimonials revealed beneath as the video tilts away */}
-      <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-16">
+      <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-40">
         <div className="max-w-7xl mx-auto">
           <motion.div
             style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
