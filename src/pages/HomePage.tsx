@@ -110,8 +110,8 @@ const DemoTestimonialsStage: React.FC = () => {
   const tiltY = useTransform(stageProgress, [0.35, 0.8], prefersReducedMotion ? [0, 0] : [0, -140]);
   const tiltOpacity = useTransform(stageProgress, [0.55, 0.85], prefersReducedMotion ? [1, 1] : [1, 0]);
 
-  const testimonialsOpacity = useTransform(stageProgress, [0.45, 0.85], prefersReducedMotion ? [1, 1] : [0, 1]);
-  const testimonialsY = useTransform(stageProgress, [0.45, 0.85], prefersReducedMotion ? [0, 0] : [60, 0]);
+  const testimonialsOpacity = useTransform(stageProgress, [0.35, 0.7], prefersReducedMotion ? [1, 1] : [0, 1]);
+  const testimonialsY = useTransform(stageProgress, [0.35, 0.8], prefersReducedMotion ? [0, 0] : [220, 0]);
 
   return (
     <div ref={stageRef} className="hidden md:block relative">
@@ -156,7 +156,7 @@ const DemoTestimonialsStage: React.FC = () => {
       </section>
 
       {/* Testimonials revealed beneath as the video tilts away */}
-      <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-16">
+      <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-40">
         <div className="max-w-7xl mx-auto">
           <motion.div
             style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
