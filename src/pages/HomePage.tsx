@@ -394,6 +394,7 @@ export const HomePage = () => {
                     { text: 'Time', className: 'text-foreground' },
                     { text: 'to', className: 'text-foreground' },
                     { text: 'get', className: 'text-foreground' },
+                    { text: 'you', className: 'text-foreground' },
                     { text: 'an', className: 'text-foreground' },
                     {
                       node: (
