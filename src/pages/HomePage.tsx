@@ -20,6 +20,7 @@ import { SubjectPlanSelector } from "@/components/SubjectPlanSelector";
 import logo from "@/assets/logo.png";
 import logoDark from "@/assets/logo-dark.png";
 import appScreenshot from "@/assets/app-screenshot.png";
+import logoMark from "@/assets/logo-mark.png";
 
 const revisionFeatures = [
 {
