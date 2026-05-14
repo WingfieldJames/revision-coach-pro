@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { motion } from "motion/react";
+import { motion, useMotionValue, useTransform, useAnimationFrame } from "motion/react";
 import matanImage from '@/assets/matan-g.png';
 import kathyImage from '@/assets/kathy-kou.png';
 import ryanImage from '@/assets/ryan-davies.png';
@@ -23,23 +23,32 @@ export const TestimonialsColumn = ({
   testimonials,
   duration = 15,
   reverse = false,
+  paused = false,
 }: {
   className?: string;
   testimonials: Testimonial[];
   duration?: number;
   reverse?: boolean;
+  paused?: boolean;
 }) => {
+  // Manual marquee so we can pause without resetting position.
+  // One full loop covers 50% of total height (we render testimonials twice).
+  const yPct = useMotionValue(reverse ? -50 : 0);
+  useAnimationFrame((_t, delta) => {
+    if (paused) return;
+    const distancePerMs = 50 / (duration * 1000); // % of column per ms
+    const dir = reverse ? 1 : -1;
+    let next = yPct.get() + dir * distancePerMs * delta;
+    if (!reverse && next <= -50) next += 50;
+    if (reverse && next >= 0) next -= 50;
+    yPct.set(next);
+  });
+  const yStyle = useTransform(yPct, (v) => `${v}%`);
+
   return (
     <div className={`flex-1 ${className || ''}`}>
       <motion.div
-        animate={{ translateY: reverse ? "0%" : "-50%" }}
-        initial={{ translateY: reverse ? "-50%" : "0%" }}
-        transition={{
-          duration,
-          repeat: Infinity,
-          ease: "linear",
-          repeatType: "loop",
-        }}
+        style={{ y: yStyle, willChange: "transform" }}
         className="flex flex-col gap-4"
       >
         {[...new Array(2)].map((_, index) => (
