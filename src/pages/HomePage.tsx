@@ -384,7 +384,7 @@ export const HomePage = () => {
       <div className="relative md:h-[160vh]">
         <section
           data-section="pick-subject-bottom"
-          className="md:sticky md:top-0 md:min-h-screen md:flex md:items-start md:pt-24 lg:pt-28 py-8 md:py-16 px-4 md:px-8"
+          className="md:sticky md:top-0 md:min-h-screen md:flex md:items-start md:pt-4 lg:pt-6 py-8 md:py-16 px-4 md:px-8"
         >
           <div className="max-w-5xl mx-auto w-full">
             <div className="text-center mb-8 md:mb-12">
