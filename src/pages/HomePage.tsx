@@ -157,31 +157,24 @@ const DemoTestimonialsStage: React.FC = () => {
         </motion.div>
       </section>
 
-      {/* Pin wrapper: holds extra scroll height so the sticky testimonials
-          section stays in view for ~1 viewport of scroll (marquee paused),
-          before the next section is revealed beneath. */}
-      <div ref={pinRef} className="relative -mt-40 h-[180vh]">
-        <section
-          data-section="testimonials"
-          className="sticky top-0 py-16 px-8 overflow-hidden bg-background min-h-screen flex items-center"
-        >
-          <div className="max-w-7xl mx-auto w-full">
-            <ScrollReveal className="text-center mb-10">
-              <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
-                10,000 students. One unfair advantage
-              </h2>
-            </ScrollReveal>
-            <motion.div
-              style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
-              className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
-            >
-              <TestimonialsColumn testimonials={firstColumn} duration={45} paused={paused} />
-              <TestimonialsColumn testimonials={secondColumn} duration={40} paused={paused} />
-              <TestimonialsColumn testimonials={thirdColumn} duration={50} paused={paused} />
-            </motion.div>
-          </div>
-        </section>
-      </div>
+      {/* Testimonials revealed beneath as the video tilts away */}
+      <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-40">
+        <div className="max-w-7xl mx-auto">
+          <ScrollReveal className="text-center mb-10">
+            <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
+              10,000 students. One unfair advantage
+            </h2>
+          </ScrollReveal>
+          <motion.div
+            style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
+            className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
+          >
+            <TestimonialsColumn testimonials={firstColumn} duration={45} />
+            <TestimonialsColumn testimonials={secondColumn} duration={40} />
+            <TestimonialsColumn testimonials={thirdColumn} duration={50} />
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 };
