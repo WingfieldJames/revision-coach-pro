@@ -20,6 +20,7 @@ import { SubjectPlanSelector } from "@/components/SubjectPlanSelector";
 import logo from "@/assets/logo.png";
 import logoDark from "@/assets/logo-dark.png";
 import appScreenshot from "@/assets/app-screenshot.png";
+import logoMark from "@/assets/logo-mark.png";
 
 const revisionFeatures = [
 {
@@ -87,29 +88,31 @@ const revisionFeatures = [
 /** Shared heading class matching FoundersCarousel / hero style */
 const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight";
 
-/** Word-by-word fade-in heading. Triggers on first time it enters the viewport. */
+/** Word-by-word fade-in heading. Triggers when the section pins to the viewport top. */
 const AnimatedWords: React.FC<{
-  words: { text: string; className?: string }[];
+  words: { text?: string; node?: React.ReactNode; className?: string }[];
   className?: string;
 }> = ({ words, className }) => {
   const ref = React.useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-15% 0px" });
+  // Fire when the element's top reaches the top of the viewport (i.e. the
+  // moment the pinned section sticks). Root rect is the top 15% of viewport.
+  const inView = useInView(ref, { once: true, margin: "0px 0px -85% 0px" });
   const prefersReducedMotion = useReducedMotion();
   return (
     <span ref={ref} className={className}>
       {words.map((w, i) => (
         <React.Fragment key={i}>
           <motion.span
-            className={`inline-block ${w.className ?? ''}`}
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
-            animate={inView ? { opacity: 1, y: 0 } : undefined}
+            className={`inline-block align-middle ${w.className ?? ''}`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 18, filter: 'blur(6px)' }}
+            animate={inView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : undefined}
             transition={{
-              duration: 0.55,
-              delay: prefersReducedMotion ? 0 : i * 0.08,
-              ease: [0.25, 0.4, 0.25, 1],
+              duration: 0.9,
+              delay: prefersReducedMotion ? 0 : i * 0.28,
+              ease: [0.22, 0.61, 0.36, 1],
             }}
           >
-            {w.text}
+            {w.node ?? w.text}
           </motion.span>
           {i < words.length - 1 && ' '}
         </React.Fragment>
@@ -392,7 +395,15 @@ export const HomePage = () => {
                     { text: 'to', className: 'text-foreground' },
                     { text: 'get', className: 'text-foreground' },
                     { text: 'an', className: 'text-foreground' },
-                    { text: 'A*', className: 'text-primary' },
+                    {
+                      node: (
+                        <img
+                          src={logoMark}
+                          alt="A*"
+                          className="inline-block h-[1em] w-auto align-[-0.12em] object-contain"
+                        />
+                      ),
+                    },
                   ]}
                 />
               </h2>
