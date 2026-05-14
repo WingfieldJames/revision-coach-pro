@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ChevronDown, Instagram, Youtube, Linkedin, Calendar, BookOpen, GraduationCap, Search, FileCheck } from "lucide-react";
-import { AnimatePresence, motion, useScroll, useTransform, useSpring, useReducedMotion, useMotionValueEvent } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform, useSpring, useReducedMotion, useInView } from "framer-motion";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeroBackgroundPaths } from "@/components/ui/hero-background-paths";
@@ -87,10 +87,40 @@ const revisionFeatures = [
 /** Shared heading class matching FoundersCarousel / hero style */
 const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight";
 
+/** Word-by-word fade-in heading. Triggers on first time it enters the viewport. */
+const AnimatedWords: React.FC<{
+  words: { text: string; className?: string }[];
+  className?: string;
+}> = ({ words, className }) => {
+  const ref = React.useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-15% 0px" });
+  const prefersReducedMotion = useReducedMotion();
+  return (
+    <span ref={ref} className={className}>
+      {words.map((w, i) => (
+        <React.Fragment key={i}>
+          <motion.span
+            className={`inline-block ${w.className ?? ''}`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+            animate={inView ? { opacity: 1, y: 0 } : undefined}
+            transition={{
+              duration: 0.55,
+              delay: prefersReducedMotion ? 0 : i * 0.08,
+              ease: [0.25, 0.4, 0.25, 1],
+            }}
+          >
+            {w.text}
+          </motion.span>
+          {i < words.length - 1 && ' '}
+        </React.Fragment>
+      ))}
+    </span>
+  );
+};
+
 const DemoTestimonialsStage: React.FC = () => {
   const stageRef = React.useRef<HTMLDivElement>(null);
   const videoRef = React.useRef<HTMLDivElement>(null);
-  const pinRef = React.useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // Entry animation for the video (drives scale-up as it enters viewport)
@@ -103,8 +133,7 @@ const DemoTestimonialsStage: React.FC = () => {
   const screenOpacityIn = useTransform(enterProgress, [0, 0.3, 1], prefersReducedMotion ? [1, 1, 1] : [0, 0.6, 1]);
 
   // Tilt + testimonial entry are driven off the video section's own scroll
-  // (independent of the testimonials pin so adding pin scroll height doesn't
-  // slow down the tilt timing).
+  // so the testimonials section can flow normally beneath it.
   const { scrollYProgress: videoExitProgress } = useScroll({
     target: videoRef,
     offset: ["center center", "end start"],
@@ -115,18 +144,6 @@ const DemoTestimonialsStage: React.FC = () => {
 
   const testimonialsOpacity = useTransform(videoExitProgress, [0.1, 0.6], prefersReducedMotion ? [1, 1] : [0, 1]);
   const testimonialsY = useTransform(videoExitProgress, [0.1, 0.8], prefersReducedMotion ? [0, 0] : [220, 0]);
-
-  // Pin: while the testimonials section is sticky-pinned, freeze the marquee.
-  const { scrollYProgress: pinProgress } = useScroll({
-    target: pinRef,
-    offset: ["start start", "end end"],
-  });
-  const [paused, setPaused] = React.useState(false);
-  useMotionValueEvent(pinProgress, "change", (v) => {
-    // Pause once the section is fully pinned (its bottom has reached the
-    // viewport bottom and we're now scrolling through the pin spacer).
-    setPaused(v > 0.05 && v < 0.98);
-  });
 
   return (
     <div ref={stageRef} className="hidden md:block relative">
@@ -170,31 +187,24 @@ const DemoTestimonialsStage: React.FC = () => {
         </motion.div>
       </section>
 
-      {/* Pin wrapper: holds extra scroll height so the sticky testimonials
-          section stays in view for ~1 viewport of scroll (marquee paused),
-          before the next section is revealed beneath. */}
-      <div ref={pinRef} className="relative -mt-40 h-[180vh]">
-        <section
-          data-section="testimonials"
-          className="sticky top-0 py-16 px-8 overflow-hidden bg-background min-h-screen flex items-center"
-        >
-          <div className="max-w-7xl mx-auto w-full">
-            <ScrollReveal className="text-center mb-10">
-              <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
-                10,000 students. One unfair advantage
-              </h2>
-            </ScrollReveal>
-            <motion.div
-              style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
-              className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
-            >
-              <TestimonialsColumn testimonials={firstColumn} duration={45} paused={paused} />
-              <TestimonialsColumn testimonials={secondColumn} duration={40} paused={paused} />
-              <TestimonialsColumn testimonials={thirdColumn} duration={50} paused={paused} />
-            </motion.div>
-          </div>
-        </section>
-      </div>
+      {/* Testimonials revealed beneath as the video tilts away */}
+      <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-40">
+        <div className="max-w-7xl mx-auto">
+          <ScrollReveal className="text-center mb-10">
+            <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
+              10,000 students. One unfair advantage
+            </h2>
+          </ScrollReveal>
+          <motion.div
+            style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
+            className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
+          >
+            <TestimonialsColumn testimonials={firstColumn} duration={45} />
+            <TestimonialsColumn testimonials={secondColumn} duration={40} />
+            <TestimonialsColumn testimonials={thirdColumn} duration={50} />
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 };
@@ -367,16 +377,30 @@ export const HomePage = () => {
       </section>
 
 
-      {/* Subject + Plan Selection */}
-      <section data-section="pick-subject-bottom" className="py-8 md:py-16 px-4 md:px-8 max-w-5xl mx-auto">
-        <ScrollReveal className="text-center mb-8 md:mb-12">
-          <h2 className={sectionHeadingClass}>
-             <span className="text-foreground">Choose your </span>
-             <span className="text-primary">subject</span>
-          </h2>
-        </ScrollReveal>
-        <SubjectPlanSelector />
-      </section>
+      {/* Subject + Plan Selection — sticky-pinned for a short hold */}
+      <div className="relative md:h-[160vh]">
+        <section
+          data-section="pick-subject-bottom"
+          className="md:sticky md:top-0 md:min-h-screen md:flex md:items-center py-8 md:py-16 px-4 md:px-8"
+        >
+          <div className="max-w-5xl mx-auto w-full">
+            <div className="text-center mb-8 md:mb-12">
+              <h2 className={sectionHeadingClass}>
+                <AnimatedWords
+                  words={[
+                    { text: 'Time', className: 'text-foreground' },
+                    { text: 'to', className: 'text-foreground' },
+                    { text: 'get', className: 'text-foreground' },
+                    { text: 'an', className: 'text-foreground' },
+                    { text: 'A*', className: 'text-primary' },
+                  ]}
+                />
+              </h2>
+            </div>
+            <SubjectPlanSelector />
+          </div>
+        </section>
+      </div>
 
       {/* FAQ Section */}
       <section className="py-16 px-4 md:px-8 bg-background relative overflow-hidden">
