@@ -90,6 +90,7 @@ const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg
 const DemoTestimonialsStage: React.FC = () => {
   const stageRef = React.useRef<HTMLDivElement>(null);
   const videoRef = React.useRef<HTMLDivElement>(null);
+  const pinRef = React.useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // Entry animation for the video (drives scale-up as it enters viewport)
@@ -101,17 +102,31 @@ const DemoTestimonialsStage: React.FC = () => {
   const screenY = useTransform(enterProgress, [0, 1], prefersReducedMotion ? [0, 0] : [120, 0]);
   const screenOpacityIn = useTransform(enterProgress, [0, 0.3, 1], prefersReducedMotion ? [1, 1, 1] : [0, 0.6, 1]);
 
-  // Shared exit/reveal progress: video tilts away, testimonials fade in beneath
-  const { scrollYProgress: stageProgress } = useScroll({
-    target: stageRef,
+  // Tilt + testimonial entry are driven off the video section's own scroll
+  // (independent of the testimonials pin so adding pin scroll height doesn't
+  // slow down the tilt timing).
+  const { scrollYProgress: videoExitProgress } = useScroll({
+    target: videoRef,
+    offset: ["center center", "end start"],
+  });
+  const tiltRotate = useTransform(videoExitProgress, [0.1, 0.7], prefersReducedMotion ? [0, 0] : [0, -35]);
+  const tiltY = useTransform(videoExitProgress, [0.1, 0.8], prefersReducedMotion ? [0, 0] : [0, -140]);
+  const tiltOpacity = useTransform(videoExitProgress, [0.4, 0.85], prefersReducedMotion ? [1, 1] : [1, 0]);
+
+  const testimonialsOpacity = useTransform(videoExitProgress, [0.1, 0.6], prefersReducedMotion ? [1, 1] : [0, 1]);
+  const testimonialsY = useTransform(videoExitProgress, [0.1, 0.8], prefersReducedMotion ? [0, 0] : [220, 0]);
+
+  // Pin: while the testimonials section is sticky-pinned, freeze the marquee.
+  const { scrollYProgress: pinProgress } = useScroll({
+    target: pinRef,
     offset: ["start start", "end end"],
   });
-  const tiltRotate = useTransform(stageProgress, [0.35, 0.75], prefersReducedMotion ? [0, 0] : [0, -35]);
-  const tiltY = useTransform(stageProgress, [0.35, 0.8], prefersReducedMotion ? [0, 0] : [0, -140]);
-  const tiltOpacity = useTransform(stageProgress, [0.55, 0.85], prefersReducedMotion ? [1, 1] : [1, 0]);
-
-  const testimonialsOpacity = useTransform(stageProgress, [0.35, 0.7], prefersReducedMotion ? [1, 1] : [0, 1]);
-  const testimonialsY = useTransform(stageProgress, [0.35, 0.8], prefersReducedMotion ? [0, 0] : [220, 0]);
+  const [paused, setPaused] = React.useState(false);
+  useMotionValueEvent(pinProgress, "change", (v) => {
+    // Pause once the section is fully pinned (its bottom has reached the
+    // viewport bottom and we're now scrolling through the pin spacer).
+    setPaused(v > 0.05 && v < 0.98);
+  });
 
   return (
     <div ref={stageRef} className="hidden md:block relative">
@@ -155,24 +170,31 @@ const DemoTestimonialsStage: React.FC = () => {
         </motion.div>
       </section>
 
-      {/* Testimonials revealed beneath as the video tilts away */}
-      <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-40">
-        <div className="max-w-7xl mx-auto">
-          <ScrollReveal className="text-center mb-10">
-            <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
-              10,000 students. One unfair advantage
-            </h2>
-          </ScrollReveal>
-          <motion.div
-            style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
-            className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
-          >
-            <TestimonialsColumn testimonials={firstColumn} duration={45} />
-            <TestimonialsColumn testimonials={secondColumn} duration={40} />
-            <TestimonialsColumn testimonials={thirdColumn} duration={50} />
-          </motion.div>
-        </div>
-      </section>
+      {/* Pin wrapper: holds extra scroll height so the sticky testimonials
+          section stays in view for ~1 viewport of scroll (marquee paused),
+          before the next section is revealed beneath. */}
+      <div ref={pinRef} className="relative -mt-40 h-[180vh]">
+        <section
+          data-section="testimonials"
+          className="sticky top-0 py-16 px-8 overflow-hidden bg-background min-h-screen flex items-center"
+        >
+          <div className="max-w-7xl mx-auto w-full">
+            <ScrollReveal className="text-center mb-10">
+              <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
+                10,000 students. One unfair advantage
+              </h2>
+            </ScrollReveal>
+            <motion.div
+              style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
+              className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
+            >
+              <TestimonialsColumn testimonials={firstColumn} duration={45} paused={paused} />
+              <TestimonialsColumn testimonials={secondColumn} duration={40} paused={paused} />
+              <TestimonialsColumn testimonials={thirdColumn} duration={50} paused={paused} />
+            </motion.div>
+          </div>
+        </section>
+      </div>
     </div>
   );
 };
