@@ -94,9 +94,8 @@ const AnimatedWords: React.FC<{
   className?: string;
 }> = ({ words, className }) => {
   const ref = React.useRef<HTMLSpanElement>(null);
-  // Fire when the element's top reaches the top of the viewport (i.e. the
-  // moment the pinned section sticks). Root rect is the top 15% of viewport.
-  const inView = useInView(ref, { once: true, margin: "0px 0px -85% 0px" });
+  // Fire when the element scrolls into view (top 20% of viewport)
+  const inView = useInView(ref, { once: true, margin: "0px 0px -20% 0px" });
   const prefersReducedMotion = useReducedMotion();
   return (
     <span ref={ref} className={className}>
