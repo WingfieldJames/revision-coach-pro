@@ -94,9 +94,8 @@ const AnimatedWords: React.FC<{
   className?: string;
 }> = ({ words, className }) => {
   const ref = React.useRef<HTMLSpanElement>(null);
-  // Fire when the element's top reaches the top of the viewport (i.e. the
-  // moment the pinned section sticks). Root rect is the top 15% of viewport.
-  const inView = useInView(ref, { once: true, margin: "0px 0px -85% 0px" });
+  // Fire when the element scrolls into view (top 20% of viewport)
+  const inView = useInView(ref, { once: true, margin: "0px 0px -20% 0px" });
   const prefersReducedMotion = useReducedMotion();
   return (
     <span ref={ref} className={className}>
@@ -380,39 +379,37 @@ export const HomePage = () => {
       </section>
 
 
-      {/* Subject + Plan Selection — sticky-pinned for a short hold */}
-      <div className="relative md:h-[160vh]">
-        <section
-          data-section="pick-subject-bottom"
-          className="md:sticky md:top-0 md:min-h-screen md:flex md:items-start py-8 md:py-0 md:pt-0 px-4 md:px-8"
-        >
-          <div className="max-w-5xl mx-auto w-full">
-            <div className="text-center mb-8 md:mb-12">
-              <h2 className={sectionHeadingClass}>
-                <AnimatedWords
-                  words={[
-                    { text: 'Time', className: 'text-foreground' },
-                    { text: 'to', className: 'text-foreground' },
-                    { text: 'get', className: 'text-foreground' },
-                    { text: 'you', className: 'text-foreground' },
-                    { text: 'an', className: 'text-foreground' },
-                    {
-                      node: (
-                        <img
-                          src={logoMark}
-                          alt="A*"
-                          className="inline-block h-[1em] w-auto align-[-0.12em] object-contain"
-                        />
-                      ),
-                    },
-                  ]}
-                />
-              </h2>
-            </div>
-            <SubjectPlanSelector />
+      {/* Subject + Plan Selection */}
+      <section
+        data-section="pick-subject-bottom"
+        className="py-16 md:py-24 px-4 md:px-8"
+      >
+        <div className="max-w-5xl mx-auto w-full">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className={sectionHeadingClass}>
+              <AnimatedWords
+                words={[
+                  { text: 'Time', className: 'text-foreground' },
+                  { text: 'to', className: 'text-foreground' },
+                  { text: 'get', className: 'text-foreground' },
+                  { text: 'you', className: 'text-foreground' },
+                  { text: 'an', className: 'text-foreground' },
+                  {
+                    node: (
+                      <img
+                        src={logoMark}
+                        alt="A*"
+                        className="inline-block h-[1em] w-auto align-[-0.12em] object-contain"
+                      />
+                    ),
+                  },
+                ]}
+              />
+            </h2>
           </div>
-        </section>
-      </div>
+          <SubjectPlanSelector />
+        </div>
+      </section>
 
       {/* FAQ Section */}
       <section className="py-16 px-4 md:px-8 bg-background relative overflow-hidden">
