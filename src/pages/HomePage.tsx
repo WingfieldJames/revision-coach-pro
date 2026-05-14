@@ -382,31 +382,39 @@ export const HomePage = () => {
       {/* Subject + Plan Selection */}
       <section
         data-section="pick-subject-bottom"
-        className="py-16 md:py-24 px-4 md:px-8"
+        className="py-16 md:py-0 px-4 md:px-8 relative"
       >
-        <div className="max-w-5xl mx-auto w-full">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className={sectionHeadingClass}>
-              <AnimatedWords
-                words={[
-                  { text: 'Time', className: 'text-foreground' },
-                  { text: 'to', className: 'text-foreground' },
-                  { text: 'get', className: 'text-foreground' },
-                  { text: 'you', className: 'text-foreground' },
-                  { text: 'an', className: 'text-foreground' },
-                  {
-                    node: (
-                      <img
-                        src={logoMark}
-                        alt="A*"
-                        className="inline-block h-[1em] w-auto align-[-0.12em] object-contain"
-                      />
-                    ),
-                  },
-                ]}
-              />
-            </h2>
-          </div>
+        {/* Whitespace gap after testimonials (desktop) */}
+        <div aria-hidden className="hidden md:block h-[55vh]" />
+
+        {/* Pinned heading — animates in alone, stays sticky as subjects scroll up below */}
+        <div className="md:sticky md:top-24 z-10 text-center mb-8 md:mb-0 md:py-8">
+          <h2 className={sectionHeadingClass}>
+            <AnimatedWords
+              words={[
+                { text: 'Time', className: 'text-foreground' },
+                { text: 'to', className: 'text-foreground' },
+                { text: 'get', className: 'text-foreground' },
+                { text: 'you', className: 'text-foreground' },
+                { text: 'an', className: 'text-foreground' },
+                {
+                  node: (
+                    <img
+                      src={logoMark}
+                      alt="A*"
+                      className="inline-block h-[1em] w-auto align-[-0.12em] object-contain"
+                    />
+                  ),
+                },
+              ]}
+            />
+          </h2>
+        </div>
+
+        {/* Spacer so the heading sits alone in view before subjects scroll in */}
+        <div aria-hidden className="hidden md:block h-[35vh]" />
+
+        <div className="max-w-5xl mx-auto w-full pb-16 md:pb-24">
           <SubjectPlanSelector />
         </div>
       </section>
