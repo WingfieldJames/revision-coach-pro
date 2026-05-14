@@ -395,7 +395,15 @@ export const HomePage = () => {
                     { text: 'to', className: 'text-foreground' },
                     { text: 'get', className: 'text-foreground' },
                     { text: 'an', className: 'text-foreground' },
-                    { text: 'A*', className: 'text-primary' },
+                    {
+                      node: (
+                        <img
+                          src={logoMark}
+                          alt="A*"
+                          className="inline-block h-[1em] w-auto align-[-0.12em] object-contain"
+                        />
+                      ),
+                    },
                   ]}
                 />
               </h2>
