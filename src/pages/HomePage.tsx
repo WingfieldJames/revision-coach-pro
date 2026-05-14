@@ -290,13 +290,13 @@ export const HomePage = () => {
                   {/* Mobile: 2 lines */}
                   <div className="md:hidden">
                     <div className="text-foreground">The AI tutor built</div>
-                    <div className="text-foreground">to get you an <span className="text-primary">A*</span>.</div>
+                    <div className="text-foreground">to get you an <img src={logoMark} alt="A*" className="inline-block h-[0.85em] w-auto align-[-0.1em] object-contain" /></div>
                   </div>
                   {/* Desktop: 3 lines */}
                   <div className="hidden md:block">
                     <div className="text-foreground">The AI tutor</div>
                     <div className="text-foreground">built to get</div>
-                    <div className="text-foreground">you an <span className="text-primary">A*</span>.</div>
+                    <div className="text-foreground">you an <img src={logoMark} alt="A*" className="inline-block h-[0.85em] w-auto align-[-0.1em] object-contain" /></div>
                   </div>
                 </h1>
 
