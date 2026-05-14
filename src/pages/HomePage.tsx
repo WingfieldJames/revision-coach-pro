@@ -87,10 +87,40 @@ const revisionFeatures = [
 /** Shared heading class matching FoundersCarousel / hero style */
 const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight";
 
+/** Word-by-word fade-in heading. Triggers on first time it enters the viewport. */
+const AnimatedWords: React.FC<{
+  words: { text: string; className?: string }[];
+  className?: string;
+}> = ({ words, className }) => {
+  const ref = React.useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-15% 0px" });
+  const prefersReducedMotion = useReducedMotion();
+  return (
+    <span ref={ref} className={className}>
+      {words.map((w, i) => (
+        <React.Fragment key={i}>
+          <motion.span
+            className={`inline-block ${w.className ?? ''}`}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+            animate={inView ? { opacity: 1, y: 0 } : undefined}
+            transition={{
+              duration: 0.55,
+              delay: prefersReducedMotion ? 0 : i * 0.08,
+              ease: [0.25, 0.4, 0.25, 1],
+            }}
+          >
+            {w.text}
+          </motion.span>
+          {i < words.length - 1 && ' '}
+        </React.Fragment>
+      ))}
+    </span>
+  );
+};
+
 const DemoTestimonialsStage: React.FC = () => {
   const stageRef = React.useRef<HTMLDivElement>(null);
   const videoRef = React.useRef<HTMLDivElement>(null);
-  const pinRef = React.useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // Entry animation for the video (drives scale-up as it enters viewport)
