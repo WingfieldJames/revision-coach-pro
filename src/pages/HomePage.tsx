@@ -103,8 +103,7 @@ const DemoTestimonialsStage: React.FC = () => {
   const screenOpacityIn = useTransform(enterProgress, [0, 0.3, 1], prefersReducedMotion ? [1, 1, 1] : [0, 0.6, 1]);
 
   // Tilt + testimonial entry are driven off the video section's own scroll
-  // (independent of the testimonials pin so adding pin scroll height doesn't
-  // slow down the tilt timing).
+  // so the testimonials section can flow normally beneath it.
   const { scrollYProgress: videoExitProgress } = useScroll({
     target: videoRef,
     offset: ["center center", "end start"],
@@ -115,18 +114,6 @@ const DemoTestimonialsStage: React.FC = () => {
 
   const testimonialsOpacity = useTransform(videoExitProgress, [0.1, 0.6], prefersReducedMotion ? [1, 1] : [0, 1]);
   const testimonialsY = useTransform(videoExitProgress, [0.1, 0.8], prefersReducedMotion ? [0, 0] : [220, 0]);
-
-  // Pin: while the testimonials section is sticky-pinned, freeze the marquee.
-  const { scrollYProgress: pinProgress } = useScroll({
-    target: pinRef,
-    offset: ["start start", "end end"],
-  });
-  const [paused, setPaused] = React.useState(false);
-  useMotionValueEvent(pinProgress, "change", (v) => {
-    // Pause once the section is fully pinned (its bottom has reached the
-    // viewport bottom and we're now scrolling through the pin spacer).
-    setPaused(v > 0.05 && v < 0.98);
-  });
 
   return (
     <div ref={stageRef} className="hidden md:block relative">
