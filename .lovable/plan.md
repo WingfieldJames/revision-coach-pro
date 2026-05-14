@@ -1,17 +1,30 @@
-## Add heading in testimonials whitespace
+## Fade in the testimonials heading and match the founders heading size
 
-Add a centered h2 "10,000 students. One unfair advantage" inside the testimonials section in `src/pages/HomePage.tsx`, placed above the three scrolling columns so it occupies the whitespace below the tilting video — without moving the testimonial columns themselves.
+Two small changes to the heading at `src/pages/HomePage.tsx:161` so it reads as the start of the testimonials section, not a leftover from the demo video.
 
-### Change
+### 1. Fade it in on scroll (instead of being statically rendered)
 
-In `src/pages/HomePage.tsx`, inside the testimonials `<section>` (around line 161), insert a heading inside the `max-w-7xl` wrapper, above the `motion.div` that holds the columns:
+Wrap the `<h2>` in the existing `ScrollReveal` component (already used for the "The A* students behind the AI" heading in `MeetTheFounders.tsx:238`). This gives it the same upward fade-in that introduces the founders section, so it visually "arrives" with the testimonials rather than sitting under the tilting video.
 
 ```tsx
-<h2 className={`${sectionHeadingClass} text-center mb-10`}>
-  10,000 students. One unfair advantage
-</h2>
+<ScrollReveal className="text-center mb-10">
+  <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
+    10,000 students. One unfair advantage
+  </h2>
+</ScrollReveal>
 ```
 
-This reuses the existing `sectionHeadingClass` (line 88) so the typography matches every other section heading on `/`. The heading sits in the existing top padding/whitespace area; the testimonial columns stay in place (still wrapped in the same motion.div with the scroll-driven `y`/`opacity`).
+Add the import: `import { ScrollReveal } from '@/components/ui/scroll-reveal';`.
 
-No other files change.
+### 2. Match the founders heading size exactly
+
+Stop using `sectionHeadingClass` for this one heading and inline the exact same Tailwind size classes used by `MeetTheFounders.tsx:233/240` so the two headings are guaranteed identical at every breakpoint. (At `lg` they already compute the same; this just removes the risk of drift and makes the intent explicit.)
+
+### Out of scope
+
+- No changes to the testimonial columns, the tilting video, the section's negative top margin, or any other section.
+- No new components, no new tokens, no animation re-tuning elsewhere.
+
+### Files changed
+
+- `src/pages/HomePage.tsx` (one heading block + one import)
