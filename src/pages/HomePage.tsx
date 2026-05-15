@@ -194,11 +194,17 @@ const DemoTestimonialsStage: React.FC = () => {
       {/* Testimonials revealed beneath as the video tilts away */}
       <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-40">
         <div className="max-w-7xl mx-auto">
-          <ScrollReveal className="text-center mb-10">
+          <motion.div
+            className="text-center mb-10"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-45% 0px -45% 0px" }}
+            transition={{ duration: 1, delay: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
+          >
             <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
               10,000 students. One unfair advantage
             </h2>
-          </ScrollReveal>
+          </motion.div>
           <motion.div
             style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
             className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
