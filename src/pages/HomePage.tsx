@@ -96,7 +96,8 @@ const AnimatedWords: React.FC<{
 }> = ({ words, className, startDelay = 0 }) => {
   const ref = React.useRef<HTMLSpanElement>(null);
   // Fire when the element scrolls into view (top 20% of viewport)
-  const inView = useInView(ref, { once: true, margin: "0px 0px -20% 0px" });
+  // Only fire once the heading reaches near the top of the viewport (after scrolling past the video)
+  const inView = useInView(ref, { once: true, margin: "0px 0px -75% 0px" });
   const prefersReducedMotion = useReducedMotion();
   return (
     <span ref={ref} className={className}>
