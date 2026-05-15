@@ -8,6 +8,7 @@ import jamesFounder from '@/assets/james-founder.png';
 import tanujKakumani from '@/assets/tanuj-kakumani.jpg';
 import aadiRakhit from '@/assets/aadi-rakhit.png';
 import yanBeletskiy from '@/assets/yan-beletskiy.png';
+import logoMark from '@/assets/logo-mark.png';
 
 interface Trainer {
   id: string;
