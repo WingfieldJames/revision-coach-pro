@@ -232,14 +232,14 @@ export function MeetTheFounders() {
         <div className="text-center mb-12 md:mb-16 md:hidden">
           <p className="text-sm sm:text-base font-medium text-muted-foreground mb-2">Meet your trainers</p>
           <h2 className="text-[1.5rem] sm:text-[2.5rem] font-bold leading-[1.2] tracking-tight">
-            <span className="text-foreground">The A* students </span>
+            <span className="text-foreground">The <img src={logoMark} alt="A*" className="inline-block h-[0.85em] w-auto align-[-0.12em] object-contain" /> students </span>
             <span className="text-primary">behind the AI</span>
           </h2>
         </div>
         <ScrollReveal className="text-center mb-12 md:mb-16 hidden md:block">
           <p className="text-sm sm:text-base font-medium text-muted-foreground mb-2">Meet your trainers</p>
           <h2 className="text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
-            <span className="text-foreground">The A* students </span>
+            <span className="text-foreground">The <img src={logoMark} alt="A*" className="inline-block h-[0.85em] w-auto align-[-0.12em] object-contain" /> students </span>
             <span className="text-primary">behind the AI</span>
           </h2>
         </ScrollReveal>
