@@ -1,30 +1,34 @@
-## Fade in the testimonials heading and match the founders heading size
+## Goal
+Change the A-Level Exam Season Pass (lifetime) price from **£19.99 → £16.99**. GCSE pricing (£17.99) stays unchanged. Everything else (copy, layout, strike-through £39.99, monthly £8.99) stays exactly the same.
 
-Two small changes to the heading at `src/pages/HomePage.tsx:161` so it reads as the start of the testimonials section, not a leftover from the demo video.
+> ⚠️ Heads-up: after this change, GCSE Pass (£17.99) will be more expensive than the A-Level Pass (£16.99). Confirm you're happy with that — if not, lower GCSE too.
 
-### 1. Fade it in on scroll (instead of being statically rendered)
+## Stripe
+No Stripe dashboard change needed. `create-checkout` builds the Stripe `price_data` dynamically per session from `products.lifetime_price`. Updating the DB value flows straight through to new checkout sessions.
 
-Wrap the `<h2>` in the existing `ScrollReveal` component (already used for the "The A* students behind the AI" heading in `MeetTheFounders.tsx:238`). This gives it the same upward fade-in that introduces the founders section, so it visually "arrives" with the testimonials rather than sitting under the tilting video.
+## Changes
 
-```tsx
-<ScrollReveal className="text-center mb-10">
-  <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
-    10,000 students. One unfair advantage
-  </h2>
-</ScrollReveal>
+### 1. Database migration
+Update all A-Level products (current `lifetime_price = 1999`) to `1699`. GCSE rows (`1799`) left alone.
+```sql
+UPDATE public.products SET lifetime_price = 1699 WHERE lifetime_price = 1999;
 ```
 
-Add the import: `import { ScrollReveal } from '@/components/ui/scroll-reveal';`.
+### 2. Edge function defaults
+- `supabase/functions/create-checkout/index.ts` line 150 — fallback `|| 1999` → `|| 1699`
+- `supabase/functions/deploy-subject/index.ts` lines 114 & 167 — A-Level default `1999` → `1699` (GCSE `1799` untouched)
 
-### 2. Match the founders heading size exactly
+### 3. Frontend copy (£19.99 → £16.99)
+- `src/components/ChatbotSidebar.tsx:647`
+- `src/components/ChatbotToolbar.tsx:454`
+- `src/components/DiagramFinderTool.tsx:142`
+- `src/components/Header.tsx:619`
+- `src/components/RAGChat.tsx:1392`
+- `src/pages/ComparePage.tsx:217` (`lifetime: '£19.99'` → `'£16.99'`)
+- `src/pages/DashboardPage.tsx:463`
+- `src/pages/ProfilePage.tsx:305` and `:380`
 
-Stop using `sectionHeadingClass` for this one heading and inline the exact same Tailwind size classes used by `MeetTheFounders.tsx:233/240` so the two headings are guaranteed identical at every breakpoint. (At `lg` they already compute the same; this just removes the risk of drift and makes the intent explicit.)
-
-### Out of scope
-
-- No changes to the testimonial columns, the tilting video, the section's negative top margin, or any other section.
-- No new components, no new tokens, no animation re-tuning elsewhere.
-
-### Files changed
-
-- `src/pages/HomePage.tsx` (one heading block + one import)
+## Out of scope
+- GCSE pricing (£17.99) and strike-through (£39.99) unchanged
+- Monthly pricing unchanged
+- No UI/layout/wording changes beyond the number
