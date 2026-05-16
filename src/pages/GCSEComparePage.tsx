@@ -253,14 +253,14 @@ export const GCSEComparePage = () => {
       <SEOHead title="Choose Your GCSE A* AI Subject" description="Compare A* AI plans for GCSE revision. AI-powered tutoring for all GCSE subjects." canonical="https://astarai.co.uk/gcse" />
       {theme === 'dark' && !isMobile && <FlowFieldBackground color="#a855f7" trailOpacity={0.04} particleCount={400} />}
       <div className="relative z-10">
-        <Header showNavLinks />
+        <Header showNavLinks showStartStudyingButton />
 
-        <main className="pt-0 pb-8 px-4 sm:px-8 lg:px-10 max-w-6xl mx-auto text-center relative z-10">
+        <main className="pt-0 pb-8 px-4 sm:px-8 lg:px-10 max-w-6xl mx-auto relative z-10">
           {/* Subject & Board Selection */}
           <ScrollReveal delay={0.1}>
             {/* Desktop */}
-            <div className="hidden md:flex flex-col items-center gap-6 mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight flex items-center justify-center gap-0 flex-nowrap">
+            <div className="hidden md:flex flex-col items-start gap-6 mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight flex items-center gap-0 flex-nowrap">
                 <span className="self-center">Choose your GCSE</span>
                 <img src={currentLogo} alt="A* AI" className={`h-16 md:h-20 inline-block -mx-2 md:-mx-3 ${theme === 'dark' ? '-translate-y-1 md:-translate-y-1.5' : ''}`} />
                 <span className="self-center">Subject</span>
