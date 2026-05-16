@@ -397,13 +397,13 @@ export const ComparePage = () => {
         <Header showNavLinks />
         
 
-        <main className="pt-0 pb-8 px-4 sm:px-8 lg:px-10 max-w-6xl mx-auto text-center relative z-10">
+        <main className="pt-0 pb-8 px-4 sm:px-8 lg:px-10 max-w-6xl mx-auto relative z-10">
 
           {/* Subject & Board Selection */}
           <ScrollReveal delay={0.1}>
             {/* Desktop: Connected toggle group + board dropdown on same line */}
-            <div className="hidden md:flex flex-col items-center gap-6 mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight flex items-center justify-center gap-0 flex-nowrap">
+            <div className="hidden md:flex flex-col items-start gap-6 mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight flex items-center gap-0 flex-nowrap">
                 <span className="self-center">Choose your</span>
                 <img src={currentLogo} alt="A* AI" className={`h-16 md:h-20 inline-block -mx-2 md:-mx-3 ${theme === 'dark' ? '-translate-y-1 md:-translate-y-1.5' : ''}`} />
                 <span className="self-center">Subject</span>
