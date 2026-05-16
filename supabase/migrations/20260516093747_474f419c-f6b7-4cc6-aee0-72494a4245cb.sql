@@ -1,0 +1,1 @@
+UPDATE public.products SET lifetime_price = 1699 WHERE lifetime_price = 1999;
