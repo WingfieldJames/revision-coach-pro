@@ -644,7 +644,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
               </div>
               <div className="p-6 rounded-xl border border-border bg-muted">
                 <h3 className="text-xl font-bold mb-1">💎 Exam Season Pass</h3>
-                <p className="text-3xl font-bold mb-1"><span className="line-through text-red-500 text-lg mr-1">£39.99</span>{isGCSE ? '£17.99' : '£19.99'}</p>
+                <p className="text-3xl font-bold mb-1"><span className="line-through text-red-500 text-lg mr-1">£39.99</span>{isGCSE ? '£17.99' : '£16.99'}</p>
                 <p className="text-sm text-muted-foreground mb-4">One-time payment • Expires 30th June 2026</p>
                 <ul className="space-y-2 mb-4 text-sm">
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500 shrink-0" /> All premium features included</li>
