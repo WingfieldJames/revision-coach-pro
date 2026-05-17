@@ -296,7 +296,7 @@ export const HomePage = () => {
                     <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-background -ml-1.5 z-[1]" />
                   </div>
                   <span className="text-foreground text-xs sm:text-sm font-medium">
-                    Loved by 5k+ students with a 4.9 star rating
+                    Used by 10,000+ A-Level & GCSE students
                   </span>
                 </div>
 
