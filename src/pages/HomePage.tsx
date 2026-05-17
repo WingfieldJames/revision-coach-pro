@@ -21,6 +21,9 @@ import logo from "@/assets/logo.png";
 import logoDark from "@/assets/logo-dark.png";
 import appScreenshot from "@/assets/app-screenshot.png";
 import logoMark from "@/assets/logo-mark.png";
+import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
+import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
+import matanImage from '@/assets/matan-g.png';
 
 const revisionFeatures = [
 {
@@ -287,7 +290,11 @@ export const HomePage = () => {
                 <div
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm">
                   
-                  <span className="text-base">⭐</span>
+                  <div className="flex">
+                    <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-background z-[3]" />
+                    <img src={jamesImage} alt="James" className="w-5 h-5 rounded-full object-cover border-2 border-background -ml-1.5 z-[2]" />
+                    <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-background -ml-1.5 z-[1]" />
+                  </div>
                   <span className="text-foreground text-xs sm:text-sm font-medium">
                     Loved by 5k+ students with a 4.9 star rating
                   </span>
