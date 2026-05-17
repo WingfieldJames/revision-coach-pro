@@ -288,7 +288,8 @@ export const HomePage = () => {
               <div className="flex-1 text-left md:max-w-[500px] xl:max-w-[520px] 2xl:max-w-[560px] md:flex-shrink-0">
                 {/* Social Proof Pill */}
                 <div
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm">
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm"
+                  style={{ boxShadow: '0 0 16px rgba(168, 85, 247, 0.12), 0 0 6px rgba(168, 85, 247, 0.08)' }}>
                   
                   <div className="flex">
                     <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-background z-[3]" />
