@@ -21,6 +21,9 @@ import logo from "@/assets/logo.png";
 import logoDark from "@/assets/logo-dark.png";
 import appScreenshot from "@/assets/app-screenshot.png";
 import logoMark from "@/assets/logo-mark.png";
+import lucyImage from '/lovable-uploads/f2b4ccb1-7fe1-48b1-a7d2-be25d9423287.png';
+import jamesImage from '/lovable-uploads/f742f39f-8b1f-456c-b2f6-b8d660792c74.png';
+import matanImage from '@/assets/matan-g.png';
 
 const revisionFeatures = [
 {
