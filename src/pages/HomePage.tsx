@@ -394,8 +394,8 @@ export const HomePage = () => {
       >
         <div className="text-center mb-12 md:mb-16">
           <h2 className={sectionHeadingClass}>
-            <AnimatedWords
-              startDelay={1.2}
+          <AnimatedWords
+              startDelay={0.6}
               words={[
                 { text: 'Time', className: 'text-foreground' },
                 { text: 'to', className: 'text-foreground' },
@@ -418,10 +418,10 @@ export const HomePage = () => {
 
         <motion.div
           className="max-w-5xl mx-auto w-full"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px 0px -75% 0px" }}
-          transition={{ duration: 0.8, delay: 3.6, ease: [0.22, 0.61, 0.36, 1] }}
+          transition={{ duration: 0.5, delay: 2.8, ease: [0.22, 0.61, 0.36, 1] }}
         >
           <SubjectPlanSelector />
         </motion.div>
