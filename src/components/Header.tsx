@@ -152,6 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
   showMyMistakes = false,
   showStartStudyingButton = false,
   customRightContent,
+  disableFloatingPill = false,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
