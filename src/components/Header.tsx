@@ -115,6 +115,7 @@ interface HeaderProps {
   showMyMistakes?: boolean;
   showStartStudyingButton?: boolean;
   customRightContent?: React.ReactNode;
+  disableFloatingPill?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -151,6 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
   showMyMistakes = false,
   showStartStudyingButton = false,
   customRightContent,
+  disableFloatingPill = false,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -170,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
-  const showFloatingPill = showNavLinks && showStartStudyingButton;
+  const showFloatingPill = showNavLinks && showStartStudyingButton && !disableFloatingPill;
 
   useEffect(() => {
     if (!showFloatingPill) return;
