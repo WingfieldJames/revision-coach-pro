@@ -172,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
-  const showFloatingPill = showNavLinks && showStartStudyingButton;
+  const showFloatingPill = showNavLinks && showStartStudyingButton && !disableFloatingPill;
 
   useEffect(() => {
     if (!showFloatingPill) return;
