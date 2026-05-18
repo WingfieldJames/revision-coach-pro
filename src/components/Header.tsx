@@ -115,6 +115,7 @@ interface HeaderProps {
   showMyMistakes?: boolean;
   showStartStudyingButton?: boolean;
   customRightContent?: React.ReactNode;
+  disableFloatingPill?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
