@@ -3,7 +3,13 @@ import { createPortal } from 'react-dom';
 import type { ExamDate } from '@/components/ExamCountdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2, Quote, User, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowUp, Loader2, Plus, X, FileText, BookOpen, GraduationCap, FileSearch, BarChart2, Crown, Maximize2, Quote, User, ThumbsUp, ThumbsDown, ChevronDown, Check } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TutorProfilePopup } from '@/components/TutorProfilePopup';
 import { ChallengePopup, isChallengeActiveFromConfig, type ChallengeConfig } from '@/components/ChallengePopup';
@@ -201,6 +207,12 @@ export const RAGChat: React.FC<RAGChatProps> = ({
   const [searchedSources, setSearchedSources] = useState<SearchedSource[]>([]);
   const [thinkingPrompt, setThinkingPrompt] = useState<string>('');
   const reactiveThinkingEnabled = productSlug === 'edexcel-economics';
+  const modelSelectorEnabled = productSlug === 'edexcel-economics';
+  const [selectedModel, setSelectedModel] = useState<'adaptive' | 'marking'>('adaptive');
+  const modelLabels: Record<'adaptive' | 'marking', string> = {
+    adaptive: 'Lock In 3.8 (adaptive)',
+    marking: 'Lock In 3.8 (marking)',
+  };
   const { getSequence: getThinkingSequence } = useReactiveThinking(
     productId,
     subjectName,
@@ -1555,15 +1567,54 @@ export const RAGChat: React.FC<RAGChatProps> = ({
                 <Plus className="w-5 h-5 text-muted-foreground" />
               </Button>
 
-              {/* Send button */}
-              <Button
-                onClick={handleSend}
-                disabled={(!input.trim() && !pendingImage) || isLoading || limitReached}
-                size="icon"
-                className="h-9 w-9 rounded-full bg-gradient-brand hover:opacity-90 glow-brand"
-              >
-                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-4 h-4" />}
-              </Button>
+              {/* Right side: model selector + send */}
+              <div className="flex items-center gap-1.5">
+                {modelSelectorEnabled && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isLoading}
+                        className="h-9 gap-1 px-2.5 text-xs font-medium hover:bg-primary/10 rounded-full"
+                      >
+                        <span className="truncate max-w-[160px] sm:max-w-none">
+                          <span className="text-foreground">Lock In 3.8</span>
+                          <span className="text-muted-foreground"> ({selectedModel})</span>
+                        </span>
+                        <ChevronDown className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" side="top" className="w-60">
+                      {(['adaptive', 'marking'] as const).map(key => (
+                        <DropdownMenuItem
+                          key={key}
+                          onClick={() => setSelectedModel(key)}
+                          className="flex items-center gap-2 py-2 cursor-pointer"
+                        >
+                          <Check
+                            className={cn(
+                              'w-4 h-4 shrink-0',
+                              selectedModel === key ? 'opacity-100 text-primary' : 'opacity-0'
+                            )}
+                          />
+                          <span className="text-sm">{modelLabels[key]}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+
+                {/* Send button */}
+                <Button
+                  onClick={handleSend}
+                  disabled={(!input.trim() && !pendingImage) || isLoading || limitReached}
+                  size="icon"
+                  className="h-9 w-9 rounded-full bg-gradient-brand hover:opacity-90 glow-brand"
+                >
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUp className="w-4 h-4" />}
+                </Button>
+              </div>
             </div>
           </div>
 
