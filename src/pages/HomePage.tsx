@@ -100,7 +100,7 @@ const AnimatedWords: React.FC<{
   const ref = React.useRef<HTMLSpanElement>(null);
   // Fire when the element scrolls into view (top 20% of viewport)
   // Only fire once the heading reaches near the top of the viewport (after scrolling past the video)
-  const inView = useInView(ref, { once: true, margin: "0px 0px -75% 0px" });
+  const inView = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
   const prefersReducedMotion = useReducedMotion();
   return (
     <span ref={ref} className={className}>
@@ -111,8 +111,8 @@ const AnimatedWords: React.FC<{
             initial={prefersReducedMotion ? false : { opacity: 0, y: 18, filter: 'blur(6px)' }}
             animate={inView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : undefined}
             transition={{
-              duration: 0.9,
-              delay: prefersReducedMotion ? 0 : startDelay + i * 0.28,
+              duration: 0.7,
+              delay: prefersReducedMotion ? 0 : startDelay + i * 0.18,
               ease: [0.22, 0.61, 0.36, 1],
             }}
           >
@@ -403,7 +403,7 @@ export const HomePage = () => {
         <div className="text-center mb-12 md:mb-16">
           <h2 className={sectionHeadingClass}>
           <AnimatedWords
-              startDelay={0.6}
+              startDelay={0.1}
               words={[
                 { text: 'Time', className: 'text-foreground' },
                 { text: 'to', className: 'text-foreground' },
@@ -428,8 +428,8 @@ export const HomePage = () => {
           className="max-w-5xl mx-auto w-full"
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "0px 0px -75% 0px" }}
-          transition={{ duration: 0.5, delay: 2.8, ease: [0.22, 0.61, 0.36, 1] }}
+          viewport={{ once: true, margin: "0px 0px -10% 0px" }}
+          transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
         >
           <SubjectPlanSelector />
         </motion.div>
