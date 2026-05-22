@@ -186,9 +186,12 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   const chatHistoryCtx = useChatHistoryContext();
   const { conversations, loading, deleteConversation, fetchConversations } = useChatHistory(productId);
 
-  const daysUntilFirstExam = examDates.length > 0
-    ? Math.round((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24))
-    : null;
+  const daysUntilFirstExam = (() => {
+    const todayMs = new Date().setHours(0, 0, 0, 0);
+    const upcomingTimes = examDates.map(e => e.date.getTime()).filter(t => t >= todayMs);
+    if (upcomingTimes.length === 0) return null;
+    return Math.round((Math.min(...upcomingTimes) - todayMs) / (1000 * 60 * 60 * 24));
+  })();
 
   useEffect(() => {
     if (chatHistoryCtx?.refreshKey) fetchConversations();
@@ -258,7 +261,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
           }
         }}
         className={cn(
-          "hidden md:flex fixed left-0 top-[5.5rem] h-[calc(100vh-5.5rem)] z-[35] flex-col bg-background pt-2",
+          "hidden md:flex fixed left-0 top-[6.5rem] h-[calc(100vh-6.5rem)] z-[35] flex-col bg-background pt-2",
           "transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width]",
           "after:absolute after:right-0 after:top-0 after:bottom-0 after:w-px after:bg-gradient-to-b after:from-transparent after:via-border after:to-transparent",
           open ? "w-[300px] sm:w-[340px]" : "w-12"
@@ -269,8 +272,10 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
           {open ? (
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2 min-w-0">
-                <GraduationCap className="h-5 w-5 text-primary shrink-0" />
-                <h2 className="font-bold text-sm truncate">{subjectName}</h2>
+                <div className="flex items-center justify-center h-6 w-6 rounded-md shrink-0" style={{ background: 'var(--gradient-brand)' }}>
+                  <GraduationCap className="h-3.5 w-3.5 text-white" />
+                </div>
+                <h2 className="font-bold text-sm truncate text-gradient-brand">{subjectName}</h2>
               </div>
               <button
                 onClick={() => setOpen(false)}
@@ -321,7 +326,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             {daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
               <>
                 <Separator className="w-6" />
-                <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-destructive/10 text-destructive">
+                <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold text-white" style={{ background: 'var(--gradient-brand)' }}>
                   <Timer className="h-2.5 w-2.5" />
                   {daysUntilFirstExam}d
                 </span>
@@ -340,13 +345,11 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                 {/* Chat History */}
                 <div className="mb-3">
                   <div className="flex items-center justify-between px-2 py-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <MessageSquare className="h-3 w-3 text-primary" />
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">Chat History</p>
-                    </div>
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 border-l-2 border-primary/40 pl-2">Chat History</span>
                     <button
                       onClick={handleNewChat}
-                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                      style={{ background: 'var(--gradient-brand)' }}
                     >
                       <Plus className="h-3 w-3" />
                       New Chat
@@ -392,10 +395,12 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                                       onClick={() => handleLoadConversation(convo.id)}
                                       className={cn(
                                         "w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all text-left group",
-                                        isActive ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"
+                                        isActive ? "bg-primary/[0.08] text-primary font-medium" : "text-foreground/75 hover:bg-muted hover:text-foreground"
                                       )}
                                     >
-                                      <MessageSquare className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                      <span className="flex items-center justify-center h-5 w-5 rounded-md bg-muted shrink-0">
+                                        <MessageSquare className="h-3 w-3 text-muted-foreground/60" />
+                                      </span>
                                       <span className="flex-1 truncate text-xs">{convo.title}</span>
                                       <span className="text-[10px] text-muted-foreground/60 shrink-0">{formatRelativeTime(convo.updated_at)}</span>
                                       <button
@@ -439,75 +444,73 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
                 {/* Additional Features */}
                 <div className="mb-3">
-                  <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Features</p>
+                  <div className="flex items-center px-2 py-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 border-l-2 border-primary/40 pl-2">Features</span>
+                  </div>
                   <div className="space-y-0.5">
                     <button
                       onClick={() => setShowRevisionTimetable(true)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-left text-foreground/80 hover:bg-muted hover:text-foreground"
                     >
-                      <Clock3 className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="min-w-0">
-                        <span className="block text-sm">Revision Timetable</span>
-                        <span className="block text-[10px] text-muted-foreground leading-tight">Optimally allocates time based on your predicted grades</span>
-                      </div>
+                      <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10 shrink-0">
+                        <Clock3 className="h-3.5 w-3.5 text-primary" />
+                      </span>
+                      <span className="text-sm font-medium">Revision Timetable</span>
                     </button>
                     <button
                       onClick={() => setShowExamCalendar(true)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-left text-foreground/80 hover:bg-muted hover:text-foreground"
                     >
-                      <CalendarDays className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="min-w-0">
-                        <span className="block text-sm">Exam Calendar</span>
-                        <span className="block text-[10px] text-muted-foreground leading-tight">View all your upcoming exam dates in one place</span>
-                      </div>
+                      <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10 shrink-0">
+                        <CalendarDays className="h-3.5 w-3.5 text-primary" />
+                      </span>
+                      <span className="text-sm font-medium">Exam Calendar</span>
                     </button>
                     <button
                       onClick={() => { setShowBrainViewer(true); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-left text-foreground/80 hover:bg-muted hover:text-foreground"
                     >
-                      <Brain className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="min-w-0">
-                        <span className="block text-sm">Your A* Brain</span>
-                        <span className="block text-[10px] text-muted-foreground leading-tight">Builds your personal profile from every conversation</span>
-                      </div>
+                      <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10 shrink-0">
+                        <Brain className="h-3.5 w-3.5 text-primary" />
+                      </span>
+                      <span className="text-sm font-medium">Your A* Brain</span>
                     </button>
                     {showMyAI && (
                       <button
                         onClick={() => setShowMyAIPopup(true)}
-                        className="lg:hidden w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                        className="lg:hidden w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-left text-foreground/80 hover:bg-muted hover:text-foreground"
                       >
-                        <Sparkles className="h-4 w-4 text-muted-foreground shrink-0" />
-                        <div className="min-w-0">
-                          <span className="block text-sm">My AI</span>
-                          <span className="block text-[10px] text-muted-foreground leading-tight">Personalize your AI tutor's responses</span>
-                        </div>
+                        <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10 shrink-0">
+                          <Sparkles className="h-3.5 w-3.5 text-primary" />
+                        </span>
+                        <span className="text-sm font-medium">My AI</span>
                       </button>
                     )}
                     {showGradeBoundaries && (
                       <button
                         onClick={() => setShowGradeBoundariesPopup(true)}
                         className={cn(
-                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted",
+                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-left text-foreground/80 hover:bg-muted hover:text-foreground",
                           !isGCSE && "lg:hidden"
                         )}
                       >
-                        <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
-                        <div className="min-w-0">
-                          <span className="block text-sm">Grade Boundaries</span>
-                          <span className="block text-[10px] text-muted-foreground leading-tight">See historical and forecasted grade thresholds</span>
-                        </div>
+                        <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10 shrink-0">
+                          <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                        </span>
+                        <span className="text-sm font-medium">Grade Boundaries</span>
                       </button>
                     )}
                     {isGCSE && showExamCountdown && examDates.length > 0 && (
                       <button
                         onClick={() => setShowExamCountdownPopup(true)}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-left text-foreground/80 hover:bg-muted hover:text-foreground"
                       >
-                        <Timer className="h-4 w-4 text-muted-foreground shrink-0" />
-                        <div className="min-w-0">
-                          <span className="block text-sm">Days to Exam{daysUntilFirstExam !== null && daysUntilFirstExam > 0 ? ` · ${daysUntilFirstExam}d` : ''}</span>
-                          <span className="block text-[10px] text-muted-foreground leading-tight">Countdown to your upcoming exams</span>
-                        </div>
+                        <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10 shrink-0">
+                          <Timer className="h-3.5 w-3.5 text-primary" />
+                        </span>
+                        <span className="text-sm font-medium">
+                          {daysUntilFirstExam !== null && daysUntilFirstExam > 0 ? `${daysUntilFirstExam} Days to Exam` : 'Exam Countdown'}
+                        </span>
                       </button>
                     )}
                   </div>
@@ -517,7 +520,9 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
                 {/* Subject Tree */}
                 <div className="mb-1">
-                  <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Subjects</p>
+                  <div className="flex items-center px-2 py-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 border-l-2 border-primary/40 pl-2">Subjects</span>
+                  </div>
                   <button
                     onClick={() => setSubjectsOpen(!subjectsOpen)}
                     className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted transition-all"
@@ -573,13 +578,12 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
                   {/* Meet Your Trainer */}
                   <button
                     onClick={() => setShowTrainerInfo(true)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left text-foreground hover:bg-muted mt-1"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-left text-foreground/80 hover:bg-muted hover:text-foreground mt-1"
                   >
-                    <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="min-w-0">
-                      <span className="block text-sm">Meet Your Trainer</span>
-                      <span className="block text-[10px] text-muted-foreground leading-tight">See who trained your AI tutor</span>
-                    </div>
+                    <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10 shrink-0">
+                      <User className="h-3.5 w-3.5 text-primary" />
+                    </span>
+                    <span className="text-sm font-medium">Meet Your Trainer</span>
                   </button>
                 </div>
 

@@ -184,9 +184,12 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('scroll', onScroll);
   }, [showFloatingPill]);
 
-  const daysUntilFirstExam = examDates.length > 0 
-    ? Math.round((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24))
-    : 0;
+  const daysUntilFirstExam = (() => {
+    const todayMs = new Date().setHours(0, 0, 0, 0);
+    const upcomingTimes = examDates.map(e => e.date.getTime()).filter(t => t >= todayMs);
+    if (upcomingTimes.length === 0) return 0;
+    return Math.round((Math.min(...upcomingTimes) - todayMs) / (1000 * 60 * 60 * 24));
+  })();
 
   const tier = isDeluxe ? 'deluxe' : 'free';
 
@@ -479,8 +482,8 @@ export const Header: React.FC<HeaderProps> = ({
                 className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200"
               >
                 <Timer className="h-4 w-4" />
-                <span className="hidden sm:inline">{daysUntilFirstExam} days</span>
-                <span className="sm:hidden">{daysUntilFirstExam}d</span>
+                <span className="hidden sm:inline">{daysUntilFirstExam === 0 ? 'Done' : `${daysUntilFirstExam} days`}</span>
+                <span className="sm:hidden">{daysUntilFirstExam === 0 ? 'Done' : `${daysUntilFirstExam}d`}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[90vw] max-w-sm p-4 bg-background dark:bg-card border border-border shadow-xl" align="start" sideOffset={8}>

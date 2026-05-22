@@ -153,9 +153,12 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const isPremiumRoute = location.pathname.includes('premium');
   const tier = isDeluxe ? 'deluxe' : 'free';
 
-  const daysUntilFirstExam = examDates.length > 0
-    ? Math.round((Math.min(...examDates.map(e => e.date.getTime())) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24))
-    : null;
+  const daysUntilFirstExam = (() => {
+    const todayMs = new Date().setHours(0, 0, 0, 0);
+    const upcomingTimes = examDates.map(e => e.date.getTime()).filter(t => t >= todayMs);
+    if (upcomingTimes.length === 0) return null;
+    return Math.round((Math.min(...upcomingTimes) - todayMs) / (1000 * 60 * 60 * 24));
+  })();
 
   useEffect(() => {
     const checkDeluxe = async () => {
@@ -264,7 +267,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
               key={tool.id}
               variant="outline"
               size="sm"
-              className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0"
+              className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               onClick={() => onMathsModeChange?.(mathsMode === 'pure' ? 'applied' : 'pure')}
             >
               {tool.icon}
@@ -286,7 +289,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
                 scheduleHoverClose('essay-marker');
               }}
               onClick={() => { markMounted('essay-marker'); setOpenPopover('essay-marker'); }}
-              className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0"
+              className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               {tool.icon}
               <span className="hidden sm:inline">{tool.label}</span>
@@ -312,26 +315,30 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
                   if (!isHoverDevice()) return;
                   scheduleHoverClose(tool.id);
                 }}
-                className={`flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative ${tool.wideOnly ? 'hidden lg:flex' : ''}`}
+                className={`flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3 transition-all duration-200 flex-shrink-0 relative focus-visible:ring-0 focus-visible:ring-offset-0 ${tool.wideOnly ? 'hidden lg:flex' : ''}`}
               >
-                {tool.id !== 'exam-countdown' && tool.icon}
+                {tool.icon}
                 {tool.id !== 'exam-countdown' && <span className="hidden sm:inline">{tool.label}</span>}
                 {tool.id === 'my-mistakes' && mistakesDueCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 flex items-center justify-center bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full">
                     {mistakesDueCount}
                   </span>
                 )}
-                {tool.id === 'exam-countdown' && daysUntilFirstExam !== null && daysUntilFirstExam > 0 && (
+                {tool.id === 'exam-countdown' && (
                   <>
-                    <span className="hidden sm:inline text-foreground font-medium">{daysUntilFirstExam} Days</span>
-                    <span className="sm:hidden text-foreground font-medium">{daysUntilFirstExam}d</span>
+                    <span className="hidden sm:inline font-medium">
+                      {daysUntilFirstExam === null ? 'Done' : daysUntilFirstExam === 0 ? 'Today' : `${daysUntilFirstExam} Days`}
+                    </span>
+                    <span className="sm:hidden font-medium">
+                      {daysUntilFirstExam === null ? 'Done' : daysUntilFirstExam === 0 ? 'Today' : `${daysUntilFirstExam}d`}
+                    </span>
                   </>
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent
               forceMount={mountedTools.has(tool.id) ? true : undefined}
-              className={`p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=closed]:hidden ${
+              className={`p-4 bg-background dark:bg-card border border-border shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-100 data-[state=closed]:hidden ${
                 tool.id === 'essay-marker'
                   ? 'w-[95vw] max-w-5xl'
                   : 'w-[90vw] max-w-md'

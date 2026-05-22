@@ -15,35 +15,28 @@ interface ExamCountdownProps {
 export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName = "Exams" }) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
-  // Sort exams by date
-  const sortedExams = [...exams].sort((a, b) => a.date.getTime() - b.date.getTime());
-  
-  // Calculate days until first exam
-  const firstExam = sortedExams[0];
-  const daysUntilFirst = Math.round((firstExam.date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  
-  // Calculate total timeline span (from today to last exam)
-  const lastExam = sortedExams[sortedExams.length - 1];
-  const totalSpan = lastExam.date.getTime() - today.getTime();
-  
-  // Calculate position for each point (0 = today, 100 = last exam)
-  const getPosition = (date: Date) => {
-    const diff = date.getTime() - today.getTime();
-    return (diff / totalSpan) * 100;
-  };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB', { 
-      weekday: 'short',
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric' 
-    });
-  };
+  const sortedExams = [...exams].sort((a, b) => a.date.getTime() - b.date.getTime());
 
   const getDaysUntil = (date: Date) => {
     return Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  };
+
+  const upcomingExams = sortedExams.filter(e => getDaysUntil(e.date) >= 0);
+  const pastExams = sortedExams.filter(e => getDaysUntil(e.date) < 0);
+  const allDone = upcomingExams.length === 0;
+
+  const nextExam = upcomingExams[0] ?? null;
+  const daysUntilNext = nextExam ? getDaysUntil(nextExam.date) : null;
+  const lastUpcoming = upcomingExams[upcomingExams.length - 1] ?? null;
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
   };
 
   return (
@@ -56,7 +49,11 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
         <div>
           <h3 className="font-semibold text-foreground">{subjectName} Timeline</h3>
           <p className="text-xs text-muted-foreground">
-            {daysUntilFirst} days until first exam
+            {allDone
+              ? "All exams complete — well done!"
+              : daysUntilNext === 0
+                ? "Next exam is today!"
+                : `${daysUntilNext} days until next exam`}
           </p>
         </div>
       </div>
@@ -65,9 +62,33 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
       <div className="relative py-4 pl-4">
         {/* Vertical line */}
         <div className="absolute left-[11px] top-0 bottom-0 w-0.5 panel-timeline-line" />
-        
+
+        {/* Past exams */}
+        {pastExams.map((exam, index) => {
+          const prevDate = index === 0 ? sortedExams[0].date : pastExams[index - 1].date;
+          const daysBetween = Math.ceil(Math.abs(exam.date.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+          const marginTop = index === 0 ? 0 : Math.max(40, daysBetween * 2);
+
+          return (
+            <div
+              key={exam.name}
+              className="relative flex items-center opacity-40"
+              style={{ marginTop: `${marginTop}px` }}
+            >
+              <div className="absolute left-0 w-6 h-6 rounded-full bg-background panel-dot-outline shadow-md z-10 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full panel-dot-inner" />
+              </div>
+              <div className="ml-10">
+                <p className="text-sm font-semibold text-foreground line-through">{exam.name}</p>
+                <p className="text-xs text-muted-foreground">{formatDate(exam.date)}</p>
+                <p className="text-xs text-muted-foreground font-medium">Completed</p>
+              </div>
+            </div>
+          );
+        })}
+
         {/* Today marker */}
-        <div className="relative flex items-center mb-6">
+        <div className="relative flex items-center" style={{ marginTop: pastExams.length > 0 ? '24px' : '0' }}>
           <div className="absolute left-0 w-6 h-6 rounded-full panel-dot-filled border-4 border-background shadow-lg z-10 flex items-center justify-center">
             <div className="w-2 h-2 rounded-full bg-background" />
           </div>
@@ -77,20 +98,15 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
           </div>
         </div>
 
-        {/* Exam markers */}
-        {sortedExams.map((exam, index) => {
-          const daysUntil = getDaysUntil(exam.date);
-          
-          // Calculate proportional spacing
-          const prevDate = index === 0 ? today : sortedExams[index - 1].date;
+        {/* Upcoming exam markers */}
+        {upcomingExams.map((exam, index) => {
+          const prevDate = index === 0 ? today : upcomingExams[index - 1].date;
           const daysBetween = Math.ceil((exam.date.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
-          const minHeight = 48;
-          const heightPerDay = 2;
-          const marginTop = Math.max(minHeight, daysBetween * heightPerDay);
+          const marginTop = Math.max(48, daysBetween * 2);
 
           return (
-            <div 
-              key={exam.name} 
+            <div
+              key={exam.name}
               className="relative flex items-center"
               style={{ marginTop: `${marginTop}px` }}
             >
@@ -100,7 +116,9 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
               <div className="ml-10">
                 <p className="text-sm font-semibold text-foreground">{exam.name}</p>
                 <p className="text-xs text-muted-foreground">{formatDate(exam.date)}</p>
-                <p className="text-xs panel-accent-text font-medium">{daysUntil} days</p>
+                <p className="text-xs panel-accent-text font-medium">
+                  {getDaysUntil(exam.date) === 0 ? "Today!" : `${getDaysUntil(exam.date)} days`}
+                </p>
               </div>
             </div>
           );
@@ -110,7 +128,11 @@ export const ExamCountdown: React.FC<ExamCountdownProps> = ({ exams, subjectName
       {/* Summary */}
       <div className="pt-2 border-t border-border">
         <p className="text-xs text-muted-foreground text-center">
-          {sortedExams.length} exams • {getDaysUntil(lastExam.date)} days total revision time
+          {allDone
+            ? `All ${sortedExams.length} exams complete`
+            : lastUpcoming
+              ? `${upcomingExams.length} exam${upcomingExams.length !== 1 ? 's' : ''} remaining • ${getDaysUntil(lastUpcoming.date)} days to go`
+              : `${sortedExams.length} exams`}
         </p>
       </div>
     </div>
