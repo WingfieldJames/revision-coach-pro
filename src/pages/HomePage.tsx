@@ -201,8 +201,8 @@ const DemoTestimonialsStage: React.FC = () => {
             className="text-center mb-10"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-45% 0px -45% 0px" }}
-            transition={{ duration: 1, delay: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
+            viewport={{ once: true, margin: "0px 0px -15% 0px" }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 0.61, 0.36, 1] }}
           >
             <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
               10,000 students. One unfair advantage
