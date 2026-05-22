@@ -233,7 +233,7 @@ export function SubjectPlanSelector() {
                 }}
                 className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                   subject === s
-                    ? 'bg-gradient-brand text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'text-foreground'
                 }`}
               >
@@ -260,7 +260,7 @@ export function SubjectPlanSelector() {
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="rounded-full px-5 py-2.5 text-sm font-semibold bg-gradient-brand text-white flex items-center gap-2 glow-brand">
+              <button className="rounded-full px-5 py-2.5 text-sm font-semibold bg-primary text-primary-foreground flex items-center gap-2">
                 {subjectLabels[subject]}
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>
