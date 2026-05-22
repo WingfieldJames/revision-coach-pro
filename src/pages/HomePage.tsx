@@ -598,8 +598,7 @@ export const HomePage = () => {
               <div className="flex flex-col sm:flex-row items-center md:items-start gap-3">
                 <button
                   onClick={() => { navigate('/select'); window.scrollTo(0, 0); }}
-                  className="px-8 py-3.5 rounded-full font-semibold text-base text-white transition-all hover:-translate-y-0.5 glow-brand hover:glow-brand-intense shadow-md"
-                  style={{ background: 'var(--gradient-brand)' }}
+                  className="px-8 py-3.5 rounded-full font-semibold text-base text-primary-foreground bg-primary transition-all hover:-translate-y-0.5 shadow-md hover:bg-primary/90"
                 >
                   Start Now →
                 </button>
@@ -624,7 +623,7 @@ export const HomePage = () => {
                         )}
                         <div className="flex flex-col items-center gap-2">
                           <div className="bg-background border border-border/60 rounded-2xl w-[4.25rem] h-[4.25rem] sm:w-20 sm:h-20 flex items-center justify-center shadow-card">
-                            <span className="text-2xl sm:text-3xl font-bold tabular-nums text-gradient-brand">
+                            <span className="text-2xl sm:text-3xl font-bold tabular-nums text-primary">
                               {String(value).padStart(2, '0')}
                             </span>
                           </div>
