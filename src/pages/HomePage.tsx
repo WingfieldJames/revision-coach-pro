@@ -253,6 +253,41 @@ export const HomePage = () => {
   };
 
   const subjects = ["Economics", "Computing", "Chemistry", "Psychology", "Physics", "Maths"];
+
+  const UPCOMING_EXAMS_2026 = React.useMemo(() => [
+    { name: "AQA Psychology Paper 2", date: new Date(2026, 4, 27) },
+    { name: "OCR Physics Paper 2", date: new Date(2026, 5, 1) },
+    { name: "Edexcel Maths Paper 1", date: new Date(2026, 5, 2) },
+    { name: "Economics Paper 3", date: new Date(2026, 5, 4) },
+    { name: "AQA Psychology Paper 3", date: new Date(2026, 5, 8) },
+    { name: "OCR Physics Paper 3", date: new Date(2026, 5, 8) },
+    { name: "Edexcel Maths Paper 2", date: new Date(2026, 5, 9) },
+    { name: "AQA Chemistry Paper 3", date: new Date(2026, 5, 10) },
+    { name: "OCR Computer Science Paper 1", date: new Date(2026, 5, 10) },
+    { name: "CIE Economics Paper 4", date: new Date(2026, 5, 12) },
+    { name: "Edexcel Maths Paper 3", date: new Date(2026, 5, 15) },
+    { name: "OCR Computer Science Paper 2", date: new Date(2026, 5, 17) },
+  ].sort((a, b) => a.date.getTime() - b.date.getTime()), []);
+
+  const nextExam = UPCOMING_EXAMS_2026.find(e => e.date.getTime() > Date.now()) ?? null;
+
+  const [countdown, setCountdown] = React.useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  React.useEffect(() => {
+    if (!nextExam) return;
+    const tick = () => {
+      const diff = nextExam.date.getTime() - Date.now();
+      if (diff <= 0) { setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 }); return; }
+      setCountdown({
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff % 86400000) / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [nextExam]);
   const [currentSubjectIndex, setCurrentSubjectIndex] = React.useState(0);
 
   React.useEffect(() => {
@@ -537,6 +572,84 @@ export const HomePage = () => {
               </Accordion>
             </ScrollReveal>
           </div>
+      </section>
+
+      {/* Exam Countdown CTA */}
+      <section className="py-20 md:py-28 px-4 md:px-8 relative overflow-hidden border-t border-border/30 bg-primary/[0.02]">
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-25">
+          <ChatbotFullscreenPaths />
+        </div>
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
+
+            {/* Copy — left on desktop */}
+            <div className="flex-1 text-center md:text-left order-2 md:order-1">
+              <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-primary bg-primary/8 border border-primary/20 px-4 py-1.5 rounded-full mb-6">
+                Exam Season 2026
+              </span>
+              <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] font-bold leading-[1.15] tracking-tight mb-5">
+                Your{' '}
+                <img src={logoMark} alt="A*" className="inline-block h-[0.88em] w-auto align-[-0.1em] object-contain" />
+                {' '}is closer<br className="hidden sm:block" /> than you think.
+              </h2>
+              <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-8 max-w-md mx-auto md:mx-0">
+                The highest-scoring students in the country — now at Oxford, LSE and Imperial — trained your AI on their exact exam techniques. Everything they know is yours, free.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center md:items-start gap-3">
+                <button
+                  onClick={() => { navigate('/select'); window.scrollTo(0, 0); }}
+                  className="px-8 py-3.5 rounded-full font-semibold text-base text-white transition-all hover:-translate-y-0.5 glow-brand hover:glow-brand-intense shadow-md"
+                  style={{ background: 'var(--gradient-brand)' }}
+                >
+                  Start Now →
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">Free to start · No card needed</p>
+            </div>
+
+            {/* Countdown — right on desktop */}
+            <div className="flex flex-col items-center gap-5 order-1 md:order-2 flex-shrink-0">
+              {nextExam ? (
+                <>
+                  <div className="flex items-end gap-2 sm:gap-3">
+                    {[
+                      { value: countdown.days, label: 'Days' },
+                      { value: countdown.hours, label: 'Hours' },
+                      { value: countdown.minutes, label: 'Mins' },
+                      { value: countdown.seconds, label: 'Secs' },
+                    ].map(({ value, label }, i) => (
+                      <React.Fragment key={label}>
+                        {i > 0 && (
+                          <span className="text-xl font-bold text-muted-foreground/30 mb-7 select-none">:</span>
+                        )}
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="bg-background border border-border/60 rounded-2xl w-[4.25rem] h-[4.25rem] sm:w-20 sm:h-20 flex items-center justify-center shadow-card">
+                            <span className="text-2xl sm:text-3xl font-bold tabular-nums text-gradient-brand">
+                              {String(value).padStart(2, '0')}
+                            </span>
+                          </div>
+                          <span className="text-[9px] uppercase tracking-widest text-muted-foreground/70">{label}</span>
+                        </div>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground/60 mb-1">Next exam</p>
+                    <p className="text-sm font-semibold text-foreground">{nextExam.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {nextExam.date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center px-8 py-10 bg-background border border-border/50 rounded-2xl shadow-card">
+                  <p className="text-lg font-semibold text-foreground mb-1">Exam season complete</p>
+                  <p className="text-sm text-muted-foreground">Results day in August — well done.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Footer */}
