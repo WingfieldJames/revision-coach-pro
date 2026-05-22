@@ -421,7 +421,7 @@ export const ComparePage = () => {
                   }}
                   className={`px-5 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
                   subject === s ?
-                  'bg-gradient-brand text-white' :
+                  'bg-primary text-primary-foreground' :
                   'text-foreground'}`
                   }>
                   

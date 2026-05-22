@@ -39,6 +39,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ProfileContent } from '@/components/ProfileContent';
 
 const MathsModeSwitcher: React.FC<{ currentMode: 'pure' | 'applied' }> = ({ currentMode }) => {
   const navigate = useNavigate();
@@ -169,6 +170,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [myMistakesOpen, setMyMistakesOpen] = useState(false);
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [isDeluxe, setIsDeluxe] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -557,10 +559,17 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Right side: Upgrade Now / Deluxe badge on chatbot pages OR Start Studying on home */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {user && location.pathname !== '/' && (
-          <Button variant="outline" size="sm" onClick={() => navigate('/profile')} className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-            <User className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Profile</span>
-          </Button>
+          <>
+            <Button variant="outline" size="sm" onClick={() => setProfileDialogOpen(true)} className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <User className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Profile</span>
+            </Button>
+            <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
+              <DialogContent className="sm:max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
+                <ProfileContent />
+              </DialogContent>
+            </Dialog>
+          </>
         )}
         {customRightContent ? customRightContent : showStartStudyingButton ? (
           <div className="hidden sm:flex items-center">
