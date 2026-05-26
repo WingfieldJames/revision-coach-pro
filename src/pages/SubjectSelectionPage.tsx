@@ -139,8 +139,8 @@ export const SubjectSelectionPage = () => {
       
       <Header />
 
-      <div className="flex-1 relative z-10 flex items-center justify-center px-4">
-        <div className="max-w-3xl w-full space-y-10 -mt-16">
+      <div className="flex-1 relative z-10 flex items-center justify-center px-4 pt-20">
+        <div className="max-w-3xl w-full space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
             <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-1.5 text-sm font-medium">
@@ -173,7 +173,7 @@ export const SubjectSelectionPage = () => {
           </div>
 
           {/* Personal Statement — FirmChoice sister product card */}
-          <div className="flex flex-col items-center gap-8 py-12">
+          <div className="flex flex-col items-center gap-5 pt-2">
 
             {/* Divider with editorial label */}
             <div className="flex items-center gap-6 w-full max-w-[420px]">
