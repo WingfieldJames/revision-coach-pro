@@ -172,6 +172,18 @@ export const SubjectSelectionPage = () => {
             </button>
           </div>
 
+          {/* Personal Statement (separate from qualification levels) */}
+          <div className="text-center">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Or</p>
+            <button
+              onClick={() => navigate('/personal-statement')}
+              className="inline-flex items-center gap-2 rounded-xl border-2 border-border px-6 py-3 text-sm font-semibold transition-all hover:border-primary/50 hover:bg-primary/5"
+            >
+              Personal Statement
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+
           {/* A-Level Subject Dropdown */}
           <AnimatePresence>
             {selectedLevel === 'alevel' && (

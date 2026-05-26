@@ -274,12 +274,14 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const handleSubjectLevelClick = (level: 'gcse' | 'alevel') => {
+  const handleSubjectLevelClick = (level: 'gcse' | 'alevel' | 'personal-statement') => {
     setSubjectsDropdownOpen(false);
     if (level === 'gcse') {
       navigate('/compare?level=gcse');
-    } else {
+    } else if (level === 'alevel') {
       navigate('/compare?level=alevel');
+    } else {
+      navigate('/personal-statement');
     }
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
   };
@@ -523,7 +525,7 @@ export const Header: React.FC<HeaderProps> = ({
 
               {/* Dropdown */}
               <div
-                className={`absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] w-36 bg-white dark:bg-popover rounded-lg shadow-md border border-border overflow-hidden transition-all duration-150 origin-top z-50 ${subjectsDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}
+                className={`absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] w-44 bg-white dark:bg-popover rounded-lg shadow-md border border-border overflow-hidden transition-all duration-150 origin-top z-50 ${subjectsDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}
               >
                 <div
                   className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors duration-100"
@@ -536,6 +538,12 @@ export const Header: React.FC<HeaderProps> = ({
                   onClick={() => handleSubjectLevelClick('alevel')}
                 >
                   A-Level
+                </div>
+                <div
+                  className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors duration-100"
+                  onClick={() => handleSubjectLevelClick('personal-statement')}
+                >
+                  Personal Statement
                 </div>
               </div>
             </div>
@@ -697,7 +705,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
                 {subjectsDropdownOpen && <div className="absolute left-0 right-0 h-2 top-full" />}
                 <div
-                  className={`absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] w-36 bg-white dark:bg-popover rounded-lg shadow-md border border-border overflow-hidden transition-all duration-150 origin-top z-50 ${subjectsDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}
+                  className={`absolute left-1/2 -translate-x-1/2 top-[calc(100%+8px)] w-44 bg-white dark:bg-popover rounded-lg shadow-md border border-border overflow-hidden transition-all duration-150 origin-top z-50 ${subjectsDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}
                 >
                   <div
                     className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20"
@@ -710,6 +718,12 @@ export const Header: React.FC<HeaderProps> = ({
                     onClick={() => handleSubjectLevelClick('alevel')}
                   >
                     A-Level
+                  </div>
+                  <div
+                    className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    onClick={() => handleSubjectLevelClick('personal-statement')}
+                  >
+                    Personal Statement
                   </div>
                 </div>
               </div>

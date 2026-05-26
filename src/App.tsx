@@ -42,6 +42,7 @@ import { DynamicPremiumPage } from "./pages/DynamicPremiumPage";
 import { BuildAboutPage } from "./pages/BuildAboutPage";
 import { GCSEComparePage } from "./pages/GCSEComparePage";
 import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
+import { PersonalStatementPage } from "./pages/PersonalStatementPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ProfilePage } from "./pages/ProfilePage";
@@ -108,6 +109,7 @@ const App = () => (
             <Route path="/s/:slug/free" element={<DynamicFreePage />} />
             <Route path="/s/:slug/premium" element={<DynamicPremiumPage />} />
             <Route path="/select" element={<SubjectSelectionPage />} />
+            <Route path="/personal-statement" element={<PersonalStatementPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/schools/info-pack" element={<SchoolInfoPackPage />} />
             <Route path="/mock-exam" element={<Navigate to="/select" replace />} />
