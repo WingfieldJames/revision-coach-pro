@@ -276,12 +276,14 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleSubjectLevelClick = (level: 'gcse' | 'alevel' | 'personal-statement') => {
     setSubjectsDropdownOpen(false);
+    if (level === 'personal-statement') {
+      window.open('https://firmchoice.vercel.app', '_blank', 'noopener,noreferrer');
+      return;
+    }
     if (level === 'gcse') {
       navigate('/compare?level=gcse');
-    } else if (level === 'alevel') {
-      navigate('/compare?level=alevel');
     } else {
-      navigate('/personal-statement');
+      navigate('/compare?level=alevel');
     }
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
   };

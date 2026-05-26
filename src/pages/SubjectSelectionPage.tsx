@@ -176,7 +176,7 @@ export const SubjectSelectionPage = () => {
           <div className="text-center">
             <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Or</p>
             <button
-              onClick={() => navigate('/personal-statement')}
+              onClick={() => window.open('https://firmchoice.vercel.app', '_blank', 'noopener,noreferrer')}
               className="inline-flex items-center gap-2 rounded-xl border-2 border-border px-6 py-3 text-sm font-semibold transition-all hover:border-primary/50 hover:bg-primary/5"
             >
               Personal Statement
