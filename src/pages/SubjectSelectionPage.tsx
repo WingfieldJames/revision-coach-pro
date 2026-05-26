@@ -172,16 +172,60 @@ export const SubjectSelectionPage = () => {
             </button>
           </div>
 
-          {/* Personal Statement (separate from qualification levels) */}
-          <div className="text-center">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Or</p>
-            <button
-              onClick={() => window.open('https://firmchoice.vercel.app', '_blank', 'noopener,noreferrer')}
-              className="inline-flex items-center gap-2 rounded-xl border-2 border-border px-6 py-3 text-sm font-semibold transition-all hover:border-primary/50 hover:bg-primary/5"
+          {/* Personal Statement — FirmChoice sister product card */}
+          <div className="flex flex-col items-center gap-8 py-12">
+
+            {/* Divider with editorial label */}
+            <div className="flex items-center gap-6 w-full max-w-[420px]">
+              <div className="flex-1 h-px bg-black/10" />
+              <span className="font-serif italic text-[15px] text-black/50" style={{ letterSpacing: "-0.01em" }}>or</span>
+              <div className="flex-1 h-px bg-black/10" />
+            </div>
+
+            {/* FirmChoice card */}
+            <a
+              href="https://firmchoice.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block w-full max-w-[520px] bg-white border border-black/10 rounded-2xl px-7 py-6 transition-all duration-200 hover:border-black/30 hover:-translate-y-px"
             >
-              Personal Statement
-              <ChevronRight className="h-4 w-4" />
-            </button>
+              <div className="flex items-center gap-5">
+
+                {/* Logo: 40x40 circle, red tick */}
+                <div className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-[#C8102E] shrink-0">
+                  <svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="#C8102E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 8.5 L6.5 12 L13 4.5" />
+                  </svg>
+                </div>
+
+                {/* Text */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-[10px]">
+                    <span className="font-serif text-[22px] font-medium text-[#0A0A0A] leading-none" style={{ letterSpacing: "-0.02em" }}>
+                      firmchoice
+                    </span>
+                    <span className="font-sans text-[11px] uppercase text-black/40" style={{ letterSpacing: "0.12em" }}>
+                      UCAS
+                    </span>
+                  </div>
+                  <p className="mt-2 font-serif italic text-[16px] text-black/60 leading-snug">
+                    For when it's time to apply.
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <span className="font-sans text-[17px] text-[#0A0A0A] shrink-0 transition-transform duration-200 group-hover:translate-x-1">
+                  →
+                </span>
+
+              </div>
+            </a>
+
+            {/* Caption */}
+            <p className="font-sans text-[13px] text-black/45 max-w-[420px] text-center leading-relaxed">
+              Sister product. UK university applications, reviewed by offer-holders.
+            </p>
+
           </div>
 
           {/* A-Level Subject Dropdown */}
