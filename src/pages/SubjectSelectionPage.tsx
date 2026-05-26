@@ -139,7 +139,7 @@ export const SubjectSelectionPage = () => {
       
       <Header />
 
-      <div className="flex-1 relative z-10 flex items-center justify-center px-4 pt-8">
+      <div className="flex-1 relative z-10 flex items-center justify-center px-4 -mt-8">
         <div className="max-w-3xl w-full space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
