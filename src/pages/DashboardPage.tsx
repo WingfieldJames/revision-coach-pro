@@ -111,22 +111,13 @@ export const DashboardPage = () => {
           const details: Record<string, any> = {};
           subs.forEach((sub: any) => {
             const slug = sub.products?.slug;
-            if (slug) {
-              // Map slugs to consistent keys
-              let key = slug;
-              if (slug === 'edexcel-economics') key = 'edexcel';
-              else if (slug === 'aqa-economics') key = 'aqa';
-              else if (slug === 'cie-economics') key = 'cie';
-              else if (slug === 'ocr-computer-science') key = 'ocr-cs';
-              else if (slug === 'ocr-physics') key = 'ocr-physics';
-              else if (slug === 'aqa-chemistry') key = 'aqa-chemistry';
-              else if (slug === 'aqa-psychology') key = 'aqa-psychology';
-              else if (slug === 'edexcel-mathematics') key = 'edexcel-maths';
-              details[key] = sub;
-            }
+            if (!slug) return;
+            // Key by slug so every product (including dynamic ones) shows up
+            details[slug] = sub;
           });
           setSubscriptionDetails(details);
         }
+
         
         setCheckingAccess(false);
       }
