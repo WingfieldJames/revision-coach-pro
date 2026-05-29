@@ -1,69 +1,85 @@
-## Problem
+## Diagnosis
 
-Evie's complaint: AQA Economics Deluxe keeps giving wrong info about the **structure of the paper**, even after 5+ corrections in chat. In-chat corrections don't persist — next session, the model drifts back to whatever it guessed from general training.
+The cancel **edge function** is fine. The cancel **button is invisible** for a chunk of paying monthly subscribers.
 
-## Root cause
+Both `src/components/ProfileContent.tsx` and `src/pages/DashboardPage.tsx` build the list of subscriptions to render from a **hardcoded `boardNames` map of 8 subject keys** (edexcel, aqa, cie, ocr-cs, ocr-physics, aqa-chemistry, aqa-psychology, edexcel-maths). They call `checkProductAccess` only for those 8 slugs and only render rows for them.
 
-I read the AQA Economics trainer system prompt (23k chars, `trainer_projects.system_prompt` for product `17ade690-...`). It covers AOs, level descriptors, marking, diagrams, evaluation lenses — but contains **no authoritative paper structure block**. There is no statement of:
+Any user whose monthly subscription is on a different product — i.e. anything added via the Build portal or any other dynamic subject — sees **no subscription row at all**, and therefore no Manage/Cancel button. They have no in-app way to cancel and have to email us.
 
-- Paper 1 / 2 / 3 titles, durations, total marks
-- Section A vs Section B layout per paper
-- Question counts, tariffs, and choice rules (e.g. "one of two contexts", "one of three essays")
-- Paper 3 Section A being 30 × 1-mark MCQs
+Diego (the screenshot) is on `ocr-economics`. Confirmed via DB:
 
-Section 7 references a "10-mark Paper 3 Section B" question and Section 6 references "9-mark Papers 1/2" — these *imply* a structure but never state it. The model is left to improvise, which is exactly what the student is seeing.
+```
+tornero.diegoj@gmail.com → ocr-economics, monthly, active, cancelled_at NULL
+```
 
-I also spotted a stray line in section "DIAGRAMS" (line 348): *"Core part of **Edexcel Economics**…"* — this is the AQA prompt. Likely copy-paste from the Edexcel build. Worth fixing while we're in there since it can leak into responses.
+`ocr-economics` is not in the hardcoded map, so his profile shows nothing to cancel.
 
-`document_chunks` for this product contains only past papers + mark schemes, no specification chunk, so RAG can't rescue this either.
+Active monthly subscribers on subjects missing from the hardcoded list (so all currently locked out of self-serve cancel):
+
+```
+ocr-economics              17
+aqa-physics                 8
+edexcel-politics            5
+aqa-computer-science        2
+edexcel-mathematics-applied 1
+aqa-geography               1
+aqa-mathematics             1
+aqa-biology                 1
+ocr-maths                   1
+edexcel-igcse-chemistry     1
+                           --
+total                      ~38
+```
+
+Also matches the project rule "Read the live subject list from the products table, not from any hardcoded array."
+
+`cancel-subscription` edge function logs are empty for these users because the request is never fired — pure UI gap, not a backend bug.
 
 ## Fix
 
-Single targeted edit to `trainer_projects.system_prompt` for product `17ade690-8c44-4961-83b5-0edf42a9faea` via the Build portal pattern (DB update — does not touch any sacred file).
+Drive the subscription list from the actual `user_subscriptions` rows we already fetch, not from a static slug map. The cancel function already accepts `subscriptionId` and works for any product.
 
-### 1. Insert a new authoritative section right after Section 5 (AOs), titled **"6. PAPER STRUCTURE (AQA 7136)"**, containing the official AQA A-Level Economics structure:
+### 1. `src/components/ProfileContent.tsx`
 
-```
-Paper 1 — Markets and market failure
-  2 hours · 80 marks · 33⅓% of A-Level
-  Section A: Data response — answer ONE context out of TWO offered.
-    Each context: 5-mark + 5-mark + 10-mark + 25-mark   (overall 40 marks*)
-  Section B: Essays — answer ONE essay out of THREE offered.
-    Each essay: 15-mark + 25-mark   (40 marks)
+- Replace the 8-slug `Promise.all(checkProductAccess(...))` block and the parallel `boardNames` map with a single fetch of all active subs:
+  ```ts
+  supabase
+    .from('user_subscriptions')
+    .select('*, products(name, slug)')
+    .eq('user_id', user.id)
+    .eq('active', true);
+  ```
+- Store the array in state (e.g. `activeSubs`).
+- Render one row per row in `activeSubs`, using `sub.products.name` for the label and `sub.products.slug` as the row key.
+- Keep the existing render logic: Monthly/Lifetime/Referral/School badge, `cancelled_at` "Cancelling" badge, renews/expires date, and the Manage button gated on `isMonthly && payment_type !== 'school' && !cancelled_at`.
+- `startCancelFlow` / `confirmCancellation` keep working — pass the sub directly (or its `id`) instead of looking it up by board key. Already calls `cancel-subscription` with `subscriptionId: sub.id`, which is product-agnostic.
+- Drop the `productAccess` state and `checkProductAccess` calls from this component — Profile no longer needs per-product access checks, only the actual sub list. (Other components that legitimately need `checkProductAccess` are untouched.)
+- School license block stays as-is.
 
-Paper 2 — National and international economy
-  Identical structure to Paper 1, applied to macro content.
+### 2. `src/pages/DashboardPage.tsx`
 
-Paper 3 — Economic principles and issues
-  2 hours · 80 marks · 33⅓% of A-Level
-  Section A: 30 multiple-choice questions, 1 mark each   (30 marks)
-  Section B: One case study with stimulus material   (50 marks)
-    9-mark + 16-mark + 25-mark
-```
+Same shape of fix in the Subscriptions card (around lines 600–690):
 
-I will verify the exact AQA 7136 tariff split before writing (a couple of values above are placeholders — the prompt currently says 9-mark Papers 1/2 and 10-mark Paper 3 Section B, which I'll reconcile against the official AQA spec sheet so the block is right first time). **Before saving, I'll quote you the final block for sign-off** — paper structure is the exact thing the student is being told wrong, so it must be 100% correct.
+- Replace the hardcoded `boardNames` iteration and the long `!productAccess['edexcel']?.hasAccess && …` "Free" condition with iteration over the fetched active subs.
+- Display name from `sub.products.name` (append " Deluxe" to preserve current copy).
+- "Free" pill shows when the user has zero active subs.
+- Cancel button calls existing `handleCancelSubscription`; update it to take the sub object (or `subscriptionId`) and forward `subscriptionId` in the edge-function body so it targets the right row when a user has multiple subs.
 
-### 2. Renumber the existing sections 6–13 → 7–14, and update the cross-reference in Section 3 ("apply exact structure from Section 6") to point to the new question-type structures section.
+### 3. Out of scope (flagging, not fixing in this pass)
 
-### 3. Fix the "Edexcel Economics" stray line in the diagrams sub-section → "AQA Economics".
+- `cancel-subscription` edge function — unchanged. It already handles `subscriptionId` correctly.
+- `productAccess.ts` — sacred file, not touched.
+- RLS, migrations, Stripe webhook — not touched.
+- For Diego specifically: once this ships he can self-serve. Separately, worth replying to his email and offering to cancel server-side; that's an ops action, not a code change.
 
-### 4. Add a hard rule at the top of the new Paper Structure section:
+## Risk
 
-> "If a student asks about paper structure, timing, mark totals, or question counts, use ONLY the values in this section. Do not infer from general knowledge."
-
-## What this does NOT change
-
-- No code edits. No migration. No RLS, billing, auth, or sacred-file touches.
-- No change to RAG, models, or any other subject.
-- Edexcel / OCR / GCSE prompts untouched.
-- No new features; this is a content correction to one trainer prompt.
+- Low. UI-only change in two files. No billing, auth, RLS, or migrations.
+- The fetch already exists in `ProfileContent` (`subscriptionDetails`), so we're consolidating, not adding a new query.
+- Visual regression risk for the existing 8 supported subjects: row text changes from the hardcoded `boardNames` value to `products.name`. I'll spot-check that `products.name` reads correctly (e.g. "Edexcel Economics" vs "Edexcel A-Level Economics") and, if there's a mismatch, keep a small slug→display override only where the DB name is wrong — not as the source of truth.
 
 ## Verification
 
-After the update, I'll:
-1. Re-read the saved `system_prompt` to confirm the block is in place.
-2. Curl the `rag-chat` edge function with a test query ("what is the structure of AQA Economics Paper 1?") as the logged-in preview user and check the response cites the new block accurately.
-
-## Open question for you
-
-Do you want me to (a) write the structure block from the official AQA 7136 spec myself and show it to you for sign-off before saving, or (b) you paste in the exact tariff split you teach and I drop that in verbatim? Option (b) is safer given the student has already been burned 5+ times.
+- Log in as a test user with an `ocr-economics` monthly sub → Profile shows the row and a working Manage button → cancel flow completes → row flips to "Cancelling".
+- Existing 8-subject users still see their row with correct name, badge, and Cancel button.
+- Users with zero subs still see "No active subscriptions" / "Free".
