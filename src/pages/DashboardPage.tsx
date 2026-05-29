@@ -111,22 +111,13 @@ export const DashboardPage = () => {
           const details: Record<string, any> = {};
           subs.forEach((sub: any) => {
             const slug = sub.products?.slug;
-            if (slug) {
-              // Map slugs to consistent keys
-              let key = slug;
-              if (slug === 'edexcel-economics') key = 'edexcel';
-              else if (slug === 'aqa-economics') key = 'aqa';
-              else if (slug === 'cie-economics') key = 'cie';
-              else if (slug === 'ocr-computer-science') key = 'ocr-cs';
-              else if (slug === 'ocr-physics') key = 'ocr-physics';
-              else if (slug === 'aqa-chemistry') key = 'aqa-chemistry';
-              else if (slug === 'aqa-psychology') key = 'aqa-psychology';
-              else if (slug === 'edexcel-mathematics') key = 'edexcel-maths';
-              details[key] = sub;
-            }
+            if (!slug) return;
+            // Key by slug so every product (including dynamic ones) shows up
+            details[slug] = sub;
           });
           setSubscriptionDetails(details);
         }
+
         
         setCheckingAccess(false);
       }
@@ -134,59 +125,46 @@ export const DashboardPage = () => {
     checkAccess();
   }, [user, subject]);
 
-  // Cancel subscription handler
-  const handleCancelSubscription = async (productKey: string) => {
-    const sub = subscriptionDetails[productKey];
+  // Cancel subscription handler — targets a specific sub by id
+  const handleCancelSubscription = async (sub: any) => {
     if (!sub || sub.payment_type !== 'monthly') {
       toast.error('Only monthly subscriptions can be cancelled');
       return;
     }
-    
+
     if (!confirm('Are you sure you want to cancel your subscription? You will keep access until the end of your billing period.')) {
       return;
     }
-    
-    setCancellingSubscription(productKey);
+
+    setCancellingSubscription(sub.id);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) {
         toast.error('Please log in again');
         return;
       }
-      
+
       const { data, error } = await supabase.functions.invoke('cancel-subscription', {
         headers: {
           Authorization: `Bearer ${sessionData.session.access_token}`,
         },
-        body: { cancelAtPeriodEnd: true },
+        body: { cancelAtPeriodEnd: true, subscriptionId: sub.id },
       });
-      
+
       if (error) throw error;
-      
+
       toast.success(data.message || 'Subscription cancelled successfully');
-      
-      // Refresh access
-      refreshProfile();
-      const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess, ocrPhysicsAccess, aqaChemistryAccess, aqaPsychologyAccess, edexcelMathsAccess] = await Promise.all([
-        checkProductAccess(user!.id, 'edexcel-economics'),
-        checkProductAccess(user!.id, 'aqa-economics'),
-        checkProductAccess(user!.id, 'cie-economics'),
-        checkProductAccess(user!.id, 'ocr-computer-science'),
-        checkProductAccess(user!.id, 'ocr-physics'),
-        checkProductAccess(user!.id, 'aqa-chemistry'),
-        checkProductAccess(user!.id, 'aqa-psychology'),
-        checkProductAccess(user!.id, 'edexcel-mathematics'),
-      ]);
-      setProductAccess({
-        'edexcel': edexcelAccess,
-        'aqa': aqaAccess,
-        'cie': cieAccess,
-        'ocr-cs': ocrCsAccess,
-        'ocr-physics': ocrPhysicsAccess,
-        'aqa-chemistry': aqaChemistryAccess,
-        'aqa-psychology': aqaPsychologyAccess,
-        'edexcel-maths': edexcelMathsAccess,
+
+      // Mark cancelled locally so the badge flips immediately
+      setSubscriptionDetails(prev => {
+        const next: Record<string, any> = {};
+        Object.entries(prev).forEach(([k, v]: [string, any]) => {
+          next[k] = v?.id === sub.id ? { ...v, cancelled_at: new Date().toISOString() } : v;
+        });
+        return next;
       });
+
+      refreshProfile();
     } catch (error: any) {
       console.error('Cancel error:', error);
       toast.error(error.message || 'Failed to cancel subscription');
@@ -194,6 +172,7 @@ export const DashboardPage = () => {
       setCancellingSubscription(null);
     }
   };
+
 
   // Save preference whenever it changes
   useEffect(() => {
@@ -636,58 +615,50 @@ export const DashboardPage = () => {
               <div>
                 <p className="text-sm font-medium mb-2">Subscription Status</p>
                 <div className="space-y-3">
-                  {(['edexcel', 'aqa', 'cie', 'ocr-cs', 'ocr-physics', 'aqa-chemistry', 'aqa-psychology', 'edexcel-maths'] as const).map((board) => {
-                    const access = productAccess[board];
-                    const sub = subscriptionDetails[board];
-                    if (!access?.hasAccess) return null;
-                    
-                    const isMonthly = sub?.payment_type === 'monthly';
-                    const boardName = {
-                      'edexcel': 'Edexcel Economics',
-                      'aqa': 'AQA Economics',
-                      'cie': 'CIE Economics',
-                      'ocr-cs': 'OCR Computer Science',
-                      'ocr-physics': 'OCR Physics',
-                      'aqa-chemistry': 'AQA Chemistry',
-                      'aqa-psychology': 'AQA Psychology',
-                      'edexcel-maths': 'Edexcel Mathematics',
-                    }[board];
-                    
-                    return (
-                      <div key={board} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div>
-                          <span className="font-medium">{boardName} Deluxe</span>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800">
-                              {isMonthly ? 'Monthly' : 'Lifetime'}
-                            </span>
-                            {isMonthly && sub?.subscription_end && (
-                              <span className="text-xs text-muted-foreground">
-                                Renews: {new Date(sub.subscription_end).toLocaleDateString()}
+                  {(() => {
+                    const subs = Object.values(subscriptionDetails).filter(Boolean) as any[];
+                    if (subs.length === 0) {
+                      return (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Free
+                        </span>
+                      );
+                    }
+                    return subs.map((sub: any) => {
+                      const isMonthly = sub?.payment_type === 'monthly';
+                      const name = sub?.products?.name || sub?.products?.slug || 'Subscription';
+                      const cancelling = cancellingSubscription === sub.id;
+                      return (
+                        <div key={sub.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                          <div>
+                            <span className="font-medium">{name} Deluxe</span>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${sub?.cancelled_at ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
+                                {sub?.cancelled_at ? 'Cancelling' : isMonthly ? 'Monthly' : 'Lifetime'}
                               </span>
-                            )}
+                              {sub?.subscription_end && (
+                                <span className="text-xs text-muted-foreground">
+                                  {sub?.cancelled_at ? 'Access until' : isMonthly ? 'Renews' : 'Expires'}: {new Date(sub.subscription_end).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
                           </div>
+                          {isMonthly && !sub?.cancelled_at && sub?.payment_type !== 'school' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleCancelSubscription(sub)}
+                              disabled={cancelling}
+                            >
+                              {cancelling ? 'Cancelling...' : 'Cancel'}
+                            </Button>
+                          )}
                         </div>
-                        {isMonthly && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => handleCancelSubscription(board)}
-                            disabled={cancellingSubscription === board}
-                          >
-                            {cancellingSubscription === board ? 'Cancelling...' : 'Cancel'}
-                          </Button>
-                        )}
-                      </div>
-                    );
-                  })}
-                  
-                  {!productAccess['edexcel']?.hasAccess && !productAccess['aqa']?.hasAccess && !productAccess['cie']?.hasAccess && !productAccess['ocr-cs']?.hasAccess && !productAccess['ocr-physics']?.hasAccess && !productAccess['aqa-chemistry']?.hasAccess && !productAccess['aqa-psychology']?.hasAccess && !productAccess['edexcel-maths']?.hasAccess && (
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      Free
-                    </span>
-                  )}
+                      );
+                    });
+                  })()}
+
                 </div>
               </div>
             </div>

@@ -10,7 +10,6 @@ import { StreakDisplay } from '@/components/StreakDisplay';
 import { ReferAFriend } from '@/components/ReferAFriend';
 import { ReviewDashboardSection } from '@/components/ReviewDashboardSection';
 import { EmailPreferences } from '@/components/EmailPreferences';
-import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -18,12 +17,11 @@ import { useNavigate } from 'react-router-dom';
 export const ProfileContent = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [productAccess, setProductAccess] = React.useState<Record<string, ProductAccess>>({});
-  const [subscriptionDetails, setSubscriptionDetails] = React.useState<Record<string, any>>({});
+  const [activeSubs, setActiveSubs] = React.useState<any[]>([]);
   const [cancellingSubscription, setCancellingSubscription] = React.useState<string | null>(null);
   const [cancelFlowOpen, setCancelFlowOpen] = React.useState(false);
   const [cancelFlowStep, setCancelFlowStep] = React.useState(0);
-  const [cancelFlowBoard, setCancelFlowBoard] = React.useState<string | null>(null);
+  const [cancelFlowSub, setCancelFlowSub] = React.useState<any | null>(null);
   const [cancelReason, setCancelReason] = React.useState('');
   const [loadingAccess, setLoadingAccess] = React.useState(true);
   const [schoolLicense, setSchoolLicense] = React.useState<{ schoolName: string; expiresAt: string } | null>(null);
@@ -32,22 +30,6 @@ export const ProfileContent = () => {
     const loadAccess = async () => {
       if (!user) return;
       setLoadingAccess(true);
-      const [edexcel, aqa, cie, ocrCs, ocrPhysics, aqaChem, aqaPsych, edexcelMaths] = await Promise.all([
-        checkProductAccess(user.id, 'edexcel-economics'),
-        checkProductAccess(user.id, 'aqa-economics'),
-        checkProductAccess(user.id, 'cie-economics'),
-        checkProductAccess(user.id, 'ocr-computer-science'),
-        checkProductAccess(user.id, 'ocr-physics'),
-        checkProductAccess(user.id, 'aqa-chemistry'),
-        checkProductAccess(user.id, 'aqa-psychology'),
-        checkProductAccess(user.id, 'edexcel-mathematics'),
-      ]);
-      setProductAccess({
-        'edexcel': edexcel, 'aqa': aqa, 'cie': cie,
-        'ocr-cs': ocrCs, 'ocr-physics': ocrPhysics,
-        'aqa-chemistry': aqaChem, 'aqa-psychology': aqaPsych,
-        'edexcel-maths': edexcelMaths,
-      });
 
       const { data: subs } = await supabase
         .from('user_subscriptions')
@@ -55,22 +37,17 @@ export const ProfileContent = () => {
         .eq('user_id', user.id)
         .eq('active', true);
 
-      if (subs) {
-        const details: Record<string, any> = {};
-        subs.forEach((sub: any) => {
-          const slug = sub.products?.slug;
-          if (!slug) return;
-          const keyMap: Record<string, string> = {
-            'edexcel-economics': 'edexcel', 'aqa-economics': 'aqa', 'cie-economics': 'cie',
-            'ocr-computer-science': 'ocr-cs', 'ocr-physics': 'ocr-physics',
-            'aqa-chemistry': 'aqa-chemistry', 'aqa-psychology': 'aqa-psychology',
-            'edexcel-mathematics': 'edexcel-maths',
-          };
-          const key = keyMap[slug] || slug;
-          details[key] = sub;
-        });
-        setSubscriptionDetails(details);
-      }
+      // Filter out subs past grace period; keep school/lifetime/monthly within window
+      const now = Date.now();
+      const graceMs = 7 * 24 * 60 * 60 * 1000;
+      const valid = (subs || []).filter((sub: any) => {
+        if (!sub.subscription_end) return true;
+        const end = new Date(sub.subscription_end).getTime();
+        if (end >= now) return true;
+        // expired: keep monthly within 7-day grace (matches productAccess.ts)
+        return sub.payment_type === 'monthly' && now - end <= graceMs;
+      });
+      setActiveSubs(valid);
 
       const { data: schoolMember } = await (supabase
         .from('school_members' as any)
@@ -95,34 +72,28 @@ export const ProfileContent = () => {
     loadAccess();
   }, [user]);
 
-  const startCancelFlow = (productKey: string) => {
-    setCancelFlowBoard(productKey);
+  const startCancelFlow = (sub: any) => {
+    setCancelFlowSub(sub);
     setCancelFlowStep(0);
     setCancelReason('');
     setCancelFlowOpen(true);
   };
 
   const confirmCancellation = async () => {
-    if (!cancelFlowBoard) return;
-    setCancellingSubscription(cancelFlowBoard);
+    if (!cancelFlowSub) return;
+    setCancellingSubscription(cancelFlowSub.id);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) { toast.error('Please log in again'); return; }
-      const sub = subscriptionDetails[cancelFlowBoard];
       const { data, error } = await supabase.functions.invoke('cancel-subscription', {
         headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
-        body: { cancelAtPeriodEnd: true, subscriptionId: sub?.id || undefined },
+        body: { cancelAtPeriodEnd: true, subscriptionId: cancelFlowSub.id },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success(data.message || 'Subscription cancelled — you keep access until the end of your billing period.');
       setCancelFlowOpen(false);
-      if (sub?.id) {
-        setSubscriptionDetails((prev: Record<string, any>) => ({
-          ...prev,
-          [cancelFlowBoard]: { ...prev[cancelFlowBoard], cancelled_at: new Date().toISOString() },
-        }));
-      }
+      setActiveSubs(prev => prev.map(s => s.id === cancelFlowSub.id ? { ...s, cancelled_at: new Date().toISOString() } : s));
     } catch (error: any) {
       toast.error(error.message || 'Failed to cancel subscription. Please try again or contact support.');
     } finally {
@@ -144,14 +115,6 @@ export const ProfileContent = () => {
     );
   }
 
-  const boardNames: Record<string, string> = {
-    'edexcel': 'Edexcel Economics', 'aqa': 'AQA Economics', 'cie': 'CIE Economics',
-    'ocr-cs': 'OCR Computer Science', 'ocr-physics': 'OCR Physics',
-    'aqa-chemistry': 'AQA Chemistry', 'aqa-psychology': 'AQA Psychology',
-    'edexcel-maths': 'Edexcel Mathematics',
-  };
-
-  const activeBoards = Object.keys(boardNames).filter(k => productAccess[k]?.hasAccess);
 
   return (
     <div className="py-4 px-1 w-full">
@@ -197,20 +160,20 @@ export const ProfileContent = () => {
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" /> Checking...
             </div>
-          ) : activeBoards.length === 0 && !schoolLicense ? (
+          ) : activeSubs.length === 0 && !schoolLicense ? (
             <div className="text-center py-4">
               <p className="text-muted-foreground mb-3">No active subscriptions</p>
               <Button variant="brand" asChild><Link to="/compare">Browse Plans</Link></Button>
             </div>
           ) : (
             <div className="space-y-3">
-              {activeBoards.map(board => {
-                const sub = subscriptionDetails[board];
+              {activeSubs.map(sub => {
                 const isMonthly = sub?.payment_type === 'monthly';
+                const name = sub?.products?.name || sub?.products?.slug || 'Subscription';
                 return (
-                  <div key={board} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div key={sub.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                     <div>
-                      <span className="font-medium">{boardNames[board]}</span>
+                      <span className="font-medium">{name}</span>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
                           {sub?.payment_type === 'school' ? 'School License' : sub?.payment_type === 'referral' ? 'Referral' : isMonthly ? 'Monthly' : 'Lifetime'}
@@ -231,7 +194,7 @@ export const ProfileContent = () => {
                       <Button
                         variant="ghost" size="sm"
                         className="text-xs text-muted-foreground hover:text-destructive"
-                        onClick={() => startCancelFlow(board)}
+                        onClick={() => startCancelFlow(sub)}
                       >
                         Manage
                       </Button>
@@ -241,6 +204,7 @@ export const ProfileContent = () => {
               })}
             </div>
           )}
+
         </CardContent>
       </Card>
 
