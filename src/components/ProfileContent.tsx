@@ -160,20 +160,20 @@ export const ProfileContent = () => {
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" /> Checking...
             </div>
-          ) : activeBoards.length === 0 && !schoolLicense ? (
+          ) : activeSubs.length === 0 && !schoolLicense ? (
             <div className="text-center py-4">
               <p className="text-muted-foreground mb-3">No active subscriptions</p>
               <Button variant="brand" asChild><Link to="/compare">Browse Plans</Link></Button>
             </div>
           ) : (
             <div className="space-y-3">
-              {activeBoards.map(board => {
-                const sub = subscriptionDetails[board];
+              {activeSubs.map(sub => {
                 const isMonthly = sub?.payment_type === 'monthly';
+                const name = sub?.products?.name || sub?.products?.slug || 'Subscription';
                 return (
-                  <div key={board} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div key={sub.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                     <div>
-                      <span className="font-medium">{boardNames[board]}</span>
+                      <span className="font-medium">{name}</span>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
                           {sub?.payment_type === 'school' ? 'School License' : sub?.payment_type === 'referral' ? 'Referral' : isMonthly ? 'Monthly' : 'Lifetime'}
@@ -194,7 +194,7 @@ export const ProfileContent = () => {
                       <Button
                         variant="ghost" size="sm"
                         className="text-xs text-muted-foreground hover:text-destructive"
-                        onClick={() => startCancelFlow(board)}
+                        onClick={() => startCancelFlow(sub)}
                       >
                         Manage
                       </Button>
@@ -204,6 +204,7 @@ export const ProfileContent = () => {
               })}
             </div>
           )}
+
         </CardContent>
       </Card>
 
