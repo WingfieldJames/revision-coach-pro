@@ -134,59 +134,46 @@ export const DashboardPage = () => {
     checkAccess();
   }, [user, subject]);
 
-  // Cancel subscription handler
-  const handleCancelSubscription = async (productKey: string) => {
-    const sub = subscriptionDetails[productKey];
+  // Cancel subscription handler — targets a specific sub by id
+  const handleCancelSubscription = async (sub: any) => {
     if (!sub || sub.payment_type !== 'monthly') {
       toast.error('Only monthly subscriptions can be cancelled');
       return;
     }
-    
+
     if (!confirm('Are you sure you want to cancel your subscription? You will keep access until the end of your billing period.')) {
       return;
     }
-    
-    setCancellingSubscription(productKey);
+
+    setCancellingSubscription(sub.id);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) {
         toast.error('Please log in again');
         return;
       }
-      
+
       const { data, error } = await supabase.functions.invoke('cancel-subscription', {
         headers: {
           Authorization: `Bearer ${sessionData.session.access_token}`,
         },
-        body: { cancelAtPeriodEnd: true },
+        body: { cancelAtPeriodEnd: true, subscriptionId: sub.id },
       });
-      
+
       if (error) throw error;
-      
+
       toast.success(data.message || 'Subscription cancelled successfully');
-      
-      // Refresh access
-      refreshProfile();
-      const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess, ocrPhysicsAccess, aqaChemistryAccess, aqaPsychologyAccess, edexcelMathsAccess] = await Promise.all([
-        checkProductAccess(user!.id, 'edexcel-economics'),
-        checkProductAccess(user!.id, 'aqa-economics'),
-        checkProductAccess(user!.id, 'cie-economics'),
-        checkProductAccess(user!.id, 'ocr-computer-science'),
-        checkProductAccess(user!.id, 'ocr-physics'),
-        checkProductAccess(user!.id, 'aqa-chemistry'),
-        checkProductAccess(user!.id, 'aqa-psychology'),
-        checkProductAccess(user!.id, 'edexcel-mathematics'),
-      ]);
-      setProductAccess({
-        'edexcel': edexcelAccess,
-        'aqa': aqaAccess,
-        'cie': cieAccess,
-        'ocr-cs': ocrCsAccess,
-        'ocr-physics': ocrPhysicsAccess,
-        'aqa-chemistry': aqaChemistryAccess,
-        'aqa-psychology': aqaPsychologyAccess,
-        'edexcel-maths': edexcelMathsAccess,
+
+      // Mark cancelled locally so the badge flips immediately
+      setSubscriptionDetails(prev => {
+        const next: Record<string, any> = {};
+        Object.entries(prev).forEach(([k, v]: [string, any]) => {
+          next[k] = v?.id === sub.id ? { ...v, cancelled_at: new Date().toISOString() } : v;
+        });
+        return next;
       });
+
+      refreshProfile();
     } catch (error: any) {
       console.error('Cancel error:', error);
       toast.error(error.message || 'Failed to cancel subscription');
@@ -194,6 +181,7 @@ export const DashboardPage = () => {
       setCancellingSubscription(null);
     }
   };
+
 
   // Save preference whenever it changes
   useEffect(() => {
