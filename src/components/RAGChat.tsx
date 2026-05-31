@@ -110,7 +110,7 @@ interface RAGChatProps {
 }
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 12;
-const ESSAY_MARKER_PATTERN = /^Mark my \d+ marker\. Use exact marking criteria\./i;
+const ESSAY_MARKER_PATTERN = /^(Mark my \d+ marker\. Use exact marking criteria\.|Mark my answer\. Use exact marking criteria\.)/i;
 
 // Helper to format source names nicely
 const formatSourceName = (name: string): string => {

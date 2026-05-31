@@ -214,7 +214,7 @@ export const EssayMarkerTool: React.FC<EssayMarkerToolProps> = ({
 
     const markToUse = fixedMark ?? selectedMark;
     const textPart = essayText.trim() ? `\n\n${essayText}` : '';
-    const prompt = `Mark my ${markToUse} marker. Use exact marking criteria.${textPart}`;
+    const prompt = `Mark my answer. Use exact marking criteria. Fallback tariff if the pasted/uploaded question does not show its own mark value: ${markToUse} marks.${textPart}`;
     
     // If there are image attachments, convert to base64 and pass via onSubmitToChat
     // The RAGChat component handles vision-based analysis
