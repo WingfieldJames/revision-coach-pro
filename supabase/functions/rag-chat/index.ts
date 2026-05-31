@@ -872,6 +872,8 @@ serve(async (req) => {
       throw new Error("message is required");
     }
 
+    const isEssayMarkerRequest = tool_type === 'essay_marker' || /^Mark my (?:\d+ marker|answer)\. Use exact marking criteria\./i.test(message);
+
     console.log(`RAG chat for product ${product_id}: "${message.substring(0, 50)}..." (diagrams: ${enable_diagrams}, trainer_test: ${trainer_test})`);
     if (user_preferences) {
       console.log(`User preferences: Year ${user_preferences.year}, Predicted: ${user_preferences.predicted_grade}, Target: ${user_preferences.target_grade}`);
@@ -1136,11 +1138,13 @@ Use this to personalise your responses — reference their weak areas, their exa
     // Add essay marking instructions
     finalSystemPrompt += `\n\n--- ESSAY MARKING CAPABILITY ---
 When a student asks you to mark their essay, answer, or response:
-1. If they haven't specified how many marks the question is worth, ASK them: "How many marks is this question worth?" before marking.
-2. Once you know the mark value, provide detailed feedback using the marking criteria from your training data.
-3. Give a mark out of the total, identify what they did well, what's missing, and how to improve.
-4. If they upload an image of their work, analyse it and mark it the same way.
-5. Use exact marking criteria and level descriptors from your training data where available.
+1. First identify the tariff from the pasted/uploaded question itself. If the question says 9, 10, 16, 25 etc, mark out of that exact number — do NOT override it with the current-spec tariff or the fallback selected in the UI.
+2. If the question itself does not show a tariff, use any explicit fallback tariff in the student's prompt. Only ask "How many marks is this question worth?" if neither the question nor fallback gives a mark value.
+3. Use the AO split from the original question/mark scheme wherever it is present in training data. Old 2017–2019 9-markers/10-markers must be marked as old 9/10-mark questions against their original AO split, not converted into the current 9/16 structure.
+4. For current AQA Psychology sample/spec questions, use the current AQA mark-scheme split: current 9-mark Research Methods/application questions are AO2 = 9; current 16-mark non-scenario essays are AO1 = 6 and AO3 = 10; current 16-mark scenario/application essays are AO1 = 6, AO2 = 4 and AO3 = 6.
+5. Start every marking response with: "Marked against: [tariff] marks — [AO split]". Then give the mark out of the tariff, strengths, missing marks, and how to improve.
+6. If they upload an image of their work, analyse it and mark it the same way.
+7. Use exact marking criteria and level descriptors from your training data where available.
 
 CRITICAL — CONCISENESS RULES FOR ALL FEEDBACK:
 - Do NOT repeat, restate, or quote back the student's full answer. They already know what they wrote.
@@ -1199,7 +1203,7 @@ CRITICAL RULES:
       ],
       stream: true,
       max_tokens: 3500,
-      temperature: 0.7,
+      temperature: isEssayMarkerRequest ? 0 : 0.7,
     });
 
     // Time-to-first-byte timeout: abort only if the upstream hasn't sent
