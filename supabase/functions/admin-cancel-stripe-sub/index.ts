@@ -10,10 +10,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { adminToken, subscriptionRowId, stripeSubId } = await req.json();
-    if (adminToken !== Deno.env.get("ADMIN_CANCEL_TOKEN")) {
-      return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    const { subscriptionRowId, stripeSubId } = await req.json();
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
       apiVersion: "2023-10-16",
