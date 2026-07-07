@@ -182,6 +182,24 @@
     animation: float 3s ease-in-out infinite;
   }
 
+  /* Homepage Refined — faint hero background lines */
+  @keyframes pathPulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.8; }
+  }
+
+  /* Homepage Refined — floating hero proof chip */
+  @keyframes chipFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  /* Homepage Refined — vertical testimonial marquee */
+  @keyframes tcolUp {
+    from { transform: translateY(0); }
+    to { transform: translateY(-50%); }
+  }
+
   /* Glow effect for buttons - theme-aware */
   .glow-brand {
     box-shadow: 0 0 20px var(--glow-1), 0 0 40px var(--glow-2);

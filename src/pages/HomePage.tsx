@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Header } from "@/components/Header";
+import { HomeHeader } from "@/components/home/HomeHeader";
 import { SEOHead } from "@/components/SEOHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -13,10 +13,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { HeroBackgroundPaths } from "@/components/ui/hero-background-paths";
 import { ChatbotFullscreenPaths } from "@/components/ui/chatbot-fullscreen-paths";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/scroll-reveal";
-import { MeetTheFounders } from "@/components/MeetTheFounders";
-import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from "@/components/ui/testimonials-columns";
-import RadialOrbitalTimeline from "@/components/ui/radial-orbital-timeline";
-import { SubjectPlanSelector } from "@/components/SubjectPlanSelector";
+import { TrainersCarousel } from "@/components/home/TrainersCarousel";
+import { SubjectShowcase } from "@/components/home/SubjectShowcase";
+import { firstColumn } from "@/components/ui/testimonials-columns";
+import { WallOfLove } from "@/components/WallOfLove";
 import logo from "@/assets/logo.png";
 import logoDark from "@/assets/logo-dark.png";
 import appScreenshot from "@/assets/app-screenshot.png";
@@ -91,6 +91,20 @@ const revisionFeatures = [
 /** Shared heading class matching FoundersCarousel / hero style */
 const sectionHeadingClass = "text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight";
 
+const PURPLE = "hsl(263, 70%, 50%)";
+
+/** Homepage Refined — the 8 faint purple background lines, verbatim from the design. */
+const HERO_LINES = [
+  { d: "M-1000 110 C -600 140, 100 170, 500 150 C 900 130, 1400 180, 2200 140", stroke: "rgba(79,54,179,0.10)", w: 0.9, dur: 22 },
+  { d: "M-970 145 C -580 175, 115 195, 520 175 C 920 155, 1420 200, 2230 175", stroke: "rgba(79,54,179,0.09)", w: 1.0, dur: 26 },
+  { d: "M-940 180 C -560 205, 130 225, 540 200 C 940 180, 1440 225, 2260 215", stroke: "rgba(79,54,179,0.11)", w: 1.1, dur: 20 },
+  { d: "M-910 215 C -540 240, 145 255, 560 230 C 960 205, 1460 250, 2290 250", stroke: "rgba(79,54,179,0.09)", w: 1.2, dur: 28 },
+  { d: "M-880 250 C -520 275, 160 285, 580 260 C 980 235, 1480 275, 2320 285", stroke: "rgba(79,54,179,0.12)", w: 1.3, dur: 24 },
+  { d: "M-850 285 C -500 310, 175 315, 600 290 C 1000 265, 1500 300, 2350 320", stroke: "rgba(79,54,179,0.10)", w: 1.4, dur: 30 },
+  { d: "M-820 320 C -480 345, 190 345, 620 320 C 1020 295, 1520 330, 2380 355", stroke: "rgba(79,54,179,0.11)", w: 1.5, dur: 21 },
+  { d: "M-790 355 C -460 380, 205 375, 640 350 C 1040 325, 1540 355, 2410 390", stroke: "rgba(79,54,179,0.08)", w: 1.6, dur: 27 },
+];
+
 /** Word-by-word fade-in heading. Triggers when the section pins to the viewport top. */
 const AnimatedWords: React.FC<{
   words: { text?: string; node?: React.ReactNode; className?: string }[];
@@ -125,102 +139,37 @@ const AnimatedWords: React.FC<{
   );
 };
 
-const DemoTestimonialsStage: React.FC = () => {
-  const stageRef = React.useRef<HTMLDivElement>(null);
-  const videoRef = React.useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = useReducedMotion();
-
-  // Entry animation for the video (drives scale-up as it enters viewport)
-  const { scrollYProgress: enterProgress } = useScroll({
-    target: videoRef,
-    offset: ["start end", "center center"],
-  });
-  const screenScale = useTransform(enterProgress, [0, 1], prefersReducedMotion ? [1, 1] : [0.7, 1]);
-  const screenY = useTransform(enterProgress, [0, 1], prefersReducedMotion ? [0, 0] : [120, 0]);
-  const screenOpacityIn = useTransform(enterProgress, [0, 0.3, 1], prefersReducedMotion ? [1, 1, 1] : [0, 0.6, 1]);
-
-  // Tilt + testimonial entry are driven off the video section's own scroll
-  // so the testimonials section can flow normally beneath it.
-  const { scrollYProgress: videoExitProgress } = useScroll({
-    target: videoRef,
-    offset: ["center center", "end start"],
-  });
-  const tiltRotate = useTransform(videoExitProgress, [0.1, 0.7], prefersReducedMotion ? [0, 0] : [0, -35]);
-  const tiltY = useTransform(videoExitProgress, [0.1, 0.8], prefersReducedMotion ? [0, 0] : [0, -140]);
-  const tiltOpacity = useTransform(videoExitProgress, [0.4, 0.85], prefersReducedMotion ? [1, 1] : [1, 0]);
-
-  const testimonialsOpacity = useTransform(videoExitProgress, [0.1, 0.6], prefersReducedMotion ? [1, 1] : [0, 1]);
-  const testimonialsY = useTransform(videoExitProgress, [0.1, 0.8], prefersReducedMotion ? [0, 0] : [220, 0]);
-
-  return (
-    <div ref={stageRef} className="hidden md:block relative">
-      <section ref={videoRef} data-section="demo-video" className="py-16 md:py-28 px-4 md:px-8 max-w-5xl mx-auto" style={{ perspective: "1200px" }}>
-        <motion.div
-          style={{
-            scale: screenScale,
-            y: screenY,
-            opacity: useTransform([screenOpacityIn, tiltOpacity], ([a, b]: number[]) => a * b),
-            rotateX: tiltRotate,
-            translateY: tiltY,
-            transformOrigin: "bottom center",
-            willChange: "transform, opacity",
-          }}
-          className="rounded-2xl overflow-hidden border border-border/50 shadow-elevated bg-muted"
-        >
-          {/* Browser chrome */}
-          <div className="flex items-center gap-3 px-4 py-2.5 bg-muted border-b border-border/50">
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-              <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
-              <span className="w-3 h-3 rounded-full bg-[#28c840]" />
-            </div>
-            <div className="flex-1 flex justify-center">
-              <div className="px-4 py-1 rounded-md bg-background/80 border border-border/50 text-xs text-muted-foreground font-medium tracking-tight max-w-[280px] w-full text-center truncate">
-                astarai.co.uk
-              </div>
-            </div>
-            <div className="w-12" />
-          </div>
-          <div style={{ position: 'relative', paddingTop: '62.28%' }}>
-            <iframe
-              src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&autoplay=1&muted=1&controls=0&title=0&byline=0&portrait=0"
-              frameBorder="0"
-              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-              title="A* AI Demo"
-            />
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Testimonials revealed beneath as the video tilts away */}
-      <section data-section="testimonials" className="py-16 px-8 overflow-hidden bg-background -mt-40">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            className="text-center mb-10"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "0px 0px -15% 0px" }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 0.61, 0.36, 1] }}
-          >
-            <h2 className="text-[1.5rem] sm:text-[2.5rem] md:text-[3.25rem] lg:text-[4rem] font-bold leading-[1.2] tracking-tight">
-              10,000 students. One unfair advantage
-            </h2>
-          </motion.div>
-          <motion.div
-            style={{ opacity: testimonialsOpacity, y: testimonialsY, willChange: "transform, opacity" }}
-            className="flex gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] max-h-[600px]"
-          >
-            <TestimonialsColumn testimonials={firstColumn} duration={45} />
-            <TestimonialsColumn testimonials={secondColumn} duration={40} />
-            <TestimonialsColumn testimonials={thirdColumn} duration={50} />
-          </motion.div>
+/** Static browser-framed demo video (refined design — no scroll tilt). */
+const DemoVideo: React.FC = () => (
+  <section data-section="demo-video" className="hidden md:block py-24 px-8 max-w-5xl mx-auto">
+    <div className="rounded-2xl overflow-hidden border border-border/50 shadow-elevated bg-muted">
+      {/* Browser chrome */}
+      <div className="flex items-center gap-3 px-4 py-2.5 bg-muted border-b border-border/50">
+        <div className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+          <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
+          <span className="w-3 h-3 rounded-full bg-[#28c840]" />
         </div>
-      </section>
+        <div className="flex-1 flex justify-center">
+          <div className="px-4 py-1 rounded-md bg-background/80 border border-border/50 text-xs text-muted-foreground font-medium tracking-tight max-w-[280px] w-full text-center truncate">
+            astarai.co.uk
+          </div>
+        </div>
+        <div className="w-12" />
+      </div>
+      <div style={{ position: 'relative', paddingTop: '62.28%' }}>
+        <iframe
+          src="https://player.vimeo.com/video/1157200471?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&autoplay=1&muted=1&controls=0&title=0&byline=0&portrait=0"
+          frameBorder="0"
+          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+          title="A* AI Demo"
+        />
+      </div>
     </div>
-  );
-};
+  </section>
+);
 
 
 export const HomePage = () => {
@@ -298,107 +247,138 @@ export const HomePage = () => {
   }, []);
 
 
-  // Smooth right→left parallax for hero device mockup
-  const heroRef = React.useRef<HTMLElement>(null);
-  const prefersReducedMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const xRaw = useTransform(scrollYProgress, [0, 0.75], prefersReducedMotion ? [0, 0] : [0, -80]);
-  const heroMockX = useSpring(xRaw, { stiffness: 80, damping: 20, mass: 0.5 });
-
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <div className="min-h-screen font-sans" style={{ background: "#ffffff", color: "#18181b" }}>
       <SEOHead canonical="https://astarai.co.uk/" />
-      <Header showNavLinks showStartStudyingButton />
+      <HomeHeader />
 
-      {/* Hero Section */}
-      <section ref={heroRef} className="overflow-hidden pb-0 mt-0 md:mt-4 sm:-mt-4 md:max-xl:mt-6 md:max-xl:pt-4 relative">
-        {/* Mobile-only purple animated paths behind hero */}
-        <div className="md:hidden absolute inset-0 z-0 overflow-hidden">
-          <ChatbotFullscreenPaths />
+      {/* ═══ Hero ═══ */}
+      <section style={{ position: "relative", overflow: "hidden" }}>
+        {/* faint animated purple lines */}
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+          <svg
+            viewBox="-400 0 2000 500"
+            fill="none"
+            preserveAspectRatio="xMidYMid slice"
+            style={{ position: "absolute", left: "50%", top: 0, height: "100%", minWidth: "120vw", transform: "translateX(-50%)" }}
+          >
+            {HERO_LINES.map((l, i) => (
+              <path key={i} d={l.d} stroke={l.stroke} strokeWidth={l.w} style={{ animation: `pathPulse ${l.dur}s ease-in-out infinite` }} />
+            ))}
+          </svg>
         </div>
-        <HeroBackgroundPaths>
-          <div className="px-6 sm:px-8 py-6 sm:py-16 md:py-24 xl:py-16 2xl:py-12 md:max-xl:py-6 max-w-7xl mx-auto md:max-w-none md:pr-0" style={{ paddingLeft: 'max(2rem, calc((100vw - 80rem) / 2))' }}>
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-16">
-              {/* Left side - Text content */}
-              <div className="flex-1 text-left md:max-w-[500px] xl:max-w-[520px] 2xl:max-w-[560px] md:flex-shrink-0">
-                {/* Social Proof Pill */}
-                <div
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border border-border bg-background/80 backdrop-blur-sm"
-                  style={{ boxShadow: '0 0 16px rgba(168, 85, 247, 0.12), 0 0 6px rgba(168, 85, 247, 0.08)' }}>
-                  
-                  <div className="flex">
-                    <img src={lucyImage} alt="Lucy" className="w-5 h-5 rounded-full object-cover border-2 border-background z-[3]" />
-                    <img src={jamesImage} alt="James" className="w-5 h-5 rounded-full object-cover border-2 border-background -ml-1.5 z-[2]" />
-                    <img src={matanImage} alt="Matan" className="w-5 h-5 rounded-full object-cover object-[center_20%] border-2 border-background -ml-1.5 z-[1]" />
-                  </div>
-                  <span className="text-foreground text-xs sm:text-sm font-medium">
-                    Used by 10,000 A-Level & GCSE students
-                  </span>
+
+        <div
+          className="pr-6 md:pr-0"
+          style={{ position: "relative", zIndex: 10, paddingTop: 48, paddingBottom: 64, paddingLeft: "max(32px, calc((100vw - 1280px) / 2))" }}
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-10 md:gap-16">
+            {/* Left: copy */}
+            <div className="flex-1 md:max-w-[540px] md:flex-shrink-0">
+              {/* Social proof pill */}
+              <div
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 9999, marginBottom: 24,
+                  border: "1px solid #e6e4ec", background: "rgba(255,255,255,0.8)", backdropFilter: "blur(4px)",
+                  boxShadow: "0 0 16px rgba(168,85,247,0.12), 0 0 6px rgba(168,85,247,0.08)",
+                }}
+              >
+                <div style={{ display: "flex" }}>
+                  <img src={lucyImage} alt="Lucy" style={{ width: 20, height: 20, borderRadius: "50%", objectFit: "cover", border: "2px solid #fff", position: "relative", zIndex: 3 }} />
+                  <img src={jamesImage} alt="James" style={{ width: 20, height: 20, borderRadius: "50%", objectFit: "cover", border: "2px solid #fff", marginLeft: -6, position: "relative", zIndex: 2 }} />
+                  <img src={matanImage} alt="Matan" style={{ width: 20, height: 20, borderRadius: "50%", objectFit: "cover", objectPosition: "center 20%", border: "2px solid #fff", marginLeft: -6, position: "relative", zIndex: 1 }} />
                 </div>
-
-                {/* Main Headline */}
-                <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.25rem] lg:text-[4rem] xl:text-[4.5rem] font-bold mb-4 leading-[1.1] tracking-tight">
-                  {/* Mobile: 2 lines */}
-                  <div className="md:hidden">
-                    <div className="text-foreground">The AI tutor built</div>
-                    <div className="text-foreground">to get you an <img src={logoMark} alt="A*" className="inline-block h-[0.85em] w-auto align-[-0.1em] object-contain" /></div>
-                  </div>
-                  {/* Desktop: 3 lines */}
-                  <div className="hidden md:block">
-                    <div className="text-foreground">The AI tutor</div>
-                    <div className="text-foreground">built to get</div>
-                    <div className="text-foreground">you an <img src={logoMark} alt="A*" className="inline-block h-[0.85em] w-auto align-[-0.1em] object-contain" /></div>
-                  </div>
-                </h1>
-
-                {/* Subheadline */}
-                <p className="text-sm sm:text-base md:text-lg xl:text-xl text-muted-foreground max-w-lg mb-8 leading-relaxed">
-                  Built for your exam board, trained by the highest achieving A* students
-                </p>
-
-                {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row items-start gap-4">
-                  <button
-                    onClick={handlePickSubject}
-                    className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg hover:bg-primary/90">
-                    
-                    Pick Your Subject →
-                  </button>
-                  <button
-                    onClick={handleSeeHowItWorks}
-                    className="px-8 py-3.5 rounded-full text-foreground font-semibold text-base sm:text-lg border border-foreground/30 bg-transparent transition-all duration-300 hover:bg-primary hover:border-primary hover:text-primary-foreground">
-                    
-                    See How It Works
-                  </button>
-                </div>
-
-                <p className="text-xs sm:text-sm text-muted-foreground mt-4">Get started free • No card needed</p>
+                <span style={{ fontSize: 14, fontWeight: 500, color: "#18181b" }}>Used by 10,000 A-Level &amp; GCSE students</span>
               </div>
 
-              {/* Right side - Device mockup */}
-              <div className="hidden md:flex flex-1 justify-end items-center relative -mr-20 xl:-mr-40 2xl:-mr-64">
-                <motion.div
-                  style={{ x: heroMockX, willChange: "transform" }}
-                  className="w-full max-w-[720px] xl:max-w-[950px] 2xl:max-w-[1200px] rounded-2xl overflow-hidden border border-border/30 shadow-elevated">
-                  <img
-                    src={appScreenshot}
-                    alt="A* AI essay marker demo"
-                    className="w-full h-auto" />
-                  
-                </motion.div>
+              {/* Headline */}
+              <h1 style={{ fontWeight: 700, lineHeight: 1.1, letterSpacing: "-0.02em", margin: "0 0 16px 0", color: "#18181b", fontSize: "clamp(38px, 7vw, 68px)" }}>
+                <div>The AI tutor</div>
+                <div>built to get</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  you an <img src={logoMark} alt="A*" style={{ display: "inline-block", height: "0.85em", width: "auto", objectFit: "contain", verticalAlign: "-0.1em" }} />
+                </div>
+              </h1>
+
+              {/* Subheadline */}
+              <p style={{ fontSize: 20, color: "#71717a", maxWidth: "32rem", margin: "0 0 32px 0", lineHeight: 1.6 }}>
+                Built for your exam board, trained by the highest achieving A* students
+              </p>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <button
+                  onClick={handlePickSubject}
+                  style={{ padding: "14px 32px", borderRadius: 9999, background: PURPLE, color: "#fff", fontWeight: 600, fontSize: 18, border: "none", cursor: "pointer", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", transition: "all 0.3s" }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 10px 20px rgba(79,54,179,0.25)"; e.currentTarget.style.background = "hsl(263, 70%, 45%)"; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)"; e.currentTarget.style.background = PURPLE; }}
+                >
+                  Pick Your Subject →
+                </button>
+                <button
+                  onClick={handleSeeHowItWorks}
+                  style={{ padding: "14px 32px", borderRadius: 9999, background: "transparent", color: "#18181b", fontWeight: 600, fontSize: 18, border: "1px solid rgba(24,24,27,0.3)", cursor: "pointer", transition: "all 0.3s" }}
+                  onMouseOver={(e) => { e.currentTarget.style.background = PURPLE; e.currentTarget.style.borderColor = PURPLE; e.currentTarget.style.color = "#fff"; }}
+                  onMouseOut={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(24,24,27,0.3)"; e.currentTarget.style.color = "#18181b"; }}
+                >
+                  See How It Works
+                </button>
+              </div>
+
+              <p style={{ fontSize: 14, color: "#71717a", margin: "16px 0 0 0" }}>
+                Get started{" "}
+                <span style={{ position: "relative", display: "inline-block" }}>
+                  free
+                  <svg viewBox="0 0 40 8" preserveAspectRatio="none" style={{ position: "absolute", left: 0, bottom: -4, width: "100%", height: 6, overflow: "visible", pointerEvents: "none" }}>
+                    <path d="M2 5 C 10 2, 22 2.5, 28 4 C 32 5, 36 4.5, 38 3" stroke={PURPLE} strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
+                  </svg>
+                </span>{" "}
+                • No card needed
+              </p>
+
+              {/* Trust strip */}
+              <div style={{ marginTop: 36, paddingTop: 24, borderTop: "1px solid rgba(228,228,232,0.8)", maxWidth: 440 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#a1a1aa", margin: "0 0 10px 0" }}>Trained by A* students now at</p>
+                <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px 20px", fontSize: 16, fontWeight: 700, letterSpacing: "-0.01em", color: "#8b8b94" }}>
+                  <span>Oxford</span><span style={{ color: "#d4d4dc", fontWeight: 400 }}>·</span>
+                  <span>Cambridge</span><span style={{ color: "#d4d4dc", fontWeight: 400 }}>·</span>
+                  <span>LSE</span><span style={{ color: "#d4d4dc", fontWeight: 400 }}>·</span>
+                  <span>Imperial</span><span style={{ color: "#d4d4dc", fontWeight: 400 }}>·</span>
+                  <span>UCL</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: screenshot with floating proof chip */}
+            <div className="hidden md:flex flex-1 justify-end items-center relative" style={{ marginRight: -80 }}>
+              <div className="relative w-full" style={{ maxWidth: 950 }}>
+                <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(228,228,232,0.5)", boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
+                  <img src={appScreenshot} alt="A* AI essay marker demo" style={{ width: "100%", height: "auto", display: "block" }} />
+                </div>
+                <div
+                  style={{ position: "absolute", top: 26, left: -26, display: "flex", alignItems: "center", gap: 8, background: "#fff", border: "1px solid #ece9f5", borderRadius: 9999, padding: "9px 16px", boxShadow: "0 8px 24px rgba(24,18,50,0.12)", animation: "chipFloat 5s ease-in-out infinite" }}
+                >
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, borderRadius: "50%", background: "rgba(34,197,94,0.12)" }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#18181b" }}>Essay marked · <span style={{ color: PURPLE }}>23/25</span></span>
+                </div>
               </div>
             </div>
           </div>
-        </HeroBackgroundPaths>
+        </div>
       </section>
 
-      {/* Meet the Founders */}
-      <div data-section="founders">
-        <MeetTheFounders />
-      </div>
+      {/* Meet the trainers */}
+      <TrainersCarousel />
 
-      {/* Demo video tilts away to reveal testimonials underneath (desktop) */}
-      <DemoTestimonialsStage />
+      {/* Demo video (desktop) */}
+      <DemoVideo />
+
+      {/* Wall of love — testimonials (desktop) */}
+      <div className="hidden md:block">
+        <WallOfLove />
+      </div>
 
 
       <section className="md:hidden py-8 px-4">
@@ -430,56 +410,21 @@ export const HomePage = () => {
       </section>
 
 
-      {/* Subject + Plan Selection */}
-      <section
-        data-section="pick-subject-bottom"
-        className="py-16 md:py-24 px-4 md:px-8 relative"
-      >
-        <div className="text-center mb-12 md:mb-16">
-          <h2 className={sectionHeadingClass}>
-          <AnimatedWords
-              startDelay={0.1}
-              words={[
-                { text: 'Time', className: 'text-foreground' },
-                { text: 'to', className: 'text-foreground' },
-                { text: 'get', className: 'text-foreground' },
-                { text: 'you', className: 'text-foreground' },
-                { text: 'an', className: 'text-foreground' },
-                {
-                  node: (
-                    <img
-                      src={logoMark}
-                      alt="A*"
-                      className="inline-block h-[1em] w-auto align-[-0.12em] object-contain"
-                    />
-                  ),
-                },
-              ]}
-            />
-          </h2>
-        </div>
-
-        <motion.div
-          className="max-w-5xl mx-auto w-full"
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "0px 0px -10% 0px" }}
-          transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
-        >
-          <SubjectPlanSelector />
-        </motion.div>
-      </section>
+      {/* Subject + plan selection */}
+      <SubjectShowcase />
 
       {/* FAQ Section */}
       <section className="py-16 px-4 md:px-8 bg-background relative overflow-hidden">
-        <div className="faq-paths-container absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <ChatbotFullscreenPaths />
-        </div>
         <div className="max-w-4xl mx-auto relative z-10 px-2 md:px-0">
             <ScrollReveal>
               <h2 className={`${sectionHeadingClass} text-center mb-6`}>
                <span className="text-foreground">Frequently asked </span>
-               <span className="text-primary">questions</span>
+               <span className="relative inline-block whitespace-nowrap text-primary">
+                 questions
+                 <svg viewBox="0 0 300 14" preserveAspectRatio="none" className="absolute left-0 -bottom-2 w-full h-3.5 overflow-visible">
+                   <path d="M4 9 C 60 2, 130 3, 158 6 C 200 10, 255 9, 296 4" stroke="hsl(var(--primary))" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.55" />
+                 </svg>
+               </span>
               </h2>
               <p className="text-center text-muted-foreground mb-8 text-lg">
                 Everything you need to know about A* AI and revision.
@@ -488,87 +433,65 @@ export const HomePage = () => {
 
             <ScrollReveal delay={0.2}>
               <Accordion type="single" collapsible defaultValue="item-1" className="space-y-4">
-                <AccordionItem value="item-1" className="bg-muted rounded-xl border-0 overflow-hidden">
-                  <AccordionTrigger
-                    hideIcon
-                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                    
-                    <span>Why is this better than ChatGPT or a normal AI?</span>
-                    <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                    <p className="mb-3">
-                      ChatGPT knows a bit about everything. A*AI knows everything about your exam - from paper layout to
-                      the small tricks that push you towards top grades.
-                    </p>
-                    <p className="mb-3">
-                      Trained on every past paper, mark scheme, and spec point for your board. A personalised 24/7
-                      tutor, built specifically for your subject.
-                    </p>
-                    <p>
-                      We handpick A* students from the UK's top universities and train the AI on exactly how they think
-                      - the structures, the shortcuts, the phrases examiners reward. The brain of an A* student, powered
-                      by AI.
-                    </p>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-2" className="bg-muted rounded-xl border-0 overflow-hidden">
-                  <AccordionTrigger
-                    hideIcon
-                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                    
-                    <span>How does it work?</span>
-                    <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                    <p className="mb-3">
-                      Pick your subject and start chatting. The AI is trained on your exact specification, past papers,
-                      and mark schemes.
-                    </p>
-                    <p className="mb-3">
-                      Use the built-in tools — Diagram Generator, Essay Marker, Past Paper Finder — to practice and get
-                      instant feedback.
-                    </p>
-                    <p>It's like having an A* student available 24/7 to help you revise.</p>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-3" className="bg-muted rounded-xl border-0 overflow-hidden">
-                  <AccordionTrigger
-                    hideIcon
-                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                    
-                    <span>What subjects do you cover?</span>
-                    <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                    <p className="mb-3">
-                      We cover Economics (Edexcel, AQA, CIE), Computer Science (OCR), Physics (OCR), Chemistry (AQA),
-                      Psychology (AQA) and Mathematics (Edexcel).
-                    </p>
-                    <p>More subjects dropping soon. Tell us what you need next — we're listening.</p>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-4" className="bg-muted rounded-xl border-0 overflow-hidden">
-                  <AccordionTrigger
-                    hideIcon
-                    className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full [&[data-state=open]>svg]:rotate-180 text-lg">
-                    
-                    <span>Is it really free?</span>
-                    <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-5 text-muted-foreground text-base leading-relaxed">
-                    <p className="mb-3">
-                      Yes! Create an account and start using all the features for free. No credit card required.
-                    </p>
-                    <p>
-                      For even more training data and priority support, you can upgrade to the Exam Season Pass or
-                      Monthly plan.
-                    </p>
-                  </AccordionContent>
-                </AccordionItem>
+                {[
+                  {
+                    q: 'Why is this better than ChatGPT or a normal AI?',
+                    paras: [
+                      "ChatGPT knows a bit about everything. A*AI knows everything about your exam - from paper layout to the small tricks that push you towards top grades.",
+                      "Trained on every past paper, mark scheme, and spec point for your board. A personalised 24/7 tutor, built specifically for your subject.",
+                      "We handpick A* students from the UK's top universities and train the AI on exactly how they think - the structures, the shortcuts, the phrases examiners reward. The brain of an A* student, powered by AI.",
+                    ],
+                  },
+                  {
+                    q: 'How does it work?',
+                    paras: [
+                      "Pick your subject and start chatting. The AI is trained on your exact specification, past papers, and mark schemes.",
+                      "Use the built-in tools — Diagram Generator, Essay Marker, Past Paper Finder — to practice and get instant feedback.",
+                      "It's like having an A* student available 24/7 to help you revise.",
+                    ],
+                  },
+                  {
+                    q: 'What subjects do you cover?',
+                    paras: [
+                      "We cover Economics (Edexcel, AQA, CIE), Computer Science (OCR), Physics (OCR), Chemistry (AQA), Psychology (AQA) and Mathematics (Edexcel).",
+                      "More subjects dropping soon. Tell us what you need next — we're listening.",
+                    ],
+                  },
+                  {
+                    q: 'Is it really free?',
+                    paras: [
+                      "Yes! Create an account and start using all the features for free. No credit card required.",
+                      "For even more training data and priority support, you can upgrade to the Exam Season Pass or Monthly plan.",
+                    ],
+                  },
+                ].map((item, i) => (
+                  <AccordionItem
+                    key={i}
+                    value={`item-${i + 1}`}
+                    className="bg-muted rounded-xl border border-transparent overflow-hidden transition-colors data-[state=open]:bg-primary/[0.04] data-[state=open]:border-primary/25"
+                  >
+                    <AccordionTrigger
+                      hideIcon
+                      className="px-6 py-5 text-left font-semibold hover:no-underline text-foreground flex justify-between items-center w-full gap-4 text-lg [&[data-state=open]>svg]:rotate-180 [&[data-state=open]_.faq-num]:text-primary [&[data-state=open]_.faq-circle]:opacity-100"
+                    >
+                      <span className="inline-flex items-baseline gap-3.5">
+                        <span className="faq-num relative inline-flex items-center justify-center w-[30px] h-[26px] shrink-0 text-[13px] font-bold tracking-[0.06em] tabular-nums text-muted-foreground/70 transition-colors">
+                          {`0${i + 1}`}
+                          <svg viewBox="0 0 40 32" className="faq-circle absolute -inset-y-1 -inset-x-1.5 w-[calc(100%+12px)] h-[calc(100%+8px)] overflow-visible pointer-events-none opacity-0 transition-opacity duration-200">
+                            <path d="M20 3.5 C 30 2.5, 37 7, 36.5 15.5 C 36 24.5, 28.5 29, 19 28.5 C 9.5 28, 3 23.5, 3.5 15 C 4 7.5, 11 4.5, 22 4" stroke="hsl(var(--primary))" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                          </svg>
+                        </span>
+                        <span>{item.q}</span>
+                      </span>
+                      <ChevronDown className="h-5 w-5 text-primary transition-transform duration-200 shrink-0" />
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-5 pl-[51px] text-muted-foreground text-base leading-relaxed space-y-3">
+                      {item.paras.map((p, pi) => (
+                        <p key={pi}>{p}</p>
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
               </Accordion>
             </ScrollReveal>
           </div>
@@ -576,9 +499,6 @@ export const HomePage = () => {
 
       {/* Exam Countdown CTA */}
       <section className="py-20 md:py-28 px-4 md:px-8 relative overflow-hidden border-t border-border/30 bg-primary/[0.02]">
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-25">
-          <ChatbotFullscreenPaths />
-        </div>
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
 
