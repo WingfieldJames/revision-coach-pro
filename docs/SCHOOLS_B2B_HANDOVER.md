@@ -1,6 +1,12 @@
 # A*AI Schools (B2B) — Session Handover
 
-**Purpose:** resume the Schools B2B build exactly where it stands. Read this first, then `git log --oneline` on `feat/schools-b2b-layer` and the task list.
+**Purpose:** resume the Schools B2B build exactly where it stands. Read this first, then `git log --oneline` and the task list.
+
+> **📋 The full end-to-end plan for the whole B2B build lives in
+> [`docs/schools-b2b-master-plan.md`](./schools-b2b-master-plan.md)** — vision, 12-table data
+> model, all 6 slices with status, the behaviour-layer spec, residency plan, dashboard panels,
+> and the prioritised "what's left to finish" list. This handover is the *session state*; that
+> is the *master plan*.
 
 Last updated: 2026-07-07, end of build session. Branch: **`feat/schools-b2b-layer`** (10 commits, **not pushed**).
 
