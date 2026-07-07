@@ -76,6 +76,37 @@ export const checkProductAccess = async (
     }
   }
   
+  // School-license access: a student on an active school seat gets deluxe access
+  // to the licensed product. Additive — every B2C path above is untouched. Mirrors
+  // the server-side check in rag-chat so client and server grant access as a pair.
+  const { data: memberships } = await supabase
+    .from('school_members')
+    .select('license_id')
+    .eq('user_id', userId)
+    .eq('invite_status', 'accepted');
+
+  const licenseIds = (memberships ?? [])
+    .map((m) => m.license_id)
+    .filter((id): id is string => !!id);
+
+  if (licenseIds.length) {
+    const { data: licenses } = await supabase
+      .from('school_licenses')
+      .select('school_id, expires_at, product_id')
+      .in('id', licenseIds)
+      .eq('active', true);
+
+    const now = new Date();
+    const match = (licenses ?? []).find(
+      (l) =>
+        (!l.expires_at || new Date(l.expires_at) >= now) &&
+        (!l.product_id || l.product_id === product.id),
+    );
+    if (match) {
+      return { hasAccess: true, tier: 'deluxe', subscription: { school: true, school_id: match.school_id } };
+    }
+  }
+
   // Fallback: Check legacy users table for backwards compatibility (Edexcel only)
   if (productSlug === 'edexcel-economics') {
     const { data: user } = await supabase
