@@ -824,6 +824,70 @@ function streamSyntheticText(text: string, headers: Record<string, string>): Res
   return new Response(stream, { headers: { ...headers, "Content-Type": "text/event-stream" } });
 }
 
+// Safeguarding screen (KCSIE / §4). Recall-biased: a missed disclosure is the
+// highest-consequence failure, so this flags on ANY welfare signal and false
+// positives (into the DSL queue only) are acceptable. On error it logs a distinct
+// searchable marker rather than silently passing.
+async function screenForSafeguarding(
+  apiKey: string,
+  message: string,
+): Promise<{ concern: boolean; severity: 'low' | 'medium' | 'high'; category: string }> {
+  const none = { concern: false, severity: 'low' as const, category: '' };
+  const sys = `You screen a student's message in a school study tool for SAFEGUARDING concerns (UK KCSIE). Reply ONLY JSON: {"concern":boolean,"severity":"low"|"medium"|"high","category":string}.
+Set concern=true for ANY sign of: self-harm or suicidal thoughts, abuse or neglect (physical/emotional/sexual), being unsafe at home, eating disorders, severe distress, bullying, or intent to harm self or others — even if indirect, hinted, or wrapped inside an academic question. Bias HARD toward flagging: if there is ANY doubt, concern=true. Set concern=false ONLY when the message is clearly ordinary revision content with no welfare signal.
+severity: "high" = explicit or imminent risk; "medium" = clear but not imminent; "low" = mild or ambiguous.
+category: short label, e.g. "self-harm", "abuse", "distress", "eating-disorder", "harm-to-others".`;
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: MODELS.utility,
+        messages: [{ role: "system", content: sys }, { role: "user", content: message }],
+        temperature: 0,
+        max_tokens: 60,
+      }),
+    });
+    if (!res.ok) throw new Error(`safeguarding screen ${res.status}`);
+    const data = await res.json();
+    const raw = String(data?.choices?.[0]?.message?.content ?? "");
+    const s = raw.indexOf("{"); const e = raw.lastIndexOf("}");
+    if (s === -1 || e === -1) return none;
+    const p = JSON.parse(raw.slice(s, e + 1));
+    if (p.concern !== true) return none;
+    const sev = ['low', 'medium', 'high'].includes(p.severity) ? p.severity : 'medium';
+    return { concern: true, severity: sev, category: typeof p.category === 'string' ? p.category : 'unspecified' };
+  } catch (err) {
+    console.error('SAFEGUARDING_SCREEN_ERROR', String((err as Error)?.message ?? err));
+    return none;
+  }
+}
+
+// Alert a school's DSL of a raised flag. Best-effort — the durable record is the
+// safeguarding_flags row; this is the notification on top. Non-alarmist copy.
+async function notifyDsl(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  schoolId: string,
+  sg: { severity: string; category: string },
+): Promise<void> {
+  const resendKey = Deno.env.get("RESEND_API_KEY");
+  const fromEmail = Deno.env.get("FROM_EMAIL");
+  if (!resendKey || !fromEmail) return;
+  const { data: school } = await supabaseAdmin
+    .from('schools').select('name, dsl_email').eq('id', schoolId).maybeSingle();
+  const dsl = (school as { dsl_email?: string } | null)?.dsl_email;
+  if (!dsl) return;
+  const name = (school as { name?: string } | null)?.name ?? 'your school';
+  const html = `<p>A safeguarding flag has been raised in the A*AI Schools tool for ${name}.</p>
+<p><strong>Category:</strong> ${sg.category || 'unspecified'} &middot; <strong>Severity:</strong> ${sg.severity}</p>
+<p>Please review it in the Safeguarding tab of your teacher dashboard, where the flagged content is available in full. This is an automated notification to the Designated Safeguarding Lead.</p>`;
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${resendKey}` },
+    body: JSON.stringify({ from: fromEmail, to: [dsl], subject: `A*AI safeguarding flag — ${name}`, html }),
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -1152,6 +1216,26 @@ serve(async (req) => {
         }
       } catch (err) {
         console.error('School-mode resolution error:', err);
+      }
+    }
+
+    // ── SAFEGUARDING (KCSIE / §4). Recall-biased screen on every school-student
+    //    turn. A missed disclosure is the highest-consequence failure, so the
+    //    flag write is awaited (never dropped); the DSL email is best-effort.
+    if (schoolMode && user_id && schoolMember) {
+      try {
+        const sg = await screenForSafeguarding(lovableApiKey, typeof message === 'string' ? message : '');
+        if (sg.concern) {
+          await supabaseAdmin.from('safeguarding_flags').insert({
+            student_id: user_id, school_id: schoolMember.school_id, class_id: schoolMember.class_id,
+            severity: sg.severity, category: sg.category,
+            excerpt: (typeof message === 'string' ? message : '').slice(0, 500),
+          });
+          notifyDsl(supabaseAdmin, schoolMember.school_id, sg).catch((e) => console.error('DSL notify failed:', e));
+          console.log(`SAFEGUARDING_FLAG raised: severity=${sg.severity} category=${sg.category} school=${schoolMember.school_id}`);
+        }
+      } catch (err) {
+        console.error('SAFEGUARDING_BLOCK_ERROR', String((err as Error)?.message ?? err));
       }
     }
 
