@@ -20,7 +20,7 @@ Building an institutional (B2B) layer on the existing B2C Edexcel Economics Coac
 **Verified vs not:**
 - ✅ Schema, RLS, access pair — DB-verified via Management API + REST.
 - ✅ Frontend — `tsc` + `eslint` + `npm run build` clean; renders against seeded demo data (dev server).
-- ❌ `rag-chat` behaviour (gate/safeguarding) — **written, committed, NOT deployed** → not runtime-verified. Deploy is the unblocker.
+- ❌ `rag-chat` behaviour (gate/safeguarding) — **written, committed, NOT deployed** → not runtime-verified. Deploy is the unblocker. **Re-confirmed 2026-07-07 via `gate_test.py` against prod: door did NOT fire, `coach_interactions` empty → deployed `rag-chat` (v209) is still the pre-school-layer version.** (Test self-cleans; no prod residue.)
 
 ---
 
@@ -61,7 +61,21 @@ python3 <scratchpad>/gate_test.py   # expects ALL PASS once rag-chat is deployed
 
 ## 5. Next work (open tasks)
 
-- **#10 Materials ingestion (backend)** — lean MVP: new edge fn ingests text/markdown uploads → chunk → embed (ai.gateway `text-embedding-3-small`) → `document_chunks` with `metadata {content_type:'school_material', school_id, material_id}`; update `school_materials.status/chunks_created`. Then `rag-chat` retrieval: in school mode also pull chunks where `metadata.school_id` = student's school. PDF extraction deferred (cost). **Best built after deploy** (untestable-until-deployed edge code).
+- **#10 Materials ingestion (backend) — DEFERRED 2026-07-07 (James): base reuse is the MVP.**
+  Key realisation: in school mode `rag-chat` already retrieves the **full existing Edexcel Econ
+  B2C corpus** for free (students query the same `product_id`), so a school gets the whole Coach
+  the moment its students are seated — no ingestion needed. This pipeline is *only* for a
+  school's **own bespoke uploads** (their mark scheme / mock / house style), the B2B moat.
+  **Full build spec + status:** `docs/schools-materials-ingestion-plan.md` (STATUS: DEFERRED).
+  **Scaffolding built this session (present, NOT wired, NOT deployed):**
+  `supabase/functions/ingest-school-material/index.ts` (Opus-written after Fable died mid-call;
+  pdf via unpdf / docx via mammoth / txt+md; chunks inserted with **`product_id = null`** =
+  structural cross-school leak guard) + `<scratchpad>/materials_test.py` verifier (Fable-written,
+  Opus-reviewed). **Not done (do when un-deferring):** config.toml entry, `MaterialsPanel`
+  invoke trigger, rag-chat school-material retrieval merge, delete-cleanup migration, deploy.
+  ⚠️ **Before any real school sees the dashboard:** the Materials tab currently accepts uploads
+  that sit at `pending` forever (nothing processes them) — gate it to "coming soon" or complete
+  the pipeline first. (Not live yet: branch unpushed, so no Vercel deploy.)
 - **#8 skill_events population** — nothing writes `skill_events` yet → dashboard skill bars empty. Needs a real design (derive per-skill 0–1 signal from essay-marker AO marks / coaching), written server-side from `rag-chat`.
 - **#7 Slice 6 surround** — largely already covered by `StudentCoach` wiring the tool suite; remaining nuance: ensure tools respect usage-cap/logging.
 - **#4 Slice 3 Vertex cutover** — blocked on creds (§2). Also fold in here: the §3 rules 6–7 (anthropomorphism/sycophancy) **regeneration backstop** (staged — currently directive-only), and the **weekly cap** (RPC is daily-only).
