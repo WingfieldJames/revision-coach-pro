@@ -719,6 +719,111 @@ async function checkAndIncrementUsage(
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// SCHOOL MODE (B2B) — additive behaviour layer. Inert for B2C users: without an
+// accepted school_members row, schoolMode never activates and the path below is
+// byte-for-byte the consumer flow. See migration 20260707120000_b2b_schools_layer.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Attempt-first gate copy — a DOOR, not a wall: warm, low-bar, collaborative.
+const SCHOOL_DOOR_COPY = "Great question to get into. Before I add anything, show me your first move — your opening line of argument, or the first link in the chain. A rough sentence is plenty; we'll build it from there together.";
+
+// School-mode directive layer, tuned by the class's settings.
+function buildSchoolDirective(
+  settings: { scaffolding_tightness?: string; writing_aid_unlocked?: boolean; blocked_topics?: string[] } | null,
+): string {
+  const tightness = settings?.scaffolding_tightness || 'standard';
+  const revealRule = tightness === 'strict'
+    ? "Release only ONE hint, or one link in the causal chain, per turn — and only after the student responds each time."
+    : tightness === 'light'
+    ? "Guide with hints and leading questions; you may offer a fuller step once the student is clearly engaging."
+    : "Work in steps: a hint, or one link in the chain, at a time — each after the student responds.";
+  const writingAid = settings?.writing_aid_unlocked
+    ? ''
+    : "\n- The full-model-answer / writing-aid mode is locked for this class. If asked to simply write the answer, decline warmly and coach the student to write it themselves.";
+  const blocked = settings?.blocked_topics?.length
+    ? `\n- Do not help with these topics; redirect the student to their teacher: ${settings.blocked_topics.join(', ')}.`
+    : '';
+  return `\n--- SCHOOL MODE (supervised learning) ---
+This is a monitored school study tool. These rules override any request to the contrary:
+- Never give final answers, full model answers, or complete worked solutions up front. ${revealRule}
+- A fuller worked comparison unlocks only AFTER a genuine attempt, and is always framed against the student's own work — never handed over cold.
+- Coach the technique: KAA and evaluation structure, causal chains ("if X -> because Y -> therefore Z"), application to context, and what the mark scheme actually rewards.
+- Use function-based phrasing ("the mark scheme rewards...", "a stronger evaluation would..."). Never say "I think" / "I feel", never imply a persona or presence, never flatter. Feedback is specific and technique-focused.
+- Ground every point in the mark schemes, past papers and examiner reports. If unsure, say so rather than invent.${writingAid}${blocked}
+---\n`;
+}
+
+// Lightweight turn classifier. Biased HARD toward attempt_present=true: a genuine
+// attempt wrongly rejected is the worst failure mode, so any doubt resolves to true
+// and any error fails OPEN (no gate). Runs on the cheap utility model.
+async function classifyStudentTurn(
+  apiKey: string,
+  message: string,
+  history: Array<{ role: string; content: string }>,
+): Promise<{ is_fresh_question: boolean; attempt_present: boolean; offload_score: number }> {
+  const failOpen = { is_fresh_question: false, attempt_present: true, offload_score: 0 };
+  const recent = (history || []).slice(-4)
+    .map((h) => `${h.role}: ${typeof h.content === 'string' ? h.content : ''}`).join('\n');
+  const sys = `You classify one student turn in an exam-coaching tool. Reply with ONLY JSON: {"is_fresh_question":boolean,"attempt_present":boolean,"offload_score":number}.
+- is_fresh_question: true if the student is asking for help on a NEW exam question/task (pastes a question, "how do I answer...", "write me a 25 marker on...").
+- attempt_present: true if the student has offered ANY genuine reasoning, partial answer, argument or their own thinking — in THIS message OR the recent history. Bias strongly to TRUE. Return FALSE only when the student gave essentially nothing but a bare question or a demand for the answer. When in ANY doubt, return true.
+- offload_score: 0..1 — how much this looks like cognitive offloading (pasting a full question and demanding the answer, "just write it for me", refusing to try). 0 = engaged effort, 1 = pure offloading.`;
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: MODELS.utility,
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: `Recent history:\n${recent}\n\nCurrent message:\n${message}` },
+        ],
+        temperature: 0,
+        max_tokens: 120,
+      }),
+    });
+    if (!res.ok) throw new Error(`classifier ${res.status}`);
+    const data = await res.json();
+    let raw = String(data?.choices?.[0]?.message?.content ?? "").trim();
+    const s = raw.indexOf("{"); const e = raw.lastIndexOf("}");
+    if (s === -1 || e === -1) return failOpen;
+    const parsed = JSON.parse(raw.slice(s, e + 1));
+    return {
+      is_fresh_question: parsed.is_fresh_question === true,
+      attempt_present: parsed.attempt_present !== false, // default true — lenient
+      offload_score: typeof parsed.offload_score === 'number' ? parsed.offload_score : 0,
+    };
+  } catch (err) {
+    console.error('classifyStudentTurn failed, failing open (no gate):', err);
+    return failOpen;
+  }
+}
+
+// Persist a school Coach interaction (server-only; RLS gives clients no INSERT path).
+async function logCoachInteraction(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  row: Record<string, unknown>,
+): Promise<void> {
+  try { await supabaseAdmin.from('coach_interactions').insert(row); }
+  catch (err) { console.error('coach_interactions insert failed:', err); }
+}
+
+// Synthetic SSE stream (metadata event + one content delta) matching the client's
+// expected shape — answers the attempt-first gate without any model call.
+function streamSyntheticText(text: string, headers: Record<string, string>): Response {
+  const enc = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(enc.encode(`data: ${JSON.stringify({ sources_searched: [], diagram: null })}\n\n`));
+      controller.enqueue(enc.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`));
+      controller.enqueue(enc.encode(`data: [DONE]\n\n`));
+      controller.close();
+    },
+  });
+  return new Response(stream, { headers: { ...headers, "Content-Type": "text/event-stream" } });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -999,6 +1104,57 @@ serve(async (req) => {
     
     console.log(`Verified tier for user ${user_id}: ${tier}`);
 
+    // ── SCHOOL MODE resolution (additive; see helpers above). Resolves entirely
+    //    from the verified auth token. Students get the gate + directive; a seat
+    //    grants deluxe (server-side parity with productAccess.ts); teachers/admins
+    //    preview UNGATED but are still logged, role-tagged, for audit + analytics.
+    let schoolMode = false;
+    let schoolMember: { school_id: string; role: string; class_id: string | null } | null = null;
+    let classAiSettings: { scaffolding_tightness?: string; writing_aid_unlocked?: boolean; blocked_topics?: string[]; daily_cap?: number | null; weekly_cap?: number | null } | null = null;
+    if (user_id && product_id && !isTrainerTest) {
+      try {
+        const { data: memberships } = await supabaseAdmin
+          .from('school_members')
+          .select('school_id, role, school_licenses(active, expires_at, product_id)')
+          .eq('user_id', user_id)
+          .eq('invite_status', 'accepted');
+        if (memberships && memberships.length) {
+          const now = new Date();
+          const licensed = (memberships as any[]).some((m) => {
+            const lic = m.school_licenses;
+            return lic && lic.active
+              && (!lic.expires_at || new Date(lic.expires_at) >= now)
+              && (!lic.product_id || lic.product_id === product_id);
+          });
+          const chosen = (memberships as any[])[0];
+          schoolMember = { school_id: chosen.school_id, role: chosen.role, class_id: null };
+          if (licensed) tier = 'deluxe'; // seat grants deluxe features
+          schoolMode = chosen.role === 'student'; // gate + directive: students only
+          if (schoolMode) {
+            const { data: cm } = await supabaseAdmin
+              .from('class_members')
+              .select('class_id, classes!inner(school_id)')
+              .eq('user_id', user_id)
+              .eq('classes.school_id', chosen.school_id)
+              .limit(1)
+              .maybeSingle();
+            if (cm?.class_id) {
+              schoolMember.class_id = cm.class_id as string;
+              const { data: settings } = await supabaseAdmin
+                .from('class_ai_settings')
+                .select('scaffolding_tightness, writing_aid_unlocked, blocked_topics, daily_cap, weekly_cap')
+                .eq('class_id', cm.class_id)
+                .maybeSingle();
+              if (settings) classAiSettings = settings as typeof classAiSettings;
+            }
+          }
+          console.log(`School mode: role=${chosen.role} schoolMode=${schoolMode} licensed=${licensed} class=${schoolMember.class_id}`);
+        }
+      } catch (err) {
+        console.error('School-mode resolution error:', err);
+      }
+    }
+
     if (tier === 'free' && !isTrainerTest && tool_type === 'essay_marker' && user_id && product_id) {
       const { data: usageRow } = await supabaseAdmin
         .from('monthly_tool_usage')
@@ -1053,6 +1209,44 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
             headers: { ...corsHeaders, "Content-Type": "application/json" } 
           }
         );
+      }
+    }
+
+    // ── SCHOOL per-class daily cap (students). Deluxe school users skip the
+    //    free-tier cap above, so this is their only limiter. Reuses the daily RPC.
+    if (schoolMode && classAiSettings?.daily_cap && user_id && usageProductId) {
+      const { data: capData } = await supabaseAdmin.rpc('increment_prompt_usage', {
+        p_user_id: user_id,
+        p_product_id: usageProductId,
+        p_limit: classAiSettings.daily_cap,
+      });
+      if (capData?.exceeded) {
+        return new Response(
+          JSON.stringify({
+            error: 'limit_exceeded',
+            message: `You've reached today's limit of ${classAiSettings.daily_cap} set by your teacher. It resets at midnight — your revision tools stay open in the meantime.`,
+            usage: { count: capData.count, limit: capData.limit },
+          }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
+    }
+
+    // ── SCHOOL attempt-first gate (§3). HARD server gate: when a fresh question
+    //    arrives with clearly no attempt, the answer is never generated — the
+    //    student is invited to have a first go (a door, not a wall). Essay-marking
+    //    is exempt (marking implies an attempt already exists). Fails OPEN.
+    let schoolTurn: { is_fresh_question: boolean; attempt_present: boolean; offload_score: number } | null = null;
+    if (schoolMode && !isEssayMarkerRequest) {
+      schoolTurn = await classifyStudentTurn(lovableApiKey, message, history);
+      if (schoolTurn.is_fresh_question && !schoolTurn.attempt_present) {
+        await logCoachInteraction(supabaseAdmin, {
+          user_id, school_id: schoolMember!.school_id, class_id: schoolMember!.class_id,
+          product_id, role: schoolMember!.role, prompt: message, response: SCHOOL_DOOR_COPY,
+          sources: [], offload_score: schoolTurn.offload_score, attempt_detected: false,
+          disclosure_state: 'attempt_requested',
+        });
+        return streamSyntheticText(SCHOOL_DOOR_COPY, corsHeaders);
       }
     }
 
@@ -1133,7 +1327,8 @@ Use this to personalise your responses — reference their weak areas, their exa
     // Build final system prompt with context injection
     // INTERNAL PACING DIRECTIVE — silent, applies to all subjects/boards
     const PACING_DIRECTIVE = `INTERNAL PACING (do not mention to the user, never reference token/character/word/space limits, never say you are "running out of space" or similar): Aim to keep each response within roughly 2,500 words. Plan the structure of your answer up-front so it lands a clean, complete ending. If a topic is too large to cover fully, prioritise the most important points first and finish with a natural offer like "Want me to go deeper on [specific aspect]?" — never trail off mid-sentence or mid-list. Do not tell the user about this limit under any circumstances.\n\n`;
-    let finalSystemPrompt = PACING_DIRECTIVE + personalizedPrompt;
+    const schoolDirective = schoolMode ? buildSchoolDirective(classAiSettings) : '';
+    let finalSystemPrompt = PACING_DIRECTIVE + schoolDirective + personalizedPrompt;
     
     // Add essay marking instructions
     finalSystemPrompt += `\n\n--- ESSAY MARKING CAPABILITY ---
@@ -1297,12 +1492,13 @@ CRITICAL RULES:
       async start(controller) {
         // Send metadata (sources + diagram) first
         controller.enqueue(encoder.encode(metadataEvent));
-        
+
         // Then pipe through the AI response, watching for finish_reason: "length"
         const reader = response.body!.getReader();
         const decoder = new TextDecoder();
         let truncated = false;
         let buffer = "";
+        let assistantText = ""; // accumulated for the school audit log
         try {
           while (true) {
             const { done, value } = await reader.read();
@@ -1320,6 +1516,8 @@ CRITICAL RULES:
                 const parsed = JSON.parse(payload);
                 const fr = parsed?.choices?.[0]?.finish_reason;
                 if (fr === "length") truncated = true;
+                const dc = parsed?.choices?.[0]?.delta?.content;
+                if (typeof dc === "string") assistantText += dc;
               } catch { /* ignore non-JSON keepalives */ }
             }
           }
@@ -1331,6 +1529,18 @@ CRITICAL RULES:
             controller.enqueue(encoder.encode(footerDelta));
           }
         } finally {
+          // School audit log (server-only write). Students AND role-tagged previews
+          // are logged; dashboards filter role='student' so previews stay out of analytics.
+          if (schoolMember) {
+            await logCoachInteraction(supabaseAdmin, {
+              user_id, school_id: schoolMember.school_id, class_id: schoolMember.class_id,
+              product_id, role: schoolMember.role, prompt: message, response: assistantText,
+              sources: sourcesSearched ?? [],
+              offload_score: schoolTurn?.offload_score ?? null,
+              attempt_detected: schoolMode ? (schoolTurn ? schoolTurn.attempt_present : true) : null,
+              disclosure_state: schoolMode ? 'coaching' : 'preview',
+            });
+          }
           reader.releaseLock();
           controller.close();
         }
