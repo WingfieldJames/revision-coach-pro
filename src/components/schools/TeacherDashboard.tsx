@@ -1,11 +1,13 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { School as SchoolIcon } from 'lucide-react';
+import { useSchoolMembership } from '@/hooks/useSchoolMembership';
 import type { School } from '@/hooks/useSchoolMembership';
 import { OverviewPanel } from '@/components/schools/panels/OverviewPanel';
 import { RosterPanel } from '@/components/schools/panels/RosterPanel';
 import { SafeguardingPanel } from '@/components/schools/panels/SafeguardingPanel';
 import { TunabilityPanel } from '@/components/schools/panels/TunabilityPanel';
+import { BrandingPanel } from '@/components/schools/panels/BrandingPanel';
 
 interface TeacherDashboardProps {
   school: School;
@@ -13,6 +15,8 @@ interface TeacherDashboardProps {
 
 export const TeacherDashboard = ({ school }: TeacherDashboardProps) => {
   const { user } = useAuth();
+  const { membership } = useSchoolMembership();
+  const isAdmin = membership?.role === 'admin';
   const accent = school.primary_color || undefined;
   const teacherName = user?.email ?? 'Teacher';
 
@@ -50,6 +54,7 @@ export const TeacherDashboard = ({ school }: TeacherDashboardProps) => {
             <TabsTrigger value="roster">Roster</TabsTrigger>
             <TabsTrigger value="safeguarding">Safeguarding</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
+            {isAdmin && <TabsTrigger value="branding">Branding</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -64,6 +69,11 @@ export const TeacherDashboard = ({ school }: TeacherDashboardProps) => {
           <TabsContent value="settings" className="mt-6">
             <TunabilityPanel school={school} />
           </TabsContent>
+          {isAdmin && (
+            <TabsContent value="branding" className="mt-6">
+              <BrandingPanel school={school} />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
