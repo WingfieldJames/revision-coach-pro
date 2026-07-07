@@ -56,6 +56,7 @@ import { AdminSeedPage } from "./pages/AdminSeedPage";
 import { RevisionTopicPage } from "./pages/RevisionTopicPage";
 import { AdminContentHooksPage } from "./pages/AdminContentHooksPage";
 import { MetricsDashboard } from "./pages/MetricsDashboard";
+import { SchoolsApp } from "./pages/SchoolsApp";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
@@ -123,6 +124,7 @@ const App = () => (
             <Route path="/revision/:slug" element={<RevisionTopicPage />} />
             <Route path="/admin/content-hooks" element={<AdminContentHooksPage />} />
             <Route path="/metrics" element={<MetricsDashboard />} />
+            <Route path="/schools/app/*" element={<SchoolsApp />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
