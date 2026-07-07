@@ -1,6 +1,6 @@
 # A*AI — Claude Code Memory
 
-> **IMPORTANT — EXAM SEASON.** Do not change billing, auth, RLS, migrations, or anything under "Sacred files" until I update this line. Reversible UI/copy changes only. Push back on structural requests.
+> **Exam-season freeze lifted 2026-07-07; structural work permitted.** Sacred files (`productAccess.ts`, `stripe-webhook`, `create-checkout`, `migrations`, RLS, `AuthContext.tsx`) still require explicit per-change sign-off.
 
 ## Bash commands
 - `npm run dev` — start Vite dev server on localhost:8080
