@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, type ITab } from '@/components/ui/tabs';
 import { School as SchoolIcon } from 'lucide-react';
 import { useSchoolMembership } from '@/hooks/useSchoolMembership';
 import type { School } from '@/hooks/useSchoolMembership';
@@ -7,6 +8,7 @@ import { OverviewPanel } from '@/components/schools/panels/OverviewPanel';
 import { RosterPanel } from '@/components/schools/panels/RosterPanel';
 import { SafeguardingPanel } from '@/components/schools/panels/SafeguardingPanel';
 import { TunabilityPanel } from '@/components/schools/panels/TunabilityPanel';
+import { MaterialsPanel } from '@/components/schools/panels/MaterialsPanel';
 import { BrandingPanel } from '@/components/schools/panels/BrandingPanel';
 
 interface TeacherDashboardProps {
@@ -17,8 +19,20 @@ export const TeacherDashboard = ({ school }: TeacherDashboardProps) => {
   const { user } = useAuth();
   const { membership } = useSchoolMembership();
   const isAdmin = membership?.role === 'admin';
+  const canManageMaterials = membership?.role === 'teacher' || membership?.role === 'admin';
   const accent = school.primary_color || undefined;
   const teacherName = user?.email ?? 'Teacher';
+
+  const tabs: ITab[] = [
+    { title: 'Overview', value: 'overview' },
+    { title: 'Roster', value: 'roster' },
+    { title: 'Safeguarding', value: 'safeguarding' },
+    { title: 'Settings', value: 'settings' },
+    ...(canManageMaterials ? [{ title: 'Materials', value: 'materials' }] : []),
+    ...(isAdmin ? [{ title: 'Branding', value: 'branding' }] : []),
+  ];
+
+  const [selected, setSelected] = useState('overview');
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,33 +62,15 @@ export const TeacherDashboard = ({ school }: TeacherDashboardProps) => {
 
       {/* Tabs */}
       <div className="px-6 sm:px-10 py-6">
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="roster">Roster</TabsTrigger>
-            <TabsTrigger value="safeguarding">Safeguarding</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-            {isAdmin && <TabsTrigger value="branding">Branding</TabsTrigger>}
-          </TabsList>
-
-          <TabsContent value="overview" className="mt-6">
-            <OverviewPanel school={school} />
-          </TabsContent>
-          <TabsContent value="roster" className="mt-6">
-            <RosterPanel school={school} />
-          </TabsContent>
-          <TabsContent value="safeguarding" className="mt-6">
-            <SafeguardingPanel school={school} />
-          </TabsContent>
-          <TabsContent value="settings" className="mt-6">
-            <TunabilityPanel school={school} />
-          </TabsContent>
-          {isAdmin && (
-            <TabsContent value="branding" className="mt-6">
-              <BrandingPanel school={school} />
-            </TabsContent>
-          )}
-        </Tabs>
+        <Tabs selected={selected} setSelected={setSelected} tabs={tabs} />
+        <div className="mt-6">
+          {selected === 'overview' && <OverviewPanel school={school} />}
+          {selected === 'roster' && <RosterPanel school={school} />}
+          {selected === 'safeguarding' && <SafeguardingPanel school={school} />}
+          {selected === 'settings' && <TunabilityPanel school={school} />}
+          {selected === 'materials' && canManageMaterials && <MaterialsPanel school={school} />}
+          {selected === 'branding' && isAdmin && <BrandingPanel school={school} />}
+        </div>
       </div>
     </div>
   );
