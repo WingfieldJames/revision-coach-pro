@@ -163,9 +163,10 @@ export const RosterPanel = ({ school }: RosterPanelProps) => {
         return;
       }
 
-      // 2–5. Fetch supporting data in parallel.
-      const [usersRes, interactionsRes, skillsRes, flagsRes] = await Promise.all([
-        supabase.from('users').select('id, email').in('id', studentIds),
+      // 2–4. Fetch supporting data in parallel. Student identity comes from
+      // school_members.invited_email (already loaded above) — staff can read
+      // school_members via RLS but not other users' rows in the users table.
+      const [interactionsRes, skillsRes, flagsRes] = await Promise.all([
         supabase
           .from('coach_interactions')
           .select('user_id, offload_score, created_at')
@@ -187,12 +188,6 @@ export const RosterPanel = ({ school }: RosterPanelProps) => {
       ]);
 
       if (cancelled) return;
-
-      // Email lookup from the users table, with invited_email as fallback.
-      const emailById = new Map<string, string>();
-      for (const u of usersRes.data ?? []) {
-        emailById.set(u.id, u.email);
-      }
 
       // Aggregate coach_interactions per student.
       const now = Date.now();
@@ -261,7 +256,7 @@ export const RosterPanel = ({ school }: RosterPanelProps) => {
 
         return {
           userId: id,
-          email: emailById.get(id) ?? emailByMember.get(id) ?? '—',
+          email: emailByMember.get(id) ?? `Student ${id.slice(0, 8)}`,
           lastActive: inter?.lastActive ?? null,
           sessionsThisWeek: inter?.sessionsThisWeek ?? 0,
           offloadLevel,

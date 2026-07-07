@@ -110,18 +110,23 @@ export const SafeguardingPanel = ({ school }: SafeguardingPanelProps) => {
     setFlags(rows);
     setLoading(false);
 
-    // Best-effort resolution of student email for context. If RLS or absence
-    // prevents it, the queue still renders with a student reference.
+    // Best-effort resolution of student email for context via school_members
+    // (invited_email), which staff can read under school_members RLS — unlike
+    // other users' rows in the users table. If absent, the queue still renders
+    // with a student reference.
     const studentIds = Array.from(new Set(rows.map((r) => r.student_id)));
     if (studentIds.length > 0) {
-      const { data: userRows } = await supabase
-        .from('users')
-        .select('id, email')
-        .in('id', studentIds);
+      const { data: memberRows } = await supabase
+        .from('school_members')
+        .select('user_id, invited_email')
+        .eq('school_id', school.id)
+        .in('user_id', studentIds);
 
-      if (userRows) {
+      if (memberRows) {
         const map: Record<string, string> = {};
-        for (const u of userRows) map[u.id] = u.email;
+        for (const m of memberRows) {
+          if (m.user_id && m.invited_email) map[m.user_id] = m.invited_email;
+        }
         setStudentEmails(map);
       }
     }
