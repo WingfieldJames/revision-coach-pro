@@ -10,7 +10,7 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.cancel-subscription]
-verify_jwt = true
+verify_jwt = false
 
 [functions.admin-cancel-stripe-sub]
 verify_jwt = false
