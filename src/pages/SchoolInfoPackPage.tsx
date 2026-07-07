@@ -33,7 +33,7 @@ export const SchoolInfoPackPage = () => {
 
       {/* Screen-only nav bar */}
       <div className="print:hidden sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-        <Link to="/progress" className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
+        <Link to="/schools" className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4" /> Back to Schools
         </Link>
         <Button variant="brand" size="sm" onClick={handlePrint} className="rounded-full">
@@ -213,7 +213,7 @@ export const SchoolInfoPackPage = () => {
             <a href="https://calendly.com/jrrwingfield0/30min" target="_blank" rel="noopener noreferrer">
               <Button variant="brand" className="rounded-full">Book a demo</Button>
             </a>
-            <Link to="/progress">
+            <Link to="/schools">
               <Button variant="outline" className="rounded-full">Purchase seats</Button>
             </Link>
           </div>

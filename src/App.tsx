@@ -101,7 +101,9 @@ const App = () => (
             <Route path="/edexcel-maths-applied-free-version" element={<EdexcelMathsAppliedFreeVersionPage />} />
             <Route path="/edexcel-maths-applied-premium" element={<EdexcelMathsAppliedPremiumPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/schools" element={<ProgressPage />} />
+            {/* Legacy URL — schools marketing page moved /progress → /schools (2026-07). Vercel 308s it in prod; this covers dev + SPA fallback. */}
+            <Route path="/progress" element={<Navigate to="/schools" replace />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/test-rag" element={<TestRAGChatPage />} />
             <Route path="/build" element={<BuildPage />} />

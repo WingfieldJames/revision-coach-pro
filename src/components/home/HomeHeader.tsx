@@ -156,7 +156,7 @@ export const HomeHeader: React.FC = () => {
               Merch
             </div>
             <div
-              onClick={() => { navigate("/progress"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              onClick={() => { navigate("/schools"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
               style={navItem}
               onMouseOver={(e) => (e.currentTarget.style.color = "#18181b")}
               onMouseOut={(e) => (e.currentTarget.style.color = "#71717a")}

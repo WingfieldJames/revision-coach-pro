@@ -227,7 +227,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const getSelectedTab = () => {
-    if (location.pathname === '/progress') return 'profile';
+    if (location.pathname === '/schools') return 'profile';
     if (location.pathname === '/dashboard') return 'profile';
     if (location.pathname === '/login') return 'profile';
     if (location.pathname === '/compare') return 'pricing';
@@ -269,7 +269,7 @@ export const Header: React.FC<HeaderProps> = ({
     } else if (value === "merch") {
       window.open('https://astarai.printify.me', '_blank');
     } else if (value === "profile") {
-      navigate('/progress');
+      navigate('/schools');
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     }
   };

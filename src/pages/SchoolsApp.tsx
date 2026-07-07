@@ -37,7 +37,7 @@ export const SchoolsApp = () => {
               Ask your teacher for an invite, or head back to your dashboard.
             </p>
             <Button asChild variant="brand" className="rounded-full">
-              <a href="/progress">Back to dashboard</a>
+              <a href="/schools">Back to dashboard</a>
             </Button>
           </CardContent>
         </Card>

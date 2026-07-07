@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/progress",
+      "destination": "/schools",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
