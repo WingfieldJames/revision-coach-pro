@@ -629,11 +629,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
 
     // Record streak activity (fire and forget)
     if (user) {
-      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-streak`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({ user_id: user.id }),
-      }).catch(() => {});
+      supabase.functions.invoke('update-streak', { body: {} }).catch(() => {});
     }
 
     // Reset animation state
@@ -793,10 +789,8 @@ export const RAGChat: React.FC<RAGChatProps> = ({
           const brainEnabled = localStorage.getItem(`astar_brain_enabled_${user.id}`) === 'true';
           if (brainEnabled) {
             const conversationForBrain = [...messages, { role: 'user' as const, content: messageText }, { role: 'assistant' as const, content: fullContentRef.current }];
-            fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-brain-profile`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-              body: JSON.stringify({ user_id: user.id, conversation_history: conversationForBrain.slice(-20).map(m => ({ role: m.role, content: m.content })) }),
+            supabase.functions.invoke('update-brain-profile', {
+              body: { conversation_history: conversationForBrain.slice(-20).map(m => ({ role: m.role, content: m.content })) },
             }).catch(err => console.error('Brain profile update failed:', err));
           }
         }

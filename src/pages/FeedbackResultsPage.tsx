@@ -110,21 +110,13 @@ export const FeedbackResultsPage = () => {
     if (authStatus !== 'authorized') return;
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `https://xoipyycgycmpflfnrlty.supabase.co/functions/v1/get-feedback`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvaXB5eWNneWNtcGZsZm5ybHR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzkzMjUsImV4cCI6MjA2OTM1NTMyNX0.pU8Ej1aAvGoAQ6CuVZwvcCvWBxSGo61X16cfQxW7_bI",
-            },
-          }
-        );
-        const result = await response.json();
-        if (response.ok) {
+        const { data: result, error: invokeError } = await supabase.functions.invoke("get-feedback", {
+          body: {},
+        });
+        if (!invokeError && !result?.error) {
           setData(result);
         } else {
-          setError(result?.error || "Failed to load feedback data");
+          setError(result?.error || invokeError?.message || "Failed to load feedback data");
         }
       } catch {
         setError("Network error");

@@ -154,23 +154,15 @@ export const AnalyticsPage = () => {
     const fetchAnalytics = async (isBackground = false) => {
       if (!isBackground) setLoading(true);
       try {
-        const response = await fetch(
-          `https://xoipyycgycmpflfnrlty.supabase.co/functions/v1/get-analytics`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvaXB5eWNneWNtcGZsZm5ybHR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzkzMjUsImV4cCI6MjA2OTM1NTMyNX0.pU8Ej1aAvGoAQ6CuVZwvcCvWBxSGo61X16cfQxW7_bI",
-            },
-          }
-        );
-        const result = await response.json();
-        if (response.ok && !result?.error) {
+        const { data: result, error: invokeError } = await supabase.functions.invoke("get-analytics", {
+          body: {},
+        });
+        if (!invokeError && !result?.error) {
           setData(result);
           setLastUpdated(new Date());
           setError(null);
         } else {
-          if (!isBackground) setError(result?.error || "Failed to load analytics");
+          if (!isBackground) setError(result?.error || invokeError?.message || "Failed to load analytics");
         }
       } catch (e) {
         if (!isBackground) setError("Network error");
