@@ -99,7 +99,7 @@ nudge, never a lockout. → ✅ **written**; runtime-unverified until deploy (`g
 **Remaining rules & enforcement:**
 | # | Rule | Mechanism | Status |
 |---|---|---|---|
-| 5 | Mode friction | writing-aid default-locked per class, server-checked | ✅ (directive/settings) |
+| 5 | Mode friction | writing-aid (essay marker) default-locked per class; teacher unlocks in Tunability; **StudentCoach now enforces the lock** | ✅ |
 | 6 | No anthropomorphism | directive **+ server-side output post-filter** strips persona I-statements | ⚠️ **directive only — post-filter backstop not built** |
 | 7 | No sycophancy | directive **+ post-filter** flags flattery; technique-anchored feedback | ⚠️ **directive only — post-filter not built** |
 | 8 | Usage limits | daily cap via `increment_prompt_usage` RPC | ✅ daily; ⚠️ **weekly cap not built** |
@@ -141,7 +141,7 @@ built:
 | Roster & usage | DfE usage-visibility | ✅ |
 | Skills (KAA/Eval/Diagram/Application) | skill diagnostic | ⚠️ **bars empty — `skill_events` unpopulated (#8)** |
 | Safeguarding (DSL queue) | safeguarding | ✅ |
-| Settings / Tunability | AI tunability → `class_ai_settings` | ✅ |
+| Settings / Tunability | AI tunability → `class_ai_settings`: scaffolding, **per-class tool visibility** (`enabled_features`), **writing-aid lock**, blocked topics, caps | ✅ |
 | Materials | customisation | ✅ UI; ⛔ backend deferred (uploads sit `pending`) |
 | Branding | customisation | ✅ |
 | Assignments · Reporting/export | assignments, SLT report | ❌ **not built** (schema exists) |

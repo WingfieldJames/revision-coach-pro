@@ -372,6 +372,7 @@ export type Database = {
           blocked_topics: string[]
           class_id: string
           daily_cap: number | null
+          enabled_features: string[] | null
           id: string
           scaffolding_tightness: string
           updated_at: string
@@ -383,6 +384,7 @@ export type Database = {
           blocked_topics?: string[]
           class_id: string
           daily_cap?: number | null
+          enabled_features?: string[] | null
           id?: string
           scaffolding_tightness?: string
           updated_at?: string
@@ -394,6 +396,7 @@ export type Database = {
           blocked_topics?: string[]
           class_id?: string
           daily_cap?: number | null
+          enabled_features?: string[] | null
           id?: string
           scaffolding_tightness?: string
           updated_at?: string

@@ -32,6 +32,13 @@ interface UsageState {
   cap: number | null;
 }
 
+/** Per-class Coach settings that shape what the student sees. */
+interface ClassSettings {
+  writingAidUnlocked: boolean;
+  /** null = show every tool the product supports; otherwise a whitelist of feature ids. */
+  enabledFeatures: string[] | null;
+}
+
 interface StudentCoachProps {
   school: School;
 }
@@ -43,6 +50,7 @@ export const StudentCoach = ({ school }: StudentCoachProps) => {
   const [trainer, setTrainer] = useState<TrainerConfig | null>(null);
   const [resolvedImageUrl, setResolvedImageUrl] = useState<string | undefined>(undefined);
   const [usage, setUsage] = useState<UsageState | null>(null);
+  const [classSettings, setClassSettings] = useState<ClassSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,10 +104,14 @@ export const StudentCoach = ({ school }: StudentCoachProps) => {
         if (classId) {
           const { data: settings } = await supabase
             .from('class_ai_settings')
-            .select('daily_cap')
+            .select('daily_cap, writing_aid_unlocked, enabled_features')
             .eq('class_id', classId)
             .maybeSingle();
           cap = settings?.daily_cap ?? null;
+          setClassSettings({
+            writingAidUnlocked: settings?.writing_aid_unlocked ?? false,
+            enabledFeatures: settings?.enabled_features ?? null,
+          });
         }
 
         setUsage({ count: usageRow?.prompt_count ?? 0, cap });
@@ -121,6 +133,15 @@ export const StudentCoach = ({ school }: StudentCoachProps) => {
   const accent = school.primary_color || undefined;
   const features = trainer?.selected_features || [];
   const hasFeature = (id: string) => features.includes(id);
+  // Per-class teacher control: null enabledFeatures = show all (default); otherwise a whitelist.
+  const classEnabled = (id: string) =>
+    !classSettings || classSettings.enabledFeatures == null
+      ? true
+      : classSettings.enabledFeatures.includes(id);
+  // A tool shows only if the product supports it AND the teacher hasn't switched it off for this class.
+  const showTool = (id: string) => hasFeature(id) && classEnabled(id);
+  // Essay marker = writing aid: locked by default, revealed only when the teacher unlocks it (§3.5).
+  const writingAidUnlocked = classSettings?.writingAidUnlocked ?? false;
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
   const qualType = trainer?.qualification_type || 'A-Level';
   const isGCSE = qualType === 'GCSE';
@@ -142,23 +163,23 @@ export const StudentCoach = ({ school }: StudentCoachProps) => {
     subjectName,
     productId: product.id,
     productSlug: product.slug,
-    showMyAI: hasFeature('my_ai'),
-    showDiagramTool: hasFeature('diagram_generator'),
+    showMyAI: showTool('my_ai'),
+    showDiagramTool: showTool('diagram_generator'),
     diagramSubject,
     customDiagramData: trainer?.diagram_library || undefined,
-    showPastPaperFinder: hasFeature('past_papers'),
-    showRevisionGuide: hasFeature('revision_guide'),
-    showEssayMarker: hasFeature('essay_marker'),
-    showExamCountdown: hasFeature('exam_countdown'),
-    showGradeBoundaries: hasFeature('grade_boundaries'),
+    showPastPaperFinder: showTool('past_papers'),
+    showRevisionGuide: showTool('revision_guide'),
+    showEssayMarker: hasFeature('essay_marker') && writingAidUnlocked,
+    showExamCountdown: showTool('exam_countdown'),
+    showGradeBoundaries: showTool('grade_boundaries'),
     gradeBoundariesData: trainer?.grade_boundaries_data || null,
     isGCSE,
     examDates,
     examSubjectName: subjectName,
-    showMyMistakes: hasFeature('my_mistakes'),
+    showMyMistakes: showTool('my_mistakes'),
     onEssayMarkerSubmit: handleEssayMarkerSubmit,
     essayMarkerCustomMarks: trainer?.essay_marker_marks || undefined,
-    showMockExam: true,
+    showMockExam: classEnabled('mock_exam'),
     mockExamBoard: product.exam_board,
     mockExamSubject: product.subject,
     customPastPaperContent: <DynamicPastPaperFinder productId={product.id} subjectName={product.subject} tier="deluxe" />,

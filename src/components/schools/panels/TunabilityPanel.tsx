@@ -54,6 +54,24 @@ const SCAFFOLDING_OPTIONS: {
   },
 ];
 
+/** The product whose Coach the school layer wraps. */
+const SCHOOL_PRODUCT_SLUG = 'edexcel-economics';
+
+/**
+ * Tools a teacher can show/hide per class. Ids match StudentCoach's feature flags.
+ * The essay marker is deliberately NOT here — it's governed by the writing-aid lock.
+ */
+const TOOL_FEATURES: { id: string; label: string }[] = [
+  { id: 'my_ai', label: 'My AI' },
+  { id: 'diagram_generator', label: 'Diagram generator' },
+  { id: 'past_papers', label: 'Past paper finder' },
+  { id: 'revision_guide', label: 'Revision guide' },
+  { id: 'exam_countdown', label: 'Exam countdown' },
+  { id: 'grade_boundaries', label: 'Grade boundaries' },
+  { id: 'my_mistakes', label: 'My Mistakes' },
+  { id: 'mock_exam', label: 'Mock exam' },
+];
+
 /** Defaults used when a class has no class_ai_settings row yet. */
 const DEFAULT_SETTINGS = {
   scaffolding_tightness: 'standard' as ScaffoldingTightness,
@@ -61,6 +79,7 @@ const DEFAULT_SETTINGS = {
   blocked_topics: [] as string[],
   daily_cap: null as number | null,
   weekly_cap: null as number | null,
+  enabled_features: null as string[] | null,
 };
 
 interface FormState {
@@ -69,6 +88,8 @@ interface FormState {
   blocked_topics: string;
   daily_cap: string;
   weekly_cap: string;
+  /** null = show every available tool (default); otherwise the whitelist of on tool ids. */
+  enabled_features: string[] | null;
 }
 
 const settingsToForm = (s: {
@@ -77,12 +98,14 @@ const settingsToForm = (s: {
   blocked_topics: string[];
   daily_cap: number | null;
   weekly_cap: number | null;
+  enabled_features: string[] | null;
 }): FormState => ({
   scaffolding_tightness: s.scaffolding_tightness,
   writing_aid_unlocked: s.writing_aid_unlocked,
   blocked_topics: s.blocked_topics.join(', '),
   daily_cap: s.daily_cap == null ? '' : String(s.daily_cap),
   weekly_cap: s.weekly_cap == null ? '' : String(s.weekly_cap),
+  enabled_features: s.enabled_features,
 });
 
 const parseCap = (value: string): number | null => {
@@ -108,6 +131,48 @@ export const TunabilityPanel = ({ school }: TunabilityPanelProps) => {
   const [form, setForm] = useState<FormState>(() => settingsToForm(DEFAULT_SETTINGS));
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Which tools this product actually supports — the teacher can only toggle among these.
+  const [availableTools, setAvailableTools] = useState<{ id: string; label: string }[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadFeatures = async () => {
+      const { data: prod } = await supabase
+        .from('products')
+        .select('id')
+        .eq('slug', SCHOOL_PRODUCT_SLUG)
+        .maybeSingle();
+      if (!prod) return;
+      const { data: tp } = await supabase
+        .from('trainer_projects')
+        .select('selected_features')
+        .eq('product_id', prod.id)
+        .maybeSingle();
+      if (cancelled) return;
+      const productFeatures = (tp?.selected_features as string[] | null) ?? [];
+      // Mock exam is always offerable (force-on for B2C); the rest come from the product config.
+      setAvailableTools(
+        TOOL_FEATURES.filter((t) => t.id === 'mock_exam' || productFeatures.includes(t.id)),
+      );
+    };
+    loadFeatures();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /** Is a tool switched on for this class? null enabled_features = all on (default). */
+  const isToolOn = (id: string): boolean =>
+    form.enabled_features == null ? true : form.enabled_features.includes(id);
+
+  const toggleTool = (id: string, on: boolean) =>
+    setForm((f) => {
+      // Materialise the implicit "all on" set before removing one, so semantics stay explicit.
+      const base = f.enabled_features == null ? availableTools.map((t) => t.id) : [...f.enabled_features];
+      const next = on ? Array.from(new Set([...base, id])) : base.filter((x) => x !== id);
+      return { ...f, enabled_features: next };
+    });
 
   const selectedClass = useMemo(
     () => classes.find((c) => c.id === selectedClassId) ?? null,
@@ -169,6 +234,7 @@ export const TunabilityPanel = ({ school }: TunabilityPanelProps) => {
           blocked_topics: row.blocked_topics ?? [],
           daily_cap: row.daily_cap,
           weekly_cap: row.weekly_cap,
+          enabled_features: row.enabled_features ?? null,
         }),
       );
     } else {
@@ -194,6 +260,7 @@ export const TunabilityPanel = ({ school }: TunabilityPanelProps) => {
         blocked_topics: parseTopics(form.blocked_topics),
         daily_cap: parseCap(form.daily_cap),
         weekly_cap: parseCap(form.weekly_cap),
+        enabled_features: form.enabled_features,
         updated_by: user?.id ?? null,
         updated_at: new Date().toISOString(),
       },
@@ -372,6 +439,36 @@ export const TunabilityPanel = ({ school }: TunabilityPanelProps) => {
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className={loadingSettings ? 'opacity-60 pointer-events-none' : undefined}>
+        <CardHeader>
+          <CardTitle className="text-base">Tools students can see</CardTitle>
+          <CardDescription>
+            Choose which Coach tools appear for this class. Anything switched off is hidden from
+            students entirely. The essay marker is controlled separately by the writing-aid lock above.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {availableTools.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Loading available tools…</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {availableTools.map((tool) => (
+                <li key={tool.id} className="flex items-center justify-between gap-4 py-3">
+                  <Label htmlFor={`tool-${tool.id}`} className="text-sm font-medium">
+                    {tool.label}
+                  </Label>
+                  <Switch
+                    id={`tool-${tool.id}`}
+                    checked={isToolOn(tool.id)}
+                    onCheckedChange={(checked) => toggleTool(tool.id, checked)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
         </CardContent>
       </Card>
 
