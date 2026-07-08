@@ -8,7 +8,9 @@
 > and the prioritised "what's left to finish" list. This handover is the *session state*; that
 > is the *master plan*.
 
-Last updated: 2026-07-07, end of build session. Branch: **`feat/schools-b2b-layer`** (10 commits, **not pushed**).
+Last updated: **2026-07-08**. Branch: **merged to `main` and pushed** (auto-deploys frontend via Vercel). The `feat/schools-b2b-layer` branch has been fast-forwarded onto `main`; work continues on `main`.
+
+**Also see:** the **positioning artifact** — capability & marketing inventory, honestly tiered Live/Built/Roadmap (what to market, how to frame it). Published at `https://claude.ai/code/artifact/8dc396f8-20d0-48fa-9a61-cec3ee85e5f6`; HTML source in the current session scratchpad (`schools-positioning.html`). **Not yet committed to `docs/`** — offer to if it should be durable.
 
 ---
 
@@ -22,10 +24,12 @@ Building an institutional (B2B) layer on the existing B2C Edexcel Economics Coac
 - **Behaviour layer** (`rag-chat`) — server-resolved `schoolMode` (students only), attempt-first **door** gate (lenient classifier, fails open), per-class directive, seat→deluxe, per-class daily cap, server-only `coach_interactions` logging (previews role-tagged out of analytics).
 - **Safeguarding** (`rag-chat`) — recall-biased screen → `safeguarding_flags` (DSL-only) + best-effort Resend alert.
 - **Frontend** — `/schools/app/*` mount, `useSchoolMembership`, `StudentCoach` shell (branded header, AI-disclosure banner, usage meter, full tool surround), `TeacherDashboard` + 6 tabs: Overview / Roster / Safeguarding / Settings(Tunability) / Materials / Branding.
+- **Routing (2026-07-08)** — schools **marketing page moved `/progress` → `/schools`** (308 redirect in `vercel.json` + client fallback; canonical/sitemap/all internal links updated). **Login seam wired:** "Log into your school account" → `/login?redirect=schools/app` so seated users land in the app. `/schools/app/*` is the gated product. *(Cosmetic debt: the component file is still `ProgressPage.tsx`.)*
+- **Per-class feature control + writing-aid lock (2026-07-08)** — teachers tailor each class: `class_ai_settings.enabled_features text[]` (migration `20260708120000_class_enabled_features.sql`, **applied to prod**; null = show all). `StudentCoach` gates every tool by `hasFeature(id) && classEnabled(id)`; **essay marker now honours `writing_aid_unlocked`** (default locked — closes the earlier "essay marker always shown" gap). Tunability panel has a "Tools students can see" card. Verified end-to-end via REST+RLS round-trip.
 
 **Verified vs not:**
-- ✅ Schema, RLS, access pair — DB-verified via Management API + REST.
-- ✅ Frontend — `tsc` + `eslint` + `npm run build` clean; renders against seeded demo data (dev server).
+- ✅ Schema, RLS, access pair, per-class feature control — DB-verified via Management API + REST.
+- ✅ Frontend — `tsc` + `eslint` + `npm run build` clean; **merged to `main`, live on Vercel** (only demo school seated → nil real exposure).
 - ❌ `rag-chat` behaviour (gate/safeguarding) — **written, committed, NOT deployed** → not runtime-verified. Deploy is the unblocker. **Re-confirmed 2026-07-07 via `gate_test.py` against prod: door did NOT fire, `coach_interactions` empty → deployed `rag-chat` (v209) is still the pre-school-layer version.** (Test self-cleans; no prod residue.)
 
 ---
@@ -44,7 +48,10 @@ Scratchpad dir (this session): `/private/tmp/claude-501/-Users-jameswingfield-de
 - `apply_migration.py` — applies a migration via Management API (`POST /v1/projects/{ref}/database/query`). Note the **User-Agent header** is required (Cloudflare 1010 otherwise).
 - `verify_access_pair.py` — seeds a fixture, checks client+server access grant as a pair, tears down.
 - `gate_test.py` — **run AFTER rag-chat deploy**: seeds a seated student, asserts no-attempt→door / attempt→coaching, checks audit rows.
+- `materials_test.py` — post-deploy verifier for the (deferred) materials pipeline: seeds a class, uploads a sentinel `.md`, ingests, asserts chunks are `product_id=null`/school-scoped, leak-checks, tests delete cleanup. Only meaningful once `ingest-school-material` is deployed + un-deferred.
 - `seed_demo_school.py` — (re)seeds the demo school below.
+
+Note: the `.sb-secrets.env` + these scripts live in the **prior session's** scratchpad (`…/8358bb4a-…/scratchpad/`), confirmed present 2026-07-08. If gone, ask James to re-provide the secrets.
 
 Project ref: `xoipyycgycmpflfnrlty`. Management API needs `User-Agent` header + `sbp_` token. Service-role key works for REST/seed/verify (not DDL).
 
@@ -81,9 +88,10 @@ python3 <scratchpad>/gate_test.py   # expects ALL PASS once rag-chat is deployed
   invoke trigger, rag-chat school-material retrieval merge, delete-cleanup migration, deploy.
   ⚠️ **Before any real school sees the dashboard:** the Materials tab currently accepts uploads
   that sit at `pending` forever (nothing processes them) — gate it to "coming soon" or complete
-  the pipeline first. (Not live yet: branch unpushed, so no Vercel deploy.)
+  the pipeline first. **(Frontend is now live on `main`/Vercel — but only the demo school is
+  seated, so this is a pre-real-onboarding hygiene item, not a live incident.)**
 - **#8 skill_events population** — nothing writes `skill_events` yet → dashboard skill bars empty. Needs a real design (derive per-skill 0–1 signal from essay-marker AO marks / coaching), written server-side from `rag-chat`.
-- **#7 Slice 6 surround** — largely already covered by `StudentCoach` wiring the tool suite; remaining nuance: ensure tools respect usage-cap/logging.
+- **#7 Slice 6 surround** — tool suite wired; **per-class tool visibility + writing-aid lock now DONE (2026-07-08)**. Remaining nuance: ensure tools respect usage-cap/logging server-side (edge work, needs deploy).
 - **#4 Slice 3 Vertex cutover** — blocked on creds (§2). Also fold in here: the §3 rules 6–7 (anthropomorphism/sycophancy) **regeneration backstop** (staged — currently directive-only), and the **weekly cap** (RPC is daily-only).
 
 Note: all remaining edge-function work is undeployable/untestable locally (no Deno/CLI here) → build it in a batch and have James deploy, then verify.
@@ -102,7 +110,7 @@ Note: all remaining edge-function work is undeployable/untestable locally (no De
 
 ## 7. How to resume in a new session
 
-1. Memories auto-load (see `MEMORY.md`). Read this file.
-2. `cd` to repo, `git checkout feat/schools-b2b-layer`, `git log --oneline -12`.
-3. Check task list. Confirm the scratchpad secrets file still exists (§3) or ask James to re-provide.
-4. If James has deployed `rag-chat`: run `gate_test.py`, then proceed to #10/#8. If Vertex creds arrived: do slice 3. Otherwise: nothing new to build blind — confirm with James.
+1. Memories auto-load (see `MEMORY.md`). Read this file, then `docs/schools-b2b-master-plan.md`.
+2. `cd` to repo — **work is on `main`** now (branch merged). `git log --oneline -15`.
+3. Confirm the scratchpad secrets file still exists (§3) or ask James to re-provide.
+4. If James has deployed `rag-chat`: run `gate_test.py`, then proceed to **#8 skill_events** (next real build). If Vertex creds arrived: do slice 3. Otherwise: buildable-blind work is limited (see master plan §7) — confirm scope with James before building edge code that can't be verified until deploy.
