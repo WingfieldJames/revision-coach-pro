@@ -3,8 +3,12 @@
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  // Superset of every header any function previously allowed — includes the
+  // supabase-js `x-supabase-client-*` set so browser preflights aren't blocked.
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-cron-secret",
+    "authorization, x-client-info, apikey, content-type, x-cron-secret, " +
+    "x-supabase-client-platform, x-supabase-client-platform-version, " +
+    "x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 /** Return a preflight response for OPTIONS, else null. */
