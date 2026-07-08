@@ -62,6 +62,12 @@ export interface ChatOptions {
   /** attach for cost logging */
   logCtx?: { admin?: SupabaseClient; fn: string; userId?: string };
   timeoutMs?: number;
+  /**
+   * Sampling temperature. Sent ONLY on the OpenAI-shaped (Gemini) path;
+   * ignored on the Anthropic path (Claude Sonnet rejects `temperature`).
+   * Use for deterministic calls (low, e.g. safeguarding) or creative ones.
+   */
+  temperature?: number;
 }
 
 export interface ChatResult {
@@ -82,6 +88,10 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 3): Promise<T> {
       return await fn();
     } catch (e) {
       lastErr = e;
+      // Timeout (AbortController) already waited the full duration — don't retry
+      // it, or a slow provider turns one 8s wait into ~25s and can blow the
+      // edge-function wall clock (regression seen in deploy-subject's embeds).
+      if ((e as { name?: string })?.name === "AbortError") throw e;
       const status = (e as { status?: number })?.status;
       // Only retry transient failures.
       if (status && status !== 429 && status < 500) throw e;
@@ -117,6 +127,9 @@ async function callOpenAIShaped(spec: ModelSpec, opts: ChatOptions): Promise<Cha
         model: spec.model, // bare, no "google/" prefix
         messages,
         max_tokens: opts.maxTokens ?? 1024,
+        // temperature is accepted on the Gemini OpenAI-compat endpoint (unlike
+        // the Anthropic path); only send it when a caller explicitly sets one.
+        ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
       }),
     },
     opts.timeoutMs ?? 30000,

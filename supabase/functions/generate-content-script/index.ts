@@ -61,7 +61,7 @@ serve(async (req) => {
       "",
       SCRIPT_PROMPT(topic, board, subject, hookType),
       "chat",
-      { maxTokens: 800, logCtx: { admin, fn: "generate-content-script", userId: user.id } },
+      { maxTokens: 800, temperature: 0.8, logCtx: { admin, fn: "generate-content-script", userId: user.id } },
     );
 
     return json({ scriptText });

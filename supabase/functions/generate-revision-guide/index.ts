@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { preflight, json, err, toResponse } from "../_shared/http.ts";
-import { requireUser } from "../_shared/auth.ts";
-import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
+import { optionalUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, ipKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
 import { chatCompletion } from "../_shared/ai.ts";
 
 const MAX_CONTEXT_CHARS = 40000;
@@ -11,10 +11,14 @@ serve(async (req) => {
   if (pre) return pre;
 
   try {
-    const { user, admin: supabaseAdmin } = await requireUser(req);
-    await enforceRateLimit(supabaseAdmin, { key: userKey(user.id, "generate-revision-guide"), ...RATE_LIMITS.chat });
+    // Best-effort auth: the logged-out /free funnel must work anonymously. Logged-in
+    // callers are rate-limited by user; anon callers by IP (which now caps anon abuse
+    // in place of the per-user monthly limit that only applies to logged-in users).
+    const { user, admin: supabaseAdmin } = await optionalUser(req);
+    const rlKey = user ? userKey(user.id, "generate-revision-guide") : ipKey(req, "generate-revision-guide");
+    await enforceRateLimit(supabaseAdmin, { key: rlKey, ...RATE_LIMITS.chat });
 
-    const userId = user.id;
+    const userId = user?.id ?? null;
 
     const {
       product_id,

@@ -51,6 +51,25 @@ export async function requireUser(req: Request): Promise<AuthContext> {
   return { user: { id: user.id, email: user.email ?? undefined }, admin: serviceClient() };
 }
 
+/**
+ * Best-effort auth: returns the verified user if a valid JWT is present, else
+ * null (never throws on a missing/invalid token). Use for endpoints that allow
+ * anonymous access but want per-user behaviour + rate limiting when logged in
+ * (e.g. the logged-out /free chatbot funnel). When the anon publishable key is
+ * sent as the bearer, getUser() yields no user → treated as anonymous.
+ */
+export async function optionalUser(req: Request): Promise<{ user: AuthedUser | null; admin: SupabaseClient }> {
+  const admin = serviceClient();
+  const authHeader = req.headers.get("Authorization") || "";
+  if (!authHeader) return { user: null, admin };
+  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false },
+  });
+  const { data: { user } } = await userClient.auth.getUser();
+  return { user: user ? { id: user.id, email: user.email ?? undefined } : null, admin };
+}
+
 /** Require an authenticated admin. Throws 401 (no user) or 403 (not admin). */
 export async function requireAdmin(req: Request): Promise<AuthContext> {
   const ctx = await requireUser(req);

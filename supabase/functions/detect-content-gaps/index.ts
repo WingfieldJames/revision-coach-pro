@@ -75,7 +75,7 @@ serve(async (req) => {
       let rawContent: string;
       try {
         const result = await chatCompletion({
-          model: "chat",
+          model: "fast",
           system: `You are an expert curriculum analyst for UK students. You will be given a list of student questions and a list of topics that already have training data. Your job is to identify the top 5 topics that students are frequently asking about but have little or no coverage in the existing training data.
 
 Return ONLY a JSON array of objects, each with:

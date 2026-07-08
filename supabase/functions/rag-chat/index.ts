@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { HttpError } from "../_shared/http.ts";
-import { requireUser } from "../_shared/auth.ts";
-import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
+import { optionalUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, ipKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
 import { chat, chatCompletion } from "../_shared/ai.ts";
 
 const corsHeaders = {
@@ -801,7 +801,7 @@ severity: "high" = explicit or imminent risk; "medium" = clear but not imminent;
 category: short label, e.g. "self-harm", "abuse", "distress", "eating-disorder", "harm-to-others".`;
   try {
     // Utility model (gemini-2.0-flash-lite) via the shared Gemini client.
-    const raw = String(await chat(sys, message, "fast", { maxTokens: 60 }) ?? "");
+    const raw = String(await chat(sys, message, "fast", { maxTokens: 60, temperature: 0.2 }) ?? "");
     const s = raw.indexOf("{"); const e = raw.lastIndexOf("}");
     if (s === -1 || e === -1) return none;
     const p = JSON.parse(raw.slice(s, e + 1));
@@ -845,17 +845,21 @@ serve(async (req) => {
   }
 
   try {
-    // Require a logged-in student (was best-effort auth allowing free anon use)
-    // and cap per-user burst before any AI or heavy DB work runs.
-    const { user, admin } = await requireUser(req);
-    await enforceRateLimit(admin, { key: userKey(user.id, "rag-chat"), ...RATE_LIMITS.chat });
+    // Best-effort auth: the logged-out /free chatbot + past-paper funnel must work
+    // anonymously. Logged-in callers get per-user behaviour + rate limiting; anon
+    // callers are rate-limited by IP. Cap burst before any AI or heavy DB work runs.
+    const { user, admin } = await optionalUser(req);
+    const rlKey = user ? userKey(user.id, "rag-chat") : ipKey(req, "rag-chat");
+    await enforceRateLimit(admin, { key: rlKey, ...RATE_LIMITS.chat });
     const supabaseAdmin = admin;
 
     const body = await req.json();
     const { message, product_id, history = [], tier: _clientTier = 'free', enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id, spec_content, tool_type } = body;
 
     // SECURITY: user id is taken from the verified token only — never the body.
-    const user_id = user.id;
+    // Anonymous callers (logged-out /free funnel) have no token → null, which the
+    // free/anon path below tolerates exactly as the original null-user_id case did.
+    const user_id = user?.id ?? null;
 
     // SECURITY: Fetch user_preferences server-side — ignore any sent by the client
     let user_preferences: { year: string; predicted_grade: string; target_grade: string; additional_info: string | null } | null = null;

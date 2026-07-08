@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { preflight, json, err, toResponse } from "../_shared/http.ts";
-import { requireAdmin } from "../_shared/auth.ts";
+import { requireOwnedProject } from "../_shared/auth.ts";
 
 interface ContentChunk {
   content: string;
@@ -25,15 +25,18 @@ serve(async (req) => {
   if (pre) return pre;
 
   try {
-    // AUTH: admin-only one-off ingestion tool. Closes the pre-fix hole where
-    // any anonymous caller could inject chunks into the RAG corpus students see.
-    const { admin: supabase } = await requireAdmin(req);
-
+    // Parse the body first so we can guard on its product_id (matches
+    // update-system-prompt). Closes the pre-fix hole where any anonymous
+    // caller could inject chunks into the RAG corpus students see.
     const { product_id, chunks }: IngestRequest = await req.json();
 
     if (!product_id) {
       return err("product_id is required", 400);
     }
+
+    // AUTH: trainer who owns/trains this subject, or an admin. BuildPage's
+    // "Add text" feature is used by trainers, not just admins.
+    const { admin: supabase } = await requireOwnedProject(req, product_id);
 
     if (!chunks || !Array.isArray(chunks) || chunks.length === 0) {
       return err("chunks array is required and must not be empty", 400);

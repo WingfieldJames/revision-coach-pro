@@ -152,6 +152,7 @@ Do NOT include generic advice. Only include specific guidelines derived from the
         const { text } = await chatCompletion({
           model: "chat",
           messages: [{ role: "user", content: analysisPrompt }],
+          maxTokens: 4000,
           logCtx: { admin: supabaseAdmin, fn: "analyze-feedback" },
         });
         guidelines = text;

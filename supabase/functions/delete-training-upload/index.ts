@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { preflight, json, err, toResponse } from "../_shared/http.ts";
-import { requireUser, requireOwnedProject, requireAdmin } from "../_shared/auth.ts";
+import { requireUser, requireOwnedProject } from "../_shared/auth.ts";
 
 serve(async (req) => {
   const pre = preflight(req);
@@ -9,7 +9,7 @@ serve(async (req) => {
   try {
     // AUTH: verified caller first; ownership is enforced below against the
     // upload's owning project.
-    const { admin: supabase } = await requireUser(req);
+    const { user, admin: supabase } = await requireUser(req);
 
     const { upload_id, delete_chunks } = await req.json();
     if (!upload_id) return err("upload_id is required", 400);
@@ -24,19 +24,30 @@ serve(async (req) => {
     if (fetchErr || !upload) return err("Upload not found", 400);
 
     // OWNERSHIP: the upload belongs to a trainer_project; resolve its product
-    // and require the caller to own/train that subject (admins bypass). If no
-    // product is linked we cannot cheaply establish ownership, so fall back to
-    // admin-only.
+    // and require the caller to own/train that subject (admins bypass).
     const { data: ownerProject } = await supabase
       .from("trainer_projects")
-      .select("product_id")
+      .select("product_id, user_id")
       .eq("id", upload.project_id)
       .single();
 
     if (ownerProject?.product_id) {
       await requireOwnedProject(req, ownerProject.product_id);
     } else {
-      await requireAdmin(req);
+      // Pre-deploy upload (no product linked yet): a legit trainer must still
+      // be able to delete their own upload. Allow if the caller owns the
+      // owning project directly, or is an admin (mirrors requireOwnedProject's
+      // admin bypass). Otherwise 403.
+      const ownsProject = ownerProject?.user_id === user.id;
+      if (!ownsProject) {
+        const { data: adminRow } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (!adminRow) return err("Forbidden", 403);
+      }
     }
 
     // If delete_chunks is true, also delete associated document_chunks
