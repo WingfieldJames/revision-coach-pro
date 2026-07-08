@@ -23,36 +23,6 @@ interface ContentScript {
 
 const HOOK_TYPES = ["question", "myth-bust", "exam-tip"] as const;
 
-const SCRIPT_PROMPT = (topic: string, examBoard: string, subject: string, hookType: string) => `You are a content writer for A* AI, a UK A-Level revision platform. Write a 60-second TikTok/YouTube Shorts script about "${topic}" for ${examBoard} ${subject} students.
-
-TONE: Casual, peer-to-peer, UK student voice. Think "your smart friend explaining it to you." NOT corporate or textbook-y. Use "you" and "we." Keep it punchy and conversational.
-
-HOOK TYPE: ${hookType === "question" ? "Start with a provocative question" : hookType === "myth-bust" ? "Start by busting a common misconception" : "Start with a surprising exam tip"}
-
-STRUCTURE (strict):
-[HOOK - 3 seconds] An attention-grabbing opening line that makes someone stop scrolling. Must be specific to the topic, not generic.
-[SETUP - 10 seconds] What the concept actually is, in plain English. No jargon without explanation.
-[CORE - 30 seconds] The key insight — the thing most students get wrong or don't understand. This is the value. Include a specific example or analogy.
-[EXAM TIP - 12 seconds] How this specifically shows up in ${examBoard} ${subject} exams. What the examiner wants to see.
-[CTA - 5 seconds] "Link in bio for AI-powered revision that actually knows your mark scheme."
-
-FORMAT your response EXACTLY like this (include the section labels):
-
-[HOOK]
-(your hook line here)
-
-[SETUP]
-(your setup here)
-
-[CORE]
-(your core explanation here)
-
-[EXAM TIP]
-(your exam tip here)
-
-[CTA]
-Link in bio for AI-powered revision that actually knows your mark scheme.`;
-
 export const AdminContentHooksPage = () => {
   const { user } = useAuth();
   const [scripts, setScripts] = useState<ContentScript[]>([]);
@@ -94,26 +64,12 @@ export const AdminContentHooksPage = () => {
 
     for (const hookType of HOOK_TYPES) {
       try {
-        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY || ""}`,
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [
-              { role: "user", content: SCRIPT_PROMPT(topic, board, subject, hookType) },
-            ],
-            temperature: 0.8,
-            max_tokens: 800,
-          }),
-        });
-
-        if (!res.ok) throw new Error(`AI request failed: ${res.status}`);
-
-        const data = await res.json();
-        const scriptText = data.choices?.[0]?.message?.content || "";
+        const { data, error: fnError } = await supabase.functions.invoke(
+          "generate-content-script",
+          { body: { topic, board, subject, hookType } },
+        );
+        if (fnError) throw new Error(`AI request failed: ${fnError.message}`);
+        const scriptText = data?.scriptText || "";
         const hookLine = scriptText.match(/\[HOOK\]\n(.+)/)?.[1] || "";
 
         const { data: inserted, error } = await (supabase as any)

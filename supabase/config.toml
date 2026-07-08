@@ -125,3 +125,6 @@ verify_jwt = false
 
 [functions.suggest-followups]
 verify_jwt = false
+
+[functions.generate-content-script]
+verify_jwt = true
