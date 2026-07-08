@@ -1,16 +1,26 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@11.2.0?target=deno";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireAdmin } from "../_shared/auth.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const pre = preflight(req);
+  if (pre) return pre;
   try {
-    const { subscriptionRowId, stripeSubId } = await req.json();
+    // AUTH: admin only. Closes the hole where any anonymous caller could
+    // cancel any customer's subscription by supplying a sub_… id.
+    const { admin } = await requireAdmin(req);
+
+    let body: { subscriptionRowId?: string; stripeSubId?: string };
+    try {
+      body = await req.json();
+    } catch {
+      return err("Invalid JSON body", 400);
+    }
+    const { subscriptionRowId, stripeSubId } = body;
+    if (!subscriptionRowId || !stripeSubId) {
+      return err("subscriptionRowId and stripeSubId are required", 400);
+    }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
       apiVersion: "2023-10-16",
@@ -19,7 +29,6 @@ serve(async (req) => {
 
     const cancelled = await stripe.subscriptions.cancel(stripeSubId);
 
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     await admin
       .from("user_subscriptions")
       .update({
@@ -30,10 +39,8 @@ serve(async (req) => {
       })
       .eq("id", subscriptionRowId);
 
-    return new Response(JSON.stringify({ success: true, stripeStatus: cancelled.status }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return json({ success: true, stripeStatus: cancelled.status });
+  } catch (e) {
+    return toResponse(e);
   }
 });

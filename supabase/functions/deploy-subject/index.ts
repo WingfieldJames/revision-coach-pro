@@ -1,35 +1,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireUser } from "../_shared/auth.ts";
+import { embed } from "../_shared/ai.ts";
+import { HttpError } from "../_shared/http.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function generateEmbedding(lovableApiKey: string, content: string, timeoutMs = 8000): Promise<number[] | null> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
+// Embeddings now go direct to OpenAI (text-embedding-3-small, 1536-dim) via the
+// shared client — same model/dimension as the old gateway call, so no re-index.
+// Preserves graceful null-on-failure so a deploy never breaks on a slow embed.
+async function generateEmbedding(content: string): Promise<number[] | null> {
   try {
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ model: "text-embedding-3-small", input: content }),
-      signal: controller.signal,
-    });
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    return data.data?.[0]?.embedding || null;
+    return await embed(content, 8000);
   } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      console.warn("Embedding generation timed out; continuing without embedding");
-    }
+    console.warn("Embedding failed; continuing without embedding", error);
     return null;
-  } finally {
-    clearTimeout(timeoutId);
   }
 }
 
@@ -67,10 +54,8 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const { user, admin } = await requireUser(req);
+    const supabase = admin; // service-role client from the auth guard
 
     const body = await req.json();
     const { project_id, staged_specifications, staged_system_prompt, staged_exam_technique, staged_custom_sections, delete_specifications_only, activate_website, deactivate_website } = body;
@@ -84,6 +69,18 @@ serve(async (req) => {
       .single();
 
     if (projError || !project) throw new Error("Project not found");
+
+    // AUTH: caller must own this trainer project (admins pass through).
+    if (project.user_id !== user.id) {
+      const { data: adminRow } = await supabase
+        .from("user_roles").select("role")
+        .eq("user_id", user.id).eq("role", "admin").maybeSingle();
+      if (!adminRow) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     // Handle specification-only deletion (for replace flow)
     if (delete_specifications_only) {
@@ -223,7 +220,7 @@ serve(async (req) => {
         const batch = normalizedSpecPoints.slice(i, i + BATCH_SIZE);
         const embeddings = await Promise.all(
           batch.map((specPoint) =>
-            generateEmbedding(lovableApiKey, specPoint).catch((err) => {
+            generateEmbedding(specPoint).catch((err) => {
               console.error(`Embedding failed for spec point (continuing with null): ${err?.message}`);
               return null;
             })
@@ -266,7 +263,7 @@ serve(async (req) => {
         .eq("product_id", productId)
         .contains("metadata", { content_type: "system_prompt" });
 
-      const embedding = await generateEmbedding(lovableApiKey, staged_system_prompt);
+      const embedding = await generateEmbedding(staged_system_prompt);
       await supabase.from("document_chunks").insert({
         product_id: productId,
         content: staged_system_prompt,
@@ -284,7 +281,7 @@ serve(async (req) => {
         .eq("product_id", productId)
         .contains("metadata", { content_type: "exam_technique" });
 
-      const embedding = await generateEmbedding(lovableApiKey, staged_exam_technique);
+      const embedding = await generateEmbedding(staged_exam_technique);
       await supabase.from("document_chunks").insert({
         product_id: productId,
         content: staged_exam_technique,
@@ -317,7 +314,7 @@ serve(async (req) => {
         const embeddings = await Promise.all(
           batch.map((section: any) => {
             const content = `[${section.name || "Custom Section"}]\n${section.content}`;
-            return generateEmbedding(lovableApiKey, content).catch(() => null);
+            return generateEmbedding(content).catch(() => null);
           })
         );
         batch.forEach((section: any, idx: number) => {
@@ -381,6 +378,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
+    if (error instanceof HttpError) return error.response;
     const errMsg = error instanceof Error ? error.message : String(error);
     const errStack = error instanceof Error ? error.stack : undefined;
     console.error("[DEPLOY-SUBJECT] Deploy error:", errMsg, errStack);
