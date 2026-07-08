@@ -1,9 +1,9 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
+import { chatCompletion } from "../_shared/ai.ts";
 
 interface PEQ {
   label: string;
@@ -13,80 +13,62 @@ interface PEQ {
   topic?: string;
 }
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+serve(async (req) => {
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const { productId, question, answer, specPoint } = await req.json();
+    let body: { productId?: string; question?: string; answer?: string; specPoint?: string };
+    try {
+      body = await req.json();
+    } catch {
+      return err("Invalid JSON body", 400);
+    }
+    const { productId, question, answer, specPoint } = body;
     if (!productId || !question || !answer) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return err("Missing required fields", 400);
     }
 
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { user, admin } = await requireUser(req);
+    await enforceRateLimit(admin, { key: userKey(user.id, "suggest-followups"), ...RATE_LIMITS.chat });
 
-    // Run AI follow-ups + PEQ lookup in parallel
     const [followups, peqs] = await Promise.all([
-      generateFollowups(lovableApiKey, question, answer, specPoint),
-      findRelatedPEQs(supabase, productId, question, answer),
+      generateFollowups(question, answer, specPoint ?? null, { admin, userId: user.id }),
+      findRelatedPEQs(admin, productId, question, answer),
     ]);
 
-    return new Response(
-      JSON.stringify({ followups, related_peqs: peqs, spec_point: specPoint || null }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (err) {
-    console.error("suggest-followups error:", err);
-    return new Response(JSON.stringify({ followups: [], related_peqs: [] }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ followups, related_peqs: peqs, spec_point: specPoint || null });
+  } catch (e) {
+    // Auth/rate-limit errors surface their own response; genuine failures here
+    // are non-critical (no chips shown), so degrade gracefully to empty.
+    const resp = toResponse(e);
+    if (resp.status === 401 || resp.status === 403 || resp.status === 429) return resp;
+    console.error("suggest-followups error:", e);
+    return json({ followups: [], related_peqs: [] });
   }
 });
 
 async function generateFollowups(
-  apiKey: string | undefined,
   question: string,
   answer: string,
-  specPoint: string | null
+  specPoint: string | null,
+  logCtx: { admin: SupabaseClient; userId: string },
 ): Promise<string[]> {
-  if (!apiKey) return [];
   try {
     const truncatedAnswer = answer.slice(0, 1200);
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an A-Level Edexcel Economics tutor suggesting 3 short follow-up questions a student would naturally ask after reading a tutor's answer. Return STRICT JSON only: {\"followups\":[\"...\",\"...\",\"...\"]}. Each follow-up must be 4–9 words, specific to the topic, and useful for revision. Vary types: one deeper concept, one application/example, one exam-technique or diagram. No numbering, no quotes inside strings.",
-          },
-          {
-            role: "user",
-            content: `Spec point (if known): ${specPoint || "unknown"}\n\nStudent question: ${question}\n\nTutor answer (truncated):\n${truncatedAnswer}`,
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: 200,
-      }),
+    const { text } = await chatCompletion({
+      model: "chat",
+      system:
+        'You are an A-Level Edexcel Economics tutor suggesting 3 short follow-up questions a student would naturally ask after reading a tutor\'s answer. Return STRICT JSON only: {"followups":["...","...","..."]}. Each follow-up must be 4–9 words, specific to the topic, and useful for revision. Vary types: one deeper concept, one application/example, one exam-technique or diagram. No numbering, no quotes inside strings.',
+      messages: [
+        {
+          role: "user",
+          content: `Spec point (if known): ${specPoint || "unknown"}\n\nStudent question: ${question}\n\nTutor answer (truncated):\n${truncatedAnswer}`,
+        },
+      ],
+      maxTokens: 200,
+      logCtx: { admin: logCtx.admin, fn: "suggest-followups", userId: logCtx.userId },
     });
-    if (!res.ok) {
-      console.error("Gateway error:", res.status, await res.text());
-      return [];
-    }
-    const data = await res.json();
-    const text: string = data?.choices?.[0]?.message?.content || "";
     const cleaned = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(cleaned);
     const arr = Array.isArray(parsed?.followups) ? parsed.followups : [];
@@ -100,10 +82,10 @@ async function generateFollowups(
 }
 
 async function findRelatedPEQs(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   productId: string,
   question: string,
-  answer: string
+  answer: string,
 ): Promise<PEQ[]> {
   try {
     const { data, error } = await supabase

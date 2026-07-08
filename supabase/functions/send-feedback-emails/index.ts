@@ -1,14 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const BASE_URL = "https://astarai.lovable.app";
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "A* AI <hello@astarai.co.uk>";
@@ -185,59 +179,72 @@ function getDeluxeUserEmailHtml(feedbackUrl: string): string {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
-  // Test mode: send a test email to a specific address
   try {
+    // Shared-secret guard: this is a pg_cron-invoked function, not user-facing.
+    const supabase = requireCronSecret(req);
+
+    // Test mode: send a test email to a specific address. Gated behind the
+    // cron secret above so an arbitrary caller can no longer target any address.
     const body = await req.json().catch(() => ({}));
     if (body.test_email) {
       const type = body.type || "free";
       const feedbackUrl = `${BASE_URL}/feedback?type=${type}`;
-      const html = type === "deluxe" 
-        ? getDeluxeUserEmailHtml(feedbackUrl) 
+      const html = type === "deluxe"
+        ? getDeluxeUserEmailHtml(feedbackUrl)
         : getFreeUserEmailHtml(feedbackUrl);
-      const subject = type === "deluxe" 
-        ? "How's Deluxe treating you? ⭐" 
+      const subject = type === "deluxe"
+        ? "How's Deluxe treating you? ⭐"
         : "How's your A* AI experience? 📚";
-      
+
       const success = await sendEmail(body.test_email, subject, html);
-      return new Response(JSON.stringify({ success, test: true, to: body.test_email }), {
-        status: success ? 200 : 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+      return json({ success, test: true, to: body.test_email }, success ? 200 : 500);
     }
-  } catch (_) {}
 
-  logStep("Starting feedback email job");
+    logStep("Starting feedback email job");
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { persistSession: false }
-  });
+    const now = new Date();
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const fourteenDaysAgoISO = fourteenDaysAgo.toISOString();
 
-  const now = new Date();
-  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-  const fourteenDaysAgoISO = fourteenDaysAgo.toISOString();
+    let freeEmailsSent = 0;
+    let deluxeEmailsSent = 0;
+    let errors = 0;
 
-  let freeEmailsSent = 0;
-  let deluxeEmailsSent = 0;
-  let errors = 0;
-
-  try {
     // ============================================
     // 1. Send emails to free users (14 days after signup)
     // ============================================
     logStep("Querying free users who signed up 14+ days ago");
 
-    // Get users from auth.users who signed up 14+ days ago
-    const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-    
+    // Get users from auth.users who signed up 14+ days ago.
+    // listUsers() is paginated (50/page by default) — page through ALL users
+    // so we don't silently miss everyone past the first page.
+    const allAuthUsers: any[] = [];
+    let authError: any = null;
+    let authPage = 1;
+    const authPerPage = 1000;
+    while (true) {
+      const { data: pageData, error: pageError } = await supabase.auth.admin.listUsers({
+        page: authPage,
+        perPage: authPerPage,
+      });
+      if (pageError) {
+        authError = pageError;
+        break;
+      }
+      const pageUsers = pageData?.users ?? [];
+      allAuthUsers.push(...pageUsers);
+      if (pageUsers.length < authPerPage) break;
+      authPage++;
+    }
+
     if (authError) {
       logStep("ERROR: Failed to list auth users", { error: authError.message });
     } else {
       // Filter users who signed up 14+ days ago
-      const eligibleFreeUsers = authUsers.users.filter(user => {
+      const eligibleFreeUsers = allAuthUsers.filter(user => {
         const createdAt = new Date(user.created_at);
         return createdAt <= fourteenDaysAgo;
       });
@@ -369,16 +376,9 @@ serve(async (req) => {
 
     logStep("Feedback email job completed", summary);
 
-    return new Response(JSON.stringify({ success: true, ...summary }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
-
+    return json({ success: true, ...summary });
   } catch (error) {
     logStep("ERROR: Unexpected error in feedback email job", { error: error.message });
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
+    return toResponse(error);
   }
 });

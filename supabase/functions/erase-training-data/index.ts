@@ -1,41 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireUser, requireOwnedProject } from "../_shared/auth.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
-
-    // Verify the caller is a trainer/admin
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) throw new Error("Unauthorized");
-
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id);
-    
-    const userRoles = (roles || []).map((r: { role: string }) => r.role);
-    if (!userRoles.includes("trainer") && !userRoles.includes("admin")) {
-      throw new Error("Insufficient permissions");
-    }
+    // AUTH: verified caller first (gives us a service-role client to resolve
+    // the project's product before enforcing per-project ownership).
+    const { admin: supabase } = await requireUser(req);
 
     const { project_id } = await req.json();
-    if (!project_id) throw new Error("project_id is required");
+    if (!project_id) return err("project_id is required", 400);
 
     // Get the product_id for this project
     const { data: project } = await supabase
@@ -45,11 +22,12 @@ serve(async (req) => {
       .single();
 
     if (!project?.product_id) {
-      return new Response(
-        JSON.stringify({ message: "No product found — nothing to erase", deleted: 0 }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ message: "No product found — nothing to erase", deleted: 0 });
     }
+
+    // OWNERSHIP: the caller must own/train this subject (admins bypass). Closes
+    // the pre-fix hole where any trainer could wipe another subject's corpus.
+    await requireOwnedProject(req, project.product_id);
 
     // Delete ALL document_chunks for this product
     const { data: deleted, error: deleteErr } = await supabase
@@ -69,15 +47,9 @@ serve(async (req) => {
       .update({ status: "draft" })
       .eq("id", project_id);
 
-    return new Response(
-      JSON.stringify({ message: "Training data erased", deleted: deletedCount }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ message: "Training data erased", deleted: deletedCount });
   } catch (error) {
     console.error("Erase error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return toResponse(error);
   }
 });

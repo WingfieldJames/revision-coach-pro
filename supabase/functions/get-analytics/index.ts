@@ -1,22 +1,13 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireAdmin } from "../_shared/auth.ts";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    // No auth required — page is hidden by obscurity
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    // AUTH: admin-only — this dumps business metrics (MRR, funnels, subs).
+    const { admin: adminClient } = await requireAdmin(req);
 
     // ---- Gather all analytics using service role client ----
 
@@ -315,17 +306,9 @@ Deno.serve(async (req) => {
       funnel: { funnelSteps, engagementBuckets, daysToPurchase },
     };
 
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json(response);
   } catch (error) {
     console.error("Analytics error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message || "Internal error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return toResponse(error);
   }
 });

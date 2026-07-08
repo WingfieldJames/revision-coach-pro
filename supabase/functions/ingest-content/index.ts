@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireAdmin } from "../_shared/auth.ts";
 
 interface ContentChunk {
   content: string;
@@ -25,24 +21,22 @@ interface IngestRequest {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // AUTH: admin-only one-off ingestion tool. Closes the pre-fix hole where
+    // any anonymous caller could inject chunks into the RAG corpus students see.
+    const { admin: supabase } = await requireAdmin(req);
 
     const { product_id, chunks }: IngestRequest = await req.json();
 
     if (!product_id) {
-      throw new Error("product_id is required");
+      return err("product_id is required", 400);
     }
 
     if (!chunks || !Array.isArray(chunks) || chunks.length === 0) {
-      throw new Error("chunks array is required and must not be empty");
+      return err("chunks array is required and must not be empty", 400);
     }
 
     console.log(`Ingesting ${chunks.length} chunks for product ${product_id}`);
@@ -76,20 +70,13 @@ serve(async (req) => {
       }
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        inserted: insertedCount,
-        total: chunks.length,
-        errors: errors.length > 0 ? errors : undefined,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    console.error("Ingest error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({
+      success: true,
+      inserted: insertedCount,
+      total: chunks.length,
+      errors: errors.length > 0 ? errors : undefined,
+    });
+  } catch (e) {
+    return toResponse(e);
   }
 });

@@ -1,22 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireCronSecret } from "../_shared/auth.ts";
+import { chatCompletion } from "../_shared/ai.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
+    const supabaseAdmin = requireCronSecret(req);
 
     // Get all products that have feedback
     const { data: productsWithFeedback } = await supabaseAdmin.rpc('get_products_with_feedback');
@@ -32,9 +24,7 @@ serve(async (req) => {
         .select('message_id');
 
       if (!data || data.length === 0) {
-        return new Response(JSON.stringify({ message: "No feedback to analyze" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ message: "No feedback to analyze" });
       }
 
       const messageIds = data.map((f: any) => f.message_id);
@@ -56,9 +46,7 @@ serve(async (req) => {
     }
 
     if (productIds.length === 0) {
-      return new Response(JSON.stringify({ message: "No feedback to analyze" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ message: "No feedback to analyze" });
     }
 
     const results: Record<string, string> = {};
@@ -159,26 +147,18 @@ Format your response as a single block of text that can be directly appended to 
 
 Do NOT include generic advice. Only include specific guidelines derived from the actual feedback patterns above.`;
 
-      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${lovableApiKey}`,
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+      let guidelines: string | undefined;
+      try {
+        const { text } = await chatCompletion({
+          model: "chat",
           messages: [{ role: "user", content: analysisPrompt }],
-          stream: false,
-        }),
-      });
-
-      if (!aiResponse.ok) {
-        console.error(`AI analysis failed for product ${productId}: ${aiResponse.status}`);
+          logCtx: { admin: supabaseAdmin, fn: "analyze-feedback" },
+        });
+        guidelines = text;
+      } catch (aiErr) {
+        console.error(`AI analysis failed for product ${productId}:`, aiErr);
         continue;
       }
-
-      const aiData = await aiResponse.json();
-      const guidelines = aiData.choices?.[0]?.message?.content;
 
       if (!guidelines) continue;
 
@@ -195,14 +175,9 @@ Do NOT include generic advice. Only include specific guidelines derived from the
       console.log(`Updated prompt improvements for product ${productId} (${pairs.length} negative responses analyzed)`);
     }
 
-    return new Response(JSON.stringify({ success: true, results }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ success: true, results });
   } catch (error) {
     console.error("Error in analyze-feedback:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return toResponse(error);
   }
 });

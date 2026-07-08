@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 interface SeasonInfo {
   name: string;
@@ -137,15 +133,11 @@ LONG-TERM PLANNING:
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const supabaseAdmin = requireCronSecret(req);
 
     // Determine current exam season
     const now = new Date();
@@ -163,17 +155,12 @@ serve(async (req) => {
     }
 
     if (!products || products.length === 0) {
-      return new Response(
-        JSON.stringify({
-          season: season.name,
-          label: season.label,
-          products_updated: 0,
-          message: "No products found to update.",
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return json({
+        season: season.name,
+        label: season.label,
+        products_updated: 0,
+        message: "No products found to update.",
+      });
     }
 
     let updatedCount = 0;
@@ -212,29 +199,16 @@ serve(async (req) => {
       }
     }
 
-    return new Response(
-      JSON.stringify({
-        season: season.name,
-        label: season.label,
-        date: now.toISOString().split("T")[0],
-        products_found: products.length,
-        products_updated: updatedCount,
-        errors: errors.length > 0 ? errors : undefined,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return json({
+      season: season.name,
+      label: season.label,
+      date: now.toISOString().split("T")[0],
+      products_found: products.length,
+      products_updated: updatedCount,
+      errors: errors.length > 0 ? errors : undefined,
+    });
   } catch (error) {
     console.error("exam-season-scheduler error:", error);
-    return new Response(
-      JSON.stringify({
-        error: error.message || "Internal server error",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return toResponse(error);
   }
 });

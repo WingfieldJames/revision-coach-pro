@@ -1,10 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireOwnedProject, requireAdmin, serviceClient } from "../_shared/auth.ts";
+import { geminiChatRaw, embed } from "../_shared/ai.ts";
 
 // --- Prompt builders ---
 
@@ -198,20 +196,17 @@ function buildGenericPrompt(sectionType: string): string {
 // --- AI call helper ---
 
 async function callAI(
-  lovableApiKey: string,
   prompt: string,
   base64: string,
   mimeType: string,
   temperature = 0.1,
-  model = "google/gemini-2.5-flash",
+  model = "gemini-2.5-flash",
 ): Promise<string> {
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${lovableApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  // Multimodal (PDF-as-image) request — routed through the shared AI client's
+  // vision escape hatch. Errors are re-shaped to the AI_ERROR:<status>:<body>
+  // format the caller inspects for 429 handling.
+  try {
+    const data = await geminiChatRaw({
       model,
       messages: [
         {
@@ -223,16 +218,12 @@ async function callAI(
         },
       ],
       temperature,
-    }),
-  });
-
-  if (!resp.ok) {
-    const errText = await resp.text();
-    throw new Error(`AI_ERROR:${resp.status}:${errText}`);
+    });
+    return data.choices?.[0]?.message?.content || "";
+  } catch (e) {
+    const status = (e as { status?: number })?.status ?? 500;
+    throw new Error(`AI_ERROR:${status}:${(e as Error).message}`);
   }
-
-  const data = await resp.json();
-  return data.choices?.[0]?.message?.content || "";
 }
 
 function parseJSONArray(raw: string): Array<Record<string, unknown>> {
@@ -304,19 +295,9 @@ function validateExtraction(chunks: Array<Record<string, unknown>>, docType: str
 
 // --- Embedding helper ---
 
-async function generateEmbedding(lovableApiKey: string, content: string): Promise<number[] | null> {
+async function generateEmbedding(content: string): Promise<number[] | null> {
   try {
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ model: "text-embedding-3-small", input: content }),
-    });
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    return data.data?.[0]?.embedding || null;
+    return await embed(content);
   } catch {
     return null;
   }
@@ -325,8 +306,7 @@ async function generateEmbedding(lovableApiKey: string, content: string): Promis
 // --- Merge logic ---
 
 async function attemptMerge(
-  supabase: ReturnType<typeof createClient>,
-  lovableApiKey: string,
+  supabase: SupabaseClient,
   projectId: string,
   year: string,
   paperNumber: number,
@@ -414,7 +394,7 @@ async function attemptMerge(
     if (msChunk) idsToDelete.push(msChunk.id);
 
     // Generate embedding for combined chunk
-    const embedding = await generateEmbedding(lovableApiKey, combined);
+    const embedding = await generateEmbedding(combined);
 
     const { error: insertErr } = await supabase.from("document_chunks").insert({
       product_id: productId,
@@ -455,26 +435,42 @@ async function attemptMerge(
 // --- Main handler ---
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   let uploadIdForError: string | null = null;
-  let supabaseForError: ReturnType<typeof createClient> | null = null;
+  let supabaseForError: SupabaseClient | null = null;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
-    supabaseForError = supabase;
-
-    const { upload_id, project_id, section_type, file_url, year } = await req.json();
-    uploadIdForError = upload_id;
+    let body: { upload_id?: string; project_id?: string; section_type?: string; file_url?: string; year?: string };
+    try {
+      body = await req.json();
+    } catch {
+      return err("Invalid JSON body", 400);
+    }
+    const { upload_id, project_id, section_type, file_url, year } = body;
 
     if (!upload_id || !project_id || !section_type || !file_url) {
-      throw new Error("upload_id, project_id, section_type, and file_url are required");
+      return err("upload_id, project_id, section_type, and file_url are required", 400);
     }
+
+    // Resolve the project's product_id up front to pick the auth guard.
+    const svc = serviceClient();
+    const { data: project } = await svc
+      .from("trainer_projects")
+      .select("product_id, subject, exam_board")
+      .eq("id", project_id)
+      .single();
+    if (!project) return err("Project not found", 404);
+
+    // AUTH: caller must own/train the product (or be an admin). A project with no
+    // product yet (brand-new draft) can only be kicked off by an admin.
+    const ctx = project.product_id
+      ? await requireOwnedProject(req, project.product_id)
+      : await requireAdmin(req);
+    const supabase = ctx.admin;
+    supabaseForError = supabase;
+    uploadIdForError = upload_id;
 
     console.log(`Processing file for project ${project_id}, section: ${section_type}, year: ${year || 'N/A'}`);
 
@@ -500,15 +496,7 @@ serve(async (req) => {
     const base64 = btoa(binary);
     const mimeType = fileData.type || "application/pdf";
 
-    // Get project info
-    const { data: project } = await supabase
-      .from("trainer_projects")
-      .select("product_id, subject, exam_board")
-      .eq("id", project_id)
-      .single();
-
-    if (!project) throw new Error("Project not found");
-
+    // Project info was fetched above (for the auth-guard decision).
     let productId = project.product_id;
 
     // Create or find draft product if needed
@@ -549,13 +537,13 @@ serve(async (req) => {
     // === PAST PAPER FLOW: classify → extract → validate → merge ===
     if (section_type === "past_paper") {
       // Use smarter model for past paper extraction
-      const EXTRACTION_MODEL = "google/gemini-2.5-pro";
+      const EXTRACTION_MODEL = "gemini-2.5-pro";
 
       // Step 1: Classify the document (stays on flash — simple task)
       console.log("Step 1: Classifying document...");
       let classification: { doc_type: string; paper_number: number };
       try {
-        const classRaw = await callAI(lovableApiKey, buildClassificationPrompt(), base64, mimeType, 0.05, "google/gemini-2.5-flash");
+        const classRaw = await callAI(buildClassificationPrompt(), base64, mimeType, 0.05, "gemini-2.5-flash");
         const parsed = parseJSONObject(classRaw);
         classification = {
           doc_type: String(parsed.doc_type).toLowerCase(),
@@ -567,9 +555,7 @@ serve(async (req) => {
       } catch (err) {
         console.error("Classification failed:", err);
         await supabase.from("trainer_uploads").update({ processing_status: "error" }).eq("id", upload_id);
-        return new Response(JSON.stringify({ error: "Failed to classify document" }), {
-          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ error: "Failed to classify document" }, 500);
       }
 
       console.log(`Classified as ${classification.doc_type} Paper ${classification.paper_number}`);
@@ -593,7 +579,7 @@ serve(async (req) => {
       while (true) {
         extractionAttempt++;
         try {
-          const extractRaw = await callAI(lovableApiKey, extractionPrompt, base64, mimeType, 0.1, EXTRACTION_MODEL);
+          const extractRaw = await callAI(extractionPrompt, base64, mimeType, 0.1, EXTRACTION_MODEL);
           
           if (classification.doc_type === "qp") {
             // QP returns structured JSON object — flatten sections[].questions[] into a flat array
@@ -674,15 +660,11 @@ serve(async (req) => {
           console.error(`Extraction failed (attempt ${extractionAttempt}):`, err);
           if (String(err).includes("AI_ERROR:429")) {
             await supabase.from("trainer_uploads").update({ processing_status: "error" }).eq("id", upload_id);
-            return new Response(JSON.stringify({ error: "Rate limited. Please try again in a minute." }), {
-              status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
+            return json({ error: "Rate limited. Please try again in a minute." }, 429);
           }
           if (extractionAttempt >= MAX_ATTEMPTS) {
             await supabase.from("trainer_uploads").update({ processing_status: "error" }).eq("id", upload_id);
-            return new Response(JSON.stringify({ error: "Failed to extract content" }), {
-              status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
+            return json({ error: "Failed to extract content" }, 500);
           }
           // Try again
           continue;
@@ -734,7 +716,7 @@ serve(async (req) => {
           ? `${chunk.question_text || ""}${extractInfo}`.trim()
           : String(chunk.mark_scheme || "").trim();
 
-        const embedding = await generateEmbedding(lovableApiKey, content);
+        const embedding = await generateEmbedding(content);
 
         const metadata: Record<string, unknown> = {
           content_type: `past_paper_${classification.doc_type}`,
@@ -772,7 +754,7 @@ serve(async (req) => {
       let mergedCount = 0;
       try {
         mergedCount = await attemptMerge(
-          supabase, lovableApiKey, project_id, year || "",
+          supabase, project_id, year || "",
           classification.paper_number, classification.doc_type,
           upload_id, productId,
         );
@@ -781,14 +763,12 @@ serve(async (req) => {
       }
 
       console.log(`Done: ${chunksCreated} chunks created, ${mergedCount} merged`);
-      return new Response(JSON.stringify({
+      return json({
         success: true,
         chunks_created: chunksCreated,
         merged_count: mergedCount,
         doc_type: classification.doc_type,
         paper_number: classification.paper_number,
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -799,16 +779,14 @@ serve(async (req) => {
 
     let rawContent: string;
     try {
-      rawContent = await callAI(lovableApiKey, extractionPrompt, base64, mimeType);
-    } catch (err) {
-      console.error("AI call failed:", err);
-      if (String(err).includes("AI_ERROR:429")) {
+      rawContent = await callAI(extractionPrompt, base64, mimeType);
+    } catch (aiErr) {
+      console.error("AI call failed:", aiErr);
+      if (String(aiErr).includes("AI_ERROR:429")) {
         await supabase.from("trainer_uploads").update({ processing_status: "error" }).eq("id", upload_id);
-        return new Response(JSON.stringify({ error: "Rate limited. Please try again in a minute." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ error: "Rate limited. Please try again in a minute." }, 429);
       }
-      throw err;
+      throw aiErr;
     }
 
     let chunks: Array<Record<string, unknown>>;
@@ -817,9 +795,7 @@ serve(async (req) => {
     } catch (parseErr) {
       console.error("Failed to parse AI response:", parseErr);
       await supabase.from("trainer_uploads").update({ processing_status: "error" }).eq("id", upload_id);
-      return new Response(JSON.stringify({ error: "Failed to parse extracted content" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "Failed to parse extracted content" }, 500);
     }
 
     let chunksCreated = 0;
@@ -828,7 +804,7 @@ serve(async (req) => {
         ? `[${chunk.topic}${chunk.subtopic ? ` > ${chunk.subtopic}` : ''}] ${chunk.content}`
         : chunk.content as string;
 
-      const embedding = await generateEmbedding(lovableApiKey, content);
+      const embedding = await generateEmbedding(content);
 
       const metadata: Record<string, unknown> = {
         content_type: chunk.content_type || section_type,
@@ -854,12 +830,12 @@ serve(async (req) => {
     }).eq("id", upload_id);
 
     console.log(`Successfully processed ${chunksCreated} chunks for upload ${upload_id}`);
-    return new Response(JSON.stringify({ success: true, chunks_created: chunksCreated }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ success: true, chunks_created: chunksCreated });
   } catch (error) {
     console.error("Process training file error:", error);
 
+    // Auth/guard failures (HttpError) surface before any upload row is touched —
+    // don't mark the upload as errored, just return the guard's response.
     if (supabaseForError && uploadIdForError) {
       try {
         await supabaseForError
@@ -871,9 +847,6 @@ serve(async (req) => {
       }
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return toResponse(error);
   }
 });

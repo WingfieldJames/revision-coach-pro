@@ -17,12 +17,10 @@
 // Never set product_id on a school chunk.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireAdmin } from "../_shared/auth.ts";
+import { embed } from "../_shared/ai.ts";
 
 // Same chunker as ingest-documents (1000/200, drops tiny chunks).
 function chunkText(text: string, chunkSize = 1000, overlap = 200): string[] {
@@ -46,26 +44,6 @@ function chunkText(text: string, chunkSize = 1000, overlap = 200): string[] {
   }
 
   return chunks.filter((chunk) => chunk.length > 50);
-}
-
-// Same embedding call as ingest-documents (Lovable AI gateway).
-async function generateEmbedding(text: string, apiKey: string): Promise<number[]> {
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ model: "text-embedding-3-small", input: text }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Embedding API error: ${error}`);
-  }
-
-  const data = await response.json();
-  return data.data[0].embedding;
 }
 
 // Extract plain text from a downloaded material by file extension.
@@ -97,20 +75,17 @@ async function extractText(fileUrl: string, blob: Blob): Promise<string> {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  const pre = preflight(req);
+  if (pre) return pre;
+
+  // AUTH: school chunks are inserted with product_id:null (compliance), so there
+  // is no product to own — restrict to admins until a school-membership guard exists.
+  let supabase: SupabaseClient;
+  try {
+    ({ admin: supabase } = await requireAdmin(req));
+  } catch (e) {
+    return toResponse(e);
   }
-
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
-  const supabase = createClient(supabaseUrl, serviceRoleKey);
-
-  const json = (body: unknown, status = 200) =>
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
 
   // Mark a material failed and return a 200 (the frontend fires-and-forgets;
   // status is read back off the row on reload).
@@ -172,7 +147,7 @@ serve(async (req) => {
     for (const chunk of chunks) {
       let embedding: number[] | null = null;
       try {
-        embedding = await generateEmbedding(chunk, lovableApiKey);
+        embedding = await embed(chunk);
       } catch (embErr) {
         console.error(`embed failed (inserting null): ${(embErr as Error).message}`);
       }

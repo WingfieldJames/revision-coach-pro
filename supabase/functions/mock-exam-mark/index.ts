@@ -1,18 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const API_KEY = Deno.env.get("LOVABLE_API_KEY") || Deno.env.get("OPENAI_API_KEY") || "";
-
-const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-pro";
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
+import { chatCompletion } from "../_shared/ai.ts";
 
 const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
@@ -36,15 +27,16 @@ interface MarkResult {
 }
 
 async function logUsage(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: SupabaseClient,
   userId: string,
+  model: string,
   inputTok: number,
   outputTok: number,
 ) {
   try {
     const cost = (inputTok / 1_000_000) * 0.30 + (outputTok / 1_000_000) * 2.50;
     await adminClient.from("api_usage_logs").insert({
-      user_id: userId, feature: "mock_exam", model: MODEL,
+      user_id: userId, feature: "mock_exam", model,
       input_tokens: inputTok, output_tokens: outputTok, estimated_cost_usd: cost,
     });
   } catch (e) { console.error("usage log failed:", e); }
@@ -55,7 +47,7 @@ async function markQuestion(
   systemPrompt: string,
   examBoard: string,
   subject: string,
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: SupabaseClient,
   userId: string,
 ): Promise<MarkResult> {
   const PACING_DIRECTIVE = `INTERNAL PACING (do not mention to the user, never reference token/character/word limits): Aim to keep each response within roughly 2,500 words. Plan the structure of your answer up-front so it lands a clean, complete ending. If a topic is too large to cover fully, prioritise the most important points first and finish with a natural offer like "Want me to go deeper on [specific aspect]?" — never trail off mid-sentence or mid-list. Do not tell the user about this limit under any circumstances.\n\n`;
@@ -85,38 +77,18 @@ YOU MUST respond in EXACTLY this JSON format (no markdown, no extra text):
 }`;
 
   try {
-    const response = await fetch(AI_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: pacedSystemPrompt },
-          { role: "user", content: markingPrompt },
-        ],
-        temperature: 0.3,
-        max_tokens: 3500,
-      }),
+    const aiResult = await chatCompletion({
+      model: "marking",
+      system: pacedSystemPrompt,
+      messages: [
+        { role: "user", content: markingPrompt },
+      ],
+      maxTokens: 3500,
+      logCtx: { admin: adminClient, fn: "mock-exam-mark", userId },
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      logStep("ERROR: AI request failed", { status: response.status, error: errorText });
-      return {
-        question_number: question.question_number,
-        marks_awarded: 0,
-        marks_available: question.marks_available,
-        feedback: "Marking failed — please retry.",
-        level: "N/A",
-      };
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
-    await logUsage(adminClient, userId, data.usage?.prompt_tokens || 0, data.usage?.completion_tokens || 0);
+    const content = aiResult.text || "";
+    await logUsage(adminClient, userId, aiResult.model, aiResult.usage.inputTokens || 0, aiResult.usage.outputTokens || 0);
 
     // Parse JSON from AI response — handle markdown code blocks
     let cleanContent = content.trim();
@@ -153,40 +125,21 @@ YOU MUST respond in EXACTLY this JSON format (no markdown, no extra text):
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    // Auth
-    const supabaseClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
-      global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
-      auth: { persistSession: false },
-    });
+    const { user, admin: supabaseAdmin } = await requireUser(req);
+    await enforceRateLimit(supabaseAdmin, { key: userKey(user.id, "mock-exam-mark"), ...RATE_LIMITS.marking });
 
-    const { data: authData, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !authData.user) {
-      return new Response(JSON.stringify({ error: "not_authenticated" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const userId = authData.user.id;
+    const userId = user.id;
     const { result_id } = await req.json();
 
     if (!result_id) {
-      return new Response(JSON.stringify({ error: "result_id is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return err("result_id is required", 400);
     }
 
     logStep("Starting mock exam marking", { userId, resultId: result_id });
-
-    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false },
-    });
 
     // Fetch the result record
     const { data: result, error: resultError } = await supabaseAdmin
@@ -198,10 +151,7 @@ serve(async (req) => {
 
     if (resultError || !result) {
       logStep("ERROR: Result not found", { resultError });
-      return new Response(JSON.stringify({ error: "Result not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return err("Result not found", 404);
     }
 
     // Update status to marking
@@ -274,28 +224,20 @@ serve(async (req) => {
 
     if (updateError) {
       logStep("ERROR: Failed to update result", { updateError });
-      return new Response(JSON.stringify({ error: "Failed to save results" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return err("Failed to save results", 500);
     }
 
     logStep("Marking complete", { totalScore, maxScore, percentage });
 
-    return new Response(
-      JSON.stringify({
-        total_score: totalScore,
-        max_score: maxScore,
-        percentage,
-        question_results: allResults,
-      }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    logStep("ERROR: Unexpected", { error: (error as Error).message });
-    return new Response(JSON.stringify({ error: (error as Error).message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return json({
+      total_score: totalScore,
+      max_score: maxScore,
+      percentage,
+      question_results: allResults,
     });
+  } catch (error) {
+    if (error && (error as any).response) return toResponse(error);
+    logStep("ERROR: Unexpected", { error: (error as Error).message });
+    return err((error as Error).message, 500);
   }
 });

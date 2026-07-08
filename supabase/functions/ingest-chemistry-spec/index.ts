@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireAdmin } from "../_shared/auth.ts";
 
 // AQA Chemistry Product ID
 const AQA_CHEMISTRY_PRODUCT_ID = "3e5bf02e-1424-4bb3-88f9-2a9c58798444";
@@ -93,20 +89,18 @@ function extractSpecChunks(
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // AUTH: admin-only one-off ingestion tool. Closes the pre-fix hole where
+    // any anonymous caller could inject chunks into the RAG corpus students see.
+    const { admin: supabase } = await requireAdmin(req);
 
     const { spec_data }: { spec_data: SpecData } = await req.json();
 
     if (!spec_data || !spec_data.spec) {
-      throw new Error("spec_data with spec object is required");
+      return err("spec_data with spec object is required", 400);
     }
 
     console.log(`Processing AQA Chemistry specification: ${spec_data.v}`);
@@ -144,21 +138,14 @@ serve(async (req) => {
       }
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        inserted: insertedCount,
-        total: chunks.length,
-        source: spec_data.v,
-        errors: errors.length > 0 ? errors : undefined,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    console.error("Ingest error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({
+      success: true,
+      inserted: insertedCount,
+      total: chunks.length,
+      source: spec_data.v,
+      errors: errors.length > 0 ? errors : undefined,
+    });
+  } catch (e) {
+    return toResponse(e);
   }
 });

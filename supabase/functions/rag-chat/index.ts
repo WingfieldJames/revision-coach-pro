@@ -1,5 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { HttpError } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
+import { chat, chatCompletion } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -107,9 +111,8 @@ function getRecencyBonus(metadata: Record<string, unknown>): number {
 // Find relevant diagram based on message content using AI-powered matching
 // ONLY uses custom diagrams from Build portal — no hardcoded fallbacks
 async function findRelevantDiagram(
-  message: string, 
+  message: string,
   customDiagrams?: Array<{ id: string; title: string; imagePath: string; keywords?: string[] }>,
-  lovableApiKey?: string
 ): Promise<{ id: string; title: string; imagePath: string } | null> {
   // If no diagrams provided at all, return null
   if (!customDiagrams || customDiagrams.length === 0) {
@@ -125,22 +128,13 @@ async function findRelevantDiagram(
   });
 
   // Use AI-powered matching for better accuracy
-  if (lovableApiKey && diagrams.length > 0) {
+  if (diagrams.length > 0) {
     try {
-      const diagramList = diagrams.map(d => 
+      const diagramList = diagrams.map(d =>
         `- ID: "${d.id}" | Title: "${d.title}" | Keywords: ${d.keywords.join(', ')}`
       ).join('\n');
 
-      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${lovableApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: MODELS.main,
-          messages: [
-            { role: 'system', content: `You are a precise diagram matcher for A-Level Economics and other subjects. Given a student's question, determine which single diagram best illustrates the CORE concept. Return ONLY a JSON object.
+      const diagramSystemPrompt = `You are a precise diagram matcher for A-Level Economics and other subjects. Given a student's question, determine which single diagram best illustrates the CORE concept. Return ONLY a JSON object.
 
 PRECISION RULES — read carefully:
 1. Match on the COMPLETE CONCEPT, never on partial word overlap. The word "negative" does NOT mean "negative externality". The word "external" does NOT mean "externality". You must match the FULL economic concept.
@@ -183,24 +177,19 @@ Available diagrams:
 ${diagramList}
 
 Response format (JSON only, no explanation):
-{"diagramId": "diagram-id-here"} or {"diagramId": null}` },
-            { role: 'user', content: message }
-          ],
-        }),
-      });
+{"diagramId": "diagram-id-here"} or {"diagramId": null}`;
 
-      if (response.ok) {
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content;
-        const jsonMatch = content?.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (parsed.diagramId) {
-            const matched = diagrams.find(d => d.id === parsed.diagramId);
-            if (matched) {
-              console.log(`AI matched diagram: ${matched.title}`);
-              return { id: matched.id, title: matched.title, imagePath: matched.imagePath };
-            }
+      // Route through the shared Gemini client (fixes the old MODELS.main
+      // dead-code bug that silently fell back to substring matching).
+      const content = await chat(diagramSystemPrompt, message, "chat");
+      const jsonMatch = content?.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.diagramId) {
+          const matched = diagrams.find(d => d.id === parsed.diagramId);
+          if (matched) {
+            console.log(`AI matched diagram: ${matched.title}`);
+            return { id: matched.id, title: matched.title, imagePath: matched.imagePath };
           }
         }
       }
@@ -356,42 +345,25 @@ function detectContentTypePriorities(userMessage: string): string[] {
 
 // Use AI to generate focused search queries for better retrieval
 async function generateSearchQueries(
-  lovableApiKey: string,
   userMessage: string,
   history: Array<{ role: string; content: string }>,
 ): Promise<string[]> {
   try {
-    const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const response = await fetch(aiUrl, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: MODELS.utility,
-        messages: [
-          {
-            role: "system",
-            content: `You generate search queries for an A-Level revision knowledge base. Given a student's question, output exactly 3 short keyword-based search queries (2-5 words each) that would find the most relevant training data chunks. Output as a JSON array of strings. Focus on subject-specific terminology, topic names, and exam concepts. Consider the conversation context when generating queries.`,
-          },
-          // Include last 2 messages of history for context
-          ...history.slice(-2),
-          { role: "user", content: userMessage },
-        ],
-        max_tokens: 150,
-        temperature: 0.3,
-      }),
+    // Utility model (gemini-2.0-flash-lite) via the shared Gemini client.
+    const { text: content } = await chatCompletion({
+      model: "fast",
+      system: `You generate search queries for an A-Level revision knowledge base. Given a student's question, output exactly 3 short keyword-based search queries (2-5 words each) that would find the most relevant training data chunks. Output as a JSON array of strings. Focus on subject-specific terminology, topic names, and exam concepts. Consider the conversation context when generating queries.`,
+      messages: [
+        // Include last 2 messages of history for context
+        ...history.slice(-2).map((h) => ({
+          role: h.role === "assistant" ? "assistant" as const : "user" as const,
+          content: typeof h.content === "string" ? h.content : "",
+        })),
+        { role: "user", content: userMessage },
+      ],
+      maxTokens: 150,
     });
 
-    if (!response.ok) {
-      console.error(`Query planning failed (${response.status}), falling back to keyword search`);
-      return [];
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '';
-    
     // Parse JSON array from response (handle markdown code blocks)
     const jsonMatch = content.match(/\[[\s\S]*?\]/);
     if (jsonMatch) {
@@ -758,7 +730,6 @@ This is a monitored school study tool. These rules override any request to the c
 // attempt wrongly rejected is the worst failure mode, so any doubt resolves to true
 // and any error fails OPEN (no gate). Runs on the cheap utility model.
 async function classifyStudentTurn(
-  apiKey: string,
   message: string,
   history: Array<{ role: string; content: string }>,
 ): Promise<{ is_fresh_question: boolean; attempt_present: boolean; offload_score: number }> {
@@ -770,22 +741,14 @@ async function classifyStudentTurn(
 - attempt_present: true if the student has offered ANY genuine reasoning, partial answer, argument or their own thinking — in THIS message OR the recent history. Bias strongly to TRUE. Return FALSE only when the student gave essentially nothing but a bare question or a demand for the answer. When in ANY doubt, return true.
 - offload_score: 0..1 — how much this looks like cognitive offloading (pasting a full question and demanding the answer, "just write it for me", refusing to try). 0 = engaged effort, 1 = pure offloading.`;
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODELS.utility,
-        messages: [
-          { role: "system", content: sys },
-          { role: "user", content: `Recent history:\n${recent}\n\nCurrent message:\n${message}` },
-        ],
-        temperature: 0,
-        max_tokens: 120,
-      }),
-    });
-    if (!res.ok) throw new Error(`classifier ${res.status}`);
-    const data = await res.json();
-    let raw = String(data?.choices?.[0]?.message?.content ?? "").trim();
+    // Utility model (gemini-2.0-flash-lite) via the shared Gemini client.
+    const content = await chat(
+      sys,
+      `Recent history:\n${recent}\n\nCurrent message:\n${message}`,
+      "fast",
+      { maxTokens: 120 },
+    );
+    const raw = String(content ?? "").trim();
     const s = raw.indexOf("{"); const e = raw.lastIndexOf("}");
     if (s === -1 || e === -1) return failOpen;
     const parsed = JSON.parse(raw.slice(s, e + 1));
@@ -829,7 +792,6 @@ function streamSyntheticText(text: string, headers: Record<string, string>): Res
 // positives (into the DSL queue only) are acceptable. On error it logs a distinct
 // searchable marker rather than silently passing.
 async function screenForSafeguarding(
-  apiKey: string,
   message: string,
 ): Promise<{ concern: boolean; severity: 'low' | 'medium' | 'high'; category: string }> {
   const none = { concern: false, severity: 'low' as const, category: '' };
@@ -838,19 +800,8 @@ Set concern=true for ANY sign of: self-harm or suicidal thoughts, abuse or negle
 severity: "high" = explicit or imminent risk; "medium" = clear but not imminent; "low" = mild or ambiguous.
 category: short label, e.g. "self-harm", "abuse", "distress", "eating-disorder", "harm-to-others".`;
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODELS.utility,
-        messages: [{ role: "system", content: sys }, { role: "user", content: message }],
-        temperature: 0,
-        max_tokens: 60,
-      }),
-    });
-    if (!res.ok) throw new Error(`safeguarding screen ${res.status}`);
-    const data = await res.json();
-    const raw = String(data?.choices?.[0]?.message?.content ?? "");
+    // Utility model (gemini-2.0-flash-lite) via the shared Gemini client.
+    const raw = String(await chat(sys, message, "fast", { maxTokens: 60 }) ?? "");
     const s = raw.indexOf("{"); const e = raw.lastIndexOf("}");
     if (s === -1 || e === -1) return none;
     const p = JSON.parse(raw.slice(s, e + 1));
@@ -894,33 +845,17 @@ serve(async (req) => {
   }
 
   try {
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    // Require a logged-in student (was best-effort auth allowing free anon use)
+    // and cap per-user burst before any AI or heavy DB work runs.
+    const { user, admin } = await requireUser(req);
+    await enforceRateLimit(admin, { key: userKey(user.id, "rag-chat"), ...RATE_LIMITS.chat });
+    const supabaseAdmin = admin;
 
     const body = await req.json();
-    const { message, product_id, history = [], tier: _clientTier = 'free', user_id: client_user_id, enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id, spec_content, tool_type } = body;
+    const { message, product_id, history = [], tier: _clientTier = 'free', enable_diagrams = false, diagram_subject = 'economics', image_data = null, trainer_test = false, search_only = false, query, prompt_product_id, spec_content, tool_type } = body;
 
-    // SECURITY: Derive user_id from auth token when available — never trust the client blindly
-    let user_id = client_user_id;
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
-      try {
-        const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") ?? "");
-        const token = authHeader.replace("Bearer ", "");
-        const { data: authData } = await anonClient.auth.getUser(token);
-        if (authData?.user?.id) {
-          if (user_id && user_id !== authData.user.id) {
-            console.warn(`[SECURITY] user_id mismatch: body=${user_id}, token=${authData.user.id}. Using token.`);
-          }
-          user_id = authData.user.id;
-        }
-      } catch (err) {
-        console.warn("Auth token verification failed, falling back to client user_id:", err);
-      }
-    }
+    // SECURITY: user id is taken from the verified token only — never the body.
+    const user_id = user.id;
 
     // SECURITY: Fetch user_preferences server-side — ignore any sent by the client
     let user_preferences: { year: string; predicted_grade: string; target_grade: string; additional_info: string | null } | null = null;
@@ -1224,7 +1159,7 @@ serve(async (req) => {
     //    flag write is awaited (never dropped); the DSL email is best-effort.
     if (schoolMode && user_id && schoolMember) {
       try {
-        const sg = await screenForSafeguarding(lovableApiKey, typeof message === 'string' ? message : '');
+        const sg = await screenForSafeguarding(typeof message === 'string' ? message : '');
         if (sg.concern) {
           await supabaseAdmin.from('safeguarding_flags').insert({
             student_id: user_id, school_id: schoolMember.school_id, class_id: schoolMember.class_id,
@@ -1322,7 +1257,7 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
     //    is exempt (marking implies an attempt already exists). Fails OPEN.
     let schoolTurn: { is_fresh_question: boolean; attempt_present: boolean; offload_score: number } | null = null;
     if (schoolMode && !isEssayMarkerRequest) {
-      schoolTurn = await classifyStudentTurn(lovableApiKey, message, history);
+      schoolTurn = await classifyStudentTurn(message, history);
       if (schoolTurn.is_fresh_question && !schoolTurn.attempt_present) {
         await logCoachInteraction(supabaseAdmin, {
           user_id, school_id: schoolMember!.school_id, class_id: schoolMember!.class_id,
@@ -1336,7 +1271,7 @@ To continue learning with unlimited prompts, upgrade to **Deluxe** and unlock:
 
     // Step 1: Run search query generation AND parallel DB fetches simultaneously
     const [searchQueries, basePrompt, brainResult, feedbackResult, seasonalResult] = await Promise.all([
-      generateSearchQueries(lovableApiKey, message, history),
+      generateSearchQueries(message, history),
       fetchSystemPrompt(supabaseAdmin, product_id),
       // Brain profile (deluxe only)
       (tier === 'deluxe' && user_id)
@@ -1399,7 +1334,7 @@ Use this to personalise your responses — reference their weak areas, their exa
         const fallbackDiagrams = ECONOMICS_DIAGRAMS_FALLBACK.filter(d => !customIds.has(d.id));
         customDiagrams = [...customDiagrams, ...fallbackDiagrams];
       }
-      const diagram = await findRelevantDiagram(message, customDiagrams, lovableApiKey);
+      const diagram = await findRelevantDiagram(message, customDiagrams);
       if (diagram) console.log(`Found relevant diagram: ${diagram.title}`);
       return diagram;
     })();
@@ -1468,9 +1403,13 @@ CRITICAL RULES:
       userMessageContent = message;
     }
 
-    // Step 3: Use unified Flash model for all chat (including essay marking)
-    const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const aiModel = MODELS.fast;
+    // Step 3: Use unified Flash model for all chat (including essay marking).
+    // Streaming path talks to Google's OpenAI-compatible endpoint directly — the
+    // shared client has no streaming helper, so we keep the SSE fetch here and only
+    // swap the vendor (URL + key + bare model name). Streaming behaviour unchanged.
+    const aiUrl = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
+    const aiModel = MODELS.fast.replace(/^google\//, ""); // bare model for direct Gemini
     console.log(`Model selected: ${aiModel}`);
 
     const buildAiBody = (model: string) => JSON.stringify({
@@ -1495,7 +1434,7 @@ CRITICAL RULES:
       response = await fetch(aiUrl, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${lovableApiKey}`,
+          "Authorization": `Bearer ${geminiApiKey}`,
           "Content-Type": "application/json",
         },
         body: buildAiBody(aiModel),
@@ -1635,6 +1574,8 @@ CRITICAL RULES:
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (error) {
+    // Auth (401) and rate-limit (429) guards carry their own ready-made response.
+    if (error instanceof HttpError) return error.response;
     console.error("RAG chat error:", error);
     return new Response(
       JSON.stringify({ error: "Something went wrong. Please try again." }),

@@ -1,15 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "A* AI <hello@astarai.co.uk>";
 const APP_URL = "https://astarai.co.uk";
@@ -422,15 +415,10 @@ function buildEmailHtml(firstName: string, stats: UserStats): string {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   logStep("Starting weekly progress email job");
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { persistSession: false },
-  });
 
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -441,6 +429,8 @@ serve(async (req) => {
   let errors = 0;
 
   try {
+    const supabase = requireCronSecret(req);
+
     // 1. Find users who sent at least 1 chat message in the last 7 days
     logStep("Querying active users from last 7 days");
 
@@ -452,10 +442,7 @@ serve(async (req) => {
 
     if (convError) {
       logStep("ERROR: Failed to query chat messages", { error: convError.message });
-      return new Response(
-        JSON.stringify({ success: false, error: convError.message }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ success: false, error: convError.message }, 500);
     }
 
     // Group messages by user_id
@@ -474,10 +461,7 @@ serve(async (req) => {
 
     if (activeUserIds.length === 0) {
       logStep("No active users found, exiting");
-      return new Response(
-        JSON.stringify({ users_emailed: 0, users_skipped: 0, errors: 0 }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ users_emailed: 0, users_skipped: 0, errors: 0 });
     }
 
     // 2. Filter out users who have unsubscribed from weekly recap
@@ -595,15 +579,9 @@ serve(async (req) => {
     const summary = { users_emailed: usersEmailed, users_skipped: usersSkipped, errors };
     logStep("Weekly progress email job completed", summary);
 
-    return new Response(JSON.stringify(summary), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json(summary);
   } catch (error) {
     logStep("ERROR: Unexpected error", { error: (error as Error).message });
-    return new Response(
-      JSON.stringify({ success: false, error: (error as Error).message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return toResponse(error);
   }
 });

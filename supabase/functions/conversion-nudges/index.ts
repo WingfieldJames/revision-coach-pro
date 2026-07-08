@@ -1,21 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const supabase = requireCronSecret(req);
 
     // Date range: last 7 days
     const today = new Date();
@@ -57,10 +49,7 @@ serve(async (req) => {
       }
 
       if (!usageRows || usageRows.length === 0) {
-        return new Response(
-          JSON.stringify({ nudged: [], message: "No candidates found" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return json({ nudged: [], message: "No candidates found" });
       }
 
       // Group by user_id: count distinct days and track product frequency
@@ -108,10 +97,7 @@ serve(async (req) => {
       }
 
       if (engagedUserIds.length === 0) {
-        return new Response(
-          JSON.stringify({ nudged: [], message: "No candidates found" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return json({ nudged: [], message: "No candidates found" });
       }
 
       // Step 2: Exclude users with active subscriptions
@@ -133,13 +119,10 @@ serve(async (req) => {
       );
 
       if (freeEngagedUserIds.length === 0) {
-        return new Response(
-          JSON.stringify({
-            nudged: [],
-            message: "All engaged users are already subscribed",
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return json({
+          nudged: [],
+          message: "All engaged users are already subscribed",
+        });
       }
 
       // Step 3: Exclude users already nudged with this nudge type
@@ -163,13 +146,10 @@ serve(async (req) => {
       );
 
       if (toNudgeUserIds.length === 0) {
-        return new Response(
-          JSON.stringify({
-            nudged: [],
-            message: "All candidates have already been nudged",
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return json({
+          nudged: [],
+          message: "All candidates have already been nudged",
+        });
       }
 
       // Step 4: Fetch emails from auth.users
@@ -220,25 +200,13 @@ serve(async (req) => {
       `Conversion nudge candidates identified: ${nudgeCandidates.length}`
     );
 
-    return new Response(
-      JSON.stringify({
-        nudged: nudgeCandidates,
-        count: nudgeCandidates.length,
-        message: `${nudgeCandidates.length} user(s) identified for conversion nudge`,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
+    return json({
+      nudged: nudgeCandidates,
+      count: nudgeCandidates.length,
+      message: `${nudgeCandidates.length} user(s) identified for conversion nudge`,
+    });
   } catch (err) {
     console.error("conversion-nudges error:", err);
-    return new Response(
-      JSON.stringify({ error: (err as Error).message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return toResponse(err);
   }
 });

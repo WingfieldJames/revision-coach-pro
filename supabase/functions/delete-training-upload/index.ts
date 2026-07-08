@@ -1,23 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireUser, requireOwnedProject, requireAdmin } from "../_shared/auth.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    // AUTH: verified caller first; ownership is enforced below against the
+    // upload's owning project.
+    const { admin: supabase } = await requireUser(req);
 
     const { upload_id, delete_chunks } = await req.json();
-    if (!upload_id) throw new Error("upload_id is required");
+    if (!upload_id) return err("upload_id is required", 400);
 
     // Get the upload record
     const { data: upload, error: fetchErr } = await supabase
@@ -26,7 +21,23 @@ serve(async (req) => {
       .eq("id", upload_id)
       .single();
 
-    if (fetchErr || !upload) throw new Error("Upload not found");
+    if (fetchErr || !upload) return err("Upload not found", 400);
+
+    // OWNERSHIP: the upload belongs to a trainer_project; resolve its product
+    // and require the caller to own/train that subject (admins bypass). If no
+    // product is linked we cannot cheaply establish ownership, so fall back to
+    // admin-only.
+    const { data: ownerProject } = await supabase
+      .from("trainer_projects")
+      .select("product_id")
+      .eq("id", upload.project_id)
+      .single();
+
+    if (ownerProject?.product_id) {
+      await requireOwnedProject(req, ownerProject.product_id);
+    } else {
+      await requireAdmin(req);
+    }
 
     // If delete_chunks is true, also delete associated document_chunks
     // Chunks are linked by metadata matching this upload's details
@@ -79,13 +90,8 @@ serve(async (req) => {
 
     if (delErr) throw delErr;
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ success: true });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return toResponse(err);
   }
 });

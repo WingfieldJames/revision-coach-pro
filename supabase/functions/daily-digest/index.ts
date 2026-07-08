@@ -1,24 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminEmail =
       Deno.env.get("ADMIN_EMAIL") || "astarai.official@gmail.com";
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = requireCronSecret(req);
 
     const now = new Date();
     const twentyFourHoursAgo = new Date(
@@ -215,22 +207,10 @@ serve(async (req) => {
       );
     }
 
-    return new Response(
-      JSON.stringify({ digest, email_sent: emailSent }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
+    return json({ digest, email_sent: emailSent });
   } catch (error) {
     console.error("Daily digest error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return toResponse(error);
   }
 });
 

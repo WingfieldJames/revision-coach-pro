@@ -1,66 +1,28 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
 
 serve(async (req) => {
   console.log("school-accept-invite function called");
 
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
+    // AUTH: require a verified caller and bind the invite to their id. Closes
+    // the pre-fix hole where a POST with no Authorization header trusted a body
+    // `user_id` and granted school premium to an arbitrary account.
+    const { user, admin: supabaseAdmin } = await requireUser(req);
+    const user_id = user.id;
+
     const body = await req.json();
     const { invite_code } = body;
-    let user_id = body.user_id;
 
     if (!invite_code) {
-      return new Response(
-        JSON.stringify({ error: "invite_code is required" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
-    }
-
-    // SECURITY: Derive user_id from auth token, not request body
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
-      try {
-        const anonClient = createClient(
-          Deno.env.get("SUPABASE_URL") ?? "",
-          Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-        );
-        const token = authHeader.replace("Bearer ", "");
-        const { data: authData } = await anonClient.auth.getUser(token);
-        if (authData?.user?.id) {
-          if (user_id && user_id !== authData.user.id) {
-            console.warn(`[SECURITY] school-accept-invite user_id mismatch: body=${user_id}, token=${authData.user.id}`);
-          }
-          user_id = authData.user.id;
-        }
-      } catch (err) {
-        console.warn("Auth token verification failed:", err);
-      }
-    }
-
-    if (!user_id) {
-      return new Response(
-        JSON.stringify({ error: "Authentication required" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 }
-      );
+      return json({ error: "invite_code is required" }, 400);
     }
 
     console.log("Accepting invite:", { invite_code, user_id });
-
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
 
     // Find the invite
     const { data: member, error: lookupError } = await supabaseAdmin
@@ -71,35 +33,17 @@ serve(async (req) => {
 
     if (lookupError || !member) {
       console.log("Invite code not found:", invite_code);
-      return new Response(
-        JSON.stringify({ error: "Invalid invite code" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 404,
-        }
-      );
+      return json({ error: "Invalid invite code" }, 404);
     }
 
     // Check if already accepted
     if (member.invite_status === "accepted") {
-      return new Response(
-        JSON.stringify({ error: "Invite already accepted" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 409,
-        }
-      );
+      return json({ error: "Invite already accepted" }, 409);
     }
 
     // Check if expired
     if (member.invite_status === "expired") {
-      return new Response(
-        JSON.stringify({ error: "Invite has expired" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 410,
-        }
-      );
+      return json({ error: "Invite has expired" }, 410);
     }
 
     // Get the active license
@@ -113,24 +57,12 @@ serve(async (req) => {
       .maybeSingle();
 
     if (!license) {
-      return new Response(
-        JSON.stringify({ error: "School license is no longer active" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
-      );
+      return json({ error: "School license is no longer active" }, 400);
     }
 
     // Check license hasn't expired
     if (new Date(license.expires_at) < new Date()) {
-      return new Response(
-        JSON.stringify({ error: "School license has expired" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        }
-      );
+      return json({ error: "School license has expired" }, 400);
     }
 
     // Accept the invite
@@ -146,13 +78,7 @@ serve(async (req) => {
 
     if (updateError) {
       console.error("Failed to accept invite:", updateError);
-      return new Response(
-        JSON.stringify({ error: "Failed to accept invite" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 500,
-        }
-      );
+      return json({ error: "Failed to accept invite" }, 500);
     }
 
     // Increment used_seats
@@ -234,24 +160,12 @@ serve(async (req) => {
       school_id: member.school_id,
     });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        school_name: school?.name ?? "your school",
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
+    return json({
+      success: true,
+      school_name: school?.name ?? "your school",
+    });
   } catch (error) {
     console.error("Unexpected error in school-accept-invite:", error);
-    return new Response(
-      JSON.stringify({ error: "internal_server_error" }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return toResponse(error);
   }
 });

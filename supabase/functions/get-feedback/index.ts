@@ -1,23 +1,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireAdmin } from "../_shared/auth.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { auth: { persistSession: false } }
-  );
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
+    // AUTH: admin-only — this dumps all user emails + raw feedback.
+    const { admin: supabase } = await requireAdmin(req);
+
     // Get all feedback
     const { data: feedback, error } = await supabase
       .from('user_feedback')
@@ -74,7 +66,7 @@ serve(async (req) => {
       .from('feedback_emails_sent')
       .select('*');
 
-    return new Response(JSON.stringify({
+    return json({
       stats: {
         total,
         avgRating: Math.round(avgRating * 10) / 10,
@@ -88,14 +80,8 @@ serve(async (req) => {
       distribution,
       dailyTrend,
       responses: enriched,
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return toResponse(err);
   }
 });

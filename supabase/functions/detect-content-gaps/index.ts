@@ -1,27 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireAdmin } from "../_shared/auth.ts";
+import { chatCompletion } from "../_shared/ai.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
+    // AUTH: admin-only analytics sweep across every product.
+    const { user, admin: supabase } = await requireAdmin(req);
 
     // Fetch all products
     const { data: products, error: productsError } = await supabase
@@ -83,21 +71,12 @@ serve(async (req) => {
         continue;
       }
 
-      // Call AI gateway to detect content gaps
-      const aiResponse = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.0-flash-lite",
-            messages: [
-              {
-                role: "system",
-                content: `You are an expert curriculum analyst for UK students. You will be given a list of student questions and a list of topics that already have training data. Your job is to identify the top 5 topics that students are frequently asking about but have little or no coverage in the existing training data.
+      // Call the shared AI client to detect content gaps
+      let rawContent: string;
+      try {
+        const result = await chatCompletion({
+          model: "chat",
+          system: `You are an expert curriculum analyst for UK students. You will be given a list of student questions and a list of topics that already have training data. Your job is to identify the top 5 topics that students are frequently asking about but have little or no coverage in the existing training data.
 
 Return ONLY a JSON array of objects, each with:
 - "topic": a concise topic name
@@ -106,10 +85,10 @@ Return ONLY a JSON array of objects, each with:
 - "sample_questions": up to 3 example student questions related to this gap
 
 Do not include any text outside the JSON array.`,
-              },
-              {
-                role: "user",
-                content: `Product: ${product.name} (${product.subject})
+          messages: [
+            {
+              role: "user",
+              content: `Product: ${product.name} (${product.subject})
 
 Student questions (last 200):
 ${studentQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
@@ -118,24 +97,18 @@ Topics with existing training data:
 ${coveredTopics.map((t, i) => `${i + 1}. ${t}`).join("\n")}
 
 Identify the top 5 content gaps.`,
-              },
-            ],
-            temperature: 0.3,
-            max_tokens: 2048,
-          }),
-        }
-      );
-
-      if (!aiResponse.ok) {
-        const errBody = await aiResponse.text();
+            },
+          ],
+          maxTokens: 2048,
+          logCtx: { admin: supabase, fn: "detect-content-gaps", userId: user.id },
+        });
+        rawContent = result.text || "[]";
+      } catch (aiErr) {
         console.error(
-          `AI request failed for product ${product.name}: ${aiResponse.status} ${errBody}`
+          `AI request failed for product ${product.name}: ${aiErr instanceof Error ? aiErr.message : String(aiErr)}`
         );
         continue;
       }
-
-      const aiData = await aiResponse.json();
-      const rawContent = aiData.choices?.[0]?.message?.content ?? "[]";
 
       // Parse the AI response – strip markdown fences if present
       let gaps: unknown[];
@@ -179,21 +152,9 @@ Identify the top 5 content gaps.`,
       });
     }
 
-    return new Response(JSON.stringify({ success: true, results: allGaps }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return json({ success: true, results: allGaps });
   } catch (error) {
     console.error("detect-content-gaps error:", error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return toResponse(error);
   }
 });

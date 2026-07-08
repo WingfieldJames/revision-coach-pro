@@ -1,53 +1,22 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
 
 const MILESTONES = [7, 14, 30, 60, 100];
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+serve(async (req) => {
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const body = await req.json().catch(() => ({}));
-    let user_id = body.user_id;
+    // AUTH: record the streak for the verified user only. Ignore any body
+    // `user_id` — closes the spoof where a caller could bump another user's streak.
+    const { user, admin } = await requireUser(req);
+    await enforceRateLimit(admin, { key: userKey(user.id, "update-streak"), ...RATE_LIMITS.cheap });
 
-    // SECURITY: Derive user_id from auth token when available
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
-      try {
-        const anonClient = createClient(
-          Deno.env.get("SUPABASE_URL")!,
-          Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-        );
-        const token = authHeader.replace("Bearer ", "");
-        const { data: authData } = await anonClient.auth.getUser(token);
-        if (authData?.user?.id) {
-          if (user_id && user_id !== authData.user.id) {
-            console.warn(`[SECURITY] update-streak user_id mismatch: body=${user_id}, token=${authData.user.id}`);
-          }
-          user_id = authData.user.id;
-        }
-      } catch (err) {
-        console.warn("Auth token verification failed, using body user_id:", err);
-      }
-    }
-
-    if (!user_id) {
-      return new Response(
-        JSON.stringify({ error: "user_id is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    const user_id = user.id;
+    const adminClient = admin;
 
     // Get today's date in UTC (YYYY-MM-DD)
     const today = new Date();
@@ -90,22 +59,16 @@ Deno.serve(async (req) => {
 
       isMilestone = MILESTONES.includes(currentStreak);
 
-      return new Response(
-        JSON.stringify({ current_streak: currentStreak, longest_streak: longestStreak, is_milestone: isMilestone }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ current_streak: currentStreak, longest_streak: longestStreak, is_milestone: isMilestone });
     }
 
     // Already active today — do nothing
     if (existing.last_active_date === todayStr) {
-      return new Response(
-        JSON.stringify({
-          current_streak: existing.current_streak,
-          longest_streak: existing.longest_streak,
-          is_milestone: false,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({
+        current_streak: existing.current_streak,
+        longest_streak: existing.longest_streak,
+        is_milestone: false,
+      });
     }
 
     // Calculate days since last active
@@ -146,15 +109,8 @@ Deno.serve(async (req) => {
 
     if (updateError) throw updateError;
 
-    return new Response(
-      JSON.stringify({ current_streak: currentStreak, longest_streak: longestStreak, is_milestone: isMilestone }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    console.error("Error updating streak:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ current_streak: currentStreak, longest_streak: longestStreak, is_milestone: isMilestone });
+  } catch (e) {
+    return toResponse(e);
   }
 });

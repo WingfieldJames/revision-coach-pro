@@ -1,23 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
+import { chatCompletion } from "../_shared/ai.ts";
 
 const MAX_CONTEXT_CHARS = 40000;
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const { user, admin: supabaseAdmin } = await requireUser(req);
+    await enforceRateLimit(supabaseAdmin, { key: userKey(user.id, "generate-revision-guide"), ...RATE_LIMITS.chat });
+
+    const userId = user.id;
 
     const {
       product_id,
@@ -28,26 +25,22 @@ serve(async (req) => {
       options = [],
       past_paper_context = "",
       diagram_context = "",
-      user_id,
     } = await req.json();
 
     if (!spec_name || !product_id) {
-      return new Response(
-        JSON.stringify({ error: "spec_name and product_id are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return err("spec_name and product_id are required", 400);
     }
 
     console.log(`Revision guide for ${board} spec ${spec_code}: ${spec_name}`);
 
     // --- Subscription check ---
     let tier = "free";
-    if (user_id && product_id) {
+    if (userId && product_id) {
       try {
         const { data: sub } = await supabaseAdmin
           .from("user_subscriptions")
           .select("tier, subscription_end")
-          .eq("user_id", user_id)
+          .eq("user_id", userId)
           .eq("product_id", product_id)
           .eq("active", true)
           .maybeSingle();
@@ -69,7 +62,7 @@ serve(async (req) => {
             const { data: legacyUser } = await supabaseAdmin
               .from("users")
               .select("is_premium, subscription_end")
-              .eq("id", user_id)
+              .eq("id", userId)
               .maybeSingle();
 
             if (legacyUser?.is_premium) {
@@ -84,24 +77,24 @@ serve(async (req) => {
       }
     }
 
-    console.log(`User ${user_id} tier: ${tier}`);
+    console.log(`User ${userId} tier: ${tier}`);
 
     // --- Free usage limit ---
-    if (tier === "free" && user_id) {
+    if (tier === "free" && userId) {
       const { data: usageData, error: usageError } = await supabaseAdmin.rpc("get_tool_usage", {
-        p_user_id: user_id,
+        p_user_id: userId,
         p_product_id: product_id,
         p_tool_type: "revision_guide",
       });
 
       const currentCount = (!usageError && usageData) ? (usageData as { count: number }).count : 0;
       if (currentCount >= 1) {
-        return new Response(
-          JSON.stringify({
+        return json(
+          {
             error: "limit_exceeded",
             message: "You've used your free revision guide this month. Upgrade to Deluxe for unlimited guides!",
-          }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          },
+          429,
         );
       }
     }
@@ -388,92 +381,52 @@ The main objectives include protecting consumers, promoting efficiency, and prev
     console.log(`Prompt length: ${prompt.length}, System prompt length: ${systemPrompt.length}`);
 
     // --- AI call ---
-    const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
     const aiModel = "google/gemini-2.5-flash";
 
-    const response = await fetch(aiUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: aiModel,
-        max_tokens: 8000,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: prompt },
-        ],
-        stream: false,
-      }),
+    const aiResult = await chatCompletion({
+      model: "chat",
+      system: systemPrompt,
+      messages: [
+        { role: "user", content: prompt },
+      ],
+      maxTokens: 8000,
+      logCtx: { admin: supabaseAdmin, fn: "generate-revision-guide", userId },
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`AI gateway error ${response.status}:`, errText);
-
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please try again later." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      return new Response(
-        JSON.stringify({ error: "Failed to generate revision guide. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const aiResult = await response.json();
-    const content = aiResult.choices?.[0]?.message?.content || "";
+    const content = aiResult.text || "";
 
     // Log AI usage
     try {
-      const inputTok = aiResult.usage?.prompt_tokens || 0;
-      const outputTok = aiResult.usage?.completion_tokens || 0;
+      const inputTok = aiResult.usage.inputTokens || 0;
+      const outputTok = aiResult.usage.outputTokens || 0;
       const cost = (inputTok / 1_000_000) * 0.30 + (outputTok / 1_000_000) * 2.50;
       await supabaseAdmin.from("api_usage_logs").insert({
-        user_id: user_id ?? null, product_id: product_id ?? null,
+        user_id: userId ?? null, product_id: product_id ?? null,
         feature: "revision_guide", model: aiModel,
         input_tokens: inputTok, output_tokens: outputTok, estimated_cost_usd: cost,
       });
     } catch (logErr) { console.error("usage log failed:", logErr); }
 
     if (!content) {
-      return new Response(
-        JSON.stringify({ error: "AI returned empty content. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return err("AI returned empty content. Please try again.", 500);
     }
 
     console.log(`Generated guide: ${content.length} chars`);
 
     // Increment usage
-    if (tier === "free" && user_id) {
+    if (tier === "free" && userId) {
       await supabaseAdmin.rpc("increment_tool_usage", {
-        p_user_id: user_id,
+        p_user_id: userId,
         p_product_id: product_id,
         p_tool_type: "revision_guide",
         p_limit: 1,
       });
     }
 
-    return new Response(
-      JSON.stringify({ content }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ content });
   } catch (e) {
+    const resp = toResponse(e);
+    if (resp.status === 401 || resp.status === 403 || resp.status === 429) return resp;
     console.error("Revision guide error:", e);
-    return new Response(
-      JSON.stringify({ error: "Something went wrong generating your revision guide. Please try again." }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return err("Something went wrong generating your revision guide. Please try again.", 500);
   }
 });

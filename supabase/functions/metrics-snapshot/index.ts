@@ -1,21 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireCronSecret } from "../_shared/auth.ts";
+import { chatCompletion } from "../_shared/ai.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const supabaseAdmin = requireCronSecret(req);
 
     const today = new Date().toISOString().split("T")[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
@@ -204,10 +197,8 @@ serve(async (req) => {
     console.log(`Metrics snapshot saved for ${today}`);
 
     // Generate AI analysis
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
     let aiAnalysis = '';
-    if (lovableApiKey) {
-      try {
+    try {
         const analysisPrompt = `You are a startup metrics analyst for an AI tutoring platform (A* AI) serving UK A-Level and GCSE students. Analyze these metrics and provide actionable insights.
 
 TODAY'S METRICS (${today}):
@@ -231,27 +222,15 @@ Provide a concise analysis (300 words max) covering:
 
 Be specific with numbers. Use plain English, no jargon.`;
 
-        const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${lovableApiKey}`,
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.0-flash-lite",
-            messages: [{ role: "user", content: analysisPrompt }],
-            stream: false,
-          }),
+        const { text } = await chatCompletion({
+          model: "fast",
+          messages: [{ role: "user", content: analysisPrompt }],
+          logCtx: { admin: supabaseAdmin, fn: "metrics-snapshot" },
         });
-
-        if (aiResponse.ok) {
-          const aiData = await aiResponse.json();
-          aiAnalysis = aiData.choices?.[0]?.message?.content || '';
-        }
+        aiAnalysis = text || '';
       } catch (err) {
         console.error('AI analysis failed:', err);
       }
-    }
 
     // Send email via Resend
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
@@ -346,27 +325,16 @@ Be specific with numbers. Use plain English, no jargon.`;
       console.log('RESEND_API_KEY not set — email skipped');
     }
 
-    return new Response(
-      JSON.stringify({
-        date: today,
-        metrics,
-        deltas: Object.keys(deltas).length > 0 ? deltas : null,
-        recent_changes: recentChanges || [],
-        ai_analysis: aiAnalysis || null,
-        email_sent: emailSent,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return json({
+      date: today,
+      metrics,
+      deltas: Object.keys(deltas).length > 0 ? deltas : null,
+      recent_changes: recentChanges || [],
+      ai_analysis: aiAnalysis || null,
+      email_sent: emailSent,
+    });
   } catch (error) {
     console.error("metrics-snapshot error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return toResponse(error);
   }
 });

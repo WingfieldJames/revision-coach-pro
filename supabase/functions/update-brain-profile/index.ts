@@ -1,32 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
+import { chatCompletion } from "../_shared/ai.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // AUTH: derive the acting user from the verified token. Ignore any
+    // body `user_id` — closes the IDOR where a caller could rewrite another
+    // student's brain profile.
+    const { user, admin } = await requireUser(req);
+    await enforceRateLimit(admin, { key: userKey(user.id, "update-brain-profile"), ...RATE_LIMITS.cheap });
 
-    const { user_id, conversation_history } = await req.json();
+    let body: { conversation_history?: Array<{ role: string; content: string }> };
+    try {
+      body = await req.json();
+    } catch {
+      return err("Invalid JSON body", 400);
+    }
+    const { conversation_history } = body;
+    const user_id = user.id;
 
-    if (!user_id || !conversation_history || conversation_history.length < 2) {
-      return new Response(JSON.stringify({ success: false, reason: "insufficient_data" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!conversation_history || conversation_history.length < 2) {
+      return json({ success: false, reason: "insufficient_data" });
     }
 
     // Fetch existing profile
-    const { data: existingProfile } = await supabase
+    const { data: existingProfile } = await admin
       .from("user_brain_profiles")
       .select("profile_summary")
       .eq("user_id", user_id)
@@ -43,18 +46,11 @@ serve(async (req) => {
       .join("\n");
 
     // Call AI to extract profile
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          {
-            role: "system",
-            content: `You are a student profile analyser. Read the conversation below and produce a concise updated student profile summary (max 500 words). Include:
+    let profileSummary = "";
+    try {
+      const { text } = await chatCompletion({
+        model: "utility",
+        system: `You are a student profile analyser. Read the conversation below and produce a concise updated student profile summary (max 500 words). Include:
 - Subjects studied and exam boards mentioned
 - Weak topics or areas they struggle with
 - Question types they ask about
@@ -66,30 +62,22 @@ serve(async (req) => {
 ${existingContext}
 
 Merge new information with the existing profile. Remove outdated info if contradicted. Output ONLY the updated profile summary text, no headers or formatting.`,
-          },
+        messages: [
           {
             role: "user",
             content: `Conversation:\n${conversationText}`,
           },
         ],
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("AI gateway error:", response.status, await response.text());
-      return new Response(JSON.stringify({ success: false, reason: "ai_error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        logCtx: { admin, fn: "update-brain-profile", userId: user_id },
       });
+      profileSummary = text || "";
+    } catch (aiError) {
+      console.error("AI error:", aiError);
+      return json({ success: false, reason: "ai_error" }, 500);
     }
 
-    const aiData = await response.json();
-    const profileSummary = aiData.choices?.[0]?.message?.content || "";
-
     if (!profileSummary.trim()) {
-      return new Response(JSON.stringify({ success: false, reason: "empty_profile" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ success: false, reason: "empty_profile" });
     }
 
     // Extract subjects and weak topics as arrays for structured storage
@@ -97,7 +85,7 @@ Merge new information with the existing profile. Remove outdated info if contrad
     const weakMatch = profileSummary.match(/(?:weak|struggle|difficult|confused)[:\s]*([^\n.]+)/gi) || [];
 
     // Upsert the brain profile
-    const { error } = await supabase
+    const { error } = await admin
       .from("user_brain_profiles")
       .upsert(
         {
@@ -112,23 +100,13 @@ Merge new information with the existing profile. Remove outdated info if contrad
 
     if (error) {
       console.error("DB upsert error:", error);
-      return new Response(JSON.stringify({ success: false, reason: "db_error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ success: false, reason: "db_error" }, 500);
     }
 
     console.log(`Brain profile updated for user ${user_id} (${profileSummary.length} chars)`);
 
-    return new Response(
-      JSON.stringify({ success: true, profile_length: profileSummary.length }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    console.error("update-brain-profile error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ success: true, profile_length: profileSummary.length });
+  } catch (e) {
+    return toResponse(e);
   }
 });

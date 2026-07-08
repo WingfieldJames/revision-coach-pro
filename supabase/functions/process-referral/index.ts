@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
 
 const REFERRAL_EXPIRY_DAYS = 90;
 const REWARD_DAYS = 7;
@@ -12,28 +9,31 @@ const REWARD_DAYS = 7;
 serve(async (req) => {
   console.log("process-referral function called");
 
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const { referral_code, referred_user_id } = await req.json();
+    // AUTH: the referred user IS the authenticated caller. Ignore any body
+    // `referred_user_id` — closes the hole where an unauthenticated caller
+    // could grant arbitrary accounts premium.
+    const { user, admin: supabaseAdmin } = await requireUser(req);
+    await enforceRateLimit(supabaseAdmin, { key: userKey(user.id, "process-referral"), ...RATE_LIMITS.cheap });
 
-    if (!referral_code || !referred_user_id) {
-      return new Response(
-        JSON.stringify({ error: "referral_code and referred_user_id are required" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
+    const referred_user_id = user.id;
+
+    let body: { referral_code?: string };
+    try {
+      body = await req.json();
+    } catch {
+      return err("Invalid JSON body", 400);
+    }
+    const { referral_code } = body;
+
+    if (!referral_code) {
+      return json({ error: "referral_code and referred_user_id are required" }, 400);
     }
 
     console.log("Processing referral:", { referral_code, referred_user_id });
-
-    // Use service role key for DB writes (bypasses RLS)
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
 
     // 1. Find the referral code
     const { data: referral, error: lookupError } = await supabaseAdmin
@@ -44,10 +44,7 @@ serve(async (req) => {
 
     if (lookupError || !referral) {
       console.log("Referral code not found:", referral_code);
-      return new Response(
-        JSON.stringify({ error: "invalid_referral_code" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
-      );
+      return json({ error: "invalid_referral_code" }, 404);
     }
 
     // 2. Check if code is expired (90 days)
@@ -60,19 +57,13 @@ serve(async (req) => {
         .update({ status: "expired" })
         .eq("id", referral.id);
 
-      return new Response(
-        JSON.stringify({ error: "referral_code_expired" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 410 }
-      );
+      return json({ error: "referral_code_expired" }, 410);
     }
 
     // 3. Check referral isn't already completed
     if (referral.status === "completed") {
       console.log("Referral already completed:", referral.id);
-      return new Response(
-        JSON.stringify({ error: "referral_already_completed" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 }
-      );
+      return json({ error: "referral_already_completed" }, 409);
     }
 
     // 4. Check the referred user hasn't already been referred by someone else
@@ -85,19 +76,13 @@ serve(async (req) => {
 
     if (existingReferral) {
       console.log("User already referred:", referred_user_id);
-      return new Response(
-        JSON.stringify({ error: "user_already_referred" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 }
-      );
+      return json({ error: "user_already_referred" }, 409);
     }
 
     // 5. Prevent self-referral
     if (referral.referrer_id === referred_user_id) {
       console.log("Self-referral attempted:", referred_user_id);
-      return new Response(
-        JSON.stringify({ error: "cannot_refer_self" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
+      return json({ error: "cannot_refer_self" }, 400);
     }
 
     // 6. Update referral record
@@ -114,10 +99,7 @@ serve(async (req) => {
 
     if (updateError) {
       console.error("Failed to update referral:", updateError);
-      return new Response(
-        JSON.stringify({ error: "failed_to_update_referral" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-      );
+      return json({ error: "failed_to_update_referral" }, 500);
     }
 
     // 7. Grant 7-day premium to BOTH users
@@ -187,19 +169,12 @@ serve(async (req) => {
       referred_id: referred_user_id,
     });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Referral processed. Both users granted 7 days of premium access.",
-        referral_id: referral.id,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
-    );
-  } catch (error) {
-    console.error("Unexpected error in process-referral:", error);
-    return new Response(
-      JSON.stringify({ error: "internal_server_error" }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-    );
+    return json({
+      success: true,
+      message: "Referral processed. Both users granted 7 days of premium access.",
+      referral_id: referral.id,
+    }, 200);
+  } catch (e) {
+    return toResponse(e);
   }
 });

@@ -1,18 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireCronSecret } from "../_shared/auth.ts";
+import { chatCompletion } from "../_shared/ai.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "A* AI <hello@astarai.co.uk>";
 const BASE_URL = "https://astarai.lovable.app";
 
@@ -35,7 +28,7 @@ interface ChurningUser {
  * in the last 7 days and have not already been sent a churn notification.
  */
 async function findChurningUsers(
-  supabase: ReturnType<typeof createClient>
+  supabase: SupabaseClient
 ): Promise<ChurningUser[]> {
   const sevenDaysAgo = new Date(
     Date.now() - 7 * 24 * 60 * 60 * 1000
@@ -187,28 +180,12 @@ Guidelines:
 - Do NOT include any greeting like "Hi" or sign-off like "Best" — those are added separately`;
 
   try {
-    const res = await fetch(AI_GATEWAY, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.0-flash-lite",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 300,
-        temperature: 0.8,
-      }),
+    const { text } = await chatCompletion({
+      model: "fast",
+      messages: [{ role: "user", content: prompt }],
+      maxTokens: 300,
     });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      logStep("ERROR: AI gateway request failed", { status: res.status, errText });
-      return getFallbackMessage(subjectList);
-    }
-
-    const data = await res.json();
-    const message = data.choices?.[0]?.message?.content?.trim();
+    const message = text?.trim();
     return message || getFallbackMessage(subjectList);
   } catch (error) {
     logStep("ERROR: AI gateway exception", { error: (error as Error).message });
@@ -319,31 +296,22 @@ async function sendEmail(
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   logStep("Starting churn detection job");
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { persistSession: false },
-  });
 
   let emailsSent = 0;
   let errors = 0;
 
   try {
+    const supabase = requireCronSecret(req);
+
     const churningUsers = await findChurningUsers(supabase);
 
     if (churningUsers.length === 0) {
       logStep("No churning users found — nothing to do");
-      return new Response(
-        JSON.stringify({ success: true, emailsSent: 0, errors: 0 }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return json({ success: true, emailsSent: 0, errors: 0 });
     }
 
     for (const user of churningUsers) {
@@ -404,18 +372,9 @@ serve(async (req) => {
     const summary = { emailsSent, errors, totalCandidates: churningUsers.length };
     logStep("Churn detection job completed", summary);
 
-    return new Response(JSON.stringify({ success: true, ...summary }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ success: true, ...summary });
   } catch (error) {
     logStep("ERROR: Unexpected error", { error: (error as Error).message });
-    return new Response(
-      JSON.stringify({ success: false, error: (error as Error).message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return toResponse(error);
   }
 });

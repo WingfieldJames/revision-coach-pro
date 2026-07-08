@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireAdmin } from "../_shared/auth.ts";
 
 // Canonical live feature configs for legacy subjects (matches Header props)
 const LEGACY_CONFIGS: Record<string, {
@@ -106,14 +102,12 @@ const LEGACY_CONFIGS: Record<string, {
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    // AUTH: admin-only — this backfills training data across every project.
+    const { admin: supabase } = await requireAdmin(req);
 
     // Get all trainer_projects with a product_id (deployed subjects)
     const { data: projects, error: projErr } = await supabase
@@ -123,9 +117,7 @@ serve(async (req) => {
 
     if (projErr) throw projErr;
     if (!projects || projects.length === 0) {
-      return new Response(JSON.stringify({ message: "No deployed projects to backfill" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ message: "No deployed projects to backfill" });
     }
 
     const results: Array<{ project_id: string; subject: string; updates: string[] }> = [];
@@ -342,13 +334,8 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ results }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ results });
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return toResponse(err);
   }
 });

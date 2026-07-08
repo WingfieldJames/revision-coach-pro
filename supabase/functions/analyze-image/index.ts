@@ -1,60 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { preflight, json, err, toResponse } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
+import { geminiChatRaw } from "../_shared/ai.ts";
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    // Authenticate user
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: {
-          headers: {
-            Authorization: req.headers.get("Authorization") ?? "",
-          },
-        },
-        auth: { persistSession: false },
-      }
-    );
-
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-
-    if (authError || !user) {
-      console.log("Authentication failed:", authError?.message);
-      return new Response(
-        JSON.stringify({ error: 'Authentication required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    const { user, admin } = await requireUser(req);
+    await enforceRateLimit(admin, { key: userKey(user.id, "analyze-image"), ...RATE_LIMITS.chat });
 
     console.log("Authenticated user:", user.id);
 
     const { image, imageType } = await req.json();
-    
-    if (!image) {
-      return new Response(
-        JSON.stringify({ error: 'No image provided' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
-      return new Response(
-        JSON.stringify({ error: 'API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!image) {
+      return err("No image provided", 400);
     }
 
     // Build the system prompt for exact OCR extraction
@@ -66,62 +29,30 @@ serve(async (req) => {
 - Headers and subheadings
 
 If there are diagrams, describe the labels/text ON the diagram only (axis labels, curve names, annotations). Do not explain what the diagram means.`;
-    
+
     let userPrompt = `Extract ALL text from this image EXACTLY as written. Do not summarize or interpret - just transcribe the exact characters you see. Preserve the original formatting and structure.`;
 
     console.log("Sending image for analysis, type:", imageType, "user:", user.id);
 
-    const aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
     const aiModel = "google/gemini-2.5-flash";
 
-    const response = await fetch(aiUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: aiModel,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { 
-            role: "user", 
-            content: [
-              { type: "text", text: userPrompt },
-              { 
-                type: "image_url", 
-                image_url: { url: image }
-              }
-            ]
-          }
-        ],
-      }),
+    const data = await geminiChatRaw({
+      model: aiModel,
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: userPrompt },
+            {
+              type: "image_url",
+              image_url: { url: image }
+            }
+          ]
+        }
+      ],
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Lovable AI error:", response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Service temporarily unavailable. Please try again later." }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      return new Response(
-        JSON.stringify({ error: 'Failed to analyze image' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const data = await response.json();
     const extractedText = data.choices?.[0]?.message?.content;
 
     // Log AI usage
@@ -129,12 +60,7 @@ If there are diagrams, describe the labels/text ON the diagram only (axis labels
       const inputTok = data.usage?.prompt_tokens || 0;
       const outputTok = data.usage?.completion_tokens || 0;
       const cost = (inputTok / 1_000_000) * 0.30 + (outputTok / 1_000_000) * 2.50;
-      const adminClient = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-        { auth: { persistSession: false } }
-      );
-      await adminClient.from("api_usage_logs").insert({
+      await admin.from("api_usage_logs").insert({
         user_id: user.id, feature: "essay", model: aiModel,
         input_tokens: inputTok, output_tokens: outputTok, estimated_cost_usd: cost,
       });
@@ -142,23 +68,13 @@ If there are diagrams, describe the labels/text ON the diagram only (axis labels
 
     if (!extractedText) {
       console.error("No content in response:", data);
-      return new Response(
-        JSON.stringify({ error: 'No content extracted from image' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return err("No content extracted from image", 500);
     }
 
     console.log("Successfully analyzed image for user:", user.id);
 
-    return new Response(
-      JSON.stringify({ extractedText }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
-    console.error("Error in analyze-image function:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return json({ extractedText });
+  } catch (e) {
+    return toResponse(e);
   }
 });

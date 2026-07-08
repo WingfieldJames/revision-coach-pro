@@ -1,22 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { preflight, json, toResponse } from "../_shared/http.ts";
+import { requireCronSecret } from "../_shared/auth.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const pre = preflight(req);
+  if (pre) return pre;
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    const supabase = requireCronSecret(req);
 
     // Find messages with 3+ thumbs_down from different users
     const { data: badMessages, error: queryError } = await supabase.rpc(
@@ -66,10 +57,7 @@ serve(async (req) => {
     }
 
     if (candidates.length === 0) {
-      return new Response(
-        JSON.stringify({ flagged: [], message: "No new messages to flag" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ flagged: [], message: "No new messages to flag" });
     }
 
     // Exclude messages already flagged
@@ -94,13 +82,10 @@ serve(async (req) => {
     );
 
     if (newCandidates.length === 0) {
-      return new Response(
-        JSON.stringify({
-          flagged: [],
-          message: "All bad messages already flagged",
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({
+        flagged: [],
+        message: "All bad messages already flagged",
+      });
     }
 
     // Fetch full context for each newly flagged message
@@ -188,21 +173,12 @@ serve(async (req) => {
       status: r.status,
     }));
 
-    return new Response(
-      JSON.stringify({
-        flagged: result,
-        message: `Flagged ${result.length} new bad response(s)`,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return new Response(JSON.stringify({ error: message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+    return json({
+      flagged: result,
+      message: `Flagged ${result.length} new bad response(s)`,
     });
+  } catch (err) {
+    console.error("escalate-bad-responses error:", err);
+    return toResponse(err);
   }
 });
