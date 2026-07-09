@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,55 +10,65 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 
 import { useAffiliateTracking } from "./hooks/useAffiliateTracking";
 import { useReferralCapture } from "./hooks/useReferralCapture";
-import { HomePage } from "./pages/HomePage";
-import { ComparePage } from "./pages/ComparePage";
-import { LoginPage } from "./pages/LoginPage";
-import { SignupPage } from "./pages/SignupPage";
-import { ContactPage } from "./pages/ContactPage";
-import { FreeVersionPage } from "./pages/FreeVersionPage";
-import { AQAFreeVersionPage } from "./pages/AQAFreeVersionPage";
-import { PremiumVersionPage } from "./pages/PremiumVersionPage";
-import { AQAPremiumPage } from "./pages/AQAPremiumPage";
-import { CIEFreeVersionPage } from "./pages/CIEFreeVersionPage";
-import { CIEPremiumPage } from "./pages/CIEPremiumPage";
-import { OCRCSFreeVersionPage } from "./pages/OCRCSFreeVersionPage";
-import { OCRCSPremiumPage } from "./pages/OCRCSPremiumPage";
-import { OCRPhysicsFreeVersionPage } from "./pages/OCRPhysicsFreeVersionPage";
-import { OCRPhysicsPremiumPage } from "./pages/OCRPhysicsPremiumPage";
-import { AQAChemistryFreeVersionPage } from "./pages/AQAChemistryFreeVersionPage";
-import { AQAChemistryPremiumPage } from "./pages/AQAChemistryPremiumPage";
- import { AQAPsychologyFreeVersionPage } from "./pages/AQAPsychologyFreeVersionPage";
- import { AQAPsychologyPremiumPage } from "./pages/AQAPsychologyPremiumPage";
-import { EdexcelMathsFreeVersionPage } from "./pages/EdexcelMathsFreeVersionPage";
-import { EdexcelMathsPremiumPage } from "./pages/EdexcelMathsPremiumPage";
-import { EdexcelMathsAppliedFreeVersionPage } from "./pages/EdexcelMathsAppliedFreeVersionPage";
-import { EdexcelMathsAppliedPremiumPage } from "./pages/EdexcelMathsAppliedPremiumPage";
-import { TestRAGChatPage } from "./pages/TestRAGChatPage";
-import { ProgressPage } from "./pages/ProgressPage";
-import { ResetPasswordPage } from "./pages/ResetPasswordPage";
-import NotFound from "./pages/NotFound";
-import { BuildPage } from "./pages/BuildPage";
-import { DynamicFreePage } from "./pages/DynamicFreePage";
-import { DynamicPremiumPage } from "./pages/DynamicPremiumPage";
-import { BuildAboutPage } from "./pages/BuildAboutPage";
-import { GCSEComparePage } from "./pages/GCSEComparePage";
-import { SubjectSelectionPage } from "./pages/SubjectSelectionPage";
-import { AnalyticsPage } from "./pages/AnalyticsPage";
-import { DashboardPage } from "./pages/DashboardPage";
-import { ProfilePage } from "./pages/ProfilePage";
-import { SchoolDashboardPage } from "./pages/SchoolDashboardPage";
-import { SchoolJoinPage } from "./pages/SchoolJoinPage";
-import { FeedbackPage } from "./pages/FeedbackPage";
-import { FeedbackResultsPage } from "./pages/FeedbackResultsPage";
-import { SchoolInfoPackPage } from "./pages/SchoolInfoPackPage";
-import { MockExamPage } from "./pages/MockExamPage";
-import { MockExamResultsPage } from "./pages/MockExamResultsPage";
-import { AdminSeedPage } from "./pages/AdminSeedPage";
-import { RevisionTopicPage } from "./pages/RevisionTopicPage";
-import { AdminContentHooksPage } from "./pages/AdminContentHooksPage";
-import { MetricsDashboard } from "./pages/MetricsDashboard";
-import { SchoolsApp } from "./pages/SchoolsApp";
+
+// Route-level code-splitting: page components load on demand so the marketing
+// homepage no longer ships every subject page in its bundle.
+const HomePage = React.lazy(() => import("./pages/HomePage").then(m => ({ default: m.HomePage })));
+const ComparePage = React.lazy(() => import("./pages/ComparePage").then(m => ({ default: m.ComparePage })));
+const LoginPage = React.lazy(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })));
+const SignupPage = React.lazy(() => import("./pages/SignupPage").then(m => ({ default: m.SignupPage })));
+const ContactPage = React.lazy(() => import("./pages/ContactPage").then(m => ({ default: m.ContactPage })));
+const FreeVersionPage = React.lazy(() => import("./pages/FreeVersionPage").then(m => ({ default: m.FreeVersionPage })));
+const AQAFreeVersionPage = React.lazy(() => import("./pages/AQAFreeVersionPage").then(m => ({ default: m.AQAFreeVersionPage })));
+const PremiumVersionPage = React.lazy(() => import("./pages/PremiumVersionPage").then(m => ({ default: m.PremiumVersionPage })));
+const AQAPremiumPage = React.lazy(() => import("./pages/AQAPremiumPage").then(m => ({ default: m.AQAPremiumPage })));
+const CIEFreeVersionPage = React.lazy(() => import("./pages/CIEFreeVersionPage").then(m => ({ default: m.CIEFreeVersionPage })));
+const CIEPremiumPage = React.lazy(() => import("./pages/CIEPremiumPage").then(m => ({ default: m.CIEPremiumPage })));
+const OCRCSFreeVersionPage = React.lazy(() => import("./pages/OCRCSFreeVersionPage").then(m => ({ default: m.OCRCSFreeVersionPage })));
+const OCRCSPremiumPage = React.lazy(() => import("./pages/OCRCSPremiumPage").then(m => ({ default: m.OCRCSPremiumPage })));
+const OCRPhysicsFreeVersionPage = React.lazy(() => import("./pages/OCRPhysicsFreeVersionPage").then(m => ({ default: m.OCRPhysicsFreeVersionPage })));
+const OCRPhysicsPremiumPage = React.lazy(() => import("./pages/OCRPhysicsPremiumPage").then(m => ({ default: m.OCRPhysicsPremiumPage })));
+const AQAChemistryFreeVersionPage = React.lazy(() => import("./pages/AQAChemistryFreeVersionPage").then(m => ({ default: m.AQAChemistryFreeVersionPage })));
+const AQAChemistryPremiumPage = React.lazy(() => import("./pages/AQAChemistryPremiumPage").then(m => ({ default: m.AQAChemistryPremiumPage })));
+const AQAPsychologyFreeVersionPage = React.lazy(() => import("./pages/AQAPsychologyFreeVersionPage").then(m => ({ default: m.AQAPsychologyFreeVersionPage })));
+const AQAPsychologyPremiumPage = React.lazy(() => import("./pages/AQAPsychologyPremiumPage").then(m => ({ default: m.AQAPsychologyPremiumPage })));
+const EdexcelMathsFreeVersionPage = React.lazy(() => import("./pages/EdexcelMathsFreeVersionPage").then(m => ({ default: m.EdexcelMathsFreeVersionPage })));
+const EdexcelMathsPremiumPage = React.lazy(() => import("./pages/EdexcelMathsPremiumPage").then(m => ({ default: m.EdexcelMathsPremiumPage })));
+const EdexcelMathsAppliedFreeVersionPage = React.lazy(() => import("./pages/EdexcelMathsAppliedFreeVersionPage").then(m => ({ default: m.EdexcelMathsAppliedFreeVersionPage })));
+const EdexcelMathsAppliedPremiumPage = React.lazy(() => import("./pages/EdexcelMathsAppliedPremiumPage").then(m => ({ default: m.EdexcelMathsAppliedPremiumPage })));
+const TestRAGChatPage = React.lazy(() => import("./pages/TestRAGChatPage").then(m => ({ default: m.TestRAGChatPage })));
+const ProgressPage = React.lazy(() => import("./pages/ProgressPage").then(m => ({ default: m.ProgressPage })));
+const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage })));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+const BuildPage = React.lazy(() => import("./pages/BuildPage").then(m => ({ default: m.BuildPage })));
+const DynamicFreePage = React.lazy(() => import("./pages/DynamicFreePage").then(m => ({ default: m.DynamicFreePage })));
+const DynamicPremiumPage = React.lazy(() => import("./pages/DynamicPremiumPage").then(m => ({ default: m.DynamicPremiumPage })));
+const BuildAboutPage = React.lazy(() => import("./pages/BuildAboutPage").then(m => ({ default: m.BuildAboutPage })));
+const GCSEComparePage = React.lazy(() => import("./pages/GCSEComparePage").then(m => ({ default: m.GCSEComparePage })));
+const SubjectSelectionPage = React.lazy(() => import("./pages/SubjectSelectionPage").then(m => ({ default: m.SubjectSelectionPage })));
+const AnalyticsPage = React.lazy(() => import("./pages/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
+const DashboardPage = React.lazy(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
+const ProfilePage = React.lazy(() => import("./pages/ProfilePage").then(m => ({ default: m.ProfilePage })));
+const SchoolDashboardPage = React.lazy(() => import("./pages/SchoolDashboardPage").then(m => ({ default: m.SchoolDashboardPage })));
+const SchoolJoinPage = React.lazy(() => import("./pages/SchoolJoinPage").then(m => ({ default: m.SchoolJoinPage })));
+const FeedbackPage = React.lazy(() => import("./pages/FeedbackPage").then(m => ({ default: m.FeedbackPage })));
+const FeedbackResultsPage = React.lazy(() => import("./pages/FeedbackResultsPage").then(m => ({ default: m.FeedbackResultsPage })));
+const SchoolInfoPackPage = React.lazy(() => import("./pages/SchoolInfoPackPage").then(m => ({ default: m.SchoolInfoPackPage })));
+const MockExamPage = React.lazy(() => import("./pages/MockExamPage").then(m => ({ default: m.MockExamPage })));
+const MockExamResultsPage = React.lazy(() => import("./pages/MockExamResultsPage").then(m => ({ default: m.MockExamResultsPage })));
+const AdminSeedPage = React.lazy(() => import("./pages/AdminSeedPage").then(m => ({ default: m.AdminSeedPage })));
+const RevisionTopicPage = React.lazy(() => import("./pages/RevisionTopicPage").then(m => ({ default: m.RevisionTopicPage })));
+const AdminContentHooksPage = React.lazy(() => import("./pages/AdminContentHooksPage").then(m => ({ default: m.AdminContentHooksPage })));
+const MetricsDashboard = React.lazy(() => import("./pages/MetricsDashboard").then(m => ({ default: m.MetricsDashboard })));
+const SchoolsApp = React.lazy(() => import("./pages/SchoolsApp").then(m => ({ default: m.SchoolsApp })));
+
 const queryClient = new QueryClient();
+
+const RouteFallback = () => (
+  <div className="flex min-h-screen items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 const AppContent = () => {
   useAffiliateTracking();
@@ -75,6 +86,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AppContent />
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/compare" element={<ComparePage />} />
@@ -129,6 +141,7 @@ const App = () => (
             <Route path="/schools/app/*" element={<SchoolsApp />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </ChatHistoryProvider>
