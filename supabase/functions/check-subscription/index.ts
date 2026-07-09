@@ -6,7 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ACTIVE_STRIPE_STATUSES = new Set(["active", "trialing", "past_due"]);
+// Loop 3.1: past_due is deliberately EXCLUDED. A failing-card subscription must not
+// heal to active and extend access into the unpaid dunning period. A past_due sub
+// falls through to the bounded 7-day monthly grace below only — not a full 30-day
+// unpaid extension. Dunning itself is handled by invoice.payment_failed in the webhook.
+const ACTIVE_STRIPE_STATUSES = new Set(["active", "trialing"]);
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
