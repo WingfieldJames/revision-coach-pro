@@ -105,6 +105,13 @@ Already done earlier / verified in code: `send-feedback-emails` pagination (page
 
 ---
 
+## Additional staged later (2026-07-09) — one more apply + deploy
+Batch 1 (above) is DONE (deployed + merged). This is a separate, additive follow-up:
+- **Apply** `supabase/migrations/20260709140000_weekly_email_sent_ledger.sql` (new table,
+  service-role only — zero risk).
+- **Deploy** `supabase functions deploy weekly-progress-email` — now skips anyone already
+  emailed this week (4.3 idempotency). Deploy AFTER the migration (the code reads the table).
+
 ## Prod health findings (read-only, 2026-07-09)
 - **Crons:** all 9 fire. No 401/403 auth failures in the pg_net window (the Loop-0 worry
   didn't materialise in what's retained). Two real issues found: `conversion-nudges` 500
