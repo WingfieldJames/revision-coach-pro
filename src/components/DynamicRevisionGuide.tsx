@@ -4,6 +4,7 @@ import { Search, BookOpen, ChevronRight, X, FileDown, Loader2, Lock } from 'luci
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { SUPABASE_URL as CONFIG_SUPABASE_URL, SUPABASE_ANON_KEY as CONFIG_SUPABASE_ANON_KEY } from '@/lib/supabaseConfig';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -11,8 +12,8 @@ import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import logoLight from '@/assets/a-star-icon-light.png';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_URL = CONFIG_SUPABASE_URL;
+const SUPABASE_ANON_KEY = CONFIG_SUPABASE_ANON_KEY;
 
 interface SpecPoint {
   id: string;

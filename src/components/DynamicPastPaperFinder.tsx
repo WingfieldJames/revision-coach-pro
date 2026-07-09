@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, FileSearch, ChevronRight, BookOpen, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabaseConfig';
 
 interface SearchResult {
   id: string;
@@ -165,7 +166,7 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
       const { data: sessionData } = await supabase.auth.getSession();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        'apikey': SUPABASE_ANON_KEY,
       };
       if (sessionData.session?.access_token) {
         headers['Authorization'] = `Bearer ${sessionData.session.access_token}`;
@@ -181,7 +182,7 @@ export const DynamicPastPaperFinder: React.FC<DynamicPastPaperFinderProps> = ({
         searchPayload.spec_content = selectedSpecPoint.content;
       }
 
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`, {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/rag-chat`, {
         method: 'POST',
         headers,
         body: JSON.stringify(searchPayload),

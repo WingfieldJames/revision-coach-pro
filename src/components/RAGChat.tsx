@@ -29,6 +29,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { supabase } from '@/integrations/supabase/client';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabaseConfig';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProductTier } from '@/hooks/useProductTier';
@@ -108,7 +109,7 @@ interface RAGChatProps {
   /** Show post-answer footer with spec point, follow-ups, related PEQs, and streak */
   showAnswerFooter?: boolean;
 }
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rag-chat`;
+const CHAT_URL = `${SUPABASE_URL}/functions/v1/rag-chat`;
 const WORD_DELAY_MS = 12;
 const ESSAY_MARKER_PATTERN = /^(Mark my \d+ marker\. Use exact marking criteria\.|Mark my answer\. Use exact marking criteria\.)/i;
 
@@ -646,7 +647,7 @@ export const RAGChat: React.FC<RAGChatProps> = ({
     try {
       // Get session token for server-side auth verification
       const { data: sessionData } = await supabase.auth.getSession();
-      const authToken = sessionData?.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const authToken = sessionData?.session?.access_token || SUPABASE_ANON_KEY;
 
       // If no image on this message, check if a recent message had one (e.g. essay upload)
       // so the AI can still "see" it on follow-up messages like "25 marks"
