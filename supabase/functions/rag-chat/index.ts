@@ -1502,60 +1502,75 @@ CRITICAL RULES:
       temperature: isEssayMarkerRequest ? 0 : 0.7,
     });
 
-    // Time-to-first-byte timeout: abort only if the upstream hasn't sent
-    // response headers within 8s of the request starting. Once the response
-    // is received, the timeout is cleared so long streaming answers are never killed.
-    const ttfbController = new AbortController();
-    const ttfbTimeoutId = setTimeout(() => ttfbController.abort(), 8000);
-    let response: Response;
-    try {
-      response = await fetch(aiUrl, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${geminiApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: buildAiBody(aiModel),
-        signal: ttfbController.signal,
-      });
-    } catch (err) {
-      clearTimeout(ttfbTimeoutId);
-      const aborted = (err as { name?: string })?.name === "AbortError";
-      console.error(JSON.stringify({
-        event: "rag_chat_upstream_error",
-        status: aborted ? 504 : 0,
-        statusText: aborted ? "ttfb_timeout" : "fetch_failed",
-        model: aiModel,
-        product_id: product_id ?? null,
-        user_id: user_id ?? null,
-        body: String((err as Error)?.message ?? err).slice(0, 500),
-      }));
-      return new Response(
-        JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
-        { status: aborted ? 504 : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    clearTimeout(ttfbTimeoutId);
+    // One Gemini streaming attempt. Time-to-first-byte timeout: abort only if the
+    // upstream hasn't sent response headers within 8s; once received, streaming
+    // answers are never killed.
+    const attemptGemini = async (): Promise<Response> => {
+      const ttfbController = new AbortController();
+      const ttfbTimeoutId = setTimeout(() => ttfbController.abort(), 8000);
+      try {
+        return await fetch(aiUrl, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${geminiApiKey}`, "Content-Type": "application/json" },
+          body: buildAiBody(aiModel),
+          signal: ttfbController.signal,
+        });
+      } finally {
+        clearTimeout(ttfbTimeoutId);
+      }
+    };
 
-    if (!response.ok) {
-      if (response.status === 429) {
+    // Resilience: when Gemini is rate-limited (429) or otherwise unavailable, fall back
+    // to Claude — a different provider + key, so a separate quota — via the shared
+    // chatCompletion helper (which itself falls back to Gemini Pro). Non-streaming, but
+    // rendered as a one-shot SSE payload the client already understands, so the student
+    // gets a real answer instead of an error. Context is in finalSystemPrompt already.
+    const claudeFallback = async (reason: string): Promise<Response> => {
+      console.warn(`Gemini unavailable (${reason}); falling back to Claude`);
+      try {
+        const fallbackText = await chat(
+          finalSystemPrompt,
+          typeof message === "string" && message.trim()
+            ? message
+            : "(Please answer the student's question using the training context provided.)",
+          { provider: "anthropic", model: "claude-sonnet-5", fallback: { provider: "gemini", model: "gemini-2.5-pro" } },
+          {
+            maxTokens: 3500,
+            temperature: isEssayMarkerRequest ? 0 : 0.7,
+            logCtx: { admin: supabaseAdmin, fn: "rag-chat-fallback", userId: user_id ?? undefined },
+          },
+        );
+        return streamSyntheticText(fallbackText, corsHeaders);
+      } catch (e) {
+        console.error("Claude fallback also failed:", (e as Error).message);
         return new Response(
           JSON.stringify({ error: "I'm a bit busy right now — please try again in a moment!" }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Service temporarily unavailable. Please try again later." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+    };
+
+    let response: Response;
+    const MAX_TRIES = 3;
+    for (let tryNum = 1; ; tryNum++) {
+      try {
+        response = await attemptGemini();
+      } catch (err) {
+        const aborted = (err as { name?: string })?.name === "AbortError";
+        console.error(JSON.stringify({ event: "rag_chat_upstream_error", status: aborted ? 504 : 0, statusText: aborted ? "ttfb_timeout" : "fetch_failed", model: aiModel, product_id: product_id ?? null, user_id: user_id ?? null, body: String((err as Error)?.message ?? err).slice(0, 500), attempt: tryNum }));
+        if (tryNum < MAX_TRIES) { await new Promise((r) => setTimeout(r, 300 * tryNum)); continue; }
+        return await claudeFallback(aborted ? "ttfb_timeout" : "fetch_failed");
       }
-      const errorText = await response.text();
-      console.error(JSON.stringify({ event: "rag_chat_upstream_error", status: response.status, statusText: response.statusText, model: aiModel, product_id: product_id ?? null, user_id: user_id ?? null, body: (errorText || "").slice(0, 500) }));
-      return new Response(
-        JSON.stringify({ error: "Something went wrong generating a response. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      if (response.ok) break;
+      // Transient upstream limits: brief backoff, retry the same model a couple of times.
+      if ((response.status === 429 || response.status === 503) && tryNum < MAX_TRIES) {
+        await new Promise((r) => setTimeout(r, 400 * tryNum));
+        continue;
+      }
+      // Exhausted retries or a non-retryable upstream error → hand off to Claude.
+      const errorText = await response.text().catch(() => "");
+      console.error(JSON.stringify({ event: "rag_chat_upstream_error", status: response.status, statusText: response.statusText, model: aiModel, product_id: product_id ?? null, user_id: user_id ?? null, body: (errorText || "").slice(0, 500), attempt: tryNum }));
+      return await claudeFallback(`gemini_${response.status}`);
     }
 
     if (tier === 'free' && !isTrainerTest && tool_type === 'essay_marker' && user_id && product_id) {
