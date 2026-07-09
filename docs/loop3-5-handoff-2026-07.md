@@ -25,8 +25,13 @@ CREATE UNIQUE INDEX IF NOT EXISTS uniq_affiliate_referral_session
 supabase functions deploy check-subscription     # 3.1
 supabase functions deploy stripe-webhook          # 3.2 + 3.3
 supabase functions deploy create-checkout         # P2-1
+supabase functions deploy conversion-nudges       # cron 500 fix (usage_date)
 ```
 (Deploy-one-first if you like; these are independent.)
+
+`conversion-nudges` is NOT billing — it's a broken daily cron found in the pg_net logs
+(it 500'd every run: queried `daily_prompt_usage.date`, real column is `usage_date`).
+Safe to deploy immediately, no Stripe involvement.
 
 ## 3. Add the two Stripe webhook events (required for 3.2 to do anything)
 Stripe Dashboard → Developers → Webhooks → your endpoint → add events:
@@ -99,6 +104,21 @@ Already done earlier / verified in code: `send-feedback-emails` pagination (page
 - **Loop 6 — Build-portal (WS-1…11).** Separate tracked plan; not part of this audit sweep.
 
 ---
+
+## Prod health findings (read-only, 2026-07-09)
+- **Crons:** all 9 fire. No 401/403 auth failures in the pg_net window (the Loop-0 worry
+  didn't materialise in what's retained). Two real issues found: `conversion-nudges` 500
+  (fixed above) and a `daily-digest` 5s pg_net timeout — the function likely still completes
+  server-side (cron fire-and-forget); worth confirming its runtime/logs but not a confirmed
+  failure. pg_net prunes responses fast, so this is a partial window.
+- **3.5:** 0 users currently hold >1 active sub row per product → the fix is a latent guard,
+  not an active outage.
+- **3.1:** 12 active monthly subs have a past local `subscription_end`. After deploy, the
+  genuinely-lapsed ones stop being healed into unpaid access (7-day grace still applies) —
+  a deliberate, correct change with real subjects, so deploy consciously.
+- **2.1 (already live):** confirmed shielding ~8,500 paid past_paper/mark_scheme chunks from
+  client reads while 5,937 `specification` chunks stay open; 0 untyped chunks caught. Working
+  as intended.
 
 ## Residual risk to keep in mind
 - The billing fixes are **logic/type/deploy-verified only** — NOT Stripe-e2e-verified. Run
