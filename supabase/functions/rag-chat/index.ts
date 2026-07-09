@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { HttpError } from "../_shared/http.ts";
 import { optionalUser } from "../_shared/auth.ts";
 import { enforceRateLimit, userKey, ipKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
-import { chat, chatCompletion } from "../_shared/ai.ts";
+import { chat, chatCompletion, embed } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -394,6 +394,72 @@ function scoreChunkByKeywords(
   return score;
 }
 
+// Hybrid retrieval candidate pool: semantic (pgvector `match_documents`) plus a
+// bounded sweep of chunks that have no embedding, so nothing is silently lost.
+// Replaces the old UNBOUNDED full-table transfer (the PostgREST 1000-row cap bug).
+// The vector layer only decides which chunks are *candidates*; the downstream
+// keyword scoring + past-paper balancing below is unchanged.
+const VECTOR_POOL = 200;          // top-N semantic candidates for chat context
+const NULL_EMBED_FALLBACK = 100;  // cap on no-embedding chunks swept back in
+
+async function fetchHybridCandidates(
+  supabase: ReturnType<typeof createClient>,
+  opts: { productId: string; queryText: string; pool?: number; contentTypes?: string[] | null },
+): Promise<Array<{ id?: string; content: string; metadata: Record<string, unknown> }>> {
+  const { productId, queryText } = opts;
+  const pool = opts.pool ?? VECTOR_POOL;
+  const contentTypes = opts.contentTypes ?? null;
+
+  // 1) Semantic candidates via pgvector. Any embed/RPC failure degrades to a
+  //    BOUNDED keyword-style fetch (still capped — never the old full-table pull).
+  let vectorRows: Array<{ id: string; content: string; metadata: Record<string, unknown> }> = [];
+  let embedded = false;
+  try {
+    const queryEmbedding = await embed(queryText.slice(0, 8000));
+    const { data, error } = await supabase.rpc('match_documents', {
+      query_embedding: queryEmbedding,
+      match_count: pool,
+      filter_product_id: productId,
+      filter_content_types: contentTypes,
+    });
+    if (error) {
+      console.error('match_documents RPC error, using bounded fallback:', error.message);
+    } else {
+      vectorRows = (data as Array<{ id: string; content: string; metadata: Record<string, unknown> }> ?? []);
+      embedded = true;
+    }
+  } catch (err) {
+    console.error('query embed failed, using bounded fallback:', (err as Error).message);
+  }
+
+  if (!embedded) {
+    const { data, error } = await supabase
+      .from('document_chunks')
+      .select('id, content, metadata')
+      .eq('product_id', productId)
+      .limit(1000);
+    if (error) {
+      console.error('bounded fallback fetch error:', error.message);
+      return [];
+    }
+    return (data as Array<{ id: string; content: string; metadata: Record<string, unknown> }> ?? []);
+  }
+
+  // 2) Sweep chunks with no embedding (invisible to the vector index) so they
+  //    remain reachable by the downstream keyword scorer.
+  const { data: nullRows, error: nullErr } = await supabase
+    .from('document_chunks')
+    .select('id, content, metadata')
+    .eq('product_id', productId)
+    .is('embedding', null)
+    .limit(NULL_EMBED_FALLBACK);
+  if (nullErr) console.error('no-embedding sweep error (non-fatal):', nullErr.message);
+
+  const combined = [...vectorRows, ...((nullRows as Array<{ id: string; content: string; metadata: Record<string, unknown> }>) ?? [])];
+  console.log(`hybrid candidates: ${vectorRows.length} vector + ${(nullRows ?? []).length} no-embedding = ${combined.length}`);
+  return combined;
+}
+
 // Query relevant document chunks from the training data
 // Uses AI-generated search queries for targeted retrieval with context cap
 async function fetchRelevantContext(
@@ -412,17 +478,16 @@ async function fetchRelevantContext(
     
     console.log(`Content type priorities: ${effectiveContentTypes.join(', ')}`);
     
-    // Fetch ALL chunks for this product (they're small enough to filter in memory)
-    const { data: allChunks, error } = await supabase
-      .from('document_chunks')
-      .select('content, metadata')
-      .eq('product_id', productId);
-    
-    if (error) {
-      console.error('Error fetching document chunks:', error);
-      return { context: '', sourcesSearched: [] };
-    }
-    
+    // Hybrid candidate pool (semantic + no-embedding sweep) — replaces the old
+    // unbounded full-table transfer. Pass no content_type filter: the balancer
+    // below does the type weighting, so it needs all types represented.
+    const allChunks = await fetchHybridCandidates(supabase, {
+      productId,
+      queryText: userMessage,
+      pool: VECTOR_POOL,
+      contentTypes: null,
+    });
+
     if (!allChunks || allChunks.length === 0) {
       console.log(`No training data found for product ${productId}`);
       return { context: '', sourcesSearched: [] };
@@ -916,14 +981,16 @@ serve(async (req) => {
       ];
       const EXCLUDED_CONTENT_TYPES = ['past_paper_ms', 'mark_scheme', 'specification', 'system_prompt', 'exam_technique'];
 
-      const { data: allChunks, error: chunkError } = await supabaseAdmin
-        .from('document_chunks')
-        .select('id, content, metadata')
-        .eq('product_id', product_id)
-        .limit(5000);
+      // Hybrid candidate pool (semantic + no-embedding sweep). No content_type
+      // filter here — the paperChunks filter below does the exact paper selection.
+      const allChunks = await fetchHybridCandidates(supabaseAdmin, {
+        productId: product_id,
+        queryText: searchQuery,
+        pool: 300,
+        contentTypes: null,
+      });
 
-      if (chunkError || !allChunks) {
-        console.error('search_only chunk fetch error:', chunkError);
+      if (!allChunks || allChunks.length === 0) {
         return new Response(JSON.stringify({ results: [] }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });

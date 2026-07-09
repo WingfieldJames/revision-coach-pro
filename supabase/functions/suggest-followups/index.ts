@@ -3,7 +3,7 @@ import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0
 import { preflight, json, err, toResponse } from "../_shared/http.ts";
 import { requireUser } from "../_shared/auth.ts";
 import { enforceRateLimit, userKey, RATE_LIMITS } from "../_shared/rateLimit.ts";
-import { chatCompletion } from "../_shared/ai.ts";
+import { chatCompletion, embed } from "../_shared/ai.ts";
 
 interface PEQ {
   label: string;
@@ -88,12 +88,33 @@ async function findRelatedPEQs(
   answer: string,
 ): Promise<PEQ[]> {
   try {
-    const { data, error } = await supabase
-      .from("document_chunks")
-      .select("content, metadata")
-      .eq("product_id", productId)
-      .limit(1500);
-    if (error || !data) return [];
+    // Hybrid retrieval: pgvector semantic candidates scoped to past-paper chunks,
+    // with a bounded keyword-style fallback if embedding/RPC fails. Replaces the
+    // old .limit(1500) full scan. The content_type set mirrors the JS filter below.
+    const PAST_PAPER_TYPES = ["past_paper", "past_paper_qp", "past_paper_ms"];
+    let data: Array<{ content: string; metadata: Record<string, unknown> }> | null = null;
+    try {
+      const queryEmbedding = await embed(`${question} ${answer.slice(0, 800)}`.slice(0, 8000));
+      const { data: vec, error: vErr } = await supabase.rpc("match_documents", {
+        query_embedding: queryEmbedding,
+        match_count: 40,
+        filter_product_id: productId,
+        filter_content_types: PAST_PAPER_TYPES,
+      });
+      if (vErr) console.error("match_documents RPC error, using bounded fallback:", vErr.message);
+      else data = (vec as Array<{ content: string; metadata: Record<string, unknown> }>) ?? [];
+    } catch (embErr) {
+      console.error("PEQ embed failed, using bounded fallback:", (embErr as Error).message);
+    }
+    if (!data) {
+      const { data: fb, error } = await supabase
+        .from("document_chunks")
+        .select("content, metadata")
+        .eq("product_id", productId)
+        .limit(1500);
+      if (error || !fb) return [];
+      data = fb;
+    }
 
     const text = `${question} ${answer.slice(0, 800)}`.toLowerCase();
     const STOP = new Set([
