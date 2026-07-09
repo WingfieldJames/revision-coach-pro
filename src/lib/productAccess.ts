@@ -27,15 +27,21 @@ export const checkProductAccess = async (
     return { hasAccess: false, tier: 'free' };
   }
   
-  // Then check user_subscriptions with the exact product_id
-  const { data: subscription, error } = await supabase
+  // Then check user_subscriptions with the exact product_id.
+  // Loop 3.5: a user can end up with >1 active row for a product (referral dupes,
+  // re-purchase, data drift). The old `.maybeSingle()` errored on >1 row and DENIED a
+  // paying customer. Instead fetch all active rows and pick the most favourable —
+  // a null end (perpetual) first, otherwise the furthest-out subscription_end.
+  const { data: subscriptions, error } = await supabase
     .from('user_subscriptions')
     .select('*')
     .eq('user_id', userId)
     .eq('product_id', product.id)
     .eq('active', true)
-    .maybeSingle();
-  
+    .order('subscription_end', { ascending: false, nullsFirst: true });
+
+  const subscription = (subscriptions ?? [])[0] ?? null;
+
   if (!error && subscription) {
     // Check if subscription is still valid
     if (subscription.subscription_end) {
