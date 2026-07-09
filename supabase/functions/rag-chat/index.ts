@@ -432,7 +432,14 @@ async function fetchHybridCandidates(
     console.error('query embed failed, using bounded fallback:', (err as Error).message);
   }
 
-  if (!embedded) {
+  // Fall back to the bounded keyword-style fetch when the vector layer gave us NOTHING —
+  // either the embed/RPC failed (!embedded) OR the RPC succeeded but returned 0 rows.
+  // The latter is the norm today: the whole corpus currently has NULL embeddings, so
+  // match_documents matches nothing. Without this, only the 100-cap no-embedding sweep
+  // reaches the keyword scorer (arbitrary chunks) and spec/content retrieval collapses —
+  // the "chatbot ignores the training" regression. This restores keyword scoring over the
+  // full 1000-chunk pool until embeddings are backfilled.
+  if (!embedded || vectorRows.length === 0) {
     const { data, error } = await supabase
       .from('document_chunks')
       .select('id, content, metadata')

@@ -106,7 +106,10 @@ async function findRelatedPEQs(
     } catch (embErr) {
       console.error("PEQ embed failed, using bounded fallback:", (embErr as Error).message);
     }
-    if (!data) {
+    // Fall back when the vector layer returned NOTHING — embed/RPC failed OR the RPC
+    // succeeded but matched 0 rows (the norm today: corpus embeddings are all NULL, so
+    // `data` comes back as an empty [] which is truthy and would skip this block).
+    if (!data || data.length === 0) {
       const { data: fb, error } = await supabase
         .from("document_chunks")
         .select("content, metadata")
