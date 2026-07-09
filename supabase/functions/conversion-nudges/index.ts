@@ -40,9 +40,9 @@ serve(async (req) => {
       // Get all daily_prompt_usage rows where prompt_count >= 3 in the last 7 days
       const { data: usageRows, error: usageError } = await supabase
         .from("daily_prompt_usage")
-        .select("user_id, product_id, date")
+        .select("user_id, product_id, usage_date")
         .gte("prompt_count", 3)
-        .gte("date", sevenDaysAgoStr);
+        .gte("usage_date", sevenDaysAgoStr);
 
       if (usageError) {
         throw new Error(`Failed to query daily_prompt_usage: ${usageError.message}`);
@@ -66,7 +66,7 @@ serve(async (req) => {
           });
         }
         const stats = userStats.get(row.user_id)!;
-        stats.days.add(row.date);
+        stats.days.add(row.usage_date);
         stats.productCounts.set(
           row.product_id,
           (stats.productCounts.get(row.product_id) || 0) + 1
