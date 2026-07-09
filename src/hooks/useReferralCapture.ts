@@ -37,7 +37,20 @@ export const useReferralCapture = () => {
     const pendingCode = getReferralCode();
 
     if (user && pendingCode) {
-      console.log('[REFERRAL-CAPTURE] User authenticated with pending referral code:', pendingCode);
+      // Loop 4.2: only redeem for a freshly-created account. Without this, any existing
+      // logged-in user could paste a referral link and self-serve another 7 days of
+      // premium. A genuine signup redeems within seconds; an established account's
+      // created_at is old. (Deeper fix: authenticate process-referral server-side and
+      // derive referred_user_id from the JWT — flagged, not done here.)
+      const createdAtMs = user.created_at ? new Date(user.created_at).getTime() : 0;
+      const isNewAccount = createdAtMs > 0 && Date.now() - createdAtMs < 15 * 60 * 1000;
+      if (!isNewAccount) {
+        console.log('[REFERRAL-CAPTURE] Existing account — not redeeming referral; clearing code');
+        clearReferralCode();
+        return;
+      }
+
+      console.log('[REFERRAL-CAPTURE] New account with pending referral code:', pendingCode);
 
       // Small delay to let user creation settle in the DB
       const timer = setTimeout(async () => {
