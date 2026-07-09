@@ -170,6 +170,86 @@ async function upsertSubscription(
   return data.id;
 }
 
+// Loop 3.2: revoke access tied to a Stripe charge (refund or dispute).
+// Maps charge -> checkout session (which carries our user_id/product_id metadata),
+// deactivates that product's entitlement, recomputes the legacy users.is_premium flag
+// from whatever the user still holds, and reverses any affiliate commission booked
+// against the session. Best-effort + conservative; caller decides full-refund gating.
+async function revokeAccessForCharge(
+  db: SupabaseClient,
+  charge: Stripe.Charge,
+  reason: string
+): Promise<{ revoked: boolean; detail: string }> {
+  const paymentIntent = (charge.payment_intent as string) || null;
+  if (!paymentIntent) return { revoked: false, detail: "no payment_intent on charge" };
+
+  let session: Stripe.Checkout.Session | null = null;
+  try {
+    const sessions = await stripe.checkout.sessions.list({ payment_intent: paymentIntent, limit: 1 });
+    session = sessions.data?.[0] ?? null;
+  } catch (e) {
+    return { revoked: false, detail: `session lookup failed: ${(e as Error).message}` };
+  }
+  if (!session) return { revoked: false, detail: "no checkout session for payment_intent" };
+
+  let customerEmail = session.customer_email;
+  const customerId = (session.customer as string) || null;
+  if (!customerEmail && customerId) {
+    try {
+      const c = (await stripe.customers.retrieve(customerId)) as Stripe.Customer;
+      customerEmail = c.email;
+    } catch { /* email best-effort */ }
+  }
+  const paymentType = session.metadata?.payment_type || (session.mode === "subscription" ? "monthly" : "lifetime");
+  const userId = await resolveUserId(db, session.metadata?.user_id ?? null, customerEmail);
+  const productId = await resolveProductId(db, session, paymentType);
+  if (!userId || !productId) {
+    return { revoked: false, detail: `could not resolve user(${userId})/product(${productId})` };
+  }
+
+  // Deactivate this product's entitlement.
+  await db
+    .from("user_subscriptions")
+    .update({
+      active: false,
+      cancelled_at: new Date().toISOString(),
+      subscription_end: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId)
+    .eq("product_id", productId)
+    .eq("active", true);
+
+  // Recompute the legacy global flag from remaining active entitlements.
+  const { data: remaining } = await db
+    .from("user_subscriptions")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("active", true)
+    .limit(1);
+  const stillPremium = !!(remaining && remaining.length);
+  if (customerEmail) {
+    await db
+      .from("users")
+      .update({
+        is_premium: stillPremium,
+        subscription_tier: stillPremium ? "Deluxe" : null,
+        subscription_end: stillPremium ? undefined : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("email", customerEmail);
+  }
+
+  // Reverse any affiliate commission for this sale (no updated_at column on this table).
+  await db
+    .from("affiliate_referrals")
+    .update({ status: "reversed" })
+    .eq("stripe_session_id", session.id);
+
+  log("Revoked access", { reason, userId, productId, sessionId: session.id, stillPremium });
+  return { revoked: true, detail: `revoked ${productId} for ${userId}` };
+}
+
 // ---------- main ----------
 
 serve(async (req) => {
@@ -327,16 +407,21 @@ serve(async (req) => {
           if (aff) {
             const sale = session.amount_total || 0;
             const commission = Math.round(sale * Number(aff.commission_rate || 0));
-            await db.from("affiliate_referrals").insert({
-              affiliate_id: aff.id,
-              referred_user_id: userId,
-              sale_amount: sale,
-              commission_amount: commission,
-              stripe_session_id: session.id,
-              payment_type: paymentType,
-              product_id: productId,
-              status: "pending",
-            });
+            // Loop 3.3: dedup on stripe_session_id so a webhook retry/redelivery can't
+            // book a second commission for the same sale (unique index enforces it).
+            await db.from("affiliate_referrals").upsert(
+              {
+                affiliate_id: aff.id,
+                referred_user_id: userId,
+                sale_amount: sale,
+                commission_amount: commission,
+                stripe_session_id: session.id,
+                payment_type: paymentType,
+                product_id: productId,
+                status: "pending",
+              },
+              { onConflict: "stripe_session_id", ignoreDuplicates: true }
+            );
           }
         }
 
@@ -463,6 +548,37 @@ serve(async (req) => {
 
       case "invoice.payment_failed": {
         await markEvent(db, event.id, "processed");
+        break;
+      }
+
+      // Loop 3.2: refund → revoke access. Only full refunds revoke; partial refunds
+      // (e.g. goodwill credits) leave access intact.
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        if ((charge.amount_refunded ?? 0) < (charge.amount ?? 0)) {
+          await markEvent(db, event.id, "skipped", { error_message: "partial refund — access unchanged" });
+          break;
+        }
+        const { revoked, detail } = await revokeAccessForCharge(db, charge, "charge.refunded");
+        await markEvent(db, event.id, "processed", { error_message: revoked ? undefined : `refund not revoked: ${detail}` });
+        break;
+      }
+
+      // Loop 3.2: dispute/chargeback → revoke access immediately.
+      case "charge.dispute.created": {
+        const dispute = event.data.object as Stripe.Dispute;
+        let charge: Stripe.Charge | null = null;
+        try {
+          charge = (await stripe.charges.retrieve(dispute.charge as string)) as Stripe.Charge;
+        } catch (e) {
+          log("WARN: dispute charge retrieve failed", { error: (e as Error).message });
+        }
+        if (!charge) {
+          await markEvent(db, event.id, "failed", { error_message: "dispute: could not retrieve charge" });
+          break;
+        }
+        const { revoked, detail } = await revokeAccessForCharge(db, charge, "charge.dispute.created");
+        await markEvent(db, event.id, "processed", { error_message: revoked ? undefined : `dispute not revoked: ${detail}` });
         break;
       }
 
