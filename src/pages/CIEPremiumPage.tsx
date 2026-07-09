@@ -8,7 +8,8 @@ import { ChatbotToolbar } from '@/components/ChatbotToolbar';
 import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
 import { CIE_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useAuth } from '@/contexts/AuthContext';
-import { checkProductAccess } from '@/lib/productAccess';
+import { fetchProductAccess } from '@/hooks/useProductAccess';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 
@@ -24,6 +25,7 @@ const DEFAULT_PROMPTS = [
 export const CIEPremiumPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const chatRef = useRef<RAGChatRef>(null);
   const tc = useTrainerConfig(CIE_PRODUCT_ID);
   const handleEssayMarkerSubmit = (message: string, imageDataUrl?: string) => { chatRef.current?.submitMessage(message, imageDataUrl); };
@@ -32,11 +34,11 @@ export const CIEPremiumPage = () => {
     const checkAccess = async () => {
       if (loading) return;
       if (!user) { navigate('/login?redirect=cie-premium'); return; }
-      const access = await checkProductAccess(user.id, 'cie-economics');
+      const access = await fetchProductAccess(queryClient, user.id, 'cie-economics');
       if (!access.hasAccess) navigate('/compare');
     };
     checkAccess();
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, queryClient]);
 
   const prompts = tc.suggested_prompts.length > 0 ? tc.suggested_prompts : DEFAULT_PROMPTS;
   const examDates = tc.exam_dates.length > 0 ? tc.exam_dates : CIE_ECONOMICS_EXAMS;

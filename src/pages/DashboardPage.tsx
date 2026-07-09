@@ -13,7 +13,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Trash2, ExternalLink, Instagram, Youtube, Linkedin, ChevronDown, AlertCircle } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
-import { checkProductAccess, ProductAccess } from '@/lib/productAccess';
+import { type ProductAccess } from '@/lib/productAccess';
+import { fetchProductAccess, invalidateProductAccess } from '@/hooks/useProductAccess';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -22,6 +24,7 @@ type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 
 export const DashboardPage = () => {
   const { user, profile, refreshProfile, loading } = useAuth();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const [subject, setSubject] = useState<Subject>(() => {
     const saved = localStorage.getItem('preferred-subject');
@@ -79,14 +82,14 @@ export const DashboardPage = () => {
       if (user) {
         setCheckingAccess(true);
         const [edexcelAccess, aqaAccess, cieAccess, ocrCsAccess, ocrPhysicsAccess, aqaChemistryAccess, aqaPsychologyAccess, edexcelMathsAccess] = await Promise.all([
-          checkProductAccess(user.id, 'edexcel-economics'),
-          checkProductAccess(user.id, 'aqa-economics'),
-          checkProductAccess(user.id, 'cie-economics'),
-          checkProductAccess(user.id, 'ocr-computer-science'),
-          checkProductAccess(user.id, 'ocr-physics'),
-          checkProductAccess(user.id, 'aqa-chemistry'),
-          checkProductAccess(user.id, 'aqa-psychology'),
-          checkProductAccess(user.id, 'edexcel-mathematics'),
+          fetchProductAccess(queryClient, user.id, 'edexcel-economics'),
+          fetchProductAccess(queryClient, user.id, 'aqa-economics'),
+          fetchProductAccess(queryClient, user.id, 'cie-economics'),
+          fetchProductAccess(queryClient, user.id, 'ocr-computer-science'),
+          fetchProductAccess(queryClient, user.id, 'ocr-physics'),
+          fetchProductAccess(queryClient, user.id, 'aqa-chemistry'),
+          fetchProductAccess(queryClient, user.id, 'aqa-psychology'),
+          fetchProductAccess(queryClient, user.id, 'edexcel-mathematics'),
         ]);
         setProductAccess({
           'edexcel': edexcelAccess,
@@ -123,7 +126,7 @@ export const DashboardPage = () => {
       }
     };
     checkAccess();
-  }, [user, subject]);
+  }, [user, subject, queryClient]);
 
   // Cancel subscription handler — targets a specific sub by id
   const handleCancelSubscription = async (sub: any) => {
@@ -199,6 +202,9 @@ export const DashboardPage = () => {
           });
           
           if (data?.success) {
+            // Drop cached access so the just-purchased entitlement is re-fetched
+            // (this page stays SPA — no full reload to clear the cache for us).
+            invalidateProductAccess(queryClient);
             // Refresh profile to get updated premium status
             setTimeout(() => {
               refreshProfile();
@@ -215,7 +221,7 @@ export const DashboardPage = () => {
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
-  }, [searchParams, refreshProfile]);
+  }, [searchParams, refreshProfile, queryClient]);
 
   // Show loading state while checking auth
   if (loading) {

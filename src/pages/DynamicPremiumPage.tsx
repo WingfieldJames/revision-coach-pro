@@ -10,7 +10,8 @@ import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 import { ExamDate } from '@/components/ExamCountdown';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { checkProductAccess } from '@/lib/productAccess';
+import { fetchProductAccess } from '@/hooks/useProductAccess';
+import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { getTopGradeLabel } from '@/lib/qualification';
 
@@ -31,6 +32,7 @@ export const DynamicPremiumPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const queryClient = useQueryClient();
   const chatRef = useRef<RAGChatRef>(null);
   const [product, setProduct] = useState<ProductConfig | null>(null);
   const [trainer, setTrainer] = useState<TrainerConfig | null>(null);
@@ -45,7 +47,7 @@ export const DynamicPremiumPage = () => {
       const { data: prod } = await supabase.from('products').select('id, name, slug, subject, exam_board, system_prompt_deluxe').eq('slug', slug).eq('active', true).maybeSingle();
       if (!prod) { navigate('/compare'); return; }
       if (!user) { navigate(`/login?redirect=${prod.slug}-premium`); return; }
-      const access = await checkProductAccess(user.id, prod.slug);
+      const access = await fetchProductAccess(queryClient, user.id, prod.slug);
       if (!access.hasAccess) { navigate('/compare'); return; }
       setProduct(prod);
       const { data: tp } = await supabase.from('trainer_projects').select('trainer_image_url, trainer_description, selected_features, exam_dates, essay_marker_marks, qualification_type, suggested_prompts, diagram_library, trainer_name, trainer_status, trainer_achievements, grade_boundaries_data').eq('product_id', prod.id).maybeSingle();
@@ -72,7 +74,7 @@ export const DynamicPremiumPage = () => {
       setLoading(false);
     };
     load();
-  }, [slug, navigate, user, authLoading]);
+  }, [slug, navigate, user, authLoading, queryClient]);
 
   if (loading || !product) return (<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>);
 

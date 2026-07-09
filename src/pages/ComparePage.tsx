@@ -19,7 +19,8 @@ import logoDark from '@/assets/logo-dark.png';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
-import { checkProductAccess } from '@/lib/productAccess';
+import { fetchProductAccess } from '@/hooks/useProductAccess';
+import { useQueryClient } from '@tanstack/react-query';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -66,6 +67,7 @@ const LEGACY_DEFAULT_BOARD: Record<string, string> = {
 
 export const ComparePage = () => {
   const { user, profile, loading } = useAuth();
+  const queryClient = useQueryClient();
   const { theme } = useTheme();
   const currentLogo = theme === 'dark' ? logo : logoDark;
   const [searchParams] = useSearchParams();
@@ -226,7 +228,7 @@ export const ComparePage = () => {
       }
       setCheckingAccess(true);
       try {
-        const access = await checkProductAccess(user.id, productSlug);
+        const access = await fetchProductAccess(queryClient, user.id, productSlug);
         setHasProductAccess(access.hasAccess);
         setSubscriptionPaymentType(access.subscription?.payment_type ?? null);
       } catch (error) {
@@ -236,7 +238,7 @@ export const ComparePage = () => {
       setCheckingAccess(false);
     };
     checkAccess();
-  }, [user, subject, examBoard, loading]);
+  }, [user, subject, examBoard, loading, queryClient]);
 
   useEffect(() => {
     localStorage.setItem('preferred-subject', subject);

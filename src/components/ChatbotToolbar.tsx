@@ -11,7 +11,7 @@ import {
   BarChart2, RotateCcw, Timer, Crown, ArrowLeftRight, ClipboardList,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { checkProductAccess } from '@/lib/productAccess';
+import { useProductAccess } from '@/hooks/useProductAccess';
 import { getTopGradeLabel } from '@/lib/qualification';
 import { supabase } from '@/lib/supabase';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
@@ -114,7 +114,7 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
   const { theme } = useTheme();
   const currentLogo = theme === 'dark' ? logo : logoDark;
 
-  const [isDeluxe, setIsDeluxe] = useState(false);
+  const { isDeluxe } = useProductAccess(productSlug);
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [openPopover, setOpenPopover] = useState<string | null>(null);
   const [mountedTools, setMountedTools] = useState<Set<string>>(new Set());
@@ -159,17 +159,6 @@ export const ChatbotToolbar: React.FC<ChatbotToolbarProps> = ({
     if (upcomingTimes.length === 0) return null;
     return Math.round((Math.min(...upcomingTimes) - todayMs) / (1000 * 60 * 60 * 24));
   })();
-
-  useEffect(() => {
-    const checkDeluxe = async () => {
-      if (!user || !productSlug) { setIsDeluxe(false); return; }
-      try {
-        const { hasAccess, tier } = await checkProductAccess(user.id, productSlug);
-        setIsDeluxe(hasAccess && tier === 'deluxe');
-      } catch { setIsDeluxe(false); }
-    };
-    checkDeluxe();
-  }, [user, productSlug]);
 
   const handleUpgradeClick = async (paymentType: 'monthly' | 'lifetime') => {
     if (!user) { saveCheckoutIntent({ productId, productSlug, paymentType }); window.location.href = '/login?redirect=stripe'; return; }

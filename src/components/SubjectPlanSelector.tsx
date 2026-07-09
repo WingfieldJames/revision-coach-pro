@@ -5,7 +5,7 @@ import { ChevronDown, Check } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
-import { checkProductAccess } from '@/lib/productAccess';
+import { useProductAccess } from '@/hooks/useProductAccess';
 import { getValidAffiliateCode } from '@/hooks/useAffiliateTracking';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { SubjectFeatureGrid } from '@/components/SubjectFeatureGrid';
@@ -64,9 +64,6 @@ export function SubjectPlanSelector() {
     return '';
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'lifetime'>('lifetime');
-  const [hasProductAccess, setHasProductAccess] = useState(false);
-  const [subscriptionPaymentType, setSubscriptionPaymentType] = useState<string | null>(null);
-  const [checkingAccess, setCheckingAccess] = useState(false);
 
   const getCurrentProductSlug = () => {
     if (!examBoard) return null;
@@ -85,6 +82,11 @@ export function SubjectPlanSelector() {
     return null;
   };
 
+  // Cached, deduped access check for the currently selected subject/board.
+  const { hasAccess: hasProductAccess, access: productAccessData, isChecking: checkingAccess } =
+    useProductAccess(getCurrentProductSlug() ?? undefined);
+  const subscriptionPaymentType = productAccessData.subscription?.payment_type ?? null;
+
   const formatBoard = (b: string) => {
     if (b === 'cie') return 'CIE';
     if (b === 'aqa') return 'AQA';
@@ -92,27 +94,6 @@ export function SubjectPlanSelector() {
     if (b === 'edexcel') return 'Edexcel';
     return b.toUpperCase();
   };
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      const productSlug = getCurrentProductSlug();
-      if (!user || loading || !productSlug) {
-        setHasProductAccess(false);
-        return;
-      }
-      setCheckingAccess(true);
-      try {
-        const access = await checkProductAccess(user.id, productSlug);
-        setHasProductAccess(access.hasAccess);
-        setSubscriptionPaymentType(access.subscription?.payment_type ?? null);
-      } catch (error) {
-        console.error('Error checking product access:', error);
-        setHasProductAccess(false);
-      }
-      setCheckingAccess(false);
-    };
-    checkAccess();
-  }, [user, subject, examBoard, loading]);
 
   useEffect(() => {
     localStorage.setItem('preferred-subject', subject);

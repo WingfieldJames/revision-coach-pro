@@ -11,7 +11,8 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EDEXCEL_MATHS_EXAMS } from '@/components/ExamCountdown';
 import { Header } from '@/components/Header';
-import { checkProductAccess } from '@/lib/productAccess';
+import { fetchProductAccess } from '@/hooks/useProductAccess';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicRevisionGuide } from '@/components/DynamicRevisionGuide';
 import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
@@ -27,6 +28,7 @@ const DEFAULT_PROMPTS = [
 export const EdexcelMathsAppliedPremiumPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const queryClient = useQueryClient();
   const chatRef = useRef<RAGChatRef>(null);
   const [productId, setProductId] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
@@ -45,13 +47,13 @@ export const EdexcelMathsAppliedPremiumPage = () => {
         const { data: product } = await supabase.from('products').select('id').eq('slug', EDEXCEL_MATHS_APPLIED_SLUG).single();
         if (!product) { setCheckingAccess(false); return; }
         setProductId(product.id);
-        const access = await checkProductAccess(user.id, EDEXCEL_MATHS_APPLIED_SLUG);
+        const access = await fetchProductAccess(queryClient, user.id, EDEXCEL_MATHS_APPLIED_SLUG);
         setHasAccess(access.hasAccess);
       } catch (e) { console.error(e); }
       finally { setCheckingAccess(false); }
     };
     if (!loading) checkAccess();
-  }, [user, loading]);
+  }, [user, loading, queryClient]);
 
   if (loading || checkingAccess) return (<div className="min-h-screen bg-background flex flex-col"><Header /><div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div></div>);
   if (!user) return (<div className="min-h-screen bg-background flex flex-col"><Header /><div className="flex-1 flex items-center justify-center"><div className="text-center max-w-md px-6"><h1 className="text-2xl font-bold mb-4">Sign In Required</h1><Button variant="brand" onClick={() => navigate('/login')}>Sign In</Button></div></div></div>);

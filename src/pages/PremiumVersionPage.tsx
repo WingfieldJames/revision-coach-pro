@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { RAGChat, RAGChatRef } from '@/components/RAGChat';
 import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import { ChatbotToolbar } from '@/components/ChatbotToolbar';
-import { checkProductAccess } from '@/lib/productAccess';
+import { fetchProductAccess } from '@/hooks/useProductAccess';
+import { useQueryClient } from '@tanstack/react-query';
 import { EDEXCEL_ECONOMICS_EXAMS } from '@/components/ExamCountdown';
 import { useTrainerConfig, resolveFeature } from '@/hooks/useTrainerConfig';
 import { DynamicPastPaperFinder } from '@/components/DynamicPastPaperFinder';
@@ -25,6 +26,7 @@ const DEFAULT_PROMPTS = [
 export const PremiumVersionPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const chatRef = useRef<RAGChatRef>(null);
   const tc = useTrainerConfig(EDEXCEL_PRODUCT_ID);
   const [hasAccess, setHasAccess] = useState(false);
@@ -36,7 +38,7 @@ export const PremiumVersionPage = () => {
       if (!loading) {
         if (!user) { navigate('/login?redirect=premium'); return; }
         try {
-          const access = await checkProductAccess(user.id, 'edexcel-economics');
+          const access = await fetchProductAccess(queryClient, user.id, 'edexcel-economics');
           if (!access.hasAccess || access.tier !== 'deluxe') { navigate('/compare'); return; }
           setHasAccess(true);
           setCheckingAccess(false);
@@ -44,7 +46,7 @@ export const PremiumVersionPage = () => {
       }
     };
     verifyAccess();
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, queryClient]);
 
   if (loading || checkingAccess) {
     return (<div className="h-screen w-screen bg-background flex items-center justify-center"><div className="text-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div><p className="text-muted-foreground">Loading...</p></div></div>);

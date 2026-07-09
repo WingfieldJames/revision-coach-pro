@@ -13,7 +13,7 @@ import { GradeBoundariesTool } from '@/components/GradeBoundariesTool';
 import { ExamCountdown, ExamDate } from '@/components/ExamCountdown';
 import { MyMistakesTool } from '@/components/MyMistakesTool';
 import { Sparkles, BarChart2, PenLine, Timer, FileSearch, Crown, BookOpen, ChevronDown, TrendingUp, RotateCcw, User } from 'lucide-react';
-import { checkProductAccess } from '@/lib/productAccess';
+import { useProductAccess } from '@/hooks/useProductAccess';
 import { getTopGradeLabel } from '@/lib/qualification';
 import {
   Dialog,
@@ -171,7 +171,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [mistakesDueCount, setMistakesDueCount] = useState(0);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
-  const [isDeluxe, setIsDeluxe] = useState(false);
+  const { isDeluxe } = useProductAccess(productSlug);
   const [isScrolled, setIsScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const showFloatingPill = showNavLinks && showStartStudyingButton && !disableFloatingPill;
@@ -192,23 +192,6 @@ export const Header: React.FC<HeaderProps> = ({
   })();
 
   const tier = isDeluxe ? 'deluxe' : 'free';
-
-  // Check if user has deluxe access for the current product
-  useEffect(() => {
-    const checkDeluxeAccess = async () => {
-      if (!user || !productSlug) {
-        setIsDeluxe(false);
-        return;
-      }
-      try {
-        const { hasAccess, tier } = await checkProductAccess(user.id, productSlug);
-        setIsDeluxe(hasAccess && tier === 'deluxe');
-      } catch {
-        setIsDeluxe(false);
-      }
-    };
-    checkDeluxeAccess();
-  }, [user, productSlug]);
 
   useEffect(() => {
     const closeAllPopovers = () => {
