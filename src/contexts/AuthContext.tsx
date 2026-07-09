@@ -187,6 +187,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (error) {
       throw error;
     }
+    // Loop 4.4: clear cross-user localStorage so account switches on a shared device
+    // don't bleed one student's qualification/subject/referral state into the next
+    // (Children's-Code-adjacent). The Supabase auth token is cleared by signOut above;
+    // the UI theme (astar-chat-theme) is intentionally preserved.
+    try {
+      [
+        'qualification_level',
+        'preferred-subject',
+        'preferred-exam-boards',
+        'affiliate_code',
+        'build_selected_project_id',
+      ].forEach((k) => localStorage.removeItem(k));
+    } catch {
+      /* ignore storage access errors */
+    }
   };
 
   const resetPassword = async (email: string) => {
