@@ -112,6 +112,31 @@ Batch 1 (above) is DONE (deployed + merged). This is a separate, additive follow
 - **Deploy** `supabase functions deploy weekly-progress-email` — now skips anyone already
   emailed this week (4.3 idempotency). Deploy AFTER the migration (the code reads the table).
 
+## RAG CHAT FIX (2026-07-09) — two parts, both on main
+
+Root cause: the whole corpus was ingested with NO embeddings (14,885 NULL chunks / 28
+products), so `match_documents` matched nothing and retrieval silently degraded to a
+100-chunk arbitrary pool → "chatbot ignores the training" (seen on edexcel-economics).
+
+**Part 1 — restore the chat NOW (keyword fallback, commit c6637e6):**
+```
+supabase functions deploy rag-chat suggest-followups --project-ref xoipyycgycmpflfnrlty
+```
+Falls back to the full keyword pool whenever the vector layer returns 0 rows. Chat works
+again (keyword-based, = pre-Loop-1 quality). I'll re-test edexcel-econ after you deploy.
+
+**Part 2 — the PROPER fix: backfill embeddings so semantic search works (commit 88e8f07):**
+```
+supabase functions deploy backfill-embeddings --project-ref xoipyycgycmpflfnrlty
+# then drive it (needs your SERVICE_ROLE_KEY as bearer); ~149 calls, ~$0.15, ~20 min:
+SRK="<your service_role key>"; B=https://xoipyycgycmpflfnrlty.supabase.co/functions/v1
+while true; do r=$(curl -s -X POST "$B/backfill-embeddings" -H "Authorization: Bearer $SRK" \
+  -H 'content-type: application/json' -d '{"limit":150}'); echo "$r"; \
+  echo "$r" | grep -q '"done":true' && break; sleep 1; done
+```
+Idempotent + resumable (only touches NULL chunks). Once done, pgvector retrieval kicks in
+and answer quality jumps. I'll verify embedding coverage + re-test after.
+
 ## Prod health findings (read-only, 2026-07-09)
 - **Crons:** all 9 fire. No 401/403 auth failures in the pg_net window (the Loop-0 worry
   didn't materialise in what's retained). Two real issues found: `conversion-nudges` 500
