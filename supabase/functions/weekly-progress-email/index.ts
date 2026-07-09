@@ -424,6 +424,12 @@ serve(async (req) => {
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const sevenDaysAgoISO = sevenDaysAgo.toISOString();
 
+  // Loop 4.3: week key (Monday, UTC) for the sent-ledger so a retry can't re-mail.
+  const monday = new Date(now);
+  const dow = monday.getUTCDay(); // 0=Sun … 6=Sat
+  monday.setUTCDate(monday.getUTCDate() + ((dow === 0 ? -6 : 1) - dow));
+  const weekStartStr = monday.toISOString().slice(0, 10);
+
   let usersEmailed = 0;
   let usersSkipped = 0;
   let errors = 0;
@@ -486,6 +492,18 @@ serve(async (req) => {
       }
 
       try {
+        // Loop 4.3: skip anyone already emailed for this week (idempotent on retry).
+        const { data: alreadySent } = await supabase
+          .from("weekly_email_sent")
+          .select("user_id")
+          .eq("user_id", userId)
+          .eq("week_start", weekStartStr)
+          .maybeSingle();
+        if (alreadySent) {
+          usersSkipped++;
+          continue;
+        }
+
         // Get user email
         const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
         if (userError || !userData.user?.email) {
@@ -564,6 +582,10 @@ serve(async (req) => {
 
         if (success) {
           usersEmailed++;
+          // Loop 4.3: record the send so a retry this week skips this user.
+          await supabase
+            .from("weekly_email_sent")
+            .upsert({ user_id: userId, week_start: weekStartStr }, { onConflict: "user_id,week_start", ignoreDuplicates: true });
         } else {
           errors++;
         }
