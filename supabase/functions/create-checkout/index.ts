@@ -113,6 +113,15 @@ serve(async (req) => {
       },
     };
 
+    // CLAUDE.md P2-1: never hardcode prices. Require the DB price and fail loudly if
+    // it's missing, rather than silently charging a stale hardcoded amount. Use `== null`
+    // (not `||`) so a legitimate 0 isn't mistaken for "missing".
+    const priceForType = paymentType === "monthly" ? product.monthly_price : product.lifetime_price;
+    if (priceForType == null) {
+      console.error("create-checkout: price missing on product", { productSlug: product.slug, paymentType });
+      return json(400, { error: "price_missing" });
+    }
+
     if (paymentType === "monthly") {
       sessionConfig.mode = "subscription";
       sessionConfig.line_items = [
@@ -123,7 +132,7 @@ serve(async (req) => {
               name: `${productName} (Monthly)`,
               description: "Premium AI-powered academic assistance - Monthly subscription",
             },
-            unit_amount: product.monthly_price || 899,
+            unit_amount: priceForType,
             recurring: { interval: "month" },
           },
           quantity: 1,
@@ -147,7 +156,7 @@ serve(async (req) => {
               name: `${productName} (Exam Season Pass)`,
               description: "Premium AI-powered academic assistance - Access until June 30, 2026",
             },
-            unit_amount: product.lifetime_price || 1699,
+            unit_amount: priceForType,
           },
           quantity: 1,
         },
