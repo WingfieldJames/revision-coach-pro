@@ -7,7 +7,7 @@ import { chatCompletion } from "../_shared/ai.ts";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "A* AI <hello@astarai.co.uk>";
-const BASE_URL = "https://astarai.lovable.app";
+const BASE_URL = "https://astarai.co.uk";
 
 const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
@@ -213,7 +213,7 @@ function buildEmailHtml(userName: string, personalMessage: string): string {
           <!-- Logo -->
           <tr>
             <td align="center" style="padding: 32px 32px 16px;">
-              <img src="https://astarai.lovable.app/email-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
+              <img src="https://astarai.co.uk/email-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
             </td>
           </tr>
           <!-- Heading -->

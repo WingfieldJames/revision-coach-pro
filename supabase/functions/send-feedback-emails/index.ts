@@ -4,7 +4,7 @@ import { requireCronSecret } from "../_shared/auth.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-const BASE_URL = "https://astarai.lovable.app";
+const BASE_URL = "https://astarai.co.uk";
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "A* AI <hello@astarai.co.uk>";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -65,7 +65,7 @@ function getFreeUserEmailHtml(feedbackUrl: string): string {
           <!-- Logo -->
           <tr>
             <td align="center" style="padding: 32px 32px 16px;">
-              <img src="https://astarai.lovable.app/email-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
+              <img src="https://astarai.co.uk/email-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
             </td>
           </tr>
           <!-- Stars decoration -->
@@ -99,7 +99,7 @@ function getFreeUserEmailHtml(feedbackUrl: string): string {
             <td style="padding: 0 32px 24px; border-top: 1px solid #e4e4e7;">
               <p style="margin: 16px 0 8px; font-size: 13px; color: #71717a; text-align: center;">Ready to unlock unlimited access?</p>
               <p style="margin: 0; text-align: center;">
-                <a href="https://astarai.lovable.app/compare" style="font-size: 13px; color: #667eea; text-decoration: none; font-weight: 600;">Upgrade to Deluxe →</a>
+                <a href="https://astarai.co.uk/compare" style="font-size: 13px; color: #667eea; text-decoration: none; font-weight: 600;">Upgrade to Deluxe →</a>
               </p>
             </td>
           </tr>
@@ -134,7 +134,7 @@ function getDeluxeUserEmailHtml(feedbackUrl: string): string {
           <!-- Logo -->
           <tr>
             <td align="center" style="padding: 32px 32px 16px;">
-              <img src="https://astarai.lovable.app/email-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
+              <img src="https://astarai.co.uk/email-logo.png" alt="A* AI" height="40" style="height: 40px; width: auto;" />
             </td>
           </tr>
           <!-- Stars decoration -->
