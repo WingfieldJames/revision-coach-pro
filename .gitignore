@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Environment — never commit (see CLAUDE.md negative rules)
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
