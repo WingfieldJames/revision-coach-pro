@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { getDefaultYear, getDefaultPredictedGrade, getDefaultTargetGrade } from '@/lib/qualification';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -167,7 +168,7 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
     try {
       const { data } = await supabase
         .from('user_preferences')
-        .select('additional_info')
+        .select('additional_info, year, predicted_grade, target_grade')
         .eq('user_id', user.id)
         .eq('product_id', productId)
         .maybeSingle();
@@ -180,9 +181,12 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
         user_id: user.id,
         product_id: productId,
         additional_info: updatedInfo,
-        year: 'Year 13',
-        predicted_grade: 'C',
-        target_grade: 'A',
+        // Loop 4.1: never overwrite the student's real grades from a challenge save.
+        // Preserve existing values; only a brand-new row gets qualification-aware
+        // defaults (GCSE vs A-Level) instead of hardcoded A-Level ones.
+        year: data?.year ?? getDefaultYear(),
+        predicted_grade: data?.predicted_grade ?? getDefaultPredictedGrade(),
+        target_grade: data?.target_grade ?? getDefaultTargetGrade(),
       }, { onConflict: 'user_id,product_id' });
     } catch (e) {
       console.error('Error saving challenge score:', e);
@@ -194,7 +198,7 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
     try {
       const { data } = await supabase
         .from('user_preferences')
-        .select('additional_info')
+        .select('additional_info, year, predicted_grade, target_grade')
         .eq('user_id', user.id)
         .eq('product_id', productId)
         .maybeSingle();
@@ -207,9 +211,12 @@ export const ChallengePopup: React.FC<ChallengePopupProps> = ({
         user_id: user.id,
         product_id: productId,
         additional_info: updatedInfo,
-        year: 'Year 13',
-        predicted_grade: 'C',
-        target_grade: 'A',
+        // Loop 4.1: never overwrite the student's real grades from a challenge save.
+        // Preserve existing values; only a brand-new row gets qualification-aware
+        // defaults (GCSE vs A-Level) instead of hardcoded A-Level ones.
+        year: data?.year ?? getDefaultYear(),
+        predicted_grade: data?.predicted_grade ?? getDefaultPredictedGrade(),
+        target_grade: data?.target_grade ?? getDefaultTargetGrade(),
       }, { onConflict: 'user_id,product_id' });
       setReflectionSaved(true);
     } catch (e) {
