@@ -37,7 +37,7 @@ const EdexcelMathsPremiumPage = React.lazy(() => import("./pages/EdexcelMathsPre
 const EdexcelMathsAppliedFreeVersionPage = React.lazy(() => import("./pages/EdexcelMathsAppliedFreeVersionPage").then(m => ({ default: m.EdexcelMathsAppliedFreeVersionPage })));
 const EdexcelMathsAppliedPremiumPage = React.lazy(() => import("./pages/EdexcelMathsAppliedPremiumPage").then(m => ({ default: m.EdexcelMathsAppliedPremiumPage })));
 const TestRAGChatPage = React.lazy(() => import("./pages/TestRAGChatPage").then(m => ({ default: m.TestRAGChatPage })));
-const ProgressPage = React.lazy(() => import("./pages/ProgressPage").then(m => ({ default: m.ProgressPage })));
+const SchoolsPage = React.lazy(() => import("./pages/SchoolsPage").then(m => ({ default: m.SchoolsPage })));
 const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage })));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const BuildPage = React.lazy(() => import("./pages/BuildPage").then(m => ({ default: m.BuildPage })));
@@ -113,7 +113,7 @@ const App = () => (
             <Route path="/edexcel-maths-applied-free-version" element={<EdexcelMathsAppliedFreeVersionPage />} />
             <Route path="/edexcel-maths-applied-premium" element={<EdexcelMathsAppliedPremiumPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/schools" element={<ProgressPage />} />
+            <Route path="/schools" element={<SchoolsPage />} />
             {/* Legacy URL — schools marketing page moved /progress → /schools (2026-07). Vercel 308s it in prod; this covers dev + SPA fallback. */}
             <Route path="/progress" element={<Navigate to="/schools" replace />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
