@@ -71,9 +71,11 @@ interface DynamicFounderSectionProps {
   subjectLabel: string;
   fallbackSubject?: string;
   fallbackExamBoard?: string;
+  /** 'strip' renders the light /compare-refined founder strip (literal colours, DB-driven). Omit for the default themed section. */
+  variant?: 'default' | 'strip';
 }
 
-export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject, fallbackExamBoard }: DynamicFounderSectionProps) {
+export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject, fallbackExamBoard, variant = 'default' }: DynamicFounderSectionProps) {
   const [trainerImageUrl, setTrainerImageUrl] = useState<string | null>(null);
   const [trainerImageStyle, setTrainerImageStyle] = useState<string>('object-cover object-top');
   const [trainerDescription, setTrainerDescription] = useState<string | null>(null);
@@ -138,6 +140,34 @@ export function DynamicFounderSection({ productId, subjectLabel, fallbackSubject
   }, [productId]);
 
   if (loading) return null;
+
+  // Light /compare-refined strip: DB-driven, literal colours so it stays light even under a dark global theme.
+  if (variant === 'strip') {
+    const stripImg = trainerImageUrl || jamesFounder;
+    const stripLine = trainerDescription
+      || 'Handpicked A* students wrote the model answers, structures and examiner phrases your AI uses every day.';
+    return (
+      <section className="cmp-founder" style={{ padding: '72px 32px', background: '#f7f9fb' }}>
+        <div className="cmp-founder-inner" style={{ maxWidth: '1024px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '56px' }}>
+          <div style={{ flexShrink: 0, display: 'flex' }}>
+            <div style={{ width: '88px', height: '88px', borderRadius: '16px', overflow: 'hidden', border: '4px solid #ffffff', boxShadow: '0 8px 20px rgba(24,18,50,0.12)', backgroundImage: `url("${stripImg}")`, backgroundSize: 'cover', backgroundPosition: 'top', transform: 'rotate(-4deg)' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h2 style={{ fontSize: '32px', fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 10px 0', color: '#18181b' }}>
+              Your {subjectLabel} AI was trained by <span style={{ color: 'hsl(263, 70%, 50%)' }}>real A* students</span>
+            </h2>
+            <p style={{ fontSize: '16px', color: '#71717a', lineHeight: 1.6, margin: '0 0 8px 0' }}>{stripLine}</p>
+            {(trainerName || trainerStatus) && (
+              <p style={{ fontSize: '14px', color: '#18181b', fontWeight: 600, margin: 0 }}>
+                {trainerName}{trainerName && trainerStatus ? ' · ' : ''}<span style={{ color: '#71717a', fontWeight: 400 }}>{trainerStatus}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!trainerDescription) {
     if (fallbackSubject) {
       return <FounderSection subject={fallbackSubject as any} examBoard={fallbackExamBoard as any} />;
