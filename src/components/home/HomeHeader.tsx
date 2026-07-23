@@ -154,7 +154,7 @@ export const HomeHeader: React.FC = () => {
               onMouseOver={(e) => (e.currentTarget.style.color = "#18181b")}
               onMouseOut={(e) => (e.currentTarget.style.color = "#71717a")}
             >
-              University
+              Uni Apps
             </div>
             <div
               onClick={() => { navigate("/schools"); window.scrollTo({ top: 0, behavior: "smooth" }); }}

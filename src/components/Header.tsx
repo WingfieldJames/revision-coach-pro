@@ -541,7 +541,7 @@ export const Header: React.FC<HeaderProps> = ({
               className={`relative text-sm duration-100 cursor-pointer pb-[5px] hover:text-foreground ${selectedTab === 'university' ? 'border-b-2 border-foreground -mb-0.5 text-foreground font-medium' : 'text-muted-foreground'}`}
               onClick={() => handleTabChange('university')}
             >
-              University
+              Uni Apps
             </div>
 
             {/* Schools */}
@@ -719,7 +719,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => handleTabChange('university')}
                 className={`hover:text-foreground transition-colors ${selectedTab === 'university' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
               >
-                University
+                Uni Apps
               </button>
               <button
                 onClick={() => handleTabChange('profile')}
