@@ -184,9 +184,8 @@ export const SubjectSelectionPage = () => {
 
             {/* FirmChoice card */}
             <a
-              href="https://firmchoice.vercel.app"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/university"
+              onClick={(e) => { e.preventDefault(); navigate('/university'); }}
               className="group block w-full max-w-[520px] bg-white border border-black/10 rounded-2xl px-7 py-6 transition-all duration-200 hover:border-black/30 hover:-translate-y-px"
             >
               <div className="flex items-center gap-5">
@@ -223,7 +222,7 @@ export const SubjectSelectionPage = () => {
 
             {/* Caption */}
             <p className="font-sans text-[13px] text-black/45 max-w-[420px] text-center leading-relaxed">
-              Sister product. UK university applications, reviewed by offer-holders.
+              Now part of A*AI. UK university applications, from course matching to personal statement.
             </p>
 
           </div>

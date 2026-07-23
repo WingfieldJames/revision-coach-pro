@@ -537,7 +537,7 @@ export const ComparePage = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', paddingBottom: '5px', marginBottom: '-1.5px', borderBottom: '2px solid #18181b', color: '#18181b', fontWeight: 500, cursor: 'pointer' }}>Subjects
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
               </div>
-              <div className="nav-link" onClick={() => window.open('https://astarai.printify.me', '_blank')} style={{ fontSize: '14px', paddingBottom: '5px', color: '#71717a', cursor: 'pointer' }}>Merch</div>
+              <div className="nav-link" onClick={() => { navigate('/university'); setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100); }} style={{ fontSize: '14px', paddingBottom: '5px', color: '#71717a', cursor: 'pointer' }}>University</div>
               <div className="nav-link" onClick={() => navigate('/schools')} style={{ fontSize: '14px', paddingBottom: '5px', color: '#71717a', cursor: 'pointer' }}>Schools</div>
             </div>
           </div>

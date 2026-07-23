@@ -211,6 +211,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const getSelectedTab = () => {
     if (location.pathname === '/schools') return 'profile';
+    if (location.pathname.startsWith('/university')) return 'university';
     if (location.pathname === '/dashboard') return 'profile';
     if (location.pathname === '/login') return 'profile';
     if (location.pathname === '/compare') return 'pricing';
@@ -249,8 +250,9 @@ export const Header: React.FC<HeaderProps> = ({
     } else if (value === "pricing") {
       navigate('/compare');
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-    } else if (value === "merch") {
-      window.open('https://astarai.printify.me', '_blank');
+    } else if (value === "university") {
+      navigate('/university');
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     } else if (value === "profile") {
       navigate('/schools');
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
@@ -260,7 +262,8 @@ export const Header: React.FC<HeaderProps> = ({
   const handleSubjectLevelClick = (level: 'gcse' | 'alevel' | 'personal-statement') => {
     setSubjectsDropdownOpen(false);
     if (level === 'personal-statement') {
-      window.open('https://firmchoice.vercel.app', '_blank', 'noopener,noreferrer');
+      navigate('/university/write');
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
       return;
     }
     if (level === 'gcse') {
@@ -533,12 +536,12 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            {/* Merch */}
+            {/* University */}
             <div
-              className={`relative text-sm duration-100 cursor-pointer pb-[5px] hover:text-foreground ${selectedTab === 'merch' ? 'border-b-2 border-foreground -mb-0.5 text-foreground font-medium' : 'text-muted-foreground'}`}
-              onClick={() => handleTabChange('merch')}
+              className={`relative text-sm duration-100 cursor-pointer pb-[5px] hover:text-foreground ${selectedTab === 'university' ? 'border-b-2 border-foreground -mb-0.5 text-foreground font-medium' : 'text-muted-foreground'}`}
+              onClick={() => handleTabChange('university')}
             >
-              Merch
+              University
             </div>
 
             {/* Schools */}
@@ -713,10 +716,10 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               </div>
               <button
-                onClick={() => handleTabChange('merch')}
-                className={`hover:text-foreground transition-colors ${selectedTab === 'merch' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
+                onClick={() => handleTabChange('university')}
+                className={`hover:text-foreground transition-colors ${selectedTab === 'university' ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
               >
-                Merch
+                University
               </button>
               <button
                 onClick={() => handleTabChange('profile')}

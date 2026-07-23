@@ -38,7 +38,8 @@ export const HomeHeader: React.FC = () => {
   const pickLevel = (level: "gcse" | "alevel" | "ps") => {
     setSubjectsOpen(false);
     if (level === "ps") {
-      window.open("https://firmchoice.vercel.app", "_blank", "noopener,noreferrer");
+      navigate("/university/write");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     navigate(`/compare?level=${level === "gcse" ? "gcse" : "alevel"}`);
@@ -148,12 +149,12 @@ export const HomeHeader: React.FC = () => {
             </div>
 
             <div
-              onClick={() => window.open("https://astarai.printify.me", "_blank")}
+              onClick={() => { navigate("/university"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
               style={navItem}
               onMouseOver={(e) => (e.currentTarget.style.color = "#18181b")}
               onMouseOut={(e) => (e.currentTarget.style.color = "#71717a")}
             >
-              Merch
+              University
             </div>
             <div
               onClick={() => { navigate("/schools"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
