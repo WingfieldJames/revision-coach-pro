@@ -61,6 +61,7 @@ const RevisionTopicPage = React.lazy(() => import("./pages/RevisionTopicPage").t
 const AdminContentHooksPage = React.lazy(() => import("./pages/AdminContentHooksPage").then(m => ({ default: m.AdminContentHooksPage })));
 const MetricsDashboard = React.lazy(() => import("./pages/MetricsDashboard").then(m => ({ default: m.MetricsDashboard })));
 const SchoolsApp = React.lazy(() => import("./pages/SchoolsApp").then(m => ({ default: m.SchoolsApp })));
+const UniversityApp = React.lazy(() => import("./pages/university/UniversityApp").then(m => ({ default: m.UniversityApp })));
 
 const queryClient = new QueryClient();
 
@@ -139,6 +140,7 @@ const App = () => (
             <Route path="/admin/content-hooks" element={<AdminContentHooksPage />} />
             <Route path="/metrics" element={<MetricsDashboard />} />
             <Route path="/schools/app/*" element={<SchoolsApp />} />
+            <Route path="/university/*" element={<UniversityApp />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
