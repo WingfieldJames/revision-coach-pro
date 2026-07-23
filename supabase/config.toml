@@ -131,3 +131,12 @@ verify_jwt = false
 
 [functions.generate-content-script]
 verify_jwt = true
+
+[functions.uni-rank]
+verify_jwt = true
+
+[functions.uni-reasons]
+verify_jwt = true
+
+[functions.uni-organise]
+verify_jwt = true
