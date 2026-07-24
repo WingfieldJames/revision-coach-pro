@@ -41,9 +41,11 @@ const formatBoard = (b: string) => {
   return b.toUpperCase();
 };
 
+// DB prices are stored in pence (Stripe unit_amount). Convert to pounds for display.
 const fmtPrice = (n?: number) => {
   if (n === undefined || n === null || Number.isNaN(n)) return '';
-  return Number.isInteger(n) ? `£${n}` : `£${n.toFixed(2)}`;
+  const pounds = n / 100;
+  return Number.isInteger(pounds) ? `£${pounds}` : `£${pounds.toFixed(2)}`;
 };
 
 // Feature card icons (verbatim from the Compare Page Refined design)

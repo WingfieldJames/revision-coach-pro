@@ -22,6 +22,13 @@ import { toast } from 'sonner';
 type Subject = 'economics' | 'computer-science' | 'physics' | 'chemistry' | 'psychology' | 'mathematics';
 type ExamBoard = 'edexcel' | 'aqa' | 'cie' | 'ocr';
 
+// DB prices are stored in pence (Stripe unit_amount). Convert to pounds for display.
+const fmtPrice = (n?: number) => {
+  if (n === undefined || n === null || Number.isNaN(n)) return '';
+  const pounds = n / 100;
+  return Number.isInteger(pounds) ? `£${pounds}` : `£${pounds.toFixed(2)}`;
+};
+
 export const DashboardPage = () => {
   const { user, profile, refreshProfile, loading } = useAuth();
   const queryClient = useQueryClient();
@@ -46,6 +53,8 @@ export const DashboardPage = () => {
   
   // Track product-specific access for each exam board
   const [productAccess, setProductAccess] = useState<Record<string, ProductAccess>>({});
+  // Live prices keyed by product slug (monthly_price / lifetime_price from the products table, in pence)
+  const [priceBySlug, setPriceBySlug] = useState<Record<string, { monthly?: number; lifetime?: number }>>({});
   const [checkingAccess, setCheckingAccess] = useState(true);
   const [cancellingSubscription, setCancellingSubscription] = useState<string | null>(null);
   const [subscriptionDetails, setSubscriptionDetails] = useState<Record<string, any>>({});
@@ -127,6 +136,24 @@ export const DashboardPage = () => {
     };
     checkAccess();
   }, [user, subject, queryClient]);
+
+  // Load live prices (in pence) for all active products — never hardcode prices
+  useEffect(() => {
+    const loadPrices = async () => {
+      const { data } = await supabase
+        .from('products')
+        .select('slug, monthly_price, lifetime_price')
+        .eq('active', true);
+      if (data) {
+        const prices: Record<string, { monthly?: number; lifetime?: number }> = {};
+        for (const p of data as { slug?: string; monthly_price?: number; lifetime_price?: number }[]) {
+          if (p.slug) prices[p.slug] = { monthly: p.monthly_price ?? undefined, lifetime: p.lifetime_price ?? undefined };
+        }
+        setPriceBySlug(prices);
+      }
+    };
+    loadPrices();
+  }, []);
 
   // Cancel subscription handler — targets a specific sub by id
   const handleCancelSubscription = async (sub: any) => {
@@ -248,9 +275,21 @@ export const DashboardPage = () => {
     );
   }
 
+  // Resolve the current subject/board to a product slug, then read its live lifetime price
+  const currentSlug =
+    subject === 'computer-science' ? 'ocr-computer-science'
+    : subject === 'physics' ? 'ocr-physics'
+    : subject === 'chemistry' ? 'aqa-chemistry'
+    : subject === 'psychology' ? 'aqa-psychology'
+    : subject === 'mathematics' ? 'edexcel-mathematics'
+    : productType === 'aqa' ? 'aqa-economics'
+    : productType === 'cie' ? 'cie-economics'
+    : 'edexcel-economics';
+  const lifetimePrice = fmtPrice(priceBySlug[currentSlug]?.lifetime);
+
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead 
+      <SEOHead
         title="Dashboard | A* AI – A-Level Economics Revision"
         description="Access your A* AI dashboard. Launch your free or Deluxe AI revision coach for Edexcel, AQA & CIE Economics."
         canonical="https://astarai.co.uk/dashboard"
@@ -445,9 +484,9 @@ export const DashboardPage = () => {
               )}
             </h2>
             <p className="text-3xl font-bold mb-2">
-              <span className="line-through text-red-500 text-lg mr-1">£39.99</span>£16.99
+              <span className="line-through text-red-500 text-lg mr-1">£39.99</span>{lifetimePrice || '—'}
             </p>
-            <p className="text-sm text-muted-foreground mb-6">One-time payment • Expires 30th June 2026</p>
+            <p className="text-sm text-muted-foreground mb-6">One-time payment</p>
             <ul className="space-y-3 mb-8">
               <li className="flex items-start">
                 <span className="text-green-500 font-bold mr-2">✓</span>
