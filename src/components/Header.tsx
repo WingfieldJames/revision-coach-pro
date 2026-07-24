@@ -259,13 +259,8 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const handleSubjectLevelClick = (level: 'gcse' | 'alevel' | 'personal-statement') => {
+  const handleSubjectLevelClick = (level: 'gcse' | 'alevel') => {
     setSubjectsDropdownOpen(false);
-    if (level === 'personal-statement') {
-      navigate('/university/write');
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
-      return;
-    }
     if (level === 'gcse') {
       navigate('/compare?level=gcse');
     } else {
@@ -527,12 +522,6 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   A-Level
                 </div>
-                <div
-                  className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors duration-100"
-                  onClick={() => handleSubjectLevelClick('personal-statement')}
-                >
-                  Personal Statement
-                </div>
               </div>
             </div>
 
@@ -706,12 +695,6 @@ export const Header: React.FC<HeaderProps> = ({
                     onClick={() => handleSubjectLevelClick('alevel')}
                   >
                     A-Level
-                  </div>
-                  <div
-                    className="px-4 py-2.5 text-sm cursor-pointer text-foreground hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                    onClick={() => handleSubjectLevelClick('personal-statement')}
-                  >
-                    Personal Statement
                   </div>
                 </div>
               </div>

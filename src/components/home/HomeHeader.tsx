@@ -35,13 +35,8 @@ export const HomeHeader: React.FC = () => {
   const closeSubjects = () => {
     closeTimer.current = setTimeout(() => setSubjectsOpen(false), 150);
   };
-  const pickLevel = (level: "gcse" | "alevel" | "ps") => {
+  const pickLevel = (level: "gcse" | "alevel") => {
     setSubjectsOpen(false);
-    if (level === "ps") {
-      navigate("/university/write");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
     navigate(`/compare?level=${level === "gcse" ? "gcse" : "alevel"}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -133,7 +128,6 @@ export const HomeHeader: React.FC = () => {
                 {[
                   { label: "GCSE", v: "gcse" as const },
                   { label: "A-Level", v: "alevel" as const },
-                  { label: "Personal Statement", v: "ps" as const },
                 ].map((o) => (
                   <div
                     key={o.v}

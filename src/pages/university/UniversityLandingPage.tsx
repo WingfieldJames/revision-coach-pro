@@ -4,7 +4,6 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SEOHead } from "@/components/SEOHead";
-import { FirmChoiceBadge } from "@/components/university/FirmChoiceBadge";
 import { ORGANISE_STORAGE_KEY } from "@/lib/uni/constants";
 import { isComplete, loadInputs } from "@/lib/uni/intake";
 import { loadPool } from "@/lib/uni/prepare";
@@ -141,9 +140,6 @@ export const UniversityLandingPage = () => {
           organise it for the three UCAS questions — free with your A*AI
           account.
         </p>
-        <div className="mt-5">
-          <FirmChoiceBadge />
-        </div>
         <div className="mt-8">
           {anyProgress ? (
             <Button asChild size="lg" className="rounded-full px-8">
